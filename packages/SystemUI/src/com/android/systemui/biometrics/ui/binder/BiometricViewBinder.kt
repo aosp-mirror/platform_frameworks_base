@@ -288,12 +288,14 @@ object BiometricViewBinder {
                 // set padding
                 launch {
                     viewModel.promptPadding.collect { promptPadding ->
-                        view.setPadding(
-                            promptPadding.left,
-                            promptPadding.top,
-                            promptPadding.right,
-                            promptPadding.bottom
-                        )
+                        if (!constraintBp()) {
+                            view.setPadding(
+                                promptPadding.left,
+                                promptPadding.top,
+                                promptPadding.right,
+                                promptPadding.bottom
+                            )
+                        }
                     }
                 }
 
@@ -460,6 +462,23 @@ object BiometricViewBinder {
                             viewModel.clearHaptics()
                         }
                     }
+                }
+
+                // Retry and confirmation when finger on sensor
+                launch {
+                    combine(
+                            viewModel.canTryAgainNow,
+                            viewModel.hasFingerOnSensor,
+                            viewModel.isPendingConfirmation,
+                            ::Triple
+                        )
+                        .collect { (canRetry, fingerAcquired, pendingConfirmation) ->
+                            if (canRetry && fingerAcquired) {
+                                legacyCallback.onButtonTryAgain()
+                            } else if (pendingConfirmation && fingerAcquired) {
+                                viewModel.confirmAuthenticated()
+                            }
+                        }
                 }
             }
         }

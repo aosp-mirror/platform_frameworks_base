@@ -25,7 +25,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,7 +62,6 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -458,39 +456,18 @@ object PlatformSliderDefaults {
 
     @Composable
     fun defaultPlatformSliderColors(): PlatformSliderColors =
-        if (isSystemInDarkTheme()) darkThemePlatformSliderColors()
-        else lightThemePlatformSliderColors()
+        PlatformSliderColors(
+            trackColor = MaterialTheme.colorScheme.secondaryContainer,
+            indicatorColor = MaterialTheme.colorScheme.primary,
+            iconColor = MaterialTheme.colorScheme.onPrimary,
+            labelColorOnIndicator = MaterialTheme.colorScheme.onPrimary,
+            labelColorOnTrack = MaterialTheme.colorScheme.onSecondaryContainer,
+            disabledTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            disabledIndicatorColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            disabledIconColor = MaterialTheme.colorScheme.outline,
+            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 }
-
-/** [PlatformSliderColors] for the light theme */
-@Composable
-private fun lightThemePlatformSliderColors() =
-    PlatformSliderColors(
-        trackColor = colorResource(android.R.color.system_accent3_200),
-        indicatorColor = MaterialTheme.colorScheme.tertiary,
-        iconColor = MaterialTheme.colorScheme.onTertiary,
-        labelColorOnIndicator = MaterialTheme.colorScheme.onTertiary,
-        labelColorOnTrack = MaterialTheme.colorScheme.onTertiaryContainer,
-        disabledTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        disabledIndicatorColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        disabledIconColor = MaterialTheme.colorScheme.outline,
-        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-
-/** [PlatformSliderColors] for the dark theme */
-@Composable
-private fun darkThemePlatformSliderColors() =
-    PlatformSliderColors(
-        trackColor = colorResource(android.R.color.system_accent3_600),
-        indicatorColor = MaterialTheme.colorScheme.tertiary,
-        iconColor = MaterialTheme.colorScheme.onTertiary,
-        labelColorOnIndicator = MaterialTheme.colorScheme.onTertiary,
-        labelColorOnTrack = colorResource(android.R.color.system_accent3_900),
-        disabledTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        disabledIndicatorColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-        disabledIconColor = MaterialTheme.colorScheme.outline,
-        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
 
 private fun PlatformSliderColors.getTrackColor(isEnabled: Boolean): Color =
     if (isEnabled) trackColor else disabledTrackColor

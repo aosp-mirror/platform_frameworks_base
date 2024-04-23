@@ -36,6 +36,8 @@ import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.util.CommunalColors
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -85,6 +87,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var communalViewModel: CommunalViewModel
     @Mock private lateinit var powerManager: PowerManager
     @Mock private lateinit var dialogFactory: SystemUIDialogFactory
+    @Mock private lateinit var communalColors: CommunalColors
     private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var shadeInteractor: ShadeInteractor
     private lateinit var keyguardInteractor: KeyguardInteractor
@@ -116,6 +119,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 keyguardInteractor,
                 shadeInteractor,
                 powerManager,
+                communalColors,
                 kosmos.sceneDataSourceDelegator,
             )
         testableLooper = TestableLooper.get(this)
@@ -156,6 +160,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         keyguardInteractor,
                         shadeInteractor,
                         powerManager,
+                        communalColors,
                         kosmos.sceneDataSourceDelegator,
                     )
 
@@ -318,6 +323,19 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
 
                 // Touch events are not intercepted.
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isFalse()
+            }
+        }
+
+    @Test
+    fun editMode_communalAvailable() =
+        with(kosmos) {
+            testScope.runTest {
+                val available by collectLastValue(underTest.communalAvailable())
+                setCommunalAvailable(false)
+
+                assertThat(available).isFalse()
+                communalInteractor.setEditModeOpen(true)
+                assertThat(available).isTrue()
             }
         }
 

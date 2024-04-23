@@ -45,6 +45,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -158,6 +159,10 @@ constructor(
     /** Show the bouncer if necessary and set the relevant states. */
     @JvmOverloads
     fun show(isScrimmed: Boolean) {
+        // When the scene container framework is enabled, instead of calling this, call
+        // SceneInteractor#changeScene(Scenes.Bouncer, ...).
+        SceneContainerFlag.assertInLegacyMode()
+
         if (primaryBouncerView.delegate == null && !Flags.composeBouncer()) {
             Log.d(
                 TAG,

@@ -9,7 +9,7 @@ import android.os.RemoteCallback;
   *
   * @hide
   */
-interface IResponseCallback {
+oneway interface IResponseCallback {
     void onSuccess(in Bundle resultBundle) = 1;
     void onFailure(int errorCode, in String errorMessage, in PersistableBundle errorParams) = 2;
     void onDataAugmentRequest(in Bundle processedContent, in RemoteCallback responseCallback) = 3;

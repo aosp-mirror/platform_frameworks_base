@@ -1517,8 +1517,9 @@ public class AudioDeviceBroker {
         sendLMsgNoDelay(MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY, SENDMSG_QUEUE, deviceState);
     }
 
-    /*package*/ void postUpdatedAdiDeviceState(AdiDeviceState deviceState) {
-        sendLMsgNoDelay(MSG_L_UPDATED_ADI_DEVICE_STATE, SENDMSG_QUEUE, deviceState);
+    /*package*/ void postUpdatedAdiDeviceState(AdiDeviceState deviceState, boolean initSA) {
+        sendILMsgNoDelay(
+                MSG_IL_UPDATED_ADI_DEVICE_STATE, SENDMSG_QUEUE, initSA ? 1 : 0, deviceState);
     }
 
     /*package*/ static final class CommunicationDeviceInfo {
@@ -1820,18 +1821,17 @@ public class AudioDeviceBroker {
                                         + "received with null profile proxy: "
                                         + btInfo)).printLog(TAG));
                     } else {
-                        @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
+                        final Pair<Integer, Boolean> codecAndChanged =
                                 mBtHelper.getCodecWithFallback(btInfo.mDevice,
                                         btInfo.mProfile, btInfo.mIsLeOutput,
                                         "MSG_L_SET_BT_ACTIVE_DEVICE");
                         synchronized (mSetModeLock) {
                             synchronized (mDeviceStateLock) {
-                                mDeviceInventory.onSetBtActiveDevice(btInfo, codec,
-                                        (btInfo.mProfile
-                                                != BluetoothProfile.LE_AUDIO
+                                mDeviceInventory.onSetBtActiveDevice(btInfo, codecAndChanged.first,
+                                        (btInfo.mProfile != BluetoothProfile.LE_AUDIO
                                                 || btInfo.mIsLeOutput)
-                                                ? mAudioService.getBluetoothContextualVolumeStream()
-                                                : AudioSystem.STREAM_DEFAULT);
+                                            ? mAudioService.getBluetoothContextualVolumeStream()
+                                            : AudioSystem.STREAM_DEFAULT);
                                 if (btInfo.mProfile == BluetoothProfile.LE_AUDIO
                                         || btInfo.mProfile
                                         == BluetoothProfile.HEARING_AID) {
@@ -1866,13 +1866,13 @@ public class AudioDeviceBroker {
                     break;
                 case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE: {
                     final BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
-                    @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
-                            mBtHelper.getCodecWithFallback(btInfo.mDevice,
-                                    btInfo.mProfile, btInfo.mIsLeOutput,
-                                    "MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE");
+                    final Pair<Integer, Boolean> codecAndChanged = mBtHelper.getCodecWithFallback(
+                            btInfo.mDevice, btInfo.mProfile, btInfo.mIsLeOutput,
+                            "MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE");
                     synchronized (mDeviceStateLock) {
-                        mDeviceInventory.onBluetoothDeviceConfigChange(
-                                btInfo, codec, BtHelper.EVENT_DEVICE_CONFIG_CHANGE);
+                        mDeviceInventory.onBluetoothDeviceConfigChange(btInfo,
+                                codecAndChanged.first, codecAndChanged.second,
+                                BtHelper.EVENT_DEVICE_CONFIG_CHANGE);
                     }
                 } break;
                 case MSG_BROADCAST_AUDIO_BECOMING_NOISY:
@@ -2049,8 +2049,8 @@ public class AudioDeviceBroker {
                         }
                     } break;
 
-                case MSG_L_UPDATED_ADI_DEVICE_STATE:
-                    mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj);
+                case MSG_IL_UPDATED_ADI_DEVICE_STATE:
+                    mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj, msg.arg1 == 1);
                     break;
 
                 default:
@@ -2137,7 +2137,7 @@ public class AudioDeviceBroker {
     private static final int MSG_CHECK_COMMUNICATION_ROUTE_CLIENT_STATE = 56;
     private static final int MSG_I_UPDATE_LE_AUDIO_GROUP_ADDRESSES = 57;
     private static final int MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY = 58;
-    private static final int MSG_L_UPDATED_ADI_DEVICE_STATE = 59;
+    private static final int MSG_IL_UPDATED_ADI_DEVICE_STATE = 59;
 
 
 

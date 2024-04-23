@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo (só o esquerdo)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo (só o dereito)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activos (o esquerdo e o dereito)"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Activo (só contido multimedia), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Activo (só contido multimedia), E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Conectado (compatible con audio compartido), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Conectado (compatible con audio compartido), E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Conectado (compatible con audio compartido), esquerdo<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Conectado (compatible con audio compartido), dereito <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Activo (só contido multimedia)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Compatible con audio compartido"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Activo (só contido multimedia), só esquerdo"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Activo (só contido multimedia), só dereito"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Activo (só contido multimedia), esquerdo e dereito"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Chamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferencia de ficheiros"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> (<xliff:g id="TIME">%2$s</xliff:g> para completar a carga)"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> (carga optimizada)"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> (cargando)"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Descoñecido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Cargando rapidamente"</string>
@@ -487,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Cargada"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Carga completa"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Carga en pausa"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Opción controlada polo administrador"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Baixo o control de opcións restrinxidas"</string>
     <string name="disabled" msgid="8017887509554714950">"Desactivada"</string>
@@ -515,7 +538,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Usar idiomas do sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Non se puido abrir a configuración de <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Este método de introdución de texto pode recompilar todo o que escribas, incluídos os datos persoais como os contrasinais e os números de tarxetas de crédito. Provén da aplicación <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Queres usar este método de introdución de texto?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: Tras un reinicio, non se pode iniciar esta aplicación ata que desbloquees o teléfono"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Nota: Tras un reinicio, non se poderá iniciar esta aplicación ata que se desbloquee o teléfono"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"Estado de rexistro de IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Rexistrado"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Non rexistrado"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Eliminarase toda a actividade ao saír"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Podes gardar ou eliminar a túa actividade ao saír"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restablece a sesión para eliminar a actividade agora, ou ben gárdaa ou elimínaa ao saír"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Tirar foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Escoller imaxe"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleccionar foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Realizaches demasiados intentos incorrectos. Eliminaranse os datos deste dispositivo."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Realizaches demasiados intentos incorrectos. Eliminarase este usuario."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Unha barra de cobertura"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Dúas barras de cobertura"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Tres barras de cobertura"</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Cobertura ao máximo"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Sen datos"</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Unha barra de sinal de datos"</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Desconectouse a Ethernet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sen chamadas."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Escolle unha imaxe do perfil"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Icona do usuario predeterminado"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Seleccionar deseño do teclado"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predeterminado"</string>

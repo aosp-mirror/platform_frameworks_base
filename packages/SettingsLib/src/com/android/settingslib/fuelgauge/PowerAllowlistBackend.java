@@ -18,14 +18,18 @@ package com.android.settingslib.fuelgauge;
 
 import static android.provider.DeviceConfig.NAMESPACE_ACTIVITY_MANAGER;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.IDeviceIdleController;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.telecom.DefaultDialerManager;
 import android.text.TextUtils;
@@ -121,6 +125,14 @@ public class PowerAllowlistBackend {
             return true;
         }
 
+        if (android.app.admin.flags.Flags.disallowUserControlBgUsageFix()) {
+            // App is subject to DevicePolicyManager.setUserControlDisabledPackages() policy.
+            final int userId = UserHandle.getUserId(uid);
+            if (mAppContext.getPackageManager().isPackageStateProtected(pkg, userId)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -163,27 +175,77 @@ public class PowerAllowlistBackend {
 
     /**
      * Add app into power save allow list.
-     * @param pkg packageName
+     * @param pkg packageName of the app
      */
+    // TODO: Fix all callers to pass in UID
     public void addApp(String pkg) {
+        addApp(pkg, Process.INVALID_UID);
+    }
+
+    /**
+     * Add app into power save allow list.
+     * @param pkg packageName of the app
+     * @param uid uid of the app
+     */
+    public void addApp(String pkg, int uid) {
         try {
+            if (android.app.Flags.appRestrictionsApi()) {
+                if (uid == Process.INVALID_UID) {
+                    uid = mAppContext.getSystemService(PackageManager.class).getPackageUid(pkg, 0);
+                }
+                final boolean wasInList = isAllowlisted(pkg, uid);
+
+                if (!wasInList) {
+                    mAppContext.getSystemService(ActivityManager.class).noteAppRestrictionEnabled(
+                            pkg, uid, ActivityManager.RESTRICTION_LEVEL_EXEMPTED,
+                            true, ActivityManager.RESTRICTION_REASON_USER,
+                            "settings", 0);
+                }
+            }
+
             mDeviceIdleService.addPowerSaveWhitelistApp(pkg);
             mAllowlistedApps.add(pkg);
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to reach IDeviceIdleController", e);
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Unable to find package", e);
         }
     }
 
     /**
      * Remove package from power save allow list.
-     * @param pkg
+     * @param pkg packageName of the app
      */
     public void removeApp(String pkg) {
+        removeApp(pkg, Process.INVALID_UID);
+    }
+
+    /**
+     * Remove package from power save allow list.
+     * @param pkg packageName of the app
+     * @param uid uid of the app
+     */
+    public void removeApp(String pkg, int uid) {
         try {
+            if (android.app.Flags.appRestrictionsApi()) {
+                if (uid == Process.INVALID_UID) {
+                    uid = mAppContext.getSystemService(PackageManager.class).getPackageUid(pkg, 0);
+                }
+                final boolean wasInList = isAllowlisted(pkg, uid);
+                if (wasInList) {
+                    mAppContext.getSystemService(ActivityManager.class).noteAppRestrictionEnabled(
+                            pkg, uid, ActivityManager.RESTRICTION_LEVEL_EXEMPTED,
+                            false, ActivityManager.RESTRICTION_REASON_USER,
+                            "settings", 0);
+                }
+            }
+
             mDeviceIdleService.removePowerSaveWhitelistApp(pkg);
             mAllowlistedApps.remove(pkg);
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to reach IDeviceIdleController", e);
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Unable to find package", e);
         }
     }
 

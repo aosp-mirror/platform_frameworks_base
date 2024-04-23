@@ -65,7 +65,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, 0/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[0]);
         // touch at 90 degrees
@@ -73,7 +74,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, -1/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[1]);
         // touch at 180 degrees
@@ -81,7 +83,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         -1 /* touchX */, 0/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[2]);
         // touch at 270 degrees
@@ -89,7 +92,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, 1/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[3]);
     }
@@ -103,7 +107,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, 0 /* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[1]);
         // touch at 90 degrees -> 180 degrees
@@ -111,7 +116,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, -1 /* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[2]);
         // touch at 180 degrees -> 270 degrees
@@ -119,7 +125,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         -1 /* touchX */, 0 /* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[3]);
         // touch at 270 degrees -> 0 degrees
@@ -127,7 +134,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, 1/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[0]);
     }
@@ -141,7 +149,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, 0/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[3]);
         // touch at 90 degrees -> 0 degrees
@@ -149,7 +158,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, -1/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[0]);
         // touch at 180 degrees -> 90 degrees
@@ -157,7 +167,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         -1 /* touchX */, 0/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[1]);
         // touch at 270 degrees -> 180 degrees
@@ -165,7 +176,8 @@ public class UdfpsUtilsTest extends SysuiTestCase {
                 mUdfpsUtils.onTouchOutsideOfSensorArea(true, mContext,
                         0 /* touchX */, 1/* touchY */,
                         new UdfpsOverlayParams(new Rect(), new Rect(), 0, 0, 1f, rotation,
-                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL)
+                                FingerprintSensorProperties.TYPE_UDFPS_OPTICAL),
+                        true /* rotatedToPortrait */
                 )
         ).isEqualTo(mTouchHints[2]);
     }

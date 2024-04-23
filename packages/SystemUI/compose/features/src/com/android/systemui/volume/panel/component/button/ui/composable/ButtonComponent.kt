@@ -16,13 +16,12 @@
 
 package com.android.systemui.volume.panel.component.button.ui.composable
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +36,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Expandable
 import com.android.systemui.animation.Expandable
@@ -64,28 +62,38 @@ class ButtonComponent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Expandable(
-                modifier =
-                    Modifier.height(64.dp).fillMaxWidth().semantics {
-                        role = Role.Button
-                        contentDescription = label
-                    },
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(28.dp),
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                borderStroke = BorderStroke(8.dp, MaterialTheme.colorScheme.surface),
-                onClick = onClick,
-            ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
+            BottomComponentButtonSurface {
+                Expandable(
+                    modifier =
+                        Modifier.fillMaxSize().padding(8.dp).semantics {
+                            role = Role.Button
+                            contentDescription = label
+                        },
+                    color =
+                        if (viewModel.isActive) {
+                            MaterialTheme.colorScheme.tertiaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surface
+                        },
+                    shape = RoundedCornerShape(28.dp),
+                    contentColor =
+                        if (viewModel.isActive) {
+                            MaterialTheme.colorScheme.onTertiaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                    onClick = onClick,
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
+                    }
                 }
             }
             Text(
-                modifier = Modifier.clearAndSetSemantics {},
+                modifier = Modifier.clearAndSetSemantics {}.basicMarquee(),
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
             )
         }
     }

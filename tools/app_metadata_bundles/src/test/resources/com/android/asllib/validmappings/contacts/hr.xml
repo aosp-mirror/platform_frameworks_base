@@ -1,0 +1,11 @@
+<app-metadata-bundles version="123">
+    <safety-labels version="12345">
+        <data-labels>
+            <data-shared dataCategory="contacts"
+                dataType="contacts"
+                isSharingOptional="false"
+                ephemeral="true"
+                purposes="analytics" />
+        </data-labels>
+    </safety-labels>
+</app-metadata-bundles>

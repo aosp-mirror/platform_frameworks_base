@@ -1,0 +1,7 @@
+<pbundle_as_map name="identifiers">
+    <pbundle_as_map name="other">
+        <int-array name="purposes" num="1">
+            <item value="2" />
+        </int-array>
+    </pbundle_as_map>
+</pbundle_as_map>

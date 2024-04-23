@@ -19,11 +19,13 @@ package com.android.server.display.mode
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.BrightnessInfo
+import android.util.SparseArray
 import android.view.Display
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
 import com.android.server.display.DisplayDeviceConfig
 import com.android.server.display.feature.DisplayManagerFlags
+import com.android.server.display.mode.DisplayModeDirector.DisplayDeviceConfigProvider
 import com.android.server.testutils.TestHandler
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -48,6 +50,7 @@ class BrightnessObserverTest {
     private val mockInjector = mock<DisplayModeDirector.Injector>()
     private val mockFlags = mock<DisplayManagerFlags>()
     private val mockDeviceConfig = mock<DisplayDeviceConfig>()
+    private val mockDisplayDeviceConfigProvider = mock<DisplayDeviceConfigProvider>()
 
     private val testHandler = TestHandler(null)
 
@@ -61,9 +64,13 @@ class BrightnessObserverTest {
         setUpLowBrightnessZone()
         whenever(mockFlags.isVsyncLowLightVoteEnabled).thenReturn(testCase.vsyncLowLightVoteEnabled)
         val displayModeDirector = DisplayModeDirector(
-                spyContext, testHandler, mockInjector, mockFlags)
+                spyContext, testHandler, mockInjector, mockFlags, mockDisplayDeviceConfigProvider)
+        val ddcByDisplay = SparseArray<DisplayDeviceConfig>()
+        whenever(mockDeviceConfig.isVrrSupportEnabled).thenReturn(testCase.vrrSupported)
+        ddcByDisplay.put(Display.DEFAULT_DISPLAY, mockDeviceConfig)
+        displayModeDirector.injectDisplayDeviceConfigByDisplay(ddcByDisplay)
         val brightnessObserver = displayModeDirector.BrightnessObserver(
-                spyContext, testHandler, mockInjector, testCase.vrrSupported, mockFlags)
+                spyContext, testHandler, mockInjector, mockFlags)
 
         brightnessObserver.onRefreshRateSettingChangedLocked(0.0f, 120.0f)
         brightnessObserver.updateBlockingZoneThresholds(mockDeviceConfig, false)

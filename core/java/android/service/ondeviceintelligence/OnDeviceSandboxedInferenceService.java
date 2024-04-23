@@ -35,6 +35,7 @@ import android.app.ondeviceintelligence.ITokenInfoCallback;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.InferenceParams;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.StateParams;
 import android.app.ondeviceintelligence.ProcessingCallback;
 import android.app.ondeviceintelligence.ProcessingSignal;
 import android.app.ondeviceintelligence.StreamingProcessingCallback;
@@ -293,7 +294,7 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
      * @param callback        callback to populate the update status and if there are params
      *                        associated with the status.
      */
-    public abstract void onUpdateProcessingState(@NonNull @InferenceParams Bundle processingState,
+    public abstract void onUpdateProcessingState(@NonNull @StateParams Bundle processingState,
             @NonNull OutcomeReceiver<PersistableBundle,
                     OnDeviceIntelligenceException> callback);
 

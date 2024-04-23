@@ -67,6 +67,8 @@ import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -76,8 +78,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Controller which coordinates all the biometric unlocking actions with the UI.
@@ -183,6 +183,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final SystemClock mSystemClock;
     private final boolean mOrderUnlockAndWake;
     private final Lazy<SelectedUserInteractor> mSelectedUserInteractor;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private long mLastFpFailureUptimeMillis;
     private int mNumConsecutiveFpFailures;
 
@@ -323,6 +324,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mOrderUnlockAndWake = resources.getBoolean(
                 com.android.internal.R.bool.config_orderUnlockAndWake);
         mSelectedUserInteractor = selectedUserInteractor;
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         javaAdapter.alwaysCollectFlow(
                 keyguardTransitionInteractor.getStartedKeyguardTransitionStep(),
                 this::consumeTransitionStepOnStartedKeyguardState);
@@ -665,7 +667,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
         if (isKeyguardShowing) {
             if ((mKeyguardViewController.primaryBouncerIsOrWillBeShowing()
-                    || mKeyguardBypassController.getAltBouncerShowing()) && unlockingAllowed) {
+                    || mKeyguardTransitionInteractor.getCurrentState()
+                    == KeyguardState.ALTERNATE_BOUNCER) && unlockingAllowed) {
                 return MODE_DISMISS_BOUNCER;
             } else if (unlockingAllowed && bypass) {
                 return MODE_UNLOCK_COLLAPSING;

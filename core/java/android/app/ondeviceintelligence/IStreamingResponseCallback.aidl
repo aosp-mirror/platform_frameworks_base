@@ -10,7 +10,7 @@ import android.os.Bundle;
   *
   * @hide
   */
-interface IStreamingResponseCallback {
+oneway interface IStreamingResponseCallback {
     void onNewContent(in Bundle processedResult) = 1;
     void onSuccess(in Bundle result) = 2;
     void onFailure(int errorCode, in String errorMessage, in PersistableBundle errorParams) = 3;

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -29,6 +30,7 @@ import android.app.admin.PackagePermissionPolicyKey;
 import android.app.admin.PackagePolicyKey;
 import android.app.admin.PolicyKey;
 import android.app.admin.UserRestrictionPolicyKey;
+import android.app.admin.flags.Flags;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -37,6 +39,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -183,15 +186,31 @@ final class PolicyEnforcerCallbacks {
     }
 
     static boolean setUserControlDisabledPackages(
-            @Nullable Set<String> packages, int userId) {
+            @Nullable Set<String> packages, Context context, int userId, PolicyKey policyKey) {
         Binder.withCleanCallingIdentity(() -> {
-            LocalServices.getService(PackageManagerInternal.class)
-                    .setOwnerProtectedPackages(
-                            userId,
-                            packages == null ? null : packages.stream().toList());
+            PackageManagerInternal pmi =
+                    LocalServices.getService(PackageManagerInternal.class);
+            pmi.setOwnerProtectedPackages(userId,
+                    packages == null ? null : packages.stream().toList());
             LocalServices.getService(UsageStatsManagerInternal.class)
-                            .setAdminProtectedPackages(
+                    .setAdminProtectedPackages(
                             packages == null ? null : new ArraySet<>(packages), userId);
+
+            if (Flags.disallowUserControlBgUsageFix()) {
+                if (packages == null) {
+                    return;
+                }
+                final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+                for (var pkg : packages) {
+                    final var appInfo = pmi.getApplicationInfo(pkg,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                            Process.myUid(), userId);
+                    if (appInfo != null) {
+                        DevicePolicyManagerService.setBgUsageAppOp(appOpsManager, appInfo);
+                    }
+                }
+            }
         });
         return true;
     }

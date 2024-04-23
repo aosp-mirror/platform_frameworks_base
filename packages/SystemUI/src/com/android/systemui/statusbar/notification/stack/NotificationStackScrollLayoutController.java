@@ -68,8 +68,6 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
@@ -83,6 +81,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
@@ -125,7 +124,6 @@ import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
-import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -189,7 +187,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final VisibilityLocationProviderDelegator mVisibilityLocationProviderDelegator;
     private final ShadeController mShadeController;
     private final Provider<WindowRootView> mWindowRootView;
-    private final NotificationStackAppearanceInteractor mStackAppearanceInteractor;
     private final KeyguardMediaController mKeyguardMediaController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -211,11 +208,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     @Nullable
     private Boolean mHistoryEnabled;
     private int mBarState;
-    private boolean mIsBouncerShowingFromCentralSurfaces;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private boolean mIsInTransitionToAod = false;
 
-    private final FeatureFlagsClassic mFeatureFlags;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
@@ -311,10 +306,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     };
 
     private final DynamicPrivacyController.Listener mDynamicPrivacyControllerListener = () -> {
-        if (mView.isExpanded()) {
-            // The bottom might change because we're using the final actual height of the view
-            mView.setAnimateBottomOnLayout(true);
-        }
         if (!FooterViewRefactor.isEnabled()) {
             // Let's update the footer once the notifications have been updated (in the next frame)
             mView.post(this::updateFooter);
@@ -742,12 +733,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             NotificationListViewBinder viewBinder,
             ShadeController shadeController,
             Provider<WindowRootView> windowRootView,
-            NotificationStackAppearanceInteractor stackAppearanceInteractor,
             InteractionJankMonitor jankMonitor,
             StackStateLogger stackLogger,
             NotificationStackScrollLogger logger,
             NotificationStackSizeCalculator notificationStackSizeCalculator,
-            FeatureFlagsClassic featureFlags,
             NotificationTargetsHelper notificationTargetsHelper,
             SecureSettings secureSettings,
             NotificationDismissibilityProvider dismissibilityProvider,
@@ -795,8 +784,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mSeenNotificationsInteractor = seenNotificationsInteractor;
         mShadeController = shadeController;
         mWindowRootView = windowRootView;
-        mStackAppearanceInteractor = stackAppearanceInteractor;
-        mFeatureFlags = featureFlags;
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;
@@ -1124,6 +1111,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public boolean isAddOrRemoveAnimationPending() {
+        SceneContainerFlag.assertInLegacyMode();
         return mView != null && mView.isAddOrRemoveAnimationPending();
     }
 
@@ -1161,29 +1149,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         if (sceneContainer != null) {
             sceneContainer.dispatchTouchEvent(ev);
         }
-    }
-
-    /** Send internal notification expansion to the scene container framework. */
-    public void sendSyntheticScrollToSceneFramework(Float delta) {
-        mStackAppearanceInteractor.setSyntheticScroll(delta);
-    }
-
-    /** Get the y-coordinate of the top bound of the stack. */
-    public float getPlaceholderTop() {
-        return mStackAppearanceInteractor.getShadeScrimBounds().getValue().getTop();
-    }
-
-    /**
-     * Returns whether the notification stack is scrolled to the top; i.e., it cannot be scrolled
-     * down any further.
-     */
-    public boolean isPlaceholderScrolledToTop() {
-        return mStackAppearanceInteractor.getScrolledToTop().getValue();
-    }
-
-    /** Set the intrinsic height of the stack content without additional padding. */
-    public void setIntrinsicContentHeight(float intrinsicContentHeight) {
-        mStackAppearanceInteractor.setStackHeight(intrinsicContentHeight);
     }
 
     public void setIntrinsicPadding(int intrinsicPadding) {
@@ -1264,6 +1229,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setScrollingEnabled(boolean enabled) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setScrollingEnabled(enabled);
     }
 
@@ -1284,6 +1250,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void updateTopPadding(float qsHeight, boolean animate) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.updateTopPadding(qsHeight, animate);
     }
 
@@ -1386,11 +1353,13 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void onExpansionStarted() {
+        SceneContainerFlag.assertInLegacyMode();
         mView.onExpansionStarted();
         checkSnoozeLeavebehind();
     }
 
     public void onExpansionStopped() {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setCheckForLeaveBehind(false);
         mView.onExpansionStopped();
     }
@@ -1409,14 +1378,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void setPanelFlinging(boolean flinging) {
         mView.setPanelFlinging(flinging);
-    }
-
-    /**
-     * Sets whether the bouncer is currently showing. Should only be called from
-     * {@link CentralSurfaces}.
-     */
-    public void setBouncerShowingFromCentralSurfaces(boolean bouncerShowing) {
-        mIsBouncerShowingFromCentralSurfaces = bouncerShowing;
     }
 
     /**
@@ -1456,29 +1417,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 // For more details, see: b/228790482
                 && !mIsInTransitionToAod
                 // Don't show any notification content if the bouncer is showing. See b/267060171.
-                && !isBouncerShowing();
+                && !mPrimaryBouncerInteractor.isBouncerShowing();
 
         mView.updateEmptyShadeView(shouldShow, mZenModeController.areNotificationsHiddenInShade());
 
         Trace.endSection();
-    }
-
-    /**
-     * Returns whether the bouncer is currently showing.
-     *
-     * There's a possible timing difference between when CentralSurfaces marks the bouncer as not
-     * showing and when PrimaryBouncerInteractor marks the bouncer as not showing. (CentralSurfaces
-     * appears to mark the bouncer as showing for 10-200ms longer than PrimaryBouncerInteractor.)
-     *
-     * This timing difference could be load bearing, which is why we have a feature flag protecting
-     * where we fetch the value from. This flag is intended to be short-lived.
-     */
-    private boolean isBouncerShowing() {
-        if (mFeatureFlags.isEnabled(Flags.USE_REPOS_FOR_BOUNCER_SHOWING)) {
-            return mPrimaryBouncerInteractor.isBouncerShowing();
-        } else {
-            return mIsBouncerShowingFromCentralSurfaces;
-        }
     }
 
     /**
@@ -1503,6 +1446,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
+        NotificationsHeadsUpRefactor.assertInLegacyMode();
         mView.setHeadsUpAnimatingAway(headsUpAnimatingAway);
     }
 
@@ -1519,6 +1463,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setExpandedHeight(float expandedHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setExpandedHeight(expandedHeight);
     }
 
@@ -1794,6 +1739,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      */
     public void setRoundedClippingBounds(int left, int top, int right, int bottom, int topRadius,
             int bottomRadius) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setRoundedClippingBounds(left, top, right, bottom, topRadius, bottomRadius);
     }
 

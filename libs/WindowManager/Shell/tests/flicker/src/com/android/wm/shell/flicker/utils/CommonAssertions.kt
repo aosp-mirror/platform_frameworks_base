@@ -18,13 +18,13 @@
 
 package com.android.wm.shell.flicker.utils
 
+import android.graphics.Region
 import android.tools.Rotation
-import android.tools.datatypes.Region
+import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.layers.LayerTraceEntrySubject
 import android.tools.flicker.subject.layers.LayersTraceSubject
-import android.tools.traces.component.IComponentMatcher
-import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.helpers.WindowUtils
+import android.tools.traces.component.IComponentMatcher
 
 fun LegacyFlickerTest.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd { this.isVisible(APP_PAIR_SPLIT_DIVIDER_COMPONENT) }
@@ -263,41 +263,41 @@ fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return invoke {
         val dividerRegion =
-            layer(SPLIT_SCREEN_DIVIDER_COMPONENT)?.visibleRegion?.region
+            layer(SPLIT_SCREEN_DIVIDER_COMPONENT)?.visibleRegion?.region?.bounds
                 ?: error("$SPLIT_SCREEN_DIVIDER_COMPONENT component not found")
         visibleRegion(component).isNotEmpty()
         visibleRegion(component)
             .coversAtMost(
-                if (displayBounds.width > displayBounds.height) {
+                if (displayBounds.width() > displayBounds.height()) {
                     if (landscapePosLeft) {
-                        Region.from(
+                        Region(
                             0,
                             0,
-                            (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
-                            displayBounds.bounds.bottom
+                            (dividerRegion.left + dividerRegion.right) / 2,
+                            displayBounds.bottom
                         )
                     } else {
-                        Region.from(
-                            (dividerRegion.bounds.left + dividerRegion.bounds.right) / 2,
+                        Region(
+                            (dividerRegion.left + dividerRegion.right) / 2,
                             0,
-                            displayBounds.bounds.right,
-                            displayBounds.bounds.bottom
+                            displayBounds.right,
+                            displayBounds.bottom
                         )
                     }
                 } else {
                     if (portraitPosTop) {
-                        Region.from(
+                        Region(
                             0,
                             0,
-                            displayBounds.bounds.right,
-                            (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2
+                            displayBounds.right,
+                            (dividerRegion.top + dividerRegion.bottom) / 2
                         )
                     } else {
-                        Region.from(
+                        Region(
                             0,
-                            (dividerRegion.bounds.top + dividerRegion.bounds.bottom) / 2,
-                            displayBounds.bounds.right,
-                            displayBounds.bounds.bottom
+                            (dividerRegion.top + dividerRegion.bottom) / 2,
+                            displayBounds.right,
+                            displayBounds.bottom
                         )
                     }
                 }
@@ -420,17 +420,17 @@ fun LegacyFlickerTest.dockedStackSecondaryBoundsIsVisibleAtEnd(
 fun getPrimaryRegion(dividerRegion: Region, rotation: Rotation): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation.isRotated()) {
-        Region.from(
+        Region(
             0,
             0,
             dividerRegion.bounds.left + WindowUtils.dockedStackDividerInset,
-            displayBounds.bounds.bottom
+            displayBounds.bottom
         )
     } else {
-        Region.from(
+        Region(
             0,
             0,
-            displayBounds.bounds.right,
+            displayBounds.right,
             dividerRegion.bounds.top + WindowUtils.dockedStackDividerInset
         )
     }
@@ -439,18 +439,18 @@ fun getPrimaryRegion(dividerRegion: Region, rotation: Rotation): Region {
 fun getSecondaryRegion(dividerRegion: Region, rotation: Rotation): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation.isRotated()) {
-        Region.from(
+        Region(
             dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset,
             0,
-            displayBounds.bounds.right,
-            displayBounds.bounds.bottom
+            displayBounds.right,
+            displayBounds.bottom
         )
     } else {
-        Region.from(
+        Region(
             0,
             dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
-            displayBounds.bounds.right,
-            displayBounds.bounds.bottom
+            displayBounds.right,
+            displayBounds.bottom
         )
     }
 }

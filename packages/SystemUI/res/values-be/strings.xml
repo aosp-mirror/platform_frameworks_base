@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Цень апавяшчэння.."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Хуткія налады."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Хуткія налады і шчыток апавяшчэнняў."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Экран блакіроўкі."</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Экран блакіроўкі дзейнасці"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Закрыць"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"поўная цішыня"</string>
@@ -270,12 +271,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Паглядзець усе"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Выкарыстоўваць Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Падключана"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Захавана"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"адключыць"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"актываваць"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Аўтаматычнае ўключэнне заўтра"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Bluetooth выкарыстоўваецца для вызначэння месцазнаходжання прылады, а таксама такімі функцыямі, як Хуткае абагульванне і Знайсці прыладу"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth будзе ўключаны заўтра ў 5 гадзін раніцы"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Узровень зараду: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Гук"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнітура"</string>
@@ -350,6 +359,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Запіс праблемы"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Пачынайце"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Спыніцеся"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Справаздача"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"З чым была звязана праблема, якая вам сустрэлася?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Выберыце тып праблемы"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Запіс экрана"</string>
@@ -363,7 +373,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандартная"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Сярэдняя"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Высокая"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слыхавыя апараты"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слыхавыя апараты"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Спалучыць новую прыладу"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Націсніце, каб спалучыць новую прыладу"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблакіраваць мікрафон прылады?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Разблакіраваць камеру прылады?"</string>
@@ -430,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе хуткая зарадка • Поўны зарад праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе павольная зарадка • Поўны зарад праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе зарадка • Поўны зарад праз <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Правядзіце пальцам па экране ўлева, каб азнаёміцца з дапаможнікам"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Наладзіць"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Закрыць"</string>
@@ -442,14 +458,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Выдаліць"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Дадаць віджэт"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Гатова"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Дадаць віджэты"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Доступ да віджэтаў любімых праграм без разблакіроўкі планшэта."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Дазволіць размяшчаць на экране блакіроўкі любыя віджэты?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Адкрыць налады"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Уключыць працоўныя праграмы?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Уключыць"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Перайсці да іншага карыстальніка"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"высоўнае меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усе праграмы і даныя гэтага сеанса будуць выдалены."</string>
@@ -741,7 +759,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Пераключыць раскладку клавіятуры"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"або"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Ачысціць пошукавы запыт"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Ярлыкі"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Спалучэнні клавіш"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Пошук ярлыкоў"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Ярлыкі не знойдзены"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Сістэма"</string>
@@ -766,9 +784,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Выклікаць Памочніка"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Экран блакіроўкі"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Стварыць нататку"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Шматзадачнасць сістэмы"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Перайсці ў рэжым падзеленага экрана з бягучай праграмай справа"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Перайсці ў рэжым падзеленага экрана з бягучай праграмай злева"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Шматзадачнасць"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Падзяліць экран і памясціць гэту праграму справа"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Падзяліць экран і памясціць гэту праграму злева"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Пераключыцца з рэжыму падзеленага экрана на поўнаэкранны рэжым"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Пераключыцца на праграму справа або ўнізе на падзеленым экране"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Пераключыцца на праграму злева або ўверсе на падзеленым экране"</string>

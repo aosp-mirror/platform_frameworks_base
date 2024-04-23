@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo; solo oído izquierdo"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo; solo oído derecho"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Activo; oídos izquierdo y derecho"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Activo (solo para contenido multimedia); <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Activo (solo para contenido multimedia); I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería; D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Conectado (admite el uso compartido de audio); <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Conectado (admite el uso compartido de audio); I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería; D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Conectado (admite el uso compartido de audio); izquierdo: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Conectado (admite el uso compartido de audio); derecho: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Activo (solo para contenido multimedia)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Admite el uso compartido de audio"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Activo (solo para contenido multimedia); solo izquierdo"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Activo (solo para contenido multimedia); solo derecho"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Activo (solo para contenido multimedia); izquierdo y derecho"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Llamadas telefónicas"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferencia de archivos"</string>
@@ -313,7 +324,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Si este modo está habilitado, es posible que la dirección MAC del dispositivo cambie cada vez que se conecte a una red que tenga habilitada la aleatorización de MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"De uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de los búferes de registro"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"¿Borrar el almacenamiento persistente del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Cuando ya no usamos el registrador persistente para monitorear, debemos borrar los datos que almacena el registrador en tu dispositivo."</string>
@@ -389,7 +400,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depurar operaciones de recorte no rectangulares"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Perfil procesamiento HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Habilitar depuración GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite capas de GPU para apps de depuración"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permite cargar capas de depuración de GPU para apps de depuración"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Habilitar registro detallado"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluye otros registros de proveedor específicos del dispositivo en los informes de errores, que podrían contener información privada, consumir más batería o usar más espacio de almacenamiento."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala de animación de ventana"</string>
@@ -449,7 +460,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteronomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalía (rojo-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalía (azul-amarillo)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corrección de color"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Corrección de colores"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La corrección de colores puede ser útil cuando quieres hacer lo siguiente:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Ver los colores con mayor precisión&lt;/li&gt; &lt;li&gt;&amp;nbsp;Quitar colores para concentrarte&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Reemplazado por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> para completar"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Carga optimizada"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Cargando"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconocido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Cargando rápidamente"</string>
@@ -487,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Cargada"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Carga completa"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Se detuvo la carga"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Controlada por el administrador"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Función controlada por configuración restringida"</string>
     <string name="disabled" msgid="8017887509554714950">"Inhabilitada"</string>
@@ -552,7 +575,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tablet"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina del conector"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Bocina de la estación de carga"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Cuando salgas, se borrará toda la actividad"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Puedes guardar o borrar la actividad cuando salgas"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restablece la sesión para eliminar la actividad ahora; o guarda o borra la actividad cuando salgas"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Tomar una foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Elegir una imagen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleccionar foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Hubo demasiados intentos incorrectos. Se borrarán los datos de este dispositivo."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Hubo demasiados intentos incorrectos. Se borrará este usuario."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Una barra de teléfono"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Dos barras de teléfono"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Tres barras de teléfono"</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Señal de teléfono completa"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"No hay datos."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Una barra de datos"</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet desconectada"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sin llamadas."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Elige una foto de perfil"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Ícono de usuario predeterminado"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Teclado físico"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Elige el diseño de teclado"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predeterminada"</string>

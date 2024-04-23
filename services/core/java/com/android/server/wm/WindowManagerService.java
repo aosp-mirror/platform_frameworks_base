@@ -49,6 +49,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
+import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -240,6 +241,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.IntArray;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
@@ -318,6 +320,7 @@ import android.window.ITaskFpsCallback;
 import android.window.ITrustedPresentationListener;
 import android.window.InputTransferToken;
 import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 import android.window.SystemPerformanceHinter;
 import android.window.TaskSnapshot;
 import android.window.TrustedPresentationThresholds;
@@ -382,6 +385,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -566,7 +570,9 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Device default insets types shall be excluded from config app sizes. */
     final int mConfigTypes;
 
-    final int mLegacyConfigTypes;
+    final int mOverrideConfigTypes;
+
+    final int mOverrideDecorTypes;
 
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
@@ -1105,6 +1111,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @GuardedBy("mGlobalLock")
     final SensitiveContentPackages mSensitiveContentPackages = new SensitiveContentPackages();
+    /**
+     * UIDs for which a Toast has been shown to indicate
+     * {@link LocalService#addBlockScreenCaptureForApps(ArraySet) screen capture blocking}. This is
+     * used to ensure we don't keep re-showing the Toast every time the window becomes visible.
+     * UIDs are removed when the app is removed from the block list.
+     */
+    @GuardedBy("mGlobalLock")
+    private final IntArray mCaptureBlockedToastShownUids = new IntArray();
 
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
@@ -1237,19 +1251,20 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mFlags.mInsetsDecoupledConfiguration) {
             mDecorTypes = 0;
             mConfigTypes = 0;
-        } else if (isScreenSizeDecoupledFromStatusBarAndCutout) {
-            mDecorTypes = WindowInsets.Type.navigationBars();
-            mConfigTypes = WindowInsets.Type.navigationBars();
         } else {
             mDecorTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars();
             mConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
                     | WindowInsets.Type.navigationBars();
         }
-        if (isScreenSizeDecoupledFromStatusBarAndCutout) {
-            // Do not fallback to legacy value for enabled devices.
-            mLegacyConfigTypes = WindowInsets.Type.navigationBars();
+        if (isScreenSizeDecoupledFromStatusBarAndCutout && !mFlags.mInsetsDecoupledConfiguration) {
+            // If the global new behavior is not there, but the partial decouple flag is on.
+            mOverrideConfigTypes = 0;
+            mOverrideDecorTypes = 0;
         } else {
-            mLegacyConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
+            mOverrideConfigTypes =
+                    WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
+                            | WindowInsets.Type.navigationBars();
+            mOverrideDecorTypes = WindowInsets.Type.displayCutout()
                     | WindowInsets.Type.navigationBars();
         }
 
@@ -2438,6 +2453,9 @@ public class WindowManagerService extends IWindowManager.Stub
             ProtoLog.i(WM_DEBUG_SCREEN_ON,
                     "Relayout %s: oldVis=%d newVis=%d. %s", win, oldVisibility,
                             viewVisibility, new RuntimeException().fillInStackTrace());
+            if (becameVisible) {
+                onWindowVisible(win);
+            }
 
             win.setDisplayLayoutNeeded();
             win.mGivenInsetsPending = (flags & WindowManagerGlobal.RELAYOUT_INSETS_PENDING) != 0;
@@ -3427,7 +3445,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard")) {
             throw new SecurityException("Requires CONTROL_KEYGUARD permission");
         }
-        if (mAtmService.mKeyguardController.isShowingDream()) {
+        if (!dreamHandlesConfirmKeys() && mAtmService.mKeyguardController.isShowingDream()) {
             mAtmService.mTaskSupervisor.wakeUp("leaveDream");
         }
         synchronized (mGlobalLock) {
@@ -3680,12 +3698,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // Switch state: AKEY_STATE_UNKNOWN.
             return CAMERA_LENS_COVER_ABSENT;
         }
-    }
-
-    // Called by window manager policy.  Not exposed externally.
-    @Override
-    public void switchKeyboardLayout(int deviceId, int direction) {
-        mInputManager.switchKeyboardLayout(deviceId, direction);
     }
 
     // Called by window manager policy.  Not exposed externally.
@@ -4162,7 +4174,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Nullable
-    private ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot() {
+    private ScreenshotHardwareBuffer takeAssistScreenshot(Set<Integer> windowTypesToExclude) {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "requestAssistScreenshot()")) {
             throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
@@ -4177,11 +4189,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 captureArgs = null;
             } else {
-                captureArgs = displayContent.getLayerCaptureArgs();
+                captureArgs = displayContent.getLayerCaptureArgs(windowTypesToExclude);
             }
         }
 
-        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
+        final ScreenshotHardwareBuffer screenshotBuffer;
         if (captureArgs != null) {
             ScreenCapture.SynchronousScreenCaptureListener syncScreenCapture =
                     ScreenCapture.createSyncCaptureListener();
@@ -4207,7 +4219,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override
     public boolean requestAssistScreenshot(final IAssistDataReceiver receiver) {
-        final ScreenCapture.ScreenshotHardwareBuffer shb = takeAssistScreenshot();
+        final ScreenshotHardwareBuffer shb =
+                takeAssistScreenshot(/* windowTypesToExclude= */ Set.of());
         final Bitmap bm = shb != null ? shb.asBitmap() : null;
         FgThread.getHandler().post(() -> {
             try {
@@ -4262,7 +4275,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mTmpRect.offsetTo(0, 0);
 
             final SurfaceControl sc = task.getSurfaceControl();
-            final ScreenCapture.ScreenshotHardwareBuffer buffer = ScreenCapture.captureLayers(
+            final ScreenshotHardwareBuffer buffer = ScreenCapture.captureLayers(
                     layerCaptureArgsBuilder.setLayer(sc).setSourceCrop(mTmpRect).build());
             if (buffer == null) {
                 Slog.w(TAG, "Could not get screenshot buffer for taskId: " + taskId);
@@ -8076,6 +8089,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             boolean allWindowsDrawn = false;
             synchronized (mGlobalLock) {
+                if (mRoot.getDefaultDisplay().mDisplayUpdater.waitForTransition(message)) {
+                    // Use the ready-to-play of transition as the signal.
+                    return;
+                }
                 container.waitForAllWindowsDrawn();
                 mWindowPlacerLocked.requestTraversal();
                 mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, container);
@@ -8749,6 +8766,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (modified) {
                     WindowManagerService.this.refreshScreenCaptureDisabled();
                 }
+                if (sensitiveContentImprovements()) {
+                    for (int i = 0; i < packageInfos.size(); i++) {
+                        int uid = packageInfos.valueAt(i).getUid();
+                        if (mCaptureBlockedToastShownUids.contains(uid)) {
+                            mCaptureBlockedToastShownUids.remove(
+                                    mCaptureBlockedToastShownUids.indexOf(uid));
+                        }
+                    }
+                }
             }
         }
 
@@ -8758,6 +8784,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean modified = mSensitiveContentPackages.clearBlockedApps();
                 if (modified) {
                     WindowManagerService.this.refreshScreenCaptureDisabled();
+                }
+                if (sensitiveContentImprovements()) {
+                    mCaptureBlockedToastShownUids.clear();
                 }
             }
         }
@@ -8781,9 +8810,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public ScreenCapture.ScreenshotHardwareBuffer takeAssistScreenshot() {
+        public ScreenshotHardwareBuffer takeAssistScreenshot(Set<Integer> windowTypesToExclude) {
             // WMS.takeAssistScreenshot takes care of the locking.
-            return WindowManagerService.this.takeAssistScreenshot();
+            return WindowManagerService.this.takeAssistScreenshot(windowTypesToExclude);
         }
     }
 
@@ -10150,7 +10179,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Called to notify WMS that the specified window has become visible. This shows a Toast if the
      * window is deemed to hold sensitive content.
      */
-    void onWindowVisible(@NonNull WindowState w) {
+    private void onWindowVisible(@NonNull WindowState w) {
         showToastIfBlockingScreenCapture(w);
     }
 
@@ -10160,13 +10189,19 @@ public class WindowManagerService extends IWindowManager.Stub
      * on sensitive content protections.
      */
     private void showToastIfBlockingScreenCapture(@NonNull WindowState w) {
-        // TODO(b/323580163): Check if already shown and update shown state.
-        if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(),
-                w.getOwningUid(), w.getWindowToken())) {
-            Toast.makeText(mContext, Looper.getMainLooper(),
-                            mContext.getString(R.string.screen_not_shared_sensitive_content),
-                            Toast.LENGTH_SHORT)
-                    .show();
+        int uid = w.getOwningUid();
+        if (mCaptureBlockedToastShownUids.contains(uid)) {
+            return;
+        }
+        if (mSensitiveContentPackages.shouldBlockScreenCaptureForApp(w.getOwningPackage(), uid,
+                w.getWindowToken())) {
+            mCaptureBlockedToastShownUids.add(uid);
+            mH.post(() -> {
+                Toast.makeText(mContext, Looper.getMainLooper(),
+                                mContext.getString(R.string.screen_not_shared_sensitive_content),
+                                Toast.LENGTH_SHORT)
+                        .show();
+            });
         }
     }
 }

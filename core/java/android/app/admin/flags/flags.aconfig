@@ -2,6 +2,7 @@
 # proto-message: flag_declarations
 
 package: "android.app.admin.flags"
+container: "system"
 
 flag {
   name: "policy_engine_migration_v2_enabled"
@@ -27,6 +28,17 @@ flag {
 }
 
 flag {
+  name: "device_policy_size_tracking_internal_bug_fix_enabled"
+  namespace: "enterprise"
+  description: "Bug fix for tracking the total policy size and have a max threshold"
+  bug: "281543351"
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
+
+
+flag {
   name: "onboarding_bugreport_v2_enabled"
   is_exported: true
   namespace: "enterprise"
@@ -35,10 +47,11 @@ flag {
 }
 
 flag {
-  name: "cross_user_suspension_enabled"
+  name: "cross_user_suspension_enabled_ro"
   namespace: "enterprise"
   description: "Allow holders of INTERACT_ACROSS_USERS_FULL to suspend apps in different users."
   bug: "263464464"
+  is_fixed_read_only: true
 }
 
 flag {
@@ -183,6 +196,25 @@ flag {
   }
 }
 
+flag {
+  name: "power_exemption_bg_usage_fix"
+  namespace: "enterprise"
+  description: "Ensure aps with EXEMPT_FROM_POWER_RESTRICTIONS can execute in the background"
+  bug: "333379020"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "disallow_user_control_bg_usage_fix"
+  namespace: "enterprise"
+  description: "Make DPM.setUserControlDisabledPackages() ensure background usage is allowed"
+  bug: "326031059"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
 
 flag {
   name: "esim_management_ux_enabled"
@@ -202,10 +234,27 @@ flag {
 }
 
 flag {
+  name: "dmrh_can_set_app_restriction"
+  namespace: "enterprise"
+  description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
+  bug: "328758346"
+}
+
+flag {
   name: "allow_screen_brightness_control_on_cope"
   namespace: "enterprise"
   description: "Allow COPE admin to control screen brightness and timeout."
   bug: "323894620"
+}
+
+flag {
+  name: "always_persist_do"
+  namespace: "enterprise"
+  description: "Always write device_owners2.xml so that migration flags aren't lost"
+  bug: "335232744"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -223,4 +272,24 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "headless_single_user_bad_device_admin_state_fix"
+    namespace: "enterprise"
+    description: "Fix the bad state in DPMS caused by an earlier bug related to the headless single user change"
+    bug: "332477138"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "headless_single_user_fixes"
+    namespace: "enterprise"
+    description: "Various fixes for headless single user mode"
+    bug: "289515470"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"فعال، فقط چپ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"فعال، فقط راست"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"فعال، چپ و راست"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"فعال (فقط رسانه)، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> باتری"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"فعال (فقط رسانه)، چپ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> باتری، راست: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> باتری"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"متصل (از اشتراک صدا پشتیبانی می‌کند)، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> باتری"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"متصل (از اشتراک صدا پشتیبانی می‌کند)، چپ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> باتری، راست: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> باتری"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"متصل (از اشتراک صدا پشتیبانی می‌کند)، چپ<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"متصل (از اشتراک صدا پشتیبانی می‌کند)، راست <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"فعال (فقط رسانه)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"از اشتراک صدا پشتیبانی می‌کند"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"فعال (فقط رسانه)، فقط چپ"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"فعال (فقط رسانه)، فقط راست"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"فعال (فقط رسانه)، چپ و راست"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"رسانه صوتی"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"تماس‌های تلفنی"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"انتقال فایل"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> تا شارژ کامل باقی مانده است"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - شارژ بهینه شده است"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - درحال شارژ"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ناشناس"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"در حال شارژ شدن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"درحال شارژ شدن سریع"</string>
@@ -487,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"شارژ کامل شد"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"کاملاً شارژ شده است"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"شارژ موقتاً متوقف شده است"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"توسط سرپرست سیستم کنترل می‌شود"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"با تنظیم «حالت محدود» کنترل می‌شود"</string>
     <string name="disabled" msgid="8017887509554714950">"غیر فعال شد"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"همه فعالیت‌ها هنگام خروج حذف خواهد شد"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"می‌توانید فعالیتتان را هنگام خروج ذخیره یا حذف کنید"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"برای حذف فعالیت جلسه در این لحظه، بازنشانی کنید یا می‌توانید فعالیت را هنگام خروج ذخیره یا حذف کنید"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"عکس گرفتن"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"انتخاب تصویر"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"انتخاب عکس"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"تلاش‌های نادرست بسیار زیادی انجام شده است. داده‌های این دستگاه حذف خواهد شد."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"تلاش‌های اشتباه بسیار زیادی انجام شده است. این کاربر حذف خواهد شد."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"یک نوار برای تلفن."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"دو نوار برای تلفن."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"سه نوار برای تلفن."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"قدرت امواج تلفن همراه کامل است."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"داده‌ای وجود ندارد."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"یک نوار برای داده."</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"اترنت قطع شد."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"اترنت."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"تماس گرفته نشود."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"انتخاب عکس نمایه"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"نماد کاربر پیش‌فرض"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"صفحه‌کلید فیزیکی"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"انتخاب جانمایی صفحه‌کلید"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"پیش‌فرض"</string>

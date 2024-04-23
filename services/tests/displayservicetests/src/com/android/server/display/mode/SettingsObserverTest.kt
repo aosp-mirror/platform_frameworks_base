@@ -19,10 +19,14 @@ package com.android.server.display.mode
 import android.content.Context
 import android.content.ContextWrapper
 import android.provider.Settings
+import android.util.SparseArray
+import android.view.Display
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
 import com.android.internal.util.test.FakeSettingsProvider
+import com.android.server.display.DisplayDeviceConfig
 import com.android.server.display.feature.DisplayManagerFlags
+import com.android.server.display.mode.DisplayModeDirector.DisplayDeviceConfigProvider
 import com.android.server.testutils.TestHandler
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -39,7 +43,6 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(TestParameterInjector::class)
 class SettingsObserverTest {
-
     @get:Rule
     val mockitoRule = MockitoJUnit.rule()
 
@@ -49,6 +52,8 @@ class SettingsObserverTest {
     private lateinit var spyContext: Context
     private val mockInjector = mock<DisplayModeDirector.Injector>()
     private val mockFlags = mock<DisplayManagerFlags>()
+    private val mockDeviceConfig = mock<DisplayDeviceConfig>()
+    private val mockDisplayDeviceConfigProvider = mock<DisplayDeviceConfigProvider>()
 
     private val testHandler = TestHandler(null)
 
@@ -67,9 +72,13 @@ class SettingsObserverTest {
                 spyContext.contentResolver, Settings.Global.LOW_POWER_MODE, lowPowerModeSetting)
 
         val displayModeDirector = DisplayModeDirector(
-                spyContext, testHandler, mockInjector, mockFlags)
+                spyContext, testHandler, mockInjector, mockFlags, mockDisplayDeviceConfigProvider)
+        val ddcByDisplay = SparseArray<DisplayDeviceConfig>()
+        whenever(mockDeviceConfig.isVrrSupportEnabled).thenReturn(testCase.vrrSupported)
+        ddcByDisplay.put(Display.DEFAULT_DISPLAY, mockDeviceConfig)
+        displayModeDirector.injectDisplayDeviceConfigByDisplay(ddcByDisplay)
         val settingsObserver = displayModeDirector.SettingsObserver(
-                spyContext, testHandler, testCase.dvrrSupported, mockFlags)
+                spyContext, testHandler, mockFlags)
 
         settingsObserver.onChange(
                 false, Settings.Global.getUriFor(Settings.Global.LOW_POWER_MODE), 1)
@@ -79,7 +88,7 @@ class SettingsObserverTest {
     }
 
     enum class SettingsObserverTestCase(
-            val dvrrSupported: Boolean,
+            val vrrSupported: Boolean,
             val vsyncLowPowerVoteEnabled: Boolean,
             val lowPowerModeEnabled: Boolean,
             internal val expectedVote: Vote?

@@ -226,18 +226,19 @@ class UninstallRepository(private val context: Context) {
                 userName
             )
             if (userManager!!.isSameProfileGroup(myUserHandle, uninstalledUser!!)) {
-                if (customUserManager!!.isManagedProfile()) {
+                if (customUserManager.isManagedProfile) {
                     messageString = context.getString(
                             R.string.uninstall_application_text_current_user_work_profile, userName
                     )
-                } else if (customUserManager!!.isCloneProfile()){
+                } else if (customUserManager.isCloneProfile){
                     isClonedApp = true
                     messageString = context.getString(
                             R.string.uninstall_application_text_current_user_clone_profile
                     )
                 } else if (Flags.allowPrivateProfile()
                         && android.multiuser.Flags.enablePrivateSpaceFeatures()
-                        && customUserManager!!.isPrivateProfile()) {
+                        && customUserManager.isPrivateProfile
+                ) {
                     // TODO(b/324244123): Get these Strings from a User Property API.
                     messageString = context.getString(
                             R.string.uninstall_application_text_current_user_private_profile
@@ -401,6 +402,7 @@ class UninstallRepository(private val context: Context) {
         uninstallData.putBoolean(Intent.EXTRA_UNINSTALL_ALL_USERS, uninstallFromAllUsers)
         uninstallData.putCharSequence(EXTRA_APP_LABEL, targetAppLabel)
         uninstallData.putBoolean(EXTRA_IS_CLONE_APP, isClonedApp)
+        uninstallData.putInt(EXTRA_TARGET_USER_ID, uninstalledUser!!.identifier)
         Log.i(LOG_TAG, "Uninstalling extras = $uninstallData")
 
         // Get a PendingIntent for result broadcast and issue an uninstall request
@@ -730,7 +732,7 @@ class UninstallRepository(private val context: Context) {
         }
     }
 
-    fun cancelInstall() {
+    fun cancelUninstall() {
         if (callback != null) {
             callback!!.onUninstallComplete(
                 targetPackageName!!,
@@ -749,6 +751,7 @@ class UninstallRepository(private val context: Context) {
         private const val EXTRA_IS_CLONE_APP = "com.android.packageinstaller.extra.IS_CLONE_APP"
         private const val EXTRA_PACKAGE_NAME =
             "com.android.packageinstaller.extra.EXTRA_PACKAGE_NAME"
+        private const val EXTRA_TARGET_USER_ID = "EXTRA_TARGET_USER_ID"
     }
 
     class CallerInfo(val activityName: String?, val uid: Int)

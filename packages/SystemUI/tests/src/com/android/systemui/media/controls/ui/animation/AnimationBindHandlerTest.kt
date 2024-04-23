@@ -18,9 +18,9 @@ package com.android.systemui.media.controls.ui.animation
 
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.Drawable
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue

@@ -66,6 +66,7 @@ public class LegacyProtoLogImpl implements IProtoLog {
     private final TraceBuffer mBuffer;
     private final LegacyProtoLogViewerConfigReader mViewerConfig;
     private final TreeMap<String, IProtoLogGroup> mLogGroups;
+    private final Runnable mCacheUpdater;
     private final int mPerChunkSize;
 
     private boolean mProtoLogEnabled;
@@ -73,20 +74,21 @@ public class LegacyProtoLogImpl implements IProtoLog {
     private final Object mProtoLogEnabledLock = new Object();
 
     public LegacyProtoLogImpl(String outputFile, String viewerConfigFilename,
-            TreeMap<String, IProtoLogGroup> logGroups) {
+            TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {
         this(new File(outputFile), viewerConfigFilename, BUFFER_CAPACITY,
-                new LegacyProtoLogViewerConfigReader(), PER_CHUNK_SIZE, logGroups);
+                new LegacyProtoLogViewerConfigReader(), PER_CHUNK_SIZE, logGroups, cacheUpdater);
     }
 
     public LegacyProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
             LegacyProtoLogViewerConfigReader viewerConfig, int perChunkSize,
-            TreeMap<String, IProtoLogGroup> logGroups) {
+            TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {
         mLogFile = file;
         mBuffer = new TraceBuffer(bufferCapacity);
         mLegacyViewerConfigFilename = viewerConfigFilename;
         mViewerConfig = viewerConfig;
         mPerChunkSize = perChunkSize;
-        this.mLogGroups = logGroups;
+        mLogGroups = logGroups;
+        mCacheUpdater = cacheUpdater;
     }
 
     /**
@@ -285,6 +287,8 @@ public class LegacyProtoLogImpl implements IProtoLog {
                 return -1;
             }
         }
+
+        mCacheUpdater.run();
         return 0;
     }
 
@@ -398,6 +402,13 @@ public class LegacyProtoLogImpl implements IProtoLog {
      */
     public int stopLoggingToLogcat(String[] groups, ILogger logger) {
         return setLogging(true /* setTextLogging */, false, logger, groups);
+    }
+
+    @Override
+    public boolean isEnabled(IProtoLogGroup group, LogLevel level) {
+        // In legacy logging we just enable an entire group at a time without more granular control,
+        // so we ignore the level argument to this function.
+        return group.isLogToLogcat() || (group.isLogToProto() && isProtoEnabled());
     }
 }
 

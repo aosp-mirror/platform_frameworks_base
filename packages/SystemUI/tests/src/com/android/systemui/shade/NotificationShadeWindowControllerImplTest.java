@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -74,8 +75,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
@@ -135,7 +134,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
     @Mock private ShadeWindowLogger mShadeWindowLogger;
     @Mock private SelectedUserInteractor mSelectedUserInteractor;
     @Mock private UserTracker mUserTracker;
-    @Mock private SceneContainerFlags mSceneContainerFlags;
     @Mock private LargeScreenHeaderHelper mLargeScreenHeaderHelper;
     @Captor private ArgumentCaptor<WindowManager.LayoutParams> mLayoutParameters;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mStateListener;
@@ -184,14 +182,12 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mKosmos.getDeviceUnlockedInteractor());
 
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
-        FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
         KeyguardTransitionInteractor keyguardTransitionInteractor =
                 mKosmos.getKeyguardTransitionInteractor();
         KeyguardInteractor keyguardInteractor = new KeyguardInteractor(
                 keyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
                 new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
@@ -255,7 +251,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
                 mUserTracker,
-                mSceneContainerFlags,
                 () -> communalInteractor) {
                     @Override
                     protected boolean isDebuggable() {
@@ -436,6 +431,10 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) != 0).isTrue();
+        assertThat(
+                (mLayoutParameters.getValue().inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_TRACING)
+                        != 0)
+                .isTrue();
     }
 
     @Test
@@ -444,6 +443,10 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
 
         verify(mWindowManager).updateViewLayout(any(), mLayoutParameters.capture());
         assertThat((mLayoutParameters.getValue().flags & FLAG_SECURE) == 0).isTrue();
+        assertThat(
+                (mLayoutParameters.getValue().inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_TRACING)
+                        == 0)
+                .isTrue();
     }
 
     @Test

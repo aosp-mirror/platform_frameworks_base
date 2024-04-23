@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.pipeline.dagger
 
 import javax.inject.Qualifier
 
-/** Wifi logs for inputs into the wifi pipeline. */
-@Qualifier
-@MustBeDocumented
-@kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
-annotation class WifiInputLog
+/**
+ * Wifi logs for inputs into
+ * [com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl].
+ */
+@Qualifier @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class WifiInputLog

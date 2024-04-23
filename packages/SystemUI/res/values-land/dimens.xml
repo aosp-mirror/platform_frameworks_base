@@ -94,4 +94,7 @@
 
     <dimen name="keyguard_indication_margin_bottom">8dp</dimen>
     <dimen name="lock_icon_margin_bottom">24dp</dimen>
+
+    <!-- Keyboard shortcuts helper -->
+    <dimen name="ksh_container_horizontal_margin">48dp</dimen>
 </resources>

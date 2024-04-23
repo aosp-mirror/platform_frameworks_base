@@ -69,6 +69,7 @@ import android.widget.RemoteViews.RemoteView;
 import com.android.internal.R;
 
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -138,6 +139,14 @@ import java.util.Locale;
  * </ul>
  * <p>The "inverse" styles provide an inverse color scheme for the spinner, which may be necessary
  * if your application uses a light colored theme (a white background).</p>
+ *
+ * <h4>Accessibility</h4>
+ * <p>
+ * Consider using
+ * {@link AccessibilityNodeInfo#setMinDurationBetweenContentChanges(Duration)} to
+ * convey to accessibility services that changes can be throttled. This may reduce the
+ * frequency of potentially disruptive notifications.
+ * </p>
  *
  * <p><strong>XML attributes</b></strong>
  * <p>

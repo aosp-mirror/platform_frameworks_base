@@ -1197,51 +1197,8 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
-    public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
-            final InputDeviceIdentifier identifier) {
-        return mKeyboardLayoutManager.getKeyboardLayoutsForInputDevice(identifier);
-    }
-
-    @Override // Binder call
     public KeyboardLayout getKeyboardLayout(String keyboardLayoutDescriptor) {
         return mKeyboardLayoutManager.getKeyboardLayout(keyboardLayoutDescriptor);
-    }
-
-    @Override // Binder call
-    public String getCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier) {
-        return mKeyboardLayoutManager.getCurrentKeyboardLayoutForInputDevice(identifier);
-    }
-
-    @EnforcePermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
-    @Override // Binder call
-    public void setCurrentKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor) {
-        super.setCurrentKeyboardLayoutForInputDevice_enforcePermission();
-        mKeyboardLayoutManager.setCurrentKeyboardLayoutForInputDevice(identifier,
-                keyboardLayoutDescriptor);
-    }
-
-    @Override // Binder call
-    public String[] getEnabledKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
-        return mKeyboardLayoutManager.getEnabledKeyboardLayoutsForInputDevice(identifier);
-    }
-
-    @EnforcePermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
-    @Override // Binder call
-    public void addKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor) {
-        super.addKeyboardLayoutForInputDevice_enforcePermission();
-        mKeyboardLayoutManager.addKeyboardLayoutForInputDevice(identifier,
-                keyboardLayoutDescriptor);
-    }
-
-    @EnforcePermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
-    @Override // Binder call
-    public void removeKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
-            String keyboardLayoutDescriptor) {
-        super.removeKeyboardLayoutForInputDevice_enforcePermission();
-        mKeyboardLayoutManager.removeKeyboardLayoutForInputDevice(identifier,
-                keyboardLayoutDescriptor);
     }
 
     @Override // Binder call
@@ -1268,11 +1225,6 @@ public class InputManagerService extends IInputManager.Stub
             @Nullable InputMethodSubtype imeSubtype) {
         return mKeyboardLayoutManager.getKeyboardLayoutListForInputDevice(identifier, userId,
                 imeInfo, imeSubtype);
-    }
-
-
-    public void switchKeyboardLayout(int deviceId, int direction) {
-        mKeyboardLayoutManager.switchKeyboardLayout(deviceId, direction);
     }
 
     public void setFocusedApplication(int displayId, InputApplicationHandle application) {

@@ -235,6 +235,12 @@
     <integer name="config_esim_bootstrap_data_limit_bytes">-1</integer>
     <java-symbol type="integer" name="config_esim_bootstrap_data_limit_bytes" />
 
+    <!-- Reevaluate existing data networks for bootstrap sim data usage at mentioned intervals
+         during esim bootstrap activation. If the value set is 0 or -1, default interval of
+         60000 millis will be set. -->
+    <integer name="config_reevaluate_bootstrap_sim_data_usage_millis">60000</integer>
+    <java-symbol type="integer" name="config_reevaluate_bootstrap_sim_data_usage_millis" />
+
     <!-- Telephony config for the PLMNs of all satellite providers. This is used by satellite modem
          to identify providers that should be ignored if the carrier config
          carrier_supported_satellite_services_per_provider_bundle does not support them.

@@ -282,7 +282,8 @@ open class UdfpsKeyguardViewControllerLegacy(
     @VisibleForTesting
     suspend fun listenForGoneToAodTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            transitionInteractor.goneToAodTransition.collect { transitionStep ->
+            transitionInteractor.transition(KeyguardState.GONE, KeyguardState.AOD).collect {
+                transitionStep ->
                 view.onDozeAmountChanged(
                     transitionStep.value,
                     transitionStep.value,

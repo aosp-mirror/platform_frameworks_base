@@ -94,6 +94,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     private BackNavigationController mBackNavigationController;
     private WindowManagerInternal mWindowManagerInternal;
     private BackAnimationAdapter mBackAnimationAdapter;
+    private BackNavigationController.NavigationMonitor mNavigationMonitor;
     private Task mRootHomeTask;
 
     @Before
@@ -105,6 +106,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         mWindowManagerInternal = mock(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
         mBackAnimationAdapter = mock(BackAnimationAdapter.class);
+        mNavigationMonitor = mock(BackNavigationController.NavigationMonitor.class);
         mRootHomeTask = initHomeActivity();
     }
 
@@ -813,6 +815,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 animationHandler.prepareAnimation(
                         BackNavigationInfo.TYPE_RETURN_TO_HOME,
                         mBackAnimationAdapter,
+                        mNavigationMonitor,
                         task,
                         mRootHomeTask,
                         bottomActivity,
@@ -832,6 +835,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 animationHandler.prepareAnimation(
                         BackNavigationInfo.TYPE_CROSS_ACTIVITY,
                         mBackAnimationAdapter,
+                        mNavigationMonitor,
                         task,
                         task,
                         topActivity,

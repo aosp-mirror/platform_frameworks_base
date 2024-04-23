@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.util.kotlin.BooleanFlowOperators.and
@@ -27,6 +28,7 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -62,6 +64,21 @@ class BooleanFlowOperatorsTest : SysuiTestCase() {
         }
 
     @Test
+    fun and_onlyEmitsWhenValueChanges() =
+        testScope.runTest {
+            val flow1 = MutableStateFlow(false)
+            val flow2 = MutableStateFlow(false)
+            val values by collectValues(and(flow1, flow2))
+
+            assertThat(values).containsExactly(false)
+            flow1.value = true
+            // Overall value is still false, we should not have emitted again.
+            assertThat(values).containsExactly(false)
+            flow2.value = true
+            assertThat(values).containsExactly(false, true).inOrder()
+        }
+
+    @Test
     fun or_allTrue_returnsTrue() =
         testScope.runTest {
             val result by collectLastValue(or(TRUE, TRUE))
@@ -80,6 +97,20 @@ class BooleanFlowOperatorsTest : SysuiTestCase() {
         testScope.runTest {
             val result by collectLastValue(or(FALSE, FALSE, FALSE))
             assertThat(result).isFalse()
+        }
+
+    @Test
+    fun or_onlyEmitsWhenValueChanges() =
+        testScope.runTest {
+            val flow1 = MutableStateFlow(false)
+            val flow2 = MutableStateFlow(false)
+            val values by collectValues(or(flow1, flow2))
+
+            assertThat(values).containsExactly(false)
+            flow1.value = true
+            assertThat(values).containsExactly(false, true).inOrder()
+            flow2.value = true
+            assertThat(values).containsExactly(false, true).inOrder()
         }
 
     @Test

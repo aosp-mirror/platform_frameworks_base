@@ -22,10 +22,12 @@ import com.android.systemui.volume.panel.componentsFactory
 import com.android.systemui.volume.panel.componentsInteractor
 import com.android.systemui.volume.panel.componentsLayoutManager
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent
+import com.android.systemui.volume.panel.domain.VolumePanelStartable
 import com.android.systemui.volume.panel.domain.interactor.ComponentsInteractor
 import com.android.systemui.volume.panel.ui.composable.ComponentsFactory
 import com.android.systemui.volume.panel.ui.layout.ComponentsLayoutManager
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
+import com.android.systemui.volume.panel.volumePanelStartables
 import kotlinx.coroutines.CoroutineScope
 
 class KosmosVolumePanelComponentFactory(private val kosmos: Kosmos) : VolumePanelComponentFactory {
@@ -41,5 +43,8 @@ class KosmosVolumePanelComponentFactory(private val kosmos: Kosmos) : VolumePane
 
             override fun componentsLayoutManager(): ComponentsLayoutManager =
                 kosmos.componentsLayoutManager
+
+            override fun volumePanelStartables(): Set<VolumePanelStartable> =
+                kosmos.volumePanelStartables
         }
 }

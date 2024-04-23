@@ -21,6 +21,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -70,9 +71,9 @@ constructor(
         keyguardTransitionInteractor.startedKeyguardTransitionStep
             .mapLatest(::determineSceneAfterTransition)
             .filterNotNull()
-            // TODO(b/322787129): Also set a custom transition animation here to avoid the regular
-            // slide-in animation when setting the scene programmatically
-            .onEach { nextScene -> communalInteractor.changeScene(nextScene) }
+            .onEach { nextScene ->
+                communalInteractor.changeScene(nextScene, CommunalTransitionKeys.SimpleFade)
+            }
             .launchIn(applicationScope)
 
         // TODO(b/322787129): re-enable once custom animations are in place
@@ -143,7 +144,14 @@ constructor(
         val docked = dockManager.isDocked
 
         return when {
-            docked && to == KeyguardState.LOCKSCREEN && from == KeyguardState.DREAMING -> {
+            to == KeyguardState.OCCLUDED -> {
+                // Hide communal when an activity is started on keyguard, to ensure the activity
+                // underneath the hub is shown.
+                CommunalScenes.Blank
+            }
+            to == KeyguardState.GLANCEABLE_HUB && from == KeyguardState.OCCLUDED -> {
+                // When transitioning to the hub from an occluded state, fade out the hub without
+                // doing any translation.
                 CommunalScenes.Communal
             }
             to == KeyguardState.GONE -> CommunalScenes.Blank

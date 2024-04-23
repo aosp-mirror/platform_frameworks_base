@@ -16,21 +16,16 @@
 
 package com.android.server.autofill;
 
-import static com.android.server.autofill.Session.REQUEST_ID_KEY;
-import static com.android.server.autofill.Session.SESSION_ID_KEY;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
-import android.os.Bundle;
+import android.os.IBinder;
 import android.service.autofill.ConvertCredentialResponse;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.util.Slog;
-import android.view.autofill.IAutoFillManagerClient;
-import android.view.inputmethod.InlineSuggestionsRequest;
 
 /**
  * Requests autofill response from a Remote Autofill Service. This autofill service can be
@@ -55,13 +50,15 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
 
     private final RemoteFillService mRemoteFillService;
     private final SecondaryProviderCallback mCallback;
+
     private int mLastFlag;
 
     SecondaryProviderHandler(
             @NonNull Context context, int userId, boolean bindInstantServiceAllowed,
-            SecondaryProviderCallback callback, ComponentName componentName) {
+            SecondaryProviderCallback callback, ComponentName componentName,
+            @Nullable ComponentName credentialAutofillService) {
         mRemoteFillService = new RemoteFillService(context, componentName, userId, this,
-                bindInstantServiceAllowed);
+                bindInstantServiceAllowed, credentialAutofillService);
         mCallback = callback;
         Slog.v(TAG, "Creating a secondary provider handler with component name, " + componentName);
     }
@@ -108,35 +105,15 @@ final class SecondaryProviderHandler implements RemoteFillService.FillServiceCal
     /**
      * Requests a new fill response.
      */
-    public void onFillRequest(FillRequest pendingFillRequest,
-            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int flag, int id,
-            IAutoFillManagerClient client) {
+    public void onFillRequest(FillRequest pendingFillRequest, int flag, IBinder client) {
         Slog.v(TAG, "Requesting fill response to secondary provider.");
         mLastFlag = flag;
         if (mRemoteFillService != null && mRemoteFillService.isCredentialAutofillService()) {
             Slog.v(TAG, "About to call CredAutofill service as secondary provider");
-            FillRequest request = addSessionIdAndRequestIdToClientState(pendingFillRequest,
-                    pendingInlineSuggestionsRequest, id);
-            mRemoteFillService.onFillCredentialRequest(request, client);
+            mRemoteFillService.onFillCredentialRequest(pendingFillRequest, client);
         } else {
             mRemoteFillService.onFillRequest(pendingFillRequest);
         }
-    }
-
-    private FillRequest addSessionIdAndRequestIdToClientState(FillRequest pendingFillRequest,
-            InlineSuggestionsRequest pendingInlineSuggestionsRequest, int sessionId) {
-        if (pendingFillRequest.getClientState() == null) {
-            pendingFillRequest = new FillRequest(pendingFillRequest.getId(),
-                    pendingFillRequest.getFillContexts(),
-                    pendingFillRequest.getHints(),
-                    new Bundle(),
-                    pendingFillRequest.getFlags(),
-                    pendingInlineSuggestionsRequest,
-                    pendingFillRequest.getDelayedFillIntentSender());
-        }
-        pendingFillRequest.getClientState().putInt(SESSION_ID_KEY, sessionId);
-        pendingFillRequest.getClientState().putInt(REQUEST_ID_KEY, pendingFillRequest.getId());
-        return pendingFillRequest;
     }
 
     public void destroy() {

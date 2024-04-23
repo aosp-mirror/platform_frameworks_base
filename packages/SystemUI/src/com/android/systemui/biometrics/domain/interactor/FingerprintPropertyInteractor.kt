@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.content.Context
+import android.graphics.Rect
 import android.hardware.biometrics.SensorLocationInternal
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.SensorLocation
@@ -43,6 +44,7 @@ constructor(
     repository: FingerprintPropertyRepository,
     configurationInteractor: ConfigurationInteractor,
     displayStateInteractor: DisplayStateInteractor,
+    udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
     val propertiesInitialized: StateFlow<Boolean> = repository.propertiesInitialized
     val isUdfps: StateFlow<Boolean> =
@@ -103,4 +105,13 @@ constructor(
             sensorLocation.scale = scale
             sensorLocation
         }
+
+    /**
+     * Sensor location for the:
+     * - current physical display
+     * - current screen resolution
+     * - device's current orientation
+     */
+    val udfpsSensorBounds: Flow<Rect> =
+        udfpsOverlayInteractor.udfpsOverlayParams.map { it.sensorBounds }.distinctUntilChanged()
 }

@@ -537,4 +537,65 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
                 assertThat(lp.height).isEqualTo(overlayParams.sensorBounds.height())
             }
         }
+
+    @Test
+    fun addViewPending_layoutIsNotUpdated() =
+        testScope.runTest {
+            withReasonSuspend(REASON_AUTH_KEYGUARD) {
+                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
+                mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+
+                // GIVEN going to sleep
+                keyguardTransitionRepository.sendTransitionSteps(
+                    from = KeyguardState.OFF,
+                    to = KeyguardState.GONE,
+                    testScope = this,
+                )
+                powerRepository.updateWakefulness(
+                    rawState = WakefulnessState.STARTING_TO_SLEEP,
+                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                    lastSleepReason = WakeSleepReason.OTHER,
+                )
+                runCurrent()
+
+                // WHEN a request comes to show the view
+                controllerOverlay.show(udfpsController, overlayParams)
+                runCurrent()
+
+                // THEN the view does not get added immediately
+                verify(windowManager, never()).addView(any(), any())
+
+                // WHEN updateOverlayParams gets called when the view is pending to be added
+                controllerOverlay.updateOverlayParams(overlayParams)
+
+                // THEN the view layout is never updated
+                verify(windowManager, never()).updateViewLayout(any(), any())
+
+                // CLEANUP we hide to end the job that listens for the finishedGoingToSleep signal
+                controllerOverlay.hide()
+            }
+        }
+
+    @Test
+    fun updateOverlayParams_viewLayoutUpdated() =
+        testScope.runTest {
+            withReasonSuspend(REASON_AUTH_KEYGUARD) {
+                mSetFlagsRule.enableFlags(Flags.FLAG_UDFPS_VIEW_PERFORMANCE)
+                powerRepository.updateWakefulness(
+                    rawState = WakefulnessState.AWAKE,
+                    lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                    lastSleepReason = WakeSleepReason.OTHER,
+                )
+                runCurrent()
+                controllerOverlay.show(udfpsController, overlayParams)
+                runCurrent()
+                verify(windowManager).addView(any(), any())
+
+                // WHEN updateOverlayParams gets called
+                controllerOverlay.updateOverlayParams(overlayParams)
+
+                // THEN the view layout is updated
+                verify(windowManager).updateViewLayout(any(), any())
+            }
+        }
 }

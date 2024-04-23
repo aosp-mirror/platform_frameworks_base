@@ -36,6 +36,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor
@@ -149,12 +151,10 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         whenever(statusBarStateController.isDozing).thenReturn(false)
         mDependency.injectTestDependency(ShadeController::class.java, shadeController)
         whenever(dockManager.isDocked).thenReturn(false)
-        whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
+        whenever(keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING))
             .thenReturn(emptyFlow())
 
         val featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
-        featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)

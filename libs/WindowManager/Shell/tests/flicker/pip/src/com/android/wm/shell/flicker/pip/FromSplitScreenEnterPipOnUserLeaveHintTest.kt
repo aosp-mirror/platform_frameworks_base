@@ -40,7 +40,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from an app via auto-enter property when navigating to home from split screen.
  *
- * To run this test: `atest WMShellFlickerTests:AutoEnterPipOnGoToHomeTest`
+ * To run this test: `atest WMShellFlickerTestsPip1:FromSplitScreenEnterPipOnUserLeaveHintTest`
  *
  * Actions:
  * ```
@@ -191,8 +191,9 @@ class FromSplitScreenEnterPipOnUserLeaveHintTest(flicker: LegacyFlickerTest) :
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams() = LegacyFlickerTestFactory.nonRotationTests(
-            supportedRotations = listOf(Rotation.ROTATION_0)
-        )
+        fun getParams() =
+            LegacyFlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Rotation.ROTATION_0)
+            )
     }
 }

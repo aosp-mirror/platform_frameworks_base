@@ -135,7 +135,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
     }
 
     private void setPackagesInternal(Set<String> packages) {
-        if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+        if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
             for (String p : packages) {
                 PolicySizeVerifier.enforceMaxPackageNameLength(p);
             }

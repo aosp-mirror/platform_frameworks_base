@@ -21,13 +21,16 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.GlanceableHubToDreamingTransitionViewModel
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.kotlin.FlowDumperImpl
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -49,7 +52,8 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val userTracker: UserTracker,
-) {
+    dumpManager: DumpManager,
+) : FlowDumperImpl(dumpManager) {
 
     fun startTransitionFromDream() {
         val showGlanceableHub =
@@ -83,6 +87,7 @@ constructor(
                 toGlanceableHubTransitionViewModel.dreamAlpha,
             )
             .distinctUntilChanged()
+            .dumpWhileCollecting("dreamAlpha")
 
     val dreamOverlayAlpha: Flow<Float> =
         merge(
@@ -93,7 +98,7 @@ constructor(
             .distinctUntilChanged()
 
     val transitionEnded =
-        keyguardTransitionInteractor.fromDreamingTransition.filter { step ->
+        keyguardTransitionInteractor.transition(from = DREAMING).filter { step ->
             step.transitionState == TransitionState.FINISHED ||
                 step.transitionState == TransitionState.CANCELED
         }

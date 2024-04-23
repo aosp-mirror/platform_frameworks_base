@@ -133,8 +133,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
+import com.android.internal.util.test.LocalServiceKeeperRule;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
-import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayManagerService.DeviceStateListener;
@@ -217,6 +217,9 @@ public class DisplayManagerServiceTest {
             new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
+
+    @Rule(order = 2)
+    public LocalServiceKeeperRule mLocalServiceKeeperRule = new LocalServiceKeeperRule();
 
     private Context mContext;
 
@@ -354,6 +357,7 @@ public class DisplayManagerServiceTest {
     @Mock SensorManager mSensorManager;
     @Mock DisplayDeviceConfig mMockDisplayDeviceConfig;
     @Mock PackageManagerInternal mMockPackageManagerInternal;
+    @Mock DisplayManagerInternal mMockDisplayManagerInternal;
     @Mock DisplayAdapter mMockDisplayAdapter;
 
     @Captor ArgumentCaptor<ContentRecordingSession> mContentRecordingSessionCaptor;
@@ -371,20 +375,20 @@ public class DisplayManagerServiceTest {
         when(mMockFlags.isConnectedDisplayManagementEnabled()).thenReturn(false);
         mSetFlagsRule.disableFlags(Flags.FLAG_INTERACTIVE_SCREEN_MIRROR);
 
-        LocalServices.removeServiceForTest(InputManagerInternal.class);
-        LocalServices.addService(InputManagerInternal.class, mMockInputManagerInternal);
-        LocalServices.removeServiceForTest(WindowManagerInternal.class);
-        LocalServices.addService(WindowManagerInternal.class, mMockWindowManagerInternal);
-        LocalServices.removeServiceForTest(LightsManager.class);
-        LocalServices.addService(LightsManager.class, mMockLightsManager);
-        LocalServices.removeServiceForTest(SensorManagerInternal.class);
-        LocalServices.addService(SensorManagerInternal.class, mMockSensorManagerInternal);
-        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
-        LocalServices.addService(
+        mLocalServiceKeeperRule.overrideLocalService(
+                InputManagerInternal.class, mMockInputManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
+                WindowManagerInternal.class, mMockWindowManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
+                LightsManager.class, mMockLightsManager);
+        mLocalServiceKeeperRule.overrideLocalService(
+                SensorManagerInternal.class, mMockSensorManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
                 VirtualDeviceManagerInternal.class, mMockVirtualDeviceManagerInternal);
-        LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
-        // TODO: b/287945043
+        mLocalServiceKeeperRule.overrideLocalService(
+                PackageManagerInternal.class, mMockPackageManagerInternal);
+        mLocalServiceKeeperRule.overrideLocalService(
+                DisplayManagerInternal.class, mMockDisplayManagerInternal);
         Display display = mock(Display.class);
         when(display.getDisplayAdjustments()).thenReturn(new DisplayAdjustments());
         when(display.getBrightnessInfo()).thenReturn(mock(BrightnessInfo.class));
@@ -960,6 +964,9 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, width, height, dpi);
         builder.setUniqueId(uniqueId);
+        builder.setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
+        when(mContext.checkCallingPermission(CAPTURE_VIDEO_OUTPUT))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
         final int firstDisplayId = binderService.createVirtualDisplay(builder.build(),
                 mMockAppToken /* callback */, null /* projection */, PACKAGE_NAME);
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
@@ -972,6 +979,7 @@ public class DisplayManagerServiceTest {
                 VIRTUAL_DISPLAY_NAME, width, height, dpi).setUniqueId(uniqueId2);
         builder2.setUniqueId(uniqueId2);
         builder2.setDisplayIdToMirror(firstDisplayId);
+        builder2.setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
         final int secondDisplayId = binderService.createVirtualDisplay(builder2.build(),
                 mMockAppToken2 /* callback */, null /* projection */,
                 PACKAGE_NAME);
@@ -1700,7 +1708,6 @@ public class DisplayManagerServiceTest {
      * {@link VirtualDisplayConfig.Builder#setSurface(Surface)}
      */
     @Test
-    @FlakyTest(bugId = 127687569)
     public void testCreateVirtualDisplay_setSurface() throws Exception {
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -2448,8 +2455,9 @@ public class DisplayManagerServiceTest {
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
         assertThat(display.isEnabledLocked()).isFalse();
+        // TODO(b/332711269) make sure only one DISPLAY_GROUP_EVENT_ADDED sent.
         assertThat(callback.receivedEvents()).containsExactly(DISPLAY_GROUP_EVENT_ADDED,
-                EVENT_DISPLAY_CONNECTED).inOrder();
+                DISPLAY_GROUP_EVENT_ADDED, EVENT_DISPLAY_CONNECTED).inOrder();
     }
 
     @Test
@@ -2624,11 +2632,19 @@ public class DisplayManagerServiceTest {
         // Create default display device
         createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
         callback.waitForExpectedEvent();
+
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         FakeDisplayDevice displayDevice =
                 createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
+        callback.waitForExpectedEvent();
+
+        callback.expectsEvent(EVENT_DISPLAY_REMOVED);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        callback.waitForExpectedEvent();
+
+        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         LogicalDisplay display =
                 logicalDisplayMapper.getDisplayLocked(displayDevice, /* includeDisabled= */ true);
-        callback.expectsEvent(EVENT_DISPLAY_ADDED);
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ true);
         logicalDisplayMapper.updateLogicalDisplays();
         callback.waitForExpectedEvent();
@@ -2651,6 +2667,7 @@ public class DisplayManagerServiceTest {
         LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
         FakeDisplayManagerCallback callback = new FakeDisplayManagerCallback();
         bs.registerCallbackWithEventMask(callback, STANDARD_DISPLAY_EVENTS);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         callback.expectsEvent(EVENT_DISPLAY_ADDED);
         // Create default display device
         createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
@@ -2664,7 +2681,6 @@ public class DisplayManagerServiceTest {
         logicalDisplayMapper.setEnabledLocked(display, /* isEnabled= */ true);
         logicalDisplayMapper.updateLogicalDisplays();
         callback.waitForExpectedEvent();
-        callback.clear();
 
         assertThrows(SecurityException.class, () -> bs.disableConnectedDisplay(displayId));
     }
@@ -2835,6 +2851,7 @@ public class DisplayManagerServiceTest {
 
         float brightness1 = 0.3f;
         float brightness2 = 0.45f;
+        waitForIdleHandler(mPowerHandler);
 
         int userId1 = 123;
         int userId2 = 456;
@@ -2844,8 +2861,8 @@ public class DisplayManagerServiceTest {
         userInfo2.id = userId2;
         when(mUserManager.getUserSerialNumber(userId1)).thenReturn(12345);
         when(mUserManager.getUserSerialNumber(userId2)).thenReturn(45678);
-        final SystemService.TargetUser from = new SystemService.TargetUser(userInfo1);
-        final SystemService.TargetUser to = new SystemService.TargetUser(userInfo2);
+        final SystemService.TargetUser user1 = new SystemService.TargetUser(userInfo1);
+        final SystemService.TargetUser user2 = new SystemService.TargetUser(userInfo2);
 
         // The same brightness will be restored for a user only if auto-brightness is off,
         // otherwise the current lux will be used to determine the brightness.
@@ -2853,20 +2870,20 @@ public class DisplayManagerServiceTest {
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
 
-        displayManager.onUserSwitching(to, from);
+        displayManager.onUserSwitching(/* from= */ user2, /* to= */ user1);
         waitForIdleHandler(mPowerHandler);
         displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, brightness1);
-        displayManager.onUserSwitching(from, to);
+        displayManager.onUserSwitching(/* from= */ user1, /* to= */ user2);
         waitForIdleHandler(mPowerHandler);
         displayManagerBinderService.setBrightness(Display.DEFAULT_DISPLAY, brightness2);
 
-        displayManager.onUserSwitching(to, from);
+        displayManager.onUserSwitching(/* from= */ user2, /* to= */ user1);
         waitForIdleHandler(mPowerHandler);
         assertEquals(brightness1,
                 displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
                 FLOAT_TOLERANCE);
 
-        displayManager.onUserSwitching(from, to);
+        displayManager.onUserSwitching(/* from= */ user1, /* to= */ user2);
         waitForIdleHandler(mPowerHandler);
         assertEquals(brightness2,
                 displayManagerBinderService.getBrightness(Display.DEFAULT_DISPLAY),
@@ -3000,6 +3017,7 @@ public class DisplayManagerServiceTest {
                 new DisplayManagerService(mContext, mBasicInjector);
 
         displayManager.systemReady(false /* safeMode */);
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
         ArgumentMatcher<IntentFilter> matchesFilter =
                 (filter) -> Intent.ACTION_SETTING_RESTORED.equals(filter.getAction(0));
         verify(mContext, times(0)).registerReceiver(any(BroadcastReceiver.class),
@@ -3365,7 +3383,7 @@ public class DisplayManagerServiceTest {
 
         void waitForExpectedEvent(Duration timeout) {
             try {
-                assertWithMessage("Event '" + mExpectedEvent + "' is received.")
+                assertWithMessage("Expected '" + mExpectedEvent + "'")
                         .that(mLatch.await(timeout.toMillis(), TimeUnit.MILLISECONDS)).isTrue();
             } catch (InterruptedException ex) {
                 throw new AssertionError("Waiting for expected event interrupted", ex);

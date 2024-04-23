@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
@@ -31,6 +32,7 @@ import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.Notificati
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.UserSetupInteractor
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
 import com.android.systemui.util.ui.AnimatedValue
@@ -64,7 +66,8 @@ constructor(
     userSetupInteractor: UserSetupInteractor,
     zenModeInteractor: ZenModeInteractor,
     @Background bgDispatcher: CoroutineDispatcher,
-) {
+    dumpManager: DumpManager,
+) : FlowDumperImpl(dumpManager) {
     /**
      * We want the NSSL to be unimportant for accessibility when there are no notifications in it
      * while the device is on lock screen, to avoid an unlabelled NSSL view in TalkBack. Otherwise,
@@ -81,8 +84,9 @@ constructor(
                 ) { hasNotifications, isShowingOnLockscreen ->
                     hasNotifications || !isShowingOnLockscreen
                 }
-                .flowOn(bgDispatcher)
                 .distinctUntilChanged()
+                .dumpWhileCollecting("isImportantForAccessibility")
+                .flowOn(bgDispatcher)
         }
     }
 
@@ -105,8 +109,9 @@ constructor(
                         else -> true
                     }
                 }
-                .flowOn(bgDispatcher)
                 .distinctUntilChanged()
+                .dumpWhileCollecting("shouldShowEmptyShadeView")
+                .flowOn(bgDispatcher)
         }
     }
 
@@ -125,8 +130,9 @@ constructor(
             // the footer to be counted as part of the shade for measurements.
             shadeInteractor.shadeExpansion
                 .map { it == 0f }
-                .flowOn(bgDispatcher)
                 .distinctUntilChanged()
+                .dumpWhileCollecting("shouldHideFooterView")
+                .flowOn(bgDispatcher)
         }
     }
 
@@ -173,7 +179,6 @@ constructor(
                         else -> VisibilityChange.APPEAR_WITH_ANIMATION
                     }
                 }
-                .flowOn(bgDispatcher)
                 .distinctUntilChanged(
                     // Equivalent unless visibility changes
                     areEquivalent = { a: VisibilityChange, b: VisibilityChange ->
@@ -199,6 +204,8 @@ constructor(
                     AnimatableEvent(visibilityChange.visible, shouldAnimate)
                 }
                 .toAnimatedValueFlow()
+                .dumpWhileCollecting("shouldIncludeFooterView")
+                .flowOn(bgDispatcher)
         }
     }
 
@@ -213,7 +220,9 @@ constructor(
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            zenModeInteractor.areNotificationsHiddenInShade
+            zenModeInteractor.areNotificationsHiddenInShade.dumpWhileCollecting(
+                "areNotificationsHiddenInShade"
+            )
         }
     }
 
@@ -222,7 +231,9 @@ constructor(
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            seenNotificationsInteractor.hasFilteredOutSeenNotifications
+            seenNotificationsInteractor.hasFilteredOutSeenNotifications.dumpWhileCollecting(
+                "hasFilteredOutSeenNotifications"
+            )
         }
     }
 
@@ -230,7 +241,9 @@ constructor(
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            activeNotificationsInteractor.hasClearableAlertingNotifications
+            activeNotificationsInteractor.hasClearableAlertingNotifications.dumpWhileCollecting(
+                "hasClearableAlertingNotifications"
+            )
         }
     }
 
@@ -238,7 +251,9 @@ constructor(
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            activeNotificationsInteractor.hasNonClearableSilentNotifications
+            activeNotificationsInteractor.hasNonClearableSilentNotifications.dumpWhileCollecting(
+                "hasNonClearableSilentNotifications"
+            )
         }
     }
 
@@ -246,7 +261,7 @@ constructor(
         if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(null)
         } else {
-            headsUpNotificationInteractor.topHeadsUpRow
+            headsUpNotificationInteractor.topHeadsUpRow.dumpWhileCollecting("topHeadsUpRow")
         }
     }
 
@@ -254,15 +269,20 @@ constructor(
         if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(emptySet())
         } else {
-            headsUpNotificationInteractor.pinnedHeadsUpRows
+            headsUpNotificationInteractor.pinnedHeadsUpRows.dumpWhileCollecting("pinnedHeadsUpRows")
         }
     }
 
     val headsUpAnimationsEnabled: Flow<Boolean> by lazy {
-        combine(keyguardInteractor.isKeyguardShowing, shadeInteractor.isShadeFullyExpanded) {
-            (isKeyguardShowing, isShadeFullyExpanded) ->
-            // TODO(b/325936094) use isShadeFullyCollapsed instead
-            !isKeyguardShowing && !isShadeFullyExpanded
+        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            combine(keyguardInteractor.isKeyguardShowing, shadeInteractor.isShadeFullyExpanded) {
+                    (isKeyguardShowing, isShadeFullyExpanded) ->
+                    // TODO(b/325936094) use isShadeFullyCollapsed instead
+                    !isKeyguardShowing && !isShadeFullyExpanded
+                }
+                .dumpWhileCollecting("headsUpAnimationsEnabled")
         }
     }
 
@@ -270,7 +290,7 @@ constructor(
         if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
-            headsUpNotificationInteractor.hasPinnedRows
+            headsUpNotificationInteractor.hasPinnedRows.dumpWhileCollecting("hasPinnedHeadsUpRow")
         }
     }
 
@@ -279,4 +299,8 @@ constructor(
         HeadsUpRowViewModel(headsUpNotificationInteractor.headsUpRow(key))
 
     fun elementKeyFor(key: HeadsUpRowKey): Any = headsUpNotificationInteractor.elementKeyFor(key)
+
+    fun setHeadsUpAnimatingAway(animatingAway: Boolean) {
+        headsUpNotificationInteractor.setHeadsUpAnimatingAway(animatingAway)
+    }
 }

@@ -568,7 +568,7 @@
     <!-- Content description for the split notification shade that also includes QS (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_qs_notification_shade">Quick settings and Notification shade.</string>
     <!-- Content description for the lock screen (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_desc_lock_screen">Lock screen.</string>
+    <string name="accessibility_desc_lock_screen">Lock screen</string>
     <!-- Content description for the work profile lock screen. This prevents work profile apps from being used, but personal apps can be used as normal (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_work_lock">Work lock screen</string>
     <!-- Content description for the close button in the zen mode panel introduction message. [CHAR LIMIT=NONE] -->
@@ -678,6 +678,8 @@
     <string name="turn_on_bluetooth">Use Bluetooth</string>
     <!-- QuickSettings: Bluetooth dialog device connected default summary [CHAR LIMIT=NONE]-->
     <string name="quick_settings_bluetooth_device_connected">Connected</string>
+    <!-- QuickSettings: Bluetooth dialog device in audio sharing default summary [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_device_audio_sharing">Audio Sharing</string>
     <!-- QuickSettings: Bluetooth dialog device saved default summary [CHAR LIMIT=NONE]-->
     <string name="quick_settings_bluetooth_device_saved">Saved</string>
     <!-- QuickSettings: Accessibility label to disconnect a device [CHAR LIMIT=NONE]-->
@@ -687,9 +689,13 @@
     <!-- QuickSettings: Bluetooth auto on tomorrow [CHAR LIMIT=NONE]-->
     <string name="turn_on_bluetooth_auto_tomorrow">Automatically turn on again tomorrow</string>
     <!-- QuickSettings: Bluetooth auto on info text when disabled [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share, Find My Device, and device location use Bluetooth</string>
+    <string name="turn_on_bluetooth_auto_info_disabled">Features like Quick Share and Find My Device use Bluetooth</string>
     <!-- QuickSettings: Bluetooth auto on info text when enabled [CHAR LIMIT=NONE]-->
-    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow at 5 AM</string>
+    <string name="turn_on_bluetooth_auto_info_enabled">Bluetooth will turn on tomorrow morning</string>
+    <!-- QuickSettings: Bluetooth dialog audio sharing button text [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_audio_sharing_button">Audio Sharing</string>
+    <!-- QuickSettings: Bluetooth dialog audio sharing button text when sharing audio [CHAR LIMIT=50]-->
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing">Sharing Audio</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
@@ -872,6 +878,8 @@
     <string name="qs_record_issue_start">Start</string>
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="qs_record_issue_stop">Stop</string>
+    <!-- QuickSettings: Should user take a bugreport or only share trace files [CHAR LIMIT=20] -->
+    <string name="qs_record_issue_bug_report">Bug Report</string>
 
     <!-- QuickSettings: Issue Type Drop down options in Record Issue Start Dialog [CHAR LIMIT=50] -->
     <string name="qs_record_issue_dropdown_header">What part of your device experience was affected?</string>
@@ -908,6 +916,8 @@
     <string name="quick_settings_pair_hearing_devices">Pair new device</string>
     <!-- QuickSettings: Content description of the hearing devices dialog pair new device [CHAR LIMIT=NONE] -->
     <string name="accessibility_hearing_device_pair_new_device">Click to pair new device</string>
+    <!-- Message when selecting hearing aids presets failed. [CHAR LIMIT=NONE] -->
+    <string name="hearing_devices_presets_error">Couldn\'t update preset</string>
 
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
@@ -1126,6 +1136,9 @@
     <!-- Indication on the keyguard that is shown when the device is dock charging. [CHAR LIMIT=80]-->
     <string name="keyguard_indication_charging_time_dock"><xliff:g id="percentage" example="20%">%2$s</xliff:g> • Charging • Full in <xliff:g id="charging_time_left" example="4 hr, 2 min">%1$s</xliff:g></string>
 
+    <!-- Label for accessibility action that shows widgets on lock screen on click. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_open_communal_hub">Widgets on lock screen</string>
+
     <!-- Indicator on keyguard to start the communal tutorial. [CHAR LIMIT=100] -->
     <string name="communal_tutorial_indicator_text">Swipe left to start the communal tutorial</string>
 
@@ -1163,6 +1176,12 @@
     <string name="work_mode_off_title">Unpause work apps?</string>
     <!-- Title for button to unpause on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Unpause</string>
+    <!-- Label for accessibility action that navigates to lock screen. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_close_communal_hub">Close widgets on lock screen</string>
+    <!-- Label for accessibility action that navigates to edit mode. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_label_edit_widgets">Customize widgets</string>
+    <!-- Accessibility content description for communal hub. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_content_description_for_communal_hub">Widgets on lock screen</string>
 
     <!-- Related to user switcher --><skip/>
 
@@ -1971,7 +1990,7 @@
     <!-- Content description for the clear search button in shortcut search list. [CHAR LIMIT=NONE] -->
     <string name="keyboard_shortcut_clear_text">Clear search query</string>
     <!-- The title for keyboard shortcut search list [CHAR LIMIT=25] -->
-    <string name="keyboard_shortcut_search_list_title">Shortcuts</string>
+    <string name="keyboard_shortcut_search_list_title">Keyboard Shortcuts</string>
     <!-- The hint for keyboard shortcut search list [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_list_hint">Search shortcuts</string>
     <!-- The description for no shortcuts results [CHAR LIMIT=25] -->
@@ -2023,12 +2042,12 @@
     <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
     <string name="group_system_quick_memo">Take a note</string>
 
-    <!-- User visible title for the system multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
-    <string name="keyboard_shortcut_group_system_multitasking">System multitasking</string>
-    <!-- User visible title for the keyboard shortcut that enters split screen with current app to RHS [CHAR LIMIT=70] -->
-    <string name="system_multitasking_rhs">Enter split screen with current app to RHS</string>
-    <!-- User visible title for the keyboard shortcut that enters split screen with current app to LHS [CHAR LIMIT=70] -->
-    <string name="system_multitasking_lhs">Enter split screen with current app to LHS</string>
+    <!-- User visible title for the multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_system_multitasking">Multitasking</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app on the right [CHAR LIMIT=70] -->
+    <string name="system_multitasking_rhs">Use split screen with current app on the right</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app on the left [CHAR LIMIT=70] -->
+    <string name="system_multitasking_lhs">Use split screen with current app on the left</string>
     <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
     <string name="system_multitasking_full_screen">Switch from split screen to full screen</string>
     <!-- User visible title for the keyboard shortcut that switches to app on right or below while using split screen [CHAR LIMIT=70] -->

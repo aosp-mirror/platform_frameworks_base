@@ -23,14 +23,8 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.model.SysUiStateTest
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.EASE_IN
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.EASE_OUT
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.MAIN
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationState.NOT_PLAYING
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.AnimationStateChangedCallback
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.PaintDrawCallback
-import com.android.systemui.surfaceeffects.loadingeffect.LoadingEffect.Companion.RenderEffectDrawCallback
+import com.android.systemui.surfaceeffects.PaintDrawCallback
+import com.android.systemui.surfaceeffects.RenderEffectDrawCallback
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseAnimationConfig
 import com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseShader
 import com.google.common.truth.Truth.assertThat
@@ -50,8 +44,8 @@ class LoadingEffectTest : SysUiStateTest() {
         var paintFromCallback: Paint? = null
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {
-                    paintFromCallback = loadingPaint
+                override fun onDraw(paint: Paint) {
+                    paintFromCallback = paint
                 }
             }
         val loadingEffect =
@@ -75,8 +69,8 @@ class LoadingEffectTest : SysUiStateTest() {
         var renderEffectFromCallback: RenderEffect? = null
         val drawCallback =
             object : RenderEffectDrawCallback {
-                override fun onDraw(loadingRenderEffect: RenderEffect) {
-                    renderEffectFromCallback = loadingRenderEffect
+                override fun onDraw(renderEffect: RenderEffect) {
+                    renderEffectFromCallback = renderEffect
                 }
             }
         val loadingEffect =
@@ -98,16 +92,19 @@ class LoadingEffectTest : SysUiStateTest() {
     @Test
     fun play_animationStateChangesInOrder() {
         val config = TurbulenceNoiseAnimationConfig()
-        val states = mutableListOf(NOT_PLAYING)
+        val states = mutableListOf(LoadingEffect.AnimationState.NOT_PLAYING)
         val stateChangedCallback =
-            object : AnimationStateChangedCallback {
-                override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
+            object : LoadingEffect.AnimationStateChangedCallback {
+                override fun onStateChanged(
+                    oldState: LoadingEffect.AnimationState,
+                    newState: LoadingEffect.AnimationState
+                ) {
                     states.add(newState)
                 }
             }
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {}
+                override fun onDraw(paint: Paint) {}
             }
         val loadingEffect =
             LoadingEffect(
@@ -125,7 +122,14 @@ class LoadingEffectTest : SysUiStateTest() {
         animatorTestRule.advanceTimeBy(config.easeOutDuration.toLong())
         animatorTestRule.advanceTimeBy(500)
 
-        assertThat(states).containsExactly(NOT_PLAYING, EASE_IN, MAIN, EASE_OUT, NOT_PLAYING)
+        assertThat(states)
+            .containsExactly(
+                LoadingEffect.AnimationState.NOT_PLAYING,
+                LoadingEffect.AnimationState.EASE_IN,
+                LoadingEffect.AnimationState.MAIN,
+                LoadingEffect.AnimationState.EASE_OUT,
+                LoadingEffect.AnimationState.NOT_PLAYING
+            )
     }
 
     @Test
@@ -133,16 +137,22 @@ class LoadingEffectTest : SysUiStateTest() {
         val config = TurbulenceNoiseAnimationConfig()
         var numPlay = 0
         val stateChangedCallback =
-            object : AnimationStateChangedCallback {
-                override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    if (oldState == NOT_PLAYING && newState == EASE_IN) {
+            object : LoadingEffect.AnimationStateChangedCallback {
+                override fun onStateChanged(
+                    oldState: LoadingEffect.AnimationState,
+                    newState: LoadingEffect.AnimationState
+                ) {
+                    if (
+                        oldState == LoadingEffect.AnimationState.NOT_PLAYING &&
+                            newState == LoadingEffect.AnimationState.EASE_IN
+                    ) {
                         numPlay++
                     }
                 }
             }
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {}
+                override fun onDraw(paint: Paint) {}
             }
         val loadingEffect =
             LoadingEffect(
@@ -172,9 +182,15 @@ class LoadingEffectTest : SysUiStateTest() {
             }
         var isFinished = false
         val stateChangedCallback =
-            object : AnimationStateChangedCallback {
-                override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    if (oldState == EASE_OUT && newState == NOT_PLAYING) {
+            object : LoadingEffect.AnimationStateChangedCallback {
+                override fun onStateChanged(
+                    oldState: LoadingEffect.AnimationState,
+                    newState: LoadingEffect.AnimationState
+                ) {
+                    if (
+                        oldState == LoadingEffect.AnimationState.EASE_OUT &&
+                            newState == LoadingEffect.AnimationState.NOT_PLAYING
+                    ) {
                         isFinished = true
                     }
                 }
@@ -205,13 +221,19 @@ class LoadingEffectTest : SysUiStateTest() {
         val config = TurbulenceNoiseAnimationConfig(maxDuration = 1000f)
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {}
+                override fun onDraw(paint: Paint) {}
             }
         var isFinished = false
         val stateChangedCallback =
-            object : AnimationStateChangedCallback {
-                override fun onStateChanged(oldState: AnimationState, newState: AnimationState) {
-                    if (oldState == MAIN && newState == NOT_PLAYING) {
+            object : LoadingEffect.AnimationStateChangedCallback {
+                override fun onStateChanged(
+                    oldState: LoadingEffect.AnimationState,
+                    newState: LoadingEffect.AnimationState
+                ) {
+                    if (
+                        oldState == LoadingEffect.AnimationState.MAIN &&
+                            newState == LoadingEffect.AnimationState.NOT_PLAYING
+                    ) {
                         isFinished = true
                     }
                 }
@@ -242,7 +264,7 @@ class LoadingEffectTest : SysUiStateTest() {
             )
         val drawCallback =
             object : PaintDrawCallback {
-                override fun onDraw(loadingPaint: Paint) {}
+                override fun onDraw(paint: Paint) {}
             }
         val loadingEffect =
             LoadingEffect(

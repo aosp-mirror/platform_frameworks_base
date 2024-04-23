@@ -17,26 +17,24 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.keyguard.ClockEventController
-import com.android.keyguard.KeyguardClockSwitch.ClockSize
-import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.systemui.keyguard.shared.model.SettingsClockSize
+import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.shared.model.ClockSizeSetting
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.shared.clocks.DEFAULT_CLOCK_ID
 import com.android.systemui.util.mockito.mock
 import dagger.Binds
 import dagger.Module
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.mockito.Mockito
 
-class FakeKeyguardClockRepository @Inject constructor() : KeyguardClockRepository {
-    private val _clockSize = MutableStateFlow(LARGE)
-    override val clockSize: StateFlow<Int> = _clockSize
+class FakeKeyguardClockRepository() : KeyguardClockRepository {
+    private val _clockSize = MutableStateFlow(ClockSize.LARGE)
+    override val clockSize: StateFlow<ClockSize> = _clockSize
 
-    private val _selectedClockSize = MutableStateFlow(SettingsClockSize.DYNAMIC)
+    private val _selectedClockSize = MutableStateFlow(ClockSizeSetting.DYNAMIC)
     override val selectedClockSize = _selectedClockSize
 
     private val _currentClockId = MutableStateFlow(DEFAULT_CLOCK_ID)
@@ -50,13 +48,25 @@ class FakeKeyguardClockRepository @Inject constructor() : KeyguardClockRepositor
         get() = _previewClock
     override val clockEventController: ClockEventController
         get() = mock()
+    override val shouldForceSmallClock: Boolean
+        get() = _shouldForceSmallClock
+    private var _shouldForceSmallClock: Boolean = false
 
-    override fun setClockSize(@ClockSize size: Int) {
+    override fun setClockSize(size: ClockSize) {
         _clockSize.value = size
+    }
+
+    fun setSelectedClockSize(size: ClockSizeSetting) {
+        _selectedClockSize.value = size
     }
 
     fun setCurrentClock(clockController: ClockController) {
         _currentClock.value = clockController
+        _currentClockId.value = clockController.config.id
+    }
+
+    fun setShouldForceSmallClock(shouldForceSmallClock: Boolean) {
+        _shouldForceSmallClock = shouldForceSmallClock
     }
 }
 

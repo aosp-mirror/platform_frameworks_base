@@ -30,22 +30,30 @@ import android.view.ViewGroup
 import android.view.ViewGroup.OnHierarchyChangeListener
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.OnBackPressedDispatcherOwner
+import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
-import com.android.keyguard.KeyguardClockSwitch.MISSING_CLOCK_ID
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.common.ui.view.onApplyWindowInsets
+import com.android.systemui.common.ui.view.onLayoutChanged
+import com.android.systemui.common.ui.view.onTouchListener
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
@@ -54,7 +62,6 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
@@ -64,11 +71,11 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
+import com.android.systemui.util.kotlin.DisposableHandles
 import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
-import javax.inject.Provider
 import kotlin.math.min
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -88,50 +95,64 @@ object KeyguardRootViewBinder {
         view: ViewGroup,
         viewModel: KeyguardRootViewModel,
         configuration: ConfigurationState,
-        occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
-        chipbarCoordinator: ChipbarCoordinator,
+        occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel?,
+        chipbarCoordinator: ChipbarCoordinator?,
         screenOffAnimationController: ScreenOffAnimationController,
         shadeInteractor: ShadeInteractor,
-        clockControllerProvider: Provider<ClockController>?,
+        clockInteractor: KeyguardClockInteractor,
         interactionJankMonitor: InteractionJankMonitor?,
         deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor?,
         vibratorHelper: VibratorHelper?,
         falsingManager: FalsingManager?,
         keyguardViewMediator: KeyguardViewMediator?,
     ): DisposableHandle {
-        var onLayoutChangeListener: OnLayoutChange? = null
+        val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
 
         if (KeyguardBottomAreaRefactor.isEnabled) {
-            view.setOnTouchListener { _, event ->
-                if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
-                    viewModel.setRootViewLastTapPosition(Point(event.x.toInt(), event.y.toInt()))
+            disposables +=
+                view.onTouchListener { _, event ->
+                    if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
+                        viewModel.setRootViewLastTapPosition(
+                            Point(event.x.toInt(), event.y.toInt())
+                        )
+                    }
+                    false
                 }
-                false
-            }
         }
 
         val burnInParams = MutableStateFlow(BurnInParameters())
-        val viewState =
-            ViewStateAccessor(
-                alpha = { view.alpha },
-            )
-
-        val disposableHandle =
+        val viewState = ViewStateAccessor(alpha = { view.alpha })
+        disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    if (ComposeLockscreen.isEnabled) {
+                        view.setViewTreeOnBackPressedDispatcherOwner(
+                            object : OnBackPressedDispatcherOwner {
+                                override val onBackPressedDispatcher =
+                                    OnBackPressedDispatcher().apply {
+                                        setOnBackInvokedDispatcher(
+                                            view.viewRootImpl.onBackInvokedDispatcher
+                                        )
+                                    }
+
+                                override val lifecycle: Lifecycle =
+                                    this@repeatWhenAttached.lifecycle
+                            }
+                        )
+                    }
                     launch {
-                        occludingAppDeviceEntryMessageViewModel.message.collect { biometricMessage
+                        occludingAppDeviceEntryMessageViewModel?.message?.collect { biometricMessage
                             ->
                             if (biometricMessage?.message != null) {
-                                chipbarCoordinator.displayView(
+                                chipbarCoordinator!!.displayView(
                                     createChipbarInfo(
                                         biometricMessage.message,
                                         R.drawable.ic_lock,
                                     )
                                 )
                             } else {
-                                chipbarCoordinator.removeView(ID, "occludingAppMsgNull")
+                                chipbarCoordinator!!.removeView(ID, "occludingAppMsgNull")
                             }
                         }
                     }
@@ -279,14 +300,11 @@ object KeyguardRootViewBinder {
                                 viewModel.goneToAodTransition.collect {
                                     when (it.transitionState) {
                                         TransitionState.STARTED -> {
-                                            val clockId =
-                                                clockControllerProvider?.get()?.config?.id
-                                                    ?: MISSING_CLOCK_ID
+                                            val clockId = clockInteractor.renderedClockId
                                             val builder =
                                                 InteractionJankMonitor.Configuration.Builder
                                                     .withView(CUJ_SCREEN_OFF_SHOW_AOD, view)
                                                     .setTag(clockId)
-
                                             jankMonitor.begin(builder)
                                         }
                                         TransitionState.CANCELED ->
@@ -341,20 +359,13 @@ object KeyguardRootViewBinder {
                 }
             }
 
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            burnInParams.update { current ->
-                current.copy(clockControllerProvider = clockControllerProvider)
-            }
-        }
-
         if (MigrateClocksToBlueprint.isEnabled) {
             burnInParams.update { current ->
                 current.copy(translationY = { childViews[burnInLayerId]?.translationY })
             }
         }
 
-        onLayoutChangeListener = OnLayoutChange(viewModel, childViews, burnInParams)
-        view.addOnLayoutChangeListener(onLayoutChangeListener)
+        disposables += view.onLayoutChanged(OnLayoutChange(viewModel, childViews, burnInParams))
 
         // Views will be added or removed after the call to bind(). This is needed to avoid many
         // calls to findViewById
@@ -369,24 +380,21 @@ object KeyguardRootViewBinder {
                 }
             }
         )
-
-        view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
-            val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            burnInParams.update { current ->
-                current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
-            }
-            insets
+        disposables += DisposableHandle {
+            view.setOnHierarchyChangeListener(null)
+            childViews.clear()
         }
 
-        return object : DisposableHandle {
-            override fun dispose() {
-                disposableHandle.dispose()
-                view.removeOnLayoutChangeListener(onLayoutChangeListener)
-                view.setOnHierarchyChangeListener(null)
-                view.setOnApplyWindowInsetsListener(null)
-                childViews.clear()
+        disposables +=
+            view.onApplyWindowInsets { _: View, insets: WindowInsets ->
+                val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+                burnInParams.update { current ->
+                    current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+                }
+                insets
             }
-        }
+
+        return disposables
     }
 
     /**

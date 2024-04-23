@@ -30,6 +30,8 @@
     <uses-permission android:name="android.permission.ACCESS_VIBRATOR_STATE" />
     <!-- Required to set always-on vibrations -->
     <uses-permission android:name="android.permission.VIBRATE_ALWAYS_ON" />
+    <!-- Required to play system-only haptic feedback constants -->
+    <uses-permission android:name="android.permission.VIBRATE_SYSTEM_CONSTANTS" />
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.mock" android:required="true" />

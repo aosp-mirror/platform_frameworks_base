@@ -662,7 +662,8 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Манжа изи таанылган жок"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Манжа изи таанылган жок"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Жүз таанылбай жатат. Манжа изин колдонуңуз."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Манжа изи текшерилди"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Жүздүн аныктыгы текшерилди"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Жүздүн аныктыгы текшерилди, эми \"Ырастоону\" басыңыз"</string>
@@ -995,7 +996,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Туура!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дагы аракет кылыңыз"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Дагы аракет кылыңыз"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Элементтердин жана дайындардын кулпусун ачуу"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Функциялар менен колдонмолордун кулпусун ачуу"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Жүзүнөн таанып ачуу аракеттеринин чегинен аштыңыз"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM карта жок"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Планшетте SIM карта жок."</string>
@@ -1283,7 +1284,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Колдонмолорду иштетип баштоо"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Жүктөлүүдө"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Кубат баскычын бастыңыз — адатта, бул экранды өчүрөт.\n\nМанжаңыздын изин жөндөп жатканда аны акырын басып көрүңүз."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Кошуп бүтүрүү үчүн экранды өчүрүңүз"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Бүтүрүү үчүн экранды өчүрүңүз"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Өчүрүү"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Манжаңыздын изин ырастоону улантасызбы?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Кубат баскычын бастыңыз — адатта, бул экранды өчүрөт.\n\nМанжаңыздын изин ырастоо үчүн аны акырын басып көрүңүз."</string>
@@ -2394,6 +2395,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Сыноо"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Жалпы"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Коопсуздук үчүн колдонмодогу контент бөлүшүлгөн экрандан жашырылды"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Спутникке автоматтык түрдө туташтырылган"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Сиз мобилдик же Wi-Fi тармагы жок эле билдирүүлөрдү жөнөтүп, ала аласыз"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>

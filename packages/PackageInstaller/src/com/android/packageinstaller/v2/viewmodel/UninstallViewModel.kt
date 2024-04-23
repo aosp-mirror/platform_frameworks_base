@@ -56,7 +56,7 @@ class UninstallViewModel(application: Application, val repository: UninstallRepo
         }
     }
 
-    fun cancelInstall() {
-        repository.cancelInstall()
+    fun cancelUninstall() {
+        repository.cancelUninstall()
     }
 }

@@ -96,6 +96,7 @@ constructor(
                 biometricStatusInteractor.fingerprintAcquiredStatus,
                 deviceEntryFingerprintAuthInteractor.authenticationStatus
             )
+            .distinctUntilChanged()
             .filter {
                 if (it is AcquiredFingerprintAuthenticationStatus) {
                     it.authenticationReason == AuthenticationReason.DeviceEntryAuthentication ||

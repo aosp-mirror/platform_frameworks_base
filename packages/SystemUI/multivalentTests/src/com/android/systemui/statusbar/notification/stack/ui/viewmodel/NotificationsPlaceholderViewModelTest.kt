@@ -16,14 +16,10 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
@@ -40,23 +36,21 @@ class NotificationsPlaceholderViewModelTest : SysuiTestCase() {
     private val underTest = kosmos.notificationsPlaceholderViewModel
 
     @Test
-    @DisableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-    fun onBoundsChanged_setsNotificationContainerBounds() =
+    fun onBoundsChanged() =
         kosmos.testScope.runTest {
-            underTest.onBoundsChanged(left = 5f, top = 5f, right = 5f, bottom = 5f)
-            val containerBounds by
-                collectLastValue(kosmos.keyguardInteractor.notificationContainerBounds)
+            val bounds = ShadeScrimBounds(left = 5f, top = 15f, right = 25f, bottom = 35f)
+            underTest.onScrimBoundsChanged(bounds)
             val stackBounds by
                 collectLastValue(kosmos.notificationStackAppearanceInteractor.shadeScrimBounds)
-            assertThat(containerBounds)
-                .isEqualTo(NotificationContainerBounds(top = 5f, bottom = 5f))
-            assertThat(stackBounds)
-                .isEqualTo(ShadeScrimBounds(left = 5f, top = 5f, right = 5f, bottom = 5f))
+            assertThat(stackBounds).isEqualTo(bounds)
         }
 
     @Test
-    fun onContentTopChanged_setsContentTop() {
-        underTest.onContentTopChanged(padding = 5f)
-        assertThat(kosmos.notificationStackAppearanceInteractor.stackTop.value).isEqualTo(5f)
-    }
+    fun onStackBoundsChanged() =
+        kosmos.testScope.runTest {
+            underTest.onStackBoundsChanged(top = 5f, bottom = 500f)
+            assertThat(kosmos.notificationStackAppearanceInteractor.stackTop.value).isEqualTo(5f)
+            assertThat(kosmos.notificationStackAppearanceInteractor.stackBottom.value)
+                .isEqualTo(500f)
+        }
 }

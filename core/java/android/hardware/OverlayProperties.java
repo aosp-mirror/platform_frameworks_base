@@ -74,7 +74,7 @@ public final class OverlayProperties implements Parcelable {
      * and {@link HardwareBuffer.Format} is supported on the device.
      *
      * @return True if the device can support efficiently compositing the content described by the
-     *         dataspace and format. False if GPOU composition fallback is otherwise required.
+     *         dataspace and format. False if GPU composition fallback is otherwise required.
      */
     @FlaggedApi(Flags.FLAG_OVERLAYPROPERTIES_CLASS_API)
     public boolean isCombinationSupported(@DataSpace.ColorDataSpace int dataspace,
@@ -135,7 +135,6 @@ public final class OverlayProperties implements Parcelable {
 
     private static native long nGetDestructor();
     private static native long nCreateDefault();
-    private static native boolean nSupportFp16ForHdr(long nativeObject);
     private static native boolean nSupportMixedColorSpaces(long nativeObject);
     private static native boolean nIsCombinationSupported(
             long nativeObject, int dataspace, int format);

@@ -1719,10 +1719,11 @@ public class UserManagerService extends IUserManager.Stub {
                     }
 
                     final KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
-                    if (km != null && km.isDeviceSecure()) {
+                    int parentUserId = getProfileParentId(userId);
+                    if (km != null && km.isDeviceSecure(parentUserId)) {
                         showConfirmCredentialToDisableQuietMode(userId, target, callingPackage);
                         return false;
-                    } else if (km != null && !km.isDeviceSecure()
+                    } else if (km != null && !km.isDeviceSecure(parentUserId)
                             && android.multiuser.Flags.showSetScreenLockDialog()
                             // TODO(b/330720545): Add a better way to accomplish this, also use it
                             //  to block profile creation w/o device credentials present.
@@ -1732,7 +1733,8 @@ public class UserManagerService extends IUserManager.Stub {
                                 SetScreenLockDialogActivity
                                         .createBaseIntent(LAUNCH_REASON_DISABLE_QUIET_MODE);
                         setScreenLockPromptIntent.putExtra(EXTRA_ORIGIN_USER_ID, userId);
-                        mContext.startActivity(setScreenLockPromptIntent);
+                        mContext.startActivityAsUser(setScreenLockPromptIntent,
+                                UserHandle.of(parentUserId));
                         return false;
                     } else {
                         Slog.w(LOG_TAG, "Allowing profile unlock even when device credentials "
@@ -1880,11 +1882,10 @@ public class UserManagerService extends IUserManager.Stub {
                 && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
             // Allow delayed locking since some profile types want to be able to unlock again via
             // biometrics.
-            ActivityManager.getService()
-                    .stopUserWithDelayedLocking(userId, /* force= */ true, null);
+            ActivityManager.getService().stopUserWithDelayedLocking(userId, null);
             return;
         }
-        ActivityManager.getService().stopUser(userId, /* force= */ true, null);
+        ActivityManager.getService().stopUserWithCallback(userId, null);
     }
 
     private void logQuietModeEnabled(@UserIdInt int userId, boolean enableQuietMode,
@@ -6130,7 +6131,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (DBG) Slog.i(LOG_TAG, "Stopping user " + userId);
             int res;
             try {
-                res = ActivityManager.getService().stopUser(userId, /* force= */ true,
+                res = ActivityManager.getService().stopUserWithCallback(userId,
                 new IStopUserCallback.Stub() {
                             @Override
                             public void userStopped(int userIdParam) {

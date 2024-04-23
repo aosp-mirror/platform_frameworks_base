@@ -1510,39 +1510,48 @@ public class BackupManagerService extends IBackupManager.Stub {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) {
             return;
         }
-        dumpWithoutCheckingPermission(fd, pw, args);
-    }
 
-    @VisibleForTesting
-    void dumpWithoutCheckingPermission(FileDescriptor fd, PrintWriter pw, String[] args) {
-        int userId = binderGetCallingUserId();
-        if (!isUserReadyForBackup(userId)) {
-            pw.println("Inactive");
+        int argIndex = 0;
+
+        String op = nextArg(args, argIndex);
+        argIndex++;
+
+        if ("--help".equals(op) || "-h".equals(op)) {
+            showDumpUsage(pw);
+            return;
+        }
+        if ("users".equals(op)) {
+            pw.print(DUMP_RUNNING_USERS_MESSAGE);
+            for (int i = 0; i < mUserServices.size(); i++) {
+                UserBackupManagerService userBackupManagerService =
+                        getServiceForUserIfCallerHasPermission(mUserServices.keyAt(i),
+                                "dump()");
+                if (userBackupManagerService != null) {
+                    pw.print(" " + userBackupManagerService.getUserId());
+                }
+            }
+            pw.println();
+            return;
+        }
+        if ("--user".equals(op)) {
+            String userArg = nextArg(args, argIndex);
+            argIndex++;
+            if (userArg == null) {
+                showDumpUsage(pw);
+                return;
+            }
+            int userId = UserHandle.parseUserArg(userArg);
+            UserBackupManagerService userBackupManagerService =
+                    getServiceForUserIfCallerHasPermission(userId, "dump()");
+            if (userBackupManagerService != null) {
+                userBackupManagerService.dump(fd, pw, args);
+            }
             return;
         }
 
-        if (args != null) {
-            for (String arg : args) {
-                if ("-h".equals(arg)) {
-                    pw.println("'dumpsys backup' optional arguments:");
-                    pw.println("  -h       : this help text");
-                    pw.println("  a[gents] : dump information about defined backup agents");
-                    pw.println("  transportclients : dump information about transport clients");
-                    pw.println("  transportstats : dump transport statts");
-                    pw.println("  users    : dump the list of users for which backup service "
-                            + "is running");
-                    return;
-                } else if ("users".equals(arg.toLowerCase())) {
-                    pw.print(DUMP_RUNNING_USERS_MESSAGE);
-                    for (int i = 0; i < mUserServices.size(); i++) {
-                        pw.print(" " + mUserServices.keyAt(i));
-                    }
-                    pw.println();
-                    return;
-                }
-            }
-        }
-
+        // We get here if we have no parameters or parameters unkonwn to us.
+        // Print dumpsys info in either case: bug report creation passes some parameter to
+        // dumpsys that we don't need to check.
         for (int i = 0; i < mUserServices.size(); i++) {
             UserBackupManagerService userBackupManagerService =
                     getServiceForUserIfCallerHasPermission(mUserServices.keyAt(i), "dump()");
@@ -1550,6 +1559,23 @@ public class BackupManagerService extends IBackupManager.Stub {
                 userBackupManagerService.dump(fd, pw, args);
             }
         }
+    }
+
+    private String nextArg(String[] args, int argIndex) {
+        if (argIndex >= args.length) {
+            return null;
+        }
+        return args[argIndex];
+    }
+
+    private static void showDumpUsage(PrintWriter pw) {
+        pw.println("'dumpsys backup' optional arguments:");
+        pw.println("  --help    : this help text");
+        pw.println("  a[gents] : dump information about defined backup agents");
+        pw.println("  transportclients : dump information about transport clients");
+        pw.println("  transportstats : dump transport stats");
+        pw.println("  users    : dump the list of users for which backup service is running");
+        pw.println("  --user <userId> : dump information for user userId");
     }
 
     /**
@@ -1661,7 +1687,7 @@ public class BackupManagerService extends IBackupManager.Stub {
      * @param message A message to include in the exception if it is thrown.
      */
     void enforceCallingPermissionOnUserId(@UserIdInt int userId, String message) {
-        if (Binder.getCallingUserHandle().getIdentifier() != userId) {
+        if (binderGetCallingUserId() != userId) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
         }

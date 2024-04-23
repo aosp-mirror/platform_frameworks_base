@@ -107,7 +107,6 @@ public abstract class NetworkEvaluationTestBase {
     @Mock protected Context mContext;
     @Mock protected Network mNetwork;
     @Mock protected FeatureFlags mFeatureFlags;
-    @Mock protected android.net.platform.flags.FeatureFlags mCoreNetFeatureFlags;
     @Mock protected TelephonySubscriptionSnapshot mSubscriptionSnapshot;
     @Mock protected ConnectivityManager mConnectivityManager;
     @Mock protected TelephonyManager mTelephonyManager;
@@ -123,6 +122,7 @@ public abstract class NetworkEvaluationTestBase {
 
         mSetFlagsRule.enableFlags(Flags.FLAG_VALIDATE_NETWORK_ON_IPSEC_LOSS);
         mSetFlagsRule.enableFlags(Flags.FLAG_EVALUATE_IPSEC_LOSS_ON_LP_NC_CHANGE);
+        mSetFlagsRule.enableFlags(Flags.FLAG_HANDLE_SEQ_NUM_LEAP);
 
         when(mNetwork.getNetId()).thenReturn(-1);
 

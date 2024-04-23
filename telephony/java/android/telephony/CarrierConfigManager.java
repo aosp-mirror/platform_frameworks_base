@@ -9890,6 +9890,60 @@ public class CarrierConfigManager {
             "satellite_entitlement_app_name_string";
 
     /**
+     * URL to redirect user to get more information about the carrier support for satellite.
+     *
+     * The default value is empty string.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_INFORMATION_REDIRECT_URL_STRING =
+            "satellite_information_redirect_url_string";
+    /**
+     * Indicate whether a carrier supports emergency messaging. When this config is {@code  false},
+     * emergency call to satellite T911 handover will be disabled.
+     *
+     * This will need agreement with carriers before enabling this flag.
+     *
+     * The default value is false.
+     *
+     * @hide
+     */
+    public static final String KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL =
+            "emergency_messaging_supported_bool";
+
+    /**
+     * An integer key holds the timeout duration in milliseconds used to determine whether to hand
+     * over an emergency call to satellite T911.
+     *
+     * The timer is started when there is an ongoing emergency call, and the IMS is not registered,
+     * and cellular service is not available. When the timer expires,
+     * {@link com.android.internal.telephony.satellite.SatelliteSOSMessageRecommender} will send the
+     * event {@link TelephonyManager#EVENT_DISPLAY_EMERGENCY_MESSAGE} to Dialer, which will then
+     * prompt user to switch to using satellite emergency messaging.
+     *
+     * The default value is 30 seconds.
+     *
+     * @hide
+     */
+    public static final String KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT =
+            "emergency_call_to_satellite_t911_handover_timeout_millis_int";
+
+    /**
+     * An int array that contains default capabilities for carrier enabled satellite roaming.
+     * If any PLMN is provided from the entitlement server, and it is not listed in
+     * {@link #KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE}, default capabilities
+     * will be used instead.
+     * <p>
+     * The default capabilities are
+     * {@link NetworkRegistrationInfo#SERVICE_TYPE_SMS}, and
+     * {@link NetworkRegistrationInfo#SERVICE_TYPE_MMS}
+     *
+     * @hide
+     */
+    public static final String KEY_CARRIER_ROAMING_SATELLITE_DEFAULT_SERVICES_INT_ARRAY =
+            "carrier_roaming_satellite_default_services_int_array";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -11034,7 +11088,16 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_SATELLITE_ENTITLEMENT_STATUS_REFRESH_DAYS_INT, 7);
         sDefaults.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
         sDefaults.putString(KEY_SATELLITE_ENTITLEMENT_APP_NAME_STRING, "androidSatmode");
+        sDefaults.putString(KEY_SATELLITE_INFORMATION_REDIRECT_URL_STRING, "");
+        sDefaults.putIntArray(KEY_CARRIER_ROAMING_SATELLITE_DEFAULT_SERVICES_INT_ARRAY,
+                new int[] {
+                        NetworkRegistrationInfo.SERVICE_TYPE_SMS,
+                        NetworkRegistrationInfo.SERVICE_TYPE_MMS
+                });
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
+        sDefaults.putBoolean(KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, false);
+        sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
+                (int) TimeUnit.SECONDS.toMillis(30));
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);

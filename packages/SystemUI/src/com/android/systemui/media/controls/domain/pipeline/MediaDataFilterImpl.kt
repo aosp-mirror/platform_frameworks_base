@@ -28,7 +28,9 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_RESUME
 import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
+import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.settings.UserTracker
@@ -67,10 +69,11 @@ constructor(
     private val mediaFlags: MediaFlags,
     private val mediaFilterRepository: MediaFilterRepository,
 ) : MediaDataManager.Listener {
-    private val _listeners: MutableSet<Listener> = mutableSetOf()
-    val listeners: Set<Listener>
+    /** Non-UI listeners to media changes. */
+    private val _listeners: MutableSet<MediaDataProcessor.Listener> = mutableSetOf()
+    val listeners: Set<MediaDataProcessor.Listener>
         get() = _listeners.toSet()
-    lateinit var mediaDataManager: MediaDataManager
+    lateinit var mediaDataProcessor: MediaDataProcessor
 
     // Ensure the field (and associated reference) isn't removed during optimization.
     @KeepForWeakReference
@@ -111,8 +114,12 @@ constructor(
 
         mediaFilterRepository.addSelectedUserMediaEntry(data)
 
+        mediaFilterRepository.addMediaDataLoadingState(
+            MediaDataLoadingModel.Loaded(data.instanceId)
+        )
+
         // Notify listeners
-        listeners.forEach { it.onMediaDataLoaded(data.instanceId) }
+        listeners.forEach { it.onMediaDataLoaded(key, oldKey, data) }
     }
 
     override fun onSmartspaceMediaDataLoaded(
@@ -159,7 +166,7 @@ constructor(
             // reactivate.
             if (shouldReactivate) {
                 val lastActiveId = sorted.lastKey() // most recently active id
-                // Notify listeners to consider this media active
+                // Update loading state to consider this media active
                 Log.d(TAG, "reactivating $lastActiveId instead of smartspace")
                 mediaFilterRepository.setReactivatedId(lastActiveId)
                 val mediaData = sorted[lastActiveId]!!.copy(active = true)
@@ -168,14 +175,22 @@ constructor(
                     mediaData.packageName,
                     mediaData.instanceId
                 )
-                listeners.forEach {
-                    it.onMediaDataLoaded(
-                        lastActiveId,
-                        receivedSmartspaceCardLatency =
-                            (systemClock.currentTimeMillis() - data.headphoneConnectionTimeMillis)
-                                .toInt(),
-                        isSsReactivated = true
-                    )
+                mediaFilterRepository.addMediaDataLoadingState(
+                    MediaDataLoadingModel.Loaded(lastActiveId)
+                )
+                listeners.forEach { listener ->
+                    getKey(lastActiveId)?.let { lastActiveKey ->
+                        listener.onMediaDataLoaded(
+                            lastActiveKey,
+                            lastActiveKey,
+                            mediaData,
+                            receivedSmartspaceCardLatency =
+                                (systemClock.currentTimeMillis() -
+                                        data.headphoneConnectionTimeMillis)
+                                    .toInt(),
+                            isSsReactivated = true
+                        )
+                    }
                 }
             }
         } else if (data.isActive) {
@@ -192,15 +207,21 @@ constructor(
             smartspaceMediaData.packageName,
             smartspaceMediaData.instanceId
         )
-        listeners.forEach { it.onSmartspaceMediaDataLoaded(key, shouldPrioritizeMutable) }
+        mediaFilterRepository.setRecommendationsLoadingState(
+            SmartspaceMediaLoadingModel.Loaded(key, shouldPrioritizeMutable)
+        )
+        listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
 
     override fun onMediaDataRemoved(key: String) {
         mediaFilterRepository.removeMediaEntry(key)?.let { mediaData ->
             val instanceId = mediaData.instanceId
             mediaFilterRepository.removeSelectedUserMediaEntry(instanceId)?.let {
+                mediaFilterRepository.addMediaDataLoadingState(
+                    MediaDataLoadingModel.Removed(instanceId)
+                )
                 // Only notify listeners if something actually changed
-                listeners.forEach { it.onMediaDataRemoved(instanceId) }
+                listeners.forEach { it.onMediaDataRemoved(key) }
             }
         }
     }
@@ -210,10 +231,15 @@ constructor(
         mediaFilterRepository.reactivatedId.value?.let { lastActiveId ->
             mediaFilterRepository.setReactivatedId(null)
             Log.d(TAG, "expiring reactivated key $lastActiveId")
-            // Notify listeners to update with actual active value
+            // Update loading state with actual active value
             mediaFilterRepository.selectedUserEntries.value[lastActiveId]?.let {
+                mediaFilterRepository.addMediaDataLoadingState(
+                    MediaDataLoadingModel.Loaded(lastActiveId, immediately)
+                )
                 listeners.forEach { listener ->
-                    listener.onMediaDataLoaded(lastActiveId, immediately)
+                    getKey(lastActiveId)?.let { lastActiveKey ->
+                        listener.onMediaDataLoaded(lastActiveKey, lastActiveKey, it, immediately)
+                    }
                 }
             }
         }
@@ -227,6 +253,9 @@ constructor(
                 )
             )
         }
+        mediaFilterRepository.setRecommendationsLoadingState(
+            SmartspaceMediaLoadingModel.Removed(key, immediately)
+        )
         listeners.forEach { it.onSmartspaceMediaDataRemoved(key, immediately) }
     }
 
@@ -238,29 +267,43 @@ constructor(
                 // Only remove media when the profile is unavailable.
                 if (DEBUG) Log.d(TAG, "Removing $key after profile change")
                 mediaFilterRepository.removeSelectedUserMediaEntry(data.instanceId, data)
-                listeners.forEach { listener -> listener.onMediaDataRemoved(data.instanceId) }
+                mediaFilterRepository.addMediaDataLoadingState(
+                    MediaDataLoadingModel.Removed(data.instanceId)
+                )
+                listeners.forEach { listener -> listener.onMediaDataRemoved(key) }
             }
         }
     }
 
     @VisibleForTesting
     internal fun handleUserSwitched() {
-        // If the user changes, remove all current MediaData objects and inform listeners
+        // If the user changes, remove all current MediaData objects.
         val listenersCopy = listeners
         val keyCopy = mediaFilterRepository.selectedUserEntries.value.keys.toMutableList()
-        // Clear the list first, to make sure callbacks from listeners if we have any entries
-        // are up to date
+        // Clear the list first and update loading state to remove media from UI.
         mediaFilterRepository.clearSelectedUserMedia()
         keyCopy.forEach { instanceId ->
             if (DEBUG) Log.d(TAG, "Removing $instanceId after user change")
-            listenersCopy.forEach { listener -> listener.onMediaDataRemoved(instanceId) }
+            mediaFilterRepository.addMediaDataLoadingState(
+                MediaDataLoadingModel.Removed(instanceId)
+            )
+            getKey(instanceId)?.let {
+                listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it) }
+            }
         }
 
         mediaFilterRepository.allUserEntries.value.forEach { (key, data) ->
             if (lockscreenUserManager.isCurrentProfile(data.userId)) {
-                if (DEBUG) Log.d(TAG, "Re-adding $key after user change")
+                if (DEBUG)
+                    Log.d(
+                        TAG,
+                        "Re-adding $key with instanceId=${data.instanceId} after user change"
+                    )
                 mediaFilterRepository.addSelectedUserMediaEntry(data)
-                listenersCopy.forEach { listener -> listener.onMediaDataLoaded(data.instanceId) }
+                mediaFilterRepository.addMediaDataLoadingState(
+                    MediaDataLoadingModel.Loaded(data.instanceId)
+                )
+                listenersCopy.forEach { listener -> listener.onMediaDataLoaded(key, null, data) }
             }
         }
     }
@@ -272,7 +315,7 @@ constructor(
         mediaEntries.forEach { (key, data) ->
             if (mediaFilterRepository.selectedUserEntries.value.containsKey(data.instanceId)) {
                 // Force updates to listeners, needed for re-activated card
-                mediaDataManager.setInactive(key, timedOut = true, forceUpdate = true)
+                mediaDataProcessor.setInactive(key, timedOut = true, forceUpdate = true)
             }
         }
         val smartspaceMediaData = mediaFilterRepository.smartspaceMediaData.value
@@ -294,7 +337,7 @@ constructor(
 
             if (mediaFlags.isPersistentSsCardEnabled()) {
                 mediaFilterRepository.setRecommendation(smartspaceMediaData.copy(isActive = false))
-                mediaDataManager.setRecommendationInactive(smartspaceMediaData.targetId)
+                mediaDataProcessor.setRecommendationInactive(smartspaceMediaData.targetId)
             } else {
                 mediaFilterRepository.setRecommendation(
                     EMPTY_SMARTSPACE_MEDIA_DATA.copy(
@@ -302,7 +345,7 @@ constructor(
                         instanceId = smartspaceMediaData.instanceId,
                     )
                 )
-                mediaDataManager.dismissSmartspaceRecommendation(
+                mediaDataProcessor.dismissSmartspaceRecommendation(
                     smartspaceMediaData.targetId,
                     delay = 0L,
                 )
@@ -311,10 +354,10 @@ constructor(
     }
 
     /** Add a listener for filtered [MediaData] changes */
-    fun addListener(listener: Listener) = _listeners.add(listener)
+    fun addListener(listener: MediaDataProcessor.Listener) = _listeners.add(listener)
 
     /** Remove a listener that was registered with addListener */
-    fun removeListener(listener: Listener) = _listeners.remove(listener)
+    fun removeListener(listener: MediaDataProcessor.Listener) = _listeners.remove(listener)
 
     /**
      * Return the time since last active for the most-recent media.
@@ -335,46 +378,14 @@ constructor(
         return sortedEntries[lastActiveInstanceId]?.let { now - it.lastActive } ?: Long.MAX_VALUE
     }
 
-    interface Listener {
-        /**
-         * Called whenever there's new MediaData Loaded for the consumption in views.
-         *
-         * @param immediately indicates should apply the UI changes immediately, otherwise wait
-         *   until the next refresh-round before UI becomes visible. True by default to take in
-         *   place immediately.
-         * @param receivedSmartspaceCardLatency is the latency between headphone connects and sysUI
-         *   displays Smartspace media targets. Will be 0 if the data is not activated by Smartspace
-         *   signal.
-         * @param isSsReactivated indicates resume media card is reactivated by Smartspace
-         *   recommendation signal
-         */
-        fun onMediaDataLoaded(
-            instanceId: InstanceId,
-            immediately: Boolean = true,
-            receivedSmartspaceCardLatency: Int = 0,
-            isSsReactivated: Boolean = false,
-        )
-
-        /**
-         * Called whenever there's new Smartspace media data loaded.
-         *
-         * @param shouldPrioritize indicates the sorting priority of the Smartspace card. If true,
-         *   it will be prioritized as the first card. Otherwise, it will show up as the last card
-         *   as default.
-         */
-        fun onSmartspaceMediaDataLoaded(key: String, shouldPrioritize: Boolean = false)
-
-        /** Called whenever a previously existing Media notification was removed. */
-        fun onMediaDataRemoved(instanceId: InstanceId)
-
-        /**
-         * Called whenever a previously existing Smartspace media data was removed.
-         *
-         * @param immediately indicates should apply the UI changes immediately, otherwise wait
-         *   until the next refresh-round before UI becomes visible. True by default to take in
-         *   place immediately.
-         */
-        fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean = true)
+    private fun getKey(instanceId: InstanceId): String? {
+        val allEntries = mediaFilterRepository.allUserEntries.value
+        val filteredEntries = allEntries.filter { (_, data) -> data.instanceId == instanceId }
+        return if (filteredEntries.isNotEmpty()) {
+            filteredEntries.keys.first()
+        } else {
+            null
+        }
     }
 
     companion object {

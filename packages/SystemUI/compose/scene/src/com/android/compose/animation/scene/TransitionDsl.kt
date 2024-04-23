@@ -205,7 +205,9 @@ interface OverscrollScope {
 interface ElementScenePicker {
     /**
      * Return the scene in which [element] should be drawn (when using `Modifier.element(key)`) or
-     * composed (when using `MovableElement(key)`) during the given [transition].
+     * composed (when using `MovableElement(key)`) during the given [transition]. If this element
+     * should not be drawn or composed in neither [transition.fromScene] nor [transition.toScene],
+     * return `null`.
      *
      * Important: For [MovableElements][SceneScope.MovableElement], this scene picker will *always*
      * be used during transitions to decide whether we should compose that element in a given scene
@@ -217,12 +219,13 @@ interface ElementScenePicker {
         transition: TransitionState.Transition,
         fromSceneZIndex: Float,
         toSceneZIndex: Float,
-    ): SceneKey
+    ): SceneKey?
 
     /**
      * Return [transition.fromScene] if it is in [scenes] and [transition.toScene] is not, or return
-     * [transition.toScene] if it is in [scenes] and [transition.fromScene] is not, otherwise throw
-     * an exception (i.e. if neither or both of fromScene and toScene are in [scenes]).
+     * [transition.toScene] if it is in [scenes] and [transition.fromScene] is not. If neither
+     * [transition.fromScene] and [transition.toScene] are in [scenes], return `null`. If both
+     * [transition.fromScene] and [transition.toScene] are in [scenes], throw an exception.
      *
      * This function can be useful when computing the scene in which a movable element should be
      * composed.
@@ -231,31 +234,22 @@ interface ElementScenePicker {
         scenes: Set<SceneKey>,
         transition: TransitionState.Transition,
         element: ElementKey,
-    ): SceneKey {
+    ): SceneKey? {
         val fromScene = transition.fromScene
         val toScene = transition.toScene
         val fromSceneInScenes = scenes.contains(fromScene)
         val toSceneInScenes = scenes.contains(toScene)
-        if (fromSceneInScenes && toSceneInScenes) {
-            error(
-                "Element $element can be in both $fromScene and $toScene. You should add a " +
-                    "special case for this transition before calling pickSingleSceneIn()."
-            )
-        }
 
-        if (!fromSceneInScenes && !toSceneInScenes) {
-            error(
-                "Element $element can be neither in $fromScene and $toScene. This either means " +
-                    "that you should add one of them in the scenes set passed to " +
-                    "pickSingleSceneIn(), or there is an internal error and this element was " +
-                    "composed when it shouldn't be."
-            )
-        }
-
-        return if (fromSceneInScenes) {
-            fromScene
-        } else {
-            toScene
+        return when {
+            fromSceneInScenes && toSceneInScenes -> {
+                error(
+                    "Element $element can be in both $fromScene and $toScene. You should add a " +
+                        "special case for this transition before calling pickSingleSceneIn()."
+                )
+            }
+            fromSceneInScenes -> fromScene
+            toSceneInScenes -> toScene
+            else -> null
         }
     }
 }
@@ -312,8 +306,12 @@ class MovableElementScenePicker(private val scenes: Set<SceneKey>) : ElementScen
         transition: TransitionState.Transition,
         fromSceneZIndex: Float,
         toSceneZIndex: Float,
-    ): SceneKey {
-        return if (scenes.contains(transition.toScene)) transition.toScene else transition.fromScene
+    ): SceneKey? {
+        return when {
+            scenes.contains(transition.toScene) -> transition.toScene
+            scenes.contains(transition.fromScene) -> transition.fromScene
+            else -> null
+        }
     }
 }
 

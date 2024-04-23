@@ -18,9 +18,7 @@ package com.android.server.pm;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.app.AppOpsManager.MODE_IGNORED;
-import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
-import static android.content.pm.PackageManager.APP_METADATA_SOURCE_APK;
-import static android.content.pm.PackageManager.APP_METADATA_SOURCE_UNKNOWN;
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -1525,10 +1523,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     void markPackageAsArchivedIfNeeded(PackageSetting pkgSetting,
-                                       ArchivedPackageParcel archivePackage, int[] userIds) {
+            ArchivedPackageParcel archivePackage, SparseArray<String> responsibleInstallerTitles,
+            int[] userIds) {
         if (pkgSetting == null || archivePackage == null
-                || archivePackage.archivedActivities == null || userIds == null
-                || userIds.length == 0) {
+                || archivePackage.archivedActivities == null
+                || responsibleInstallerTitles == null
+                || userIds == null || userIds.length == 0) {
             return;
         }
 
@@ -1554,7 +1554,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         for (int userId : userIds) {
             var archiveState = mInstallerService.mPackageArchiver.createArchiveState(
-                    archivePackage, userId, responsibleInstallerPackage);
+                    archivePackage, userId, responsibleInstallerPackage,
+                    responsibleInstallerTitles.get(userId));
             if (archiveState != null) {
                 pkgSetting
                     .modifyUserState(userId)
@@ -3182,7 +3183,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     callingMethod);
         }
 
-        if (crossUserSuspensionEnabled()) {
+        if (crossUserSuspensionEnabledRo()) {
             final int suspendingPackageUid =
                     snapshot.getPackageUid(suspender.packageName, 0, suspender.userId);
             if (suspendingPackageUid != callingUid) {
@@ -3220,7 +3221,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         final String[] allPackages = computer.getPackageStates().keySet().toArray(new String[0]);
         final Predicate<UserPackage> suspenderPredicate =
                 UserPackage.of(suspendingUserId, suspendingPackage)::equals;
-        if (!crossUserSuspensionEnabled() || !inAllUsers) {
+        if (!crossUserSuspensionEnabledRo() || !inAllUsers) {
             mSuspendPackageHelper.removeSuspensionsBySuspendingPackage(computer,
                     allPackages, suspenderPredicate, suspendingUserId);
         } else {
@@ -4366,7 +4367,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
         mInstantAppRegistry.onUserRemoved(userId);
         mPackageMonitorCallbackHelper.onUserRemoved(userId);
-        if (crossUserSuspensionEnabled()) {
+        if (crossUserSuspensionEnabledRo()) {
             cleanUpCrossUserSuspension(userId);
         }
     }
@@ -5232,26 +5233,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return null;
             }
             File file = new File(filePath);
-            if (Flags.aslInApkAppMetadataSource() && !file.exists()
-                    && ps.getAppMetadataSource() == APP_METADATA_SOURCE_APK) {
-                AndroidPackageInternal pkg = ps.getPkg();
-                if (pkg == null) {
-                    Slog.w(TAG, "Unable to to extract app metadata for " + packageName
-                            + ". APK missing from device");
-                    return null;
-                }
-                if (!PackageManagerServiceUtils.extractAppMetadataFromApk(pkg, file)) {
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                    synchronized (mLock) {
-                        PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
-                        pkgSetting.setAppMetadataFilePath(null);
-                        pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
-                    }
-                    return null;
-                }
-            }
             try {
                 return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
             } catch (FileNotFoundException e) {
@@ -5775,17 +5756,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public void setApplicationCategoryHint(String packageName, int categoryHint,
                 String callerPackageName) {
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getCallingUserId();
             final FunctionalUtils.ThrowingBiFunction<PackageStateMutator.InitialState, Computer,
                     PackageStateMutator.Result> implementation = (initialState, computer) -> {
-                if (computer.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+                if (computer.getInstantAppPackageName(callingUid) != null) {
                     throw new SecurityException(
                             "Instant applications don't have access to this method");
                 }
-                mInjector.getSystemService(AppOpsManager.class)
-                        .checkPackage(Binder.getCallingUid(), callerPackageName);
+                final int callerPackageUid = computer.getPackageUid(callerPackageName, 0, userId);
+                if (callerPackageUid != callingUid) {
+                    throw new SecurityException(
+                            "Package " + callerPackageName + " does not belong to " + callingUid);
+                }
 
                 PackageStateInternal packageState = computer.getPackageStateForInstalledAndFiltered(
-                        packageName, Binder.getCallingUid(), UserHandle.getCallingUserId());
+                        packageName, callingUid, userId);
                 if (packageState == null) {
                     throw new IllegalArgumentException("Unknown target package " + packageName);
                 }
@@ -6302,7 +6288,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final boolean quarantined = ((flags & PackageManager.FLAG_SUSPEND_QUARANTINED) != 0)
                     && Flags.quarantinedEnabled();
             final Computer snapshot = snapshotComputer();
-            final UserPackage suspender = crossUserSuspensionEnabled()
+            final UserPackage suspender = crossUserSuspensionEnabledRo()
                     ? UserPackage.of(suspendingUserId, suspendingPackage)
                     : UserPackage.of(targetUserId, suspendingPackage);
             enforceCanSetPackagesSuspendedAsUser(snapshot, quarantined, suspender, callingUid,
@@ -6787,7 +6773,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // Suspension by admin isn't attributed to admin package but to the platform,
             // Using USER_SYSTEM for consistency with other internal suspenders, like shell or root.
             final int suspendingUserId =
-                    crossUserSuspensionEnabled() ? UserHandle.USER_SYSTEM : userId;
+                    crossUserSuspensionEnabledRo() ? UserHandle.USER_SYSTEM : userId;
             final UserPackage suspender = UserPackage.of(
                     suspendingUserId, PackageManagerService.PLATFORM_PACKAGE_NAME);
             return mSuspendPackageHelper.setPackagesSuspended(snapshotComputer(), packageNames,

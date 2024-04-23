@@ -32,6 +32,7 @@ import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.net.Uri;
@@ -71,6 +72,7 @@ import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
@@ -81,7 +83,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Controls the window animation run when a user initiates a back gesture.
  */
-public class BackAnimationController implements RemoteCallable<BackAnimationController> {
+public class BackAnimationController implements RemoteCallable<BackAnimationController>,
+        ConfigurationChangeListener {
     private static final String TAG = "ShellBackPreview";
     private static final int SETTING_VALUE_OFF = 0;
     private static final int SETTING_VALUE_ON = 1;
@@ -173,6 +176,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         ProtoLog.i(WM_SHELL_BACK_PREVIEW, "Navigation window gone.");
                         setTriggerBack(false);
                         resetTouchTracker();
+                        // Don't wait for animation start
+                        mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
                     });
                 }
             });
@@ -246,6 +251,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
+        mShellController.addConfigurationChangeListener(this);
     }
 
     private void setupAnimationDeveloperSettingsObserver(
@@ -293,6 +299,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private final BackAnimationImpl mBackAnimation = new BackAnimationImpl();
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mShellBackAnimationRegistry.onConfigurationChanged(newConfig);
+    }
 
     @Override
     public Context getContext() {
@@ -826,6 +837,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
         // The next callback should be {@link #onBackAnimationFinished}.
         if (mCurrentTracker.getTriggerBack()) {
+            // notify gesture finished
+            mBackNavigationInfo.onBackGestureFinished(true);
             dispatchOrAnimateOnBackInvoked(mActiveCallback, mCurrentTracker);
         } else {
             tryDispatchOnBackCancelled(mActiveCallback);
@@ -954,7 +967,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             ProtoLog.e(WM_SHELL_BACK_PREVIEW, "Lack of navigation info to start animation.");
             return;
         }
-        if (mApps == null) {
+        if (!validateAnimationTargets(mApps)) {
             ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Not starting animation due to mApps being null.");
             return;
         }
@@ -985,6 +998,21 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
     }
 
+    /**
+     * Validate animation targets.
+     */
+    static boolean validateAnimationTargets(RemoteAnimationTarget[] apps) {
+        if (apps == null || apps.length == 0) {
+            return false;
+        }
+        for (int i = apps.length - 1; i >= 0; --i) {
+            if (!apps[i].leash.isValid()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void createAdapter() {
         IBackAnimationRunner runner =
                 new IBackAnimationRunner.Stub() {
@@ -997,6 +1025,10 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                         mShellExecutor.execute(
                                 () -> {
                                     endLatencyTracking();
+                                    if (!validateAnimationTargets(apps)) {
+                                        Log.e(TAG, "Invalid animation targets!");
+                                        return;
+                                    }
                                     mBackAnimationFinishedCallback = finishedCallback;
                                     mApps = apps;
                                     startSystemAnimation();

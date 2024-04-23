@@ -36,7 +36,8 @@ import java.io.File
 object PackageUtil {
     private val LOG_TAG = InstallRepository::class.java.simpleName
     private const val DOWNLOADS_AUTHORITY = "downloads"
-    private const val SPLIT_BASE_APK_END_WITH = "base.apk"
+    private const val SPLIT_BASE_APK_SUFFIX = "base.apk"
+    const val localLogv = false
 
     /**
      * Determines if the UID belongs to the system downloads provider and returns the
@@ -394,7 +395,7 @@ object PackageUtil {
     @JvmStatic
     fun getPackageInfo(context: Context, sourceFile: File, flags: Int): PackageInfo? {
         var filePath = sourceFile.absolutePath
-        if (filePath.endsWith(SPLIT_BASE_APK_END_WITH)) {
+        if (filePath.endsWith(SPLIT_BASE_APK_SUFFIX)) {
             val dir = sourceFile.parentFile
             if ((dir?.listFiles()?.size ?: 0) > 1) {
                 // split apks, use file directory to get archive info
@@ -436,5 +437,9 @@ object PackageUtil {
      * The class to hold an incoming package's icon and label.
      * See [getAppSnippet]
      */
-    data class AppSnippet(var label: CharSequence?, var icon: Drawable?)
+    data class AppSnippet(var label: CharSequence?, var icon: Drawable?) {
+        override fun toString(): String {
+            return "AppSnippet[label = ${label}, hasIcon = ${icon != null}]"
+        }
+    }
 }

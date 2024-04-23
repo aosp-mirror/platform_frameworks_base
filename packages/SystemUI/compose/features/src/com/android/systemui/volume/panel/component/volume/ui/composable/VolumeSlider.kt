@@ -16,13 +16,15 @@
 
 package com.android.systemui.volume.panel.component.volume.ui.composable
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -32,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -50,6 +51,7 @@ import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.Sl
 fun VolumeSlider(
     state: SliderState,
     onValueChange: (newValue: Float) -> Unit,
+    onValueChangeFinished: (() -> Unit)? = null,
     onIconTapped: () -> Unit,
     modifier: Modifier = Modifier,
     sliderColors: PlatformSliderColors,
@@ -59,7 +61,8 @@ fun VolumeSlider(
         modifier =
             modifier.clearAndSetSemantics {
                 if (!state.isEnabled) disabled()
-                contentDescription = state.label
+                contentDescription =
+                    state.disabledMessage?.let { "${state.label}, $it" } ?: state.label
 
                 // provide a not animated value to the a11y because it fails to announce the
                 // settled value when it changes rapidly.
@@ -84,28 +87,31 @@ fun VolumeSlider(
         value = value,
         valueRange = state.valueRange,
         onValueChange = onValueChange,
+        onValueChangeFinished = onValueChangeFinished,
         enabled = state.isEnabled,
-        icon = { isDragging ->
-            if (isDragging) {
-                Text(text = state.valueText, color = LocalContentColor.current)
-            } else {
-                state.icon?.let {
-                    SliderIcon(
-                        icon = it,
-                        onIconTapped = onIconTapped,
-                        isTappable = state.isMutable,
-                    )
-                }
+        icon = {
+            state.icon?.let {
+                SliderIcon(
+                    icon = it,
+                    onIconTapped = onIconTapped,
+                    isTappable = state.isMutable,
+                )
             }
         },
         colors = sliderColors,
-        label = {
-            VolumeSliderContent(
-                modifier = Modifier,
-                label = state.label,
-                isEnabled = state.isEnabled,
-                disabledMessage = state.disabledMessage,
-            )
+        label = { isDragging ->
+            AnimatedVisibility(
+                visible = !isDragging,
+                enter = fadeIn(tween(150)),
+                exit = fadeOut(tween(150)),
+            ) {
+                VolumeSliderContent(
+                    modifier = Modifier,
+                    label = state.label,
+                    isEnabled = state.isEnabled,
+                    disabledMessage = state.disabledMessage,
+                )
+            }
         }
     )
 }
@@ -130,24 +136,20 @@ private fun SliderIcon(
     isTappable: Boolean,
     modifier: Modifier = Modifier
 ) {
-    if (isTappable) {
-        IconButton(
-            modifier = modifier,
-            onClick = onIconTapped,
-            colors =
-                IconButtonColors(
-                    contentColor = LocalContentColor.current,
-                    containerColor = Color.Transparent,
-                    disabledContentColor = LocalContentColor.current,
-                    disabledContainerColor = Color.Transparent,
-                ),
-            content = { Icon(modifier = Modifier.size(24.dp), icon = icon) },
-        )
-    } else {
-        Box(
-            modifier = modifier,
-            contentAlignment = Alignment.Center,
-            content = { Icon(modifier = Modifier.size(24.dp), icon = icon) },
-        )
-    }
+    val boxModifier =
+        if (isTappable) {
+                modifier.clickable(
+                    onClick = onIconTapped,
+                    interactionSource = null,
+                    indication = null
+                )
+            } else {
+                modifier
+            }
+            .fillMaxSize()
+    Box(
+        modifier = boxModifier,
+        contentAlignment = Alignment.Center,
+        content = { Icon(modifier = Modifier.size(24.dp), icon = icon) },
+    )
 }

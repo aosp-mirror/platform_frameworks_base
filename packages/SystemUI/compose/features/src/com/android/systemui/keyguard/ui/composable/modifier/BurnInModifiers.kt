@@ -19,6 +19,8 @@ package com.android.systemui.keyguard.ui.composable.modifier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
@@ -39,9 +41,12 @@ fun Modifier.burnInAware(
     params: BurnInParameters,
     isClock: Boolean = false,
 ): Modifier {
-    val burnIn = viewModel.movement(params)
+    val translationYState = remember { mutableStateOf(0F) }
+    val copiedParams = params.copy(translationY = { translationYState.value })
+    val burnIn = viewModel.movement(copiedParams)
     val translationX by burnIn.map { it.translationX.toFloat() }.collectAsState(initial = 0f)
     val translationY by burnIn.map { it.translationY.toFloat() }.collectAsState(initial = 0f)
+    translationYState.value = translationY
     val scaleViewModel by
         burnIn
             .map {

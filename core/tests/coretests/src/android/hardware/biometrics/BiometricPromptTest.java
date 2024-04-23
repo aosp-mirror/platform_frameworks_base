@@ -16,6 +16,14 @@
 
 package android.hardware.biometrics;
 
+import static android.hardware.biometrics.BiometricPrompt.MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER;
+import static android.hardware.biometrics.PromptContentViewWithMoreOptionsButton.MAX_DESCRIPTION_CHARACTER_NUMBER;
+import static android.hardware.biometrics.PromptVerticalListContentView.MAX_EACH_ITEM_CHARACTER_NUMBER;
+import static android.hardware.biometrics.PromptVerticalListContentView.MAX_ITEM_NUMBER;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -40,6 +48,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Random;
 import java.util.concurrent.Executor;
 
 
@@ -83,10 +92,11 @@ public class BiometricPromptTest {
                 ArgumentCaptor.forClass(IBiometricServiceReceiver.class);
         BiometricPrompt.AuthenticationCallback callback =
                 new BiometricPrompt.AuthenticationCallback() {
-            @Override
-            public void onAuthenticationError(int errorCode, CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-            }};
+                    @Override
+                    public void onAuthenticationError(int errorCode, CharSequence errString) {
+                        super.onAuthenticationError(errorCode, errString);
+                    }
+                };
         mBiometricPrompt.authenticate(mCancellationSignal, mExecutor, callback);
         mLooper.dispatchAll();
 
@@ -98,5 +108,113 @@ public class BiometricPromptTest {
         mCancellationSignal.cancel();
 
         verify(mService).cancelAuthentication(any(), anyString(), anyLong());
+    }
+
+    @Test
+    public void testLogoDescription_null() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> new BiometricPrompt.Builder(mContext).setLogoDescription(null)
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "Logo description passed in can not be null or exceed");
+    }
+
+    @Test
+    public void testLogoDescription_charLimit() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> new BiometricPrompt.Builder(mContext).setLogoDescription(
+                        generateRandomString(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER + 1))
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "Logo description passed in can not be null or exceed");
+    }
+
+    @Test
+    public void testMoreOptionsButton_descriptionCharLimit() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> new PromptContentViewWithMoreOptionsButton.Builder().setDescription(
+                        generateRandomString(MAX_DESCRIPTION_CHARACTER_NUMBER + 1))
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "The character number of description exceeds ");
+    }
+
+    @Test
+    public void testMoreOptionsButton_ExecutorNull() {
+        PromptContentViewWithMoreOptionsButton.Builder builder =
+                new PromptContentViewWithMoreOptionsButton.Builder().setMoreOptionsButtonListener(
+                        null, null);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                builder::build
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "The executor for the listener of more options button on prompt content must be "
+                        + "set");
+    }
+
+    @Test
+    public void testMoreOptionsButton_ListenerNull() {
+        PromptContentViewWithMoreOptionsButton.Builder builder =
+                new PromptContentViewWithMoreOptionsButton.Builder().setMoreOptionsButtonListener(
+                        mExecutor, null);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                builder::build
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "The listener of more options button on prompt content must be set");
+    }
+
+    @Test
+    public void testVerticalList_descriptionCharLimit() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> new PromptVerticalListContentView.Builder().setDescription(
+                        generateRandomString(MAX_DESCRIPTION_CHARACTER_NUMBER + 1))
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "The character number of description exceeds ");
+    }
+
+    @Test
+    public void testVerticalList_itemCharLimit() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> new PromptVerticalListContentView.Builder().addListItem(
+                        new PromptContentItemBulletedText(
+                                generateRandomString(MAX_EACH_ITEM_CHARACTER_NUMBER + 1)))
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "The character number of list item exceeds ");
+    }
+
+    @Test
+    public void testVerticalList_itemNumLimit() {
+        PromptVerticalListContentView.Builder builder = new PromptVerticalListContentView.Builder();
+
+        for (int i = 0; i < MAX_ITEM_NUMBER; i++) {
+            builder.addListItem(new PromptContentItemBulletedText(generateRandomString(10)));
+        }
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> builder.addListItem(
+                        new PromptContentItemBulletedText(generateRandomString(10)))
+        );
+
+        assertThat(e).hasMessageThat().contains(
+                "The number of list items exceeds ");
+    }
+
+    private String generateRandomString(int charNum) {
+        final Random random = new Random();
+        final StringBuilder longString = new StringBuilder(charNum);
+        for (int j = 0; j < charNum; j++) {
+            longString.append(random.nextInt(10));
+        }
+        return longString.toString();
     }
 }

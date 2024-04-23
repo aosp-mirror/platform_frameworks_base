@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -90,7 +91,8 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
         assumeTrue(getContext().getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT));
 
-        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FINGERPRINT);
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FINGERPRINT,
+                false);
 
         verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
 
@@ -115,7 +117,8 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
         assumeTrue(getContext().getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT));
 
-        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FINGERPRINT);
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FINGERPRINT,
+                false);
 
         verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
 
@@ -134,11 +137,25 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
     }
 
     @Test
+    public void testFingerprintReEnrollDialog_forced() {
+        assumeTrue(getContext().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_FINGERPRINT));
+
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FINGERPRINT,
+                true);
+
+        verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
+
+        verify(mDialog, never()).setNegativeButton(anyInt(), any());
+    }
+
+    @Test
     public void testFaceReEnrollDialog_onRemovalSucceeded() {
         assumeTrue(getContext().getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_FACE));
 
-        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FACE);
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FACE,
+                false);
 
         verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
 
@@ -163,7 +180,8 @@ public class BiometricNotificationDialogFactoryTest extends SysuiTestCase {
         assumeTrue(getContext().getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_FACE));
 
-        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FACE);
+        mDialogFactory.createReenrollDialog(0, mActivityStarter, BiometricSourceType.FACE,
+                false);
 
         verify(mDialog).setPositiveButton(anyInt(), mOnClickListenerArgumentCaptor.capture());
 

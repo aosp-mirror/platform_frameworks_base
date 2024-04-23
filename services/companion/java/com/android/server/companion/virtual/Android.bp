@@ -10,6 +10,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "virtualdevice_flags",
     package: "com.android.server.companion.virtual",
+    container: "system",
     srcs: [
         "flags.aconfig",
     ],

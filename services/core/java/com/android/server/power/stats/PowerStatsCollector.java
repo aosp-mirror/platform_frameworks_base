@@ -17,9 +17,12 @@
 package com.android.server.power.stats;
 
 import android.annotation.Nullable;
+import android.hardware.power.stats.EnergyConsumer;
+import android.hardware.power.stats.EnergyConsumerResult;
+import android.hardware.power.stats.EnergyConsumerType;
 import android.os.ConditionVariable;
 import android.os.Handler;
-import android.os.PersistableBundle;
+import android.power.PowerStatsInternal;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -30,7 +33,12 @@ import com.android.internal.os.PowerStats;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -43,214 +51,38 @@ import java.util.function.Consumer;
 public abstract class PowerStatsCollector {
     private static final String TAG = "PowerStatsCollector";
     private static final int MILLIVOLTS_PER_VOLT = 1000;
+    private static final long POWER_STATS_ENERGY_CONSUMERS_TIMEOUT = 20000;
     private final Handler mHandler;
+    protected final PowerStatsUidResolver mUidResolver;
     protected final Clock mClock;
     private final long mThrottlePeriodMs;
     private final Runnable mCollectAndDeliverStats = this::collectAndDeliverStats;
     private boolean mEnabled;
     private long mLastScheduledUpdateMs = -1;
 
-    /**
-     * Captures the positions and lengths of sections of the stats array, such as usage duration,
-     * power usage estimates etc.
-     */
-    public static class StatsArrayLayout {
-        private static final String EXTRA_DEVICE_POWER_POSITION = "dp";
-        private static final String EXTRA_DEVICE_DURATION_POSITION = "dd";
-        private static final String EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION = "de";
-        private static final String EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT = "dec";
-        private static final String EXTRA_UID_POWER_POSITION = "up";
-
-        protected static final double MILLI_TO_NANO_MULTIPLIER = 1000000.0;
-
-        private int mDeviceStatsArrayLength;
-        private int mUidStatsArrayLength;
-
-        protected int mDeviceDurationPosition;
-        private int mDeviceEnergyConsumerPosition;
-        private int mDeviceEnergyConsumerCount;
-        private int mDevicePowerEstimatePosition;
-        private int mUidPowerEstimatePosition;
-
-        public int getDeviceStatsArrayLength() {
-            return mDeviceStatsArrayLength;
-        }
-
-        public int getUidStatsArrayLength() {
-            return mUidStatsArrayLength;
-        }
-
-        protected int addDeviceSection(int length) {
-            int position = mDeviceStatsArrayLength;
-            mDeviceStatsArrayLength += length;
-            return position;
-        }
-
-        protected int addUidSection(int length) {
-            int position = mUidStatsArrayLength;
-            mUidStatsArrayLength += length;
-            return position;
-        }
-
-        /**
-         * Declare that the stats array has a section capturing usage duration
-         */
-        public void addDeviceSectionUsageDuration() {
-            mDeviceDurationPosition = addDeviceSection(1);
-        }
-
-        /**
-         * Saves the usage duration in the corresponding <code>stats</code> element.
-         */
-        public void setUsageDuration(long[] stats, long value) {
-            stats[mDeviceDurationPosition] = value;
-        }
-
-        /**
-         * Extracts the usage duration from the corresponding <code>stats</code> element.
-         */
-        public long getUsageDuration(long[] stats) {
-            return stats[mDeviceDurationPosition];
-        }
-
-        /**
-         * Declares that the stats array has a section capturing EnergyConsumer data from
-         * PowerStatsService.
-         */
-        public void addDeviceSectionEnergyConsumers(int energyConsumerCount) {
-            mDeviceEnergyConsumerPosition = addDeviceSection(energyConsumerCount);
-            mDeviceEnergyConsumerCount = energyConsumerCount;
-        }
-
-        public int getEnergyConsumerCount() {
-            return mDeviceEnergyConsumerCount;
-        }
-
-        /**
-         * Saves the accumulated energy for the specified rail the corresponding
-         * <code>stats</code> element.
-         */
-        public void setConsumedEnergy(long[] stats, int index, long energy) {
-            stats[mDeviceEnergyConsumerPosition + index] = energy;
-        }
-
-        /**
-         * Extracts the EnergyConsumer data from a device stats array for the specified
-         * EnergyConsumer.
-         */
-        public long getConsumedEnergy(long[] stats, int index) {
-            return stats[mDeviceEnergyConsumerPosition + index];
-        }
-
-        /**
-         * Declare that the stats array has a section capturing a power estimate
-         */
-        public void addDeviceSectionPowerEstimate() {
-            mDevicePowerEstimatePosition = addDeviceSection(1);
-        }
-
-        /**
-         * Converts the supplied mAh power estimate to a long and saves it in the corresponding
-         * element of <code>stats</code>.
-         */
-        public void setDevicePowerEstimate(long[] stats, double power) {
-            stats[mDevicePowerEstimatePosition] = (long) (power * MILLI_TO_NANO_MULTIPLIER);
-        }
-
-        /**
-         * Extracts the power estimate from a device stats array and converts it to mAh.
-         */
-        public double getDevicePowerEstimate(long[] stats) {
-            return stats[mDevicePowerEstimatePosition] / MILLI_TO_NANO_MULTIPLIER;
-        }
-
-        /**
-         * Declare that the UID stats array has a section capturing a power estimate
-         */
-        public void addUidSectionPowerEstimate() {
-            mUidPowerEstimatePosition = addUidSection(1);
-        }
-
-        /**
-         * Converts the supplied mAh power estimate to a long and saves it in the corresponding
-         * element of <code>stats</code>.
-         */
-        public void setUidPowerEstimate(long[] stats, double power) {
-            stats[mUidPowerEstimatePosition] = (long) (power * MILLI_TO_NANO_MULTIPLIER);
-        }
-
-        /**
-         * Extracts the power estimate from a UID stats array and converts it to mAh.
-         */
-        public double getUidPowerEstimate(long[] stats) {
-            return stats[mUidPowerEstimatePosition] / MILLI_TO_NANO_MULTIPLIER;
-        }
-
-        /**
-         * Copies the elements of the stats array layout into <code>extras</code>
-         */
-        public void toExtras(PersistableBundle extras) {
-            extras.putInt(EXTRA_DEVICE_DURATION_POSITION, mDeviceDurationPosition);
-            extras.putInt(EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION,
-                    mDeviceEnergyConsumerPosition);
-            extras.putInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT,
-                    mDeviceEnergyConsumerCount);
-            extras.putInt(EXTRA_DEVICE_POWER_POSITION, mDevicePowerEstimatePosition);
-            extras.putInt(EXTRA_UID_POWER_POSITION, mUidPowerEstimatePosition);
-        }
-
-        /**
-         * Retrieves elements of the stats array layout from <code>extras</code>
-         */
-        public void fromExtras(PersistableBundle extras) {
-            mDeviceDurationPosition = extras.getInt(EXTRA_DEVICE_DURATION_POSITION);
-            mDeviceEnergyConsumerPosition = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_POSITION);
-            mDeviceEnergyConsumerCount = extras.getInt(EXTRA_DEVICE_ENERGY_CONSUMERS_COUNT);
-            mDevicePowerEstimatePosition = extras.getInt(EXTRA_DEVICE_POWER_POSITION);
-            mUidPowerEstimatePosition = extras.getInt(EXTRA_UID_POWER_POSITION);
-        }
-
-        protected void putIntArray(PersistableBundle extras, String key, int[] array) {
-            if (array == null) {
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            for (int value : array) {
-                if (!sb.isEmpty()) {
-                    sb.append(',');
-                }
-                sb.append(value);
-            }
-            extras.putString(key, sb.toString());
-        }
-
-        protected int[] getIntArray(PersistableBundle extras, String key) {
-            String string = extras.getString(key);
-            if (string == null) {
-                return null;
-            }
-            String[] values = string.trim().split(",");
-            int[] result = new int[values.length];
-            for (int i = 0; i < values.length; i++) {
-                try {
-                    result[i] = Integer.parseInt(values[i]);
-                } catch (NumberFormatException e) {
-                    Slog.wtf(TAG, "Invalid CSV format: " + string);
-                    return null;
-                }
-            }
-            return result;
-        }
-    }
-
     @GuardedBy("this")
     @SuppressWarnings("unchecked")
     private volatile List<Consumer<PowerStats>> mConsumerList = Collections.emptyList();
 
-    public PowerStatsCollector(Handler handler, long throttlePeriodMs, Clock clock) {
+    public PowerStatsCollector(Handler handler, long throttlePeriodMs,
+            PowerStatsUidResolver uidResolver, Clock clock) {
         mHandler = handler;
         mThrottlePeriodMs = throttlePeriodMs;
+        mUidResolver = uidResolver;
+        mUidResolver.addListener(new PowerStatsUidResolver.Listener() {
+            @Override
+            public void onIsolatedUidAdded(int isolatedUid, int parentUid) {
+            }
+
+            @Override
+            public void onBeforeIsolatedUidRemoved(int isolatedUid, int parentUid) {
+            }
+
+            @Override
+            public void onAfterIsolatedUidRemoved(int isolatedUid, int parentUid) {
+                mHandler.post(()->onUidRemoved(isolatedUid));
+            }
+        });
         mClock = clock;
     }
 
@@ -388,10 +220,87 @@ public abstract class PowerStatsCollector {
         done.block();
     }
 
+    protected void onUidRemoved(int uid) {
+    }
+
     /** Calculate charge consumption (in microcoulombs) from a given energy and voltage */
-    protected long uJtoUc(long deltaEnergyUj, int avgVoltageMv) {
+    protected static long uJtoUc(long deltaEnergyUj, int avgVoltageMv) {
         // To overflow, a 3.7V 10000mAh battery would need to completely drain 69244 times
         // since the last snapshot. Round off to the nearest whole long.
         return (deltaEnergyUj * MILLIVOLTS_PER_VOLT + (avgVoltageMv / 2)) / avgVoltageMv;
+    }
+
+    interface ConsumedEnergyRetriever {
+        int[] getEnergyConsumerIds(@EnergyConsumerType int energyConsumerType);
+
+        @Nullable
+        long[] getConsumedEnergyUws(int[] energyConsumerIds);
+    }
+
+    static class ConsumedEnergyRetrieverImpl implements ConsumedEnergyRetriever {
+        private final PowerStatsInternal mPowerStatsInternal;
+
+        ConsumedEnergyRetrieverImpl(PowerStatsInternal powerStatsInternal) {
+            mPowerStatsInternal = powerStatsInternal;
+        }
+
+        @Override
+        public int[] getEnergyConsumerIds(int energyConsumerType) {
+            if (mPowerStatsInternal == null) {
+                return new int[0];
+            }
+
+            EnergyConsumer[] energyConsumerInfo = mPowerStatsInternal.getEnergyConsumerInfo();
+            if (energyConsumerInfo == null) {
+                return new int[0];
+            }
+
+            List<EnergyConsumer> energyConsumers = new ArrayList<>();
+            for (EnergyConsumer energyConsumer : energyConsumerInfo) {
+                if (energyConsumer.type == energyConsumerType) {
+                    energyConsumers.add(energyConsumer);
+                }
+            }
+            if (energyConsumers.isEmpty()) {
+                return new int[0];
+            }
+
+            energyConsumers.sort(Comparator.comparing(c -> c.ordinal));
+
+            int[] ids = new int[energyConsumers.size()];
+            for (int i = 0; i < ids.length; i++) {
+                ids[i] = energyConsumers.get(i).id;
+            }
+            return ids;
+        }
+
+        @Override
+        public long[] getConsumedEnergyUws(int[] energyConsumerIds) {
+            CompletableFuture<EnergyConsumerResult[]> future =
+                    mPowerStatsInternal.getEnergyConsumedAsync(energyConsumerIds);
+            EnergyConsumerResult[] results = null;
+            try {
+                results = future.get(
+                        POWER_STATS_ENERGY_CONSUMERS_TIMEOUT, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                Slog.e(TAG, "Could not obtain energy consumers from PowerStatsService", e);
+            }
+
+            if (results == null) {
+                return null;
+            }
+
+            long[] energy = new long[energyConsumerIds.length];
+            for (int i = 0; i < energyConsumerIds.length; i++) {
+                int id = energyConsumerIds[i];
+                for (EnergyConsumerResult result : results) {
+                    if (result.id == id) {
+                        energy[i] = result.energyUWs;
+                        break;
+                    }
+                }
+            }
+            return energy;
+        }
     }
 }

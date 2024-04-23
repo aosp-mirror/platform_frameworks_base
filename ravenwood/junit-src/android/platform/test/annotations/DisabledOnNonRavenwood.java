@@ -31,13 +31,17 @@ import java.lang.annotation.Target;
  * which means if a test class has this annotation, you can't negate it in subclasses or
  * on a per-method basis.
  *
+ * THIS ANNOTATION CANNOT BE ADDED TO CLASSES AT THIS PONINT.
+ * See {@link com.android.ravenwoodtest.bivalenttest.RavenwoodClassRuleRavenwoodOnlyTest}
+ * for the reason.
+ *
  * The {@code RAVENWOOD_RUN_DISABLED_TESTS} environmental variable won't work because it won't be
  * propagated to the device. (We may support it in the future, possibly using a debug. sysprop.)
  *
  * @hide
  */
 @Inherited
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DisabledOnNonRavenwood {
     /**

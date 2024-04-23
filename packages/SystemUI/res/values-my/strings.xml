@@ -235,7 +235,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"အ​ကြောင်းကြားစာအကွက်"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"အမြန်လုပ် အပြင်အဆင်"</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"‘အမြန်ဆက်တင်များ’ နှင့် ‘အကြောင်းကြားစာအကွက်’။"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"မျက်နှာပြင် သော့ပိတ်ရန်"</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"အလုပ်သုံး လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ပိတ်ရန်"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"လုံးဝ အသံပိတ်ထားရန်"</string>
@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"အားလုံးကြည့်ရန်"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ဘလူးတုသ်သုံးရန်"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ချိတ်ဆက်ထားသည်"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"သိမ်းထားသည်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ချိတ်ဆက်မှုဖြုတ်ရန်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"စသုံးရန်"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"မနက်ဖြန် အလိုအလျောက် ထပ်ဖွင့်ရန်"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"‘အမြန် မျှဝေပါ’၊ Find My Device နှင့် စက်ပစ္စည်းတည်နေရာကဲ့သို့ တူးလ်များသည် ဘလူးတုသ်သုံးသည်"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"မနက်ဖြန် မနက် ၅ နာရီတွင် ဘလူးတုသ်ကို ဖွင့်ပါမည်"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ဘက်ထရီ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"အသံ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"မိုက်ခွက်ပါနားကြပ်"</string>
@@ -350,6 +358,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ပြဿနာကို မှတ်တမ်းတင်ခြင်း"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"စတင်ပါ"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"ရပ်ပါ"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ချွတ်ယွင်းမှု အစီရင်ခံစာ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"စက်အသုံးပြုမှု၏ မည်သည့်အပိုင်းကို သက်ရောက်သလဲ။"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ပြဿနာအမျိုးအစား ရွေးရန်"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ဖန်သားပြင်ရိုက်ကူးရန်"</string>
@@ -363,7 +372,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ပုံမှန်"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"အသင့်အတင့်"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"များ"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"နားကြားကိရိယာ"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"နားကြားကိရိယာ"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"စက်အသစ်တွဲချိတ်ရန်"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"စက်အသစ် တွဲချိတ်ရန် နှိပ်ပါ"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"စက်၏မိုက်ခရိုဖုန်းကို ပြန်ဖွင့်မလား။"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"စက်၏ကင်မရာကို ပြန်ဖွင့်မလား။"</string>
@@ -430,6 +443,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အမြန်အားသွင်းနေသည် • အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လိုသည်"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည် • အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လိုသည်"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • အားသွင်းနေသည် • အားပြည့်ရန် <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> လိုသည်"</string>
+    <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"လော့ခ်မျက်နှာပြင်ရှိ ဝိဂျက်များ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"အများသုံးရှင်းလင်းပို့ချချက် စတင်ရန် ဘယ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"စိတ်ကြိုက်လုပ်ရန်"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ပယ်ရန်"</string>
@@ -442,14 +456,14 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ဖယ်ရှားရန်"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ဝိဂျက်ထည့်ရန်"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ပြီးပြီ"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ဝိဂျက်များ ထည့်ရန်"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"တက်ဘလက်မဖွင့်ဘဲ သင့်အကြိုက်ဆုံး အက်ပ်ဝိဂျက်များကို အမြန်သုံးခွင့် ရယူပါ။"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"လော့ခ်မျက်နှာပြင်ရှိ ဝိဂျက်အားလုံးကို ခွင့်ပြုမလား။"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ဆက်တင်များ ဖွင့်ရန်"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"အလုပ်သုံးအက်ပ် ပြန်ဖွင့်မလား။"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"ပြန်ဖွင့်ရန်"</string>
+    <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"လော့ခ်မျက်နှာပြင်ရှိ ဝိဂျက်များကို ပိတ်ရန်"</string>
+    <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"လော့ခ်မျက်နှာပြင်ရှိ ဝိဂျက်များ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"အသုံးပြုသူကို ပြောင်းလဲရန်"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ဆွဲချမီနူး"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ဒီချိတ်ဆက်မှု ထဲက အက်ပ်များ အားလုံး နှင့် ဒေတာကို ဖျက်ပစ်မည်။"</string>
@@ -547,7 +561,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ဤစက်ပစ္စည်းကို သင့်မိဘက စီမံခန့်ခွဲသည်။ သင့်မိဘက သင်သုံးသောအက်ပ်များ၊ သင်၏တည်နေရာနှင့် အသုံးပြုချိန် ကဲ့သို့သော အချက်အလက်များကို မြင်နိုင်ပြီး စီမံခန့်ခွဲနိုင်သည်။"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ဖြင့် ဆက်ဖွင့်ထားရန်"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"စက်လော့ခ်ကျနေသည်၊ အထောက်အထားစိစစ်ရန် ကြိုးပမ်းမှုအကြိမ်ရေ များလွန်းသည်"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"လော့ခ်ကျနေသည်၊ အထောက်အထားစိစစ်ရန် ကြိုးပမ်းကြိမ် များလွန်းသည်"</string>
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"စက်လော့ခ်ကျနေသည်\nအထောက်အထားစိစစ်၍ မရပါ"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>။ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"အသံဆက်တင်များ"</string>
@@ -581,7 +595,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"အက်ပ်ကို ပင်ဖြုတ်လိုက်သည်"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"ဖုန်းခေါ်ရန်"</string>
     <string name="stream_system" msgid="7663148785370565134">"စနစ်"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"အသံမြည်စေသည်"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"ဖုန်းမြည်သံ"</string>
     <string name="stream_music" msgid="2188224742361847580">"မီဒီယာ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"နှိုးစက်"</string>
     <string name="stream_notification" msgid="7930294049046243939">"အကြောင်းကြားချက်"</string>
@@ -590,7 +604,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"အများသုံးနိုင်မှု"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"အသံမြည်သည်"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"တုန်ခါသည်"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံတိတ်သည်"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံပိတ်ရန်"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"ကာစ်လုပ်ရန်"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"ဖုန်းမြည်သံပိတ်ထားသဖြင့် မရနိုင်ပါ"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"‘မနှောင့်ယှက်ရ’ ဖွင့်ထားသောကြောင့် မရနိုင်ပါ"</string>
@@ -603,8 +617,8 @@
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"ဆူညံသံ ထိန်းချုပ်ရန်"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"ထောင့်စုံအော်ဒီယို"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"ပိတ်"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ဖွင့်ပြီးပြီ"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ဦးခေါင်းလှုပ်ရှားမှု စောင့်ကြည့်ခြင်း"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ပုံသေ"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ခေါင်းလှုပ်ရှားမှု စောင့်ကြည့်ခြင်း"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"ဖုန်းခေါ်သံမုဒ်သို့ ပြောင်းရန် တို့ပါ"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"အသံပိတ်ရန်"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"အသံဖွင့်ရန်"</string>
@@ -617,7 +631,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s အသံပိတ်ရန်"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s အသံပြန်ဖွင့်ရန်"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ကို ဖွင့်နေသည်"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"အောက်တွင်အသံဖွင့်မည်"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"အသံဖွင့်မည့်နေရာ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"စနစ် UI ဖမ်းစက်"</string>
     <string name="status_bar" msgid="4357390266055077437">"အခြေအနေပြနေရာ"</string>
     <string name="demo_mode" msgid="263484519766901593">"စနစ် UI စရုပ်ပြမုဒ်"</string>
@@ -674,7 +688,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;အခြေအနေ-&lt;/b&gt; အဆင့်လျှော့ထားသည်"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင် ပြ၍ လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ် ပြသည်"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင် ပြ၍ လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ် ပြကာ ပူဖောင်းကွက်အဖြစ် မြင်ရသည်"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းနှင့် ပရိုဖိုင်ပုံအဖြစ် လော့ခ်မျက်နှာပြင်တွင် ပြသည်။ ပူဖောင်းကွက်အဖြစ် မြင်ရပြီး ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင်နှင့် လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ်  ပြသည်။ ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းနှင့် ပရိုဖိုင်ပုံအဖြစ် လော့ခ်မျက်နှာပြင်တွင် ပြသည်။ ပူဖောင်းကွက်အဖြစ် မြင်ရပြီး ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ဦးစားပေး"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> က စကားဝိုင်းဝန်ဆောင်မှုများကို မပံ့ပိုးပါ"</string>
@@ -741,7 +755,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ကီးဘုတ်အပြင်အဆင် ပြောင်းခြင်း"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"သို့မဟုတ်"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ရှာဖွေစာလုံး ရှင်းထုတ်ရန်"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ဖြတ်လမ်းလင့်ခ်များ"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"လက်ကွက်ဖြတ်လမ်းများ"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ဖြတ်လမ်းလင့်ခ်များ ရှာပါ"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ဖြတ်လမ်းလင့်ခ် မတွေ့ပါ"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"စနစ်"</string>
@@ -766,9 +780,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ဖွင့်ရန်"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"မှတ်စုရေးရန်"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"စနစ်က တစ်ပြိုင်နက် များစွာလုပ်ခြင်း"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"လက်ရှိအက်ပ်ကို မျက်နှာပြင် ခွဲ၍ပြသမှု၏ ညာဘက်တွင်ထည့်ရန်"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"လက်ရှိအက်ပ်ကို မျက်နှာပြင် ခွဲ၍ပြသမှု၏ ဘယ်ဘက်တွင်ထည့်ရန်"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"တစ်ပြိုင်နက် များစွာလုပ်ခြင်း"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"လက်ရှိအက်ပ်ကို ညာ၌ထားကာ မျက်နှာပြင် ခွဲ၍ပြသခြင်း သုံးရန်"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"လက်ရှိအက်ပ်ကို ဘယ်၌ထားကာ မျက်နှာပြင် ခွဲ၍ပြသခြင်း သုံးရန်"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"မျက်နှာပြင် ခွဲ၍ပြသမှုမှ မျက်နှာပြင်အပြည့်သို့ ပြောင်းရန်"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"မျက်နှာပြင်ခွဲ၍ပြသခြင်း သုံးစဉ် ညာ (သို့) အောက်ရှိအက်ပ်သို့ ပြောင်းရန်"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းသုံးစဉ် ဘယ် (သို့) အထက်ရှိအက်ပ်သို့ ပြောင်းရန်"</string>
@@ -864,7 +878,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ဆက်တင်များ၏ အစီအစဉ်ကို တည်းဖြတ်ပါ။"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ပါဝါမီနူး"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်ချထားချိန် မျက်နှာပြင်"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="finder_active" msgid="7907846989716941952">"ပါဝါပိတ်ထားသော်လည်း Find My Device ဖြင့် ဤဖုန်းကို ရှာနိုင်သည်"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"စက်ပိတ်နေသည်…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>

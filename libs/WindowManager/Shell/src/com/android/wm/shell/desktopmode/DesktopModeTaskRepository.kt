@@ -16,11 +16,13 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.graphics.Rect
 import android.graphics.Region
 import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.SparseArray
 import android.view.Display.INVALID_DISPLAY
+import android.window.WindowContainerToken
 import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
@@ -45,9 +47,12 @@ class DesktopModeTaskRepository {
          */
         val activeTasks: ArraySet<Int> = ArraySet(),
         val visibleTasks: ArraySet<Int> = ArraySet(),
+        val minimizedTasks: ArraySet<Int> = ArraySet(),
         var stashed: Boolean = false
     )
 
+    // Token of the current wallpaper activity, used to remove it when the last task is removed
+    var wallpaperActivityToken: WindowContainerToken? = null
     // Tasks currently in freeform mode, ordered from top to bottom (top is at index 0).
     private val freeformTasksInZOrder = mutableListOf<Int>()
     private val activeTasksListeners = ArraySet<ActiveTasksListener>()
@@ -55,6 +60,8 @@ class DesktopModeTaskRepository {
     private val visibleTasksListeners = ArrayMap<VisibleTasksListener, Executor>()
     // Track corner/caption regions of desktop tasks, used to determine gesture exclusion
     private val desktopExclusionRegions = SparseArray<Region>()
+    // Track last bounds of task before toggled to stable bounds
+    private val boundsBeforeMaximizeByTaskId = SparseArray<Rect>()
     private var desktopGestureExclusionListener: Consumer<Region>? = null
     private var desktopGestureExclusionExecutor: Executor? = null
 
@@ -196,11 +203,46 @@ class DesktopModeTaskRepository {
         }
     }
 
+    /** Return whether the given Task is minimized. */
+    fun isMinimizedTask(taskId: Int): Boolean {
+        return displayData.valueIterator().asSequence().any { data ->
+            data.minimizedTasks.contains(taskId)
+        }
+    }
+
+    /**
+     *  Check if a task with the given [taskId] is the only active task on its display
+     */
+    fun isOnlyActiveTask(taskId: Int): Boolean {
+        return displayData.valueIterator().asSequence().any { data ->
+            data.activeTasks.singleOrNull() == taskId
+        }
+    }
+
     /**
      * Get a set of the active tasks for given [displayId]
      */
     fun getActiveTasks(displayId: Int): ArraySet<Int> {
         return ArraySet(displayData[displayId]?.activeTasks)
+    }
+
+    /**
+     * Returns whether Desktop Mode is currently showing any tasks, i.e. whether any Desktop Tasks
+     * are visible.
+     */
+    fun isDesktopModeShowing(displayId: Int): Boolean = getVisibleTaskCount(displayId) > 0
+
+    /**
+     * Returns a list of Tasks IDs representing all active non-minimized Tasks on the given display,
+     * ordered from front to back.
+     */
+    fun getActiveNonMinimizedTasksOrderedFrontToBack(displayId: Int): List<Int> {
+        val activeTasks = getActiveTasks(displayId)
+        val allTasksInZOrder = getFreeformTasksInZOrder()
+        return activeTasks
+                // Don't show already minimized Tasks
+                .filter { taskId -> !isMinimizedTask(taskId) }
+                .sortedBy { taskId -> allTasksInZOrder.indexOf(taskId) }
     }
 
     /**
@@ -240,6 +282,7 @@ class DesktopModeTaskRepository {
         val prevCount = getVisibleTaskCount(displayId)
         if (visible) {
             displayData.getOrCreate(displayId).visibleTasks.add(taskId)
+            unminimizeTask(displayId, taskId)
         } else {
             displayData[displayId]?.visibleTasks?.remove(taskId)
         }
@@ -297,6 +340,24 @@ class DesktopModeTaskRepository {
         freeformTasksInZOrder.add(0, taskId)
     }
 
+    /** Mark a Task as minimized. */
+    fun minimizeTask(displayId: Int, taskId: Int) {
+        KtProtoLog.v(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeTaskRepository: minimize Task: display=%d, task=%d",
+                displayId, taskId)
+        displayData.getOrCreate(displayId).minimizedTasks.add(taskId)
+    }
+
+    /** Mark a Task as non-minimized. */
+    fun unminimizeTask(displayId: Int, taskId: Int) {
+        KtProtoLog.v(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopModeTaskRepository: unminimize Task: display=%d, task=%d",
+                displayId, taskId)
+        displayData[displayId]?.minimizedTasks?.remove(taskId)
+    }
+
     /**
      * Remove the task from the ordered list.
      */
@@ -307,9 +368,10 @@ class DesktopModeTaskRepository {
             taskId
         )
         freeformTasksInZOrder.remove(taskId)
+        boundsBeforeMaximizeByTaskId.remove(taskId)
         KtProtoLog.d(
             WM_SHELL_DESKTOP_MODE,
-            "DesktopTaskRepo: remaining freeform tasks: " + freeformTasksInZOrder.toDumpString()
+            "DesktopTaskRepo: remaining freeform tasks: %s", freeformTasksInZOrder.toDumpString(),
         )
     }
 
@@ -355,6 +417,20 @@ class DesktopModeTaskRepository {
                 executor.execute { listener.onStashedChanged(displayId, stashed) }
             }
         }
+    }
+
+    /**
+     * Removes and returns the bounds saved before maximizing the given task.
+     */
+    fun removeBoundsBeforeMaximize(taskId: Int): Rect? {
+        return boundsBeforeMaximizeByTaskId.removeReturnOld(taskId)
+    }
+
+    /**
+     * Saves the bounds of the given task before maximizing.
+     */
+    fun saveBoundsBeforeMaximize(taskId: Int, bounds: Rect) {
+        boundsBeforeMaximizeByTaskId.set(taskId, Rect(bounds))
     }
 
     /**

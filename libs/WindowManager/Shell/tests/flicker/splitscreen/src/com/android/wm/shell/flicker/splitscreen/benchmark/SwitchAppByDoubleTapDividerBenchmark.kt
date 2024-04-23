@@ -128,7 +128,7 @@ abstract class SwitchAppByDoubleTapDividerBenchmark(override val flicker: Legacy
 
     private fun isLandscape(rotation: Rotation): Boolean {
         val displayBounds = WindowUtils.getDisplayBounds(rotation)
-        return displayBounds.width > displayBounds.height
+        return displayBounds.width() > displayBounds.height()
     }
 
     companion object {

@@ -19,10 +19,11 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+    default_team: "trendy_team_framework_cdm",
 }
 
 android_test {
-    name: "cdm_snippet",
+    name: "cdm_snippet_legacy",
     srcs: ["src/**/*.kt"],
     manifest: "AndroidManifest.xml",
 

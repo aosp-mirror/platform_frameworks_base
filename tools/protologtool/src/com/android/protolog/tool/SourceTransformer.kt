@@ -22,6 +22,7 @@ import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.ast.expr.ArrayAccessExpr
 import com.github.javaparser.ast.expr.CastExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
@@ -35,6 +36,8 @@ import com.github.javaparser.ast.expr.TypeExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.stmt.ExpressionStmt
+import com.github.javaparser.ast.stmt.IfStmt
+import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.ast.type.ArrayType
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.ast.type.PrimitiveType
@@ -74,6 +77,8 @@ class SourceTransformer(
 
     private val protoLogImplClassNode =
             StaticJavaParser.parseExpression<FieldAccessExpr>(protoLogImplClassName)
+    private val protoLogImplCacheClassNode =
+        StaticJavaParser.parseExpression<FieldAccessExpr>("$protoLogImplClassName.Cache")
     private var processedCode: MutableList<String> = mutableListOf()
     private var offsets: IntArray = IntArray(0)
     /** The path of the file being processed, relative to $ANDROID_BUILD_TOP */
@@ -121,8 +126,9 @@ class SourceTransformer(
         group: LogGroup,
         level: LogLevel,
         messageString: String
-    ): BlockStmt {
+    ): Statement {
         val hash = CodeUtils.hash(packagePath, messageString, level, group)
+
         val newCall = call.clone()
         if (!group.textEnabled) {
             // Remove message string if text logging is not enabled by default.
@@ -166,11 +172,15 @@ class SourceTransformer(
         }
         blockStmt.addStatement(ExpressionStmt(newCall))
 
-        return blockStmt
+        val isLogEnabled = ArrayAccessExpr()
+            .setName(NameExpr("$protoLogImplCacheClassNode.${group.name}_enabled"))
+            .setIndex(IntegerLiteralExpr(level.ordinal))
+
+        return IfStmt(isLogEnabled, blockStmt, null)
     }
 
     private fun injectProcessedCallStatementInCode(
-        processedCallStatement: BlockStmt,
+        processedCallStatement: Statement,
         parentStmt: ExpressionStmt
     ) {
         // Inline the new statement.

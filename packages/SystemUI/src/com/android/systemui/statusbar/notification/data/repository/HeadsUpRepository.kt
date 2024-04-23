@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A repository of currently displayed heads up notifications.
@@ -29,13 +30,15 @@ interface HeadsUpRepository {
 
     /**
      * True if we are exiting the headsUp pinned mode, and some notifications might still be
-     * animating out. This is used to keep the touchable regions in a reasonable state.
+     * animating out. This is used to keep their view container visible.
      */
-    val headsUpAnimatingAway: Flow<Boolean>
+    val isHeadsUpAnimatingAway: StateFlow<Boolean>
 
     /** The heads up row that should be displayed on top. */
     val topHeadsUpRow: Flow<HeadsUpRowRepository?>
 
     /** Set of currently active top-level heads up rows to be displayed. */
     val activeHeadsUpRows: Flow<Set<HeadsUpRowRepository>>
+
+    fun setHeadsUpAnimatingAway(animatingAway: Boolean)
 }

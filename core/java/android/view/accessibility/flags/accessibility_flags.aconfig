@@ -1,4 +1,5 @@
 package: "android.view.accessibility"
+container: "system"
 
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
@@ -80,6 +81,16 @@ flag {
 }
 
 flag {
+    name: "migrate_enable_shortcuts"
+    namespace: "accessibility"
+    description: "Refactors deprecated code to use AccessibilityManager#enableShortcutsForTargets."
+    bug: "332006721"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "motion_event_observing"
     is_exported: true
     namespace: "accessibility"
@@ -129,6 +140,16 @@ flag {
     namespace: "accessibility"
     description: "Feature flag for system pinch zoom gesture detector and related opt-out apis"
     bug: "283323770"
+}
+
+flag {
+    name: "prevent_leaking_viewrootimpl"
+    namespace: "accessibility"
+    description: "Clear pending messages and callbacks of the handler in AccessibilityInteractionController when the ViewRootImpl is detached from Window to prevent leaking ViewRootImpl"
+    bug: "320701910"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

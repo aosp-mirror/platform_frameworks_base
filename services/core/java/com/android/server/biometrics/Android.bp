@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "biometrics_flags",
     package: "com.android.server.biometrics",
+    container: "system",
     srcs: [
         "biometrics.aconfig",
     ],

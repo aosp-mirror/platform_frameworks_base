@@ -19,11 +19,11 @@ package com.android.systemui.communal.widgets
 import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryImpl.Companion.GLANCEABLE_HUB_ENABLED
 import com.android.systemui.communal.data.repository.fakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
@@ -220,7 +220,11 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
             fakeUserRepository.setSelectedUserInfo(MAIN_USER_INFO)
             fakeKeyguardRepository.setKeyguardShowing(true)
             val settingsValue = if (available) 1 else 0
-            fakeSettings.putIntForUser(GLANCEABLE_HUB_ENABLED, settingsValue, MAIN_USER_INFO.id)
+            fakeSettings.putIntForUser(
+                Settings.Secure.GLANCEABLE_HUB_ENABLED,
+                settingsValue,
+                MAIN_USER_INFO.id
+            )
         }
 
     private fun createWidgetForUser(appWidgetId: Int, userId: Int): CommunalWidgetContentModel =

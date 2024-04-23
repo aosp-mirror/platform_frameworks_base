@@ -30,7 +30,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
@@ -64,7 +64,6 @@ constructor(
     transitionInteractor: KeyguardTransitionInteractor,
     val keyguardInteractor: KeyguardInteractor,
     val viewModel: AodToLockscreenTransitionViewModel,
-    private val sceneContainerFlags: SceneContainerFlags,
     private val keyguardViewController: Lazy<KeyguardViewController>,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val deviceEntrySourceInteractor: DeviceEntrySourceInteractor,
@@ -242,7 +241,7 @@ constructor(
         }
 
     suspend fun onLongPress() {
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             deviceEntryInteractor.attemptDeviceEntry()
         } else {
             keyguardViewController.get().showPrimaryBouncer(/* scrim */ true)

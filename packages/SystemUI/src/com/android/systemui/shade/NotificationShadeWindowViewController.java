@@ -17,7 +17,8 @@
 package com.android.systemui.shade;
 
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-import static com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -102,7 +103,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PulsingGestureListener mPulsingGestureListener;
     private final LockscreenHostedDreamGestureListener mLockscreenHostedDreamGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
-    private final boolean mIsTrackpadCommonEnabled;
     private final FeatureFlagsClassic mFeatureFlagsClassic;
     private final SysUIKeyEventHandler mSysUIKeyEventHandler;
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
@@ -209,7 +209,6 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mLockscreenHostedDreamGestureListener = lockscreenHostedDreamGestureListener;
         mNotificationInsetsController = notificationInsetsController;
         mGlanceableHubContainerController = glanceableHubContainerController;
-        mIsTrackpadCommonEnabled = featureFlagsClassic.isEnabled(TRACKPAD_GESTURE_COMMON);
         mFeatureFlagsClassic = featureFlagsClassic;
         mSysUIKeyEventHandler = sysUIKeyEventHandler;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
@@ -221,7 +220,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
         bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
 
-        collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
+        collectFlow(mView, keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING),
                 mLockscreenToDreamingTransition);
         collectFlow(
                 mView,
@@ -382,12 +381,15 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     float x = ev.getRawX();
                     float y = ev.getRawY();
                     if (mStatusBarViewController.touchIsWithinView(x, y)) {
-                        if (mStatusBarWindowStateController.windowIsShowing()) {
-                            mIsTrackingBarGesture = true;
-                            return logDownDispatch(ev, "sending touch to status bar",
-                                    mStatusBarViewController.sendTouchToView(ev));
-                        } else {
-                            return logDownDispatch(ev, "hidden or hiding", true);
+                        if (!(MigrateClocksToBlueprint.isEnabled()
+                                && mPrimaryBouncerInteractor.isBouncerShowing())) {
+                            if (mStatusBarWindowStateController.windowIsShowing()) {
+                                mIsTrackingBarGesture = true;
+                                return logDownDispatch(ev, "sending touch to status bar",
+                                        mStatusBarViewController.sendTouchToView(ev));
+                            } else {
+                                return logDownDispatch(ev, "hidden or hiding", true);
+                            }
                         }
                     }
                 } else if (mIsTrackingBarGesture) {
@@ -563,6 +565,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
             public boolean dispatchKeyEvent(KeyEvent event) {
                 return mSysUIKeyEventHandler.dispatchKeyEvent(event);
             }
+
+            @Override
+            public void collectKeyEvent(KeyEvent event) {
+                mFalsingCollector.onKeyEvent(event);
+            }
         });
 
         mView.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
@@ -633,22 +640,19 @@ public class NotificationShadeWindowViewController implements Dumpable {
         if (mTouchActive) {
             final long now = mClock.uptimeMillis();
             final MotionEvent event;
-            if (mIsTrackpadCommonEnabled) {
-                event = MotionEvent.obtain(mDownEvent);
-                event.setDownTime(now);
-                event.setAction(MotionEvent.ACTION_CANCEL);
-                event.setLocation(0.0f, 0.0f);
-            } else {
-                event = MotionEvent.obtain(now, now,
-                        MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
-                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-            }
+            event = MotionEvent.obtain(mDownEvent);
+            event.setDownTime(now);
+            event.setAction(MotionEvent.ACTION_CANCEL);
+            event.setLocation(0.0f, 0.0f);
             Log.w(TAG, "Canceling current touch event (should be very rare)");
             mView.dispatchTouchEvent(event);
             event.recycle();
             mTouchCancelled = true;
         }
         mAmbientState.setSwipingUp(false);
+        if (MigrateClocksToBlueprint.isEnabled()) {
+            mDragDownHelper.stopDragging();
+        }
     }
 
     @Override

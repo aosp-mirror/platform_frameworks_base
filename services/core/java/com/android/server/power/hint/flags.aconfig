@@ -1,4 +1,5 @@
 package: "com.android.server.power.hint"
+container: "system"
 
 flag {
     name: "powerhint_thread_cleanup"

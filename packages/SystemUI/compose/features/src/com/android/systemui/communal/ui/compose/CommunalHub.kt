@@ -17,9 +17,11 @@
 package com.android.systemui.communal.ui.compose
 
 import android.appwidget.AppWidgetHostView
+import android.content.res.Configuration
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.SizeF
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -30,6 +32,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -43,6 +46,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -92,12 +96,16 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -110,14 +118,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.core.view.setPadding
 import androidx.window.layout.WindowMetricsCalculator
-import com.android.compose.modifiers.height
-import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.compose.Dimensions.CardOutlineWidth
 import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.compose.extensions.detectLongPressGesture
@@ -222,32 +229,33 @@ fun CommunalHub(
                         .motionEventSpy { onMotionEvent(viewModel) }
                 },
     ) {
-        if (!viewModel.isEditMode && isEmptyState) {
-            EmptyStateCta(
-                contentPadding = contentPadding,
-                viewModel = viewModel,
-            )
-        } else {
-            CommunalHubLazyGrid(
-                communalContent = communalContent,
-                viewModel = viewModel,
-                contentPadding = contentPadding,
-                contentOffset = contentOffset,
-                setGridCoordinates = { gridCoordinates = it },
-                updateDragPositionForRemove = { offset ->
-                    isDraggingToRemove =
-                        isPointerWithinCoordinates(
-                            offset = gridCoordinates?.let { it.positionInWindow() + offset },
-                            containerToCheck = removeButtonCoordinates
-                        )
-                    isDraggingToRemove
-                },
-                onOpenWidgetPicker = onOpenWidgetPicker,
-                gridState = gridState,
-                contentListState = contentListState,
-                selectedKey = selectedKey,
-                widgetConfigurator = widgetConfigurator,
-            )
+        AccessibilityContainer(viewModel) {
+            if (!viewModel.isEditMode && isEmptyState) {
+                EmptyStateCta(
+                    contentPadding = contentPadding,
+                    viewModel = viewModel,
+                )
+            } else {
+                CommunalHubLazyGrid(
+                    communalContent = communalContent,
+                    viewModel = viewModel,
+                    contentPadding = contentPadding,
+                    contentOffset = contentOffset,
+                    setGridCoordinates = { gridCoordinates = it },
+                    updateDragPositionForRemove = { offset ->
+                        isDraggingToRemove =
+                            isPointerWithinCoordinates(
+                                offset = gridCoordinates?.let { it.positionInWindow() + offset },
+                                containerToCheck = removeButtonCoordinates
+                            )
+                        isDraggingToRemove
+                    },
+                    gridState = gridState,
+                    contentListState = contentListState,
+                    selectedKey = selectedKey,
+                    widgetConfigurator = widgetConfigurator,
+                )
+            }
         }
 
         // TODO(b/326060686): Remove this once keyguard indication area can persist over hub
@@ -364,7 +372,7 @@ private fun ScrollOnUpdatedLiveContentEffect(
             liveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
 
         // Scroll if current position is behind the first updated content
-        if (indexOfFirstUpdatedContent in 0..<gridState.firstVisibleItemIndex) {
+        if (indexOfFirstUpdatedContent in 0 until gridState.firstVisibleItemIndex) {
             // Launching with a scope to prevent the job from being canceled in the case of a
             // recomposition during scrolling
             coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
@@ -384,7 +392,6 @@ private fun BoxScope.CommunalHubLazyGrid(
     contentListState: ContentListState,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
     updateDragPositionForRemove: (offset: Offset) -> Boolean,
-    onOpenWidgetPicker: (() -> Unit)? = null,
     widgetConfigurator: WidgetConfigurator?,
 ) {
     var gridModifier =
@@ -452,7 +459,6 @@ private fun BoxScope.CommunalHubLazyGrid(
                         model = list[index],
                         viewModel = viewModel,
                         size = size,
-                        onOpenWidgetPicker = onOpenWidgetPicker,
                         selected = selected && !isDragging,
                         widgetConfigurator = widgetConfigurator,
                     )
@@ -730,7 +736,6 @@ private fun CommunalContent(
     size: SizeF,
     selected: Boolean,
     modifier: Modifier = Modifier,
-    onOpenWidgetPicker: (() -> Unit)? = null,
     widgetConfigurator: WidgetConfigurator? = null,
 ) {
     when (model) {
@@ -834,6 +839,13 @@ private fun WidgetContent(
     widgetConfigurator: WidgetConfigurator?,
     modifier: Modifier = Modifier,
 ) {
+    var widgetId: Int by remember { mutableStateOf(-1) }
+    var configuration: Configuration? by remember { mutableStateOf(null) }
+
+    // In addition to returning the current configuration, this also causes a recompose on
+    // configuration change.
+    val currentConfiguration = LocalConfiguration.current
+
     Box(
         modifier =
             modifier.thenIf(!viewModel.isEditMode && model.inQuietMode) {
@@ -849,18 +861,48 @@ private fun WidgetContent(
         AndroidView(
             modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
             factory = { context ->
-                model.appWidgetHost
-                    .createViewForCommunal(context, model.appWidgetId, model.providerInfo)
-                    .apply {
-                        updateAppWidgetSize(Bundle.EMPTY, listOf(size))
-                        // Remove the extra padding applied to AppWidgetHostView to allow widgets to
-                        // occupy the entire box.
-                        setPadding(0)
-                    }
+                // This FrameLayout becomes the container view for the AppWidgetHostView we add as a
+                // child in update below. Having a container view allows for updating the contained
+                // host view as needed (e.g. on configuration changes).
+                FrameLayout(context).apply {
+                    layoutParams =
+                        ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                    setPadding(0)
+                }
+            },
+            update = { widgetContainer: ViewGroup ->
+                if (widgetId == model.appWidgetId && currentConfiguration.equals(configuration)) {
+                    return@AndroidView
+                }
+
+                // Add the widget's host view to the FrameLayout parent (after removing any
+                // previously added host view).
+                widgetContainer.removeAllViews()
+                widgetContainer.addView(
+                    model.appWidgetHost
+                        .createViewForCommunal(
+                            widgetContainer.context,
+                            model.appWidgetId,
+                            model.providerInfo
+                        )
+                        .apply {
+                            updateAppWidgetSize(Bundle.EMPTY, listOf(size))
+                            // Remove the extra padding applied to AppWidgetHostView to allow
+                            // widgets to occupy the entire box.
+                            setPadding(0)
+                        }
+                )
+
+                widgetId = model.appWidgetId
+                configuration = currentConfiguration
             },
             // For reusing composition in lazy lists.
             onReset = {},
         )
+
         if (
             viewModel is CommunalEditModeViewModel &&
                 model.reconfigurable &&
@@ -990,6 +1032,45 @@ private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier)
     )
 }
 
+/** Container of the glanceable hub grid to enable accessibility actions when focused. */
+@Composable
+fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val isFocusable by viewModel.isFocusable.collectAsState(initial = false)
+    Box(
+        modifier =
+            Modifier.fillMaxWidth().wrapContentHeight().thenIf(
+                isFocusable && !viewModel.isEditMode
+            ) {
+                Modifier.focusable(isFocusable).semantics {
+                    contentDescription =
+                        context.getString(
+                            R.string.accessibility_content_description_for_communal_hub
+                        )
+                    customActions =
+                        listOf(
+                            CustomAccessibilityAction(
+                                context.getString(
+                                    R.string.accessibility_action_label_close_communal_hub
+                                )
+                            ) {
+                                viewModel.changeScene(CommunalScenes.Blank)
+                                true
+                            },
+                            CustomAccessibilityAction(
+                                context.getString(R.string.accessibility_action_label_edit_widgets)
+                            ) {
+                                viewModel.onOpenWidgetEditor()
+                                true
+                            }
+                        )
+                }
+            }
+    ) {
+        content()
+    }
+}
+
 /**
  * Returns the `contentPadding` of the grid. Use the vertical padding to push the grid content area
  * below the toolbar and let the grid take the max size. This ensures the item can be dragged
@@ -1066,7 +1147,7 @@ object Dimensions {
     val CardHeightHalf = 282.dp
     val CardHeightThird = 177.33.dp
     val CardOutlineWidth = 3.dp
-    val GridTopSpacing = 72.dp
+    val GridTopSpacing = 64.dp
     val GridHeight = CardHeightFull + GridTopSpacing
     val Spacing = 16.dp
 

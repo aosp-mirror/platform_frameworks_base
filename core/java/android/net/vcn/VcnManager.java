@@ -124,6 +124,22 @@ public class VcnManager {
             "vcn_network_selection_ipsec_packet_loss_percent_threshold";
 
     /**
+     * Key for detecting unusually large increases in IPsec packet sequence numbers.
+     *
+     * <p>If the sequence number increases by more than this value within a second, it may indicate
+     * an intentional leap on the server's downlink. To avoid false positives, the packet loss
+     * detector will suppress loss reporting.
+     *
+     * <p>By default, there's no maximum limit enforced, prioritizing detection of lossy networks.
+     * To reduce false positives, consider setting an appropriate maximum threshold.
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY =
+            "vcn_network_selection_max_seq_num_increase_per_second";
+
+    /**
      * Key for the list of timeouts in minute to stop penalizing an underlying network candidate
      *
      * @hide
@@ -180,6 +196,7 @@ public class VcnManager {
                 VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,
                 VCN_NETWORK_SELECTION_POLL_IPSEC_STATE_INTERVAL_SECONDS_KEY,
                 VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY,
+                VCN_NETWORK_SELECTION_MAX_SEQ_NUM_INCREASE_PER_SECOND_KEY,
                 VCN_NETWORK_SELECTION_PENALTY_TIMEOUT_MINUTES_LIST_KEY,
                 VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
                 VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY,

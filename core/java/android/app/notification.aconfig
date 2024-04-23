@@ -1,4 +1,9 @@
 package: "android.app"
+container: "system"
+
+# Note: When adding a new flag here, consider including the word "notification(s)" in the flag name
+# when appropriate, as it's not currently part of the namespace so it may not be obvious what the
+# flag relates to.
 
 flag {
   name: "modes_api"
@@ -41,6 +46,13 @@ flag {
 }
 
 flag {
+  name: "notifications_use_app_icon"
+  namespace: "systemui"
+  description: "Experiment to replace the small icon in a notification with the app icon."
+  bug: "335211019"
+}
+
+flag {
   name: "keyguard_private_notifications"
   namespace: "systemui"
   description: "Fixes the behavior of KeyguardManager#setPrivateNotificationsAllowed()"
@@ -74,6 +86,16 @@ flag {
 }
 
 flag {
+  name: "secure_allowlist_token"
+  namespace: "systemui"
+  description: "Prevents allowlist_token from leaking out and foreign tokens from being accepted"
+  bug: "328254922"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "update_ranking_time"
   namespace: "systemui"
   description: "Updates notification sorting criteria to highlight new content while maintaining stability"
@@ -88,4 +110,32 @@ flag {
   namespace: "systemui"
   description: "Changes notification sort order to be by time within a section"
   bug: "330193582"
+}
+
+flag {
+  name: "restrict_audio_attributes_call"
+  namespace: "systemui"
+  description: "Only CallStyle notifs can use USAGE_NOTIFICATION_RINGTONE"
+  bug: "331793339"
+}
+
+flag {
+  name: "restrict_audio_attributes_alarm"
+  namespace: "systemui"
+  description: "Only alarm category notifs can use USAGE_ALARM"
+  bug: "331793339"
+}
+
+flag {
+  name: "restrict_audio_attributes_media"
+  namespace: "systemui"
+  description: "No notifs can use USAGE_UNKNOWN or USAGE_MEDIA"
+  bug: "331793339"
+}
+
+flag {
+  name: "clean_up_spans_and_new_lines"
+  namespace: "systemui"
+  description: "Cleans up spans and unnecessary new lines from standard notification templates"
+  bug: "313439845"
 }

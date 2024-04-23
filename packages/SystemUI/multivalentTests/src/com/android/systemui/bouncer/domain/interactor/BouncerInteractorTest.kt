@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.uiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -25,14 +26,15 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationResul
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
+import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
@@ -48,11 +50,13 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class BouncerInteractorTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val authenticationInteractor = kosmos.authenticationInteractor
+    private val uiEventLoggerFake = kosmos.uiEventLoggerFake
 
     private lateinit var underTest: BouncerInteractor
 
@@ -83,6 +87,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Thus, when auth method is sim, we expect to skip here.
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SKIPPED)
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(0)
         }
 
     @Test
@@ -104,6 +109,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Wrong 6-digit pin
             assertThat(underTest.authenticate(listOf(1, 2, 3, 5, 5, 6), tryAutoConfirm = true))
                 .isEqualTo(AuthenticationResult.FAILED)
+            assertThat(uiEventLoggerFake[0].eventId)
+                .isEqualTo(BouncerUiEvent.BOUNCER_PASSWORD_FAILURE.id)
 
             // Correct input.
             assertThat(
@@ -113,6 +120,9 @@ class BouncerInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
+            assertThat(uiEventLoggerFake[1].eventId)
+                .isEqualTo(BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS.id)
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(2)
         }
 
     @Test
@@ -148,6 +158,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Wrong input.
             assertThat(underTest.authenticate("alohamora".toList()))
                 .isEqualTo(AuthenticationResult.FAILED)
+            assertThat(uiEventLoggerFake[0].eventId)
+                .isEqualTo(BouncerUiEvent.BOUNCER_PASSWORD_FAILURE.id)
 
             // Too short input.
             assertThat(
@@ -165,6 +177,9 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Correct input.
             assertThat(underTest.authenticate("password".toList()))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
+            assertThat(uiEventLoggerFake[1].eventId)
+                .isEqualTo(BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS.id)
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(2)
         }
 
     @Test
@@ -187,6 +202,8 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(wrongPattern.size)
                 .isAtLeast(kosmos.fakeAuthenticationRepository.minPatternLength)
             assertThat(underTest.authenticate(wrongPattern)).isEqualTo(AuthenticationResult.FAILED)
+            assertThat(uiEventLoggerFake[0].eventId)
+                .isEqualTo(BouncerUiEvent.BOUNCER_PASSWORD_FAILURE.id)
 
             // Too short input.
             val tooShortPattern =
@@ -200,6 +217,9 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Correct input.
             assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
+            assertThat(uiEventLoggerFake[1].eventId)
+                .isEqualTo(BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS.id)
+            assertThat(uiEventLoggerFake.numLogs()).isEqualTo(2)
         }
 
     @Test

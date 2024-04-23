@@ -163,7 +163,11 @@ enum class GetScreenState {
     /** The single tap biometric selection page. */
     BIOMETRIC_SELECTION,
 
-    /** The secondary credential selection page, where all sign-in options are listed. */
+    /**
+     * The secondary credential selection page, where all sign-in options are listed.
+     *
+     * This state is expected to go back to PRIMARY_SELECTION on back navigation
+     */
     ALL_SIGN_IN_OPTIONS,
 
     /** The snackbar only page when there's no account but only a remoteEntry. */
@@ -171,6 +175,14 @@ enum class GetScreenState {
 
     /** The snackbar when there are only auth entries and all of them turn out to be empty. */
     UNLOCKED_AUTH_ENTRIES_ONLY,
+
+    /**
+     * The secondary credential selection page, where all sign-in options are listed.
+     *
+     * This state has no option for the user to navigate back to PRIMARY_SELECTION, and
+     * instead can be terminated independently.
+     */
+    ALL_SIGN_IN_OPTIONS_ONLY,
 }
 
 
@@ -238,6 +250,7 @@ fun toProviderDisplayInfo(
 /**
  * This generates the res code for the large display title text for the selector. For example, it
  * retrieves the resource for strings like: "Use your saved passkey for *rpName*".
+ * TODO(b/330396140) : Validate approach and add dynamic auth strings
  */
 internal fun generateDisplayTitleTextResCode(
     singleEntryType: CredentialType,
@@ -284,8 +297,8 @@ private fun toGetScreenState(
         providerDisplayInfo.remoteEntry != null)
         GetScreenState.REMOTE_ONLY
     else if (isRequestForAllOptions)
-        GetScreenState.ALL_SIGN_IN_OPTIONS
-    else if (isBiometricFlow(providerDisplayInfo))
+        GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY
+    else if (isBiometricFlow(providerDisplayInfo, isFlowAutoSelectable(providerDisplayInfo)))
         GetScreenState.BIOMETRIC_SELECTION
     else GetScreenState.PRIMARY_SELECTION
 }
@@ -293,9 +306,14 @@ private fun toGetScreenState(
 /**
  * Determines if the flow is a biometric flow by taking into account autoselect criteria.
  */
-internal fun isBiometricFlow(providerDisplayInfo: ProviderDisplayInfo) =
-    findBiometricFlowEntry(providerDisplayInfo,
-        findAutoSelectEntry(providerDisplayInfo) != null) != null
+internal fun isBiometricFlow(providerDisplayInfo: ProviderDisplayInfo, isAutoSelectFlow: Boolean) =
+    findBiometricFlowEntry(providerDisplayInfo, isAutoSelectFlow) != null
+
+/**
+ * Determines if the flow is an autoselect flow.
+ */
+internal fun isFlowAutoSelectable(providerDisplayInfo: ProviderDisplayInfo) =
+    findAutoSelectEntry(providerDisplayInfo) != null
 
 internal class CredentialEntryInfoComparatorByTypeThenTimestamp(
         val typePriorityMap: Map<String, Int>,

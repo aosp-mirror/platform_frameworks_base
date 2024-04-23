@@ -31,18 +31,19 @@ import android.text.style.BulletSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
-import androidx.lifecycle.lifecycleScope
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.ui.BiometricPromptLayout
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import kotlin.math.ceil
-import kotlinx.coroutines.launch
+
+private const val TAG = "BiometricCustomizedViewBinder"
 
 /** Sub-binder for [BiometricPromptLayout.customized_view_container]. */
 object BiometricCustomizedViewBinder {
@@ -52,21 +53,20 @@ object BiometricCustomizedViewBinder {
         legacyCallback: Spaghetti.Callback
     ) {
         customizedViewContainer.repeatWhenAttached { containerView ->
-            lifecycleScope.launch {
-                if (contentView == null) {
-                    containerView.visibility = View.GONE
-                    return@launch
-                }
+            if (contentView == null) {
+                containerView.visibility = View.GONE
+                return@repeatWhenAttached
+            }
 
-                containerView.width { containerWidth ->
-                    if (containerWidth == 0) {
-                        return@width
-                    }
-                    (containerView as LinearLayout).addView(
-                        contentView.toView(containerView.context, containerWidth, legacyCallback)
-                    )
-                    containerView.visibility = View.VISIBLE
+            containerView.width { containerWidth ->
+                if (containerWidth == 0) {
+                    return@width
                 }
+                (containerView as LinearLayout).addView(
+                    contentView.toView(containerView.context, containerWidth, legacyCallback),
+                    LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+                )
+                containerView.visibility = View.VISIBLE
             }
         }
     }
@@ -118,60 +118,47 @@ private fun PromptVerticalListContentView.initLayout(
     containerViewWidth: Int
 ): View {
     val inflater = LayoutInflater.from(context)
-    val resources = context.resources
+    context.resources
     val contentView =
         inflater.inflateContentView(
             R.layout.biometric_prompt_vertical_list_content_layout,
             description
         )
+    val listItemsToShow = ArrayList<PromptContentItem>(listItems)
     // Show two column by default, once there is an item exceeding max lines, show single
     // item instead.
     val showTwoColumn =
-        listItems.all { !it.doesExceedMaxLinesIfTwoColumn(context, containerViewWidth) }
-    var currRowView = createNewRowLayout(inflater)
-    for (item in listItems) {
-        val itemView = item.toView(context, inflater)
-        // If this item will be in the first row (contentView only has description view) and
-        // description is empty, remove top padding of this item.
-        if (contentView.childCount == 1 && description.isNullOrEmpty()) {
-            itemView.setPadding(
-                itemView.paddingLeft,
-                0,
-                itemView.paddingRight,
-                itemView.paddingBottom
-            )
-        }
-        currRowView.addView(itemView)
-
-        // If this is the first item in the current row, add space behind it.
-        if (currRowView.childCount == 1 && showTwoColumn) {
-            currRowView.addSpaceView(
-                resources.getDimensionPixelSize(
-                    R.dimen.biometric_prompt_content_space_width_between_items
-                ),
-                MATCH_PARENT
-            )
-        }
-
-        // If there are already two items (plus the space view) in the current row, or it
-        // should be one column, start a new row
-        if (currRowView.childCount == 3 || !showTwoColumn) {
-            contentView.addView(currRowView)
-            currRowView = createNewRowLayout(inflater)
-        }
+        listItemsToShow.all { !it.doesExceedMaxLinesIfTwoColumn(context, containerViewWidth) }
+    // If should show two columns and there are more than one items, make listItems always have odd
+    // number items.
+    if (showTwoColumn && listItemsToShow.size > 1 && listItemsToShow.size % 2 == 1) {
+        listItemsToShow.add(dummyItem())
     }
-    if (currRowView.childCount > 0) {
-        contentView.addView(currRowView)
+    var currRow = createNewRowLayout(inflater)
+    for (i in 0 until listItemsToShow.size) {
+        val item = listItemsToShow[i]
+        val itemView = item.toView(context, inflater)
+        contentView.removeTopPaddingForFirstRow(description, itemView)
+
+        // If there should be two column, and there is already one item in the current row, add
+        // space between two items.
+        if (showTwoColumn && currRow.childCount == 1) {
+            currRow.addSpaceViewBetweenListItem()
+        }
+        currRow.addView(itemView)
+
+        // If there should be one column, or there are already two items (plus the space view) in
+        // the current row, or it's already the last item, start a new row
+        if (!showTwoColumn || currRow.childCount == 3 || i == listItemsToShow.size - 1) {
+            contentView.addView(currRow)
+            currRow = createNewRowLayout(inflater)
+        }
     }
     return contentView
 }
 
 private fun createNewRowLayout(inflater: LayoutInflater): LinearLayout {
     return inflater.inflate(R.layout.biometric_prompt_content_row_layout, null) as LinearLayout
-}
-
-private fun LinearLayout.addSpaceView(width: Int, height: Int) {
-    addView(Space(context), LinearLayout.LayoutParams(width, height))
 }
 
 private fun PromptContentItem.doesExceedMaxLinesIfTwoColumn(
@@ -194,7 +181,10 @@ private fun PromptContentItem.doesExceedMaxLinesIfTwoColumn(
             val contentViewPadding =
                 resources.getDimensionPixelSize(R.dimen.biometric_prompt_content_padding_horizontal)
             val listItemPadding = getListItemPadding(resources)
-            val maxWidth = containerViewWidth / 2 - contentViewPadding - listItemPadding
+            var maxWidth = containerViewWidth / 2 - contentViewPadding - listItemPadding
+            // Reduce maxWidth a bit since paint#measureText is not accurate. See b/330909104 for
+            // more context.
+            maxWidth -= contentViewPadding / 2
 
             val paint = TextPaint()
             val attributes =
@@ -224,6 +214,7 @@ private fun PromptContentItem.toView(
     inflater: LayoutInflater,
 ): TextView {
     val resources = context.resources
+    // Somehow xml layout params settings doesn't work, set it again here.
     val textView =
         inflater.inflate(R.layout.biometric_prompt_content_row_item_text_view, null) as TextView
     val lp = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
@@ -250,6 +241,29 @@ private fun PromptContentItem.toView(
     }
     return textView
 }
+
+/* [contentView] function */
+private fun LinearLayout.addSpaceViewBetweenListItem() =
+    addView(
+        Space(context),
+        LinearLayout.LayoutParams(
+            resources.getDimensionPixelSize(
+                R.dimen.biometric_prompt_content_space_width_between_items
+            ),
+            MATCH_PARENT
+        )
+    )
+
+/* [contentView] function*/
+private fun LinearLayout.removeTopPaddingForFirstRow(description: String?, itemView: TextView) {
+    // If this item will be in the first row (contentView only has description view and
+    // description is empty), remove top padding of this item.
+    if (description.isNullOrEmpty() && childCount == 1) {
+        itemView.setPadding(itemView.paddingLeft, 0, itemView.paddingRight, itemView.paddingBottom)
+    }
+}
+
+private fun dummyItem(): PromptContentItem = PromptContentItemPlainText("")
 
 private fun PromptContentItem.getListItemPadding(resources: Resources): Int {
     var listItemPadding =

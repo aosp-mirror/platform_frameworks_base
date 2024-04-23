@@ -33,6 +33,7 @@ import com.airbnb.lottie.model.KeyPath
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.Utils
+import com.android.systemui.Flags.FLAG_CONSTRAINT_BP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
@@ -75,6 +76,7 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.phone.dozeServiceHost
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -233,6 +235,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 mContext,
                 deviceEntryFingerprintAuthRepository,
+                kosmos.sceneInteractor,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 keyguardUpdateMonitor
@@ -347,6 +350,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     @Test
     fun updatesOverlayViewParams_onDisplayRotationChange_xAlignedSensor() {
         testScope.runTest {
+            mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
@@ -388,6 +392,7 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
     @Test
     fun updatesOverlayViewParams_onDisplayRotationChange_yAlignedSensor() {
         testScope.runTest {
+            mSetFlagsRule.disableFlags(FLAG_CONSTRAINT_BP)
             setupTestConfiguration(
                 DeviceConfig.Y_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,

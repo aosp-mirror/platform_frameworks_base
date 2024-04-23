@@ -993,6 +993,16 @@ public class WifiNl80211Manager {
      * {@link #setupInterfaceForClientMode(String, Executor, ScanEventCallback, ScanEventCallback)}
      * or {@link #setupInterfaceForSoftApMode(String)}.
      *
+     * <p>
+     * When an Access Point’s beacon or probe response includes a Multi-BSSID Element, the
+     * returned scan results should include separate scan result for each BSSID within the
+     * Multi-BSSID Information Element. This includes both transmitted and non-transmitted BSSIDs.
+     * Original Multi-BSSID Element will be included in the Information Elements attached to
+     * each of the scan results.
+     * Note: This is the expected behavior for devices supporting 11ax (WiFi-6) and above, and an
+     * optional requirement for devices running with older WiFi generations.
+     * </p>
+     *
      * @param ifaceName Name of the interface.
      * @param scanType The type of scan result to be returned, can be
      * {@link #SCAN_TYPE_SINGLE_SCAN} or {@link #SCAN_TYPE_PNO_SCAN}.

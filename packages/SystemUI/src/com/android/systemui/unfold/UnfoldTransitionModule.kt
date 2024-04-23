@@ -19,6 +19,7 @@ package com.android.systemui.unfold
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.SystemProperties
+import com.android.internal.foldables.FoldLockSettingAvailabilityProvider
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
 import com.android.systemui.dagger.qualifiers.Application
@@ -31,8 +32,6 @@ import com.android.systemui.unfold.data.repository.FoldStateRepository
 import com.android.systemui.unfold.data.repository.FoldStateRepositoryImpl
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepository
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
-import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
-import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractorImpl
 import com.android.systemui.unfold.system.SystemUnfoldSharedModule
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.FoldStateProvider
@@ -175,11 +174,15 @@ class UnfoldTransitionModule {
     fun provideDisplaySwitchLatencyLogger(): DisplaySwitchLatencyLogger =
         DisplaySwitchLatencyLogger()
 
+    @Provides
+    @Singleton
+    fun provideFoldLockSettingAvailabilityProvider(
+        context: Context
+    ): FoldLockSettingAvailabilityProvider = FoldLockSettingAvailabilityProvider(context.resources)
+
     @Module
     interface Bindings {
         @Binds fun bindRepository(impl: UnfoldTransitionRepositoryImpl): UnfoldTransitionRepository
-
-        @Binds fun bindInteractor(impl: UnfoldTransitionInteractorImpl): UnfoldTransitionInteractor
 
         @Binds fun bindFoldStateRepository(impl: FoldStateRepositoryImpl): FoldStateRepository
     }

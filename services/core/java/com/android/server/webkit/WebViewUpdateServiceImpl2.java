@@ -247,9 +247,12 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
                 attemptRepair();
             }
 
+        } catch (WebViewPackageMissingException e) {
+            Slog.e(TAG, "Could not find valid WebView package to create relro with", e);
         } catch (Throwable t) {
-            // Log and discard errors at this stage as we must not crash the system server.
-            Slog.e(TAG, "error preparing webview provider from system server", t);
+            // We don't know a case when this should happen but we log and discard errors at this
+            // stage as we must not crash the system server.
+            Slog.wtf(TAG, "error preparing webview provider from system server", t);
         }
     }
 

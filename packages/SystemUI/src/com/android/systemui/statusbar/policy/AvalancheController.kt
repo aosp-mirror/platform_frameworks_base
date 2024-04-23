@@ -17,9 +17,12 @@ package com.android.systemui.statusbar.policy
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.policy.BaseHeadsUpManager.HeadsUpEntry
+import java.io.PrintWriter
 import javax.inject.Inject
 
 /*
@@ -27,7 +30,9 @@ import javax.inject.Inject
  * succession, by delaying visual listener side effects and removal handling from BaseHeadsUpManager
  */
 @SysUISingleton
-class AvalancheController @Inject constructor() {
+class AvalancheController @Inject constructor(
+    dumpManager: DumpManager,
+) : Dumpable {
 
     private val tag = "AvalancheController"
     private val debug = false
@@ -54,28 +59,32 @@ class AvalancheController @Inject constructor() {
     // For debugging only
     @VisibleForTesting var debugDropSet: MutableSet<HeadsUpEntry> = HashSet()
 
-    /**
-     * Run or delay Runnable for given HeadsUpEntry
-     */
-    fun update(entry: HeadsUpEntry, runnable: Runnable, label: String) {
+    init {
+        dumpManager.registerNormalDumpable(tag, /* module */ this)
+    }
+
+    /** Run or delay Runnable for given HeadsUpEntry */
+    fun update(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
         if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
             return
         }
-        val fn = "[$label] => AvalancheController.update ${getKey(entry)}"
-
+        val fn = "[$label] => AvalancheController.update [${getKey(entry)}]"
+        if (entry == null) {
+            log { "Entry is NULL, stop update." }
+            return;
+        }
         if (debug) {
             debugRunnableLabelMap[runnable] = label
         }
-
         if (isShowing(entry)) {
-            log {"$fn => [update showing]" }
+            log { "\n$fn => [update showing]" }
             runnable.run()
         } else if (entry in nextMap) {
-            log { "$fn => [update next]" }
+            log { "\n$fn => [update next]" }
             nextMap[entry]?.add(runnable)
         } else if (headsUpEntryShowing == null) {
-            log { "$fn => [showNow]" }
+            log { "\n$fn => [showNow]" }
             showNow(entry, arrayListOf(runnable))
         } else {
             // Clean up invalid state when entry is in list but not map and vice versa
@@ -106,13 +115,16 @@ class AvalancheController @Inject constructor() {
      * Run or ignore Runnable for given HeadsUpEntry. If entry was never shown, ignore and delete
      * all Runnables associated with that entry.
      */
-    fun delete(entry: HeadsUpEntry, runnable: Runnable, label: String) {
+    fun delete(entry: HeadsUpEntry?, runnable: Runnable, label: String) {
         if (!NotificationThrottleHun.isEnabled) {
             runnable.run()
             return
         }
         val fn = "[$label] => AvalancheController.delete " + getKey(entry)
-
+        if (entry == null) {
+            log { "$fn => cannot remove NULL entry" }
+            return
+        }
         if (entry in nextMap) {
             log { "$fn => [remove from next]" }
             if (entry in nextMap) nextMap.remove(entry)
@@ -142,31 +154,49 @@ class AvalancheController @Inject constructor() {
             return autoDismissMs
         }
         val showingList: MutableList<HeadsUpEntry> = mutableListOf()
-        headsUpEntryShowing?.let { showingList.add(it) }
-
+        if (headsUpEntryShowing != null) {
+            showingList.add(headsUpEntryShowing!!)
+        }
+        nextList.sort()
         val entryList = showingList + nextList
-        if (entryList.indexOf(entry) == entryList.size - 1) {
-            // Use default duration if last entry
+        if (entryList.isEmpty()) {
+            log { "No avalanche HUNs, use default ms: $autoDismissMs" }
             return autoDismissMs
         }
+        // entryList.indexOf(entry) returns -1 even when the entry is in entryList
+        var thisEntryIndex = -1
+        for ((i, e) in entryList.withIndex()) {
+            if (e == entry) {
+                thisEntryIndex = i
+            }
+        }
+        if (thisEntryIndex == -1) {
+            log { "Untracked entry, use default ms: $autoDismissMs" }
+            return autoDismissMs
+        }
+        val nextEntryIndex = thisEntryIndex + 1
 
-        nextList.sort()
-        val nextEntry = nextList[0]
-
+        // If last entry, use default duration
+        if (nextEntryIndex >= entryList.size) {
+            log { "Last entry, use default ms: $autoDismissMs" }
+            return autoDismissMs
+        }
+        val nextEntry = entryList[nextEntryIndex]
         if (nextEntry.compareNonTimeFields(entry) == -1) {
             // Next entry is higher priority
+            log { "Next entry is higher priority: 500ms" }
             return 500
         } else if (nextEntry.compareNonTimeFields(entry) == 0) {
             // Next entry is same priority
+            log { "Next entry is same priority: 1000ms" }
             return 1000
         } else {
+            log { "Next entry is lower priority, use default ms: $autoDismissMs" }
             return autoDismissMs
         }
     }
 
-    /**
-     * Return true if entry is waiting to show.
-     */
+    /** Return true if entry is waiting to show. */
     fun isWaiting(key: String): Boolean {
         if (!NotificationThrottleHun.isEnabled) {
             return false
@@ -179,9 +209,7 @@ class AvalancheController @Inject constructor() {
         return false
     }
 
-    /**
-     * Return list of keys for huns waiting
-     */
+    /** Return list of keys for huns waiting */
     fun getWaitingKeys(): MutableList<String> {
         if (!NotificationThrottleHun.isEnabled) {
             return mutableListOf()
@@ -198,24 +226,24 @@ class AvalancheController @Inject constructor() {
     }
 
     private fun showNow(entry: HeadsUpEntry, runnableList: MutableList<Runnable>) {
-        log { "show " + getKey(entry) + " backlog size: " + runnableList.size }
+        log { "SHOW: " + getKey(entry) }
 
         headsUpEntryShowing = entry
 
         runnableList.forEach {
             if (it in debugRunnableLabelMap) {
-                log { "run runnable from: ${debugRunnableLabelMap[it]}" }
+                log { "RUNNABLE: ${debugRunnableLabelMap[it]}" }
             }
             it.run()
         }
     }
 
     private fun showNext() {
-        log { "showNext" }
+        log { "SHOW NEXT" }
         headsUpEntryShowing = null
 
         if (nextList.isEmpty()) {
-            log { "no more to show!" }
+            log { "NO MORE TO SHOW" }
             return
         }
 
@@ -254,39 +282,45 @@ class AvalancheController @Inject constructor() {
         }
     }
 
-    // TODO(b/315362456) expose as dumpable for bugreports
+    private fun getStateStr(): String {
+        return "SHOWING: [${getKey(headsUpEntryShowing)}]" +
+                "\nNEXT LIST: $nextListStr" +
+                "\nNEXT MAP: $nextMapStr" +
+                "\nDROPPED: $dropSetStr"
+    }
+
     private fun logState(reason: String) {
-        log { "state $reason" }
-        log { "showing: " + getKey(headsUpEntryShowing) }
-        log { "next list: $nextListStr map: $nextMapStr" }
-        log { "drop: $dropSetStr" }
+        log { "\n================================================================================="}
+        log { "STATE $reason" }
+        log { getStateStr() }
+        log { "=================================================================================\n"}
     }
 
     private val dropSetStr: String
         get() {
             val queue = ArrayList<String>()
             for (entry in debugDropSet) {
-                queue.add(getKey(entry))
+                queue.add("[${getKey(entry)}]")
             }
-            return java.lang.String.join(" ", queue)
+            return java.lang.String.join("\n", queue)
         }
 
     private val nextListStr: String
         get() {
             val queue = ArrayList<String>()
             for (entry in nextList) {
-                queue.add(getKey(entry))
+                queue.add("[${getKey(entry)}]")
             }
-            return java.lang.String.join(" ", queue)
+            return java.lang.String.join("\n", queue)
         }
 
     private val nextMapStr: String
         get() {
             val queue = ArrayList<String>()
             for (entry in nextMap.keys) {
-                queue.add(getKey(entry))
+                queue.add("[${getKey(entry)}]")
             }
-            return java.lang.String.join(" ", queue)
+            return java.lang.String.join("\n", queue)
         }
 
     fun getKey(entry: HeadsUpEntry?): String {
@@ -297,5 +331,9 @@ class AvalancheController @Inject constructor() {
             return entry.toString()
         }
         return entry.mEntry!!.key
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("AvalancheController: ${getStateStr()}")
     }
 }

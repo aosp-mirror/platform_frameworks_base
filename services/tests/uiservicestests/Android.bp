@@ -50,6 +50,7 @@ android_test {
         "SettingsLib",
         "libprotobuf-java-lite",
         "platformprotoslite",
+        "platform-parametric-runner-lib",
     ],
 
     libs: [

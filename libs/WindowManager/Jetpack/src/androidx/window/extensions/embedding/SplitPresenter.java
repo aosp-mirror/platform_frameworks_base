@@ -467,6 +467,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             reorderTaskFragmentToFront(wct,
                     pinnedContainer.getSecondaryContainer().getTaskFragmentToken());
         }
+        final TaskFragmentContainer alwaysOnTopOverlayContainer = container.getTaskContainer()
+                .getAlwaysOnTopOverlayContainer();
+        if (alwaysOnTopOverlayContainer != null) {
+            reorderTaskFragmentToFront(wct, alwaysOnTopOverlayContainer.getTaskFragmentToken());
+        }
     }
 
     @Override
@@ -565,7 +570,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     @Override
     void setCompanionTaskFragment(@NonNull WindowContainerTransaction wct, @NonNull IBinder primary,
-            @Nullable IBinder secondary) {
+                                  @Nullable IBinder secondary) {
         final TaskFragmentContainer container = mController.getContainer(primary);
         if (container == null) {
             throw new IllegalStateException("setCompanionTaskFragment on TaskFragment that is"
@@ -590,7 +595,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Rect relativeBounds = sanitizeBounds(attributes.getRelativeBounds(), minDimensions,
                 taskBounds);
         final boolean isFillParent = relativeBounds.isEmpty();
-        final boolean isIsolatedNavigated = !isFillParent && container.isOverlay();
+        // Note that we only set isolated navigation for overlay container without activity
+        // association. Activity will be launched to an expanded container on top of the overlay
+        // if the overlay is associated with an activity. Thus, an overlay with activity association
+        // will never be isolated navigated.
+        final boolean isIsolatedNavigated = container.isOverlay()
+                && !container.isAssociatedWithActivity() && !isFillParent;
         final boolean dimOnTask = !isFillParent
                 && attributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK
                 && Flags.fullscreenDimFlag();
@@ -714,6 +724,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     static boolean shouldShowSplit(@NonNull SplitAttributes splitAttributes) {
         return !(splitAttributes.getSplitType() instanceof ExpandContainersSplitType);
+    }
+
+    static boolean shouldShowPlaceholderWhenExpanded(@NonNull SplitAttributes splitAttributes) {
+        // The placeholder should be kept if the expand split type is a result of user dragging
+        // the divider.
+        return SplitAttributesHelper.isDraggableExpandType(splitAttributes);
     }
 
     @NonNull

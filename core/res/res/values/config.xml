@@ -3009,6 +3009,10 @@
     <!-- Maximum number of users we allow to be running at a time -->
     <integer name="config_multiuserMaxRunningUsers">3</integer>
 
+    <!-- Number of seconds of uptime after a full user enters the background before we attempt to
+         stop it due to inactivity. Set to -1 to disable scheduling stopping background users. -->
+    <integer name="config_backgroundUserScheduledStopTimeSecs">1800</integer> <!-- 30 minutes -->
+
     <!-- Whether to delay user data locking for background user.
          If false, user switched-out from user switching will still be in running state until
          config_multiuserMaxRunningUsers is reached. Once config_multiuserMaxRunningUsers is
@@ -3350,6 +3354,11 @@
     <string name="config_hdmiCecSetMenuLanguageActivity">
         com.android.systemui/com.android.systemui.tv.hdmi.HdmiCecSetMenuLanguageActivity
     </string>
+
+    <!-- Component name of the activity used to inform user that their device lost Active Source
+      status and will go to standby if there is no interaction. -->
+    <string name="config_hdmiCecActiveSourceLostActivity"
+    >com.android.systemui/com.android.systemui.tv.hdmi.HdmiCecActiveSourceLostActivity</string>
 
     <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
     <string name="config_platformVpnConfirmDialogComponent" translatable="false"
@@ -4329,9 +4338,6 @@
     -->
     <bool name="config_wallpaperTopApp">false</bool>
 
-    <!-- True if the device supports dVRR  -->
-    <bool name="config_supportsDvrr">false</bool>
-
     <!-- True if the device supports at least one form of multi-window.
          E.g. freeform, split-screen, picture-in-picture. -->
     <bool name="config_supportsMultiWindow">true</bool>
@@ -4807,6 +4813,18 @@
      See android.credentials.CredentialManager
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
+    
+    <!-- The component name, flattened to a string, for the system's credential manager
+      autofill service. This service allows interceding autofill requests and routing
+      them to credential manager.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, autofill will still
+     work with the user configured autofill service
+
+     See android.credentials.CredentialManager
+    -->
+    <string name="config_defaultCredentialManagerAutofillService" translatable="false"></string>
 
     <!-- The component name(s), flattened to a string, for the system's credential manager
       provider services. These services allow retrieving and storing credentials.
@@ -7001,4 +7019,9 @@
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
+
+    <!-- Min time in milliseconds to complete an emergency gesture for it count.
+         If the gesture is completed faster than this, we assume it's not performed by human and the
+         event gets ignored. -->
+    <integer name="config_defaultMinEmergencyGestureTapDurationMillis">200</integer>
 </resources>

@@ -26,9 +26,9 @@ import static junit.framework.Assert.fail;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
-import androidx.test.filters.FlakyTest;
+
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
@@ -46,11 +46,10 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-@FlakyTest(bugId = 327655994) // Also b/324682425
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class PluginInstanceTest extends SysuiTestCase {
@@ -177,7 +176,7 @@ public class PluginInstanceTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLoadUnloadSimultaneous_HoldsUnload() throws Exception {
+    public void testLoadUnloadSimultaneous_HoldsUnload() throws Throwable {
         final Semaphore loadLock = new Semaphore(1);
         final Semaphore unloadLock = new Semaphore(1);
 
@@ -190,16 +189,16 @@ public class PluginInstanceTest extends SysuiTestCase {
             Thread.yield();
             boolean isLocked = getLock(unloadLock, 1000);
 
-            // Ensure the bg thread failed to do delete the plugin
+            // Ensure the bg thread failed to delete the plugin
             assertNotNull(mPluginInstance.getPlugin());
             // We expect that bgThread deadlocked holding the semaphore
             assertFalse(isLocked);
         };
 
-        AtomicBoolean isBgThreadFailed = new AtomicBoolean(false);
+        AtomicReference<Throwable> bgFailure = new AtomicReference<Throwable>(null);
         Thread bgThread = new Thread(() -> {
             assertTrue(getLock(unloadLock, 10));
-            assertTrue(getLock(loadLock, 4000)); // Wait for the foreground thread
+            assertTrue(getLock(loadLock, 10000)); // Wait for the foreground thread
             assertNotNull(mPluginInstance.getPlugin());
             // Attempt to delete the plugin, this should block until the load completes
             mPluginInstance.unloadPlugin();
@@ -210,8 +209,9 @@ public class PluginInstanceTest extends SysuiTestCase {
 
         // This protects the test suite from crashing due to the uncaught exception.
         bgThread.setUncaughtExceptionHandler((Thread t, Throwable ex) -> {
-            Log.e("testLoadUnloadSimultaneous_HoldsUnload", "Exception from BG Thread", ex);
-            isBgThreadFailed.set(true);
+            Log.e("PluginInstanceTest#testLoadUnloadSimultaneous_HoldsUnload",
+                    "Exception from BG Thread", ex);
+            bgFailure.set(ex);
         });
 
         loadLock.acquire();
@@ -222,7 +222,13 @@ public class PluginInstanceTest extends SysuiTestCase {
         mPluginInstance.loadPlugin();
 
         bgThread.join(5000);
-        assertFalse(isBgThreadFailed.get());
+
+        // Rethrow final background exception on test thread
+        Throwable bgEx = bgFailure.get();
+        if (bgEx != null) {
+            throw bgEx;
+        }
+
         assertNull(mPluginInstance.getPlugin());
     }
 
@@ -230,6 +236,8 @@ public class PluginInstanceTest extends SysuiTestCase {
         try {
             return lock.tryAcquire(millis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ex) {
+            Log.e("PluginInstanceTest#getLock",
+                    "Interrupted Exception getting lock", ex);
             fail();
             return false;
         }

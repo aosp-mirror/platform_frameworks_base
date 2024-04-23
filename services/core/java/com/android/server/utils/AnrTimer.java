@@ -193,6 +193,10 @@ public class AnrTimer<V> implements AutoCloseable {
     @GuardedBy("mLock")
     private int mTotalStarted = 0;
 
+    /** The total number of timers that were restarted without an explicit cancel. */
+    @GuardedBy("mLock")
+    private int mTotalRestarted = 0;
+
     /** The total number of errors detected. */
     @GuardedBy("mLock")
     private int mTotalErrors = 0;
@@ -434,10 +438,10 @@ public class AnrTimer<V> implements AutoCloseable {
         @Override
         void start(@NonNull V arg, int pid, int uid, long timeoutMs) {
             synchronized (mLock) {
-                if (mTimerIdMap.containsKey(arg)) {
-                    // There is an existing timer.  Cancel it.
-                    cancel(arg);
-                }
+                // If there is an existing timer, cancel it.  This is a nop if the timer does not
+                // exist.
+                if (cancel(arg)) mTotalRestarted++;
+
                 int timerId = nativeAnrTimerStart(mNative, pid, uid, timeoutMs, mExtend);
                 if (timerId > 0) {
                     mTimerIdMap.put(arg, timerId);
@@ -546,9 +550,7 @@ public class AnrTimer<V> implements AutoCloseable {
         private Integer removeLocked(V arg) {
             Integer r = mTimerIdMap.remove(arg);
             if (r != null) {
-                synchronized (mTimerArgMap) {
-                    mTimerArgMap.remove(r);
-                }
+                mTimerArgMap.remove(r);
             }
             return r;
         }
@@ -672,8 +674,8 @@ public class AnrTimer<V> implements AutoCloseable {
         synchronized (mLock) {
             pw.format("timer: %s\n", mLabel);
             pw.increaseIndent();
-            pw.format("started=%d maxStarted=%d running=%d expired=%d errors=%d\n",
-                    mTotalStarted, mMaxStarted, mTimerIdMap.size(),
+            pw.format("started=%d maxStarted=%d  restarted=%d running=%d expired=%d errors=%d\n",
+                    mTotalStarted, mMaxStarted, mTotalRestarted, mTimerIdMap.size(),
                     mTotalExpired, mTotalErrors);
             pw.decreaseIndent();
             mFeature.dump(pw, false);

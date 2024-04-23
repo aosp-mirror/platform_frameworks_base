@@ -31,15 +31,14 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBl
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
-import com.android.systemui.statusbar.policy.SplitShadeStateController
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -49,14 +48,13 @@ constructor(
     private val keyguardBlueprintRepository: KeyguardBlueprintRepository,
     @Application private val applicationScope: CoroutineScope,
     private val context: Context,
-    private val splitShadeStateController: SplitShadeStateController,
+    private val shadeInteractor: ShadeInteractor,
     private val clockInteractor: KeyguardClockInteractor,
     configurationInteractor: ConfigurationInteractor,
     fingerprintPropertyInteractor: FingerprintPropertyInteractor,
 ) {
-
     /** The current blueprint for the lockscreen. */
-    val blueprint: Flow<KeyguardBlueprint> = keyguardBlueprintRepository.blueprint
+    val blueprint: StateFlow<KeyguardBlueprint> = keyguardBlueprintRepository.blueprint
 
     /**
      * Triggered when the blueprint isn't changed, but the ConstraintSet should be rebuilt and
@@ -64,39 +62,23 @@ constructor(
      */
     val refreshTransition = keyguardBlueprintRepository.refreshTransition
 
-    private val configOrPropertyChange =
-        merge(
+    /** Current BlueprintId */
+    val blueprintId =
+        combine(
             configurationInteractor.onAnyConfigurationChange,
-            fingerprintPropertyInteractor.propertiesInitialized.filter { it }.map {}, // map to Unit
-        )
-    init {
-        applicationScope.launch {
-            configOrPropertyChange.onStart { emit(Unit) }.collect { updateBlueprint() }
-        }
-        applicationScope.launch { clockInteractor.currentClock.collect { updateBlueprint() } }
-    }
-
-    /**
-     * Detects when a new blueprint should be applied and calls [transitionToBlueprint]. This may
-     * end up reapplying the same blueprint, which is fine as configuration may have changed.
-     */
-    private fun updateBlueprint() {
-        val useSplitShade =
-            splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
-        // TODO(b/326098079): Make ID a constant value.
-        val useWeatherClockLayout =
-            clockInteractor.currentClock.value?.config?.id == "DIGITAL_CLOCK_WEATHER" &&
-                ComposeLockscreen.isEnabled
-
-        val blueprintId =
+            fingerprintPropertyInteractor.propertiesInitialized.filter { it },
+            clockInteractor.currentClock,
+            shadeInteractor.shadeMode,
+        ) { _, _, _, shadeMode ->
+            val useSplitShade = shadeMode == ShadeMode.Split && !ComposeLockscreen.isEnabled
             when {
-                useWeatherClockLayout && useSplitShade -> SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID
-                useWeatherClockLayout -> WEATHER_CLOCK_BLUEPRINT_ID
-                useSplitShade && !ComposeLockscreen.isEnabled -> SplitShadeKeyguardBlueprint.ID
+                useSplitShade -> SplitShadeKeyguardBlueprint.ID
                 else -> DefaultKeyguardBlueprint.DEFAULT
             }
+        }
 
-        transitionToBlueprint(blueprintId)
+    init {
+        applicationScope.launch { blueprintId.collect { transitionToBlueprint(it) } }
     }
 
     /**
@@ -127,14 +109,5 @@ constructor(
 
     fun getCurrentBlueprint(): KeyguardBlueprint {
         return keyguardBlueprintRepository.blueprint.value
-    }
-
-    companion object {
-        /**
-         * These values live here because classes in the composable package do not exist in some
-         * systems.
-         */
-        const val WEATHER_CLOCK_BLUEPRINT_ID = "weather-clock"
-        const val SPLIT_SHADE_WEATHER_CLOCK_BLUEPRINT_ID = "split-shade-weather-clock"
     }
 }

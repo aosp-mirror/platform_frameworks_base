@@ -50,6 +50,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
+import android.content.pm.LauncherApps.ShortcutChangeCallback;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -151,6 +152,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -320,12 +322,11 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private final Handler mHandler;
 
-    @GuardedBy("mLock")
-    private final ArrayList<ShortcutChangeListener> mListeners = new ArrayList<>(1);
+    private final CopyOnWriteArrayList<ShortcutChangeListener> mListeners =
+            new CopyOnWriteArrayList<>();
 
-    @GuardedBy("mLock")
-    private final ArrayList<LauncherApps.ShortcutChangeCallback> mShortcutChangeCallbacks =
-            new ArrayList<>(1);
+    private final CopyOnWriteArrayList<ShortcutChangeCallback> mShortcutChangeCallbacks =
+            new CopyOnWriteArrayList<>();
 
     private final AtomicLong mRawLastResetTime = new AtomicLong(0);
 
@@ -1841,18 +1842,11 @@ public class ShortcutService extends IShortcutService.Stub {
             @UserIdInt final int userId) {
         return () -> {
             try {
-                final ArrayList<ShortcutChangeListener> copy;
-                synchronized (mLock) {
-                    if (!isUserUnlockedL(userId)) {
-                        return;
-                    }
-
-                    copy = new ArrayList<>(mListeners);
+                if (!isUserUnlockedL(userId)) {
+                    return;
                 }
                 // Note onShortcutChanged() needs to be called with the system service permissions.
-                for (int i = copy.size() - 1; i >= 0; i--) {
-                    copy.get(i).onShortcutChanged(packageName, userId);
-                }
+                mListeners.forEach(listener -> listener.onShortcutChanged(packageName, userId));
             } catch (Exception ignore) {
             }
         };
@@ -1867,22 +1861,17 @@ public class ShortcutService extends IShortcutService.Stub {
         final UserHandle user = UserHandle.of(userId);
         injectPostToHandler(() -> {
             try {
-                final ArrayList<LauncherApps.ShortcutChangeCallback> copy;
-                synchronized (mLock) {
-                    if (!isUserUnlockedL(userId)) {
-                        return;
-                    }
-
-                    copy = new ArrayList<>(mShortcutChangeCallbacks);
+                if (!isUserUnlockedL(userId)) {
+                    return;
                 }
-                for (int i = copy.size() - 1; i >= 0; i--) {
+                mShortcutChangeCallbacks.forEach(callback -> {
                     if (!CollectionUtils.isEmpty(changedList)) {
-                        copy.get(i).onShortcutsAddedOrUpdated(packageName, changedList, user);
+                        callback.onShortcutsAddedOrUpdated(packageName, changedList, user);
                     }
                     if (!CollectionUtils.isEmpty(removedList)) {
-                        copy.get(i).onShortcutsRemoved(packageName, removedList, user);
+                        callback.onShortcutsRemoved(packageName, removedList, user);
                     }
-                }
+                });
             } catch (Exception ignore) {
             }
         });
@@ -3425,17 +3414,13 @@ public class ShortcutService extends IShortcutService.Stub {
 
         @Override
         public void addListener(@NonNull ShortcutChangeListener listener) {
-            synchronized (mLock) {
-                mListeners.add(Objects.requireNonNull(listener));
-            }
+            mListeners.add(Objects.requireNonNull(listener));
         }
 
         @Override
         public void addShortcutChangeCallback(
                 @NonNull LauncherApps.ShortcutChangeCallback callback) {
-            synchronized (mLock) {
-                mShortcutChangeCallbacks.add(Objects.requireNonNull(callback));
-            }
+            mShortcutChangeCallbacks.add(Objects.requireNonNull(callback));
         }
 
         @Override

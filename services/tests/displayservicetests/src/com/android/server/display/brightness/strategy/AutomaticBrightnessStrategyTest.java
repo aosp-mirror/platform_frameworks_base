@@ -398,6 +398,34 @@ public class AutomaticBrightnessStrategyTest {
                 0.0f);
     }
 
+    @Test
+    public void isAutoBrightnessValid_returnsFalseWhenAutoBrightnessIsDisabled() {
+        assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
+    }
+
+    @Test
+    public void isAutoBrightnessValid_returnsFalseWhenBrightnessIsInvalid() {
+        mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON, true,
+                BrightnessReason.REASON_UNKNOWN,
+                DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT, 0.1f,
+                false);
+        when(mAutomaticBrightnessController.getAutomaticScreenBrightness(null))
+                .thenReturn(Float.NaN);
+        assertFalse(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
+    }
+
+    @Test
+    public void isAutoBrightnessValid_returnsTrueWhenBrightnessIsValid() {
+        mAutomaticBrightnessStrategy.setUseAutoBrightness(true);
+        mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON, true,
+                BrightnessReason.REASON_UNKNOWN,
+                DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT, 0.1f,
+                false);
+        when(mAutomaticBrightnessController.getAutomaticScreenBrightness(null))
+                .thenReturn(0.2f);
+        assertTrue(mAutomaticBrightnessStrategy.isAutoBrightnessValid());
+    }
+
     private void setPendingAutoBrightnessAdjustment(float pendingAutoBrightnessAdjustment) {
         Settings.System.putFloat(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, pendingAutoBrightnessAdjustment);

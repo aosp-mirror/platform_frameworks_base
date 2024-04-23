@@ -38,13 +38,14 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.testing.TestableLooper;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -61,9 +62,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
 @TestableLooper.RunWithLooper
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public class BaseHeadsUpManagerTest extends SysuiTestCase {
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
@@ -73,7 +79,9 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
-    private AvalancheController mAvalancheController = new AvalancheController();
+
+    @Mock private DumpManager dumpManager;
+    private AvalancheController mAvalancheController;
 
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
@@ -126,10 +134,19 @@ public class BaseHeadsUpManagerTest extends SysuiTestCase {
         }
     }
 
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getFlags() {
+        return FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME);
+    }
+
+    public BaseHeadsUpManagerTest(FlagsParameterization flags) {
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
+
     @Override
     public void SysuiSetup() throws Exception {
         super.SysuiSetup();
-        mSetFlagsRule.disableFlags(NotificationThrottleHun.FLAG_NAME);
+        mAvalancheController = new AvalancheController(dumpManager);
     }
 
     @Test

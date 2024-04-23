@@ -1681,7 +1681,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         WindowContainerToken wct = rootTask.mRemoteToken.toWindowContainerToken();
         t.setWindowingMode(wct, WINDOWING_MODE_PINNED);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
+        verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivitiesUnchecked(any(),
+                any(), any(), anyBoolean());
 
         clearInvocations(mWm.mAtmService.mRootWindowContainer);
         // The token for the PIP root task may have changed when the task entered PIP mode, so do
@@ -1690,7 +1691,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
                 record.getRootTask().mRemoteToken.toWindowContainerToken();
         t.setWindowingMode(newToken, WINDOWING_MODE_FULLSCREEN);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
-        verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
+        verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivitiesUnchecked(any(),
+                any(), any(), anyBoolean());
     }
 
     @Test

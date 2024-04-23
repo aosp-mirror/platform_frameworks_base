@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.quickswitch
 
+import android.graphics.Rect
 import android.tools.NavBar
-import android.tools.datatypes.Rect
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -285,7 +285,7 @@ class QuickSwitchBetweenTwoAppsForwardTest(flicker: LegacyFlickerTest) : BaseTes
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
-        private var startDisplayBounds = Rect.EMPTY
+        private var startDisplayBounds = Rect()
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

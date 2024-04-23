@@ -63,6 +63,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManagerPolicyConstants;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.RemoteTransitionStub;
 import android.window.TransitionInfo;
 
 import com.android.internal.annotations.GuardedBy;
@@ -187,7 +188,7 @@ public class KeyguardService extends Service {
     // Note: Also used for wrapping occlude by Dream animation. It works (with some redundancy).
     public static IRemoteTransition wrap(final KeyguardViewMediator keyguardViewMediator,
             final IRemoteAnimationRunner runner) {
-        return new IRemoteTransition.Stub() {
+        return new RemoteTransitionStub() {
 
             @GuardedBy("mLeashMap")
             private final ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = new ArrayMap<>();
@@ -251,11 +252,6 @@ public class KeyguardService extends Service {
                 } catch (RemoteException e) {
                     // Ignore.
                 }
-            }
-
-            @Override
-            public void onTransitionConsumed(IBinder transition, boolean aborted) {
-                // No-op.
             }
 
             private static void initAlphaForAnimationTargets(@NonNull SurfaceControl.Transaction t,

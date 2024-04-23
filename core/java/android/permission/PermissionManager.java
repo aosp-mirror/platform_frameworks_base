@@ -240,6 +240,16 @@ public final class PermissionManager {
     public static final String EXTRA_PERMISSION_USAGES =
             "android.permission.extra.PERMISSION_USAGES";
 
+    /**
+     * Specify what permissions are device aware. Only device aware permissions can be granted to
+     * a remote device.
+     * @hide
+     */
+    public static final Set<String> DEVICE_AWARE_PERMISSIONS =
+            Flags.deviceAwarePermissionsEnabled()
+                    ? Set.of(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+                    : Collections.emptySet();
+
     private final @NonNull Context mContext;
 
     private final IPackageManager mPackageManager;
@@ -1662,6 +1672,21 @@ public final class PermissionManager {
             e.rethrowFromSystemServer();
         }
         return false;
+    }
+
+    /**
+     * Gets the number of currently registered attribution sources for a particular UID. This should
+     * only be used for testing purposes.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.UPDATE_APP_OPS_STATS)
+    public int getNumRegisteredAttributionSourcesForTest(int uid) {
+        try {
+            return mPermissionManager.getNumRegisteredAttributionSources(uid);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return -1;
     }
 
     /**

@@ -17,12 +17,12 @@
 package com.android.server.credentials;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.flags.Flags;
 import android.credentials.selection.ProviderData;
@@ -34,7 +34,6 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.service.credentials.CallingAppInfo;
 import android.util.Slog;
@@ -56,7 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * every time a new response type is expected from the providers.
  */
 abstract class RequestSession<T, U, V> implements CredentialManagerUi.CredentialManagerUiCallback {
-    private static final String TAG = "RequestSession";
+    private static final String TAG = CredentialManager.TAG;
 
     public interface SessionLifetime {
         /** Called when the user makes a selection. */
@@ -102,9 +101,6 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             new RequestSessionDeathRecipient();
 
     protected PendingIntent mPendingIntent;
-
-    @Nullable
-    protected ResultReceiver mFinalResponseReceiver;
 
     @NonNull
     protected RequestSessionStatus mRequestSessionStatus =
@@ -224,8 +220,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     // UI callbacks
 
     @Override // from CredentialManagerUiCallbacks
-    public void onUiSelection(UserSelectionDialogResult selection,
-            ResultReceiver finalResponseReceiver) {
+    public void onUiSelection(UserSelectionDialogResult selection) {
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
             Slog.w(TAG, "Request has already been completed. This is strange.");
             return;
@@ -241,7 +236,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             Slog.w(TAG, "providerSession not found in onUiSelection. This is strange.");
             return;
         }
-        mFinalResponseReceiver = finalResponseReceiver;
+
         ProviderSessionMetric providerSessionMetric = providerSession.mProviderSessionMetric;
         int initialAuthMetricsProvider = providerSessionMetric.getBrowsedAuthenticationMetric()
                 .size();

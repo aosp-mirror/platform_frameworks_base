@@ -191,6 +191,8 @@ public class PackageArchiverTest {
         when(mContext.checkCallingOrSelfPermission(
                 eq(Manifest.permission.REQUEST_DELETE_PACKAGES))).thenReturn(
                 PackageManager.PERMISSION_DENIED);
+        when(mContext.createPackageContextAsUser(
+                eq(INSTALLER_PACKAGE), anyInt(), eq(UserHandle.CURRENT))).thenReturn(mContext);
 
         when(mAppOpsManager.checkOp(
                 eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),

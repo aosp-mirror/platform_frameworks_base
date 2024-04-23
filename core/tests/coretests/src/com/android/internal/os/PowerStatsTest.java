@@ -21,20 +21,27 @@ import static com.google.common.truth.Truth.assertThat;
 import android.os.BatteryConsumer;
 import android.os.Parcel;
 import android.os.PersistableBundle;
-import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.util.SparseArray;
+import android.util.Xml;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-@IgnoreUnderRavenwood(reason = "Needs kernel support")
 public class PowerStatsTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
@@ -47,7 +54,10 @@ public class PowerStatsTest {
         mRegistry = new PowerStats.DescriptorRegistry();
         PersistableBundle extras = new PersistableBundle();
         extras.putBoolean("hasPowerMonitor", true);
-        mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU, 3, 2, extras);
+        SparseArray<String> stateLabels = new SparseArray<>();
+        stateLabels.put(0x0F, "idle");
+        mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU, 3, stateLabels,
+                1, 2, extras);
         mRegistry.register(mDescriptor);
     }
 
@@ -58,6 +68,8 @@ public class PowerStatsTest {
         stats.stats[0] = 10;
         stats.stats[1] = 20;
         stats.stats[2] = 30;
+        stats.stateStats.put(0x0F, new long[]{16});
+        stats.stateStats.put(0xF0, new long[]{17});
         stats.uidStats.put(42, new long[]{40, 50});
         stats.uidStats.put(99, new long[]{60, 70});
 
@@ -73,6 +85,7 @@ public class PowerStatsTest {
         assertThat(newDescriptor.powerComponentId).isEqualTo(BatteryConsumer.POWER_COMPONENT_CPU);
         assertThat(newDescriptor.name).isEqualTo("cpu");
         assertThat(newDescriptor.statsArrayLength).isEqualTo(3);
+        assertThat(newDescriptor.stateStatsArrayLength).isEqualTo(1);
         assertThat(newDescriptor.uidStatsArrayLength).isEqualTo(2);
         assertThat(newDescriptor.extras.getBoolean("hasPowerMonitor")).isTrue();
 
@@ -81,6 +94,11 @@ public class PowerStatsTest {
         PowerStats newStats = PowerStats.readFromParcel(newParcel, mRegistry);
         assertThat(newStats.durationMs).isEqualTo(1234);
         assertThat(newStats.stats).isEqualTo(new long[]{10, 20, 30});
+        assertThat(newStats.stateStats.size()).isEqualTo(2);
+        assertThat(newStats.stateStats.get(0x0F)).isEqualTo(new long[]{16});
+        assertThat(newStats.descriptor.getStateLabel(0x0F)).isEqualTo("idle");
+        assertThat(newStats.stateStats.get(0xF0)).isEqualTo(new long[]{17});
+        assertThat(newStats.descriptor.getStateLabel(0xF0)).isEqualTo("cpu-f0");
         assertThat(newStats.uidStats.size()).isEqualTo(2);
         assertThat(newStats.uidStats.get(42)).isEqualTo(new long[]{40, 50});
         assertThat(newStats.uidStats.get(99)).isEqualTo(new long[]{60, 70});
@@ -90,9 +108,33 @@ public class PowerStatsTest {
     }
 
     @Test
+    public void xmlFormat() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        TypedXmlSerializer serializer = Xml.newBinarySerializer();
+        serializer.setOutput(out, StandardCharsets.UTF_8.name());
+        mDescriptor.writeXml(serializer);
+        serializer.flush();
+
+        byte[] bytes = out.toByteArray();
+
+        TypedXmlPullParser parser = Xml.newBinaryPullParser();
+        parser.setInput(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8.name());
+        PowerStats.Descriptor actual = PowerStats.Descriptor.createFromXml(parser);
+
+        assertThat(actual.powerComponentId).isEqualTo(BatteryConsumer.POWER_COMPONENT_CPU);
+        assertThat(actual.name).isEqualTo("cpu");
+        assertThat(actual.statsArrayLength).isEqualTo(3);
+        assertThat(actual.stateStatsArrayLength).isEqualTo(1);
+        assertThat(actual.getStateLabel(0x0F)).isEqualTo("idle");
+        assertThat(actual.getStateLabel(0xF0)).isEqualTo("cpu-f0");
+        assertThat(actual.uidStatsArrayLength).isEqualTo(2);
+        assertThat(actual.extras.getBoolean("hasPowerMonitor")).isEqualTo(true);
+    }
+
+    @Test
     public void parceling_unrecognizedPowerComponent() {
         PowerStats stats = new PowerStats(
-                new PowerStats.Descriptor(777, "luck", 3, 2, new PersistableBundle()));
+                new PowerStats.Descriptor(777, "luck", 3, null, 1, 2, new PersistableBundle()));
         stats.durationMs = 1234;
 
         Parcel parcel = Parcel.obtain();

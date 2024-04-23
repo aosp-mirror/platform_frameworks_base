@@ -88,6 +88,7 @@ constructor(
     fun logUserActionRejectedByPolicy(
         userAction: QSTileUserAction,
         tileSpec: TileSpec,
+        restriction: String,
     ) {
         tileSpec
             .getLogBuffer()
@@ -95,7 +96,7 @@ constructor(
                 tileSpec.getLogTag(),
                 LogLevel.DEBUG,
                 { str1 = userAction.toLogString() },
-                { "tile $str1: rejected by policy" }
+                { "tile $str1: rejected by policy, restriction: $restriction" }
             )
     }
 

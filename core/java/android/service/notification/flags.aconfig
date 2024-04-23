@@ -1,5 +1,6 @@
 package: "android.service.notification"
 container: "system"
+container: "system"
 
 flag {
   name: "ranking_update_ashmem"
@@ -14,7 +15,17 @@ flag {
   namespace: "systemui"
   description: "This flag controls the redacting of sensitive notifications from untrusted NotificationListenerServices"
   bug: "306271190"
+}
+
+flag {
+  name: "redact_sensitive_notifications_big_text_style"
   is_exported: true
+  namespace: "systemui"
+  description: "This flag controls the redacting of BigTextStyle fields in sensitive notifications"
+  bug: "335488909"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

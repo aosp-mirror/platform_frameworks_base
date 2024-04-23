@@ -23,12 +23,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.graphics.SurfaceTexture;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Handler;
+import android.util.Size;
 import android.view.Surface;
 
 import com.android.internal.camera.flags.Flags;
@@ -530,9 +532,10 @@ public abstract class CameraDevice implements AutoCloseable {
      *   SurfaceTexture}: Set the size of the SurfaceTexture with {@link
      *   android.graphics.SurfaceTexture#setDefaultBufferSize} to be one of the sizes returned by
      *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(SurfaceTexture.class)}
-     *   before creating a Surface from the SurfaceTexture with {@link Surface#Surface}. If the size
-     *   is not set by the application, it will be set to be the smallest supported size less than
-     *   1080p, by the camera device.</li>
+     *   before creating a Surface from the SurfaceTexture with
+     *   {@link Surface#Surface(SurfaceTexture)}. If the size is not set by the application,
+     *   it will be set to be the smallest supported size less than 1080p, by the camera
+     *   device.</li>
      *
      * <li>For recording with {@link android.media.MediaCodec}: Call
      *   {@link android.media.MediaCodec#createInputSurface} after configuring
@@ -1405,10 +1408,16 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * <p><b>NOTE:</b>
      * For apps targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and above,
-     * this method will ensure session parameters set through calls to
-     * {@link SessionConfiguration#setSessionParameters} are also supported if the Camera Device
-     * supports it. For apps targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and
-     * below, session parameters will be ignored.</p>
+     * this method will automatically delegate to
+     * {@link CameraDeviceSetup#isSessionConfigurationSupported} whenever possible. This
+     * means that the output of this method will consider parameters set through
+     * {@link SessionConfiguration#setSessionParameters} as well.
+     * </p>
+     *
+     * <p>Session Parameters will be ignored for apps targeting <=
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, or if
+     * {@link CameraManager#isCameraDeviceSetupSupported} returns false for the camera id
+     * associated with this {@code CameraDevice}.</p>
      *
      * @return {@code true} if the given session configuration is supported by the camera device
      *         {@code false} otherwise.
@@ -1419,6 +1428,8 @@ public abstract class CameraDevice implements AutoCloseable {
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
      *
+     * @see CameraManager#isCameraDeviceSetupSupported(String)
+     * @see CameraDeviceSetup#isSessionConfigurationSupported(SessionConfiguration)
      */
     public boolean isSessionConfigurationSupported(
             @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
@@ -1703,7 +1714,7 @@ public abstract class CameraDevice implements AutoCloseable {
          * SessionConfiguration} can then be created using the OutputConfiguration objects and
          * be used to query whether it's supported by the camera device. To create the
          * CameraCaptureSession, the application still needs to make sure all output surfaces
-         * are added via {@link OutputConfiguration#addSurfaces} with the exception of deferred
+         * are added via {@link OutputConfiguration#addSurface} with the exception of deferred
          * surfaces for {@link android.view.SurfaceView} and
          * {@link android.graphics.SurfaceTexture}.</li>
          * </ul>
@@ -1751,15 +1762,18 @@ public abstract class CameraDevice implements AutoCloseable {
          * SessionConfiguration} can then be created using the OutputConfiguration objects and
          * be used for this function. To create the CameraCaptureSession, the application still
          * needs to make sure all output surfaces are added via {@link
-         * OutputConfiguration#addSurfaces} with the exception of deferred surfaces for {@link
+         * OutputConfiguration#addSurface} with the exception of deferred surfaces for {@link
          * android.view.SurfaceView} and {@link android.graphics.SurfaceTexture}.</p>
          *
          * @param sessionConfig The session configuration for which characteristics are fetched.
          * @return CameraCharacteristics specific to a given session configuration.
          *
-         * @throws IllegalArgumentException      if the session configuration is invalid
-         * @throws CameraAccessException         if the camera device is no longer connected or has
-         *                                       encountered a fatal error
+         * @throws IllegalArgumentException if the session configuration is invalid or if
+         *                                  {@link #isSessionConfigurationSupported} returns
+         *                                  {@code false} for the provided
+         *                                  {@link SessionConfiguration}
+         * @throws CameraAccessException    if the camera device is no longer connected or has
+         *                                  encountered a fatal error
          *
          * @see CameraCharacteristics#getAvailableSessionCharacteristicsKeys
          */

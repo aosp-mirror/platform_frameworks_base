@@ -98,7 +98,8 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
@@ -145,7 +146,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
-    private final SceneContainerFlags mSceneContainerFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
     private final Lazy<ShadeViewController> mShadeViewControllerLazy;
@@ -207,7 +207,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onStatusBarTouchEvent(MotionEvent event) {
             verifyCallerAndClearCallingIdentity("onStatusBarTouchEvent", () -> {
-                if (mSceneContainerFlags.isEnabled()) {
+                if (SceneContainerFlag.isEnabled()) {
                     //TODO(b/329863123) implement latency tracking for shade scene
                     Log.i(TAG_OPS, "Scene container enabled. Latency tracking not started.");
                 } else if (event.getActionMasked() == ACTION_DOWN) {
@@ -222,7 +222,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
                         // If scene framework is enabled, set the scene container window to
                         // visible and let the touch "slip" into that window.
-                        if (mSceneContainerFlags.isEnabled()) {
+                        if (SceneContainerFlag.isEnabled()) {
                             mSceneInteractor.get().onRemoteUserInteractionStarted("launcher swipe");
                         } else {
                             mShadeViewControllerLazy.get().startInputFocusTransfer();
@@ -231,7 +231,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     if (action == ACTION_UP || action == ACTION_CANCEL) {
                         mInputFocusTransferStarted = false;
 
-                        if (!mSceneContainerFlags.isEnabled()) {
+                        if (!SceneContainerFlag.isEnabled()) {
                             float velocity = (event.getY() - mInputFocusTransferStartY)
                                     / (event.getEventTime() - mInputFocusTransferStartMillis);
                             if (action == ACTION_CANCEL) {
@@ -239,6 +239,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             } else {
                                 mShadeViewControllerLazy.get().finishInputFocusTransfer(velocity);
                             }
+                        } else if (action == ACTION_UP) {
+                            // Gesture was too short to be picked up by scene container touch
+                            // handling; programmatically start the transition to shade scene.
+                            mSceneInteractor.get().changeScene(
+                                    Scenes.Shade, "short launcher swipe");
                         }
                     }
                     event.recycle();
@@ -256,6 +261,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) {
             verifyCallerAndClearCallingIdentityPostMain("animateNavBarLongPress", () ->
                     notifyAnimateNavBarLongPress(isTouchDown, shrink, durationMs));
+        }
+
+        @Override
+        public void setOverrideHomeButtonLongPress(long duration, float slopMultiplier) {
+            verifyCallerAndClearCallingIdentityPostMain("setOverrideHomeButtonLongPress",
+                    () -> notifySetOverrideHomeButtonLongPress(duration, slopMultiplier));
         }
 
         @Override
@@ -600,7 +611,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager,
             AssistUtils assistUtils,
-            SceneContainerFlags sceneContainerFlags,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder,
             BroadcastDispatcher broadcastDispatcher
@@ -612,7 +622,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         mContext = context;
-        mSceneContainerFlags = sceneContainerFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
         mShadeViewControllerLazy = shadeViewControllerLazy;
@@ -947,6 +956,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifySetOverrideHomeButtonLongPress(long duration, float slopMultiplier) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).setOverrideHomeButtonLongPress(duration, slopMultiplier);
+        }
+    }
+
     public void notifyAssistantVisibilityChanged(float visibility) {
         try {
             if (mOverviewProxy != null) {
@@ -1104,6 +1119,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void startAssistant(Bundle bundle) {}
         default void setAssistantOverridesRequested(int[] invocationTypes) {}
         default void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) {}
+        /** Set override of home button long press duration and touch slop multiplier. */
+        default void setOverrideHomeButtonLongPress(long override, float slopMultiplier) {}
     }
 
     /**

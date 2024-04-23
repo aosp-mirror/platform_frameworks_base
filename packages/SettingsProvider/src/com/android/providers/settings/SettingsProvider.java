@@ -3943,8 +3943,10 @@ public class SettingsProvider extends ContentProvider {
                         globalSettings.updateSettingLocked(Settings.Global.ZEN_MODE,
                                 Integer.toString(Settings.Global.ZEN_MODE_OFF), null,
                                 true, SettingsState.SYSTEM_PACKAGE_NAME);
+                        final int defaultRingerMode =
+                                getContext().getResources().getInteger(R.integer.def_ringer_mode);
                         globalSettings.updateSettingLocked(Settings.Global.MODE_RINGER,
-                                Integer.toString(AudioManager.RINGER_MODE_NORMAL), null,
+                                Integer.toString(defaultRingerMode), null,
                                 true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 119;

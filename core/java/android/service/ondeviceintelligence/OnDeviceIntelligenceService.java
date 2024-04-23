@@ -35,7 +35,7 @@ import android.app.ondeviceintelligence.IFeatureDetailsCallback;
 import android.app.ondeviceintelligence.IListFeaturesCallback;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceManager;
-import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.InferenceParams;
+import android.app.ondeviceintelligence.OnDeviceIntelligenceManager.StateParams;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
@@ -245,13 +245,13 @@ public abstract class OnDeviceIntelligenceService extends Service {
      * service if there is a state change to be performed. State change could be config updates,
      * performing initialization or cleanup tasks in the remote inference service.
      * The Bundle passed in here is expected to be read-only and will be rejected if it has any
-     * writable fields as detailed under {@link InferenceParams}.
+     * writable fields as detailed under {@link StateParams}.
      *
      * @param processingState  the updated state to be applied.
      * @param callbackExecutor executor to the run status callback on.
      * @param statusReceiver   receiver to get status of the update state operation.
      */
-    public final void updateProcessingState(@NonNull @InferenceParams Bundle processingState,
+    public final void updateProcessingState(@NonNull @StateParams Bundle processingState,
             @NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull OutcomeReceiver<PersistableBundle, OnDeviceIntelligenceException> statusReceiver) {
         Objects.requireNonNull(callbackExecutor);

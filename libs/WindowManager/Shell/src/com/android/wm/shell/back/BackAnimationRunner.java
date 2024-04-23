@@ -28,6 +28,7 @@ import android.view.RemoteAnimationTarget;
 import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.Cuj.CujType;
 import com.android.wm.shell.common.InteractionJankMonitorUtils;
 
@@ -108,7 +109,8 @@ public class BackAnimationRunner {
         }
     }
 
-    private boolean shouldMonitorCUJ(RemoteAnimationTarget[] apps) {
+    @VisibleForTesting
+    boolean shouldMonitorCUJ(RemoteAnimationTarget[] apps) {
         return apps.length > 0 && mCujType != NO_CUJ;
     }
 

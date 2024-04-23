@@ -22,7 +22,6 @@ import static android.view.InsetsControllerProto.CONTROL;
 import static android.view.InsetsControllerProto.STATE;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsSource.ID_IME_CAPTION_BAR;
-import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.all;
@@ -31,7 +30,6 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
-import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TypeEvaluator;
@@ -69,7 +67,6 @@ import android.view.inputmethod.ImeTracker.InputMethodJankContext;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.util.function.TriFunction;
@@ -142,10 +139,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          */
         @Appearance int getSystemBarsAppearance();
 
-        default boolean isSystemBarsAppearanceControlled() {
-            return false;
-        }
-
         /**
          * @see WindowInsetsController#setSystemBarsBehavior
          */
@@ -155,10 +148,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          * @see WindowInsetsController#getSystemBarsBehavior
          */
         @Behavior int getSystemBarsBehavior();
-
-        default boolean isSystemBarsBehaviorControlled() {
-            return false;
-        }
 
         /**
          * Releases a surface and ensure that this is done after {@link #applySurfaceParams} has
@@ -387,16 +376,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         private final WindowInsetsAnimationControlListener mLoggingListener;
         private final InputMethodJankContext mInputMethodJankContext;
 
-        private final ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
-                new ThreadLocal<AnimationHandler>() {
-            @Override
-            protected AnimationHandler initialValue() {
-                AnimationHandler handler = new AnimationHandler();
-                handler.setProvider(new SfVsyncFrameCallbackProvider());
-                return handler;
-            }
-        };
-
         public InternalAnimationControlListener(boolean show, boolean hasAnimationCallbacks,
                 @InsetsType int requestedTypes, @Behavior int behavior, boolean disable,
                 int floatingImeBottomInset, WindowInsetsAnimationControlListener loggingListener,
@@ -478,9 +457,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     ImeTracker.forJank().onFinishAnimation(getAnimationType());
                 }
             });
-            if (!mHasAnimationCallbacks) {
-                mAnimator.setAnimationHandler(mSfAnimationHandlerThreadLocal.get());
-            }
             mAnimator.start();
         }
 
@@ -672,6 +648,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private int mImeCaptionBarInsetsHeight = 0;
     private boolean mAnimationsDisabled;
     private boolean mCompatSysUiVisibilityStaled;
+    private @Appearance int mAppearanceControlled;
+    private @Appearance int mAppearanceFromResource;
+    private boolean mBehaviorControlled;
 
     private final Runnable mPendingControlTimeout = this::abortPendingImeControlRequest;
     private final ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
@@ -705,9 +684,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
                 @Override
                 public void onIdNotFoundInState2(int index1, InsetsSource source1) {
-                    if (!CAPTION_ON_SHELL && source1.getType() == captionBar()) {
-                        return;
-                    }
                     if (source1.getId() == ID_IME_CAPTION_BAR) {
                         return;
                     }
@@ -868,15 +844,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     public boolean onStateChanged(InsetsState state) {
-        boolean stateChanged = false;
-        if (!CAPTION_ON_SHELL) {
-            stateChanged = !mState.equals(state, true /* excludesCaptionBar */,
-                    false /* excludesInvisibleIme */)
-                    || captionInsetsUnchanged();
-        } else {
-            stateChanged = !mState.equals(state, false /* excludesCaptionBar */,
-                    false /* excludesInvisibleIme */);
-        }
+        boolean stateChanged = !mState.equals(state, false /* excludesCaptionBar */,
+                false /* excludesInvisibleIme */);
         if (!stateChanged && mLastDispatchedState.equals(state)) {
             return false;
         }
@@ -942,21 +911,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (cancelledUserAnimationTypes[0] != 0) {
             mHandler.post(() -> show(cancelledUserAnimationTypes[0]));
         }
-    }
-
-    private boolean captionInsetsUnchanged() {
-        if (CAPTION_ON_SHELL) {
-            return false;
-        }
-        final InsetsSource source = mState.peekSource(ID_CAPTION_BAR);
-        if (source == null && mCaptionInsetsHeight == 0) {
-            return false;
-        }
-        if (source != null && mCaptionInsetsHeight == source.getFrame().height()) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -1884,38 +1838,28 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setSystemBarsAppearance(@Appearance int appearance, @Appearance int mask) {
+        mAppearanceControlled |= mask;
         mHost.setSystemBarsAppearance(appearance, mask);
     }
 
     @Override
-    public @Appearance int getSystemBarsAppearance() {
-        @Appearance int appearance = mHost.getSystemBarsAppearance();
+    public void setSystemBarsAppearanceFromResource(@Appearance int appearance,
+            @Appearance int mask) {
+        mAppearanceFromResource = (mAppearanceFromResource & ~mask) | (appearance & mask);
 
-        // We only return the requested appearance, not the implied one.
-        appearance &= ~APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
-        if (!mHost.isSystemBarsAppearanceControlled()) {
-            appearance &= ~COMPATIBLE_APPEARANCE_FLAGS;
-        }
-
-        return appearance;
+        // Don't change the flags which are already controlled by setSystemBarsAppearance.
+        mHost.setSystemBarsAppearance(appearance, mask & ~mAppearanceControlled);
     }
 
     @Override
-    public void setCaptionInsetsHeight(int height) {
-        // This method is to be removed once the caption is moved to the shell.
-        if (CAPTION_ON_SHELL) {
-            return;
-        }
-        if (mCaptionInsetsHeight != height) {
-            mCaptionInsetsHeight = height;
-            if (mCaptionInsetsHeight != 0) {
-                mState.getOrCreateSource(ID_CAPTION_BAR, captionBar()).setFrame(
-                        mFrame.left, mFrame.top, mFrame.right, mFrame.top + mCaptionInsetsHeight);
-            } else {
-                mState.removeSource(ID_CAPTION_BAR);
-            }
-            mHost.notifyInsetsChanged();
-        }
+    public @Appearance int getSystemBarsAppearance() {
+        // We only return the requested appearance, not the implied one.
+        return (mHost.getSystemBarsAppearance() & mAppearanceControlled)
+                | (mAppearanceFromResource & ~mAppearanceControlled);
+    }
+
+    public @Appearance int getAppearanceControlled() {
+        return mAppearanceControlled;
     }
 
     @Override
@@ -1949,16 +1893,21 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setSystemBarsBehavior(@Behavior int behavior) {
+        mBehaviorControlled = true;
         mHost.setSystemBarsBehavior(behavior);
     }
 
     @Override
     public @Behavior int getSystemBarsBehavior() {
-        if (!mHost.isSystemBarsBehaviorControlled()) {
+        if (!mBehaviorControlled) {
             // We only return the requested behavior, not the implied one.
-            return 0;
+            return BEHAVIOR_DEFAULT;
         }
         return mHost.getSystemBarsBehavior();
+    }
+
+    public boolean isBehaviorControlled() {
+        return mBehaviorControlled;
     }
 
     @Override

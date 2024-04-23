@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktief, net links"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktief, net regs"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktief, links en regs"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktiewe (net media), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>-battery"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktiewe (net media), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>-battery, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>-battery"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Gekoppelde (steun oudiodeling), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>-battery"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Gekoppelde (steun oudiodeling), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>-battery, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>-battery"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Gekoppelde (steun oudiodeling), linkerkantse <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Gekoppelde (steun oudiodeling), regterkantse <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktief (net media)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Steun oudiodeling"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktief (net media), net linkerkant"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktief (net media), net regterkant"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktief (net media), linker- en regterkant"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Media-oudio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Foonoproepe"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Lêeroordrag"</string>
@@ -313,8 +324,8 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Wanneer hierdie modus geaktiveer is, kan hierdie toestel se MAC-adres verander elke keer wanneer dit aan \'n netwerk koppel waarvoor MAC-verewekansiging geaktiveer is."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Beperk"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Onbeperk"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Loggerbuffer se groottes"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Kies loggergroottes per logbuffer"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Logskepperbuffer se groottes"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Kies logskeppergroottes per logbuffer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Maak logskrywer se aanhoudende berging skoon?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Wanneer ons nie meer monitering met die aanhoudende logskrywer uitvoer nie, word ons vereis om die logskrywerdata wat op jou toestel is, uit te vee."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Berg logskrywerdata aanhoudend op toestel"</string>
@@ -389,7 +400,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Ontfout nie-reghoekige knipbedrywighede"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Profiel-HWUI-lewering"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktiveer GPU-ontfoutlae"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Laat laai van GPU-ontfoutlae vir ontfoutprogramme toe"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Laat laai van GPU-ontfoutlae vir ontfoutapps toe"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktiveer woordryke verkoperloginskrywing"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sluit bykomende toestelspesifieke verkoperloglêers by foutverslae in, wat privaat inligting kan bevat, meer batterykrag kan gebruik, en/of meer berging kan gebruik."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Vensteranimasieskaal"</string>
@@ -476,6 +487,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> oor tot vol"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laaiproses word geoptimeer"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – Laai tans"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Volgelaai teen <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> – Volgelaai teen <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"Volgelaai teen <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"Volgelaai teen <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laai"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Laai tans vinnig"</string>
@@ -487,12 +502,14 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Gelaai"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Volgelaai"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Laai wag tans"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"Laai tans"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Laai vinnig"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Beheer deur administrateur"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Beheer deur Beperkte Instellings"</string>
     <string name="disabled" msgid="8017887509554714950">"Gedeaktiveer"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Toegelaat"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nie toegelaat nie"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende programme"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Installeer onbekende apps"</string>
     <string name="home" msgid="973834627243661438">"Instellingstuisblad"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -643,8 +660,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Alle aktiwiteit sal uitgevee word wanneer jy uitgaan"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Jy kan jou aktiwiteit stoor of uitvee wanneer jy uitgaan"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Stel terug om aktiwiteit nou uit te vee, of stoor of vee aktiwiteit uit wanneer jy uitgaan"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Neem \'n foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Kies \'n prent"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Kies foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Te veel verkeerde pogings. Hierdie toestel se data sal uitgevee word."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Te veel verkeerde pogings. Hierdie gebruiker sal uitgevee word."</string>
@@ -675,6 +690,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Foon, een staaf."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Foon, twee stawe."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Foon, drie stawe."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"Foon vier strepies."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Foonsein is vol."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Geen data nie."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Data, een staaf."</string>
@@ -684,14 +700,12 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet is ontkoppel."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Geen oproepe nie."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Kies \'n profielprent"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Verstekgebruikerikoon"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fisieke sleutelbord"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Kies sleutelborduitleg"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Verstek"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Skakel skerm aan"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Laat toe dat die skerm aangeskakel word"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Laat ’n program toe om die skerm aan te skakel. As jy toestemming gee, kan die program die skerm enige tyd sonder jou uitdruklike bedoeling aanskakel."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Laat ’n app toe om die skerm aan te skakel. As jy toestemming gee, kan die app die skerm enige tyd sonder jou uitdruklike bedoeling aanskakel."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hou op om <xliff:g id="APP_NAME">%1$s</xliff:g> uit te saai?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"As jy <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitsaai of die uitvoer verander, sal jou huidige uitsending stop"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Saai <xliff:g id="SWITCHAPP">%1$s</xliff:g> uit"</string>

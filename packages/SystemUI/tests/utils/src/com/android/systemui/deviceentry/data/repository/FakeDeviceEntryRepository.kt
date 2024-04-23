@@ -21,7 +21,6 @@ import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [DeviceEntryRepository] */
 @SysUISingleton
@@ -31,19 +30,8 @@ class FakeDeviceEntryRepository @Inject constructor() : DeviceEntryRepository {
     private val _isBypassEnabled = MutableStateFlow(false)
     override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled
 
-    private val _isUnlocked = MutableStateFlow(false)
-    override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
-
     override suspend fun isLockscreenEnabled(): Boolean {
         return isLockscreenEnabled
-    }
-
-    override fun reportSuccessfulAuthentication() {
-        _isUnlocked.value = true
-    }
-
-    fun setUnlocked(isUnlocked: Boolean) {
-        _isUnlocked.value = isUnlocked
     }
 
     fun setLockscreenEnabled(isLockscreenEnabled: Boolean) {

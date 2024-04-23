@@ -33,14 +33,14 @@ import android.view.ViewGroup;
 
 import com.android.app.animation.Interpolators;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
-import com.android.systemui.res.R;
+import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
-import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.util.ViewController;

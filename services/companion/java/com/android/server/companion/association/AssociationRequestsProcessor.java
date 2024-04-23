@@ -130,7 +130,7 @@ public class AssociationRequestsProcessor {
     private final @NonNull PackageManagerInternal mPackageManagerInternal;
     private final @NonNull AssociationStore mAssociationStore;
     @NonNull
-    private final ComponentName mCompanionDeviceActivity;
+    private final ComponentName mCompanionAssociationActivity;
 
     public AssociationRequestsProcessor(@NonNull Context context,
             @NonNull PackageManagerInternal packageManagerInternal,
@@ -138,9 +138,9 @@ public class AssociationRequestsProcessor {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
         mAssociationStore = associationStore;
-        mCompanionDeviceActivity = createRelative(
+        mCompanionAssociationActivity = createRelative(
                 mContext.getString(R.string.config_companionDeviceManagerPackage),
-                ".CompanionDeviceActivity");
+                ".CompanionAssociationActivity");
     }
 
     /**
@@ -204,7 +204,7 @@ public class AssociationRequestsProcessor {
         extras.putParcelable(EXTRA_RESULT_RECEIVER, prepareForIpc(mOnRequestConfirmationReceiver));
 
         final Intent intent = new Intent();
-        intent.setComponent(mCompanionDeviceActivity);
+        intent.setComponent(mCompanionAssociationActivity);
         intent.putExtras(extras);
 
         // 2b.3. Create a PendingIntent.
@@ -232,7 +232,7 @@ public class AssociationRequestsProcessor {
         extras.putBoolean(EXTRA_FORCE_CANCEL_CONFIRMATION, true);
 
         final Intent intent = new Intent();
-        intent.setComponent(mCompanionDeviceActivity);
+        intent.setComponent(mCompanionAssociationActivity);
         intent.putExtras(extras);
 
         return createPendingIntent(packageUid, intent);
@@ -284,7 +284,7 @@ public class AssociationRequestsProcessor {
             @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
             boolean selfManaged, @Nullable IAssociationRequestCallback callback,
             @Nullable ResultReceiver resultReceiver) {
-        final int id = mAssociationStore.getNextId(userId);
+        final int id = mAssociationStore.getNextId();
         final long timestamp = System.currentTimeMillis();
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,

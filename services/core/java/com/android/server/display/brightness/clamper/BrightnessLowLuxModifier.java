@@ -70,11 +70,10 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
         mHandler = handler;
         mContentResolver = context.getContentResolver();
         mSettingsObserver = new SettingsObserver(mHandler);
+        mDisplayDeviceConfig = displayDeviceConfig;
         mHandler.post(() -> {
             start();
         });
-
-        mDisplayDeviceConfig = displayDeviceConfig;
     }
 
     /**

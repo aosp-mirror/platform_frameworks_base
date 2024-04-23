@@ -34,10 +34,11 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;

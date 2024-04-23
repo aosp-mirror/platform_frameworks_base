@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, bara vänster"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, bara höger"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, vänster och höger"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktiv (endast media), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktiv (endast media), V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Ansluten (ljuddelning stöds), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Ansluten (ljuddelning stöds), V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Ansluten (ljuddelning stöds), vänster <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Ansluten (ljuddelning stöds), höger <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktiv (endast media)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Ljuddelning stöds"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktiv (endast media), endast vänster"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktiv (endast media), endast höger"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktiv (endast media), vänster och höger"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medialjud"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonsamtal"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Filöverföring"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> kvar tills fulladdat"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Laddningen har optimerats"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – laddas"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Okänd"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laddar"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Laddas snabbt"</string>
@@ -487,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Laddat"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Fulladdad"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Laddningen har pausats"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Strys av administratören"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Styrs av spärrad inställning"</string>
     <string name="disabled" msgid="8017887509554714950">"Inaktiverad"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"All aktivitet raderas när du avslutar"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Du kan spara eller radera aktivitet när du avslutar"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Återställ om du vill radera sessionsaktiviteten nu, eller spara eller radera aktivitet när du avslutar"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Ta ett foto"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Välj en bild"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Välj foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"För många felaktiga försök. Enhetens data raderas."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"För många felaktiga försök. Den här användaren raderas."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefon: en stapel."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefon: två staplar."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefon: tre staplar."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Telefonsignalen är full."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Inga data."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Data: en stapel."</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet har kopplats från."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Inga anrop."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Välj en profilbild"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Ikon för standardanvändare"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fysiskt tangentbord"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Välj en tangentbordslayout"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standard"</string>

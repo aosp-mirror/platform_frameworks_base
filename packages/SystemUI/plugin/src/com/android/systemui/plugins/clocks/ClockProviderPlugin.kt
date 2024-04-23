@@ -267,6 +267,9 @@ data class ClockConfig(
 
     /** True if the clock will react to tone changes in the seed color. */
     val isReactiveToTone: Boolean = true,
+
+    /** True if the clock is large frame clock, which will use weather in compose. */
+    val useCustomClockScene: Boolean = false,
 )
 
 /** Render configuration options for a clock face. Modifies the way SystemUI behaves. */
@@ -283,6 +286,9 @@ data class ClockFaceConfig(
      * animation will be used (e.g. a simple translation).
      */
     val hasCustomPositionUpdatedAnimation: Boolean = false,
+
+    /** True if the clock is large frame clock, which will use weatherBlueprint in compose. */
+    val useCustomClockScene: Boolean = false,
 )
 
 /** Structure for keeping clock-specific settings */

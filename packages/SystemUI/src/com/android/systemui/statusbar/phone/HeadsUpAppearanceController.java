@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -421,9 +422,12 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     public void updateHeader(NotificationEntry entry) {
         ExpandableNotificationRow row = entry.getRow();
         float headerVisibleAmount = 1.0f;
-        if (row.isPinned() || row.isHeadsUpAnimatingAway() || row == mTrackedChild
-                || row.showingPulsing()) {
-            headerVisibleAmount = mAppearFraction;
+        // To fix the invisible HUN group header issue
+        if (!AsyncGroupHeaderViewInflation.isEnabled()) {
+            if (row.isPinned() || row.isHeadsUpAnimatingAway() || row == mTrackedChild
+                    || row.showingPulsing()) {
+                headerVisibleAmount = mAppearFraction;
+            }
         }
         row.setHeaderVisibleAmount(headerVisibleAmount);
     }

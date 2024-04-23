@@ -168,6 +168,9 @@ internal class ExpandableControllerImpl(
 
             override var transitionContainer: ViewGroup = composeViewRoot.rootView as ViewGroup
 
+            // TODO(b/323863002): update to be dependant on usage.
+            override val isLaunching: Boolean = true
+
             override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
                 animatorState.value = null
             }

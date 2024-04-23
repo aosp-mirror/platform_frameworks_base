@@ -1617,9 +1617,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             final int displayId = displays[i].getDisplayId();
             onDisplayRemoved(displayId);
         }
-        if (com.android.server.accessibility.Flags.cleanupA11yOverlays()) {
             detachAllOverlays();
-        }
     }
 
     /**

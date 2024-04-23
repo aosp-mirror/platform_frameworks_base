@@ -85,7 +85,6 @@ import android.os.VibratorInfo;
 import android.os.test.TestLooper;
 import android.service.dreams.DreamManagerInternal;
 import android.telecom.TelecomManager;
-import android.util.FeatureFlagUtils;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -743,15 +742,8 @@ class TestPhoneWindowManager {
 
     void assertSwitchKeyboardLayout(int direction, int displayId) {
         mTestLooper.dispatchAll();
-        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_NEW_KEYBOARD_UI)) {
-            verify(mInputMethodManagerInternal).onSwitchKeyboardLayoutShortcut(eq(direction),
-                    eq(displayId), eq(mImeTargetWindowToken));
-            verify(mWindowManagerFuncsImpl, never()).switchKeyboardLayout(anyInt(), anyInt());
-        } else {
-            verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), eq(direction));
-            verify(mInputMethodManagerInternal, never())
-                    .onSwitchKeyboardLayoutShortcut(anyInt(), anyInt(), any());
-        }
+        verify(mInputMethodManagerInternal).onSwitchKeyboardLayoutShortcut(eq(direction),
+                eq(displayId), eq(mImeTargetWindowToken));
     }
 
     void assertTakeBugreport() {

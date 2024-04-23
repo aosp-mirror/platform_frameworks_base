@@ -49,7 +49,6 @@ import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
 import android.view.ContentInfo;
 
 import androidx.annotation.NonNull;
@@ -150,10 +149,8 @@ public final class NotificationEntry extends ListEntry {
     private int mCachedContrastColor = COLOR_INVALID;
     private int mCachedContrastColorIsFor = COLOR_INVALID;
     private InflationTask mRunningTask = null;
-    private Throwable mDebugThrowable;
     public CharSequence remoteInputTextWhenReset;
     public long lastRemoteInputSent = NOT_LAUNCHED_YET;
-    public final ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
 
     private final MutableStateFlow<CharSequence> mHeadsUpStatusBarText =
             StateFlowKt.MutableStateFlow(null);
@@ -188,11 +185,6 @@ public final class NotificationEntry extends ListEntry {
      * Flag to determine if the entry is blockable by DnD filters
      */
     private boolean mBlockable;
-
-    /**
-     * The {@link SystemClock#elapsedRealtime()} when this notification entry was created.
-     */
-    public long mCreationElapsedRealTime;
 
     /**
      * Whether this notification has ever been a non-sticky HUN.
@@ -264,13 +256,8 @@ public final class NotificationEntry extends ListEntry {
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
-        mCreationElapsedRealTime = SystemClock.elapsedRealtime();
     }
 
-    @VisibleForTesting
-    public void setCreationElapsedRealTime(long time) {
-        mCreationElapsedRealTime = time;
-    }
     @Override
     public NotificationEntry getRepresentativeEntry() {
         return this;
@@ -581,19 +568,6 @@ public final class NotificationEntry extends ListEntry {
         return mRunningTask;
     }
 
-    /**
-     * Set a throwable that is used for debugging
-     *
-     * @param debugThrowable the throwable to save
-     */
-    public void setDebugThrowable(Throwable debugThrowable) {
-        mDebugThrowable = debugThrowable;
-    }
-
-    public Throwable getDebugThrowable() {
-        return mDebugThrowable;
-    }
-
     public void onRemoteInputInserted() {
         lastRemoteInputSent = NOT_LAUNCHED_YET;
         remoteInputTextWhenReset = null;
@@ -747,12 +721,6 @@ public final class NotificationEntry extends ListEntry {
 
     public boolean areChildrenExpanded() {
         return row != null && row.areChildrenExpanded();
-    }
-
-
-    //TODO: probably less confusing to say "is group fully visible"
-    public boolean isGroupNotFullyVisible() {
-        return row == null || row.isGroupNotFullyVisible();
     }
 
     public NotificationGuts getGuts() {

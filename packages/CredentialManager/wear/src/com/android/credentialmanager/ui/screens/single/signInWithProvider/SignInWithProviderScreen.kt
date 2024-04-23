@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.components.AccountRow
+import com.android.credentialmanager.ui.components.BottomSpacer
 import com.android.credentialmanager.ui.components.ContinueChip
+import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
 import com.android.credentialmanager.ui.components.DismissChip
 import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.ui.components.SignInOptionsChip
@@ -35,7 +37,7 @@ import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 /**
  * Screen that shows sign in with provider credential.
  *
- * @param entry The password entry.
+ * @param entry The custom credential entry.
  * @param columnState ScalingLazyColumn configuration to be be applied to SingleAccountScreen
  * @param modifier styling for composable
  * @param flowEngine [FlowEngine] that updates ui state for this screen
@@ -57,16 +59,15 @@ fun SignInWithProviderScreen(
         },
         accountContent = {
             val displayName = entry.displayName
-            if (displayName != null) {
+            if (displayName == null ||
+                entry.displayName.equals(entry.userName, ignoreCase = true)) {
                 AccountRow(
-                    primaryText = displayName,
-                    secondaryText = entry.userName,
-                    modifier = Modifier.padding(top = 10.dp),
+                    primaryText = entry.userName,
                 )
             } else {
                 AccountRow(
-                    primaryText = entry.userName,
-                    modifier = Modifier.padding(top = 10.dp),
+                    primaryText = displayName,
+                    secondaryText = entry.userName,
                 )
             }
         },
@@ -77,8 +78,11 @@ fun SignInWithProviderScreen(
             val selectEntry = flowEngine.getEntrySelector()
             Column {
                 ContinueChip { selectEntry(entry, false) }
+                CredentialsScreenChipSpacer()
                 SignInOptionsChip{ flowEngine.openSecondaryScreen() }
+                CredentialsScreenChipSpacer()
                 DismissChip { flowEngine.cancel() }
+                BottomSpacer()
             }
         }
     }

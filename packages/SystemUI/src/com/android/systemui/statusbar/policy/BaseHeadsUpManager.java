@@ -165,6 +165,8 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     public void showNotification(@NonNull NotificationEntry entry) {
         HeadsUpEntry headsUpEntry = createHeadsUpEntry(entry);
 
+        mLogger.logShowNotificationRequest(entry);
+
         Runnable runnable = () -> {
             // TODO(b/315362456) log outside runnable too
             mLogger.logShowNotification(entry);
@@ -219,6 +221,8 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      */
     public void updateNotification(@NonNull String key, boolean shouldHeadsUpAgain) {
         HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
+        mLogger.logUpdateNotificationRequest(key, shouldHeadsUpAgain, headsUpEntry != null);
+
         Runnable runnable = () -> {
             updateNotificationInternal(key, shouldHeadsUpAgain);
         };
@@ -252,10 +256,15 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         // A copy is necessary here as we are changing the underlying map.  This would cause
         // undefined behavior if we iterated over the key set directly.
         ArraySet<String> keysToRemove = new ArraySet<>(mHeadsUpEntryMap.keySet());
+
+        // Must get waiting keys before calling removeEntry, which clears waiting entries in
+        // AvalancheController
+        List<String> waitingKeysToRemove = mAvalancheController.getWaitingKeys();
+
         for (String key : keysToRemove) {
             removeEntry(key);
         }
-        for (String key : mAvalancheController.getWaitingKeys()) {
+        for (String key : waitingKeysToRemove) {
             removeEntry(key);
         }
     }
@@ -378,8 +387,11 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
      */
     protected final void removeEntry(@NonNull String key) {
         HeadsUpEntry headsUpEntry = mHeadsUpEntryMap.get(key);
+        mLogger.logRemoveEntryRequest(key);
 
         Runnable runnable = () -> {
+            mLogger.logRemoveEntry(key);
+
             if (headsUpEntry == null) {
                 return;
             }
@@ -566,8 +578,10 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     public void unpinAll(boolean userUnPinned) {
         for (String key : mHeadsUpEntryMap.keySet()) {
             HeadsUpEntry headsUpEntry = getHeadsUpEntry(key);
-
+            mLogger.logUnpinEntryRequest(key);
             Runnable runnable = () -> {
+                mLogger.logUnpinEntry(key);
+
                 setEntryPinned(headsUpEntry, false /* isPinned */);
                 // maybe it got un sticky
                 headsUpEntry.updateEntry(false /* updatePostTime */, "unpinAll");
@@ -886,6 +900,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
          * Clear any pending removal runnables.
          */
         public void cancelAutoRemovalCallbacks(@Nullable String reason) {
+            mLogger.logAutoRemoveCancelRequest(this.mEntry, reason);
             Runnable runnable = () -> {
                 final boolean removed = cancelAutoRemovalCallbackInternal();
 
@@ -893,13 +908,18 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                     mLogger.logAutoRemoveCanceled(mEntry, reason);
                 }
             };
-            mAvalancheController.update(this, runnable,
-                    reason + " removeAutoRemovalCallbacks");
+            if (isHeadsUpEntry(this.mEntry.getKey())) {
+                mAvalancheController.update(this, runnable, reason + " cancelAutoRemovalCallbacks");
+            } else {
+                // Just removed
+                runnable.run();
+            }
         }
 
         public void scheduleAutoRemovalCallback(FinishTimeUpdater finishTimeCalculator,
                 @NonNull String reason) {
 
+            mLogger.logAutoRemoveRequest(this.mEntry, reason);
             Runnable runnable = () -> {
                 long delayMs = finishTimeCalculator.updateAndGetTimeRemaining();
 

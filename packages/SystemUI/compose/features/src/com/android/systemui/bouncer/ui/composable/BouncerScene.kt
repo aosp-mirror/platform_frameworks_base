@@ -22,11 +22,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
@@ -35,9 +32,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 object Bouncer {
     object Elements {
@@ -57,13 +52,7 @@ constructor(
     override val key = Scenes.Bouncer
 
     override val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        MutableStateFlow(
-                mapOf(
-                    Back to UserActionResult(Scenes.Lockscreen),
-                    Swipe(SwipeDirection.Down) to UserActionResult(Scenes.Lockscreen),
-                )
-            )
-            .asStateFlow()
+        viewModel.destinationScenes
 
     @Composable
     override fun SceneScope.Content(

@@ -16,10 +16,14 @@
 
 package com.android.systemui.unfold.domain.interactor
 
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.unfold.data.repository.unfoldTransitionRepository
 
 val Kosmos.unfoldTransitionInteractor by Fixture {
-    UnfoldTransitionInteractorImpl(repository = unfoldTransitionRepository)
+    UnfoldTransitionInteractor(
+        repository = unfoldTransitionRepository,
+        configurationInteractor = configurationInteractor,
+    )
 }

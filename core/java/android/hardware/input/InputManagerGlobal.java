@@ -1068,36 +1068,21 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#getKeyboardLayoutsForInputDevice(InputDeviceIdentifier)
+     * TODO(b/330517633): Cleanup the unsupported API
      */
     @NonNull
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             @NonNull InputDeviceIdentifier identifier) {
-        try {
-            return mIm.getKeyboardLayoutsForInputDevice(identifier);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
+        return new KeyboardLayout[0];
     }
 
     /**
-     * @see InputManager#setCurrentKeyboardLayoutForInputDevice
-     * (InputDeviceIdentifier, String)
+     * TODO(b/330517633): Cleanup the unsupported API
      */
-    @RequiresPermission(Manifest.permission.SET_KEYBOARD_LAYOUT)
     public void setCurrentKeyboardLayoutForInputDevice(
             @NonNull InputDeviceIdentifier identifier,
-            @NonNull String keyboardLayoutDescriptor) {
-        Objects.requireNonNull(identifier, "identifier must not be null");
-        Objects.requireNonNull(keyboardLayoutDescriptor,
-                "keyboardLayoutDescriptor must not be null");
-        try {
-            mIm.setCurrentKeyboardLayoutForInputDevice(identifier,
-                    keyboardLayoutDescriptor);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
+            @NonNull String keyboardLayoutDescriptor) {}
+
 
     /**
      * @see InputDevice#getSensorManager()

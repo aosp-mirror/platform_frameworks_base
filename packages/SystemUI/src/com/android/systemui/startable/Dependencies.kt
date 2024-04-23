@@ -16,7 +16,8 @@
 package com.android.systemui.startable
 
 import com.android.systemui.CoreStartable
-import kotlin.reflect.KClass
+import java.lang.annotation.Documented
+import javax.inject.Qualifier
 
 /**
  * Allows a [CoreStartable] to declare that it must be started after its dependencies.
@@ -24,7 +25,4 @@ import kotlin.reflect.KClass
  * This creates a partial, topological ordering. See [com.android.systemui.SystemUIApplication] for
  * how this ordering is enforced at runtime.
  */
-@MustBeDocumented
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class Dependencies(vararg val value: KClass<out CoreStartable> = [])
+@Qualifier @Documented @Retention(AnnotationRetention.RUNTIME) annotation class Dependencies()

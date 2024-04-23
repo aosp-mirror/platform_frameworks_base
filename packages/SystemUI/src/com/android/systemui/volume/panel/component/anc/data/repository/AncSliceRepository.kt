@@ -41,12 +41,14 @@ import kotlinx.coroutines.flow.map
 interface AncSliceRepository {
 
     /**
-     * ANC slice with a given width. Emits null when there is no ANC slice available. This can mean
-     * that:
+     * ANC slice with a given width. [isCollapsed] slice shows a single button, and expanded shows a
+     * row buttons.
+     *
+     * Emits null when there is no ANC slice available. This can mean that:
      * - there is no supported device connected;
      * - there is no slice provider for the uri;
      */
-    fun ancSlice(width: Int): Flow<Slice?>
+    fun ancSlice(width: Int, isCollapsed: Boolean, hideLabel: Boolean): Flow<Slice?>
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -60,9 +62,14 @@ constructor(
 
     private val localMediaRepository = mediaRepositoryFactory.create(null)
 
-    override fun ancSlice(width: Int): Flow<Slice?> {
+    override fun ancSlice(width: Int, isCollapsed: Boolean, hideLabel: Boolean): Flow<Slice?> {
         return localMediaRepository.currentConnectedDevice
-            .map { (it as? BluetoothMediaDevice)?.cachedDevice?.device?.getExtraControlUri(width) }
+            .map {
+                (it as? BluetoothMediaDevice)
+                    ?.cachedDevice
+                    ?.device
+                    ?.getExtraControlUri(width, isCollapsed, hideLabel)
+            }
             .distinctUntilChanged()
             .flatMapLatest { sliceUri ->
                 sliceUri ?: return@flatMapLatest flowOf(null)
@@ -71,7 +78,11 @@ constructor(
             .flowOn(backgroundCoroutineContext)
     }
 
-    private fun BluetoothDevice.getExtraControlUri(width: Int): Uri? {
+    private fun BluetoothDevice.getExtraControlUri(
+        width: Int,
+        isCollapsed: Boolean,
+        hideLabel: Boolean
+    ): Uri? {
         val uri: String? = BluetoothUtils.getControlUriMetaData(this)
         uri ?: return null
 
@@ -81,7 +92,8 @@ constructor(
             Uri.parse(
                 "$uri$width" +
                     "&version=${SliceParameters.VERSION}" +
-                    "&is_collapsed=${SliceParameters.IS_COLLAPSED}"
+                    "&is_collapsed=$isCollapsed" +
+                    "&hide_label=$hideLabel"
             )
         }
     }
@@ -98,11 +110,5 @@ constructor(
          * 2) new slice
          */
         const val VERSION = 2
-
-        /**
-         * Collapsed slice shows a single button, and expanded shows a row buttons. Supported since
-         * [VERSION]==2.
-         */
-        const val IS_COLLAPSED = false
     }
 }

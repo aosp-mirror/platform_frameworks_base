@@ -662,7 +662,8 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Саусақ ізі танылмады."</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Саусақ ізі танылмады."</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Бет танылмады. Орнына саусақ ізін пайдаланыңыз."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Саусақ ізі аутентификацияланды"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Бет танылды"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Бет танылды, \"Растау\" түймесін басыңыз"</string>
@@ -831,7 +832,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және Android TV құрылғыңыздың барлық деректерінен тазарту."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Экран құлпын ашқан кезде, терілген қате құпия сөздердің саны бақыланады, сондай-ақ құпия сөздер бірнеше рет қате терілсе, ақпараттық-сауықтық жүйе құлыпталады немесе оның барлық дерегі жойылады."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және телефонды бекіту немесе тым көп қате құпия сөздер терілген болса, телефонның бүкіл деректерін өшіру."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Экран құлпын ашқан кезде терілген қате құпия сөздердің санын бақылау және құпия сөз тым көп рет қате терілгенде, телефонды құлыптау немесе оның бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, планшетті бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Экранның құлпын ашу кезінде қате енгізілген құпия сөздердің санын бақылау, құпия сөз тым көп қате енгізілген жағдайда, Android TV құрылғысын құлыптау және барлық пайдаланушы деректерінен тазарту."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Экран құлпын ашқан кезде, терілген қате құпия сөздердің саны бақыланады, сондай-ақ құпия сөздер бірнеше рет қате терілсе, ақпараттық-сауықтық жүйе құлыпталады немесе осы профильдің барлық дерегі жойылады."</string>
@@ -995,7 +996,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Дұрыс!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Қайталап көріңіз"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Қайталап көріңіз"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Мүмкіндіктер мен деректер үшін құлыпты ашыңыз"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Барлық функция мен дерек үшін құлыпты ашыңыз"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Бет тану арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM картасы жоқ."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Планшетте SIM картасы жоқ."</string>
@@ -1283,7 +1284,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Қосуды аяқтауда."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін реттеу үшін, оны жайлап түртіп көріңіз."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Реттеуді аяқтау үшін экранды өшіріңіз"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Реттеуді аяқтау үшін экранды өшіріңіз."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Өшіру"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Саусақ ізін растауды жалғастырасыз ба?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Қуат түймесін бастыңыз. Бұл әдетте экранды өшіреді.\n\nСаусақ ізін растау үшін, оны жайлап түртіп көріңіз."</string>
@@ -1561,7 +1562,7 @@
     <string name="sync_really_delete" msgid="5657871730315579051">"Бұл нәрселер жойылсын"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Жойылғандарды кері орындау"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Қазір ешқандай әрекет жасамаңыз"</string>
-    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдау"</string>
+    <string name="choose_account_label" msgid="5557833752759831548">"Аккаунт таңдаңыз"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Аккаунт қосу"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Аккаунт қосу."</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Арттыру"</string>
@@ -1929,12 +1930,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> басқарады."</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Қосулы"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Өшірулі"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Кез келген күнтізбе"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> кейбір дыбыстарды өшіруде"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"There\'s an internal problem with your device. Contact your manufacturer for details."</string>
@@ -1973,7 +1971,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Санатқа жатқызылмаған"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Сіз осы хабарландырулардың маңыздылығын орнатасыз."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Қатысты адамдарға байланысты бұл маңызды."</string>
-    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Арнаулы хабар хабарландыруы"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Арнаулы қолданба хабарландыруы"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунты бар жаңа пайдаланушы (мұндай аккаунтқа ие пайдаланушы бұрыннан бар) жасауға рұқсат етілсін бе?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунты бар жаңа пайдаланушы жасауға рұқсат етілсін бе?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"Бақыланатын пайдаланушыны қосу"</string>
@@ -2397,6 +2395,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Сынақ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Жалпы"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Қауіпсіздік мақсатында қолданба контенті экранды көрсету кезінде жасырылды."</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Жерсерік қызметіне автоматты түрде қосылды"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Мобильдік не Wi-Fi желісіне қосылмастан хабар жібере аласыз және ала аласыз."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages қолданбасын ашу"</string>

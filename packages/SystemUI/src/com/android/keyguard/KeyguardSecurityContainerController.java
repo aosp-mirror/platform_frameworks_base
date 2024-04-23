@@ -83,14 +83,14 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.RefactorKeyguardDismissIntent;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -101,6 +101,8 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 
+import dagger.Lazy;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
@@ -108,7 +110,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import dagger.Lazy;
 import kotlinx.coroutines.Job;
 
 /** Controller for {@link KeyguardSecurityContainer} */
@@ -133,7 +134,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final UserSwitcherController mUserSwitcherController;
     private final GlobalSettings mGlobalSettings;
     private final FeatureFlags mFeatureFlags;
-    private final SceneContainerFlags mSceneContainerFlags;
     private final SessionTracker mSessionTracker;
     private final Optional<SideFpsController> mSideFpsController;
     private final FalsingA11yDelegate mFalsingA11yDelegate;
@@ -310,7 +310,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
          */
         @Override
         public void finish(int targetUserId) {
-            if (!mFeatureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+            if (!RefactorKeyguardDismissIntent.isEnabled()) {
                 // If there's a pending runnable because the user interacted with a widget
                 // and we're leaving keyguard, then run it.
                 boolean deferKeyguardDone = false;
@@ -455,7 +455,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             FalsingManager falsingManager,
             UserSwitcherController userSwitcherController,
             FeatureFlags featureFlags,
-            SceneContainerFlags sceneContainerFlags,
             GlobalSettings globalSettings,
             SessionTracker sessionTracker,
             Optional<SideFpsController> sideFpsController,
@@ -490,7 +489,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mFalsingManager = falsingManager;
         mUserSwitcherController = userSwitcherController;
         mFeatureFlags = featureFlags;
-        mSceneContainerFlags = sceneContainerFlags;
         mGlobalSettings = globalSettings;
         mSessionTracker = sessionTracker;
         if (SideFpsControllerRefactor.isEnabled()) {
@@ -533,7 +531,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
         showPrimarySecurityScreen(false);
 
-        if (mSceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             // When the scene framework says that the lockscreen has been dismissed, dismiss the
             // keyguard here, revealing the underlying app or launcher:
             mSceneTransitionCollectionJob = mJavaAdapter.get().alwaysCollectFlow(
@@ -649,7 +647,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      * @param action callback to be invoked when keyguard disappear animation completes.
      */
     public void setOnDismissAction(ActivityStarter.OnDismissAction action, Runnable cancelAction) {
-        if (mFeatureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (RefactorKeyguardDismissIntent.isEnabled()) {
             return;
         }
         if (mCancelAction != null) {
@@ -943,7 +941,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mUiEventLogger.log(uiEvent, getSessionId());
         }
 
-        if (mFeatureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+        if (RefactorKeyguardDismissIntent.isEnabled()) {
             if (authenticatedWithPrimaryAuth) {
                 mPrimaryBouncerInteractor.get()
                         .notifyKeyguardAuthenticatedPrimaryAuth(targetUserId);

@@ -39,13 +39,13 @@ import com.android.systemui.statusbar.notification.InflationException
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Inflates and updates icons associated with notifications
@@ -239,8 +239,8 @@ constructor(
 
         val sbi = icon.toStatusBarIcon(entry)
 
-        // Cache if important conversation.
-        if (isImportantConversation(entry)) {
+        // Cache if important conversation or app icon.
+        if (isImportantConversation(entry) || android.app.Flags.notificationsUseAppIcon()) {
             if (showPeopleAvatar) {
                 entry.icons.peopleAvatarDescriptor = sbi
             } else {

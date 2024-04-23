@@ -88,13 +88,14 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
     private lateinit var dialog: SystemUIDialog
     private lateinit var factory: SystemUIDialog.Factory
     private lateinit var latch: CountDownLatch
+    private var issueRecordingState = IssueRecordingState()
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         whenever(dprLazy.get()).thenReturn(devicePolicyResolver)
         whenever(sysuiState.setFlag(anyInt(), anyBoolean())).thenReturn(sysuiState)
-        whenever(screenCaptureDisabledDialogDelegate.createDialog())
+        whenever(screenCaptureDisabledDialogDelegate.createSysUIDialog())
             .thenReturn(screenCaptureDisabledDialog)
         whenever(
                 userFileManager.getSharedPreferences(
@@ -128,6 +129,7 @@ class RecordIssueDialogDelegateTest : SysuiTestCase() {
                     mediaProjectionMetricsLogger,
                     userFileManager,
                     screenCaptureDisabledDialogDelegate,
+                    issueRecordingState,
                 ) {
                     latch.countDown()
                 }

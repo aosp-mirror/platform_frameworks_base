@@ -34,7 +34,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.contains
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
-import com.android.systemui.customization.R as customizationR
 import com.android.systemui.customization.R
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.largeClockElementKey
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.smallClockElementKey
@@ -61,36 +60,31 @@ constructor(
         modifier: Modifier = Modifier,
     ) {
         val currentClock by viewModel.currentClock.collectAsState()
+        val smallTopMargin by
+            viewModel.smallClockTopMargin.collectAsState(viewModel.getSmallClockTopMargin())
         if (currentClock?.smallClock?.view == null) {
             return
         }
         val context = LocalContext.current
-        MovableElement(key = smallClockElementKey, modifier = modifier) {
-            content {
-                AndroidView(
-                    factory = { context ->
-                        FrameLayout(context).apply {
-                            ensureClockViewExists(checkNotNull(currentClock).smallClock.view)
-                        }
-                    },
-                    update = {
-                        it.ensureClockViewExists(checkNotNull(currentClock).smallClock.view)
-                    },
-                    modifier =
-                        Modifier.height(dimensionResource(R.dimen.small_clock_height))
-                            .padding(
-                                horizontal =
-                                    dimensionResource(customizationR.dimen.clock_padding_start)
-                            )
-                            .padding(top = { viewModel.getSmallClockTopMargin(context) })
-                            .onTopPlacementChanged(onTopChanged)
-                            .burnInAware(
-                                viewModel = aodBurnInViewModel,
-                                params = burnInParams,
-                            ),
-                )
-            }
-        }
+        AndroidView(
+            factory = { context ->
+                FrameLayout(context).apply {
+                    ensureClockViewExists(checkNotNull(currentClock).smallClock.view)
+                }
+            },
+            update = { it.ensureClockViewExists(checkNotNull(currentClock).smallClock.view) },
+            modifier =
+                modifier
+                    .height(dimensionResource(R.dimen.small_clock_height))
+                    .padding(horizontal = dimensionResource(R.dimen.clock_padding_start))
+                    .padding(top = { smallTopMargin })
+                    .onTopPlacementChanged(onTopChanged)
+                    .burnInAware(
+                        viewModel = aodBurnInViewModel,
+                        params = burnInParams,
+                    )
+                    .element(smallClockElementKey),
+        )
     }
 
     @Composable
@@ -115,13 +109,8 @@ constructor(
                     1f
                 }
 
-            val distance =
-                if (transition.toScene == splitShadeLargeClockScene) {
-                        -getClockCenteringDistance()
-                    } else {
-                        getClockCenteringDistance()
-                    }
-                    .toFloat()
+            val dir = if (transition.toScene == splitShadeLargeClockScene) -1f else 1f
+            val distance = dir * getClockCenteringDistance()
             val largeClock = checkNotNull(currentClock).largeClock
             largeClock.animations.onPositionUpdated(
                 distance = distance,

@@ -31,7 +31,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from an app via [onUserLeaveHint] and by navigating to home.
  *
- * To run this test: `atest WMShellFlickerTests:EnterPipOnUserLeaveHintTest`
+ * To run this test: `atest WMShellFlickerTestsPip2:EnterPipOnUserLeaveHintTest`
  *
  * Actions:
  * ```

@@ -111,7 +111,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -135,6 +136,9 @@ import java.util.function.Consumer;
 public class SplitControllerTest {
     private static final Intent PLACEHOLDER_INTENT = new Intent().setComponent(
             new ComponentName("test", "placeholder"));
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Rule
     public final SetFlagsRule mSetFlagRule = new SetFlagsRule();
@@ -166,7 +170,6 @@ public class SplitControllerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         doReturn(new WindowLayoutInfo(new ArrayList<>())).when(mWindowLayoutComponent)
                 .getCurrentWindowLayoutInfo(anyInt(), any());
         DeviceStateManagerFoldingFeatureProducer producer =
@@ -227,13 +230,13 @@ public class SplitControllerTest {
 
         // When the activity is not finishing, do not clear the record.
         doReturn(false).when(mActivity).isFinishing();
-        mSplitController.onActivityDestroyed(mActivity);
+        mSplitController.onActivityDestroyed(mTransaction, mActivity);
 
         assertTrue(tf.hasActivity(mActivity.getActivityToken()));
 
         // Clear the record when the activity is finishing and destroyed.
         doReturn(true).when(mActivity).isFinishing();
-        mSplitController.onActivityDestroyed(mActivity);
+        mSplitController.onActivityDestroyed(mTransaction, mActivity);
 
         assertFalse(tf.hasActivity(mActivity.getActivityToken()));
     }
@@ -612,7 +615,7 @@ public class SplitControllerTest {
 
         assertFalse(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString(), any());
+                anyString(), any(), anyBoolean());
     }
 
     @Test
@@ -775,7 +778,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString(), any());
+                anyString(), any(), anyBoolean());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 
@@ -818,7 +821,7 @@ public class SplitControllerTest {
 
         assertTrue(result);
         verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt(), any(),
-                anyString(), any());
+                anyString(), any(), anyBoolean());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any(), any());
     }
 

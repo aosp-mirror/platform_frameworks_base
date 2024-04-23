@@ -416,6 +416,7 @@ public class SecureSettingsValidators {
                 BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DND_CONFIGS_MIGRATED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.HUB_MODE_TUTORIAL_STATE, NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.GLANCEABLE_HUB_ENABLED, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Secure.STYLUS_BUTTONS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.STYLUS_HANDWRITING_ENABLED,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1"}));
@@ -429,5 +430,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.AUDIO_DEVICE_INVENTORY, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Secure.SCREEN_RESOLUTION_MODE, new InclusiveIntegerRangeValidator(
                 Secure.RESOLUTION_MODE_UNKNOWN, Secure.RESOLUTION_MODE_FULL));
+        VALIDATORS.put(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
+                new InclusiveIntegerRangeValidator(0, 10));
     }
 }

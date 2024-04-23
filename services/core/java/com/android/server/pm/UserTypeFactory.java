@@ -306,7 +306,7 @@ public final class UserTypeFactory {
                         R.color.black)
                 .setDarkThemeBadgeColors(
                         R.color.white)
-                .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setDefaultRestrictions(getDefaultPrivateProfileRestrictions())
                 .setDefaultCrossProfileIntentFilters(getDefaultPrivateCrossProfileIntentFilter())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
@@ -327,7 +327,8 @@ public final class UserTypeFactory {
                                 UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT)
                         .setProfileApiVisibility(
                                 UserProperties.PROFILE_API_VISIBILITY_HIDDEN)
-                        .setItemsRestrictedOnHomeScreen(true));
+                        .setItemsRestrictedOnHomeScreen(true)
+                        .setUpdateCrossProfileIntentFiltersOnOTA(true));
     }
 
     /**
@@ -426,6 +427,13 @@ public final class UserTypeFactory {
     private static Bundle getDefaultProfileRestrictions() {
         final Bundle restrictions = new Bundle();
         restrictions.putBoolean(UserManager.DISALLOW_WALLPAPER, true);
+        return restrictions;
+    }
+
+    @VisibleForTesting
+    static Bundle getDefaultPrivateProfileRestrictions() {
+        final Bundle restrictions = getDefaultProfileRestrictions();
+        restrictions.putBoolean(UserManager.DISALLOW_BLUETOOTH_SHARING, true);
         return restrictions;
     }
 

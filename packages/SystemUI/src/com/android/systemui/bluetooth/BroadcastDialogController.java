@@ -56,4 +56,22 @@ public class BroadcastDialogController {
             broadcastDialog.show();
         }
     }
+
+    /** Creates a [BroadcastDialog] for the user to switch broadcast or change the output device
+     *
+     * @param currentBroadcastAppName Indicates the APP name currently broadcasting
+     * @param outputPkgName Indicates the output media package name to be switched
+     * @param controller Indicates the dialog controller of the source view.
+     */
+    public void createBroadcastDialogWithController(
+            String currentBroadcastAppName, String outputPkgName,
+            DialogTransitionAnimator.Controller controller) {
+        SystemUIDialog broadcastDialog = mBroadcastDialogFactory.create(
+                currentBroadcastAppName, outputPkgName).createDialog();
+        if (controller != null) {
+            mDialogTransitionAnimator.show(broadcastDialog, controller);
+        } else {
+            broadcastDialog.show();
+        }
+    }
 }

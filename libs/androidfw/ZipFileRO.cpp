@@ -119,29 +119,40 @@ ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
  * appear to be bogus.
  */
 bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
+ uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
+ uint32_t* pModWhen, uint32_t* pCrc32) const
+{
+     return getEntryInfo(entry, pMethod, pUncompLen, pCompLen, pOffset, pModWhen,
+      pCrc32, nullptr);
+}
+
+bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
     uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
-    uint32_t* pModWhen, uint32_t* pCrc32) const
+    uint32_t* pModWhen, uint32_t* pCrc32, uint16_t* pExtraFieldSize) const
 {
     const _ZipEntryRO* zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
     const ZipEntry& ze = zipEntry->entry;
 
-    if (pMethod != NULL) {
+    if (pMethod != nullptr) {
         *pMethod = ze.method;
     }
-    if (pUncompLen != NULL) {
+    if (pUncompLen != nullptr) {
         *pUncompLen = ze.uncompressed_length;
     }
-    if (pCompLen != NULL) {
+    if (pCompLen != nullptr) {
         *pCompLen = ze.compressed_length;
     }
-    if (pOffset != NULL) {
+    if (pOffset != nullptr) {
         *pOffset = ze.offset;
     }
-    if (pModWhen != NULL) {
+    if (pModWhen != nullptr) {
         *pModWhen = ze.mod_time;
     }
-    if (pCrc32 != NULL) {
+    if (pCrc32 != nullptr) {
         *pCrc32 = ze.crc32;
+    }
+    if (pExtraFieldSize != nullptr) {
+        *pExtraFieldSize = ze.extra_field_size;
     }
 
     return true;
@@ -304,9 +315,13 @@ bool ZipFileRO::uncompressEntry(ZipEntryRO entry, int fd) const
     _ZipEntryRO *zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
     const int32_t error = ExtractEntryToFile(mHandle, &(zipEntry->entry), fd);
     if (error) {
-        ALOGW("ExtractToMemory failed with %s", ErrorCodeString(error));
+        ALOGW("ExtractToFile failed with %s", ErrorCodeString(error));
         return false;
     }
 
     return true;
+}
+
+const char* ZipFileRO::getZipFileName() {
+    return mFileName;
 }

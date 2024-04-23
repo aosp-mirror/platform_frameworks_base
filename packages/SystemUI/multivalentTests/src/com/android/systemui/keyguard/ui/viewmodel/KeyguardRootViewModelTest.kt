@@ -30,11 +30,8 @@ import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -60,13 +57,9 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardRootViewModelTest : SysuiTestCase() {
-    private val kosmos =
-        testKosmos().apply {
-            fakeFeatureFlagsClassic.apply { set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false) }
-        }
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    private val keyguardInteractor = kosmos.keyguardInteractor
     private val keyguardRepository = kosmos.fakeKeyguardRepository
     private val communalRepository = kosmos.communalRepository
     private val screenOffAnimationController = kosmos.screenOffAnimationController
@@ -82,7 +75,10 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     fun setUp() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
-        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+        mSetFlagsRule.disableFlags(
+            AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
+            AConfigFlags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT,
+        )
     }
 
     @Test
@@ -418,6 +414,25 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.GONE,
+                testScope = testScope,
+            )
+            assertThat(alpha).isEqualTo(0f)
+
+            // Try pulling down shade and ensure the value doesn't change
+            shadeRepository.setQsExpansion(0.5f)
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun alpha_idleOnDream_isZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha(viewState))
+            assertThat(alpha).isEqualTo(1f)
+
+            // Go to GONE state
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DREAMING,
                 testScope = testScope,
             )
             assertThat(alpha).isEqualTo(0f)

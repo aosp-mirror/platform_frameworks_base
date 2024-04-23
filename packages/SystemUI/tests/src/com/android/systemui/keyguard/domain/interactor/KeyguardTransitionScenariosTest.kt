@@ -27,6 +27,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
+import com.android.systemui.dock.DockManager
+import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeCommandQueue
@@ -108,6 +110,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
     private val powerInteractor = kosmos.powerInteractor
     private val communalInteractor = kosmos.communalInteractor
+    private val dockManager = kosmos.fakeDockManager
 
     @Before
     fun setUp() {
@@ -752,35 +755,6 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun goneToDreamingLockscreenHosted() =
-        testScope.runTest {
-            // GIVEN a device that is not dreaming or dozing
-            keyguardRepository.setDreamingWithOverlay(false)
-            keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
-            )
-            runCurrent()
-
-            // GIVEN a prior transition has run to GONE
-            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
-
-            // WHEN the device begins to dream with the lockscreen hosted dream
-            keyguardRepository.setDreamingWithOverlay(true)
-            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
-            advanceTimeBy(100L)
-
-            assertThat(transitionRepository)
-                .startedTransition(
-                    to = KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
-                    from = KeyguardState.GONE,
-                    ownerName = "FromGoneTransitionInteractor",
-                    animatorAssertion = { it.isNotNull() }
-                )
-
-            coroutineContext.cancelChildren()
-        }
-
-    @Test
     fun goneToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to GONE
@@ -1230,6 +1204,44 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    fun occludedToGlanceableHubWhenDocked() =
+        testScope.runTest {
+            // GIVEN a device on lockscreen
+            keyguardRepository.setKeyguardShowing(true)
+            runCurrent()
+
+            // GIVEN a prior transition has run to OCCLUDED
+            runTransitionAndSetWakefulness(KeyguardState.GLANCEABLE_HUB, KeyguardState.OCCLUDED)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // GIVEN device is docked/communal is available
+            dockManager.setIsDocked(true)
+            dockManager.setDockEvent(DockManager.STATE_DOCKED)
+            val idleTransitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(CommunalScenes.Communal)
+                )
+            communalInteractor.setTransitionState(idleTransitionState)
+            runCurrent()
+
+            // WHEN occlusion ends
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            // THEN a transition to GLANCEABLE_HUB should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = FromOccludedTransitionInteractor::class.simpleName,
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.GLANCEABLE_HUB,
+                    animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     fun occludedToAlternateBouncer() =
         testScope.runTest {
             // GIVEN a prior transition has run to OCCLUDED
@@ -1337,6 +1349,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // WHEN the keyguard is occluded and device wakes up and is no longer dreaming
             keyguardRepository.setDreaming(false)
+            testScheduler.advanceTimeBy(150) // The dreaming signal is debounced.
+            runCurrent()
             keyguardRepository.setKeyguardOccluded(true)
             powerInteractor.setAwakeForTest()
             runCurrent()
@@ -1344,9 +1358,33 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition to OCCLUDED should occur
             assertThat(transitionRepository)
                 .startedTransition(
-                    ownerName = "FromDreamingTransitionInteractor",
+                    ownerName = "FromDreamingTransitionInteractor(Occluded but no longer dreaming)",
                     from = KeyguardState.DREAMING,
                     to = KeyguardState.OCCLUDED,
+                    animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dreamingToPrimaryBouncer() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DREAMING
+            keyguardRepository.setDreaming(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
+            runCurrent()
+
+            // WHEN the primary bouncer is set to show
+            bouncerRepository.setPrimaryShow(true)
+            runCurrent()
+
+            // THEN a transition to PRIMARY_BOUNCER should occur
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = "FromDreamingTransitionInteractor",
+                    from = KeyguardState.DREAMING,
+                    to = KeyguardState.PRIMARY_BOUNCER,
                     animatorAssertion = { it.isNotNull() },
                 )
 
@@ -1457,7 +1495,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition to OCCLUDED should occur
             assertThat(transitionRepository)
                 .startedTransition(
-                    ownerName = "FromAodTransitionInteractor",
+                    ownerName = "FromAodTransitionInteractor(isOccluded = true)",
                     from = KeyguardState.AOD,
                     to = KeyguardState.OCCLUDED,
                     animatorAssertion = { it.isNotNull() },
@@ -1496,7 +1534,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runTransitionAndSetWakefulness(KeyguardState.AOD, KeyguardState.LOCKSCREEN)
             runCurrent()
 
-            // WHEN the device begins to sleep (first power button press)...
+            // WHEN the device begins to sleep (first power button press), which starts
+            // LS -> DOZING...
             powerInteractor.setAsleepForTest()
             runCurrent()
             reset(transitionRepository)
@@ -1509,11 +1548,11 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             }
             runCurrent()
 
-            // THEN a transition from LOCKSCREEN => OCCLUDED should occur
+            // THEN a transition from DOZING => OCCLUDED should occur
             assertThat(transitionRepository)
                 .startedTransition(
-                    ownerName = "FromLockscreenTransitionInteractor",
-                    from = KeyguardState.LOCKSCREEN,
+                    ownerName = "FromDozingTransitionInteractor",
+                    from = KeyguardState.DOZING,
                     to = KeyguardState.OCCLUDED,
                     animatorAssertion = { it.isNotNull() },
                 )

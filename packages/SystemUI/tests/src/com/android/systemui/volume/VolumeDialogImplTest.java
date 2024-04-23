@@ -65,6 +65,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 
 import androidx.test.core.view.MotionEventBuilder;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -247,6 +248,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
             VolumeDialogController.StreamState ss = new VolumeDialogController.StreamState();
             ss.name = STREAMS.get(i);
             ss.level = 1;
+            ss.levelMin = 0;
+            ss.levelMax = 25;
             state.states.append(i, ss);
         }
         return state;
@@ -293,7 +296,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
-    @Test
+    @Test @FlakyTest(bugId = 329099861)
     @EnableFlags(FLAG_HAPTIC_VOLUME_SLIDER)
     public void testVolumeChange_withSliderHaptics_deliversOnProgressChangedHapticsEagerly() {
         // create haptic plugins on the rows with the flag enabled

@@ -744,11 +744,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
 
         mLastReason = oomAdjReason;
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
-        mService.mOomAdjProfiler.oomAdjStarted();
 
         fullUpdateLSP(oomAdjReason);
 
-        mService.mOomAdjProfiler.oomAdjEnded();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
@@ -766,14 +764,12 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         mLastReason = oomAdjReason;
         mProcessStateCurTop = enqueuePendingTopAppIfNecessaryLSP();
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReasonToString(oomAdjReason));
-        mService.mOomAdjProfiler.oomAdjStarted();
 
         synchronized (mProcLock) {
             partialUpdateLSP(oomAdjReason, mPendingProcessSet);
         }
         mPendingProcessSet.clear();
 
-        mService.mOomAdjProfiler.oomAdjEnded();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 

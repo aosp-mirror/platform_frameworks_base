@@ -149,9 +149,10 @@ public class BubblePositioner {
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
 
         if (mShowingInBubbleBar) {
-            mExpandedViewLargeScreenWidth = isLandscape()
-                    ? (int) (bounds.width() * EXPANDED_VIEW_BUBBLE_BAR_LANDSCAPE_WIDTH_PERCENT)
-                    : (int) (bounds.width() * EXPANDED_VIEW_BUBBLE_BAR_PORTRAIT_WIDTH_PERCENT);
+            mExpandedViewLargeScreenWidth = Math.min(
+                    res.getDimensionPixelSize(R.dimen.bubble_bar_expanded_view_width),
+                    mPositionRect.width() - 2 * mExpandedViewPadding
+            );
         } else if (mDeviceConfig.isSmallTablet()) {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
@@ -839,10 +840,41 @@ public class BubblePositioner {
      * How tall the expanded view should be when showing from the bubble bar.
      */
     public int getExpandedViewHeightForBubbleBar(boolean isOverflow) {
-        return isOverflow
-                ? mOverflowHeight
-                : getExpandedViewBottomForBubbleBar() - mInsets.top - mExpandedViewPadding;
+        if (isOverflow) {
+            return mOverflowHeight;
+        } else {
+            return getBubbleBarExpandedViewHeightForLandscape();
+        }
     }
+
+    /**
+     * Calculate the height of expanded view in landscape mode regardless current orientation.
+     * Here is an explanation:
+     * ------------------------ mScreenRect.top
+     * |         top inset ↕  |
+     * |-----------------------
+     * |      16dp spacing ↕  |
+     * |           ---------  | --- expanded view top
+     * |           |       |  |   ↑
+     * |           |       |  |   ↓ expanded view height
+     * |           ---------  | --- expanded view bottom
+     * |      16dp spacing ↕  |   ↑
+     * |         @bubble bar@ |   | height of the bubble bar container
+     * ------------------------   | already includes bottom inset and spacing
+     * |      bottom inset ↕  |   ↓
+     * |----------------------| --- mScreenRect.bottom
+     */
+    private int getBubbleBarExpandedViewHeightForLandscape() {
+        int heightOfBubbleBarContainer =
+                mScreenRect.height() - getExpandedViewBottomForBubbleBar();
+        // getting landscape height from screen rect
+        int expandedViewHeight = Math.min(mScreenRect.width(), mScreenRect.height());
+        expandedViewHeight -= heightOfBubbleBarContainer; /* removing bubble container height */
+        expandedViewHeight -= mInsets.top; /* removing top inset */
+        expandedViewHeight -= mExpandedViewPadding; /* removing spacing */
+        return expandedViewHeight;
+    }
+
 
     /** The bottom position of the expanded view when showing above the bubble bar. */
     public int getExpandedViewBottomForBubbleBar() {

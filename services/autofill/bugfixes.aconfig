@@ -1,4 +1,5 @@
 package: "android.service.autofill"
+container: "system"
 
 flag {
   name: "test"
@@ -40,4 +41,18 @@ flag {
   namespace: "autofill"
   description: "Use weak reference to address binder leak problem"
   bug: "307972253"
+}
+
+flag {
+  name: "add_last_focused_id_to_client_state"
+  namespace: "autofill"
+  description: "Include the current view id into the FillEventHistory events as part of ClientState"
+  bug: "334141398"
+}
+
+flag {
+  name: "add_session_id_to_client_state"
+  namespace: "autofill"
+  description: "Include the session id into the FillEventHistory events as part of ClientState"
+  bug: "333927465"
 }

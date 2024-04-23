@@ -23,15 +23,16 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationStackAppearanceViewModel
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationScrollViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationsPlaceholderViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -45,11 +46,11 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
 
     private val kosmos =
         testKosmos().apply {
-            fakeSceneContainerFlags.enabled = true
             fakeFeatureFlagsClassic.apply {
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
                 set(Flags.NSSL_DEBUG_LINES, false)
@@ -57,27 +58,44 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         }
     private val testScope = kosmos.testScope
     private val placeholderViewModel by lazy { kosmos.notificationsPlaceholderViewModel }
-    private val appearanceViewModel by lazy { kosmos.notificationStackAppearanceViewModel }
+    private val appearanceViewModel by lazy { kosmos.notificationScrollViewModel }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
 
     @Test
     fun updateBounds() =
         testScope.runTest {
-            val clipping by collectLastValue(appearanceViewModel.shadeScrimClipping)
+            val radius = MutableStateFlow(32)
+            val leftOffset = MutableStateFlow(0)
+            val shape by collectLastValue(appearanceViewModel.shadeScrimShape(radius, leftOffset))
 
-            val top = 200f
-            val left = 0f
-            val bottom = 550f
-            val right = 100f
-            placeholderViewModel.onBoundsChanged(
-                left = left,
-                top = top,
-                right = right,
-                bottom = bottom
+            placeholderViewModel.onScrimBoundsChanged(
+                ShadeScrimBounds(left = 0f, top = 200f, right = 100f, bottom = 550f)
             )
-            assertThat(clipping?.bounds)
-                .isEqualTo(ShadeScrimBounds(left = left, top = top, right = right, bottom = bottom))
+            assertThat(shape)
+                .isEqualTo(
+                    ShadeScrimShape(
+                        bounds =
+                            ShadeScrimBounds(left = 0f, top = 200f, right = 100f, bottom = 550f),
+                        topRadius = 32,
+                        bottomRadius = 0
+                    )
+                )
+
+            leftOffset.value = 200
+            radius.value = 24
+            placeholderViewModel.onScrimBoundsChanged(
+                ShadeScrimBounds(left = 210f, top = 200f, right = 300f, bottom = 550f)
+            )
+            assertThat(shape)
+                .isEqualTo(
+                    ShadeScrimShape(
+                        bounds =
+                            ShadeScrimBounds(left = 10f, top = 200f, right = 100f, bottom = 550f),
+                        topRadius = 24,
+                        bottomRadius = 0
+                    )
+                )
         }
 
     @Test

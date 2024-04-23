@@ -25,6 +25,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.RemoteException
+import android.view.Choreographer
 import android.view.Display
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.IRemoteAnimationRunner
@@ -67,7 +68,7 @@ class CrossActivityBackAnimation @Inject constructor(
 
     private val backAnimRect = Rect()
 
-    private val cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
+    private var cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
 
     private val backAnimationRunner = BackAnimationRunner(
         Callback(), Runner(), context, Cuj.CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY
@@ -86,12 +87,18 @@ class CrossActivityBackAnimation @Inject constructor(
     private val enteringStartOffset =
         context.resources.getDimension(R.dimen.cross_activity_back_entering_start_offset)
 
-    private val gestureInterpolator = Interpolators.STANDARD_DECELERATE
+    private val gestureInterpolator = Interpolators.BACK_GESTURE
     private val postCommitInterpolator = Interpolators.FAST_OUT_SLOW_IN
     private val verticalMoveInterpolator: Interpolator = DecelerateInterpolator()
 
     private var scrimLayer: SurfaceControl? = null
     private var maxScrimAlpha: Float = 0f
+
+    private var isLetterboxed = false
+
+    override fun onConfigurationChanged(newConfiguration: Configuration) {
+        cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
+    }
 
     override fun getRunner() = backAnimationRunner
 
@@ -107,9 +114,15 @@ class CrossActivityBackAnimation @Inject constructor(
         initialTouchPos.set(backMotionEvent.touchX, backMotionEvent.touchY)
 
         transaction.setAnimationTransaction()
-
+        isLetterboxed = closingTarget!!.taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed
+        if (isLetterboxed) {
+            // Include letterbox in back animation
+            backAnimRect.set(closingTarget!!.windowConfiguration.bounds)
+        } else {
+            // otherwise play animation on localBounds only
+            backAnimRect.set(closingTarget!!.localBounds)
+        }
         // Offset start rectangle to align task bounds.
-        backAnimRect.set(closingTarget!!.localBounds)
         backAnimRect.offsetTo(0, 0)
 
         startClosingRect.set(backAnimRect)
@@ -137,7 +150,7 @@ class CrossActivityBackAnimation @Inject constructor(
             enteringTarget!!.taskInfo.taskDescription!!.backgroundColor, transaction
         )
         ensureScrimLayer()
-        transaction.apply()
+        applyTransaction()
     }
 
     private fun onGestureProgress(backEvent: BackEvent) {
@@ -150,7 +163,7 @@ class CrossActivityBackAnimation @Inject constructor(
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
         currentEnteringRect.offset(0f, yOffset)
         applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
-        transaction.apply()
+        applyTransaction()
     }
 
     private fun getYOffset(centeredRect: RectF, touchY: Float): Float {
@@ -210,7 +223,7 @@ class CrossActivityBackAnimation @Inject constructor(
         applyTransform(closingTarget?.leash, currentClosingRect, closingAlpha)
         currentEnteringRect.setInterpolatedRectF(startEnteringRect, targetEnteringRect, progress)
         applyTransform(enteringTarget?.leash, currentEnteringRect, 1f)
-        transaction.apply()
+        applyTransaction()
     }
 
     private fun finishAnimation() {
@@ -226,7 +239,7 @@ class CrossActivityBackAnimation @Inject constructor(
         closingTarget = null
 
         background.removeBackground(transaction)
-        transaction.apply()
+        applyTransaction()
         transformMatrix.reset()
         initialTouchPos.set(0f, 0f)
         try {
@@ -236,6 +249,7 @@ class CrossActivityBackAnimation @Inject constructor(
         }
         finishCallback = null
         removeScrimLayer()
+        isLetterboxed = false
     }
 
     private fun applyTransform(leash: SurfaceControl?, rect: RectF, alpha: Float) {
@@ -248,6 +262,11 @@ class CrossActivityBackAnimation @Inject constructor(
             .setMatrix(leash, transformMatrix, tmpFloat9)
             .setCrop(leash, backAnimRect)
             .setCornerRadius(leash, cornerRadius)
+    }
+
+    private fun applyTransaction() {
+        transaction.setFrameTimelineVsync(Choreographer.getInstance().vsyncId)
+        transaction.apply()
     }
 
     private fun ensureScrimLayer() {
@@ -264,10 +283,11 @@ class CrossActivityBackAnimation @Inject constructor(
         scrimLayer = scrimBuilder.build()
         val colorComponents = floatArrayOf(0f, 0f, 0f)
         maxScrimAlpha = if (isDarkTheme) MAX_SCRIM_ALPHA_DARK else MAX_SCRIM_ALPHA_LIGHT
+        val scrimCrop = if (isLetterboxed) backAnimRect else closingTarget!!.localBounds
         transaction
             .setColor(scrimLayer, colorComponents)
             .setAlpha(scrimLayer!!, maxScrimAlpha)
-            .setCrop(scrimLayer!!, closingTarget!!.localBounds)
+            .setCrop(scrimLayer!!, scrimCrop)
             .setRelativeLayer(scrimLayer!!, closingTarget!!.leash, -1)
             .show(scrimLayer)
     }
@@ -275,7 +295,8 @@ class CrossActivityBackAnimation @Inject constructor(
     private fun removeScrimLayer() {
         scrimLayer?.let {
             if (it.isValid) {
-                transaction.remove(it).apply()
+                transaction.remove(it)
+                applyTransaction()
             }
         }
         scrimLayer = null
@@ -287,7 +308,7 @@ class CrossActivityBackAnimation @Inject constructor(
             // in case we're still animating an onBackCancelled event, let's remove the finish-
             // callback from the progress animator to prevent calling finishAnimation() before
             // restarting a new animation
-            progressAnimator.removeOnBackCancelledFinishCallback();
+            progressAnimator.removeOnBackCancelledFinishCallback()
 
             startBackAnimation(backMotionEvent)
             progressAnimator.onBackStarted(backMotionEvent) { backEvent: BackEvent ->

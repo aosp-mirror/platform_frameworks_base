@@ -300,7 +300,7 @@ class TransitionController {
      * Creates a transition. It can immediately collect participants.
      */
     @NonNull
-    private Transition createTransition(@WindowManager.TransitionType int type,
+    Transition createTransition(@WindowManager.TransitionType int type,
             @WindowManager.TransitionFlags int flags) {
         if (mTransitionPlayer == null) {
             throw new IllegalStateException("Shell Transitions not enabled");
@@ -564,6 +564,9 @@ class TransitionController {
     boolean isTransientLaunch(@NonNull ActivityRecord ar) {
         if (isTransientCollect(ar)) {
             return true;
+        }
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
+            if (mWaitingTransitions.get(i).isTransientLaunch(ar)) return true;
         }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isTransientLaunch(ar)) return true;

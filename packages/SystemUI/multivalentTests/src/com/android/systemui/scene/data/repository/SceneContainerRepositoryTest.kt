@@ -23,10 +23,10 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -39,10 +39,10 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@android.platform.test.annotations.EnabledOnRavenwood
+@EnableSceneContainer
 class SceneContainerRepositoryTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos().apply { fakeSceneContainerFlags.enabled = true }
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
     @Test
@@ -139,5 +139,24 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
                 .isEqualTo(
                     ObservableTransitionState.Idle(kosmos.sceneContainerConfig.initialSceneKey)
                 )
+        }
+
+    @Test
+    fun previousScene() =
+        testScope.runTest {
+            val underTest = kosmos.sceneContainerRepository
+            val currentScene by collectLastValue(underTest.currentScene)
+            val previousScene by collectLastValue(underTest.previousScene)
+
+            assertThat(previousScene).isNull()
+
+            val firstScene = currentScene
+            underTest.changeScene(Scenes.Shade)
+            assertThat(previousScene).isEqualTo(firstScene)
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+
+            underTest.changeScene(Scenes.QuickSettings)
+            assertThat(previousScene).isEqualTo(Scenes.Shade)
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
         }
 }

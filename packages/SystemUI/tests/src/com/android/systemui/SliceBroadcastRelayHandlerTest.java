@@ -31,36 +31,57 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.SliceBroadcastRelay;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidTestingRunner.class)
+import java.util.List;
+
+@RunWith(Parameterized.class)
 @SmallTest
 public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
 
+    @Parameterized.Parameters(name = "{0}")
+    public static List<FlagsParameterization> getFlags() {
+        return FlagsParameterization.allCombinationsOf(
+                Flags.FLAG_SLICE_BROADCAST_RELAY_IN_BACKGROUND);
+    }
+
     private static final String TEST_ACTION = "com.android.systemui.action.TEST_ACTION";
+    private final FakeExecutor mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
+
     private SliceBroadcastRelayHandler mRelayHandler;
     private Context mSpyContext;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
+
+
+    public SliceBroadcastRelayHandlerTest(FlagsParameterization flags) {
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mSpyContext = spy(mContext);
 
-        mRelayHandler = new SliceBroadcastRelayHandler(mSpyContext, mBroadcastDispatcher);
+        mRelayHandler = new SliceBroadcastRelayHandler(mSpyContext, mBroadcastDispatcher,
+                mBackgroundExecutor);
     }
 
     @Test
@@ -80,6 +101,7 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, testUri);
 
         mRelayHandler.handleIntent(intent);
+        mBackgroundExecutor.runAllReady();
         verify(mSpyContext).registerReceiver(any(), eq(value), anyInt());
     }
 
@@ -99,12 +121,14 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         intent.putExtra(SliceBroadcastRelay.EXTRA_FILTER, value);
 
         mRelayHandler.handleIntent(intent);
+        mBackgroundExecutor.runAllReady();
         ArgumentCaptor<BroadcastReceiver> relay = ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mSpyContext).registerReceiver(relay.capture(), eq(value), anyInt());
 
         intent = new Intent(SliceBroadcastRelay.ACTION_UNREGISTER);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
         mRelayHandler.handleIntent(intent);
+        mBackgroundExecutor.runAllReady();
         verify(mSpyContext).unregisterReceiver(eq(relay.getValue()));
     }
 
@@ -119,6 +143,7 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         Intent intent = new Intent(SliceBroadcastRelay.ACTION_UNREGISTER);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
         mRelayHandler.handleIntent(intent);
+        mBackgroundExecutor.runAllReady();
         // No crash
     }
 
@@ -138,6 +163,7 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         intent.putExtra(SliceBroadcastRelay.EXTRA_FILTER, value);
 
         mRelayHandler.handleIntent(intent);
+        mBackgroundExecutor.runAllReady();
         ArgumentCaptor<BroadcastReceiver> relay = ArgumentCaptor.forClass(BroadcastReceiver.class);
         verify(mSpyContext).registerReceiver(relay.capture(), eq(value), anyInt());
         relay.getValue().onReceive(mSpyContext, new Intent(TEST_ACTION));
@@ -146,11 +172,26 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRegisteredWithDispatcher() {
+    @DisableFlags(Flags.FLAG_SLICE_BROADCAST_RELAY_IN_BACKGROUND)
+    public void testRegisteredWithDispatcher_onMainThread() {
         mRelayHandler.start();
+        mBackgroundExecutor.runAllReady();
 
         verify(mBroadcastDispatcher)
                 .registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class));
+        verify(mSpyContext, never())
+                .registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SLICE_BROADCAST_RELAY_IN_BACKGROUND)
+    public void testRegisteredWithDispatcher_onBackgroundThread() {
+        mRelayHandler.start();
+        mBackgroundExecutor.runAllReady();
+
+        verify(mBroadcastDispatcher)
+                .registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class),
+                        eq(mBackgroundExecutor));
         verify(mSpyContext, never())
                 .registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class));
     }

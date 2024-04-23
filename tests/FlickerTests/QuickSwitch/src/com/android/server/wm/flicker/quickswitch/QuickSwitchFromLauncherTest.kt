@@ -16,10 +16,10 @@
 
 package com.android.server.wm.flicker.quickswitch
 
+import android.graphics.Rect
 import android.platform.test.annotations.Presubmit
 import android.tools.NavBar
 import android.tools.Rotation
-import android.tools.datatypes.Rect
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
@@ -266,7 +266,7 @@ class QuickSwitchFromLauncherTest(flicker: LegacyFlickerTest) : BaseTest(flicker
 
     companion object {
         /** {@inheritDoc} */
-        private var startDisplayBounds = Rect.EMPTY
+        private var startDisplayBounds = Rect()
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

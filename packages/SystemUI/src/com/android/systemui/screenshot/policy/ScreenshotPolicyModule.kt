@@ -16,7 +16,14 @@
 
 package com.android.systemui.screenshot.policy
 
+import android.content.ComponentName
+import android.content.Context
+import android.os.Process
+import com.android.systemui.Flags.screenshotPrivateProfileBehaviorFix
+import com.android.systemui.SystemUIService
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.screenshot.ImageCapture
 import com.android.systemui.screenshot.RequestProcessor
 import com.android.systemui.screenshot.ScreenshotPolicy
@@ -29,6 +36,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
+import kotlinx.coroutines.CoroutineDispatcher
 
 @Module
 interface ScreenshotPolicyModule {
@@ -37,18 +45,46 @@ interface ScreenshotPolicyModule {
     @SysUISingleton
     fun bindProfileTypeRepository(impl: ProfileTypeRepositoryImpl): ProfileTypeRepository
 
-    companion object {
-        @Provides
-        @SysUISingleton
-        fun bindScreenshotRequestProcessor(
-            imageCapture: ImageCapture,
-            policyProvider: Provider<ScreenshotPolicy>,
-        ): ScreenshotRequestProcessor {
-            return RequestProcessor(imageCapture, policyProvider.get())
-        }
-    }
-
     @Binds
     @SysUISingleton
     fun bindDisplayContentRepository(impl: DisplayContentRepositoryImpl): DisplayContentRepository
+
+    companion object {
+        @JvmStatic
+        @Provides
+        @SysUISingleton
+        fun bindCapturePolicyList(
+            privateProfilePolicy: PrivateProfilePolicy,
+            workProfilePolicy: WorkProfilePolicy,
+        ): List<CapturePolicy> {
+            // In order of priority. The first matching policy applies.
+            return listOf(workProfilePolicy, privateProfilePolicy)
+        }
+
+        @JvmStatic
+        @Provides
+        @SysUISingleton
+        fun bindScreenshotRequestProcessor(
+            @Application context: Context,
+            @Background background: CoroutineDispatcher,
+            imageCapture: ImageCapture,
+            policyProvider: Provider<ScreenshotPolicy>,
+            displayContentRepoProvider: Provider<DisplayContentRepository>,
+            policyListProvider: Provider<List<CapturePolicy>>,
+        ): ScreenshotRequestProcessor {
+            return if (screenshotPrivateProfileBehaviorFix()) {
+                PolicyRequestProcessor(
+                    background = background,
+                    capture = imageCapture,
+                    displayTasks = displayContentRepoProvider.get(),
+                    policies = policyListProvider.get(),
+                    defaultOwner = Process.myUserHandle(),
+                    defaultComponent =
+                        ComponentName(context.packageName, SystemUIService::class.java.toString())
+                )
+            } else {
+                RequestProcessor(imageCapture, policyProvider.get())
+            }
+        }
+    }
 }

@@ -43,7 +43,6 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.Flags.notifyPowerManagerUserActivityBackground;
 import static com.android.systemui.Flags.refactorGetCurrentUser;
 import static com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel.DREAMING_ANIMATION_DURATION_MS;
-import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -98,7 +97,6 @@ import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
@@ -137,6 +135,7 @@ import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.TransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
@@ -164,7 +163,6 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -178,8 +176,6 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -189,6 +185,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
+import dagger.Lazy;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
@@ -585,7 +582,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private CentralSurfaces mCentralSurfaces;
 
-    private IRemoteAnimationFinishedCallback mUnoccludeFromDreamFinishedCallback;
+    private IRemoteAnimationFinishedCallback mUnoccludeFinishedCallback;
 
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
@@ -964,6 +961,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     @VisibleForTesting
     final ActivityTransitionAnimator.Controller mOccludeAnimationController =
             new ActivityTransitionAnimator.Controller() {
+                private boolean mIsLaunching = true;
+
+                @Override
+                public boolean isLaunching() {
+                    return mIsLaunching;
+                }
+
                 @Override
                 public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
                     mOccludeAnimationPlaying = true;
@@ -1228,10 +1232,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             mUnoccludeAnimator.cancel();
                         }
 
-                        if (isDream) {
+                        if (isDream || mShowCommunalByDefault) {
                             initAlphaForAnimationTargets(wallpapers);
-                            mDreamViewModel.get().startTransitionFromDream();
-                            mUnoccludeFromDreamFinishedCallback = finishedCallback;
+                            if (isDream) {
+                                mDreamViewModel.get().startTransitionFromDream();
+                            }
+                            mUnoccludeFinishedCallback = finishedCallback;
                             return;
                         }
 
@@ -1298,7 +1304,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private Consumer<Float> getRemoteSurfaceAlphaApplier() {
         return (Float alpha) -> {
-            if (mRemoteAnimationTarget == null) return;
+            if (mRemoteAnimationTarget == null) {
+                Log.e(TAG, "Attempting to set alpha on null animation target");
+                return;
+            }
             final View localView = mKeyguardViewControllerLazy.get().getViewRootImpl().getView();
             final SyncRtSurfaceTransactionApplier applier =
                     new SyncRtSurfaceTransactionApplier(localView);
@@ -1313,10 +1322,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private Consumer<TransitionStep> getFinishedCallbackConsumer() {
         return (TransitionStep step) -> {
-            if (mUnoccludeFromDreamFinishedCallback == null) return;
+            if (mUnoccludeFinishedCallback == null) return;
             try {
-                mUnoccludeFromDreamFinishedCallback.onAnimationFinished();
-                mUnoccludeFromDreamFinishedCallback = null;
+                mUnoccludeFinishedCallback.onAnimationFinished();
+                mUnoccludeFinishedCallback = null;
             } catch (RemoteException e) {
                 Log.e(TAG, "Wasn't able to callback", e);
             }
@@ -1359,7 +1368,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final SessionTracker mSessionTracker;
     private final CoroutineDispatcher mMainDispatcher;
     private final Lazy<DreamViewModel> mDreamViewModel;
+    private final Lazy<CommunalTransitionViewModel> mCommunalTransitionViewModel;
     private RemoteAnimationTarget mRemoteAnimationTarget;
+    private boolean mShowCommunalByDefault = false;
 
     private final Lazy<WindowManagerLockscreenVisibilityManager> mWmLockscreenVisibilityManager;
 
@@ -1408,6 +1419,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<DreamViewModel> dreamViewModel,
+            Lazy<CommunalTransitionViewModel> communalTransitionViewModel,
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
             SelectedUserInteractor selectedUserInteractor,
@@ -1479,6 +1491,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mSessionTracker = sessionTracker;
 
         mDreamViewModel = dreamViewModel;
+        mCommunalTransitionViewModel = communalTransitionViewModel;
         mWmLockscreenVisibilityManager = wmLockscreenVisibilityManager;
         mMainDispatcher = mainDispatcher;
 
@@ -1607,14 +1620,18 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             adjustStatusBarLocked();
             mDreamOverlayStateController.addCallback(mDreamOverlayStateCallback);
 
-            ViewRootImpl viewRootImpl = mKeyguardViewControllerLazy.get().getViewRootImpl();
-            if (viewRootImpl != null) {
-                final DreamViewModel viewModel = mDreamViewModel.get();
-                collectFlow(viewRootImpl.getView(), viewModel.getDreamAlpha(),
-                        getRemoteSurfaceAlphaApplier(), mMainDispatcher);
-                collectFlow(viewRootImpl.getView(), viewModel.getTransitionEnded(),
-                        getFinishedCallbackConsumer(), mMainDispatcher);
-            }
+            final DreamViewModel dreamViewModel = mDreamViewModel.get();
+            final CommunalTransitionViewModel communalViewModel =
+                    mCommunalTransitionViewModel.get();
+
+            mJavaAdapter.alwaysCollectFlow(dreamViewModel.getDreamAlpha(),
+                    getRemoteSurfaceAlphaApplier());
+            mJavaAdapter.alwaysCollectFlow(dreamViewModel.getTransitionEnded(),
+                    getFinishedCallbackConsumer());
+            mJavaAdapter.alwaysCollectFlow(communalViewModel.getShowByDefault(),
+                    (showByDefault) -> mShowCommunalByDefault = showByDefault);
+            mJavaAdapter.alwaysCollectFlow(communalViewModel.getTransitionFromOccludedEnded(),
+                    getFinishedCallbackConsumer());
         }
         // Most services aren't available until the system reaches the ready state, so we
         // send it here when the device first boots.
@@ -2147,13 +2164,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_TRANSITION_FROM_AOD);
 
         synchronized (KeyguardViewMediator.this) {
-            if (mHiding && isOccluded) {
-                // We're in the process of going away but WindowManager wants to show a
-                // SHOW_WHEN_LOCKED activity instead.
-                // TODO(bc-unlock): Migrate to remote animation.
-                startKeyguardExitAnimation(0, 0);
-            }
-
             mPowerGestureIntercepted =
                     isOccluded && mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
 
@@ -3540,15 +3550,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             ShadeLockscreenInteractor shadeLockscreenInteractor,
             @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
-            View notificationContainer, KeyguardBypassController bypassController) {
+            View notificationContainer) {
         mCentralSurfaces = centralSurfaces;
         mKeyguardViewControllerLazy.get().registerCentralSurfaces(
                 centralSurfaces,
                 shadeLockscreenInteractor,
                 shadeExpansionStateManager,
                 biometricUnlockController,
-                notificationContainer,
-                bypassController);
+                notificationContainer);
         return mKeyguardViewControllerLazy.get();
     }
 

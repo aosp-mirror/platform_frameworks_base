@@ -110,8 +110,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
-    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 500;
-    private static final long RAPID_ACTIVITY_LAUNCH_MS = 300;
+    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 50;
+    private static final long RAPID_ACTIVITY_LAUNCH_MS = 500;
     private static final long RESET_RAPID_ACTIVITY_LAUNCH_MS = 5 * RAPID_ACTIVITY_LAUNCH_MS;
 
     public static final int STOPPED_STATE_NOT_STOPPED = 0;
@@ -201,6 +201,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     // Whether this process has ever started a service with the BIND_INPUT_METHOD permission.
     private volatile boolean mHasImeService;
+
+    /**
+     * Whether this process can use realtime prioirity (SCHED_FIFO) for its UI and render threads
+     * when this process is SCHED_GROUP_TOP_APP.
+     */
+    private final boolean mUseFifoUiScheduling;
 
     /** Whether {@link #mActivities} is not empty. */
     private volatile boolean mHasActivities;
@@ -340,6 +346,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             // TODO(b/151161907): Remove after support for display-independent (raw) SysUi configs.
             mIsActivityConfigOverrideAllowed = false;
         }
+        mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
+                && (isSysUiPackage || mAtm.isCallerRecents(uid));
 
         mCanUseSystemGrammaticalGender = mAtm.mGrammaticalManagerInternal != null
                 && mAtm.mGrammaticalManagerInternal.canGetSystemGrammaticalGender(mUid,
@@ -631,9 +639,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         if (mRapidActivityLaunchCount > MAX_RAPID_ACTIVITY_LAUNCH_COUNT) {
-            Slog.w(TAG, "Killing " + mPid + " because of rapid activity launch");
-            r.getRootTask().moveTaskToBack(r.getTask());
-            mAtm.mH.post(() -> mAtm.mAmInternal.killProcess(mName, mUid, "rapidActivityLaunch"));
+            mRapidActivityLaunchCount = 0;
+            final Task task = r.getTask();
+            Slog.w(TAG, "Removing task " + task.mTaskId + " because of rapid activity launch");
+            mAtm.mH.post(() -> {
+                synchronized (mAtm.mGlobalLock) {
+                    task.removeImmediately("rapid-activity-launch");
+                }
+                mAtm.mAmInternal.killProcess(mName, mUid, "rapidActivityLaunch");
+            });
         }
     }
 
@@ -1901,6 +1915,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
+    /** Returns {@code true} if the process prefers to use fifo scheduling. */
+    public boolean useFifoUiScheduling() {
+        return mUseFifoUiScheduling;
+    }
+
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public void onTopProcChanged() {
         if (mAtm.mVrController.isInterestingToSchedGroup()) {
@@ -2077,6 +2096,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 pw.print("legacy-recents");
             }
             pw.println();
+        }
+        if (mUseFifoUiScheduling) {
+            pw.println(prefix + " mUseFifoUiScheduling=true");
         }
 
         final int stateFlags = mActivityStateFlags;

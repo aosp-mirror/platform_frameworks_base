@@ -44,9 +44,29 @@ internal class Scene(
     internal val scope = SceneScopeImpl(layoutImpl, this)
 
     var content by mutableStateOf(content)
-    var userActions by mutableStateOf(actions)
+    private var _userActions by mutableStateOf(checkValid(actions))
     var zIndex by mutableFloatStateOf(zIndex)
     var targetSize by mutableStateOf(IntSize.Zero)
+
+    var userActions
+        get() = _userActions
+        set(value) {
+            _userActions = checkValid(value)
+        }
+
+    private fun checkValid(
+        userActions: Map<UserAction, UserActionResult>
+    ): Map<UserAction, UserActionResult> {
+        userActions.forEach { (action, result) ->
+            if (key == result.toScene) {
+                error(
+                    "Transition to the same scene is not supported. Scene $key, action $action," +
+                        " result $result"
+                )
+            }
+        }
+        return userActions
+    }
 
     @Composable
     @OptIn(ExperimentalComposeUiApi::class)

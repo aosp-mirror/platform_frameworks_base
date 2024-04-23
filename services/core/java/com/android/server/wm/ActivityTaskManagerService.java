@@ -390,6 +390,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final VisibleActivityProcessTracker mVisibleActivityProcessTracker;
 
+    /** The starting activities which are waiting for their processes to attach. */
+    final ArrayList<ActivityRecord> mStartingProcessActivities = new ArrayList<>();
+
     /* Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
     /**
@@ -883,6 +886,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mRecentTasks.onSystemReadyLocked();
             mTaskSupervisor.onSystemReady();
             mActivityClientController.onSystemReady();
+            mAppWarnings.onSystemReady();
             // TODO(b/258792202) Cleanup once ASM is ready to launch
             ActivitySecurityModelFeatureFlags.initialize(mContext.getMainExecutor());
             mGrammaticalManagerInternal = LocalServices.getService(
@@ -3732,16 +3736,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
 
-        // If PiP2 flag is on and client-request to enter PiP comes in,
-        // we request a direct transition from Shell to TRANSIT_PIP to get the startWct
-        // with the right entry bounds. So PiP activity isn't moved to a pinned task until after
-        // Shell calls back into Core with the entry bounds passed through.
         if (isPip2ExperimentEnabled()) {
-            final Transition legacyEnterPipTransition = new Transition(TRANSIT_PIP,
+            // If PiP2 flag is on and request to enter PiP comes in,
+            // we request a direct transition TRANSIT_PIP from Shell to get the right entry bounds.
+            // So PiP activity isn't moved to a pinned task until after
+            // Shell calls back into Core with the entry bounds to be applied with startWCT.
+            final Transition enterPipTransition = new Transition(TRANSIT_PIP,
                     0 /* flags */, getTransitionController(), mWindowManager.mSyncEngine);
-            legacyEnterPipTransition.setPipActivity(r);
-            getTransitionController().startCollectOrQueue(legacyEnterPipTransition, (deferred) -> {
-                getTransitionController().requestStartTransition(legacyEnterPipTransition,
+            enterPipTransition.setPipActivity(r);
+            r.mAutoEnteringPip = isAutoEnter;
+            getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
+                getTransitionController().requestStartTransition(enterPipTransition,
                         r.getTask(), null /* remoteTransition */, null /* displayChange */);
             });
             return true;
@@ -3786,7 +3791,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // Continue the pausing process after entering pip.
                 if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,
-                            false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
+                            false /* pauseImmediately */, true /* autoEnteringPip */,
+                            "auto-pip");
                 }
                 r.mAutoEnteringPip = false;
             }
@@ -4321,6 +4327,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mActiveUids.dump(pw, "  ");
             if (mDemoteTopAppReasons != 0) {
                 pw.println("  mDemoteTopAppReasons=" + mDemoteTopAppReasons);
+            }
+            if (!mStartingProcessActivities.isEmpty()) {
+                pw.println("  mStartingProcessActivities=" + mStartingProcessActivities);
             }
         }
 
@@ -5169,6 +5178,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void startProcessAsync(ActivityRecord activity, boolean knownToBeDead, boolean isTop,
             String hostingType) {
+        if (!mStartingProcessActivities.contains(activity)) {
+            mStartingProcessActivities.add(activity);
+        } else if (mProcessNames.get(
+                activity.processName, activity.info.applicationInfo.uid) != null) {
+            // The process is already starting. Wait for it to attach.
+            return;
+        }
         try {
             if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "dispatchingStartProcess:"
@@ -6165,7 +6181,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onProcessRemoved(String name, int uid) {
             synchronized (mGlobalLockWithoutBoost) {
-                mProcessNames.remove(name, uid);
+                final WindowProcessController proc = mProcessNames.remove(name, uid);
+                if (proc != null && !mStartingProcessActivities.isEmpty()) {
+                    for (int i = mStartingProcessActivities.size() - 1; i >= 0; i--) {
+                        final ActivityRecord r = mStartingProcessActivities.get(i);
+                        if (uid == r.info.applicationInfo.uid && name.equals(r.processName)) {
+                            Slog.w(TAG, proc + " is removed with pending start " + r);
+                            mStartingProcessActivities.remove(i);
+                            // If visible, finish it to avoid getting stuck on screen.
+                            if (r.isVisibleRequested()) {
+                                r.finishIfPossible("starting-proc-removed", false /* oomAdj */);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -6325,7 +6354,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onPackageDataCleared(String name, int userId) {
             synchronized (mGlobalLock) {
                 mCompatModePackages.handlePackageDataClearedLocked(name);
-                mAppWarnings.onPackageDataCleared(name);
+                mAppWarnings.onPackageDataCleared(name, userId);
                 mPackageConfigPersister.onPackageDataCleared(name, userId);
             }
         }
@@ -6333,7 +6362,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onPackageUninstalled(String name, int userId) {
             synchronized (mGlobalLock) {
-                mAppWarnings.onPackageUninstalled(name);
+                mAppWarnings.onPackageUninstalled(name, userId);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
                 mPackageConfigPersister.onPackageUninstall(name, userId);
             }

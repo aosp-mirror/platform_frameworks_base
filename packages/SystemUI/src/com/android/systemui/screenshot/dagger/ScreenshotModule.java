@@ -22,11 +22,9 @@ import android.app.Service;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.screenshot.DefaultScreenshotActionsProvider;
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
 import com.android.systemui.screenshot.LegacyScreenshotViewProxy;
-import com.android.systemui.screenshot.ScreenshotActionsProvider;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
 import com.android.systemui.screenshot.ScreenshotShelfViewProxy;
@@ -89,10 +87,6 @@ public abstract class ScreenshotModule {
     @Binds
     abstract ScreenshotSoundController bindScreenshotSoundController(
             ScreenshotSoundControllerImpl screenshotSoundProviderImpl);
-
-    @Binds
-    abstract ScreenshotActionsProvider.Factory bindScreenshotActionsProviderFactory(
-            DefaultScreenshotActionsProvider.Factory defaultScreenshotActionsProviderFactory);
 
     @Provides
     @SysUISingleton

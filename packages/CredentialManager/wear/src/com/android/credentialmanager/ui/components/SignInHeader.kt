@@ -18,49 +18,44 @@ package com.android.credentialmanager.ui.components
 
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import androidx.wear.compose.material.Text
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.Icon
-import androidx.wear.compose.material.MaterialTheme as WearMaterialTheme
-import androidx.compose.ui.text.style.TextAlign
+import com.android.credentialmanager.common.ui.components.WearTitleText
 
 /* Used as header across Credential Selector screens. */
 @Composable
 fun SignInHeader(
     icon: Drawable?,
     title: String,
-    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier,
+        modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (icon != null) {
             Icon(
                 bitmap = icon.toBitmap().asImageBitmap(),
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(24.dp),
                 // Decorative purpose only.
                 contentDescription = null,
                 tint = Color.Unspecified,
 
             )
         }
+        Spacer(modifier = Modifier.size(8.dp))
 
-        Text(
+        WearTitleText(
             text = title,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(top = 6.dp)
-                .padding(horizontal = 10.dp),
-            style = WearMaterialTheme.typography.title3
         )
+
+        Spacer(modifier = Modifier.size(8.dp))
     }
 }

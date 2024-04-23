@@ -2,12 +2,17 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+filegroup {
+    name: "SettingsLibDataStore-srcs",
+    srcs: ["src/**/*"],
+}
+
 android_library {
     name: "SettingsLibDataStore",
     defaults: [
         "SettingsLintDefaults",
     ],
-    srcs: ["src/**/*"],
+    srcs: [":SettingsLibDataStore-srcs"],
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.collection_collection-ktx",

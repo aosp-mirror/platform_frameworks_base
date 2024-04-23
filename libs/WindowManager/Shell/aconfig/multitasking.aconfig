@@ -1,4 +1,5 @@
 package: "com.android.wm.shell"
+container: "system"
 
 flag {
     name: "enable_app_pairs"

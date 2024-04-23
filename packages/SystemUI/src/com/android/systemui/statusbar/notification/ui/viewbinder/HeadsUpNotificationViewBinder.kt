@@ -16,18 +16,17 @@
 
 package com.android.systemui.statusbar.notification.ui.viewbinder
 
-import android.util.Log
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.util.kotlin.sample
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-
-private const val TAG = "HunBinder"
-private val DEBUG = true // Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)
 
 class HeadsUpNotificationViewBinder
 @Inject
@@ -39,10 +38,6 @@ constructor(private val viewModel: NotificationListViewModel) {
                 viewModel.pinnedHeadsUpRows
                     .sample(viewModel.headsUpAnimationsEnabled, ::Pair)
                     .collect { (newKeys, animationsEnabled) ->
-                        if (DEBUG) {
-                            Log.d(TAG, "update:$newKeys")
-                        }
-
                         val added = newKeys - previousKeys
                         val removed = previousKeys - newKeys
                         previousKeys = newKeys
@@ -70,9 +65,18 @@ constructor(private val viewModel: NotificationListViewModel) {
             launch {
                 viewModel.hasPinnedHeadsUpRow.collect { parentView.setInHeadsUpPinnedMode(it) }
             }
+            launch {
+                parentView.isHeadsUpAnimatingAway.collect { viewModel.setHeadsUpAnimatingAway(it) }
+            }
         }
 
     private fun obtainView(key: HeadsUpRowKey): ExpandableNotificationRow {
         return viewModel.elementKeyFor(key) as ExpandableNotificationRow
     }
 }
+
+private val NotificationStackScrollLayout.isHeadsUpAnimatingAway: Flow<Boolean>
+    get() = conflatedCallbackFlow {
+        setHeadsUpAnimatingAwayListener { animatingAway -> trySend(animatingAway) }
+        awaitClose { setHeadsUpAnimatingAwayListener(null) }
+    }

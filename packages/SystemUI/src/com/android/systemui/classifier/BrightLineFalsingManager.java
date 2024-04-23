@@ -398,6 +398,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 || mAccessibilityManager.isTouchExplorationEnabled()
                 || mDataProvider.isA11yAction()
                 || mDataProvider.isFromTrackpad()
+                || mDataProvider.isFromKeyboard()
                 || (mFeatureFlags.isEnabled(Flags.FALSING_OFF_FOR_UNFOLDED)
                     && mDataProvider.isUnfolded());
     }

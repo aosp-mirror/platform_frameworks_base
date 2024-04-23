@@ -21,33 +21,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Text
+import com.android.credentialmanager.common.ui.components.WearDisplayNameText
+import com.android.credentialmanager.common.ui.components.WearUsernameText
 import com.google.android.horologist.compose.tools.WearPreview
 
 @Composable
 fun PasswordRow(
     email: String,
-    modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
+    Column(modifier = Modifier.padding(bottom = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        WearDisplayNameText(
             text = email,
-            color = Color(0xFFE6FF7B),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-            style = MaterialTheme.typography.title2
         )
-        Text(
-            text = "••••••••••••••",
-            modifier = Modifier.padding(top = 7.dp),
-            color = Color(0xFFCAC5BC),
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1,
-            style = MaterialTheme.typography.body1,
+        WearUsernameText(
+            text = "••••••••••••••"
         )
     }
 }

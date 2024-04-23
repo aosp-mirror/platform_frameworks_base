@@ -140,12 +140,14 @@ void DrawFrameTask::run() {
     if (CC_LIKELY(canDrawThisFrame)) {
         context->draw(solelyTextureViewUpdates);
     } else {
+#ifdef __ANDROID__
         // Do a flush in case syncFrameState performed any texture uploads. Since we skipped
         // the draw() call, those uploads (or deletes) will end up sitting in the queue.
         // Do them now
         if (GrDirectContext* grContext = mRenderThread->getGrContext()) {
             grContext->flushAndSubmit();
         }
+#endif
         // wait on fences so tasks don't overlap next frame
         context->waitOnFences();
     }
@@ -176,11 +178,13 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     bool canDraw = mContext->makeCurrent();
     mContext->unpinImages();
 
+#ifdef __ANDROID__
     for (size_t i = 0; i < mLayers.size(); i++) {
         if (mLayers[i]) {
             mLayers[i]->apply();
         }
     }
+#endif
 
     mLayers.clear();
     mContext->setContentDrawBounds(mContentDrawBounds);

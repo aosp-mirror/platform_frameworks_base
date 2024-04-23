@@ -662,7 +662,8 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Không nhận dạng được vân tay"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Không nhận dạng được vân tay"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Không thể nhận dạng khuôn mặt. Hãy dùng vân tay."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Đã xác thực vân tay"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Đã xác thực khuôn mặt"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Đã xác thực khuôn mặt, vui lòng nhấn để xác nhận"</string>
@@ -1929,12 +1930,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Do <xliff:g id="APP_NAME">%1$s</xliff:g> quản lý"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Bật"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Tắt"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Bất kỳ lịch nào"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> đang tắt một số âm thanh"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Đã xảy ra sự cố nội bộ với thiết bị của bạn và thiết bị có thể sẽ không ổn định cho tới khi bạn thiết lập lại dữ liệu ban đầu."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Đã xảy ra sự cố nội bộ với thiết bị. Hãy liên hệ với nhà sản xuất của bạn để biết chi tiết."</string>
@@ -2181,9 +2179,9 @@
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Khóa màn hình"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Chụp ảnh màn hình"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Giá treo tai nghe"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Phím tắt hỗ trợ tiếp cận trên màn hình"</string>
-    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Bộ chọn phím tắt hỗ trợ tiếp cận trên màn hình"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Phím tắt hỗ trợ tiếp cận"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Lối tắt hỗ trợ tiếp cận trên màn hình"</string>
+    <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Bộ chọn lối tắt hỗ trợ tiếp cận trên màn hình"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Lối tắt hỗ trợ tiếp cận"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Đóng Ngăn thông báo"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Chuyển lên trên bằng bàn phím di chuyển"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Chuyển xuống dưới bằng bàn phím di chuyển"</string>
@@ -2397,6 +2395,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Kiểm thử"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Dùng chung"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Nội dung ứng dụng bị ẩn khỏi tính năng chia sẻ màn hình vì lý do bảo mật"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Đã tự động kết nối với vệ tinh"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Bạn có thể gửi và nhận tin nhắn mà không cần có mạng di động hoặc mạng Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>

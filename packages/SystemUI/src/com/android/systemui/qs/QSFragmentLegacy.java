@@ -31,7 +31,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.res.R;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController;
+import com.android.systemui.settings.brightness.MirrorController;
 import com.android.systemui.util.LifecycleFragment;
 
 import java.util.function.Consumer;
@@ -182,7 +182,7 @@ public class QSFragmentLegacy extends LifecycleFragment implements QS {
     }
 
     public void setBrightnessMirrorController(
-            BrightnessMirrorController brightnessMirrorController) {
+            MirrorController brightnessMirrorController) {
         if (mQsImpl != null) {
             mQsImpl.setBrightnessMirrorController(brightnessMirrorController);
         }

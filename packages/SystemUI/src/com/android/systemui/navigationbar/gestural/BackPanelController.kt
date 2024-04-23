@@ -34,7 +34,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.postDelayed
 import androidx.core.view.isVisible
 import androidx.dynamicanimation.animation.DynamicAnimation
-import com.android.internal.jank.Cuj.CUJ_BACK_PANEL_ARROW
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.dagger.qualifiers.Main
@@ -1039,7 +1038,7 @@ internal constructor(
     override fun dump(pw: PrintWriter) {
         pw.println("$TAG:")
         pw.println("  currentState=$currentState")
-        pw.println("  isLeftPanel=$mView.isLeftPanel")
+        pw.println("  isLeftPanel=${mView.isLeftPanel}")
     }
 
     init {

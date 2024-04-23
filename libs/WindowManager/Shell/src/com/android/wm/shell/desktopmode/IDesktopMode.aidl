@@ -45,4 +45,7 @@ interface IDesktopMode {
 
     /** Set listener that will receive callbacks about updates to desktop tasks */
     oneway void setTaskListener(IDesktopTaskListener listener);
+
+    /** Move a task with given `taskId` to desktop */
+    void moveToDesktop(int taskId);
 }

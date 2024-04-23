@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"അറിയിപ്പ് ഷെയ്‌ഡ്."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ദ്രുത ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"അറിയിപ്പ് ഷെയ്‌ഡിനുള്ള ദ്രുത ക്രമീകരണം."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ലോക്ക് സ്‌ക്രീൻ."</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ഔദ്യോഗിക ലോക്ക് സ്ക്രീൻ"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"അവസാനിപ്പിക്കുക"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"പൂർണ്ണ നിശബ്‌ദത"</string>
@@ -270,12 +271,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"എല്ലാം കാണുക"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth ഉപയോഗിക്കുക"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"കണക്‌റ്റ് ചെയ്‌തു"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"സംരക്ഷിച്ചു"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"വിച്ഛേദിക്കുക"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"സജീവമാക്കുക"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"നാളെ വീണ്ടും സ്വയമേവ ഓണാക്കുക"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"ക്വിക്ക് ഷെയർ, Find My Device, ഉപകരണ ലൊക്കേഷൻ എന്നിവ പോലുള്ള ഫീച്ചറുകൾ Bluetooth ഉപയോഗിക്കുന്നു"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth നാളെ 5 AM-ന് ഓണാക്കും"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ബാറ്ററി"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ഓഡിയോ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ഹെഡ്‌സെറ്റ്"</string>
@@ -350,6 +359,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"പ്രശ്‌നം റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ആരംഭിക്കുക"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"നിർത്തുക"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"നിങ്ങളുടെ ഉപകരണ അനുഭവത്തിന്‍റെ ഏത് ഭാഗമാണ് ബാധിച്ചത്?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"പ്രശ്ന തരം തിരഞ്ഞെടുക്കുക"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"സ്‌ക്രീൻ റെക്കോർഡ്"</string>
@@ -363,7 +373,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"സ്‌റ്റാൻഡേർഡ്"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ഇടത്തരം"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"കൂടുതൽ"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"കേൾവിക്കുള്ള ഉപകരണങ്ങൾ"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"കേൾവിക്കുള്ള ഉപകരണങ്ങൾ"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"പുതിയ ഉപകരണം ജോടിയാക്കുക"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"പുതിയ ഉപകരണം ജോടിയാക്കാൻ ക്ലിക്ക് ചെയ്യുക"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ഉപകരണ മൈക്രോഫോൺ അൺബ്ലോക്ക് ചെയ്യണോ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ഉപകരണ ക്യാമറ അൺബ്ലോക്ക് ചെയ്യണോ?"</string>
@@ -430,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ചാർജ് ചെയ്യുന്നു • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>-ൽ പൂർത്തിയാകും"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"കമ്മ്യൂണൽ ട്യൂട്ടോറിയൽ ആരംഭിക്കാൻ ഇടത്തോട്ട് സ്വൈപ്പ് ചെയ്യുക"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ഇഷ്‌ടാനുസൃതമാക്കുക"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
@@ -442,14 +458,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"നീക്കം ചെയ്യുക"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"വിജറ്റ് ചേർക്കുക"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"പൂർത്തിയായി"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"വിജറ്റുകൾ ചേർക്കുക"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"ടാബ്‌ലെറ്റ് അൺലോക്ക് ചെയ്യാതെ തന്നെ നിങ്ങളുടെ പ്രിയപ്പെട്ട ആപ്പ് വിജറ്റുകളിലേക്ക് പെട്ടെന്ന് ആക്‌സസ് നേടുക."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"ലോക്ക് സ്ക്രീനിൽ ഏതെങ്കിലും വിജറ്റ് അനുവദിക്കണോ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ക്രമീകരണം തുറക്കുക"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"വർക്ക് ആപ്പുകൾ പുനരാരംഭിക്കണോ?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"പുനരാരംഭിക്കുക"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"പുൾഡൗൺ മെനു"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ഈ സെഷനിലെ എല്ലാ ആപ്പുകളും ഡാറ്റയും ഇല്ലാതാക്കും."</string>
@@ -741,7 +759,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"കീബോർഡ് ലേഔട്ട് മാറുക"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"അല്ലെങ്കിൽ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"തിരയൽ ചോദ്യം മായ്‌ക്കുക"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"കുറുക്കുവഴികൾ"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"കീബോർഡ് കുറുക്കുവഴികൾ"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"കുറുക്കുവഴികൾ തിരയുക"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"കുറുക്കുവഴി കണ്ടെത്തിയില്ല"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"സിസ്റ്റം"</string>
@@ -766,9 +784,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant തുറക്കുക"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"ഒരു കുറിപ്പെടുക്കുക"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"സിസ്റ്റം മൾട്ടിടാസ്‌കിംഗ്"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"നിലവിലെ ആപ്പ് വലതുവശത്ത് വരുന്ന രീതിയിൽ സ്ക്രീൻ വിഭജന മോഡിൽ കടക്കുക"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"നിലവിലെ ആപ്പ് ഇടതുവശത്ത് വരുന്ന രീതിയിൽ സ്ക്രീൻ വിഭജന മോഡിൽ കടക്കുക"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"മൾട്ടിടാസ്‌കിംഗ്"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"വലതുവശത്തുള്ള നിലവിലെ ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ഇടതുവശത്തുള്ള നിലവിലെ ആപ്പിനൊപ്പം സ്‌ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുക"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"സ്‌ക്രീൻ വിഭജന മോഡിൽ നിന്ന് പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറുക"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ വലതുവശത്തെ/താഴത്തെ ആപ്പിലേക്ക് മാറൂ"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"സ്ക്രീൻ വിഭജന മോഡ് ഉപയോഗിക്കുമ്പോൾ ഇടതുവശത്തെ/മുകളിലെ ആപ്പിലേക്ക് മാറൂ"</string>

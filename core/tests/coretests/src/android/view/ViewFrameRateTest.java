@@ -19,23 +19,30 @@ package android.view;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
-import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
 
 import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.NonNull;
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.DisplayMetrics;
+import android.widget.FrameLayout;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
@@ -60,9 +67,14 @@ public class ViewFrameRateTest {
     public ActivityTestRule<ViewCaptureTestActivity> mActivityRule = new ActivityTestRule<>(
             ViewCaptureTestActivity.class);
 
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private Activity mActivity;
     private View mMovingView;
     private ViewRootImpl mViewRoot;
+    private CountDownLatch mAfterDrawLatch;
+    private Throwable mAfterDrawThrowable;
 
     @Before
     public void setUp() throws Throwable {
@@ -76,22 +88,34 @@ public class ViewFrameRateTest {
             parent = parent.getParent();
         }
         mViewRoot = (ViewRootImpl) parent;
+        mAfterDrawThrowable = null;
     }
 
-    @UiThreadTest
     @Test
-    @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
-    public void frameRateChangesWhenContentMoves() {
-        mMovingView.offsetLeftAndRight(100);
-        float frameRate = mViewRoot.getPreferredFrameRate();
-        assertTrue(frameRate > 0);
+    @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
+    public void frameRateChangesWhenContentMoves() throws Throwable {
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.offsetLeftAndRight(100);
+            runAfterDraw(() -> {
+                if (toolkitFrameRateVelocityMappingReadOnly()) {
+                    float frameRate = mViewRoot.getLastPreferredFrameRate();
+                    assertTrue(frameRate > 0);
+                } else {
+                    assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                            mViewRoot.getLastPreferredFrameRateCategory());
+                }
+            });
+        });
+        waitForAfterDraw();
     }
 
     @UiThreadTest
     @Test
     @RequiresFlagsEnabled(FLAG_VIEW_VELOCITY_API)
     public void firstFrameNoMovement() {
-        assertEquals(0f, mViewRoot.getPreferredFrameRate(), 0f);
+        assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
     }
 
     @Test
@@ -121,7 +145,8 @@ public class ViewFrameRateTest {
 
     @Test
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
-            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void lowVelocity60() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
@@ -133,14 +158,40 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             mMovingView.setFrameContentVelocity(1f);
             mMovingView.invalidate();
-            assertEquals(60f, mViewRoot.getPreferredFrameRate(), 0f);
-            assertEquals(FRAME_RATE_COMPATIBILITY_GTE, mViewRoot.getFrameRateCompatibility());
+            runAfterDraw(() -> assertEquals(60f, mViewRoot.getLastPreferredFrameRate(), 0f));
         });
+        waitForAfterDraw();
     }
 
     @Test
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
-            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY})
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
+    public void velocityWithChildMovement() throws Throwable {
+        FrameLayout frameLayout = new FrameLayout(mActivity);
+        mActivityRule.runOnUiThread(() -> {
+            ViewGroup.LayoutParams fullSize = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            mActivity.setContentView(frameLayout, fullSize);
+            if (mMovingView.getParent() instanceof ViewGroup) {
+                ((ViewGroup) mMovingView.getParent()).removeView(mMovingView);
+            }
+            frameLayout.addView(mMovingView, fullSize);
+        });
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            frameLayout.setFrameContentVelocity(1f);
+            mMovingView.offsetTopAndBottom(100);
+            runAfterDraw(() -> assertEquals(60f, mViewRoot.getLastPreferredFrameRate(), 0f));
+        });
+        waitForAfterDraw();
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void highVelocity140() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
@@ -152,27 +203,16 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             mMovingView.setFrameContentVelocity(1_000_000_000f);
             mMovingView.invalidate();
-            assertEquals(140f, mViewRoot.getPreferredFrameRate(), 0f);
-            assertEquals(FRAME_RATE_COMPATIBILITY_GTE, mViewRoot.getFrameRateCompatibility());
-        });
-    }
-
-    private void waitForFrameRateCategoryToSettle() throws Throwable {
-        for (int i = 0; i < 5; i++) {
-            final CountDownLatch drawLatch = new CountDownLatch(1);
-
-            // Now that it is small, any invalidation should have a normal category
-            mActivityRule.runOnUiThread(() -> {
-                mMovingView.invalidate();
-                mMovingView.getViewTreeObserver().addOnDrawListener(drawLatch::countDown);
+            runAfterDraw(() -> {
+                assertEquals(140f, mViewRoot.getLastPreferredFrameRate(), 0f);
             });
-
-            assertTrue(drawLatch.await(1, TimeUnit.SECONDS));
-        }
+        });
+        waitForAfterDraw();
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategorySmall() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -201,12 +241,15 @@ public class ViewFrameRateTest {
             mMovingView.invalidate();
             int expected = toolkitFrameRateBySizeReadOnly()
                     ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
-            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
+            runAfterDraw(
+                    () -> assertEquals(expected, mViewRoot.getLastPreferredFrameRateCategory()));
         });
+        waitForAfterDraw();
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategoryNarrowWidth() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -234,12 +277,15 @@ public class ViewFrameRateTest {
             mMovingView.invalidate();
             int expected = toolkitFrameRateBySizeReadOnly()
                     ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
-            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
+            runAfterDraw(
+                    () -> assertEquals(expected, mViewRoot.getLastPreferredFrameRateCategory()));
         });
+        waitForAfterDraw();
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategoryNarrowHeight() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -267,12 +313,15 @@ public class ViewFrameRateTest {
             mMovingView.invalidate();
             int expected = toolkitFrameRateBySizeReadOnly()
                     ? FRAME_RATE_CATEGORY_LOW : FRAME_RATE_CATEGORY_NORMAL;
-            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
+            runAfterDraw(
+                    () -> assertEquals(expected, mViewRoot.getLastPreferredFrameRateCategory()));
         });
+        waitForAfterDraw();
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategoryLargeWidth() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -300,12 +349,15 @@ public class ViewFrameRateTest {
             mMovingView.invalidate();
             int expected = toolkitFrameRateDefaultNormalReadOnly()
                     ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
-            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
+            runAfterDraw(
+                    () -> assertEquals(expected, mViewRoot.getLastPreferredFrameRateCategory()));
         });
+        waitForAfterDraw();
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void noVelocityUsesCategoryLargeHeight() throws Throwable {
         final CountDownLatch drawLatch1 = new CountDownLatch(1);
         mActivityRule.runOnUiThread(() -> {
@@ -333,12 +385,15 @@ public class ViewFrameRateTest {
             mMovingView.invalidate();
             int expected = toolkitFrameRateDefaultNormalReadOnly()
                     ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
-            assertEquals(expected, mViewRoot.getPreferredFrameRateCategory());
+            runAfterDraw(
+                    () -> assertEquals(expected, mViewRoot.getLastPreferredFrameRateCategory()));
         });
+        waitForAfterDraw();
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
     public void defaultNormal() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             View parent = (View) mMovingView.getParent();
@@ -352,8 +407,74 @@ public class ViewFrameRateTest {
             mMovingView.invalidate();
             int expected = toolkitFrameRateDefaultNormalReadOnly()
                     ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
-            assertEquals(expected,
-                    mViewRoot.getPreferredFrameRateCategory());
+            runAfterDraw(() -> assertEquals(expected,
+                    mViewRoot.getLastPreferredFrameRateCategory()));
         });
+        waitForAfterDraw();
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY
+    })
+    public void frameRateAndCategory() throws Throwable {
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_LOW);
+            mMovingView.setFrameContentVelocity(1f);
+            mMovingView.invalidate();
+            runAfterDraw(() -> {
+                assertEquals(FRAME_RATE_CATEGORY_LOW,
+                        mViewRoot.getLastPreferredFrameRateCategory());
+                assertEquals(60f, mViewRoot.getLastPreferredFrameRate());
+            });
+        });
+        waitForAfterDraw();
+    }
+
+    private void runAfterDraw(@NonNull Runnable runnable) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        mAfterDrawLatch = new CountDownLatch(1);
+        ViewTreeObserver.OnDrawListener listener = new ViewTreeObserver.OnDrawListener() {
+            @Override
+            public void onDraw() {
+                handler.postAtFrontOfQueue(() -> {
+                    mMovingView.getViewTreeObserver().removeOnDrawListener(this);
+                    try {
+                        runnable.run();
+                    } catch (Throwable t) {
+                        mAfterDrawThrowable = t;
+                    }
+                    mAfterDrawLatch.countDown();
+                });
+            }
+        };
+        mMovingView.getViewTreeObserver().addOnDrawListener(listener);
+    }
+
+    private void waitForAfterDraw() throws Throwable {
+        assertTrue(mAfterDrawLatch.await(1, TimeUnit.SECONDS));
+        if (mAfterDrawThrowable != null) {
+            throw mAfterDrawThrowable;
+        }
+    }
+
+    private void waitForFrameRateCategoryToSettle() throws Throwable {
+        for (int i = 0; i < 5 || mViewRoot.getIsFrameRateBoosting(); i++) {
+            final CountDownLatch drawLatch = new CountDownLatch(1);
+
+            // Now that it is small, any invalidation should have a normal category
+            ViewTreeObserver.OnDrawListener listener = drawLatch::countDown;
+
+            mActivityRule.runOnUiThread(() -> {
+                mMovingView.invalidate();
+                mMovingView.getViewTreeObserver().addOnDrawListener(listener);
+            });
+
+            assertTrue(drawLatch.await(1, TimeUnit.SECONDS));
+            mActivityRule.runOnUiThread(
+                    () -> mMovingView.getViewTreeObserver().removeOnDrawListener(listener));
+        }
     }
 }

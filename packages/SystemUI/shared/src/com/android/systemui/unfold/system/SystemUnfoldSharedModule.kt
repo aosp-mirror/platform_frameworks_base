@@ -32,6 +32,8 @@ import dagger.Module
 import dagger.Provides
 import java.util.concurrent.Executor
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.android.asCoroutineDispatcher
 
 /**
  * Dagger module with system-only dependencies for the unfold animation. The code that is used to
@@ -73,6 +75,13 @@ abstract class SystemUnfoldSharedModule {
         @Singleton
         fun unfoldBgProgressHandler(@UnfoldBg looper: Looper): Handler {
             return Handler(looper)
+        }
+
+        @Provides
+        @UnfoldBg
+        @Singleton
+        fun unfoldBgDispatcher(@UnfoldBg handler: Handler): CoroutineDispatcher {
+            return handler.asCoroutineDispatcher("@UnfoldBg Dispatcher")
         }
 
         @Provides

@@ -65,15 +65,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.security.Authorization;
 import android.security.GateKeeper;
-import android.security.KeyStore;
-import android.security.authorization.IKeystoreAuthorization;
-import android.security.authorization.ResponseCode;
+import android.security.KeyStoreAuthorization;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -123,11 +119,9 @@ public class BiometricService extends SystemService {
     @VisibleForTesting
     IStatusBarService mStatusBarService;
     @VisibleForTesting
-    KeyStore mKeyStore;
-    @VisibleForTesting
     ITrustManager mTrustManager;
     @VisibleForTesting
-    IKeystoreAuthorization mKeystoreAuthorization;
+    KeyStoreAuthorization mKeyStoreAuthorization;
     @VisibleForTesting
     IGateKeeperService mGateKeeper;
 
@@ -674,19 +668,7 @@ public class BiometricService extends SystemService {
             int[] authTypesArray = hardwareAuthenticators.stream()
                     .mapToInt(Integer::intValue)
                     .toArray();
-            try {
-                return mKeystoreAuthorization.getLastAuthTime(secureUserId, authTypesArray);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Error getting last auth time: " + e);
-                return BiometricConstants.BIOMETRIC_NO_AUTHENTICATION;
-            } catch (ServiceSpecificException e) {
-                // This is returned when the feature flag test fails in keystore2
-                if (e.errorCode == ResponseCode.PERMISSION_DENIED) {
-                    throw new UnsupportedOperationException();
-                }
-
-                return BiometricConstants.BIOMETRIC_NO_AUTHENTICATION;
-            }
+            return mKeyStoreAuthorization.getLastAuthTime(secureUserId, authTypesArray);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
@@ -868,8 +850,10 @@ public class BiometricService extends SystemService {
 
             Slog.d(TAG, "resetLockout(userId=" + userId
                     + ", hat=" + (hardwareAuthToken == null ? "null " : "present") + ")");
-            mBiometricContext.getAuthSessionCoordinator()
+            mHandler.post(() -> {
+                mBiometricContext.getAuthSessionCoordinator()
                     .resetLockoutFor(userId, Authenticators.BIOMETRIC_STRONG, -1);
+            });
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
@@ -1011,8 +995,8 @@ public class BiometricService extends SystemService {
             return ActivityManager.getService();
         }
 
-        public IKeystoreAuthorization getKeystoreAuthorizationService() {
-            return Authorization.getService();
+        public KeyStoreAuthorization getKeyStoreAuthorization() {
+            return KeyStoreAuthorization.getInstance();
         }
 
         public IGateKeeperService getGateKeeperService() {
@@ -1034,10 +1018,6 @@ public class BiometricService extends SystemService {
         public SettingObserver getSettingObserver(Context context, Handler handler,
                 List<EnabledOnKeyguardCallback> callbacks) {
             return new SettingObserver(context, handler, callbacks);
-        }
-
-        public KeyStore getKeyStore() {
-            return KeyStore.getInstance();
         }
 
         /**
@@ -1138,7 +1118,7 @@ public class BiometricService extends SystemService {
         mBiometricContext = injector.getBiometricContext(context);
         mUserManager = injector.getUserManager(context);
         mBiometricCameraManager = injector.getBiometricCameraManager(context);
-        mKeystoreAuthorization = injector.getKeystoreAuthorizationService();
+        mKeyStoreAuthorization = injector.getKeyStoreAuthorization();
         mGateKeeper = injector.getGateKeeperService();
         mBiometricNotificationLogger = injector.getNotificationLogger();
 
@@ -1159,7 +1139,6 @@ public class BiometricService extends SystemService {
 
     @Override
     public void onStart() {
-        mKeyStore = mInjector.getKeyStore();
         mStatusBarService = mInjector.getStatusBarService();
         mTrustManager = mInjector.getTrustManager();
         mInjector.publishBinderService(this, mImpl);
@@ -1481,7 +1460,7 @@ public class BiometricService extends SystemService {
 
         final boolean debugEnabled = mInjector.isDebugEnabled(getContext(), userId);
         mAuthSession = new AuthSession(getContext(), mBiometricContext, mStatusBarService,
-                createSysuiReceiver(requestId), mKeyStore, mRandom,
+                createSysuiReceiver(requestId), mKeyStoreAuthorization, mRandom,
                 createClientDeathReceiver(requestId), preAuthInfo, token, requestId,
                 operationId, userId, createBiometricSensorReceiver(requestId), receiver,
                 opPackageName, promptInfo, debugEnabled,

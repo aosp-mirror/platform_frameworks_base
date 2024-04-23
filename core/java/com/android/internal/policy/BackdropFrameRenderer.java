@@ -56,7 +56,6 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     // during a configuration change.
     private int mLastContentWidth;
     private int mLastContentHeight;
-    private int mLastCaptionHeight;
     private int mLastXOffset;
     private int mLastYOffset;
 
@@ -269,7 +268,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             final boolean firstCall = mLastContentWidth == 0;
             // The current content buffer is drawn here.
             mLastContentWidth = xSize;
-            mLastContentHeight = ySize - mLastCaptionHeight;
+            mLastContentHeight = ySize;
             mLastXOffset = xOffset;
             mLastYOffset = yOffset;
 
@@ -278,12 +277,11 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                     mLastXOffset,
                     mLastYOffset,
                     mLastXOffset + mLastContentWidth,
-                    mLastYOffset + mLastCaptionHeight + mLastContentHeight);
+                    mLastYOffset + mLastContentHeight);
 
             // If this was the first call and redrawLocked got already called prior
             // to us, we should re-issue a redrawLocked now.
-            return firstCall
-                    && (mLastCaptionHeight != 0 || !mDecorView.isShowingCaption());
+            return firstCall;
         }
     }
 
@@ -303,22 +301,9 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
      */
     private void redrawLocked(Rect newBounds, boolean fullscreen) {
 
-        // While a configuration change is taking place the view hierarchy might become
-        // inaccessible. For that case we remember the previous metrics to avoid flashes.
-        // Note that even when there is no visible caption, the caption child will exist.
-        final int captionHeight = mDecorView.getCaptionHeight();
-
-        // The caption height will probably never dynamically change while we are resizing.
-        // Once set to something other then 0 it should be kept that way.
-        if (captionHeight != 0) {
-            // Remember the height of the caption.
-            mLastCaptionHeight = captionHeight;
-        }
-
         // Make sure that the other thread has already prepared the render draw calls for the
         // content. If any size is 0, we have to wait for it to be drawn first.
-        if ((mLastCaptionHeight == 0 && mDecorView.isShowingCaption()) ||
-                mLastContentWidth == 0 || mLastContentHeight == 0) {
+        if (mLastContentWidth == 0 || mLastContentHeight == 0) {
             return;
         }
 
@@ -337,13 +322,13 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                 ? mUserCaptionBackgroundDrawable : mCaptionBackgroundDrawable;
 
         if (drawable != null) {
-            drawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
+            drawable.setBounds(0, 0, left + width, top);
             drawable.draw(canvas);
         }
 
         // The backdrop: clear everything with the background. Clipping is done elsewhere.
         if (mResizingBackgroundDrawable != null) {
-            mResizingBackgroundDrawable.setBounds(0, mLastCaptionHeight, left + width, top + height);
+            mResizingBackgroundDrawable.setBounds(0, 0, left + width, top + height);
             mResizingBackgroundDrawable.draw(canvas);
         }
         mFrameAndBackdropNode.endRecording();

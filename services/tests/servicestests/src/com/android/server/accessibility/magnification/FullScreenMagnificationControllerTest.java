@@ -20,6 +20,7 @@ import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MOD
 
 import static com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
 import static com.android.server.accessibility.magnification.MockMagnificationConnection.TEST_DISPLAY;
+import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -139,6 +140,8 @@ public class FullScreenMagnificationControllerTest {
 
     private final TimeAnimator mMockTimeAnimator = mock(TimeAnimator.class);
 
+    private boolean mMockMagnificationConnectionState;
+
     FullScreenMagnificationController mFullScreenMagnificationController;
 
     public DisplayManagerInternal mDisplayManagerInternalMock = mock(DisplayManagerInternal.class);
@@ -175,6 +178,8 @@ public class FullScreenMagnificationControllerTest {
 
         mScaleProvider = new MagnificationScaleProvider(mMockContext);
 
+        // Assume the connection is established by default
+        mMockMagnificationConnectionState = true;
         mFullScreenMagnificationController =
                 new FullScreenMagnificationController(
                         mMockControllerCtx,
@@ -184,7 +189,8 @@ public class FullScreenMagnificationControllerTest {
                         () -> mMockThumbnail,
                         ConcurrentUtils.DIRECT_EXECUTOR,
                         () -> mMockScroller,
-                        () -> mMockTimeAnimator);
+                        () -> mMockTimeAnimator,
+                        () -> mMockMagnificationConnectionState);
     }
 
     @After
@@ -195,7 +201,6 @@ public class FullScreenMagnificationControllerTest {
                 mOriginalMagnificationPersistedScale,
                 CURRENT_USER_ID);
     }
-
 
     @Test
     public void testRegister_WindowManagerAndContextRegisterListeners() {
@@ -288,6 +293,21 @@ public class FullScreenMagnificationControllerTest {
         mFullScreenMagnificationController.getCenterY(displayId);
         mFullScreenMagnificationController.offsetMagnifiedRegion(displayId, 50, 50, 1);
         mFullScreenMagnificationController.unregister(displayId);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
+    public void testSetScale_noConnection_doNothing() {
+        register(TEST_DISPLAY);
+
+        // Assume that the connection does not exist.
+        mMockMagnificationConnectionState = false;
+
+        final float scale = 2.0f;
+        final PointF center = INITIAL_MAGNIFICATION_BOUNDS_CENTER;
+        assertFalse(mFullScreenMagnificationController
+                .setScale(TEST_DISPLAY, scale, center.x, center.y, false, SERVICE_ID_1));
+        assertFalse(mFullScreenMagnificationController.isActivated(TEST_DISPLAY));
     }
 
     @Test

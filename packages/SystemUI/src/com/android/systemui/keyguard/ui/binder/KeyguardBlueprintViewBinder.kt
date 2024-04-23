@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.os.Handler
-import android.os.Trace
 import android.transition.Transition
 import android.transition.TransitionManager
 import android.util.Log
@@ -26,9 +25,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.BaseBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
@@ -37,12 +38,10 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.shared.R as sharedR
+import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlin.math.max
-import kotlinx.coroutines.launch
-
-private const val TAG = "KeyguardBlueprintViewBinder"
-private const val DEBUG = false
 
 @SysUISingleton
 class KeyguardBlueprintViewBinder
@@ -90,60 +89,60 @@ constructor(
     ) {
         constraintLayout.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
-                    viewModel.blueprint.collect { blueprint ->
-                        Trace.beginSection("KeyguardBlueprintViewBinder#applyBlueprint")
-                        val prevBluePrint = viewModel.currentBluePrint
+                launch("$TAG#viewModel.blueprint") {
+                    viewModel.blueprint
+                        .pairwise(
+                            null as KeyguardBlueprint?,
+                        )
+                        .collect { (prevBlueprint, blueprint) ->
+                            val cs =
+                                ConstraintSet().apply {
+                                    clone(constraintLayout)
+                                    val emptyLayout = ConstraintSet.Layout()
+                                    knownIds.forEach {
+                                        getConstraint(it).layout.copyFrom(emptyLayout)
+                                    }
+                                    blueprint.applyConstraints(this)
+                                }
 
-                        val cs =
-                            ConstraintSet().apply {
-                                clone(constraintLayout)
-                                val emptyLayout = ConstraintSet.Layout()
-                                knownIds.forEach { getConstraint(it).layout.copyFrom(emptyLayout) }
-                                blueprint.applyConstraints(this)
-                            }
-
-                        var transition =
-                            if (
-                                !KeyguardBottomAreaRefactor.isEnabled &&
-                                    prevBluePrint != null &&
-                                    prevBluePrint != blueprint
-                            ) {
-                                BaseBlueprintTransition(clockViewModel)
-                                    .addTransition(
-                                        IntraBlueprintTransition(
-                                            Config.DEFAULT,
-                                            clockViewModel,
-                                            smartspaceViewModel
+                            var transition =
+                                if (
+                                    !KeyguardBottomAreaRefactor.isEnabled &&
+                                        prevBlueprint != null &&
+                                        prevBlueprint != blueprint
+                                ) {
+                                    BaseBlueprintTransition(clockViewModel)
+                                        .addTransition(
+                                            IntraBlueprintTransition(
+                                                Config.DEFAULT,
+                                                clockViewModel,
+                                                smartspaceViewModel
+                                            )
                                         )
+                                } else {
+                                    IntraBlueprintTransition(
+                                        Config.DEFAULT,
+                                        clockViewModel,
+                                        smartspaceViewModel
                                     )
-                            } else {
-                                IntraBlueprintTransition(
-                                    Config.DEFAULT,
-                                    clockViewModel,
-                                    smartspaceViewModel
-                                )
+                                }
+
+                            runTransition(constraintLayout, transition, Config.DEFAULT) {
+                                // Add and remove views of sections that are not contained by the
+                                // other.
+                                blueprint.replaceViews(constraintLayout, prevBlueprint)
+                                logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
+                                cs.applyTo(constraintLayout)
                             }
-
-                        runTransition(constraintLayout, transition, Config.DEFAULT) {
-                            // Add and remove views of sections that are not contained by the other.
-                            blueprint.replaceViews(prevBluePrint, constraintLayout)
-                            logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
-                            cs.applyTo(constraintLayout)
                         }
-
-                        viewModel.currentBluePrint = blueprint
-                        Trace.endSection()
-                    }
                 }
 
-                launch {
+                launch("$TAG#viewModel.refreshTransition") {
                     viewModel.refreshTransition.collect { transition ->
-                        Trace.beginSection("KeyguardBlueprintViewBinder#refreshTransition")
                         val cs =
                             ConstraintSet().apply {
                                 clone(constraintLayout)
-                                viewModel.currentBluePrint?.applyConstraints(this)
+                                viewModel.blueprint.value.applyConstraints(this)
                             }
 
                         runTransition(
@@ -158,7 +157,6 @@ constructor(
                             logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
                             cs.applyTo(constraintLayout)
                         }
-                        Trace.endSection()
                     }
                 }
             }
@@ -217,15 +215,26 @@ constructor(
         if (!DEBUG || currentClock == null) return
         val smallClockViewId = R.id.lockscreen_clock_view
         val largeClockViewId = currentClock.largeClock.layout.views[0].id
+        val smartspaceDateId = sharedR.id.date_smartspace_view
         Log.i(
             TAG,
             "applyCsToSmallClock: vis=${cs.getVisibility(smallClockViewId)} " +
-                "alpha=${cs.getConstraint(smallClockViewId).propertySet}"
+                "alpha=${cs.getConstraint(smallClockViewId).propertySet.alpha}"
         )
         Log.i(
             TAG,
             "applyCsToLargeClock: vis=${cs.getVisibility(largeClockViewId)} " +
-                "alpha=${cs.getConstraint(largeClockViewId).propertySet}"
+                "alpha=${cs.getConstraint(largeClockViewId).propertySet.alpha}"
         )
+        Log.i(
+            TAG,
+            "applyCsToSmartspaceDate: vis=${cs.getVisibility(smartspaceDateId)} " +
+                "alpha=${cs.getConstraint(smartspaceDateId).propertySet.alpha}"
+        )
+    }
+
+    companion object {
+        private const val TAG = "KeyguardBlueprintViewBinder"
+        private const val DEBUG = false
     }
 }

@@ -28,7 +28,6 @@ import com.android.systemui.bouncer.data.repository.fakeSimBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -253,7 +252,14 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAutoConfirm_whenCorrect() =
         testScope.runTest {
+            // TODO(b/332768183) remove this after the bug if fixed.
+            // Collect the flow so that it is hot, in the real application this is done by using a
+            // refreshingFlow that relies on the UI to make this flow hot.
+            val autoConfirmEnabled by
+                collectLastValue(authenticationInteractor.isAutoConfirmEnabled)
             kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
+
+            assertThat(autoConfirmEnabled).isTrue()
             val authResult by collectLastValue(authenticationInteractor.onAuthenticationResult)
             lockDeviceAndOpenPinBouncer()
 
@@ -265,9 +271,17 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAutoConfirm_whenWrong() =
         testScope.runTest {
+            // TODO(b/332768183) remove this after the bug if fixed.
+            // Collect the flow so that it is hot, in the real application this is done by using a
+            // refreshingFlow that relies on the UI to make this flow hot.
+            val autoConfirmEnabled by
+                collectLastValue(authenticationInteractor.isAutoConfirmEnabled)
+
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
             kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
+
+            assertThat(autoConfirmEnabled).isTrue()
             lockDeviceAndOpenPinBouncer()
 
             FakeAuthenticationRepository.DEFAULT_PIN.dropLast(1).forEach { digit ->
@@ -375,6 +389,61 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             assertThat(isAnimationEnabled).isTrue()
         }
 
+    @Test
+    fun onPinButtonClicked_whenInputSameLengthAsHintedPin_ignoresClick() =
+        testScope.runTest {
+            val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            assertThat(hintedPinLength).isEqualTo(FakeAuthenticationRepository.HINTING_PIN_LENGTH)
+            lockDeviceAndOpenPinBouncer()
+
+            repeat(FakeAuthenticationRepository.HINTING_PIN_LENGTH - 1) { repetition ->
+                underTest.onPinButtonClicked(repetition + 1)
+                runCurrent()
+            }
+            kosmos.fakeAuthenticationRepository.pauseCredentialChecking()
+            // If credential checking were not paused, this would check the credentials and succeed.
+            underTest.onPinButtonClicked(FakeAuthenticationRepository.HINTING_PIN_LENGTH)
+            runCurrent()
+
+            // This one should be ignored because the user has already entered a number of digits
+            // that's equal to the length of the hinting PIN length. It should result in a PIN
+            // that's exactly the same length as the hinting PIN length.
+            underTest.onPinButtonClicked(FakeAuthenticationRepository.HINTING_PIN_LENGTH + 1)
+            runCurrent()
+
+            assertThat(pin)
+                .isEqualTo(
+                    buildList {
+                        repeat(FakeAuthenticationRepository.HINTING_PIN_LENGTH) { index ->
+                            add(index + 1)
+                        }
+                    }
+                )
+
+            kosmos.fakeAuthenticationRepository.unpauseCredentialChecking()
+            runCurrent()
+            assertThat(pin).isEmpty()
+        }
+
+    @Test
+    fun onPinButtonClicked_whenPinNotHinted_doesNotIgnoreClick() =
+        testScope.runTest {
+            val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
+            kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(false)
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            assertThat(hintedPinLength).isNull()
+            lockDeviceAndOpenPinBouncer()
+
+            repeat(FakeAuthenticationRepository.HINTING_PIN_LENGTH + 1) { repetition ->
+                underTest.onPinButtonClicked(repetition + 1)
+                runCurrent()
+            }
+
+            assertThat(pin).hasSize(FakeAuthenticationRepository.HINTING_PIN_LENGTH + 1)
+        }
+
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)
         val bouncerHidden = currentScene == Scenes.Bouncer && toScene != Scenes.Bouncer
@@ -387,7 +456,6 @@ class PinBouncerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.lockDeviceAndOpenPinBouncer() {
         kosmos.fakeAuthenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-        kosmos.fakeDeviceEntryRepository.setUnlocked(false)
         switchToScene(Scenes.Bouncer)
     }
 

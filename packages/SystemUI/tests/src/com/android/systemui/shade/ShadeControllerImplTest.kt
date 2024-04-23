@@ -33,7 +33,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
@@ -95,7 +94,6 @@ class ShadeControllerImplTest : SysuiTestCase() {
             headsUpManager,
             PowerInteractorFactory.create().powerInteractor,
             ActiveNotificationsInteractor(activeNotificationsRepository, testDispatcher),
-            kosmos.sceneContainerFlags,
             kosmos::sceneInteractor,
         )
     }

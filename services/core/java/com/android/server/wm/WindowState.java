@@ -28,7 +28,6 @@ import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.permission.flags.Flags.sensitiveContentImprovements;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
@@ -247,6 +246,7 @@ import android.window.OnBackInvokedCallbackInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ToBooleanFunction;
@@ -2138,9 +2138,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
             setDisplayLayoutNeeded();
-            if (sensitiveContentImprovements() && visible) {
-                mWmService.onWindowVisible(this);
-            }
         }
     }
 
@@ -2973,6 +2970,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
 
+        // Do not allow back predictive animation target to receive touch, app can trigger an
+        // unexpected transition so basically unable to polish it.
+        if (mWmService.mAtmService.mBackNavigationController.shouldPauseTouch(mActivityRecord)) {
+            return false;
+        }
         return !mActivityRecord.getTask().getRootTask().shouldIgnoreInput()
                 && mActivityRecord.isVisibleRequested();
     }
@@ -3700,22 +3702,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
 
-        // App window resize may trigger Activity#onConfigurationChanged, so we need to update
-        // ActivityWindowInfo as well.
-        final IBinder activityToken;
-        final ActivityWindowInfo activityWindowInfo;
-        if (mLastReportedActivityWindowInfo != null) {
-            activityToken = mActivityRecord.token;
-            activityWindowInfo = mLastReportedActivityWindowInfo;
-        } else {
-            activityToken = null;
-            activityWindowInfo = null;
-        }
-
         final int prevRotation = mLastReportedConfiguration
                 .getMergedConfiguration().windowConfiguration.getRotation();
         fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
-                activityWindowInfo, true /* useLatestConfig */, false /* relayoutVisible */);
+                mLastReportedActivityWindowInfo, true /* useLatestConfig */,
+                false /* relayoutVisible */);
         final boolean syncRedraw = shouldSendRedrawForSync();
         final boolean syncWithBuffers = syncRedraw && shouldSyncWithBuffers();
         final boolean reportDraw = syncRedraw || drawPending;
@@ -3739,14 +3730,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             mLastReportedConfiguration, getCompatInsetsState(), forceRelayout,
                             alwaysConsumeSystemBars, displayId,
                             syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
-                            activityToken, activityWindowInfo));
+                            mLastReportedActivityWindowInfo));
             onResizePostDispatched(drawPending, prevRotation, displayId);
         } else {
             // TODO(b/301870955): cleanup after launch
             try {
                 mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
                         getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
-                        syncWithBuffers ? mSyncSeqId : -1, isDragResizing, activityWindowInfo);
+                        syncWithBuffers ? mSyncSeqId : -1, isDragResizing,
+                        mLastReportedActivityWindowInfo);
                 onResizePostDispatched(drawPending, prevRotation, displayId);
             } catch (RemoteException e) {
                 // Cancel orientation change of this window to avoid blocking unfreeze display.
@@ -4739,7 +4731,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void onExitAnimationDone() {
-        if (ProtoLog.isEnabled(WM_DEBUG_ANIM)) {
+        if (ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.VERBOSE)) {
             final AnimationAdapter animationAdapter = mSurfaceAnimator.getAnimation();
             StringWriter sw = new StringWriter();
             if (animationAdapter != null) {
@@ -4977,8 +4969,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 displayInfo.appWidth, displayInfo.appHeight);
         anim.restrictDuration(MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mWmService.getWindowAnimationScaleLocked());
+        final Point position = new Point();
+        if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()) {
+            transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
+                    position);
+        } else {
+            position.set(mSurfacePosition);
+        }
         final AnimationAdapter adapter = new LocalAnimationAdapter(
-                new WindowAnimationSpec(anim, mSurfacePosition, false /* canSkipFirstFrame */,
+                new WindowAnimationSpec(anim, position, false /* canSkipFirstFrame */,
                         0 /* windowCornerRadius */),
                 mWmService.mSurfaceAnimationRunner);
         startAnimation(getPendingTransaction(), adapter);

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
-import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
+import com.android.settingslib.AccessibilityContentDescriptions
 import com.android.systemui.Flags.statusBarStaticInoutIndicators
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -50,7 +50,7 @@ interface MobileIconViewModelCommon {
     /** True if this view should be visible at all. */
     val isVisible: StateFlow<Boolean>
     val icon: Flow<SignalIconModel>
-    val contentDescription: Flow<ContentDescription>
+    val contentDescription: Flow<ContentDescription?>
     val roaming: Flow<Boolean>
     /** The RAT icon (LTE, 3G, 5G, etc) to be displayed. Null if we shouldn't show anything */
     val networkTypeIcon: Flow<Icon.Resource?>
@@ -123,7 +123,7 @@ class MobileIconViewModel(
 
     override val icon: Flow<SignalIconModel> = vmProvider.flatMapLatest { it.icon }
 
-    override val contentDescription: Flow<ContentDescription> =
+    override val contentDescription: Flow<ContentDescription?> =
         vmProvider.flatMapLatest { it.contentDescription }
 
     override val roaming: Flow<Boolean> = vmProvider.flatMapLatest { it.roaming }
@@ -206,12 +206,26 @@ private class CellularIconViewModel(
 
     override val icon: Flow<SignalIconModel> = iconInteractor.signalLevelIcon
 
-    override val contentDescription: Flow<ContentDescription> = run {
-        val initial = ContentDescription.Resource(PHONE_SIGNAL_STRENGTH[0])
+    override val contentDescription: Flow<ContentDescription?> =
         iconInteractor.signalLevelIcon
-            .map { ContentDescription.Resource(PHONE_SIGNAL_STRENGTH[it.level]) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
-    }
+            .map {
+                // We expect the signal icon to be cellular here since this is the cellular vm
+                if (it !is SignalIconModel.Cellular) {
+                    null
+                } else {
+                    val resId =
+                        AccessibilityContentDescriptions.getDescriptionForLevel(
+                            it.level,
+                            it.numberOfLevels
+                        )
+                    if (resId != 0) {
+                        ContentDescription.Resource(resId)
+                    } else {
+                        null
+                    }
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     private val showNetworkTypeIcon: Flow<Boolean> =
         combine(

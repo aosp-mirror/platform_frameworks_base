@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 
@@ -690,7 +690,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final void unsuspendAdminSuspendedPackages(int affectedUser) {
         final int suspendingUserId =
-                crossUserSuspensionEnabled() ? UserHandle.USER_SYSTEM : affectedUser;
+                crossUserSuspensionEnabledRo() ? UserHandle.USER_SYSTEM : affectedUser;
         mService.unsuspendForSuspendingPackage(
                 snapshot(), PLATFORM_PACKAGE_NAME, suspendingUserId, /* inAllUsers= */ false);
     }
@@ -699,7 +699,7 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final boolean isAdminSuspendingAnyPackages(int userId) {
         final int suspendingUserId =
-                crossUserSuspensionEnabled() ? UserHandle.USER_SYSTEM : userId;
+                crossUserSuspensionEnabledRo() ? UserHandle.USER_SYSTEM : userId;
         return snapshot().isSuspendingAnyPackages(PLATFORM_PACKAGE_NAME, suspendingUserId, userId);
     }
 

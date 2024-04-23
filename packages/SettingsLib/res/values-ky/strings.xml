@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Иштеп жатат, сол кулак гана"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Жигердүү, оң кулакчын гана"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Жигердүү, сол жана оң кулакчын"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Активдүү (медиа үчүн гана), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарея"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Активдүү (медиа үчүн гана), С: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батарея, О: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батарея"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Туташкан (чогуу угуу колдоого алынат), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарея"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Туташкан (чогуу угуу колдоого алынат), С: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батарея, О: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батарея"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Туташкан (чогуу угуу колдоого алынат), сол <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Туташкан (чогуу угуу колдоого алынат), оң <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Активдүү (медиа үчүн гана)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Чогуу угуу колдоого алынат"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Активдүү (медиа үчүн гана), сол кулакчын гана"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Активдүү (медиа үчүн гана), оң кулакчын гана"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Активдүү (медиа үчүн гана), сол жана оң кулакчын"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Аудио"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Телефон чалуулар"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Файл алмашуу"</string>
@@ -270,7 +281,7 @@
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM бөгөттөн чыгаруу"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Кайра жүктөгүчтү бөгөттөн чыгарууга уруксат берүү"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM бөгөттөн чыгарууга уруксатпы?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ЭСКЕРТҮҮ: Бул жөндөө күйгүзүлүп турганда түзмөктү коргоо өзгөчөлүктөрү иштебейт."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ЭСКЕРТҮҮ: Бул параметр күйгүзүлүп турганда түзмөктү коргоо өзгөчөлүктөрү иштебейт."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Жалган жайгашкан жерлерди көрсөткөн колдонмону тандоо"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Жалган жайгашкан жерлерди көрсөткөн колдонмо жок"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Жалган жайгашкан жерлерди көрсөткөн колдонмо: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -317,7 +328,7 @@
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Каттоо буфери үчүн Каттагычтын көлөмүн тандаңыз"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Таржымалдын туруктуу диски тазалансынбы?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Туруктуу таржымалга көз салууну токтотсок, анын түзмөктө сакталган дайындарын жок кылууга аргасыз болобуз."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Журналдагы маалымат түзмөккө сакталсын"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Журналдагы нерселерди түзмөккө сактоо"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Түзмөккө туруктуу сактоо үчүн таржымал буферлерин тандаңыз"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB конфигурациясын тандоо"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB конфигурациясын тандоо"</string>
@@ -376,7 +387,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Аномалияга окшошуу"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL трейстерин иштетүү"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Аудиону өткөрүүнү өчүрүү (USB)"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Тышкы USB аудио жабдыктарына авто өткөрүү өчрлт"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Тышкы USB түзмөктөргө автоматтык түрдө өтпөйт"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Элементтрдн чектрин көрст"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Кесилген нерсенин чектери жана жээктери көрүнөт"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Интерфейсти чагылдыруу"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> кийин толук кубатталат"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> — Кубаттоо жакшыртылды"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - Кубатталууда"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгисиз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Кубатталууда"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ыкчам кубатталууда"</string>
@@ -487,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Кубатталды"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Толук кубатталды"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Кубаттоо күтүү режиминде"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Администратор тарабынан көзөмөлдөнөт"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Чектелген параметр аркылуу көзөмөлдөнөт"</string>
     <string name="disabled" msgid="8017887509554714950">"Өчүрүлгөн"</string>
@@ -552,7 +575,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Ушул планшет"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Док бекети үчүн динамик"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Док бекеттин динамиги"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Тышкы түзмөк"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Туташкан түзмөк"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ушул телефон"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Чыксаңыз, бардык аракеттер өчүп калат"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Чыгуудан мурун аракеттериңизди сактап же жок кылсаңыз болот"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Сеанстагы аракеттерди азыр өчүрсөңүз болот же чыгып баратып өчүрүп же сактап коюңуз"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Сүрөткө тартуу"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Сүрөт тандаңыз"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Сүрөт тандаңыз"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Өтө көп жолу туура эмес аракет кылынды. Бул түзмөктүн дайындары жок кылынат."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Өтө көп жолу жаңылдыңыз. Бул колдонуучу өчүрүлөт."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Телефон сигналы бир таякча."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Телефон сигналы эки таякча."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Телефон сигналы үч таякча."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Телефон сигналы толук."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Сигнал жок."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Мобилдик интернеттин сигналы бир таякча."</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet ажырады."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Чалуу жок."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Профилдин сүрөтүн тандоо"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Демейки колдонуучунун сүрөтчөсү"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Аппараттык баскычтоп"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Тергичтин жайылмасын тандоо"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Демейки"</string>

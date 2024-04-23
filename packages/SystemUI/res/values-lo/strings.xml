@@ -235,7 +235,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ໜ້າຈໍແຈ້ງເຕືອນ."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ການຕັ້ງຄ່າດ່ວນ."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"ການຕັ້ງຄ່າດ່ວນ ແລະ ເງົາການແຈ້ງເຕືອນ."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ລັອກ​ໜ້າ​ຈໍ."</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"ໜ້າຈໍລັອກ"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ໜ້າຈໍລັອກວຽກ"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ປິດ"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ງຽບທັງໝົດ"</string>
@@ -270,12 +270,15 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"ເບິ່ງທັງໝົດ"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ໃຊ້ Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ເຊື່ອມຕໍ່ແລ້ວ"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ການແບ່ງປັນສຽງ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ບັນທຶກແລ້ວ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ຕັດການເຊື່ອມຕໍ່"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ເປີດນຳໃຊ້"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"ເປີດໃຊ້ໂດຍອັດຕະໂນມັດອີກຄັ້ງມື້ອື່ນ"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"ຄຸນສົມບັດຕ່າງໆ ເຊັ່ນ: ການແຊຣ໌ດ່ວນ, ຊອກຫາອຸປະກອນຂອງຂ້ອຍ ແລະ ສະຖານທີ່ຂອງອຸປະກອນແມ່ນໃຊ້ Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth ຈະເປີດມື້ອື່ນເວລາ 05:00 ໂມງ"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"ຄຸນສົມບັດຕ່າງໆໃຊ້ Bluetooth ເຊັ່ນ: ການແຊຣ໌ດ່ວນ ແລະ ຊອກຫາອຸປະກອນຂອງຂ້ອຍ"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth ຈະເປີດມື້ອື່ນເຊົ້າ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ການແບ່ງປັນສຽງ"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"ກຳລັງແບ່ງປັນສຽງ"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ສຽງ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ຊຸດຫູຟັງ"</string>
@@ -350,6 +353,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ບັນຫາກ່ຽວກັບການບັນທຶກ"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ເລີ່ມ"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"ຢຸດ"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ລາຍງານຂໍ້ຜິດພາດ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ສ່ວນໃດຂອງປະສົບການອຸປະກອນຂອງທ່ານໄດ້ຮັບຜົນກະທົບ?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ເລືອກປະເພດບັນຫາ"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ບັນທຶກໜ້າຈໍ"</string>
@@ -363,7 +367,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ມາດຕະຖານ"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ປານກາງ"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ສູງ"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ອຸປະກອນຊ່ວຍຟັງ"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ອຸປະກອນຊ່ວຍຟັງ"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ຈັບຄູ່ອຸປະກອນໃໝ່"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ຄລິກເພື່ອຈັບຄູ່ອຸປະກອນໃໝ່"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ປົດບລັອກໄມໂຄຣໂຟນອຸປະກອນບໍ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ປົດບລັອກກ້ອງຖ່າຍຮູບອຸ​ປະ​ກອນບໍ?"</string>
@@ -430,6 +438,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟແບບໄວ • ຈະເຕັມໃນອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟແບບຊ້າ • ຈະເຕັມໃນອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟ • ຈະເຕັມໃນອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ວິດເຈັດຢູ່ໜ້າຈໍລັອກ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ປັດຊ້າຍເພື່ອເລີ່ມບົດແນະນຳສ່ວນກາງ"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ປັບແຕ່ງ"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ປ່ອຍ​ໄປ"</string>
@@ -442,14 +451,14 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ລຶບອອກ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ເພີ່ມວິດເຈັດ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ແລ້ວໆ"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ເພີ່ມວິດເຈັດ"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"ຮັບການເຂົ້າເຖິງດ່ວນຫາແອັບວິດເຈັດທີ່ທ່ານມັກໂດຍບໍ່ຕ້ອງປົດລັອກແທັບເລັດຂອງທ່ານ."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"ອະນຸຍາດວິດເຈັດໃດກໍຕາມຢູ່ໜ້າຈໍລັອກບໍ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ເປີດການຕັ້ງຄ່າ"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"ຍົກເລີກການຢຸດຊົ່ວຄາວແອັບບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"ຍົກເລີກການຢຸດຊົ່ວຄາວ"</string>
+    <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"ປິດວິດເຈັດຢູ່ໜ້າຈໍລັອກ"</string>
+    <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ວິດເຈັດຢູ່ໜ້າຈໍລັອກ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ສະຫຼັບຜູ້ໃຊ້"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ເມນູແບບດຶງລົງ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ແອັບຯ​ແລະ​ຂໍ້​ມູນ​ທັງ​ໝົດ​ໃນ​ເຊດ​ຊັນ​ນີ້​ຈະ​ຖືກ​ລຶບ​ອອກ."</string>
@@ -649,7 +658,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"ມ່ວນຊື່ນສຳລັບບາງຄົນ ແຕ່ບໍ່ແມ່ນສຳລັບທຸກຄົນ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner ໃຫ້ທ່ານມີວິທີພິເສດຕື່ມອີກໃນການປັບປ່ຽນ ແລະຕົບແຕ່ງສ່ວນຕໍ່ປະສານຜູ້ໃຊ້ຂອງ Android. ຄຸນສົມບັດທົດລອງໃຊ້ເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການວາງຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງດຳເນີນຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"ຄຸນສົມບັດທົດລອງໃຊ້ງານເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການອອກຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງສືບຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
-    <string name="got_it" msgid="477119182261892069">"ໄດ້​ແລ້ວ"</string>
+    <string name="got_it" msgid="477119182261892069">"ເຂົ້າ​ໃຈ​ແລ້ວ"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"ຍິນດີດ້ວຍ! System UI Tuner ໄດ້ຖືກເພີ່ມໃສ່ການຕັ້ງຄ່າແລ້ວ"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"ເອົາອອກ​ຈາກ​ການ​ຕັ້ງ​ຄ່າ"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"ເອົາ System UI Tuner ອອກຈາກການຕັ້ງຄ່າ ແລະຢຸດການໃຊ້ທຸກຄຸນສົມບັດໃຊ້ງານຂອງມັນ?"</string>
@@ -741,7 +750,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ສະຫຼັບແປ້ນພິມ"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ຫຼື"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ລຶບລ້າງຄຳຊອກຫາ"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ທາງລັດ"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"ຄີລັດ"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ທາງລັດການຊອກຫາ"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ບໍ່ພົບທາງລັດ"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ລະບົບ"</string>
@@ -766,9 +775,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"ເປີດຜູ້ຊ່ວຍ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ໜ້າຈໍລັອກ"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"ຈົດບັນທຶກ"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ການເຮັດຫຼາຍໜ້າວຽກພ້ອມກັນຂອງລະບົບ"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"ເຂົ້າສູ່ແບ່ງໜ້າຈໍດ້ວຍແອັບປັດຈຸບັນໄປຫາ RHS"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"ເຂົ້າສູ່ແບ່ງໜ້າຈໍດ້ວຍແອັບປັດຈຸບັນໄປຫາ LHS"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ການເຮັດຫຼາຍໜ້າວຽກພ້ອມກັນ"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"ໃຊ້ການແບ່ງໜ້າຈໍກັບແອັບປັດຈຸບັນຢູ່ເບື້ອງຂວາ"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ໃຊ້ການແບ່ງໜ້າຈໍກັບແອັບປັດຈຸບັນຢູ່ເບື້ອງຊ້າຍ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ສະຫຼັບຈາກແບ່ງໜ້າຈໍໄປເປັນເຕັມຈໍ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ສະຫຼັບໄປໃຊ້ແອັບຢູ່ຂວາ ຫຼື ທາງລຸ່ມໃນຂະນະທີ່ໃຊ້ແບ່ງໜ້າຈໍ"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ສະຫຼັບໄປໃຊ້ແອັບຢູ່ຊ້າຍ ຫຼື ທາງເທິງໃນຂະນະທີ່ໃຊ້ແບ່ງໜ້າຈໍ"</string>

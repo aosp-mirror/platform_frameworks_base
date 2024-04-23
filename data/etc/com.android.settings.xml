@@ -67,5 +67,7 @@
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
         <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
         <permission name="android.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS" />
+        <permission name="android.permission.SATELLITE_COMMUNICATION" />
+        <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
     </privapp-permissions>
 </permissions>

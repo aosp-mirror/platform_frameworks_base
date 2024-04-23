@@ -94,7 +94,8 @@ sealed interface SignalIconModel : Diffable<SignalIconModel> {
         }
 
         override fun logFully(row: TableRowLogger) {
-            row.logChange("numLevels", "HELLO")
+            // Satellite icon has only 3 levels, unchanging
+            row.logChange(COL_NUM_LEVELS, "3")
             row.logChange(COL_TYPE, "s")
             row.logChange(COL_LEVEL, level)
         }

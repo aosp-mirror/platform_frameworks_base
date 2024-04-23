@@ -17,10 +17,16 @@
 package com.android.systemui.media.controls.domain.interactor
 
 import android.R
+import android.content.ComponentName
+import android.content.Intent
+import android.content.applicationContext
 import android.graphics.drawable.Icon
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.Expandable
+import com.android.systemui.broadcast.broadcastSender
+import com.android.systemui.broadcast.mockBroadcastSender
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
@@ -28,25 +34,36 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestHelper
 import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaRecommendationsInteractor
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaRecommendationsInteractor.Companion.EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaRecommendationsInteractor
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
 import com.android.systemui.media.controls.shared.model.MediaRecModel
 import com.android.systemui.media.controls.shared.model.MediaRecommendationsModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class MediaRecommendationsInteractorTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos()
+    private val spyContext = spy(context)
+    private val kosmos = testKosmos().apply { applicationContext = spyContext }
     private val testScope = kosmos.testScope
 
     private val mediaDataFilter: MediaDataFilterImpl = kosmos.mediaDataFilter
+    private val activityStarter = kosmos.activityStarter
     private val icon: Icon = Icon.createWithResource(context, R.drawable.ic_media_play)
     private val smartspaceMediaData: SmartspaceMediaData =
         SmartspaceMediaData(
@@ -56,7 +73,11 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
             recommendations = MediaTestHelper.getValidRecommendationList(icon),
         )
 
-    private val underTest: MediaRecommendationsInteractor = kosmos.mediaRecommendationsInteractor
+    private val underTest: MediaRecommendationsInteractor =
+        with(kosmos) {
+            broadcastSender = mockBroadcastSender
+            kosmos.mediaRecommendationsInteractor
+        }
 
     @Test
     fun addRecommendation_smartspaceMediaDataUpdate() =
@@ -110,6 +131,50 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
             assertThat(recommendations?.areRecommendationsValid).isFalse()
             assertThat(recommendations?.mediaRecs?.isEmpty()).isTrue()
         }
+
+    @Test
+    fun removeRecommendation_noTrampolineActivity() {
+        val intent = Intent()
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        underTest.removeMediaRecommendations(KEY_MEDIA_SMARTSPACE, intent, 0)
+
+        verify(kosmos.mockBroadcastSender).sendBroadcast(eq(intent))
+    }
+
+    @Test
+    fun removeRecommendation_usingTrampolineActivity() {
+        doNothing().whenever(spyContext).startActivity(any())
+        val intent = Intent()
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.component = ComponentName(PACKAGE_NAME, EXPORTED_SMARTSPACE_TRAMPOLINE_ACTIVITY_NAME)
+
+        underTest.removeMediaRecommendations(KEY_MEDIA_SMARTSPACE, intent, 0)
+
+        verify(spyContext).startActivity(eq(intent))
+    }
+
+    @Test
+    fun startSettings() {
+        underTest.startSettings()
+
+        verify(activityStarter).startActivity(any(), eq(true))
+    }
+
+    @Test
+    fun startClickIntent() {
+        doNothing().whenever(spyContext).startActivity(any())
+        val intent = Intent()
+        val expandable = mock<Expandable>()
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        underTest.startClickIntent(expandable, intent)
+
+        verify(spyContext).startActivity(eq(intent))
+    }
 
     companion object {
         private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"

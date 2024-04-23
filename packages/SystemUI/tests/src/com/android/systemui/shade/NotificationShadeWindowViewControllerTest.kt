@@ -38,11 +38,11 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.flags.Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION
-import com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON
-import com.android.systemui.flags.Flags.TRACKPAD_GESTURE_FEATURES
 import com.android.systemui.keyevent.domain.interactor.SysUIKeyEventHandler
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
@@ -69,7 +69,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -87,6 +86,8 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import kotlin.test.assertEquals
+import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -138,6 +139,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private val notificationLaunchAnimationInteractor =
         NotificationLaunchAnimationInteractor(notificationLaunchAnimationRepository)
 
+    private lateinit var falsingCollector: FalsingCollectorFake
     private lateinit var fakeClock: FakeSystemClock
     private lateinit var interactionEventHandlerCaptor: ArgumentCaptor<InteractionEventHandler>
     private lateinit var interactionEventHandler: InteractionEventHandler
@@ -158,23 +160,22 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             .thenReturn(keyguardBouncerComponent)
         whenever(keyguardBouncerComponent.securityContainerController)
             .thenReturn(keyguardSecurityContainerController)
-        whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
+        whenever(keyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING))
             .thenReturn(emptyFlow<TransitionStep>())
 
         featureFlagsClassic = FakeFeatureFlagsClassic()
-        featureFlagsClassic.set(TRACKPAD_GESTURE_COMMON, true)
-        featureFlagsClassic.set(TRACKPAD_GESTURE_FEATURES, false)
         featureFlagsClassic.set(SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlagsClassic.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
         mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
 
         testScope = TestScope()
+        falsingCollector = FalsingCollectorFake()
         fakeClock = FakeSystemClock()
         underTest =
             NotificationShadeWindowViewController(
                 lockscreenShadeTransitionController,
-                FalsingCollectorFake(),
+                falsingCollector,
                 sysuiStatusBarStateController,
                 dockManager,
                 notificationShadeDepthController,
@@ -564,6 +565,21 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)
         interactionEventHandler.interceptMediaKey(keyEvent)
         verify(sysUIKeyEventHandler).interceptMediaKey(keyEvent)
+    }
+
+    @Test
+    fun forwardsCollectKeyEvent() {
+        val keyEvent = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A)
+        interactionEventHandler.collectKeyEvent(keyEvent)
+        assertEquals(keyEvent, falsingCollector.lastKeyEvent)
+    }
+
+    @Test
+    fun cancelCurrentTouch_callsDragDownHelper() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+        underTest.cancelCurrentTouch()
+
+        verify(dragDownHelper).stopDragging()
     }
 
     companion object {

@@ -16,36 +16,38 @@
 
 package com.android.systemui.volume.panel.component.button.ui.composable
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.systemui.common.ui.compose.Icon
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
+import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
 import com.android.systemui.volume.panel.ui.composable.ComposeVolumePanelUiComponent
 import com.android.systemui.volume.panel.ui.composable.VolumePanelComposeScope
 import kotlinx.coroutines.flow.StateFlow
 
 /** [ComposeVolumePanelUiComponent] implementing a toggleable button from a bottom row. */
 class ToggleButtonComponent(
-    private val viewModelFlow: StateFlow<ToggleButtonViewModel?>,
+    private val viewModelFlow: StateFlow<ButtonViewModel?>,
     private val onCheckedChange: (isChecked: Boolean) -> Unit
 ) : ComposeVolumePanelUiComponent {
 
@@ -60,29 +62,38 @@ class ToggleButtonComponent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            OutlinedIconToggleButton(
-                modifier =
-                    Modifier.height(64.dp).fillMaxWidth().semantics { contentDescription = label },
-                checked = viewModel.isChecked,
-                onCheckedChange = onCheckedChange,
-                shape = RoundedCornerShape(28.dp),
-                colors =
-                    IconButtonDefaults.outlinedIconToggleButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
-                border = BorderStroke(8.dp, MaterialTheme.colorScheme.surface),
-            ) {
-                Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
+            BottomComponentButtonSurface {
+                val colors =
+                    if (viewModel.isActive) {
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        )
+                    } else {
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                Button(
+                    modifier =
+                        Modifier.fillMaxSize().padding(8.dp).semantics {
+                            role = Role.Switch
+                            contentDescription = label
+                        },
+                    onClick = { onCheckedChange(!viewModel.isActive) },
+                    shape = RoundedCornerShape(28.dp),
+                    colors = colors
+                ) {
+                    Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
+                }
             }
+
             Text(
-                modifier = Modifier.clearAndSetSemantics {},
+                modifier = Modifier.clearAndSetSemantics {}.basicMarquee(),
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
             )
         }
     }

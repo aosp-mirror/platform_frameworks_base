@@ -102,7 +102,8 @@ public class GrammaticalInflectionService extends SystemService {
         mContext = context;
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mBackupHelper = new GrammaticalInflectionBackupHelper(this, context.getPackageManager());
+        mBackupHelper = new GrammaticalInflectionBackupHelper(mContext.getAttributionSource(), this,
+                context.getPackageManager());
         mBinderService = new GrammaticalInflectionBinderService();
         mPermissionManager = context.getSystemService(PermissionManager.class);
     }
@@ -173,6 +174,18 @@ public class GrammaticalInflectionService extends SystemService {
         @Override
         public void stageAndApplyRestoredPayload(byte[] payload, int userId) {
             mBackupHelper.stageAndApplyRestoredPayload(payload, userId);
+        }
+
+        @Override
+        @Nullable
+        public byte[] getSystemBackupPayload(int userId) {
+            isCallerAllowed();
+            return mBackupHelper.getSystemBackupPayload(userId);
+        }
+
+        @Override
+        public void applyRestoredSystemPayload(byte[] payload, int userId) {
+            mBackupHelper.applyRestoredSystemPayload(payload, userId);
         }
 
         @Override
@@ -290,6 +303,7 @@ public class GrammaticalInflectionService extends SystemService {
                     userId,
                     grammaticalGender != GRAMMATICAL_GENDER_NOT_SPECIFIED,
                     preValue != GRAMMATICAL_GENDER_NOT_SPECIFIED);
+            GrammaticalInflectionBackupHelper.notifyBackupManager();
         } catch (RemoteException e) {
             Log.w(TAG, "Can not update configuration", e);
         }

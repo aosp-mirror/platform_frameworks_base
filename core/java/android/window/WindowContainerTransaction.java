@@ -88,6 +88,19 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Clear the transaction object.
+     * This is equivalent to a new empty {@link WindowContainerTransaction} in content.
+     *
+     * @hide
+     */
+    public void clear() {
+        mChanges.clear();
+        mHierarchyOps.clear();
+        mErrorCallbackToken = null;
+        mTaskFragmentOrganizer = null;
+    }
+
+    /**
      * Resize a container.
      */
     @NonNull
@@ -1284,6 +1297,12 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             if ((mChangeMask & CHANGE_FOCUSABLE) != 0) {
                 sb.append("focusable:" + mFocusable + ",");
+            }
+            if ((mChangeMask & CHANGE_FORCE_TRANSLUCENT) != 0) {
+                sb.append("forceTranslucent:" + mForceTranslucent + ",");
+            }
+            if ((mChangeMask & CHANGE_HIDDEN) != 0) {
+                sb.append("hidden:" + mHidden + ",");
             }
             if ((mChangeMask & CHANGE_DRAG_RESIZING) != 0) {
                 sb.append("dragResizing:" + mDragResizing + ",");

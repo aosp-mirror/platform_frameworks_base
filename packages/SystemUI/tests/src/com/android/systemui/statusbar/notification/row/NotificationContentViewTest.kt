@@ -79,10 +79,11 @@ class NotificationContentViewTest : SysuiTestCase() {
         initMocks(this)
         fakeParent =
             spy(FrameLayout(mContext, /* attrs= */ null).also { it.visibility = View.GONE })
+        val mockEntry = createMockNotificationEntry()
         row =
             spy(
-                ExpandableNotificationRow(mContext, /* attrs= */ null).apply {
-                    entry = createMockNotificationEntry()
+                ExpandableNotificationRow(mContext, /* attrs= */ null, mockEntry).apply {
+                    entry = mockEntry
                 }
             )
         ViewUtils.attachView(fakeParent)

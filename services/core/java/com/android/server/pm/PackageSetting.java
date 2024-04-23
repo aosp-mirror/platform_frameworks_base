@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
@@ -1241,7 +1241,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 for (int j = 0; j < state.getSuspendParams().size(); j++) {
                     proto.write(PackageProto.UserInfoProto.SUSPENDING_PACKAGE,
                             state.getSuspendParams().keyAt(j).packageName);
-                    if (crossUserSuspensionEnabled()) {
+                    if (crossUserSuspensionEnabledRo()) {
                         proto.write(PackageProto.UserInfoProto.SUSPENDING_USER,
                                 state.getSuspendParams().keyAt(j).userId);
                     }

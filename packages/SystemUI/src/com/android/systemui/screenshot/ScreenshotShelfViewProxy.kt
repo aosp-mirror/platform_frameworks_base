@@ -20,22 +20,20 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Notification
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.net.Uri
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.ScrollCaptureResponse
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
+import android.view.WindowManager
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.res.R
-import com.android.systemui.screenshot.LogConfig.DEBUG_ACTIONS
 import com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS
 import com.android.systemui.screenshot.LogConfig.DEBUG_INPUT
 import com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW
@@ -44,8 +42,8 @@ import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHE
 import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.ui.ScreenshotAnimationController
 import com.android.systemui.screenshot.ui.ScreenshotShelfView
+import com.android.systemui.screenshot.ui.SwipeGestureListener
 import com.android.systemui.screenshot.ui.binder.ScreenshotShelfViewBinder
-import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -57,9 +55,10 @@ class ScreenshotShelfViewProxy
 constructor(
     private val logger: UiEventLogger,
     private val viewModel: ScreenshotViewModel,
+    private val windowManager: WindowManager,
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
-) : ScreenshotViewProxy, ScreenshotActionsProvider.ScreenshotActionsCallback {
+) : ScreenshotViewProxy {
     override val view: ScreenshotShelfView =
         LayoutInflater.from(context).inflate(R.layout.screenshot_shelf, null) as ScreenshotShelfView
     override val screenshotPreview: View
@@ -77,23 +76,37 @@ constructor(
     override var isPendingSharedTransition = false
 
     private val animationController = ScreenshotAnimationController(view)
-    private var imageData: SavedImageData? = null
-    private var runOnImageDataAcquired: ((SavedImageData) -> Unit)? = null
+    private val swipeGestureListener =
+        SwipeGestureListener(
+            view,
+            onDismiss = { requestDismissal(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, it) },
+            onCancel = { animationController.getSwipeReturnAnimation().start() }
+        )
 
     init {
-        ScreenshotShelfViewBinder.bind(view, viewModel, LayoutInflater.from(context))
+        ScreenshotShelfViewBinder.bind(view, viewModel, LayoutInflater.from(context)) {
+            swipeGestureListener.onMotionEvent(it)
+        }
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         debugLog(DEBUG_WINDOW) { "adding OnComputeInternalInsetsListener" }
+        view.viewTreeObserver.addOnComputeInternalInsetsListener { info ->
+            val touchableRegion =
+                view.getTouchRegion(
+                    windowManager.currentWindowMetrics.windowInsets.getInsets(
+                        WindowInsets.Type.systemGestures()
+                    )
+                )
+            info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
+            info.touchableRegion.set(touchableRegion)
+        }
         screenshotPreview = view.screenshotPreview
     }
 
     override fun reset() {
         animationController.cancel()
         isPendingSharedTransition = false
-        imageData = null
         viewModel.reset()
-        runOnImageDataAcquired = null
     }
     override fun updateInsets(insets: WindowInsets) {}
     override fun updateOrientation(insets: WindowInsets) {}
@@ -104,12 +117,13 @@ constructor(
 
     override fun addQuickShareChip(quickShareAction: Notification.Action) {}
 
-    override fun setChipIntents(data: SavedImageData) {
-        imageData = data
-        runOnImageDataAcquired?.invoke(data)
+    override fun setChipIntents(imageData: SavedImageData) {}
+
+    override fun requestDismissal(event: ScreenshotEvent?) {
+        requestDismissal(event, getDismissalVelocity())
     }
 
-    override fun requestDismissal(event: ScreenshotEvent) {
+    private fun requestDismissal(event: ScreenshotEvent?, velocity: Float) {
         debugLog(DEBUG_DISMISS) { "screenshot dismissal requested: $event" }
 
         // If we're already animating out, don't restart the animation
@@ -117,8 +131,8 @@ constructor(
             debugLog(DEBUG_DISMISS) { "Already dismissing, ignoring duplicate command $event" }
             return
         }
-        logger.log(event, 0, packageName)
-        val animator = animationController.getExitAnimation()
+        event?.let { logger.log(it, 0, packageName) }
+        val animator = animationController.getSwipeDismissAnimation(velocity)
         animator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animator: Animator) {
@@ -143,13 +157,18 @@ constructor(
         newScreenshot: Bitmap,
         screenshotTakenInPortrait: Boolean,
         onTransitionPrepared: Runnable,
-    ) {}
+    ) {
+        onTransitionPrepared.run()
+    }
 
     override fun startLongScreenshotTransition(
         transitionDestination: Rect,
         onTransitionEnd: Runnable,
         longScreenshot: ScrollCaptureController.LongScreenshot
-    ) {}
+    ) {
+        onTransitionEnd.run()
+        callbacks?.onDismiss()
+    }
 
     override fun restoreNonScrollingUi() {}
 
@@ -200,6 +219,7 @@ constructor(
             }
         )
     }
+
     private fun setOnKeyListener(onDismissRequested: (ScreenshotEvent) -> Unit) {
         view.setOnKeyListener(
             object : View.OnKeyListener {
@@ -215,45 +235,14 @@ constructor(
         )
     }
 
+    private fun getDismissalVelocity(): Float {
+        val isLTR = view.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
+        // dismiss to the left in LTR locales, to the right in RTL
+        return if (isLTR) -1.5f else 1.5f
+    }
+
     @AssistedFactory
     interface Factory : ScreenshotViewProxy.Factory {
         override fun getProxy(context: Context, displayId: Int): ScreenshotShelfViewProxy
-    }
-
-    override fun setPreviewAction(overrideTransition: Boolean, retrieveIntent: (Uri) -> Intent) {
-        viewModel.setPreviewAction {
-            imageData?.let {
-                val intent = retrieveIntent(it.uri)
-                debugLog(DEBUG_ACTIONS) { "Preview tapped: $intent" }
-                isPendingSharedTransition = true
-                callbacks?.onAction(intent, it.owner, overrideTransition)
-            }
-        }
-    }
-
-    override fun addActions(actions: List<ScreenshotActionsProvider.ScreenshotAction>) {
-        viewModel.addActions(
-            actions.map { action ->
-                ActionButtonViewModel(action.icon, action.text, action.description) {
-                    val actionRunnable =
-                        getActionRunnable(action.retrieveIntent, action.overrideTransition)
-                    imageData?.let { actionRunnable(it) }
-                        ?: run { runOnImageDataAcquired = actionRunnable }
-                }
-            }
-        )
-    }
-
-    private fun getActionRunnable(
-        retrieveIntent: (Uri) -> Intent,
-        overrideTransition: Boolean
-    ): (SavedImageData) -> Unit {
-        val onClick: (SavedImageData) -> Unit = {
-            val intent = retrieveIntent(it.uri)
-            debugLog(DEBUG_ACTIONS) { "Action tapped: $intent" }
-            isPendingSharedTransition = true
-            callbacks!!.onAction(intent, it.owner, overrideTransition)
-        }
-        return onClick
     }
 }

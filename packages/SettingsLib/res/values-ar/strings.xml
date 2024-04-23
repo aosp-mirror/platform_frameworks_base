@@ -106,10 +106,21 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"السمّاعة الطبية اليسرى فقط مفعَّلة"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"السمّاعة الطبية اليمنى فقط مفعَّلة"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"السمّاعتان اليسرى واليمنى مفعَّلتان"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"‏البلوتوث مفعَّل (للوسائط فقط)، مستوى شحن البطارية: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"‏البلوتوث مفعَّل (للوسائط فقط)، مستوى الشحن في السماعة اليسرى: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، مستوى الشحن في السماعة اليمنى: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"‏البلوتوث متصل (ميزة \"مشاركة الصوت\" متاحة)، مستوى شحن البطارية: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"‏البلوتوث متصل (ميزة \"مشاركة الصوت\" متاحة)، مستوى الشحن في السماعة اليسرى: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، مستوى الشحن في السماعة اليمنى: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"‏البلوتوث متصل (ميزة \"مشاركة الصوت\" متاحة)، مستوى الشحن في السماعة اليسرى: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"‏البلوتوث متصل (ميزة \"مشاركة الصوت\" متاحة)، مستوى الشحن في السماعة اليمنى: ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"البلوتوث مفعَّل (للوسائط فقط)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"تتوفّر ميزة \"مشاركة الصوت\""</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"السماعة اليسرى فقط مشغَّلة (للوسائط فقط)"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"السماعة اليمنى فقط مشغَّلة (للوسائط فقط)"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"السماعتان اليسرى واليمنى مشغَّلتان (للوسائط فقط)"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"الإعدادات الصوتية للوسائط"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"المكالمات الهاتفية"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"نقل الملف"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز الإرسال"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز إدخال بيانات"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"الوصول إلى الإنترنت"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"السماح بالوصول إلى جهات الاتصال وسجلّ المكالمات"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"سيتم استخدام المعلومات لإرسال إشعارات المكالمات وغيرها"</string>
@@ -180,8 +191,8 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"تم ضبط بعض الإعدادات التلقائية"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"لم يتم ضبط إعدادات تلقائية"</string>
     <string name="tts_settings" msgid="8130616705989351312">"إعدادات تحويل النص إلى كلام"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"إخراج النص إلى كلام"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"معدل سرعة الكلام"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"الصوت عند تحويل النص إلى كلام"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"سرعة الكلام"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعة قول الكلام"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"درجة الصوت"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"للتأثير في نبرة الكلام المُرَكَّب"</string>
@@ -472,10 +483,18 @@
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"سيبقى شحن البطارية أكثر من <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)."</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"سيبقى شحن البطارية أكثر من <xliff:g id="TIME_REMAINING">%1$s</xliff:g>."</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"يتبقّى <xliff:g id="TIME">%1$s</xliff:g> حتى اكتمال شحن البطارية."</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"يتبقّى <xliff:g id="TIME">%1$s</xliff:g> حتى اكتمال شحن البطارية"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - يتبقّى <xliff:g id="TIME">%2$s</xliff:g> حتى اكتمال شحن البطارية."</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - تم تحسين الشحن"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"‫<xliff:g id="LEVEL">%1$s</xliff:g>: جارٍ الشحن"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"غير معروف"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"جارٍ الشحن سريعًا"</string>
@@ -487,11 +506,15 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"مشحونة"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"البطارية مشحونة بالكامل."</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"الشحن معلَّق"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"إعدادات يتحكم فيها المشرف"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"يتحكّم فيه إعداد محظور"</string>
     <string name="disabled" msgid="8017887509554714950">"غير مفعّل"</string>
-    <string name="external_source_trusted" msgid="1146522036773132905">"مسموح به"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"غير مسموح به"</string>
+    <string name="external_source_trusted" msgid="1146522036773132905">"تطبيق مسموح به"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"تطبيق غير مسموح به"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"تثبيت التطبيقات غير المعروفة"</string>
     <string name="home" msgid="973834627243661438">"الشاشة الرئيسية للإعدادات"</string>
   <string-array name="battery_labels">
@@ -533,7 +556,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"المنبّهات والتذكيرات"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"السماح بضبط المنبّهات والتذكيرات"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"المنبّهات والتذكيرات"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات لتنفيذها في الوقت المناسب. ويسمح هذا الإذن بتشغيل التطبيق في الخلفية، ما قد يستهلك المزيد من البطارية.\n\nفي حال عدم تفعيل هذا الإذن، لن تعمل المنبهات الحالية والأحداث المستندة إلى الوقت المضبوطة في هذا التطبيق."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"يمكنك السماح لهذا التطبيق بضبط المنبّهات وجدولة الإجراءات لتنفيذها في الوقت المناسب. ويسمح هذا الإذن بتشغيل التطبيق في الخلفية، ما قد يستهلك المزيد من البطارية.\n\nفي حال عدم تفعيل هذا الإذن، لن تعمل المنبهات المضبوطة والأحداث المستندة إلى الوقت المجدولة حاليًا في هذا التطبيق."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"جدول زمني، جدولة، منبّه، تذكير، ساعة"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"تفعيل"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"تفعيل ميزة \"عدم الإزعاج\""</string>
@@ -616,7 +639,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"تعذّر إنشاء مستخدم جديد."</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"تعذّر إنشاء جلسة ضيف جديدة."</string>
     <string name="user_nickname" msgid="262624187455825083">"اللقب"</string>
-    <string name="edit_user_info_message" msgid="6677556031419002895">"سيظهر الاسم والصورة اللذين تختارهما لأي شخص يستخدم هذا الجهاز."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"بإمكان أي شخص يستخدم هذا الجهاز رؤية الاسم والصورة اللذين تختارهما."</string>
     <string name="user_add_user" msgid="7876449291500212468">"إضافة مستخدم"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"إضافة ضيف"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"إزالة جلسة الضيف"</string>
@@ -643,12 +666,10 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"سيتم حذف جميع الأنشطة عند الخروج من وضع الضيف"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"يمكنك حفظ نشاطك أو حذفه عند الخروج من وضع الضيف."</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"يمكنك إجراء إعادة ضبط لحذف نشاط الجلسة الآن، أو حِفظ النشاط أو حذفه عند الخروج من وضع الضيف."</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"التقاط صورة"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"اختيار صورة"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"اختيار صورة"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف بيانات هذا الجهاز."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف حساب هذا المستخدم."</string>
-    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف الملف الشخصي للعمل وبياناته."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"لقد استنفدت عدد المحاولات غير الصحيحة وسيتم حذف ملف العمل وبياناته."</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"إغلاق"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"الإعداد التلقائي للجهاز"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غير مفعّل"</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"إشارة الهاتف تتكون من شريط واحد."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"إشارة الهاتف تتكون من شريطين."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"إشارة الهاتف تتكون من ثلاثة أشرطة."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"إشارة الهاتف كاملة."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"لا تتوفر بيانات."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"إشارة البيانات تتكون من شريط واحد."</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"‏تم قطع اتصال Ethernet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"إيثرنت"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"لا يتم الاتصال."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"اختيار صورة الملف الشخصي"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"رمز المستخدم التلقائي"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"لوحة المفاتيح الخارجية"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"اختيار تنسيق لوحة مفاتيح"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"التنسيق التلقائي"</string>

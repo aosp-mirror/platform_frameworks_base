@@ -16,6 +16,8 @@
 
 package com.android.systemui.volume.panel.component.mediaoutput.domain.model
 
+import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
+
 /** Models a pair of local and remote [MediaDeviceSession]s. */
 data class MediaDeviceSessions(
     val local: MediaDeviceSession?,

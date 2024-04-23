@@ -106,13 +106,24 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actief, alleen links"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Actief, alleen rechts"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Actief, links en rechts"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Actief (alleen media), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batterij"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Actief (alleen media), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batterij, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batterij"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Verbonden (ondersteunt audio delen), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batterij"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Verbonden (ondersteunt audio delen), L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batterij, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batterij"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Verbonden (ondersteunt audio delen), links <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Verbonden (ondersteunt audio delen), rechts <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Actief (alleen media)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Ondersteunt audio delen"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Actief (alleen media), alleen links"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Actief (alleen media), alleen rechts"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Actief (alleen media), links en rechts"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Media-audio"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefoongesprekken"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Bestandsoverdracht"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Invoerapparaat"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Internettoegang"</string>
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"Toegang geven tot contacten en gespreksgeschiedenis"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"De informatie wordt onder andere gebruikt voor gespreksaankondigingen"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"Deze informatie wordt o.a. gebruikt voor gespreksaankondigingen"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Internetverbinding delen"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Sms-berichten"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"Simtoegang"</string>
@@ -450,7 +461,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalie (rood-groen)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalie (blauw-geel)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Kleurcorrectie"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Kleurcorrectie kan handig zijn in de volgende situaties:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren nauwkeuriger zien.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren verwijderen zodat je je beter kunt focussen.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Kleurcorrectie kan handig zijn in de volgende situaties:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren nauwkeuriger zien.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Je wilt kleuren verwijderen zodat je je beter kunt concentreren.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Overschreven door <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g>: opladen is in de wacht gezet om de batterij te beschermen"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - vol over <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Opladen geoptimaliseerd"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ Opladen"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Onbekend"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Opladen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Snel opladen"</string>
@@ -487,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"Opgeladen"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Volledig opgeladen"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Opladen in de wacht"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Ingesteld door beheerder"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Beheerd door beperkte instelling"</string>
     <string name="disabled" msgid="8017887509554714950">"Uitgezet"</string>
@@ -515,7 +538,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"Gebruik systeemtalen"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"Instellingen openen voor <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> mislukt"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"Deze invoermethode verzamelt mogelijk alle tekst die je typt, inclusief persoonsgegevens zoals wachtwoorden en creditcardnummers. De methode is afkomstig uit de app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Deze invoermethode aanzetten?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Opmerking: Wanneer je telefoon opnieuw is opgestart, kan deze app pas worden gestart nadat je je telefoon hebt ontgrendeld"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"Opmerking: Nadat je de telefoon opnieuw opstart, wordt deze app pas gestart nadat je de telefoon ontgrendelt"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS-registratiestatus"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Geregistreerd"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Niet geregistreerd"</string>
@@ -531,7 +554,7 @@
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Klaar"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en herinneringen"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Wekkers en herinneringen laten instellen"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Instellen van wekkers en herinneringen toestaan"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en herinneringen"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Sta toe dat deze app wekkers zet en tijdgevoelige acties plant. De app kan hierdoor op de achtergrond worden uitgevoerd, waardoor je misschien meer batterijlading verbruikt.\n\nAls dit recht uitstaat, werken door deze app geplande bestaande wekkers en tijdgebaseerde afspraken niet."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plannen, schema, wekker, alarm, herinnering, klok"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Alle activiteit wordt na het afsluiten verwijderd"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Je kunt je activiteit bij afsluiten opslaan of verwijderen"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Voer een reset uit om de sessie-activiteit nu te verwijderen of verwijder of sla je activiteit op bij afsluiten"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Foto maken"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Afbeelding kiezen"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Foto selecteren"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Te veel onjuiste pogingen. De gegevens van dit apparaat worden verwijderd."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Te veel onjuiste pogingen. Deze gebruiker wordt verwijderd."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefoon: één streepje."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefoon: twee streepjes."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefoon: drie streepjes."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Telefoonsignaal is op volle sterkte."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Geen gegevens."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Gegevens: één streepje."</string>
@@ -684,14 +707,12 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernetverbinding verbroken."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Geen gesprekken."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Kies een profielfoto"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Standaard gebruikersicoon"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fysiek toetsenbord"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Toetsenbordindeling kiezen"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Standaard"</string>
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Scherm aanzetten"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Scherm aanzetten toestaan"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Toestaan dat een app het scherm aanzet. Indien toegestaan, kan de app het scherm op elk moment aanzetten zonder jouw expliciete intentie."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Sta toe dat een app het scherm aanzet. Indien toegestaan, kan de app het scherm op elk moment aanzetten zonder jouw expliciete intentie."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Uitzending van <xliff:g id="APP_NAME">%1$s</xliff:g> stopzetten?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Als je <xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzendt of de uitvoer wijzigt, wordt je huidige uitzending gestopt"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uitzenden"</string>

@@ -45,13 +45,13 @@ import android.os.test.TestLooper;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.util.AtomicFile;
+import android.util.LongArrayQueue;
 import android.util.Xml;
-import android.utils.LongArrayQueue;
-import android.utils.XmlUtils;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.PackageWatchdog.HealthCheckState;
@@ -1224,7 +1224,7 @@ public class PackageWatchdogTest {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver bootObserver = new TestObserver(OBSERVER_NAME_1);
         watchdog.registerHealthObserver(bootObserver);
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_THRESHOLD; i++) {
+        for (int i = 0; i < 15; i++) {
             watchdog.noteBoot();
         }
         assertThat(bootObserver.mitigatedBootLoop()).isTrue();
@@ -1262,22 +1262,6 @@ public class PackageWatchdogTest {
     }
 
     /**
-     * Ensure that boot loop mitigation is not done when the number of boots does not meet the
-     * threshold.
-     */
-    @Test
-    public void testBootLoopDetection_doesNotMeetThresholdRecoverabilityHighImpact() {
-        PackageWatchdog watchdog = createWatchdog();
-        TestObserver bootObserver = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_LEVEL_80);
-        watchdog.registerHealthObserver(bootObserver);
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_THRESHOLD - 1; i++) {
-            watchdog.noteBoot();
-        }
-        assertThat(bootObserver.mitigatedBootLoop()).isFalse();
-    }
-
-    /**
      * Ensure that boot loop mitigation is done for the observer with the lowest user impact
      */
     @Test
@@ -1306,7 +1290,7 @@ public class PackageWatchdogTest {
         bootObserver2.setImpact(PackageHealthObserverImpact.USER_IMPACT_LEVEL_30);
         watchdog.registerHealthObserver(bootObserver1);
         watchdog.registerHealthObserver(bootObserver2);
-        for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_THRESHOLD; i++) {
+        for (int i = 0; i < 15; i++) {
             watchdog.noteBoot();
         }
         assertThat(bootObserver1.mitigatedBootLoop()).isTrue();
@@ -1349,9 +1333,7 @@ public class PackageWatchdogTest {
             watchdog.noteBoot();
         }
         for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; j++) {
                 watchdog.noteBoot();
-            }
         }
 
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS + 1);
@@ -1360,38 +1342,7 @@ public class PackageWatchdogTest {
             watchdog.noteBoot();
         }
         for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; j++) {
                 watchdog.noteBoot();
-            }
-        }
-
-        assertThat(bootObserver.mBootMitigationCounts).isEqualTo(List.of(1, 2, 3, 4, 1, 2, 3, 4));
-    }
-
-    @Test
-    public void testMultipleBootLoopMitigationRecoverabilityHighImpact() {
-        PackageWatchdog watchdog = createWatchdog();
-        TestObserver bootObserver = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_LEVEL_80);
-        watchdog.registerHealthObserver(bootObserver);
-        for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_THRESHOLD - 1; j++) {
-            watchdog.noteBoot();
-        }
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; j++) {
-                watchdog.noteBoot();
-            }
-        }
-
-        moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_DEESCALATION_WINDOW_MS + 1);
-
-        for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_THRESHOLD - 1; j++) {
-            watchdog.noteBoot();
-        }
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT; j++) {
-                watchdog.noteBoot();
-            }
         }
 
         assertThat(bootObserver.mBootMitigationCounts).isEqualTo(List.of(1, 2, 3, 4, 1, 2, 3, 4));
@@ -1642,8 +1593,7 @@ public class PackageWatchdogTest {
 
         mSpyBootThreshold = spy(watchdog.new BootThreshold(
                 PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
-                PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS,
-                PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT));
+                PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS));
 
         watchdog.saveAllObserversBootMitigationCountToMetadata(filePath);
 
@@ -1798,16 +1748,9 @@ public class PackageWatchdogTest {
         mCrashRecoveryPropertiesMap = new HashMap<>();
 
         try {
-            if (Flags.recoverabilityDetection()) {
-                mSpyBootThreshold = spy(watchdog.new BootThreshold(
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS,
-                    PackageWatchdog.DEFAULT_BOOT_LOOP_MITIGATION_INCREMENT));
-            } else {
-                mSpyBootThreshold = spy(watchdog.new BootThreshold(
+            mSpyBootThreshold = spy(watchdog.new BootThreshold(
                     PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
                     PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS));
-            }
 
             doAnswer((Answer<Integer>) invocationOnMock -> {
                 String storedValue = mCrashRecoveryPropertiesMap

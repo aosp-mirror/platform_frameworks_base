@@ -1030,6 +1030,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     "startProcessLocked failed");
             return true;
         }
+        // TODO: b/335420031 - cache receiver intent to avoid multiple calls to getReceiverIntent.
+        mService.mProcessList.getAppStartInfoTracker().handleProcessBroadcastStart(
+                SystemClock.elapsedRealtimeNanos(), queue.app, r.getReceiverIntent(receiver),
+                r.alarm /* isAlarm */);
         return false;
     }
 

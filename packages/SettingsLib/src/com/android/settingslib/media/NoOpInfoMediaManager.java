@@ -20,6 +20,7 @@ import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
+import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,17 +59,28 @@ import java.util.List;
     NoOpInfoMediaManager(
             Context context,
             @NonNull String packageName,
+            @NonNull UserHandle userHandle,
             LocalBluetoothManager localBluetoothManager) {
-        super(context, packageName, localBluetoothManager);
-    }
-
-    @Override
-    public void stopScan() {
-        // Do nothing.
+        super(context, packageName, userHandle, localBluetoothManager);
     }
 
     @Override
     protected void startScanOnRouter() {
+        // Do nothing.
+    }
+
+    @Override
+    protected void registerRouter() {
+        // Do nothing.
+    }
+
+    @Override
+    protected void stopScanOnRouter() {
+        // Do nothing.
+    }
+
+    @Override
+    protected void unregisterRouter() {
         // Do nothing.
     }
 

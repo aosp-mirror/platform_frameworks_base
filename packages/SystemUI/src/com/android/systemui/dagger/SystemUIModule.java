@@ -29,9 +29,11 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CameraProtectionModule;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.accessibility.AccessibilityModule;
 import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
+import com.android.systemui.ambient.dagger.AmbientModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.authentication.AuthenticationModule;
@@ -43,6 +45,7 @@ import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule;
 import com.android.systemui.bouncer.data.repository.BouncerRepositoryModule;
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractorModule;
 import com.android.systemui.bouncer.ui.BouncerViewModule;
+import com.android.systemui.brightness.dagger.ScreenBrightnessModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.common.data.CommonDataLayerModule;
@@ -103,6 +106,7 @@ import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
+import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -160,14 +164,17 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+import dagger.multibindings.Multibinds;
+
+import kotlinx.coroutines.CoroutineScope;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Named;
-
-import kotlinx.coroutines.CoroutineScope;
 
 /**
  * A dagger module for injecting components of System UI that are required by System UI.
@@ -182,6 +189,7 @@ import kotlinx.coroutines.CoroutineScope;
 @Module(includes = {
         AccessibilityModule.class,
         AccessibilityRepositoryModule.class,
+        AmbientModule.class,
         AppOpsModule.class,
         AssistModule.class,
         AuthenticationModule.class,
@@ -229,6 +237,7 @@ import kotlinx.coroutines.CoroutineScope;
         RecordIssueModule.class,
         ReferenceModule.class,
         RetailModeModule.class,
+        ScreenBrightnessModule.class,
         ScreenshotModule.class,
         SensorModule.class,
         SecurityRepositoryModule.class,
@@ -265,6 +274,10 @@ import kotlinx.coroutines.CoroutineScope;
             WindowRootViewComponent.class,
         })
 public abstract class SystemUIModule {
+
+    @Multibinds
+    @Dependencies
+    abstract Map<Class<?>, Set<Class<? extends CoreStartable>>> startableDependencyMap();
 
     @Binds
     abstract BootCompleteCache bindBootCompleteCache(BootCompleteCacheImpl bootCompleteCache);

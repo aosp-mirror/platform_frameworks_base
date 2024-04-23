@@ -21,6 +21,7 @@ import static com.android.systemui.dock.DockManager.DockEventListener;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import androidx.annotation.VisibleForTesting;
@@ -49,7 +50,10 @@ import com.android.systemui.util.time.SystemClock;
 
 import dagger.Lazy;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -60,6 +64,14 @@ class FalsingCollectorImpl implements FalsingCollector {
     private static final String PROXIMITY_SENSOR_TAG = "FalsingCollector";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long GESTURE_PROCESSING_DELAY_MS = 100;
+
+    private final Set<Integer> mAcceptedKeycodes = new HashSet<>(Arrays.asList(
+        KeyEvent.KEYCODE_ENTER,
+        KeyEvent.KEYCODE_ESCAPE,
+        KeyEvent.KEYCODE_SHIFT_LEFT,
+        KeyEvent.KEYCODE_SHIFT_RIGHT,
+        KeyEvent.KEYCODE_SPACE
+    ));
 
     private final FalsingDataProvider mFalsingDataProvider;
     private final FalsingManager mFalsingManager;
@@ -275,6 +287,14 @@ class FalsingCollectorImpl implements FalsingCollector {
         logDebug("REAL: onBouncerHidden");
         if (mSessionStarted) {
             registerSensors();
+        }
+    }
+
+    @Override
+    public void onKeyEvent(KeyEvent ev) {
+        // Only collect if it is an ACTION_UP action and is allow-listed
+        if (ev.getAction() == KeyEvent.ACTION_UP && mAcceptedKeycodes.contains(ev.getKeyCode())) {
+            mFalsingDataProvider.onKeyEvent(ev);
         }
     }
 

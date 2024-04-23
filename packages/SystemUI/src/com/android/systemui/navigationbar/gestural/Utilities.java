@@ -24,16 +24,12 @@ import android.view.MotionEvent;
 
 public final class Utilities {
 
-    public static boolean isTrackpadScroll(boolean isTrackpadGestureFeaturesEnabled,
-            MotionEvent event) {
-        return isTrackpadGestureFeaturesEnabled
-                && event.getClassification() == CLASSIFICATION_TWO_FINGER_SWIPE;
+    public static boolean isTrackpadScroll(MotionEvent event) {
+        return event.getClassification() == CLASSIFICATION_TWO_FINGER_SWIPE;
     }
 
-    public static boolean isTrackpadThreeFingerSwipe(boolean isTrackpadGestureFeaturesEnabled,
-            MotionEvent event) {
-        return isTrackpadGestureFeaturesEnabled
-                && event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
+    public static boolean isTrackpadThreeFingerSwipe(MotionEvent event) {
+        return event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE
                 && event.getAxisValue(AXIS_GESTURE_SWIPE_FINGER_COUNT) == 3;
     }
 }

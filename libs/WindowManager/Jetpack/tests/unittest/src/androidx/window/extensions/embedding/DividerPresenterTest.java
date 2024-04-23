@@ -59,7 +59,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.concurrent.Executor;
 
@@ -73,6 +74,9 @@ import java.util.concurrent.Executor;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DividerPresenterTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Rule
     public final SetFlagsRule mSetFlagRule = new SetFlagsRule();
 
@@ -118,7 +122,6 @@ public class DividerPresenterTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_EMBEDDING_INTERACTIVE_DIVIDER_FLAG);
 
         when(mTaskContainer.getTaskId()).thenReturn(MOCK_TASK_ID);
@@ -144,10 +147,12 @@ public class DividerPresenterTest {
                 new Configuration(),
                 DEFAULT_DIVIDER_ATTRIBUTES,
                 mSurfaceControl,
-                getInitialDividerPosition(mSplitContainer),
+                getInitialDividerPosition(
+                        mSplitContainer, true /* isVerticalSplit */, false /* isReversedLayout */),
                 true /* isVerticalSplit */,
                 false /* isReversedLayout */,
-                Display.DEFAULT_DISPLAY);
+                Display.DEFAULT_DISPLAY,
+                false /* isDraggableExpandType */);
 
         mDividerPresenter = new DividerPresenter(
                 MOCK_TASK_ID, mDragEventCallback, mock(Executor.class));
@@ -261,6 +266,22 @@ public class DividerPresenterTest {
     }
 
     @Test
+    public void testSanitizeDividerAttributes_setDefaultValues_fixedDivider() {
+        DividerAttributes attributes =
+                new DividerAttributes.Builder(DividerAttributes.DIVIDER_TYPE_FIXED).build();
+        DividerAttributes sanitized = DividerPresenter.sanitizeDividerAttributes(attributes);
+
+        assertEquals(DividerAttributes.DIVIDER_TYPE_FIXED, sanitized.getDividerType());
+        assertEquals(DividerPresenter.DEFAULT_DIVIDER_WIDTH_DP, sanitized.getWidthDp());
+
+        // The ratios should not be set for fixed divider
+        assertEquals(DividerAttributes.RATIO_SYSTEM_DEFAULT, sanitized.getPrimaryMinRatio(),
+                0.0f /* delta */);
+        assertEquals(DividerAttributes.RATIO_SYSTEM_DEFAULT, sanitized.getPrimaryMaxRatio(),
+                0.0f /* delta */);
+    }
+
+    @Test
     public void testSanitizeDividerAttributes_notChangingValidValues() {
         DividerAttributes attributes =
                 new DividerAttributes.Builder(DividerAttributes.DIVIDER_TYPE_DRAGGABLE)
@@ -348,7 +369,8 @@ public class DividerPresenterTest {
                         dividerWidthPx,
                         dividerAttributes,
                         true /* isVerticalSplit */,
-                        false /* isReversedLayout */));
+                        0 /* minPosition */,
+                        900 /* maxPosition */));
 
         // Top-to-bottom split
         when(event.getRawY()).thenReturn(1000f); // Touch event is in display space
@@ -361,7 +383,8 @@ public class DividerPresenterTest {
                         dividerWidthPx,
                         dividerAttributes,
                         false /* isVerticalSplit */,
-                        false /* isReversedLayout */));
+                        0 /* minPosition */,
+                        900 /* maxPosition */));
     }
 
     @Test
@@ -453,7 +476,6 @@ public class DividerPresenterTest {
         final Rect primaryBounds = new Rect(0, 0, 500, 2000);
         final Rect secondaryBounds = new Rect(600, 0, 1100, 2000);
         final int dividerWidthPx = 100;
-        final int dividerPosition = 300;
 
         final TaskFragmentContainer mockPrimaryContainer =
                 createMockTaskFragmentContainer(mPrimaryContainerToken, primaryBounds);
@@ -462,6 +484,8 @@ public class DividerPresenterTest {
         when(mSplitContainer.getPrimaryContainer()).thenReturn(mockPrimaryContainer);
         when(mSplitContainer.getSecondaryContainer()).thenReturn(mockSecondaryContainer);
 
+        // Test the normal case
+        int dividerPosition = 300;
         assertEquals(
                 0.3f, // Primary is 300px after dragging.
                 DividerPresenter.calculateNewSplitRatio(
@@ -470,7 +494,43 @@ public class DividerPresenterTest {
                         taskBounds,
                         dividerWidthPx,
                         true /* isVerticalSplit */,
-                        false /* isReversedLayout */),
+                        false /* isReversedLayout */,
+                        200 /* minPosition */,
+                        1000 /* maxPosition */,
+                        false /* isDraggingToFullscreenAllowed */),
+                0.0001 /* delta */);
+
+        // Test the case when dragging to fullscreen is allowed and divider is dragged to the edge
+        dividerPosition = 0;
+        assertEquals(
+                DividerPresenter.RATIO_EXPANDED_SECONDARY,
+                DividerPresenter.calculateNewSplitRatio(
+                        mSplitContainer,
+                        dividerPosition,
+                        taskBounds,
+                        dividerWidthPx,
+                        true /* isVerticalSplit */,
+                        false /* isReversedLayout */,
+                        200 /* minPosition */,
+                        1000 /* maxPosition */,
+                        true /* isDraggingToFullscreenAllowed */),
+                0.0001 /* delta */);
+
+        // Test the case when dragging to fullscreen is not allowed and divider is dragged to the
+        // edge.
+        dividerPosition = 0;
+        assertEquals(
+                0.2f, // Adjusted to the minPosition 200
+                DividerPresenter.calculateNewSplitRatio(
+                        mSplitContainer,
+                        dividerPosition,
+                        taskBounds,
+                        dividerWidthPx,
+                        true /* isVerticalSplit */,
+                        false /* isReversedLayout */,
+                        200 /* minPosition */,
+                        1000 /* maxPosition */,
+                        false /* isDraggingToFullscreenAllowed */),
                 0.0001 /* delta */);
     }
 
@@ -482,7 +542,6 @@ public class DividerPresenterTest {
         final Rect primaryBounds = new Rect(0, 0, 2000, 1100);
         final Rect secondaryBounds = new Rect(0, 0, 2000, 500);
         final int dividerWidthPx = 100;
-        final int dividerPosition = 300;
 
         final TaskFragmentContainer mockPrimaryContainer =
                 createMockTaskFragmentContainer(mPrimaryContainerToken, primaryBounds);
@@ -491,6 +550,8 @@ public class DividerPresenterTest {
         when(mSplitContainer.getPrimaryContainer()).thenReturn(mockPrimaryContainer);
         when(mSplitContainer.getSecondaryContainer()).thenReturn(mockSecondaryContainer);
 
+        // Test the normal case
+        int dividerPosition = 300;
         assertEquals(
                 // After dragging, secondary is [0, 0, 2000, 300]. Primary is [0, 400, 2000, 1100].
                 0.7f,
@@ -500,7 +561,46 @@ public class DividerPresenterTest {
                         taskBounds,
                         dividerWidthPx,
                         false /* isVerticalSplit */,
-                        true /* isReversedLayout */),
+                        true /* isReversedLayout */,
+                        200 /* minPosition */,
+                        1000 /* maxPosition */,
+                        true /* isDraggingToFullscreenAllowed */),
+                0.0001 /* delta */);
+
+        // Test the case when dragging to fullscreen is not allowed and divider is dragged to the
+        // edge.
+        dividerPosition = 0;
+        assertEquals(
+                // The primary (bottom) container is expanded
+                DividerPresenter.RATIO_EXPANDED_PRIMARY,
+                DividerPresenter.calculateNewSplitRatio(
+                        mSplitContainer,
+                        dividerPosition,
+                        taskBounds,
+                        dividerWidthPx,
+                        false /* isVerticalSplit */,
+                        true /* isReversedLayout */,
+                        200 /* minPosition */,
+                        1000 /* maxPosition */,
+                        true /* isDraggingToFullscreenAllowed */),
+                0.0001 /* delta */);
+
+        // Test the case when dragging to fullscreen is not allowed and divider is dragged to the
+        // edge.
+        dividerPosition = 0;
+        assertEquals(
+                // Adjusted to minPosition 200, so the primary (bottom) container is 800.
+                0.8f,
+                DividerPresenter.calculateNewSplitRatio(
+                        mSplitContainer,
+                        dividerPosition,
+                        taskBounds,
+                        dividerWidthPx,
+                        false /* isVerticalSplit */,
+                        true /* isReversedLayout */,
+                        200 /* minPosition */,
+                        1000 /* maxPosition */,
+                        false /* isDraggingToFullscreenAllowed */),
                 0.0001 /* delta */);
     }
 

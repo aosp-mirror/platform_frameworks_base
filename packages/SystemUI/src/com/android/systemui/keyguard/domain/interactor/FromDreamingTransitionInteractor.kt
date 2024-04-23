@@ -30,12 +30,15 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -62,6 +65,7 @@ constructor(
     ) {
 
     override fun start() {
+        listenForDreamingToAlternateBouncer()
         listenForDreamingToOccluded()
         listenForDreamingToGoneWhenDismissable()
         listenForDreamingToGoneFromBiometricUnlock()
@@ -69,6 +73,17 @@ constructor(
         listenForDreamingToAodOrDozing()
         listenForTransitionToCamera(scope, keyguardInteractor)
         listenForDreamingToGlanceableHub()
+        listenForDreamingToPrimaryBouncer()
+    }
+
+    private fun listenForDreamingToAlternateBouncer() {
+        scope.launch("$TAG#listenForDreamingToAlternateBouncer") {
+            keyguardInteractor.alternateBouncerShowing
+                .filterRelevantKeyguardStateAnd { isAlternateBouncerShowing ->
+                    isAlternateBouncerShowing
+                }
+                .collect { startTransitionTo(KeyguardState.ALTERNATE_BOUNCER) }
+        }
     }
 
     private fun listenForDreamingToGlanceableHub() {
@@ -79,6 +94,21 @@ constructor(
                 fromState = KeyguardState.DREAMING,
                 toState = KeyguardState.GLANCEABLE_HUB,
             )
+        }
+    }
+
+    private fun listenForDreamingToPrimaryBouncer() {
+        scope.launch {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isBouncerShowing, lastStartedTransitionStep) = pair
+                    if (
+                        isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.DREAMING
+                    ) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                    }
+                }
         }
     }
 
@@ -106,6 +136,7 @@ constructor(
         }
     }
 
+    @OptIn(FlowPreview::class)
     private fun listenForDreamingToOccluded() {
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
@@ -121,13 +152,24 @@ constructor(
             scope.launch {
                 combine(
                         keyguardInteractor.isKeyguardOccluded,
-                        keyguardInteractor.isDreaming,
+                        keyguardInteractor.isDreaming
+                            // Debounce the dreaming signal since there is a race condition between
+                            // the occluded and dreaming signals. We therefore add a small delay
+                            // to give enough time for occluded to flip to false when the dream
+                            // ends, to avoid transitioning to OCCLUDED erroneously when exiting
+                            // the dream.
+                            .debounce(100.milliseconds),
                         ::Pair
                     )
                     .filterRelevantKeyguardStateAnd { (isOccluded, isDreaming) ->
                         isOccluded && !isDreaming
                     }
-                    .collect { startTransitionTo(KeyguardState.OCCLUDED) }
+                    .collect {
+                        startTransitionTo(
+                            toState = KeyguardState.OCCLUDED,
+                            ownerReason = "Occluded but no longer dreaming",
+                        )
+                    }
             }
         }
     }

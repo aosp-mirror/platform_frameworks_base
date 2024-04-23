@@ -1767,7 +1767,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         this(context, attrs, context);
-        Log.wtf(TAG, "This constructor shouldn't be called");
+        // NOTE(b/317503801): Always crash when using the insecure constructor.
+        throw new UnsupportedOperationException("Insecure constructor");
     }
 
     /**
@@ -2068,6 +2069,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // Remove views that don't translate
         mTranslateableViews.remove(mChildrenContainerStub);
         mTranslateableViews.remove(mGutsStub);
+        // We don't handle focus highlight in this view, it's done in background drawable instead
+        setDefaultFocusHighlightEnabled(false);
     }
 
     /**
@@ -2804,12 +2807,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpanded(boolean allowOnKeyguard) {
-        if (DEBUG) {
-            if (!mShowingPublicInitialized && !allowOnKeyguard) {
-                Log.d(TAG, "mShowingPublic is not initialized.");
-            }
-        }
-        return !mShowingPublic && (!mOnKeyguard || allowOnKeyguard)
+        return (!shouldShowPublic()) && (!mOnKeyguard || allowOnKeyguard)
                 && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
                 || isUserExpanded());
     }

@@ -1,4 +1,5 @@
 package: "com.android.window.flags"
+container: "system"
 
 flag {
   name: "allows_screen_size_decoupled_from_status_bar_and_cutout"

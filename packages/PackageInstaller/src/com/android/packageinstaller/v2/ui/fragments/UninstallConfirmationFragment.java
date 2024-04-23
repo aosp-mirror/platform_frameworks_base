@@ -23,6 +23,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -37,7 +38,7 @@ import com.android.packageinstaller.v2.ui.UninstallActionListener;
  * Dialog to show while requesting user confirmation for uninstalling an app.
  */
 public class UninstallConfirmationFragment extends DialogFragment {
-
+    private static final String LOG_TAG = UninstallConfirmationFragment.class.getSimpleName();
     private final UninstallUserActionRequired mDialogData;
     private UninstallActionListener mUninstallActionListener;
 
@@ -56,6 +57,7 @@ public class UninstallConfirmationFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
             .setTitle(mDialogData.getTitle())
             .setPositiveButton(R.string.ok,

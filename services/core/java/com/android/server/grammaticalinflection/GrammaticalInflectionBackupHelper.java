@@ -17,6 +17,7 @@
 package com.android.server.grammaticalinflection;
 
 import android.app.backup.BackupManager;
+import android.content.AttributionSource;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -30,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.HashMap;
@@ -47,6 +49,7 @@ public class GrammaticalInflectionBackupHelper {
     private final PackageManager mPackageManager;
     private final GrammaticalInflectionService mGrammaticalGenderService;
     private final Clock mClock;
+    private final AttributionSource mAttributionSource;
 
     static class StagedData {
         final long mCreationTimeMillis;
@@ -58,8 +61,9 @@ public class GrammaticalInflectionBackupHelper {
         }
     }
 
-    public GrammaticalInflectionBackupHelper(GrammaticalInflectionService grammaticalGenderService,
-            PackageManager packageManager) {
+    public GrammaticalInflectionBackupHelper(AttributionSource attributionSource,
+            GrammaticalInflectionService grammaticalGenderService, PackageManager packageManager) {
+        mAttributionSource = attributionSource;
         mGrammaticalGenderService = grammaticalGenderService;
         mPackageManager = packageManager;
         mClock = Clock.systemUTC();
@@ -115,6 +119,23 @@ public class GrammaticalInflectionBackupHelper {
         }
     }
 
+    /**
+     * Returns the system-gender to be backed up as a data-blob.
+     */
+    public byte[] getSystemBackupPayload(int userId) {
+        int gender = mGrammaticalGenderService.getSystemGrammaticalGender(mAttributionSource,
+                userId);
+        return intToByteArray(gender);
+    }
+
+    /**
+     * Restores the system-gender that were previously backed up.
+     */
+    public void applyRestoredSystemPayload(byte[] payload, int userId) {
+        int gender = convertByteArrayToInt(payload);
+        mGrammaticalGenderService.setSystemWideGrammaticalGender(gender, userId);
+    }
+
     private boolean hasSetBeforeRestoring(String pkgName, int userId) {
         return mGrammaticalGenderService.getApplicationGrammaticalGender(pkgName, userId)
                 != Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
@@ -155,6 +176,17 @@ public class GrammaticalInflectionBackupHelper {
             Log.e(TAG, "cannot convert payload to byte array.", e);
             return null;
         }
+    }
+
+    private byte[] intToByteArray(final int gender) {
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.putInt(gender);
+        return bb.array();
+    }
+
+    private int convertByteArrayToInt(byte[] intBytes) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(intBytes);
+        return byteBuffer.getInt();
     }
 
     private HashMap<String, Integer> readFromByteArray(byte[] payload) {

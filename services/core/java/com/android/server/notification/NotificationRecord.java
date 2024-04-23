@@ -15,6 +15,9 @@
  */
 package com.android.server.notification;
 
+import static android.app.Flags.restrictAudioAttributesAlarm;
+import static android.app.Flags.restrictAudioAttributesCall;
+import static android.app.Flags.restrictAudioAttributesMedia;
 import static android.app.Flags.updateRankingTime;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
@@ -63,19 +66,21 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.widget.RemoteViews;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.uri.UriGrantsManagerInternal;
+
 import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -597,8 +602,7 @@ public final class NotificationRecord {
         pw.println(prefix + "headsUpContentView="
                 + formatRemoteViews(notification.headsUpContentView));
         pw.println(prefix + String.format("color=0x%08x", notification.color));
-        pw.println(prefix + "timeout="
-                + TimeUtils.formatForLogging(notification.getTimeoutAfter()));
+        pw.println(prefix + "timeout=" + Duration.ofMillis(notification.getTimeoutAfter()));
         if (notification.actions != null && notification.actions.length > 0) {
             pw.println(prefix + "actions={");
             final int N = notification.actions.length;
@@ -1159,6 +1163,15 @@ public final class NotificationRecord {
             mChannel = channel;
             calculateImportance();
             calculateUserSentiment();
+            mVibration = calculateVibration();
+            if (restrictAudioAttributesCall() || restrictAudioAttributesAlarm()
+                    || restrictAudioAttributesMedia()) {
+                if (channel.getAudioAttributes() != null) {
+                    mAttributes = channel.getAudioAttributes();
+                } else {
+                    mAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+                }
+            }
         }
     }
 

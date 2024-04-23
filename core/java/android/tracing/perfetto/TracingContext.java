@@ -30,20 +30,19 @@ import java.util.List;
  *
  * @hide
  */
-public class TracingContext<DataSourceInstanceType extends DataSourceInstance,
-        TlsStateType, IncrementalStateType> {
+public class TracingContext<DataSourceInstanceType extends DataSourceInstance, TlsStateType,
+        IncrementalStateType> {
 
-    private final long mContextPtr;
-    private final TlsStateType mTlsState;
-    private final IncrementalStateType mIncrementalState;
+    private final DataSource<DataSourceInstanceType, TlsStateType, IncrementalStateType>
+            mDataSource;
+    private final int mInstanceIndex;
     private final List<ProtoOutputStream> mTracePackets = new ArrayList<>();
 
-    // Should only be created from the native side.
-    private TracingContext(long contextPtr, TlsStateType tlsState,
-            IncrementalStateType incrementalState) {
-        this.mContextPtr = contextPtr;
-        this.mTlsState = tlsState;
-        this.mIncrementalState = incrementalState;
+    TracingContext(DataSource<DataSourceInstanceType, TlsStateType, IncrementalStateType>
+            dataSource,
+            int instanceIndex) {
+        this.mDataSource = dataSource;
+        this.mInstanceIndex = instanceIndex;
     }
 
     /**
@@ -69,18 +68,26 @@ public class TracingContext<DataSourceInstanceType extends DataSourceInstance,
      * Stop timeout expires.
      */
     public void flush() {
-        nativeFlush(this, mContextPtr);
+        nativeFlush(mDataSource.mNativeObj, getAndClearAllPendingTracePackets());
     }
 
     /**
      * Can optionally be used to store custom per-sequence
      * session data, which is not reset when incremental state is cleared
      * (e.g. configuration options).
-     *
+     *h
      * @return The TlsState instance for the tracing thread and instance.
      */
     public TlsStateType getCustomTlsState() {
-        return this.mTlsState;
+        TlsStateType tlsState = (TlsStateType) nativeGetCustomTls(mDataSource.mNativeObj);
+        if (tlsState == null) {
+            final CreateTlsStateArgs<DataSourceInstanceType> args =
+                    new CreateTlsStateArgs<>(mDataSource, mInstanceIndex);
+            tlsState = mDataSource.createTlsState(args);
+            nativeSetCustomTls(mDataSource.mNativeObj, tlsState);
+        }
+
+        return tlsState;
     }
 
     /**
@@ -90,10 +97,18 @@ public class TracingContext<DataSourceInstanceType extends DataSourceInstance,
      * @return The current IncrementalState object instance.
      */
     public IncrementalStateType getIncrementalState() {
-        return this.mIncrementalState;
+        IncrementalStateType incrementalState =
+                (IncrementalStateType) nativeGetIncrementalState(mDataSource.mNativeObj);
+        if (incrementalState == null) {
+            final CreateIncrementalStateArgs<DataSourceInstanceType> args =
+                    new CreateIncrementalStateArgs<>(mDataSource, mInstanceIndex);
+            incrementalState = mDataSource.createIncrementalState(args);
+            nativeSetIncrementalState(mDataSource.mNativeObj, incrementalState);
+        }
+
+        return incrementalState;
     }
 
-    // Called from native to get trace packets
     private byte[][] getAndClearAllPendingTracePackets() {
         byte[][] res = new byte[mTracePackets.size()][];
         for (int i = 0; i < mTracePackets.size(); i++) {
@@ -105,5 +120,11 @@ public class TracingContext<DataSourceInstanceType extends DataSourceInstance,
         return res;
     }
 
-    private static native void nativeFlush(TracingContext thiz, long ctxPointer);
+    private static native void nativeFlush(long dataSourcePtr, byte[][] packetData);
+
+    private static native Object nativeGetCustomTls(long nativeDsPtr);
+    private static native void nativeSetCustomTls(long nativeDsPtr, Object tlsState);
+
+    private static native Object nativeGetIncrementalState(long nativeDsPtr);
+    private static native void nativeSetIncrementalState(long nativeDsPtr, Object incrementalState);
 }

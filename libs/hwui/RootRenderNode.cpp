@@ -18,11 +18,12 @@
 
 #ifdef __ANDROID__ // Layoutlib does not support Looper (windows)
 #include <utils/Looper.h>
+#else
+#include "utils/MessageHandler.h"
 #endif
 
 namespace android::uirenderer {
 
-#ifdef __ANDROID__ // Layoutlib does not support Looper
 class FinishAndInvokeListener : public MessageHandler {
 public:
     explicit FinishAndInvokeListener(PropertyValuesAnimatorSet* anim) : mAnimator(anim) {
@@ -237,9 +238,13 @@ void RootRenderNode::detachVectorDrawableAnimator(PropertyValuesAnimatorSet* ani
         // user events, in which case the already posted listener's id will become stale, and
         // the onFinished callback will then be ignored.
         sp<FinishAndInvokeListener> message = new FinishAndInvokeListener(anim);
+#ifdef __ANDROID__  // Layoutlib does not support Looper
         auto looper = Looper::getForThread();
         LOG_ALWAYS_FATAL_IF(looper == nullptr, "Not on a looper thread?");
         looper->sendMessageDelayed(ms2ns(remainingTimeInMs), message, 0);
+#else
+        message->handleMessage(0);
+#endif
         anim->clearOneShotListener();
     }
 }
@@ -285,22 +290,5 @@ private:
 AnimationContext* ContextFactoryImpl::createAnimationContext(renderthread::TimeLord& clock) {
     return new AnimationContextBridge(clock, mRootNode);
 }
-#else
-
-void RootRenderNode::prepareTree(TreeInfo& info) {
-    info.errorHandler = mErrorHandler.get();
-    info.updateWindowPositions = true;
-    RenderNode::prepareTree(info);
-    info.updateWindowPositions = false;
-    info.errorHandler = nullptr;
-}
-
-void RootRenderNode::attachAnimatingNode(RenderNode* animatingNode) { }
-
-void RootRenderNode::destroy() { }
-
-void RootRenderNode::addVectorDrawableAnimator(PropertyValuesAnimatorSet* anim) { }
-
-#endif
 
 }  // namespace android::uirenderer

@@ -22,6 +22,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_OWNER_CANCELED;
+import static com.android.server.am.PendingIntentRecord.CANCEL_REASON_SUPERSEDED;
 
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -54,6 +56,7 @@ import com.android.internal.util.RingBuffer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
+import com.android.server.am.PendingIntentRecord.CancellationReason;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.SafeActivityOptions;
 
@@ -191,7 +194,7 @@ public class PendingIntentController {
                     }
                     return rec;
                 }
-                makeIntentSenderCanceled(rec);
+                makeIntentSenderCanceled(rec, CANCEL_REASON_SUPERSEDED);
                 mIntentSenderRecords.remove(key);
                 decrementUidStatLocked(rec);
             }
@@ -206,7 +209,7 @@ public class PendingIntentController {
     }
 
     boolean removePendingIntentsForPackage(String packageName, int userId, int appId,
-            boolean doIt) {
+            boolean doIt, @CancellationReason int cancelReason) {
 
         boolean didSomething = false;
         synchronized (mLock) {
@@ -256,7 +259,7 @@ public class PendingIntentController {
                 }
                 didSomething = true;
                 it.remove();
-                makeIntentSenderCanceled(pir);
+                makeIntentSenderCanceled(pir, cancelReason);
                 decrementUidStatLocked(pir);
                 if (pir.key.activity != null) {
                     final Message m = PooledLambda.obtainMessage(
@@ -289,13 +292,14 @@ public class PendingIntentController {
             } catch (RemoteException e) {
                 throw new SecurityException(e);
             }
-            cancelIntentSender(rec, true);
+            cancelIntentSender(rec, true, CANCEL_REASON_OWNER_CANCELED);
         }
     }
 
-    public void cancelIntentSender(PendingIntentRecord rec, boolean cleanActivity) {
+    public void cancelIntentSender(PendingIntentRecord rec, boolean cleanActivity,
+            @CancellationReason int cancelReason) {
         synchronized (mLock) {
-            makeIntentSenderCanceled(rec);
+            makeIntentSenderCanceled(rec, cancelReason);
             mIntentSenderRecords.remove(rec.key);
             decrementUidStatLocked(rec);
             if (cleanActivity && rec.key.activity != null) {
@@ -359,8 +363,10 @@ public class PendingIntentController {
         }
     }
 
-    private void makeIntentSenderCanceled(PendingIntentRecord rec) {
+    private void makeIntentSenderCanceled(PendingIntentRecord rec,
+            @CancellationReason int cancelReason) {
         rec.canceled = true;
+        rec.cancelReason = cancelReason;
         final RemoteCallbackList<IResultReceiver> callbacks = rec.detachCancelListenersLocked();
         if (callbacks != null) {
             final Message m = PooledLambda.obtainMessage(

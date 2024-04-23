@@ -232,7 +232,9 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         if (!mRunning) {
             return false;
         }
-        if (!getSessionInfos().isEmpty() || mIsManagerScanning) {
+        boolean bindDueToManagerScan =
+                mIsManagerScanning && Flags.enablePreventionOfManagerScansWhenNoAppsScan();
+        if (!getSessionInfos().isEmpty() || bindDueToManagerScan) {
             // We bind if any manager is scanning (regardless of whether an app is scanning) to give
             // the opportunity for providers to publish routing sessions that were established
             // directly between the app and the provider (typically via AndroidX MediaRouter). See

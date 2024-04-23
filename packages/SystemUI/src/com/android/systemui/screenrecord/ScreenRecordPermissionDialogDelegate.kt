@@ -18,6 +18,7 @@ package com.android.systemui.screenrecord
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -35,12 +36,15 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Switch
 import androidx.annotation.LayoutRes
+import androidx.annotation.StyleRes
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorActivity
 import com.android.systemui.mediaprojection.permission.BaseMediaProjectionPermissionDialogDelegate
 import com.android.systemui.mediaprojection.permission.ENTIRE_SCREEN
 import com.android.systemui.mediaprojection.permission.SINGLE_APP
+import com.android.systemui.mediaprojection.permission.ScreenShareMode
 import com.android.systemui.mediaprojection.permission.ScreenShareOption
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
@@ -51,15 +55,18 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 /** Dialog to select screen recording options */
-class ScreenRecordPermissionDialogDelegate @AssistedInject constructor(
-    @Assisted private val hostUserHandle: UserHandle,
-    @Assisted private val hostUid: Int,
-    @Assisted private val controller: RecordingController,
+class ScreenRecordPermissionDialogDelegate(
+    private val hostUserHandle: UserHandle,
+    private val hostUid: Int,
+    private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
     private val userContextProvider: UserContextProvider,
-    @Assisted private val onStartRecordingClicked: Runnable?,
+    private val onStartRecordingClicked: Runnable?,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     private val systemUIDialogFactory: SystemUIDialog.Factory,
+    @ScreenShareMode defaultSelectedMode: Int,
+    @StyleRes private val theme: Int,
+    private val context: Context,
 ) :
     BaseMediaProjectionPermissionDialogDelegate<SystemUIDialog>(
         createOptionList(),
@@ -67,9 +74,34 @@ class ScreenRecordPermissionDialogDelegate @AssistedInject constructor(
         hostUid = hostUid,
         mediaProjectionMetricsLogger,
         R.drawable.ic_screenrecord,
-        R.color.screenrecord_icon_color
-    ), SystemUIDialog.Delegate {
-
+        R.color.screenrecord_icon_color,
+        defaultSelectedMode,
+    ),
+    SystemUIDialog.Delegate {
+    @AssistedInject
+    constructor(
+        @Assisted hostUserHandle: UserHandle,
+        @Assisted hostUid: Int,
+        @Assisted controller: RecordingController,
+        activityStarter: ActivityStarter,
+        userContextProvider: UserContextProvider,
+        @Assisted onStartRecordingClicked: Runnable?,
+        mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
+        systemUIDialogFactory: SystemUIDialog.Factory,
+        @Application context: Context,
+    ) : this(
+        hostUserHandle,
+        hostUid,
+        controller,
+        activityStarter,
+        userContextProvider,
+        onStartRecordingClicked,
+        mediaProjectionMetricsLogger,
+        systemUIDialogFactory,
+        defaultSelectedMode = SINGLE_APP,
+        theme = SystemUIDialog.DEFAULT_THEME,
+        context,
+    )
 
     @AssistedFactory
     interface Factory {
@@ -77,7 +109,7 @@ class ScreenRecordPermissionDialogDelegate @AssistedInject constructor(
             recordingController: RecordingController,
             hostUserHandle: UserHandle,
             hostUid: Int,
-            onStartRecordingClicked: Runnable?
+            onStartRecordingClicked: Runnable?,
         ): ScreenRecordPermissionDialogDelegate
     }
 
@@ -89,7 +121,7 @@ class ScreenRecordPermissionDialogDelegate @AssistedInject constructor(
     private lateinit var options: Spinner
 
     override fun createDialog(): SystemUIDialog {
-        return systemUIDialogFactory.create(this)
+        return systemUIDialogFactory.create(this, context, theme)
     }
 
     override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {

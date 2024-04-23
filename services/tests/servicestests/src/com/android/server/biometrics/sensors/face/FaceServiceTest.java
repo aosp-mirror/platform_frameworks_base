@@ -147,11 +147,10 @@ public class FaceServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
-    public void registerAuthenticatorsLegacy_defaultOnly() throws Exception {
+    public void registerAuthenticators_defaultOnly() throws Exception {
         initService();
 
-        mFaceService.mServiceWrapper.registerAuthenticatorsLegacy(mFaceSensorConfigurations);
+        mFaceService.mServiceWrapper.registerAuthenticators(mFaceSensorConfigurations);
         waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_DEFAULT),
@@ -161,13 +160,13 @@ public class FaceServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
+    @RequiresFlagsEnabled(Flags.FLAG_FACE_VHAL_FEATURE)
     public void registerAuthenticatorsLegacy_virtualOnly() throws Exception {
         initService();
         Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
                 Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 1);
 
-        mFaceService.mServiceWrapper.registerAuthenticatorsLegacy(mFaceSensorConfigurations);
+        mFaceService.mServiceWrapper.registerAuthenticators(mFaceSensorConfigurations);
         waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL),
@@ -176,13 +175,27 @@ public class FaceServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_DE_HIDL)
-    public void registerAuthenticatorsLegacy_virtualAlwaysWhenNoOther() throws Exception {
+    @RequiresFlagsEnabled(Flags.FLAG_FACE_VHAL_FEATURE)
+    public void registerAuthenticators_virtualFaceOnly() throws Exception {
+        initService();
+        Settings.Secure.putInt(mSettingsRule.mockContentResolver(mContext),
+                Settings.Secure.BIOMETRIC_FACE_VIRTUAL_ENABLED, 1);
+
+        mFaceService.mServiceWrapper.registerAuthenticators(mFaceSensorConfigurations);
+        waitForRegistration();
+
+        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL),
+                eq(BiometricAuthenticator.TYPE_FACE),
+                eq(Utils.propertyStrengthToAuthenticatorStrength(STRENGTH_STRONG)), any());
+    }
+
+    @Test
+    public void registerAuthenticators_virtualAlwaysWhenNoOther() throws Exception {
         mFaceSensorConfigurations = new FaceSensorConfigurations(false);
         mFaceSensorConfigurations.addAidlConfigs(new String[]{NAME_VIRTUAL});
         initService();
 
-        mFaceService.mServiceWrapper.registerAuthenticatorsLegacy(mFaceSensorConfigurations);
+        mFaceService.mServiceWrapper.registerAuthenticators(mFaceSensorConfigurations);
         waitForRegistration();
 
         verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL),
@@ -195,7 +208,7 @@ public class FaceServiceTest {
         FaceAuthenticateOptions faceAuthenticateOptions = new FaceAuthenticateOptions.Builder()
                 .build();
         initService();
-        mFaceService.mServiceWrapper.registerAuthenticators(List.of());
+        mFaceService.mServiceWrapper.registerAuthenticators(mFaceSensorConfigurations);
         waitForRegistration();
 
         final long operationId = 5;
@@ -215,7 +228,7 @@ public class FaceServiceTest {
                 R.string.config_keyguardComponent,
                 OP_PACKAGE_NAME);
         initService();
-        mFaceService.mServiceWrapper.registerAuthenticators(List.of());
+        mFaceService.mServiceWrapper.registerAuthenticators(mFaceSensorConfigurations);
         waitForRegistration();
         mFaceService.mServiceWrapper.detectFace(mToken, mFaceServiceReceiver,
                 faceAuthenticateOptions);

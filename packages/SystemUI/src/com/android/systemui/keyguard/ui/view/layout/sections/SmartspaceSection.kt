@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -96,12 +95,8 @@ constructor(
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!MigrateClocksToBlueprint.isEnabled) return
         if (!keyguardSmartspaceViewModel.isSmartspaceEnabled) return
-        val horizontalPaddingStart =
-            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start) +
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
-        val horizontalPaddingEnd =
-            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end) +
-                context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+        val horizontalPaddingStart = KeyguardSmartspaceViewModel.getSmartspaceStartMargin(context)
+        val horizontalPaddingEnd = KeyguardSmartspaceViewModel.getSmartspaceEndMargin(context)
         constraintSet.apply {
             // migrate addDateWeatherView, addWeatherView from KeyguardClockSwitchController
             constrainHeight(sharedR.id.date_smartspace_view, ConstraintSet.WRAP_CONTENT)
@@ -209,8 +204,7 @@ constructor(
         smartspaceController.requestSmartspaceUpdate()
 
         constraintSet.apply {
-            setVisibility(
-                sharedR.id.weather_smartspace_view,
+            val weatherVisibility =
                 when (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {
                     true -> ConstraintSet.GONE
                     false ->
@@ -219,11 +213,18 @@ constructor(
                             false -> ConstraintSet.GONE
                         }
                 }
+            setVisibility(sharedR.id.weather_smartspace_view, weatherVisibility)
+            setAlpha(
+                sharedR.id.weather_smartspace_view,
+                if (weatherVisibility == ConstraintSet.VISIBLE) 1f else 0f
             )
-            setVisibility(
-                sharedR.id.date_smartspace_view,
+            val dateVisibility =
                 if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) ConstraintSet.GONE
                 else ConstraintSet.VISIBLE
+            setVisibility(sharedR.id.date_smartspace_view, dateVisibility)
+            setAlpha(
+                sharedR.id.date_smartspace_view,
+                if (dateVisibility == ConstraintSet.VISIBLE) 1f else 0f
             )
         }
     }

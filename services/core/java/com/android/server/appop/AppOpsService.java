@@ -70,6 +70,7 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
+import static android.permission.flags.Flags.runtimePermissionAppopsMappingEnabled;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
@@ -248,6 +249,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             Process.ROOT_UID,
             Process.PHONE_UID,
             Process.BLUETOOTH_UID,
+            Process.AUDIOSERVER_UID,
             Process.NFC_UID,
             Process.NETWORK_STACK_UID,
             Process.SHELL_UID};
@@ -1364,6 +1366,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @GuardedBy("this")
     private void packageRemovedLocked(int uid, String packageName) {
+        mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::clearHistory,
+                mHistoricalRegistry, uid, packageName));
+
         UidState uidState = mUidStates.get(uid);
         if (uidState == null) {
             return;
@@ -1398,9 +1403,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
-
-        mHandler.post(PooledLambda.obtainRunnable(HistoricalRegistry::clearHistory,
-                    mHistoricalRegistry, uid, packageName));
     }
 
     public void uidRemoved(int uid) {
@@ -2671,19 +2673,24 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    public CheckOpsDelegate getAppOpsServiceDelegate() {
-        synchronized (AppOpsService.this) {
-            final CheckOpsDelegateDispatcher dispatcher = mCheckOpsDelegateDispatcher;
-            return (dispatcher != null) ? dispatcher.getCheckOpsDelegate() : null;
-        }
-    }
-
-    public void setAppOpsServiceDelegate(CheckOpsDelegate delegate) {
+    /**
+     * Sets the CheckOpDelegate
+     */
+    public void setCheckOpsDelegate(CheckOpsDelegate delegate) {
         synchronized (AppOpsService.this) {
             final CheckOpsDelegateDispatcher oldDispatcher = mCheckOpsDelegateDispatcher;
             final CheckOpsDelegate policy = (oldDispatcher != null) ? oldDispatcher.mPolicy : null;
             mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(policy, delegate);
         }
+    }
+
+    /**
+     * When querying the mode these should always be allowed and the checking service might not
+     * have information on them.
+     */
+    private static boolean isOpAllowedForUid(int uid) {
+        return runtimePermissionAppopsMappingEnabled()
+                && (uid == Process.ROOT_UID || uid == Process.SYSTEM_UID);
     }
 
     @Override
@@ -2760,6 +2767,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (isOpRestrictedLocked(uid, code, packageName, attributionTag, virtualDeviceId,
                     pvr.bypass, true)) {
                 return AppOpsManager.MODE_IGNORED;
+            }
+            if (isOpAllowedForUid(uid)) {
+                return MODE_ALLOWED;
             }
             code = AppOpsManager.opToSwitch(code);
             UidState uidState = getUidStateLocked(uid, false);
@@ -3075,9 +3085,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
                         packageName);
             }
-            // If there is a non-default per UID policy (we set UID op mode only if
-            // non-default) it takes over, otherwise use the per package policy.
-            if (mAppOpsCheckingService.getUidMode(
+            if (isOpAllowedForUid(uid)) {
+                // Op is always allowed for the UID, do nothing.
+
+                // If there is a non-default per UID policy (we set UID op mode only if
+                // non-default) it takes over, otherwise use the per package policy.
+            } else if (mAppOpsCheckingService.getUidMode(
                             uidState.uid, getPersistentId(virtualDeviceId), switchCode)
                     != AppOpsManager.opToDefaultMode(switchCode)) {
                 final int uidMode =
@@ -3669,10 +3682,13 @@ public class AppOpsService extends IAppOpsService.Stub {
             isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag,
                     virtualDeviceId, pvr.bypass, false);
             final int switchCode = AppOpsManager.opToSwitch(code);
-            // If there is a non-default per UID policy (we set UID op mode only if
-            // non-default) it takes over, otherwise use the per package policy.
-            if (mAppOpsCheckingService.getUidMode(
-                            uidState.uid, getPersistentId(virtualDeviceId), switchCode)
+            if (isOpAllowedForUid(uid)) {
+                // Op is always allowed for the UID, do nothing.
+
+                // If there is a non-default per UID policy (we set UID op mode only if
+                // non-default) it takes over, otherwise use the per package policy.
+            } else if (mAppOpsCheckingService.getUidMode(
+                    uidState.uid, getPersistentId(virtualDeviceId), switchCode)
                     != AppOpsManager.opToDefaultMode(switchCode)) {
                 final int uidMode =
                         uidState.evalMode(
@@ -4711,9 +4727,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if ((code == OP_CAMERA) && isAutomotive()) {
-            if ((Flags.cameraPrivacyAllowlist())
-                    && (mSensorPrivacyManager.isCameraPrivacyEnabled(packageName))) {
-                return true;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if ((Flags.cameraPrivacyAllowlist())
+                        && (mSensorPrivacyManager.isCameraPrivacyEnabled(packageName))) {
+                    return true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
 
@@ -5524,6 +5545,20 @@ public class AppOpsService extends IAppOpsService.Stub {
                         pw.println("Last settings read.");
                     } finally {
                         Binder.restoreCallingIdentity(token);
+                    }
+                    return 0;
+                }
+                case "note": {
+                    int res = shell.parseUserPackageOp(true, err);
+                    if (res < 0) {
+                        return res;
+                    }
+                    if (shell.packageName != null) {
+                        shell.mInterface.noteOperation(shell.op, shell.packageUid,
+                                shell.packageName, shell.attributionTag, true,
+                                "appops note shell command", true);
+                    } else {
+                        return -1;
                     }
                     return 0;
                 }
@@ -7155,10 +7190,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 @Nullable CheckOpsDelegate checkOpsDelegate) {
             mPolicy = policy;
             mCheckOpsDelegate = checkOpsDelegate;
-        }
-
-        public @NonNull CheckOpsDelegate getCheckOpsDelegate() {
-            return mCheckOpsDelegate;
         }
 
         public int checkOperation(int code, int uid, String packageName,

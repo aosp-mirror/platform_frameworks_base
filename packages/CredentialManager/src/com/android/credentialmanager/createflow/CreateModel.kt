@@ -16,9 +16,11 @@
 
 package com.android.credentialmanager.createflow
 
+import android.credentials.flags.Flags.credmanBiometricApiEnabled
 import android.graphics.drawable.Drawable
-import com.android.credentialmanager.model.EntryInfo
+import com.android.credentialmanager.R
 import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.creation.CreateOptionInfo
 import com.android.credentialmanager.model.creation.RemoteInfo
 
@@ -33,14 +35,94 @@ data class CreateCredentialUiState(
     val foundCandidateFromUserDefaultProvider: Boolean,
 )
 
+/**
+ * Checks if this create flow is a biometric flow. Note that this flow differs slightly from the
+ * autoselect 'get' flow. Namely, given there can be multiple providers, rather than multiple
+ * accounts, the idea is that autoselect is ever only enabled for a single provider (or even, in
+ * that case, a single 'type' (family only, or work only) for a provider). However, for all other
+ * cases, the biometric screen should always show up if that entry contains the biometric bit.
+ */
+internal fun findBiometricFlowEntry(
+    activeEntry: ActiveEntry,
+    isAutoSelectFlow: Boolean,
+): CreateOptionInfo? {
+    if (!credmanBiometricApiEnabled()) {
+        return null
+    }
+    if (isAutoSelectFlow) {
+        // Since this is the create flow, auto select will only ever be true for a single provider.
+        // However, for all other cases, biometric should be used if that bit is opted into. If
+        // they clash, autoselect is always preferred, but that's only if there's a single provider.
+        return null
+    }
+    val biometricEntry = getCreateEntry(activeEntry)
+    return if (biometricEntry?.biometricRequest != null) biometricEntry else null
+}
+
+/**
+ * Retrieves the activeEntry by validating it is a [CreateOptionInfo]. This is done by ensuring
+ * that the [activeEntry] exists as a [CreateOptionInfo] to retrieve its [EntryInfo].
+ */
+internal fun getCreateEntry(
+    activeEntry: ActiveEntry?,
+): CreateOptionInfo? {
+    val entry = activeEntry?.activeEntryInfo
+    if (entry !is CreateOptionInfo) {
+        return null
+    }
+    return entry
+}
+
+/**
+* Determines if the flow is a biometric flow by taking into account autoselect criteria.
+*/
+internal fun isBiometricFlow(
+    activeEntry: ActiveEntry,
+    isAutoSelectFlow: Boolean,
+) = findBiometricFlowEntry(activeEntry, isAutoSelectFlow) != null
+
+/**
+ * This utility presents the correct resource string for the create flows title conditionally.
+ * Similar to generateDisplayTitleTextResCode in the 'get' flow, but for the create flow instead.
+ * This is for the title, and is a shared resource, unlike the specific unlock request text.
+ * E.g. this will look something like: "Create passkey to sign in to Tribank."
+ * // TODO(b/330396140) : Validate approach and add dynamic auth strings
+ */
+internal fun getCreateTitleResCode(createRequestDisplayInfo: RequestDisplayInfo): Int =
+    when (createRequestDisplayInfo.type) {
+        CredentialType.PASSKEY ->
+            R.string.choose_create_option_passkey_title
+
+        CredentialType.PASSWORD ->
+            R.string.choose_create_option_password_title
+
+        CredentialType.UNKNOWN ->
+            R.string.choose_create_option_sign_in_title
+    }
+
 internal fun isFlowAutoSelectable(
     uiState: CreateCredentialUiState
 ): Boolean {
-  return uiState.requestDisplayInfo.isAutoSelectRequest &&
-      uiState.sortedCreateOptionsPairs.size == 1 &&
-      uiState.activeEntry?.activeEntryInfo?.let {
-        it is CreateOptionInfo && it.allowAutoSelect
-      } ?: false
+    return isFlowAutoSelectable(uiState.requestDisplayInfo, uiState.activeEntry,
+        uiState.sortedCreateOptionsPairs)
+}
+
+/**
+ * When initializing, the [CreateCredentialUiState] is generated after the initial screen is set.
+ * This overloaded method allows identifying if the flow is auto selectable prior to the creation
+ * of the [CreateCredentialUiState].
+ */
+internal fun isFlowAutoSelectable(
+    requestDisplayInfo: RequestDisplayInfo,
+    activeEntry: ActiveEntry?,
+    sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>
+): Boolean {
+    val isAutoSelectRequest = requestDisplayInfo.isAutoSelectRequest
+    if (sortedCreateOptionsPairs.size != 1) {
+        return false
+    }
+    val singleEntry = getCreateEntry(activeEntry)
+    return isAutoSelectRequest && singleEntry?.allowAutoSelect == true
 }
 
 internal fun hasContentToDisplay(state: CreateCredentialUiState): Boolean {
@@ -95,7 +177,9 @@ data class ActiveEntry (
 /** The name of the current screen. */
 enum class CreateScreenState {
   CREATION_OPTION_SELECTION,
+  BIOMETRIC_SELECTION,
   MORE_OPTIONS_SELECTION,
   DEFAULT_PROVIDER_CONFIRMATION,
   EXTERNAL_ONLY_SELECTION,
+  MORE_OPTIONS_SELECTION_ONLY,
 }

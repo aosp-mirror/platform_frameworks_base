@@ -663,7 +663,8 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Impressão digital não reconhecida"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Impressão digital não reconhecida"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Não foi possível reconhecer o rosto Use a impressão digital."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Impressão digital autenticada"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Rosto autenticado"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Rosto autenticado, pressione \"Confirmar\""</string>
@@ -726,7 +727,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Falha ao criar o modelo de rosto. Tente de novo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Óculos escuros detectados. Seu rosto precisa estar completamente visível."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detectada. Seu rosto precisa estar visível."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tem algo cobrindo seu rosto. Ele precisa estar visível."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Impossível verificar rosto. Hardware indisponível."</string>
@@ -1371,8 +1372,8 @@
     <string name="sim_added_message" msgid="6602906609509958680">"Reinicie o dispositivo para acessar a rede móvel."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Ativar serviço móvel"</string>
-    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Faça o download do app da operadora para ativar seu novo chip"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Faça o download do app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar seu novo chip"</string>
+    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Baixe o app da operadora para ativar seu novo chip"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Baixe o app <xliff:g id="APP_NAME">%1$s</xliff:g> para ativar seu novo chip"</string>
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Fazer download do app"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Novo chip inserido"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Toque para configurar"</string>
@@ -1744,7 +1745,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correção de cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo uma mão"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer a tela"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer ainda mais a tela"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Aparelhos auditivos"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume pressionadas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume pressionadas. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
@@ -1930,12 +1931,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gerenciada pelo app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Ativada"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desativada"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualquer agenda"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> está silenciando alguns sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Há um problema interno com seu dispositivo. Ele pode ficar instável até que você faça a redefinição para configuração original."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Há um problema interno com seu dispositivo. Entre em contato com o fabricante para saber mais detalhes."</string>
@@ -2398,6 +2396,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Teste"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Público"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Conteúdo do app oculto no compartilhamento de tela por motivos de segurança"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Conectado automaticamente ao satélite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Você pode enviar e receber mensagens sem um dispositivo móvel ou uma rede Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Abrir o app Mensagens"</string>

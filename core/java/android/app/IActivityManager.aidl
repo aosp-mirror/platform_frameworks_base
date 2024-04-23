@@ -394,7 +394,7 @@ interface IActivityManager {
     oneway void getMimeTypeFilterAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
-            boolean runGc, in String path, in ParcelFileDescriptor fd,
+            boolean runGc, in String dumpBitmaps, in String path, in ParcelFileDescriptor fd,
             in RemoteCallback finishCallback);
     @UnsupportedAppUsage
     boolean isUserRunning(int userid, int flags);
@@ -452,12 +452,14 @@ interface IActivityManager {
             in IBinder resultTo, in String resultWho, int requestCode, int flags,
             in ProfilerInfo profilerInfo, in Bundle options, int userId);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    int stopUser(int userid, boolean force, in IStopUserCallback callback);
+    int stopUser(int userid, boolean stopProfileRegardlessOfParent, in IStopUserCallback callback);
+    int stopUserWithCallback(int userid, in IStopUserCallback callback);
+    int stopUserExceptCertainProfiles(int userid, boolean stopProfileRegardlessOfParent, in IStopUserCallback callback);
     /**
-     * Check {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int, boolean, IStopUserCallback)}
+     * Check {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int, IStopUserCallback)}
      * for details.
      */
-    int stopUserWithDelayedLocking(int userid, boolean force, in IStopUserCallback callback);
+    int stopUserWithDelayedLocking(int userid, in IStopUserCallback callback);
 
     @UnsupportedAppUsage
     void registerUserSwitchObserver(in IUserSwitchObserver observer, in String name);
@@ -499,6 +501,7 @@ interface IActivityManager {
             in String shareDescription);
 
     void requestInteractiveBugReport();
+    void requestBugReportWithExtraAttachment(in Uri extraAttachment);
     void requestFullBugReport();
     void requestRemoteBugReport(long nonce);
     boolean launchBugReportHandlerApp();
@@ -970,4 +973,48 @@ interface IActivityManager {
      * time in the past.
      */
     long getUidLastIdleElapsedTime(int uid, in String callingPackage);
+
+    /**
+     * Adds permission to be overridden to the given state. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permission will be overridden
+     * @param permission The permission whose state will be overridden
+     * @param result The state to override the permission to
+     *
+     * @see PackageManager.PermissionResult
+     */
+    void addOverridePermissionState(int originatingUid, int uid, String permission, int result);
+
+    /**
+     * Removes overridden permission. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permission is overridden
+     * @param permission The permission whose state will no longer be overridden
+     */
+    void removeOverridePermissionState(int originatingUid, int uid, String permission);
+
+    /**
+     * Clears all overridden permissions for the given UID. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     * @param uid The UID of the app whose permissions will no longer be overridden
+     */
+    void clearOverridePermissionStates(int originatingUid, int uid);
+
+    /**
+     * Clears all overridden permissions on the device. Must be called from root user.
+     *
+     * @param originatingUid The UID of the instrumented app that initialized the override
+     */
+    void clearAllOverridePermissionStates(int originatingUid);
+
+    /**
+     * Request the system to log the reason for restricting / unrestricting an app.
+     * @see ActivityManager#noteAppRestrictionEnabled
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DEVICE_POWER)")
+    void noteAppRestrictionEnabled(in String packageName, int uid, int restrictionType,
+            boolean enabled, int reason, in String subReason, long threshold);
 }

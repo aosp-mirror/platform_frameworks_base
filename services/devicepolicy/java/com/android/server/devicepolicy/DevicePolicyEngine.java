@@ -103,7 +103,7 @@ final class DevicePolicyEngine {
                     UserManager.DISALLOW_CELLULAR_2G);
 
     //TODO(b/295504706) : Speak to security team to decide what to set Policy_Size_Limit
-    private static final int DEFAULT_POLICY_SIZE_LIMIT = -1;
+    static final int DEFAULT_POLICY_SIZE_LIMIT = -1;
 
     private final Context mContext;
     private final UserManager mUserManager;
@@ -225,7 +225,7 @@ final class DevicePolicyEngine {
 
         synchronized (mLock) {
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
-            if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
                 if (!handleAdminPolicySizeLimit(localPolicyState, enforcingAdmin, value,
                         policyDefinition, userId)) {
                     return;
@@ -350,7 +350,7 @@ final class DevicePolicyEngine {
             }
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
 
-            if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
                 decreasePolicySizeForAdmin(localPolicyState, enforcingAdmin);
             }
 
@@ -496,7 +496,7 @@ final class DevicePolicyEngine {
 
         synchronized (mLock) {
             PolicyState<V> globalPolicyState = getGlobalPolicyStateLocked(policyDefinition);
-            if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
                 if (!handleAdminPolicySizeLimit(globalPolicyState, enforcingAdmin, value,
                         policyDefinition, UserHandle.USER_ALL)) {
                     return;
@@ -568,7 +568,7 @@ final class DevicePolicyEngine {
         synchronized (mLock) {
             PolicyState<V> policyState = getGlobalPolicyStateLocked(policyDefinition);
 
-            if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
                 decreasePolicySizeForAdmin(policyState, enforcingAdmin);
             }
 
@@ -1598,6 +1598,7 @@ final class DevicePolicyEngine {
             existingPolicySize = sizeOf(policyState.getPoliciesSetByAdmins().get(admin));
         }
         int policySize = sizeOf(value);
+
         // Policy size limit is disabled if mPolicySizeLimit is -1.
         if (mPolicySizeLimit == -1
                 || currentAdminPoliciesSize + policySize - existingPolicySize < mPolicySizeLimit) {
@@ -1635,11 +1636,14 @@ final class DevicePolicyEngine {
      * active policies for that admin.
      */
     private <V> void decreasePolicySizeForAdmin(PolicyState<V> policyState, EnforcingAdmin admin) {
-        if (policyState.getPoliciesSetByAdmins().containsKey(admin)) {
-            mAdminPolicySize.get(admin.getUserId()).put(admin,
-                    mAdminPolicySize.get(admin.getUserId()).get(admin) - sizeOf(
-                            policyState.getPoliciesSetByAdmins().get(admin)));
+        if (!policyState.getPoliciesSetByAdmins().containsKey(admin)
+                || !mAdminPolicySize.contains(admin.getUserId())
+                || !mAdminPolicySize.get(admin.getUserId()).containsKey(admin)) {
+            return;
         }
+        mAdminPolicySize.get(admin.getUserId()).put(admin,
+                mAdminPolicySize.get(admin.getUserId()).get(admin) - sizeOf(
+                        policyState.getPoliciesSetByAdmins().get(admin)));
         if (mAdminPolicySize.get(admin.getUserId()).get(admin) <= 0) {
             mAdminPolicySize.get(admin.getUserId()).remove(admin);
         }
@@ -1653,10 +1657,6 @@ final class DevicePolicyEngine {
      * the limitation.
      */
     void setMaxPolicyStorageLimit(int storageLimit) {
-        if (storageLimit < DEFAULT_POLICY_SIZE_LIMIT && storageLimit != -1) {
-            throw new IllegalArgumentException("Can't set a size limit less than the minimum "
-                    + "allowed size.");
-        }
         mPolicySizeLimit = storageLimit;
     }
 
@@ -1666,6 +1666,15 @@ final class DevicePolicyEngine {
      */
     int getMaxPolicyStorageLimit() {
         return mPolicySizeLimit;
+    }
+
+    int getPolicySizeForAdmin(EnforcingAdmin admin) {
+        if (mAdminPolicySize.contains(admin.getUserId())
+                && mAdminPolicySize.get(
+                admin.getUserId()).containsKey(admin)) {
+            return mAdminPolicySize.get(admin.getUserId()).get(admin);
+        }
+        return 0;
     }
 
     public void dump(IndentingPrintWriter pw) {
@@ -1694,6 +1703,25 @@ final class DevicePolicyEngine {
                 pw.println();
             }
             pw.decreaseIndent();
+            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
+                pw.println();
+
+                pw.println("Default admin policy size limit: " + DEFAULT_POLICY_SIZE_LIMIT);
+                pw.println("Current admin policy size limit: " + mPolicySizeLimit);
+                pw.println("Admin Policies size: ");
+                for (int i = 0; i < mAdminPolicySize.size(); i++) {
+                    int userId = mAdminPolicySize.keyAt(i);
+                    pw.printf("User %d:\n", userId);
+                    pw.increaseIndent();
+                    for (EnforcingAdmin admin : mAdminPolicySize.get(userId).keySet()) {
+                        pw.printf("Admin : " + admin + " : " + mAdminPolicySize.get(userId).get(
+                                admin));
+                        pw.println();
+                    }
+                    pw.decreaseIndent();
+                }
+                pw.decreaseIndent();
+            }
         }
     }
 
@@ -1902,7 +1930,7 @@ final class DevicePolicyEngine {
 
         private void writeEnforcingAdminSizeInner(TypedXmlSerializer serializer)
                 throws IOException {
-            if (Flags.devicePolicySizeTrackingInternalEnabled()) {
+            if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
                 if (mAdminPolicySize != null) {
                     for (int i = 0; i < mAdminPolicySize.size(); i++) {
                         int userId = mAdminPolicySize.keyAt(i);
@@ -1926,7 +1954,7 @@ final class DevicePolicyEngine {
 
         private void writeMaxPolicySizeInner(TypedXmlSerializer serializer)
                 throws IOException {
-            if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
+            if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
                 return;
             }
             serializer.startTag(/* namespace= */ null, TAG_MAX_POLICY_SIZE_LIMIT);
@@ -2091,7 +2119,7 @@ final class DevicePolicyEngine {
 
         private void readMaxPolicySizeInner(TypedXmlPullParser parser)
                 throws XmlPullParserException, IOException {
-            if (!Flags.devicePolicySizeTrackingInternalEnabled()) {
+            if (!Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
                 return;
             }
             mPolicySizeLimit = parser.getAttributeInt(/* namespace= */ null, ATTR_POLICY_SUM_SIZE);

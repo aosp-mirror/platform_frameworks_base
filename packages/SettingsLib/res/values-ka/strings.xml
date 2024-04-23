@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"აქტიური, მხოლოდ მარცხნივ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"აქტიური, მხოლოდ მარჯვნივ"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"აქტიური, მარცხნივ და მარჯვნივ"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"აქტიური (მხოლოდ მედია), ბატარეა: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"აქტიური (მხოლოდ მედია), მარცხენა: ბატარეა <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, მარჯვენა: ბატარეა<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"დაკავშირებული (აუდიოს გაზიარება მხარდაჭერილია), ბატარეა <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"დაკავშირებული (აუდიოს გაზიარება მხარდაჭერილია), მარცხენა: ბატარეა <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, მარჯვენა: ბატარეა <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"დაკავშირებული (აუდიოს გაზიარება მხარდაჭერილია), მარცხენა: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"დაკავშირებული (აუდიოს გაზიარება მხარდაჭერილია), მარჯვენა: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"აქტიური (მხოლოდ მედია)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"აუდიოს გაზიარება მხარდაჭერილია"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"აქტიური (მხოლოდ მედია), მხოლოდ მარცხენა"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"აქტიური (მხოლოდ მედია), მხოლოდ მარჯვენა"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"აქტიური (მხოლოდ მედია), მარცხენა და მარჯვენა"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"მედია აუდიო"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"სატელეფონო ზარები"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ფაილების გადაცემა"</string>
@@ -476,6 +487,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> — სრულ დატენვამდე დარჩენილია <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - დატენვა ოპტიმიზირებულია"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – იტენება"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - სრულად დატენის დრო: <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - სრულად დატენის დრო: <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"სრულად დატენის დრო: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"სრულად დატენის დრო: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"უცნობი"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"იტენება"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"სწრაფად იტენება"</string>
@@ -487,6 +502,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"დატენილია"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"ბოლომდე დატენილი"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"დატენვა შეჩერებულია"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"იტენება"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"სწრაფი დატენა"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"იმართება ადმინისტრატორის მიერ"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"კონტროლდება შეზღუდული რეჟიმის პარამეტრით"</string>
     <string name="disabled" msgid="8017887509554714950">"გამორთული"</string>
@@ -552,7 +569,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ეს ტაბლეტი"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"დინამიკის სამაგრი"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"სამაგრის დინამიკი"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"გარე მოწყობილობა"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"დაკავშირებული მოწყობილობა"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ეს ტელეფონი"</string>
@@ -616,7 +633,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"ახალი მომხმარებლის შექმნა ვერ მოხერხდა"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"ახალი სტუმრის შექმნა ვერ მოხერხდა"</string>
     <string name="user_nickname" msgid="262624187455825083">"მეტსახელი"</string>
-    <string name="edit_user_info_message" msgid="6677556031419002895">"თქვენ მიერ არჩეული სახელი და სურათი ამ მოწყობილობით მოსარგებლე ნებისმიერი პირისთვის იქნება ხილვადი."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"სახელი და სურათი, რომელსაც აირჩევთ, ხილვადი იქნება ამ მოწყობილობით მოსარგებლე ნებისმიერი პირისთვის."</string>
     <string name="user_add_user" msgid="7876449291500212468">"მომხმარებლის დამატება"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"სტუმრის დამატება"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"სტუმრის ამოშლა"</string>
@@ -643,8 +660,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"გასვლისას ყველა აქტივობა წაიშლება"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"გასვლისას შეგიძლიათ შეინახოთ ან წაშალოთ თქვენი აქტივობა"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"გადააყენეთ სესიის აქტივობის ახლა წასაშლელად. შენახვა/წაშლა გასვლისასაც შეიძლება."</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"ფოტოს გადაღება"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"აირჩიეთ სურათი"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ფოტოს არჩევა"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"დაფიქსირდა ზედმეტად ბევრი არასწორი მცდელობა. შედეგად, ამ მოწყობილობის მონაცემები წაიშლება."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"დაფიქსირდა ზედმეტად ბევრი არასწორი მცდელობა. შედეგად, ეს მომხმარებელი წაიშლება."</string>
@@ -675,6 +690,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"ტელეფონის სიგნალი ერთ ზოლზეა."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"ტელეფონის სიგნალი ორ ზოლზეა."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"ტელეფონის სიგნალი სამ ზოლზეა."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"ტელეფონის სიგნალი ოთხ ზოლზეა."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"ტელეფონის სიგნალი სრულია."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"მონაცემები არ არის."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"თარიღი ზოლზე."</string>
@@ -684,8 +700,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet კავშირი შეწყვეტილია."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ზარების გარეშე."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"აირჩიეთ პროფილის სურათი"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"მომხმარებლის ნაგულისხმევი ხატულა"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ფიზიკური კლავიატურა"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"აირჩიე კლავიატურის განლაგება"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ნაგულისხმევი"</string>

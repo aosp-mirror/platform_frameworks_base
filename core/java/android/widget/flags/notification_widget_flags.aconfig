@@ -1,4 +1,5 @@
 package: "android.widget.flags"
+container: "system"
 
 flag {
    name: "notif_linearlayout_optimized"
@@ -22,6 +23,16 @@ flag {
   namespace: "systemui"
   description: "Offloads conversation avatar drawable loading to the background thread"
   bug: "305540309"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "toast_no_weakref"
+  namespace: "systemui"
+  description: "Do not use WeakReference for custom view Toast"
+  bug: "321732224"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

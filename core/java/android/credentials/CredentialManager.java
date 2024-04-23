@@ -61,7 +61,9 @@ import java.util.concurrent.Executor;
 @SystemService(Context.CREDENTIAL_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_CREDENTIALS)
 public final class CredentialManager {
-    private static final String TAG = "CredentialManager";
+    /** @hide **/
+    @Hide
+    public static final String TAG = "CredentialManager";
     private static final Bundle OPTIONS_SENDER_BAL_OPTIN = ActivityOptions.makeBasic()
             .setPendingIntentBackgroundActivityStartMode(
                     ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
@@ -130,6 +132,13 @@ public final class CredentialManager {
      */
     private static final String DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API =
             "enable_credential_description_api";
+
+    /**
+     * @hide
+     */
+    @Hide
+    public static final String EXTRA_AUTOFILL_RESULT_RECEIVER =
+            "android.credentials.AUTOFILL_RESULT_RECEIVER";
 
     /**
      * @hide instantiated by ContextImpl.

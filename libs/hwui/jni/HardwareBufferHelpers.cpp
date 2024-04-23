@@ -16,7 +16,9 @@
 
 #include "HardwareBufferHelpers.h"
 
+#ifdef __ANDROID__
 #include <dlfcn.h>
+#endif
 #include <log/log.h>
 
 #ifdef __ANDROID__

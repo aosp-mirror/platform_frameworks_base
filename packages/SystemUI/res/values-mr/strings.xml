@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"सूचना शेड."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"क्विक सेटिंग्ज."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"क्विक सेटिंग्ज आणि सूचना शेड."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"लॉक स्क्रीन."</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"कार्य लॉक स्क्रीन"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"बंद करा"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"संपूर्ण शांतता"</string>
@@ -270,12 +271,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"सर्व पहा"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्‍लूटूथ वापरा"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"कनेक्ट केले"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेव्ह केले"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिस्कनेक्ट करा"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ॲक्टिव्हेट करा"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"उद्या पुन्हा आपोआप सुरू करा"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"क्विक शेअर, Find My Device आणि डिव्हाइसचे स्थान यांसारखी वैशिष्ट्ये ब्लूटूथ वापरतात"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"ब्लूटूथ उद्या सकाळी ५ वाजता सुरू होईल"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> बॅटरी"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ऑडिओ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
@@ -350,6 +359,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"समस्या रेकॉर्ड करा"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"सुरुवात करा"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"थांबवा"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"बग रिपोर्ट"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"तुमच्या डिव्हाइसबाबत कोणत्या अनुभवावर परिणाम झाला?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"समस्येचा प्रकार निवडा"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"स्क्रीन रेकॉर्ड"</string>
@@ -363,7 +373,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"साधारण"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"मध्यम"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"उच्च"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"श्रवणयंत्रे"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"श्रवणयंत्रे"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"नवीन डिव्हाइस पेअर करा"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"नवीन डिव्हाइस पेअर करण्यासाठी क्लिक करा"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"डिव्हाइसचा मायक्रोफोन अनब्लॉक करायचा आहे का?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"डिव्हाइसचा कॅमेरा अनब्लॉक करायचा आहे का?"</string>
@@ -430,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • वेगाने चार्ज होत आहे • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • हळू चार्ज होत आहे • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज होत आहे • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"सामुदायिक ट्यूटोरियल सुरू करण्यासाठी डावीकडे स्वाइप करा"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"कस्टमाइझ करा"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"डिसमिस करा"</string>
@@ -442,14 +458,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"काढून टाका"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"विजेट जोडा"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"पूर्ण झाले"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"विजेट जोडा"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"तुमचा टॅबलेट अनलॉक न करता तुमच्या आवडत्या ॲपची विजेट झटपट अ‍ॅक्सेस करा."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"लॉक स्क्रीनवर कोणत्याही विजेटला अनुमती द्यायची आहे का?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"सेटिंग्ज उघडा"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"वर्क ॲप्स पुन्हा सुरू करायची?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"पुन्हा सुरू करा"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"वापरकर्ता स्विच करा"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेनू"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"या सत्रातील सर्व अ‍ॅप्स आणि डेटा हटवला जाईल."</string>
@@ -674,7 +692,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिती&lt;/b&gt; ला थोडी कमी म्हणून रँक केले गेले"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"संभाषण नोटिफिकेशनच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"संभाषण सूचनांच्या वरती आणि लॉक स्क्रीनवरील प्रोफाइल फोटो म्हणून दिसते, बबल म्हणून दिसते, व्यत्यय आणू नका यामध्ये अडथळा आणते"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राधान्य"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे संभाषण वैशिष्ट्यांना सपोर्ट करत नाही"</string>
@@ -741,7 +759,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"कीबोर्ड लेआउट स्विच करा"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"किंवा"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"शोध क्वेरी साफ करा"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"शॉर्टकट"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"कीबोर्ड शॉर्टकट"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"शॉर्टकट शोधा"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"एकही शॉर्टकट आढळला नाहीत"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"सिस्टीम"</string>
@@ -753,7 +771,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"इनपुट शॉर्टकट दाखवत आहे"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"ॲप्स उघडणारे शॉर्टकट दाखवत आहे"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"सद्य अ‍ॅपसाठी शॉर्टकट दाखवत आहे"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"सूचना पहा"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"नोटिफिकेशन पहा"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"स्क्रीनशॉट घ्या"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"शॉर्टकट दाखवा"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"मागे जा"</string>
@@ -766,9 +784,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant उघडा"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"लॉक स्क्रीन"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"नोंद घ्या"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"सिस्टीम मल्टिटास्किंग"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"उजव्या बाजूला सध्याचे अ‍ॅप असलेल्या स्प्लिट स्क्रीनवर जा"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"डाव्या बाजूला सध्याचे अ‍ॅप असलेल्या स्प्लिट स्क्रीनवर जा"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"मल्टिटास्किंग"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"सद्य ॲप उजवीकडे ठेवून स्प्लिट स्क्रीन वापरा"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"सद्य ॲप डावीकडे ठेवून स्प्लिट स्क्रीन वापरा"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"स्प्लिट स्क्रीनवरून फुल स्क्रीनवर स्विच करा"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"स्प्लिट स्क्रीन वापरताना उजवीकडील किंवा खालील अ‍ॅपवर स्विच करा"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"स्प्लिट स्क्रीन वापरताना डावीकडील किंवा वरील अ‍ॅपवर स्विच करा"</string>

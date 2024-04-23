@@ -62,6 +62,27 @@
             "file_patterns": ["SensorPrivacyService\\.java"]
         },
         {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.SensitiveContentProtectionManagerServiceContentTest"
+                },
+                {
+                    "include-filter": "com.android.server.SensitiveContentProtectionManagerServiceNotificationTest"
+                }
+            ],
+            "file_patterns": ["SensitiveContentProtectionManagerService\\.java"]
+        },
+        {
+            "name": "FrameworksMockingServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.StorageManagerServiceTest"
+                }
+            ],
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
             "name": "FrameworksServicesTests",
             "options": [
                 {
@@ -163,6 +184,9 @@
                 }
             ],
             "file_patterns": ["PinnerService\\.java"]
+        },
+        {
+            "name": "SelinuxFrameworksTests"
         }
     ]
 }

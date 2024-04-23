@@ -97,6 +97,7 @@ import android.opengl.GLES10;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.IProgressListener;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
@@ -125,6 +126,8 @@ import com.android.server.LocalServices;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.am.nano.Capabilities;
 import com.android.server.am.nano.Capability;
+import com.android.server.am.nano.FrameworkCapability;
+import com.android.server.am.nano.VMCapability;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
@@ -171,6 +174,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private static final DateTimeFormatter LOG_NAME_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss", Locale.ROOT);
 
+    private static final String PROFILER_OUTPUT_VERSION_FLAG = "--profiler-output-version";
+
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
     final IActivityTaskManager mTaskInterface;
@@ -196,6 +201,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private String mAgent;  // Agent to attach on startup.
     private boolean mAttachAgentDuringBind;  // Whether agent should be attached late.
     private int mClockType; // Whether we need thread cpu / wall clock / both.
+    private int mProfilerOutputVersion; // The version of the profiler output.
     private int mDisplayId;
     private int mTaskDisplayAreaFeatureId;
     private int mWindowingMode;
@@ -443,6 +449,22 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 capabilities.values[i] = cap;
             }
 
+            String[] vmCapabilities = Debug.getVmFeatureList();
+            capabilities.vmCapabilities = new VMCapability[vmCapabilities.length];
+            for (int i = 0; i < vmCapabilities.length; i++) {
+                VMCapability cap = new VMCapability();
+                cap.name = vmCapabilities[i];
+                capabilities.vmCapabilities[i] = cap;
+            }
+
+            String[] fmCapabilities = Debug.getFeatureList();
+            capabilities.frameworkCapabilities = new FrameworkCapability[fmCapabilities.length];
+            for (int i = 0; i < fmCapabilities.length; i++) {
+                FrameworkCapability cap = new FrameworkCapability();
+                cap.name = fmCapabilities[i];
+                capabilities.frameworkCapabilities[i] = cap;
+            }
+
             try {
                 getRawOutputStream().write(Capabilities.toByteArray(capabilities));
             } catch (IOException e) {
@@ -452,9 +474,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } else {
             // Unfortunately we don't have protobuf text format capabilities here.
             // Fallback to line separated list instead for text parser.
-            pw.println("Format: 1");
+            pw.println("Format: 2");
             for (String capability : CAPABILITIES) {
                 pw.println(capability);
+            }
+            for (String capability : Debug.getVmFeatureList()) {
+                pw.println("vm:" + capability);
+            }
+            for (String capability : Debug.getFeatureList()) {
+                pw.println("framework:" + capability);
             }
         }
         return 0;
@@ -502,6 +530,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--clock-type")) {
                     String clock_type = getNextArgRequired();
                     mClockType = ProfilerInfo.getClockTypeFromString(clock_type);
+                } else if (opt.equals(PROFILER_OUTPUT_VERSION_FLAG)) {
+                    mProfilerOutputVersion = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--attach-agent")) {
@@ -554,7 +584,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--splashscreen-show-icon")) {
                     mShowSplashScreen = true;
                 } else if (opt.equals("--dismiss-keyguard-if-insecure")
-                      || opt.equals("--dismiss-keyguard")) {
+                        || opt.equals("--dismiss-keyguard")) {
                     mDismissKeyguardIfInsecure = true;
                 } else if (opt.equals("--allow-fgs-start-reason")) {
                     final int reasonCode = Integer.parseInt(getNextArgRequired());
@@ -667,8 +697,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                         return 1;
                     }
                 }
-                profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
-                        mStreaming, mAgent, mAttachAgentDuringBind, mClockType);
+                profilerInfo =
+                        new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop, mStreaming,
+                                mAgent, mAttachAgentDuringBind, mClockType, mProfilerOutputVersion);
             }
 
             pw.println("Starting: " + intent);
@@ -1011,6 +1042,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mSamplingInterval = 0;
         mStreaming = false;
         mClockType = ProfilerInfo.CLOCK_TYPE_DEFAULT;
+        mProfilerOutputVersion = ProfilerInfo.OUTPUT_VERSION_DEFAULT;
 
         String process = null;
 
@@ -1025,6 +1057,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--clock-type")) {
                     String clock_type = getNextArgRequired();
                     mClockType = ProfilerInfo.getClockTypeFromString(clock_type);
+                } else if (opt.equals(PROFILER_OUTPUT_VERSION_FLAG)) {
+                    mProfilerOutputVersion = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--sampling")) {
@@ -1072,7 +1106,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
             profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming,
-                    null, false, mClockType);
+                    null, false, mClockType, mProfilerOutputVersion);
         }
 
         if (!mInterface.profileControl(process, userId, start, profilerInfo, profileType)) {
@@ -1239,6 +1273,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PrintWriter err = getErrPrintWriter();
         boolean managed = true;
         boolean mallocInfo = false;
+        String dumpBitmaps = null;
         int userId = UserHandle.USER_CURRENT;
         boolean runGc = false;
 
@@ -1257,6 +1292,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             } else if (opt.equals("-m")) {
                 managed = false;
                 mallocInfo = true;
+            } else if (opt.equals("-b")) {
+                dumpBitmaps = getNextArg();
+                if (dumpBitmaps == null) {
+                    dumpBitmaps = "png"; // default to PNG in dumping bitmaps
+                }
             } else {
                 err.println("Error: Unknown option: " + opt);
                 return -1;
@@ -1288,8 +1328,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }, null);
 
-        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd,
-                finishCallback)) {
+        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, dumpBitmaps,
+                heapFile, fd, finishCallback)) {
             err.println("HEAP DUMP FAILED on process " + process);
             return -1;
         }
@@ -2554,7 +2594,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 "shell_runStopUser-" + userId + "-[stopUser]");
         try {
-            int res = mInterface.stopUser(userId, force, callback);
+            int res = mInterface.stopUserExceptCertainProfiles(
+                    userId, /* stopProfileRegardlessOfParent= */ force, callback);
             if (res != ActivityManager.USER_OP_SUCCESS) {
                 String txt = "";
                 switch (res) {
@@ -3974,8 +4015,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
             case "background_restricted":
                 return ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
-            case "hibernation":
-                return ActivityManager.RESTRICTION_LEVEL_HIBERNATION;
+            case "force_stopped":
+                return ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED;
+            case "user_launch_only":
+                return ActivityManager.RESTRICTION_LEVEL_USER_LAUNCH_ONLY;
+            case "custom":
+                return ActivityManager.RESTRICTION_LEVEL_CUSTOM;
             default:
                 return ActivityManager.RESTRICTION_LEVEL_UNKNOWN;
         }
@@ -4160,6 +4205,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Print this help text.");
             pw.println("  start-activity [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]");
             pw.println("          [--sampling INTERVAL] [--clock-type <TYPE>] [--streaming]");
+            pw.println("          [" + PROFILER_OUTPUT_VERSION_FLAG + " NUMBER]");
             pw.println("          [-R COUNT] [-S] [--track-allocation]");
             pw.println("          [--user <USER_ID> | current] [--suspend] <INTENT>");
             pw.println("      Start an Activity.  Options are:");
@@ -4175,6 +4221,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          The default value is dual. (use with --start-profiler)");
             pw.println("      --streaming: stream the profiling output to the specified file");
             pw.println("          (use with --start-profiler)");
+            pw.println("      " + PROFILER_OUTPUT_VERSION_FLAG + " Specify the version of the");
+            pw.println("          profiling output (use with --start-profiler)");
             pw.println("      -P <FILE>: like above, but profiling stops when app goes idle");
             pw.println("      --attach-agent <agent>: attach the given agent before binding");
             pw.println("      --attach-agent-bind <agent>: attach the given agent during binding");
@@ -4266,6 +4314,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --dump-file <FILE>: Specify the file the trace should be dumped to.");
             pw.println("  profile start [--user <USER_ID> current]");
             pw.println("          [--clock-type <TYPE>]");
+            pw.println("          [" + PROFILER_OUTPUT_VERSION_FLAG + " VERSION]");
             pw.println("          [--sampling INTERVAL | --streaming] <PROCESS> <FILE>");
             pw.println("      Start profiler on a process.  The given <PROCESS> argument");
             pw.println("        may be either a process name or pid.  Options are:");
@@ -4275,6 +4324,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --clock-type <TYPE>: use the specified clock to report timestamps.");
             pw.println("          The type can be one of wall | thread-cpu | dual. The default");
             pw.println("          value is dual.");
+            pw.println("      " + PROFILER_OUTPUT_VERSION_FLAG + "VERSION: specifies the output");
+            pw.println("          format version");
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples.");
             pw.println("      --streaming: stream the profiling output to the specified file.");
@@ -4284,11 +4335,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to profile; uses current user if not");
             pw.println("          specified.");
-            pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] <PROCESS> <FILE>");
+            pw.println("  dumpheap [--user <USER_ID> current] [-n] [-g] [-b <format>] ");
+            pw.println("           <PROCESS> <FILE>");
             pw.println("      Dump the heap of a process.  The given <PROCESS> argument may");
             pw.println("        be either a process name or pid.  Options are:");
             pw.println("      -n: dump native heap instead of managed heap");
             pw.println("      -g: force GC before dumping the heap");
+            pw.println("      -b <format>: dump contents of bitmaps in the format specified,");
+            pw.println("         which can be \"png\", \"jpg\" or \"webp\".");
             pw.println("      --user <USER_ID> | current: When supplying a process name,");
             pw.println("          specify user of process to dump; uses current user if not specified.");
             pw.println("  set-debug-app [-w] [--persistent] <PACKAGE>");
@@ -4385,7 +4439,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Stop execution of USER_ID, not allowing it to run any");
             pw.println("      code until a later explicit start or switch to it.");
             pw.println("      -w: wait for stop-user to complete.");
-            pw.println("      -f: force stop even if there are related users that cannot be stopped.");
+            pw.println("      -f: force stop, even if user has an unstoppable parent.");
             pw.println("  is-user-stopped <USER_ID>");
             pw.println("      Returns whether <USER_ID> has been stopped or not.");
             pw.println("  get-started-user-state <USER_ID>");

@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-#include "SkiaPipeline.h"
+#include "pipeline/skia/SkiaPipeline.h"
 
-#include <include/android/SkSurfaceAndroid.h>
-#include <include/gpu/ganesh/SkSurfaceGanesh.h>
-#include <include/encode/SkPngEncoder.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkColorSpace.h>
@@ -27,7 +24,6 @@
 #include <SkImageAndroid.h>
 #include <SkImageInfo.h>
 #include <SkMatrix.h>
-#include <SkMultiPictureDocument.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
@@ -40,6 +36,10 @@
 #include <SkTypeface.h>
 #include <android-base/properties.h>
 #include <gui/TraceUtils.h>
+#include <include/android/SkSurfaceAndroid.h>
+#include <include/docs/SkMultiPictureDocument.h>
+#include <include/encode/SkPngEncoder.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <unistd.h>
 
 #include <sstream>
@@ -62,35 +62,11 @@ SkiaPipeline::SkiaPipeline(RenderThread& thread) : mRenderThread(thread) {
     setSurfaceColorProperties(mColorMode);
 }
 
-SkiaPipeline::~SkiaPipeline() {
-    unpinImages();
-}
+SkiaPipeline::~SkiaPipeline() {}
 
 void SkiaPipeline::onDestroyHardwareResources() {
     unpinImages();
     mRenderThread.cacheManager().trimStaleResources();
-}
-
-bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
-    if (!mRenderThread.getGrContext()) {
-        ALOGD("Trying to pin an image with an invalid GrContext");
-        return false;
-    }
-    for (SkImage* image : mutableImages) {
-        if (skgpu::ganesh::PinAsTexture(mRenderThread.getGrContext(), image)) {
-            mPinnedImages.emplace_back(sk_ref_sp(image));
-        } else {
-            return false;
-        }
-    }
-    return true;
-}
-
-void SkiaPipeline::unpinImages() {
-    for (auto& image : mPinnedImages) {
-        skgpu::ganesh::UnpinTexture(mRenderThread.getGrContext(), image.get());
-    }
-    mPinnedImages.clear();
 }
 
 void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
@@ -102,136 +78,48 @@ void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
     layerUpdateQueue->clear();
 }
 
-void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
-    sk_sp<GrDirectContext> cachedContext;
-
-    // Render all layers that need to be updated, in order.
-    for (size_t i = 0; i < layers.entries().size(); i++) {
-        RenderNode* layerNode = layers.entries()[i].renderNode.get();
-        // only schedule repaint if node still on layer - possible it may have been
-        // removed during a dropped frame, but layers may still remain scheduled so
-        // as not to lose info on what portion is damaged
-        if (CC_UNLIKELY(layerNode->getLayerSurface() == nullptr)) {
-            continue;
-        }
-        SkASSERT(layerNode->getLayerSurface());
-        SkiaDisplayList* displayList = layerNode->getDisplayList().asSkiaDl();
-        if (!displayList || displayList->isEmpty()) {
-            ALOGE("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName());
-            return;
-        }
-
-        const Rect& layerDamage = layers.entries()[i].damage;
-
-        SkCanvas* layerCanvas = layerNode->getLayerSurface()->getCanvas();
-
-        int saveCount = layerCanvas->save();
-        SkASSERT(saveCount == 1);
-
-        layerCanvas->androidFramework_setDeviceClipRestriction(layerDamage.toSkIRect());
-
-        // TODO: put localized light center calculation and storage to a drawable related code.
-        // It does not seem right to store something localized in a global state
-        // fix here and in recordLayers
-        const Vector3 savedLightCenter(LightingInfo::getLightCenterRaw());
-        Vector3 transformedLightCenter(savedLightCenter);
-        // map current light center into RenderNode's coordinate space
-        layerNode->getSkiaLayer()->inverseTransformInWindow.mapPoint3d(transformedLightCenter);
-        LightingInfo::setLightCenterRaw(transformedLightCenter);
-
-        const RenderProperties& properties = layerNode->properties();
-        const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
-        if (properties.getClipToBounds() && layerCanvas->quickReject(bounds)) {
-            return;
-        }
-
-        ATRACE_FORMAT("drawLayer [%s] %.1f x %.1f", layerNode->getName(), bounds.width(),
-                      bounds.height());
-
-        layerNode->getSkiaLayer()->hasRenderedSinceRepaint = false;
-        layerCanvas->clear(SK_ColorTRANSPARENT);
-
-        RenderNodeDrawable root(layerNode, layerCanvas, false);
-        root.forceDraw(layerCanvas);
-        layerCanvas->restoreToCount(saveCount);
-
-        LightingInfo::setLightCenterRaw(savedLightCenter);
-
-        // cache the current context so that we can defer flushing it until
-        // either all the layers have been rendered or the context changes
-        GrDirectContext* currentContext =
-            GrAsDirectContext(layerNode->getLayerSurface()->getCanvas()->recordingContext());
-        if (cachedContext.get() != currentContext) {
-            if (cachedContext.get()) {
-                ATRACE_NAME("flush layers (context changed)");
-                cachedContext->flushAndSubmit();
-            }
-            cachedContext.reset(SkSafeRef(currentContext));
-        }
+bool SkiaPipeline::renderLayerImpl(RenderNode* layerNode, const Rect& layerDamage) {
+    SkASSERT(layerNode->getLayerSurface());
+    SkiaDisplayList* displayList = layerNode->getDisplayList().asSkiaDl();
+    if (!displayList || displayList->isEmpty()) {
+        ALOGE("%p drawLayers(%s) : missing drawable", layerNode, layerNode->getName());
+        return false;
     }
 
-    if (cachedContext.get()) {
-        ATRACE_NAME("flush layers");
-        cachedContext->flushAndSubmit();
-    }
-}
+    SkCanvas* layerCanvas = layerNode->getLayerSurface()->getCanvas();
 
-bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                                       ErrorHandler* errorHandler) {
-    // compute the size of the surface (i.e. texture) to be allocated for this layer
-    const int surfaceWidth = ceilf(node->getWidth() / float(LAYER_SIZE)) * LAYER_SIZE;
-    const int surfaceHeight = ceilf(node->getHeight() / float(LAYER_SIZE)) * LAYER_SIZE;
+    int saveCount = layerCanvas->save();
+    SkASSERT(saveCount == 1);
 
-    SkSurface* layer = node->getLayerSurface();
-    if (!layer || layer->width() != surfaceWidth || layer->height() != surfaceHeight) {
-        SkImageInfo info;
-        info = SkImageInfo::Make(surfaceWidth, surfaceHeight, getSurfaceColorType(),
-                                 kPremul_SkAlphaType, getSurfaceColorSpace());
-        SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
-        SkASSERT(mRenderThread.getGrContext() != nullptr);
-        node->setLayerSurface(SkSurfaces::RenderTarget(mRenderThread.getGrContext(),
-                                                       skgpu::Budgeted::kYes, info, 0,
-                                                       this->getSurfaceOrigin(), &props));
-        if (node->getLayerSurface()) {
-            // update the transform in window of the layer to reset its origin wrt light source
-            // position
-            Matrix4 windowTransform;
-            damageAccumulator.computeCurrentTransform(&windowTransform);
-            node->getSkiaLayer()->inverseTransformInWindow.loadInverse(windowTransform);
-        } else {
-            String8 cachesOutput;
-            mRenderThread.cacheManager().dumpMemoryUsage(cachesOutput,
-                                                         &mRenderThread.renderState());
-            ALOGE("%s", cachesOutput.c_str());
-            if (errorHandler) {
-                std::ostringstream err;
-                err << "Unable to create layer for " << node->getName();
-                const int maxTextureSize = DeviceInfo::get()->maxTextureSize();
-                err << ", size " << info.width() << "x" << info.height() << " max size "
-                    << maxTextureSize << " color type " << (int)info.colorType() << " has context "
-                    << (int)(mRenderThread.getGrContext() != nullptr);
-                errorHandler->onError(err.str());
-            }
-        }
-        return true;
-    }
-    return false;
-}
+    layerCanvas->androidFramework_setDeviceClipRestriction(layerDamage.toSkIRect());
 
-void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
-    GrDirectContext* context = thread.getGrContext();
-    if (context && !bitmap->isHardware()) {
-        ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
-        auto image = bitmap->makeImage();
-        if (image.get()) {
-            skgpu::ganesh::PinAsTexture(context, image.get());
-            skgpu::ganesh::UnpinTexture(context, image.get());
-            // A submit is necessary as there may not be a frame coming soon, so without a call
-            // to submit these texture uploads can just sit in the queue building up until
-            // we run out of RAM
-            context->flushAndSubmit();
-        }
+    // TODO: put localized light center calculation and storage to a drawable related code.
+    // It does not seem right to store something localized in a global state
+    // fix here and in recordLayers
+    const Vector3 savedLightCenter(LightingInfo::getLightCenterRaw());
+    Vector3 transformedLightCenter(savedLightCenter);
+    // map current light center into RenderNode's coordinate space
+    layerNode->getSkiaLayer()->inverseTransformInWindow.mapPoint3d(transformedLightCenter);
+    LightingInfo::setLightCenterRaw(transformedLightCenter);
+
+    const RenderProperties& properties = layerNode->properties();
+    const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());
+    if (properties.getClipToBounds() && layerCanvas->quickReject(bounds)) {
+        return false;
     }
+
+    ATRACE_FORMAT("drawLayer [%s] %.1f x %.1f", layerNode->getName(), bounds.width(),
+                  bounds.height());
+
+    layerNode->getSkiaLayer()->hasRenderedSinceRepaint = false;
+    layerCanvas->clear(SK_ColorTRANSPARENT);
+
+    RenderNodeDrawable root(layerNode, layerCanvas, false);
+    root.forceDraw(layerCanvas);
+    layerCanvas->restoreToCount(saveCount);
+
+    LightingInfo::setLightCenterRaw(savedLightCenter);
+    return true;
 }
 
 static void savePictureAsync(const sk_sp<SkData>& data, const std::string& filename) {
@@ -297,7 +185,7 @@ bool SkiaPipeline::setupMultiFrameCapture() {
         // we need to keep it until after mMultiPic.close()
         // procs is passed as a pointer, but just as a method of having an optional default.
         // procs doesn't need to outlive this Make call.
-        mMultiPic = SkMakeMultiPictureDocument(mOpenMultiPicStream.get(), &procs,
+        mMultiPic = SkMultiPictureDocument::Make(mOpenMultiPicStream.get(), &procs,
             [sharingCtx = mSerialContext.get()](const SkPicture* pic) {
                     SkSharingSerialContext::collectNonTextureImagesFromPicture(pic, sharingCtx);
             });
@@ -597,45 +485,6 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
             }
         }
     }
-}
-
-void SkiaPipeline::dumpResourceCacheUsage() const {
-    int resources;
-    size_t bytes;
-    mRenderThread.getGrContext()->getResourceCacheUsage(&resources, &bytes);
-    size_t maxBytes = mRenderThread.getGrContext()->getResourceCacheLimit();
-
-    SkString log("Resource Cache Usage:\n");
-    log.appendf("%8d items\n", resources);
-    log.appendf("%8zu bytes (%.2f MB) out of %.2f MB maximum\n", bytes,
-                bytes * (1.0f / (1024.0f * 1024.0f)), maxBytes * (1.0f / (1024.0f * 1024.0f)));
-
-    ALOGD("%s", log.c_str());
-}
-
-void SkiaPipeline::setHardwareBuffer(AHardwareBuffer* buffer) {
-    if (mHardwareBuffer) {
-        AHardwareBuffer_release(mHardwareBuffer);
-        mHardwareBuffer = nullptr;
-    }
-
-    if (buffer) {
-        AHardwareBuffer_acquire(buffer);
-        mHardwareBuffer = buffer;
-    }
-}
-
-sk_sp<SkSurface> SkiaPipeline::getBufferSkSurface(
-        const renderthread::HardwareBufferRenderParams& bufferParams) {
-    auto bufferColorSpace = bufferParams.getColorSpace();
-    if (mBufferSurface == nullptr || mBufferColorSpace == nullptr ||
-        !SkColorSpace::Equals(mBufferColorSpace.get(), bufferColorSpace.get())) {
-        mBufferSurface = SkSurfaces::WrapAndroidHardwareBuffer(
-                mRenderThread.getGrContext(), mHardwareBuffer, kTopLeft_GrSurfaceOrigin,
-                bufferColorSpace, nullptr, true);
-        mBufferColorSpace = bufferColorSpace;
-    }
-    return mBufferSurface;
 }
 
 void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {

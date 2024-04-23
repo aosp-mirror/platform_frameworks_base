@@ -44,11 +44,12 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
+import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import javax.inject.Provider
@@ -83,7 +84,6 @@ constructor(
     private val repository: KeyguardRepository,
     private val commandQueue: CommandQueue,
     powerInteractor: PowerInteractor,
-    sceneContainerFlags: SceneContainerFlags,
     bouncerRepository: KeyguardBouncerRepository,
     configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
@@ -192,7 +192,7 @@ constructor(
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
 
     /** Whether the keyguard is dismissible or not. */
-    val isKeyguardDismissible: Flow<Boolean> = repository.isKeyguardDismissible
+    val isKeyguardDismissible: StateFlow<Boolean> = repository.isKeyguardDismissible
 
     /** Whether the keyguard is occluded (covered by an activity). */
     @Deprecated("Use KeyguardTransitionInteractor + KeyguardState.OCCLUDED")
@@ -209,7 +209,8 @@ constructor(
                 keyguardTransitionInteractor
                     .transitionValue(GONE)
                     .map { it == 1f }
-                    .onStart { emit(false) },
+                    .onStart { emit(false) }
+                    .distinctUntilChanged(),
                 repository.topClippingBounds
             ) { _, isGone, topClippingBounds ->
                 if (!isGone) {
@@ -279,12 +280,16 @@ constructor(
      * signal should be sent directly to transitions.
      */
     val dismissAlpha: Flow<Float?> =
-        combine(
-                shadeRepository.legacyShadeExpansion,
+        shadeRepository.legacyShadeExpansion
+            .filter { it < 1f }
+            .sampleCombine(
                 statusBarState,
                 keyguardTransitionInteractor.currentKeyguardState,
                 isKeyguardDismissible,
-            ) { legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible ->
+            )
+            .map {
+                (legacyShadeExpansion, statusBarState, currentKeyguardState, isKeyguardDismissible)
+                ->
                 if (
                     statusBarState == StatusBarState.KEYGUARD &&
                         isKeyguardDismissible &&
@@ -325,7 +330,7 @@ constructor(
 
     /** Whether to animate the next doze mode transition. */
     val animateDozingTransitions: Flow<Boolean> by lazy {
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled) {
             sceneInteractorProvider
                 .get()
                 .transitioningTo

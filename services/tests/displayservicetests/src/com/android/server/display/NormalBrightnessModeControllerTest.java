@@ -43,6 +43,11 @@ public class NormalBrightnessModeControllerTest {
 
     private final NormalBrightnessModeController mController = new NormalBrightnessModeController();
 
+    // AutoBrightnessController sends ambientLux values *only* when auto brightness enabled.
+    // NormalBrightnessModeController is temporary disabled  if auto brightness is off,
+    // to avoid capping brightness based on stale ambient lux. Temporary disabling tests with
+    // auto brightness off and default config pres
+    // The issue is tracked here: b/322445088
     @Keep
     private static Object[][] brightnessData() {
         return new Object[][]{
@@ -59,10 +64,10 @@ public class NormalBrightnessModeControllerTest {
                         ImmutableMap.of(99f, 0.1f, 101f, 0.2f)
                 ), 0.2f},
                 // Auto brightness - off, config only for default
-                {100, AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED, ImmutableMap.of(
-                        BrightnessLimitMapType.DEFAULT,
-                        ImmutableMap.of(99f, 0.1f, 101f, 0.2f)
-                ), 0.2f},
+                // {100, AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED, ImmutableMap.of(
+                //        BrightnessLimitMapType.DEFAULT,
+                //        ImmutableMap.of(99f, 0.1f, 101f, 0.2f)
+                // ), 0.2f},
                 // Auto brightness - off, config only for adaptive
                 {100, AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED, ImmutableMap.of(
                         BrightnessLimitMapType.ADAPTIVE,
@@ -81,12 +86,12 @@ public class NormalBrightnessModeControllerTest {
                         ImmutableMap.of(99f, 0.3f, 101f, 0.4f)
                 ), 0.4f},
                 // Auto brightness - off, config for both
-                {100, AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED, ImmutableMap.of(
-                        BrightnessLimitMapType.DEFAULT,
-                        ImmutableMap.of(99f, 0.1f, 101f, 0.2f),
-                        BrightnessLimitMapType.ADAPTIVE,
-                        ImmutableMap.of(99f, 0.3f, 101f, 0.4f)
-                ), 0.2f},
+                // {100, AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED, ImmutableMap.of(
+                //        BrightnessLimitMapType.DEFAULT,
+                //        ImmutableMap.of(99f, 0.1f, 101f, 0.2f),
+                //        BrightnessLimitMapType.ADAPTIVE,
+                //        ImmutableMap.of(99f, 0.3f, 101f, 0.4f)
+                // ), 0.2f},
                 // Auto brightness - on, config for both, ambient high
                 {1000, AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED, ImmutableMap.of(
                         BrightnessLimitMapType.DEFAULT,

@@ -27,8 +27,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
  */
 @SysUISingleton
 class NotificationPlaceholderRepository @Inject constructor() {
-    /** The bounds of the notification shade scrim / container in the current scene. */
-    val shadeScrimBounds = MutableStateFlow(ShadeScrimBounds())
+    /**
+     * The bounds of the notification shade scrim / container in the current scene.
+     *
+     * When `null`, clipping should not be applied to notifications.
+     */
+    val shadeScrimBounds = MutableStateFlow<ShadeScrimBounds?>(null)
 
     /**
      * The y-coordinate in px of top of the contents of the notification stack. This value can be
@@ -44,7 +48,7 @@ class NotificationPlaceholderRepository @Inject constructor() {
     val headsUpTop = MutableStateFlow(0f)
 
     /** height made available to the notifications in the size-constrained mode of lock screen. */
-    val constrainedAvailableSpace = MutableStateFlow(0f)
+    val constrainedAvailableSpace = MutableStateFlow(0)
 
     /**
      * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any

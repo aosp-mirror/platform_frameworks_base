@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktívne, iba ľavá strana"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktívne, iba pravá strana"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktívne, ľavá aj pravá strana"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktívne (iba médiá), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktívne (iba médiá), Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batérie, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batérie"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Pripojené (podporuje zdieľanie zvuku), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Pripojené (podporuje zdieľanie zvuku), Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batérie, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batérie"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Pripojené (podporuje zdieľanie zvuku), ľavá strana: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Pripojené (podporuje zdieľanie zvuku), pravá strana: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktívne (iba médiá)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Podporuje zdieľanie zvuku"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktívne (iba médiá), iba ľavá strana"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktívne (iba médiá), iba pravá strana"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktívne (iba médiá), ľavá aj pravá strana"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Zvuk médií"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonické hovory"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenos súborov"</string>
@@ -476,17 +487,29 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do úplného nabitia"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Nabíjanie je optimalizované"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – nabíja sa"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Neznáme"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nabíja sa"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Rýchle nabíjanie"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Pomalé nabíjanie"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Nabíja sa bezdrôtovo"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bezdrôtové nabíjanie"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Nabíja sa"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenabíja sa"</string>
     <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Pripojené, ale nenabíja sa"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Nabité"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Úplne nabitá"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Nabíjanie je pozastavené"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Ovládané správcom"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Ovládané obmedzeným nastavením"</string>
     <string name="disabled" msgid="8017887509554714950">"Deaktivované"</string>
@@ -533,7 +556,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Budíky a pripomenutia"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Povoliť nastavovanie budíkov a pripomenutí"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Budíky a pripomenutia"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Povoľte tejto aplikácii nastavovať budíky a plánovať akcie s časovým obmedzením. Aplikácii to umožní pracovať na pozadí, čo môže zvýšiť spotrebu batérie.\n\nAk je toto povolenie vypnuté, existujúce budíky a udalosti s časovým obmedzením naplánované touto aplikáciu nebudú fungovať."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Povoľte tejto aplikácii nastavovať budíky a plánovať akcie s časovým obmedzením. Aplikácii to umožní pracovať na pozadí, čo môže zvýšiť spotrebu batérie.\n\nAk je toto povolenie vypnuté, existujúce budíky a udalosti s časovým obmedzením naplánované touto aplikáciou nebudú fungovať."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plán, budík, pripomenutie, hodiny"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Zapnúť"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Zapnite režim bez vyrušení"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Pri ukončení sa všetka aktivita odstráni"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Aktivitu môžete pri ukončení uložiť alebo odstrániť"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Resetovaním ihneď odstránite aktivitu relácie alebo ju uložte či odstráňte pri ukončení relácie"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Odfotiť"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Vybrať obrázok"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Vybrať fotku"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Príliš veľa chybných pokusov. Údaje tohto zariadenia budú odstránené."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Príliš veľa chybných pokusov. Tento používateľ bude odobraný."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Jeden stĺpec signálu telefónnej siete."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Dve čiarky signálu telefónnej siete."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Tri čiarky signálu telefónnej siete."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Plný signál telefónnej siete."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Žiadna dátová sieť."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Jedna čiarka signálu dátovej siete."</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Sieť ethernet je odpojená"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Žiadne volanie."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Výber profilovej fotky"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Predvolená ikona používateľa"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fyzická klávesnica"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Vyberte rozloženie klávesnice"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predvolené"</string>

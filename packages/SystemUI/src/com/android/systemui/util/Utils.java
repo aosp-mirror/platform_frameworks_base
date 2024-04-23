@@ -128,7 +128,10 @@ public class Utils {
 
     /**
      * Gets the {@link R.dimen#status_bar_header_height_keyguard}.
+     *
+     * @deprecated Prefer SystemBarUtilsState or SystemBarUtilsProxy
      */
+    @Deprecated
     public static int getStatusBarHeaderHeightKeyguard(Context context) {
         final int statusBarHeight = SystemBarUtils.getStatusBarHeight(context);
         final DisplayCutout cutout = context.getDisplay().getCutout();

@@ -173,7 +173,7 @@ public class AudioDeviceInventory {
                 if (ads.getAudioDeviceCategory() != category && (userDefined
                         || category != AUDIO_DEVICE_CATEGORY_UNKNOWN)) {
                     ads.setAudioDeviceCategory(category);
-                    mDeviceBroker.postUpdatedAdiDeviceState(ads);
+                    mDeviceBroker.postUpdatedAdiDeviceState(ads, false /*initSA*/);
                     mDeviceBroker.postPersistAudioDeviceSettings();
                 }
                 mDeviceBroker.postSynchronizeAdiDevicesInInventory(ads);
@@ -186,7 +186,7 @@ public class AudioDeviceInventory {
             mDeviceInventory.put(ads.getDeviceId(), ads);
             checkDeviceInventorySize_l();
 
-            mDeviceBroker.postUpdatedAdiDeviceState(ads);
+            mDeviceBroker.postUpdatedAdiDeviceState(ads, true /*initSA*/);
             mDeviceBroker.postPersistAudioDeviceSettings();
         }
     }
@@ -216,7 +216,7 @@ public class AudioDeviceInventory {
             checkDeviceInventorySize_l();
         }
         if (updatedCategory.get()) {
-            mDeviceBroker.postUpdatedAdiDeviceState(deviceState);
+            mDeviceBroker.postUpdatedAdiDeviceState(deviceState, false /*initSA*/);
         }
         mDeviceBroker.postSynchronizeAdiDevicesInInventory(deviceState);
     }
@@ -318,7 +318,7 @@ public class AudioDeviceInventory {
                     }
                     ads2.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
-                    mDeviceBroker.postUpdatedAdiDeviceState(ads2);
+                    mDeviceBroker.postUpdatedAdiDeviceState(ads2, false /*initSA*/);
                     AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                             "synchronizeBleDeviceInInventory synced device pair ads1="
                                     + updatedDevice + " ads2=" + ads2).printLog(TAG));
@@ -339,7 +339,7 @@ public class AudioDeviceInventory {
                     }
                     ads2.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
-                    mDeviceBroker.postUpdatedAdiDeviceState(ads2);
+                    mDeviceBroker.postUpdatedAdiDeviceState(ads2, false /*initSA*/);
                     AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                             "synchronizeBleDeviceInInventory synced device pair ads1="
                                     + updatedDevice + " peer ads2=" + ads2).printLog(TAG));
@@ -364,7 +364,7 @@ public class AudioDeviceInventory {
             }
             ads.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
-            mDeviceBroker.postUpdatedAdiDeviceState(ads);
+            mDeviceBroker.postUpdatedAdiDeviceState(ads, false /*initSA*/);
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                     "synchronizeDeviceProfilesInInventory synced device pair ads1="
                             + updatedDevice + " ads2=" + ads).printLog(TAG));
@@ -868,7 +868,8 @@ public class AudioDeviceInventory {
     @GuardedBy("mDeviceBroker.mDeviceStateLock")
     /*package*/ void onBluetoothDeviceConfigChange(
             @NonNull AudioDeviceBroker.BtDeviceInfo btInfo,
-            @AudioSystem.AudioFormatNativeEnumForBtCodec int codec, int event) {
+            @AudioSystem.AudioFormatNativeEnumForBtCodec int codec,
+            boolean codecChanged, int event) {
         MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId
                 + "onBluetoothDeviceConfigChange")
                 .set(MediaMetrics.Property.EVENT, BtHelper.deviceEventToString(event));
@@ -916,14 +917,12 @@ public class AudioDeviceInventory {
 
 
             if (event == BtHelper.EVENT_DEVICE_CONFIG_CHANGE) {
-                boolean codecChange = false;
                 if (btInfo.mProfile == BluetoothProfile.A2DP
                         || btInfo.mProfile == BluetoothProfile.LE_AUDIO
                         || btInfo.mProfile == BluetoothProfile.LE_AUDIO_BROADCAST) {
-                    if (di.mDeviceCodecFormat != codec) {
+                    if (codecChanged) {
                         di.mDeviceCodecFormat = codec;
                         mConnectedDevices.replace(key, di);
-                        codecChange = true;
                         final int res = mAudioSystem.handleDeviceConfigChange(
                                 btInfo.mAudioSystemDevice, address,
                                 BtHelper.getName(btDevice), codec);
@@ -947,7 +946,7 @@ public class AudioDeviceInventory {
                         }
                     }
                 }
-                if (!codecChange) {
+                if (!codecChanged) {
                     updateBluetoothPreferredModes_l(btDevice /*connectedDevice*/);
                 }
             }
@@ -988,9 +987,9 @@ public class AudioDeviceInventory {
                     }
                     if (di.mPeerDeviceAddress.equals("")) {
                         for (Pair<String, String> addr : addresses) {
-                            if (!addr.first.equals(di.mDeviceAddress)) {
-                                di.mPeerDeviceAddress = addr.first;
-                                di.mPeerIdentityDeviceAddress = addr.second;
+                            if (!di.mDeviceAddress.equals(addr.first)) {
+                                di.mPeerDeviceAddress = TextUtils.emptyIfNull(addr.first);
+                                di.mPeerIdentityDeviceAddress = TextUtils.emptyIfNull(addr.second);
                                 break;
                             }
                         }
@@ -1001,8 +1000,8 @@ public class AudioDeviceInventory {
                     }
                     if (di.mDeviceIdentityAddress.equals("")) {
                         for (Pair<String, String> addr : addresses) {
-                            if (addr.first.equals(di.mDeviceAddress)) {
-                                di.mDeviceIdentityAddress = addr.second;
+                            if (di.mDeviceAddress.equals(addr.first)) {
+                                di.mDeviceIdentityAddress = TextUtils.emptyIfNull(addr.second);
                                 break;
                             }
                         }

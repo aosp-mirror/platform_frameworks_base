@@ -16,9 +16,13 @@
 
 package com.android.server.wm.flicker.activityembedding.rotation
 
+import android.graphics.Rect
 import android.platform.test.annotations.Presubmit
+import android.tools.Position
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import android.tools.traces.Condition
+import android.tools.traces.DeviceStateDump
 import android.tools.traces.component.ComponentNameMatcher
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.setRotation
@@ -30,7 +34,14 @@ abstract class RotationTransition(flicker: LegacyFlickerTest) : ActivityEmbeddin
     override val transition: FlickerBuilder.() -> Unit = {
         setup { this.setRotation(flicker.scenario.startRotation) }
         teardown { testApp.exit(wmHelper) }
-        transitions { this.setRotation(flicker.scenario.endRotation) }
+        transitions {
+            this.setRotation(flicker.scenario.endRotation)
+            if (!flicker.scenario.isTablet) {
+                wmHelper.StateSyncBuilder()
+                    .add(navBarInPosition(flicker.scenario.isGesturalNavigation))
+                    .waitForAndVerify()
+            }
+        }
     }
 
     /** {@inheritDoc} */
@@ -75,5 +86,38 @@ abstract class RotationTransition(flicker: LegacyFlickerTest) : ActivityEmbeddin
         super.cujCompleted()
         appLayerRotates_StartingPos()
         appLayerRotates_EndingPos()
+    }
+
+    private fun navBarInPosition(isGesturalNavigation: Boolean): Condition<DeviceStateDump> {
+        return Condition("navBarPosition") { dump ->
+            val display =
+                dump.layerState.displays.filterNot { it.isOff }.minByOrNull { it.id }
+                    ?: error("There is no display!")
+            val displayArea = display.layerStackSpace
+            val navBarPosition = display.navBarPosition(isGesturalNavigation)
+            val navBarRegion = dump.layerState
+                .getLayerWithBuffer(ComponentNameMatcher.NAV_BAR)
+                ?.visibleRegion?.bounds ?: Rect()
+
+            when (navBarPosition) {
+                Position.TOP ->
+                    navBarRegion.top == displayArea.top &&
+                        navBarRegion.left == displayArea.left &&
+                        navBarRegion.right == displayArea.right
+                Position.BOTTOM ->
+                    navBarRegion.bottom == displayArea.bottom &&
+                        navBarRegion.left == displayArea.left &&
+                        navBarRegion.right == displayArea.right
+                Position.LEFT ->
+                    navBarRegion.left == displayArea.left &&
+                        navBarRegion.top == displayArea.top &&
+                        navBarRegion.bottom == displayArea.bottom
+                Position.RIGHT ->
+                    navBarRegion.right == displayArea.right &&
+                        navBarRegion.top == displayArea.top &&
+                        navBarRegion.bottom == displayArea.bottom
+                else -> error("Unknown position $navBarPosition")
+            }
+        }
     }
 }

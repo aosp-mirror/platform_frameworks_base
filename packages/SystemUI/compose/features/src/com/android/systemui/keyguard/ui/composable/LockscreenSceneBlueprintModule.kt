@@ -17,10 +17,7 @@
 package com.android.systemui.keyguard.ui.composable
 
 import com.android.systemui.keyguard.ui.composable.blueprint.CommunalBlueprintModule
-import com.android.systemui.keyguard.ui.composable.blueprint.DefaultBlueprintModule
 import com.android.systemui.keyguard.ui.composable.blueprint.ShortcutsBesideUdfpsBlueprintModule
-import com.android.systemui.keyguard.ui.composable.blueprint.SplitShadeWeatherClockBlueprintModule
-import com.android.systemui.keyguard.ui.composable.blueprint.WeatherClockBlueprintModule
 import com.android.systemui.keyguard.ui.composable.section.OptionalSectionModule
 import dagger.Module
 
@@ -28,11 +25,8 @@ import dagger.Module
     includes =
         [
             CommunalBlueprintModule::class,
-            DefaultBlueprintModule::class,
             OptionalSectionModule::class,
             ShortcutsBesideUdfpsBlueprintModule::class,
-            SplitShadeWeatherClockBlueprintModule::class,
-            WeatherClockBlueprintModule::class,
         ],
 )
 interface LockscreenSceneBlueprintModule

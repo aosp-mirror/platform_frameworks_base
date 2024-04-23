@@ -22,6 +22,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
@@ -34,7 +35,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 /**
  * Binds a keyguard indication area view to its view-model.
@@ -66,7 +66,7 @@ object KeyguardIndicationAreaBinder {
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch {
+                    launch("$TAG#viewModel.alpha") {
                         // Do not independently apply alpha, as [KeyguardRootViewModel] should work
                         // for this and all its children
                         if (
@@ -77,13 +77,13 @@ object KeyguardIndicationAreaBinder {
                         }
                     }
 
-                    launch {
+                    launch("$TAG#viewModel.indicationAreaTranslationX") {
                         viewModel.indicationAreaTranslationX.collect { translationX ->
                             view.translationX = translationX
                         }
                     }
 
-                    launch {
+                    launch("$TAG#viewModel.isIndicationAreaPadded") {
                         combine(
                                 viewModel.isIndicationAreaPadded,
                                 configurationBasedDimensions.map { it.indicationAreaPaddingPx },
@@ -97,7 +97,7 @@ object KeyguardIndicationAreaBinder {
                             .collect { paddingPx -> view.setPadding(paddingPx, 0, paddingPx, 0) }
                     }
 
-                    launch {
+                    launch("$TAG#viewModel.indicationAreaTranslationY") {
                         configurationBasedDimensions
                             .map { it.defaultBurnInPreventionYOffsetPx }
                             .flatMapLatest { defaultBurnInOffsetY ->
@@ -106,7 +106,7 @@ object KeyguardIndicationAreaBinder {
                             .collect { translationY -> view.translationY = translationY }
                     }
 
-                    launch {
+                    launch("$TAG#indicationText.setTextSize") {
                         configurationBasedDimensions.collect { dimensions ->
                             indicationText.setTextSize(
                                 TypedValue.COMPLEX_UNIT_PX,
@@ -119,7 +119,7 @@ object KeyguardIndicationAreaBinder {
                         }
                     }
 
-                    launch {
+                    launch("$TAG#viewModel.configurationChange") {
                         viewModel.configurationChange.collect {
                             configurationBasedDimensions.value = loadFromResources(view)
                         }
@@ -147,4 +147,6 @@ object KeyguardIndicationAreaBinder {
         val indicationAreaPaddingPx: Int,
         val indicationTextSizePx: Int,
     )
+
+    private const val TAG = "KeyguardIndicationAreaBinder"
 }

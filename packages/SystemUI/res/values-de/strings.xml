@@ -198,7 +198,7 @@
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Entsperrung per Gesichtserkennung neu einrichten"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Entsperrung per Gesichtserkennung"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Entsperrung per Gesichtserkennung einrichten"</string>
-    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Wenn du die Entsperrung per Gesichtserkennung neu einrichtest, wird dein aktuelles Gesichtsmodell gelöscht.\n\nDu musst diese Funktion neu einrichten, damit du dein Smartphone weiterhin mit deinem Gesicht entsperren kannst."</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Wenn du die Entsperrung per Gesichtserkennung neu einrichtest, wird dein aktuelles Gesichtsmodell gelöscht.\n\nDu musst diese Funktion neu einrichten, damit du dein Smartphone weiterhin mithilfe der Gesichtserkennung entsperren kannst."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Die Entsperrung per Gesichtserkennung konnte nicht eingerichtet werden. Gehe zu den Einstellungen und versuche es noch einmal."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Berühre den Fingerabdrucksensor"</string>
     <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Tippe zum Fortfahren auf das Symbol „Entsperren“"</string>
@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Benachrichtigungsleiste"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Schnelleinstellungen"</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Schnelleinstellungen und Benachrichtigungsleiste."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Sperrbildschirm"</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Sperrbildschirm für Arbeitsprofil"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Schließen"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"lautlos"</string>
@@ -270,12 +271,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Alle anzeigen"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth verwenden"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Verbunden"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gespeichert"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"Verknüpfung aufheben"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivieren"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Morgen automatisch wieder aktivieren"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Für Funktionen wie Quick Share, „Mein Gerät finden“ und den Gerätestandort wird Bluetooth verwendet"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth wird morgen um 5:00 Uhr aktiviert"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Akkustand: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -329,7 +338,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Geschäftliche Apps"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"Pausiert"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Nachtlicht"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An bei Sonnenuntergang"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"An: Sonnenuntergang"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"Bis Sonnenaufgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"An um <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"Bis <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -350,6 +359,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Problem aufnehmen"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Aufnahme starten"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Aufnahme beenden"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Fehlerbericht"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Welche Bereiche des Geräts waren betroffen?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Art des Problems auswählen"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Bildschirmaufnahme"</string>
@@ -363,7 +373,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Mittel"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Hoch"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Hörgeräte"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Hörgeräte"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Neues Gerät koppeln"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klicken, um neues Gerät zu koppeln"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Blockierung des Gerätemikrofons aufheben?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Blockierung der Gerätekamera aufheben?"</string>
@@ -430,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wird schnell geladen • Voll in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wird langsam geladen • Voll in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wird geladen • Voll in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Wische nach links, um das gemeinsame Tutorial zu starten"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Anpassen"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Schließen"</string>
@@ -442,14 +458,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Entfernen"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Widget hinzufügen"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Fertig"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Widgets hinzufügen"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Greife schnell auf deine App-Widgets zu, ohne das Tablet entsperren zu müssen."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Beliebige Widgets auf Sperrbildschirm zulassen?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Einstellungen öffnen"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Geschäftliche Apps nicht mehr pausieren?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Nicht mehr pausieren"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Nutzer wechseln"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"Pull-down-Menü"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle Apps und Daten in dieser Sitzung werden gelöscht."</string>
@@ -579,7 +597,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Bildschirm wurde fixiert"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App vom Bildschirm losgelöst"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Anruf"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Anrufen"</string>
     <string name="stream_system" msgid="7663148785370565134">"System"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Klingelton"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medien"</string>
@@ -594,17 +612,17 @@
     <string name="media_device_cast" msgid="4786241789687569892">"Stream"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Nicht verfügbar, da Klingelton stumm"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Nicht verfügbar, weil „Bitte nicht stören“ an ist"</string>
-    <string name="stream_media_unavailable" msgid="6823020894438959853">"Nicht verfügbar, weil „Bitte nicht stören“ an ist"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Nicht verfügbar, weil „Bitte nicht stören“ an"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Zum Aufheben der Stummschaltung tippen."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tippen, um Vibrieren festzulegen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Zum Aktivieren der Vibration tippen."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Zum Stummschalten tippen."</string>
-    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Geräuschunterdrückung"</string>
+    <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Geräusch­unterdrückung"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Spatial Audio"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Aus"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Statisch"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Erfassung von Kopfbewegungen"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Erfassung von Kopfbewe­gungen"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Zum Ändern des Klingeltonmodus tippen"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"Stummschalten"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"Aufheben der Stummschaltung"</string>
@@ -741,7 +759,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Tastaturlayout wechseln"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"oder"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Suchanfrage löschen"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Tastenkombinationen"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Tastenkombinationen"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Tastenkombinationen suchen"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Keine gefunden"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"System"</string>
@@ -766,16 +784,16 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant öffnen"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Sperrbildschirm"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Notiz machen"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"System-Multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Splitscreen aktivieren, aktuelle App rechts"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Splitscreen aktivieren, aktuelle App links"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Splitscreen mit der aktuellen App auf der rechten Seite nutzen"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Splitscreen mit der aktuellen App auf der linken Seite nutzen"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Vom Splitscreen zum Vollbild wechseln"</string>
-    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Im Splitscreen-Modus rechts oder unten zu einer App wechseln"</string>
-    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Im Splitscreen-Modus links oder oben zu einer App wechseln"</string>
+    <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Im Splitscreen-Modus zu einer App rechts oder unten wechseln"</string>
+    <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Im Splitscreen-Modus zu einer App links oder oben wechseln"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Im Splitscreen: eine App durch eine andere ersetzen"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Eingabe"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Zur nächsten Sprache wechseln"</string>
-    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zu vorheriger Sprache wechseln"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Zur vorherigen Sprache wechseln"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Auf Emoji zugreifen"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Auf Spracheingabe zugreifen"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
@@ -787,7 +805,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musik"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
     <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Rechner"</string>
-    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Karten"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Bitte nicht stören"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Tastenkombination für Lautstärketasten"</string>
     <string name="battery" msgid="769686279459897127">"Akku"</string>
@@ -994,7 +1012,7 @@
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Verknüpfung für „<xliff:g id="FEATURE_NAME">%s</xliff:g>“ entfernt"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# Verknüpfung entfernt}other{# Verknüpfungen entfernt}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Nach oben links verschieben"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Nach rechts oben verschieben"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Nach oben rechts verschieben"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Nach unten links verschieben"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Nach unten rechts verschieben"</string>
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"An den Rand verschieben und verbergen"</string>

@@ -23,6 +23,9 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.ActivityOptions.LaunchCookie;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.Overridable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -64,6 +67,18 @@ import java.util.Map;
 @SystemService(Context.MEDIA_PROJECTION_SERVICE)
 public final class MediaProjectionManager {
     private static final String TAG = "MediaProjectionManager";
+
+    /**
+     * This change id ensures that users are presented with a choice of capturing a single app
+     * or the entire screen when initiating a MediaProjection session, overriding the usage of
+     * MediaProjectionConfig#createConfigForDefaultDisplay.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_DISABLE_MEDIA_PROJECTION_SINGLE_APP_OPTION = 316897322L;
 
     /**
      * Intent extra to customize the permission dialog based on the host app's preferences.

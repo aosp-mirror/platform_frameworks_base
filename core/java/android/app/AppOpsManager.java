@@ -1502,12 +1502,10 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
 
     /**
-     * Allows the privileged assistant app to receive the training data from the sandboxed hotword
-     * detection service.
+     * This op has been deprecated.
      *
-     * @hide
      */
-    public static final int OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA =
+    private static final int OP_DEPRECATED_3 =
             AppProtoEnums.APP_OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA;
 
     /**
@@ -1556,11 +1554,11 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_READ_SYSTEM_GRAMMATICAL_GENDER;
 
     /**
-     * Allows an app with a major use case of backing-up or syncing content to run longer jobs.
+     * This app has been removed..
      *
      * @hide
      */
-    public static final int OP_RUN_BACKUP_JOBS = AppProtoEnums.APP_OP_RUN_BACKUP_JOBS;
+    private static final int OP_DEPRECATED_4 = AppProtoEnums.APP_OP_RUN_BACKUP_JOBS;
 
     /**
      * Whether the app has enabled to receive the icon overlay for fetching archived apps.
@@ -1735,13 +1733,11 @@ public class AppOpsManager {
             OPSTR_CAMERA_SANDBOXED,
             OPSTR_RECORD_AUDIO_SANDBOXED,
             OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
             OPSTR_MEDIA_ROUTING_CONTROL,
             OPSTR_ENABLE_MOBILE_DATA_BY_USER,
             OPSTR_RESERVED_FOR_TESTING,
             OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
-            OPSTR_RUN_BACKUP_JOBS,
             OPSTR_ARCHIVE_ICON_OVERLAY,
             OPSTR_UNARCHIVAL_CONFIRMATION,
             OPSTR_EMERGENCY_LOCATION,
@@ -2395,13 +2391,10 @@ public class AppOpsManager {
             "android:receive_sandbox_trigger_audio";
 
     /**
-     * Allows the privileged assistant app to receive training data from the sandboxed hotword
-     * detection service.
-     *
+     * App op has been deprecated.
      * @hide
      */
-    public static final String OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA =
-            "android:RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA";
+    public static final String OPSTR_DEPRECATED_3 = "android:deprecated_3";
 
     /**
      * Creation of an overlay using accessibility services
@@ -2453,11 +2446,11 @@ public class AppOpsManager {
             "android:read_system_grammatical_gender";
 
     /**
-     * Allows an app whose primary use case is to backup or sync content to run longer jobs.
+     * App op has been removed.
      *
      * @hide
      */
-    public static final String OPSTR_RUN_BACKUP_JOBS = "android:run_backup_jobs";
+    public static final String OPSTR_DEPRECATED_4 = "android:deprecated_4";
 
     /**
      * Allows an app to access location without the traditional location permissions and while the
@@ -2582,10 +2575,8 @@ public class AppOpsManager {
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
             OP_USE_FULL_SCREEN_INTENT,
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-            OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
             OP_MEDIA_ROUTING_CONTROL,
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
-            OP_RUN_BACKUP_JOBS,
             OP_ARCHIVE_ICON_OVERLAY,
             OP_UNARCHIVAL_CONFIRMATION,
     };
@@ -3021,11 +3012,8 @@ public class AppOpsManager {
                 "RECEIVE_SANDBOX_TRIGGER_AUDIO")
                 .setPermission(Manifest.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO)
                 .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
-        new AppOpInfo.Builder(OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                OPSTR_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                "RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA")
-                .setPermission(Manifest.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA)
-                .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_3, OPSTR_DEPRECATED_3, "DEPRECATED_3")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_CREATE_ACCESSIBILITY_OVERLAY,
                 OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
                 "CREATE_ACCESSIBILITY_OVERLAY")
@@ -3046,8 +3034,8 @@ public class AppOpsManager {
                 // will make it an app-op permission in the future.
                 // .setPermission(Manifest.permission.READ_SYSTEM_GRAMMATICAL_GENDER)
                 .build(),
-        new AppOpInfo.Builder(OP_RUN_BACKUP_JOBS, OPSTR_RUN_BACKUP_JOBS, "RUN_BACKUP_JOBS")
-                .setPermission(Manifest.permission.RUN_BACKUP_JOBS).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_4, OPSTR_DEPRECATED_4, "DEPRECATED_4")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_ARCHIVE_ICON_OVERLAY, OPSTR_ARCHIVE_ICON_OVERLAY,
                 "ARCHIVE_ICON_OVERLAY")
                 .setDefaultMode(MODE_ALLOWED).build(),

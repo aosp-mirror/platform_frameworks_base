@@ -507,6 +507,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 final Point animRelOffset = new Point(
                         change.getEndAbsBounds().left - animRoot.getOffset().x,
                         change.getEndAbsBounds().top - animRoot.getOffset().y);
+
+                if (change.getActivityComponent() != null) {
+                    // For appcompat letterbox: we intentionally report the task-bounds so that we
+                    // can animate as-if letterboxes are "part of" the activity. This means we can't
+                    // always rely solely on endAbsBounds and need to also max with endRelOffset.
+                    animRelOffset.x = Math.max(animRelOffset.x, change.getEndRelOffset().x);
+                    animRelOffset.y = Math.max(animRelOffset.y, change.getEndRelOffset().y);
+                }
+
                 if (change.getActivityComponent() != null && !isActivityLevel) {
                     // At this point, this is an independent activity change in a non-activity
                     // transition. This means that an activity transition got erroneously combined
@@ -585,7 +594,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     .setName("animation-background")
                     .setCallsite("DefaultTransitionHandler")
                     .setColorLayer();
-            final SurfaceControl backgroundSurface = colorLayerBuilder.build();
 
             // Attaching the background surface to the transition root could unexpectedly make it
             // cover one of the split root tasks. To avoid this, put the background surface just
@@ -596,8 +604,10 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             if (isSplitTaskInvolved) {
                 mRootTDAOrganizer.attachToDisplayArea(displayId, colorLayerBuilder);
             } else {
-                startTransaction.reparent(backgroundSurface, info.getRootLeash());
+                colorLayerBuilder.setParent(info.getRootLeash());
             }
+
+            final SurfaceControl backgroundSurface = colorLayerBuilder.build();
             startTransaction.setColor(backgroundSurface, colorArray)
                     .setLayer(backgroundSurface, -1)
                     .show(backgroundSurface);

@@ -37,8 +37,8 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
-import com.android.server.companion.presence.CompanionAppBinder;
-import com.android.server.companion.presence.DevicePresenceProcessor;
+import com.android.server.companion.devicepresence.CompanionAppBinder;
+import com.android.server.companion.devicepresence.DevicePresenceProcessor;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 /**

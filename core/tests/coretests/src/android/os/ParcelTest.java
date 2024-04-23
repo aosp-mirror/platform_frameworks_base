@@ -16,6 +16,8 @@
 
 package android.os;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
@@ -24,12 +26,15 @@ import static org.junit.Assert.assertTrue;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -349,6 +354,50 @@ public class ParcelTest {
     }
 
     @Test
+    public void testClassCookies() {
+        Parcel p = Parcel.obtain();
+        assertThat(p.hasClassCookie(ParcelTest.class)).isFalse();
+
+        p.setClassCookie(ParcelTest.class, "string_cookie");
+        assertThat(p.hasClassCookie(ParcelTest.class)).isTrue();
+        assertThat(p.getClassCookie(ParcelTest.class)).isEqualTo("string_cookie");
+
+        p.removeClassCookie(ParcelTest.class, "string_cookie");
+        assertThat(p.hasClassCookie(ParcelTest.class)).isFalse();
+        assertThat(p.getClassCookie(ParcelTest.class)).isEqualTo(null);
+
+        p.setClassCookie(ParcelTest.class, "to_be_discarded_cookie");
+        p.recycle();
+        assertThat(p.getClassCookie(ParcelTest.class)).isNull();
+    }
+
+    @Test
+    public void testClassCookies_removeUnexpected() {
+        Parcel p = Parcel.obtain();
+
+        assertLogsWtf(() -> p.removeClassCookie(ParcelTest.class, "not_present"));
+
+        p.setClassCookie(ParcelTest.class, "value");
+
+        assertLogsWtf(() -> p.removeClassCookie(ParcelTest.class, "different"));
+        assertThat(p.getClassCookie(ParcelTest.class)).isNull(); // still removed
+
+        p.recycle();
+    }
+
+    private static void assertLogsWtf(Runnable test) {
+        ArrayList<Log.TerribleFailure> wtfs = new ArrayList<>();
+        Log.TerribleFailureHandler oldHandler = Log.setWtfHandler(
+                (tag, what, system) -> wtfs.add(what));
+        try {
+            test.run();
+        } finally {
+            Log.setWtfHandler(oldHandler);
+        }
+        assertThat(wtfs).hasSize(1);
+    }
+
+    @Test
     @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testHasBinders_AfterWritingBinderToParcel() {
         Binder binder = new Binder();
@@ -359,7 +408,6 @@ public class ParcelTest {
         pA.writeStrongBinder(binder);
         assertTrue(pA.hasBinders());
     }
-
 
     @Test
     @IgnoreUnderRavenwood(blockedBy = Parcel.class)

@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import static android.app.admin.flags.Flags.crossUserSuspensionEnabled;
+import static android.app.admin.flags.Flags.crossUserSuspensionEnabledRo;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -2058,7 +2058,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             return null;
         }
         int suspendingUserId;
-        if (crossUserSuspensionEnabled()) {
+        if (crossUserSuspensionEnabledRo()) {
             suspendingUserId = parser.getAttributeInt(
                     null, ATTR_SUSPENDING_USER, UserHandle.USER_NULL);
             if (suspendingUserId == UserHandle.USER_NULL) {
@@ -2437,7 +2437,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 serializer.startTag(null, TAG_SUSPEND_PARAMS);
                                 serializer.attribute(null, ATTR_SUSPENDING_PACKAGE,
                                         suspendingPackage.packageName);
-                                if (crossUserSuspensionEnabled()) {
+                                if (crossUserSuspensionEnabledRo()) {
                                     serializer.attributeInt(null, ATTR_SUSPENDING_USER,
                                             suspendingPackage.userId);
                                 }

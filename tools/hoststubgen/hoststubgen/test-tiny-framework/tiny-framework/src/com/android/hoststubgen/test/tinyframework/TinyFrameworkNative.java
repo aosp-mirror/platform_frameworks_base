@@ -52,4 +52,6 @@ public class TinyFrameworkNative {
     public static void nativeStillNotSupported_should_be_like_this() {
         throw new RuntimeException();
     }
+
+    public static native byte nativeBytePlus(byte arg1, byte arg2);
 }

@@ -662,7 +662,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Sidik jari tidak dikenali"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Sidik jari tidak dikenali"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Tidak dapat mengenali wajah. Gunakan sidik jari."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"Wajah tidak dikenali. Gunakan sidik jari."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Sidik jari diautentikasi"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Wajah diautentikasi"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Wajah diautentikasi, silakan tekan konfirmasi"</string>
@@ -995,7 +995,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Perbaiki!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Coba lagi"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Coba lagi"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Membuka kunci untuk semua fitur dan data"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Buka kunci untuk melihat semua fitur dan data"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Percobaan Buka dengan Wajah melebihi batas maksimum"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Tidak ada SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Tidak ada SIM di tablet."</string>
@@ -1367,7 +1367,7 @@
     <string name="sim_removed_message" msgid="8469588437451533845">"Jaringan seluler tidak akan tersedia sampai Anda memulai ulang dengan SIM yang valid."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Selesai"</string>
     <string name="sim_added_title" msgid="2976783426741012468">"SIM ditambahkan"</string>
-    <string name="sim_added_message" msgid="6602906609509958680">"Mulai ulang perangkat Anda untuk mengakses jaringan selular."</string>
+    <string name="sim_added_message" msgid="6602906609509958680">"Mulai ulang perangkat Anda untuk mengakses jaringan seluler."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Mulai Ulang"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktifkan layanan seluler"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Download aplikasi operator untuk mengaktifkan SIM baru"</string>
@@ -1725,9 +1725,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> mengontrol perangkat Anda secara penuh?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang mendukung kebutuhan aksesibilitas Anda, tetapi tidak untuk sebagian besar aplikasi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengontrol layar"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Voice Access dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Menampilkan dan melakukan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Voice Access dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Izinkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"Uninstal"</string>
@@ -1929,12 +1929,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Dikelola oleh <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aktif"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Nonaktif"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Kalender mana saja"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> mematikan beberapa suara"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Ada masalah dengan perangkat. Hal ini mungkin membuat perangkat jadi tidak stabil dan perlu dikembalikan ke setelan pabrik."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Ada masalah dengan perangkat. Hubungi produsen perangkat untuk informasi selengkapnya."</string>
@@ -2397,6 +2394,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Pengujian"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Umum"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Konten aplikasi disembunyikan dari berbagi layar untuk alasan keamanan"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Menghubungkan otomatis ke satelit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Anda dapat mengirim dan menerima pesan tanpa jaringan seluler atau Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Buka Message"</string>

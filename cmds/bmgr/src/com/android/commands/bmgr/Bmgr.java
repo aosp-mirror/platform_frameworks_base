@@ -1280,6 +1280,24 @@ public class Bmgr {
                 return "START_PACKAGE_RESTORE";
             case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE:
                 return "AGENT_FAILURE";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_AT_INSTALL_INVOKED:
+                return "RESTORE_AT_INSTALL_INVOKED";
+            case BackupManagerMonitor.LOG_EVENT_ID_SKIP_RESTORE_AT_INSTALL:
+                return "SKIP_RESTORE_AT_INSTALL";
+            case BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_ACCEPTED_FOR_RESTORE:
+                return "PACKAGE_ACCEPTED_FOR_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_RESTORE_DATA_DOES_NOT_BELONG_TO_PACKAGE:
+                return "RESTORE_DATA_DOES_NOT_BELONG_TO_PACKAGE";
+            case BackupManagerMonitor.LOG_EVENT_ID_UNABLE_TO_CREATE_AGENT_FOR_RESTORE:
+                return "UNABLE_TO_CREATE_AGENT_FOR_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_CRASHED_BEFORE_RESTORE_DATA_IS_SENT:
+                return "AGENT_CRASHED_BEFORE_RESTORE_DATA_IS_SEN";
+            case BackupManagerMonitor.LOG_EVENT_ID_FAILED_TO_SEND_DATA_TO_AGENT_DURING_RESTORE:
+                return "FAILED_TO_SEND_DATA_TO_AGENT_DURING_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_AGENT_FAILURE_DURING_RESTORE:
+                return "AGENT_FAILURE_DURING_RESTORE";
+            case BackupManagerMonitor.LOG_EVENT_ID_FAILED_TO_READ_DATA_FROM_TRANSPORT:
+                return "FAILED_TO_READ_DATA_FROM_TRANSPORT";
             default:
                 return "UNKNOWN_ID";
         }

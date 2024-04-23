@@ -28,7 +28,6 @@ import static androidx.lifecycle.Lifecycle.State.RESUMED;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 import static com.android.systemui.Flags.lightRevealMigration;
 import static com.android.systemui.Flags.newAodTransition;
-import static com.android.systemui.Flags.predictiveBackSysui;
 import static com.android.systemui.Flags.truncatedStatusBarIconsFix;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
@@ -165,10 +164,10 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -592,8 +591,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
-
-    private final SceneContainerFlags mSceneContainerFlags;
+    private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
 
     /**
      * Public constructor for CentralSurfaces.
@@ -706,7 +704,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             UserTracker userTracker,
             Provider<FingerprintManager> fingerprintManager,
             ActivityStarter activityStarter,
-            SceneContainerFlags sceneContainerFlags
+            BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor
     ) {
         mContext = context;
         mNotificationsController = notificationsController;
@@ -801,7 +799,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mUserTracker = userTracker;
         mFingerprintManager = fingerprintManager;
         mActivityStarter = activityStarter;
-        mSceneContainerFlags = sceneContainerFlags;
+        mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -837,7 +835,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mLightRevealScrimViewModelLazy = lightRevealScrimViewModelLazy;
         mLightRevealScrim = lightRevealScrim;
 
-        if (predictiveBackSysui()) {
+        if (PredictiveBackSysUiFlag.isEnabled()) {
             mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
         }
     }
@@ -1084,6 +1082,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mJavaAdapter.alwaysCollectFlow(
                 mCommunalInteractor.isIdleOnCommunal(),
                 mIdleOnCommunalConsumer);
+        if (SceneContainerFlag.isEnabled()) {
+            mJavaAdapter.alwaysCollectFlow(
+                    mBrightnessMirrorShowingInteractor.isShowing(),
+                    this::setBrightnessMirrorShowing
+            );
+        }
     }
 
     /**
@@ -1267,7 +1271,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         // Set up the quick settings tile panel
         final View container = getNotificationShadeWindowView().findViewById(R.id.qs_frame);
-        if (container != null && !mSceneContainerFlags.isEnabled()) {
+        if (container != null && !SceneContainerFlag.isEnabled()) {
             FragmentHostManager fragmentHostManager =
                     mFragmentService.getFragmentHostManager(container);
             ExtensionFragmentListener.attachExtensonToFragment(
@@ -1285,10 +1289,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     mShadeSurface,
                     mNotificationShadeDepthControllerLazy.get(),
                     mBrightnessSliderFactory,
-                    (visible) -> {
-                        mBrightnessMirrorVisible = visible;
-                        updateScrimController();
-                    });
+                    this::setBrightnessMirrorShowing);
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragmentLegacy) {
@@ -1347,6 +1348,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
     }
 
+    private void setBrightnessMirrorShowing(boolean showing) {
+        mBrightnessMirrorVisible = showing;
+        updateScrimController();
+    }
 
     /**
      * When swiping up to dismiss the lock screen, the panel expansion fraction goes from 1f to 0f.
@@ -1534,8 +1539,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 mShadeSurface,
                 mShadeExpansionStateManager,
                 mBiometricUnlockController,
-                mStackScroller,
-                mKeyguardBypassController);
+                mStackScroller);
         mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
@@ -2412,7 +2416,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
-        mStackScrollerController.setBouncerShowingFromCentralSurfaces(bouncerShowing);
         setBouncerShowingForStatusBarComponents(bouncerShowing);
         mStatusBarHideIconsForBouncerManager.setBouncerShowingAndTriggerUpdate(bouncerShowing);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
@@ -3061,7 +3064,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         public void onConfigChanged(Configuration newConfig) {
             updateResources();
             updateDisplaySize(); // populates mDisplayMetrics
-            if (predictiveBackSysui()) {
+            if (PredictiveBackSysUiFlag.isEnabled()) {
                 mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
             }
 

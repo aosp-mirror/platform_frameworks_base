@@ -96,7 +96,6 @@ import static com.android.server.wm.AppTransitionProto.LAST_USED_APP_TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
-import static com.android.server.wm.WindowManagerInternal.KeyguardExitAnimationStartListener;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
@@ -105,7 +104,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -117,7 +115,6 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
@@ -137,6 +134,7 @@ import android.view.animation.TranslateAnimation;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -244,7 +242,7 @@ public class AppTransition implements Dump {
         mHandler = new Handler(service.mH.getLooper());
         mDisplayContent = displayContent;
         mTransitionAnimation = new TransitionAnimation(
-                context, ProtoLog.isEnabled(WM_DEBUG_ANIM), TAG);
+                context, ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.DEBUG), TAG);
 
         final TypedArray windowStyle = mContext.getTheme().obtainStyledAttributes(
                 com.android.internal.R.styleable.Window);

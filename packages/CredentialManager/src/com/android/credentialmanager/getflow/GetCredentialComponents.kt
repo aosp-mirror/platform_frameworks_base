@@ -32,6 +32,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Divider
 import androidx.compose.material3.TextButton
@@ -52,9 +54,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.BiometricError
+import com.android.credentialmanager.common.BiometricFlowType
+import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
-import com.android.credentialmanager.common.runBiometricFlow
+import com.android.credentialmanager.common.runBiometricFlowForGet
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ActionEntry
 import com.android.credentialmanager.common.ui.ConfirmButton
@@ -144,19 +149,44 @@ fun GetCredentialScreen(
                         } else if (credmanBiometricApiEnabled() && getCredentialUiState
                                 .currentScreenState == GetScreenState.BIOMETRIC_SELECTION) {
                             BiometricSelectionPage(
-                                // TODO(b/326243754) : Utilize expected entry for this flow, confirm
-                                // activeEntry will always be what represents the single tap flow
                                 biometricEntry = getCredentialUiState.activeEntry,
-                                onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
-                                onCancelFlowAndFinish = viewModel::onIllegalUiState,
+                                onMoreOptionSelected = viewModel::getFlowOnMoreOptionOnlySelected,
+                                onCancelFlowAndFinish = viewModel::onUserCancel,
+                                onIllegalStateAndFinish = viewModel::onIllegalUiState,
                                 requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
                                 providerInfoList = getCredentialUiState.providerInfoList,
                                 providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
                                 onBiometricEntrySelected =
                                 viewModel::getFlowOnEntrySelected,
                                 fallbackToOriginalFlow =
-                                viewModel::getFlowOnBackToPrimarySelectionScreen,
+                                viewModel::fallbackFromBiometricToNormalFlow,
+                                getBiometricPromptState =
+                                viewModel::getBiometricPromptState,
+                                onBiometricPromptStateChange =
+                                viewModel::onBiometricPromptStateChange
                             )
+                        } else if (credmanBiometricApiEnabled() &&
+                                getCredentialUiState.currentScreenState
+                                == GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY) {
+                            AllSignInOptionCard(
+                                    providerInfoList = getCredentialUiState.providerInfoList,
+                                    providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                    onEntrySelected = viewModel::getFlowOnEntrySelected,
+                                    onBackButtonClicked = viewModel::onUserCancel,
+                                    onCancel = viewModel::onUserCancel,
+                                    onLog = { viewModel.logUiEvent(it) },
+                                    customTopBar = { MoreOptionTopAppBar(
+                                            text = stringResource(
+                                                    R.string.get_dialog_title_sign_in_options),
+                                            onNavigationIconClicked = viewModel::onUserCancel,
+                                            navigationIcon = Icons.Filled.Close,
+                                            navigationIconContentDescription =
+                                            stringResource(R.string.accessibility_close_button),
+                                            bottomPadding = 0.dp
+                                    ) }
+                            )
+                            viewModel.uiMetrics.log(GetCredentialEvent
+                                    .CREDMAN_GET_CRED_SCREEN_ALL_SIGN_IN_OPTIONS)
                         } else {
                             AllSignInOptionCard(
                                 providerInfoList = getCredentialUiState.providerInfoList,
@@ -212,24 +242,34 @@ fun GetCredentialScreen(
 @Composable
 internal fun BiometricSelectionPage(
     biometricEntry: EntryInfo?,
-    onCancelFlowAndFinish: (String) -> Unit,
+    onCancelFlowAndFinish: () -> Unit,
+    onIllegalStateAndFinish: (String) -> Unit,
     onMoreOptionSelected: () -> Unit,
     requestDisplayInfo: RequestDisplayInfo,
     providerInfoList: List<ProviderInfo>,
     providerDisplayInfo: ProviderDisplayInfo,
-    onBiometricEntrySelected: (EntryInfo, BiometricPrompt.AuthenticationResult?) -> Unit,
-    fallbackToOriginalFlow: () -> Unit,
+    onBiometricEntrySelected: (
+        EntryInfo,
+        BiometricPrompt.AuthenticationResult?,
+        BiometricError?
+    ) -> Unit,
+    fallbackToOriginalFlow: (BiometricFlowType) -> Unit,
+    getBiometricPromptState: () -> BiometricPromptState,
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
 ) {
     if (biometricEntry == null) {
-        fallbackToOriginalFlow()
+        fallbackToOriginalFlow(BiometricFlowType.GET)
         return
     }
-    runBiometricFlow(
+    runBiometricFlowForGet(
         biometricEntry = biometricEntry,
         context = LocalContext.current,
         openMoreOptionsPage = onMoreOptionSelected,
         sendDataToProvider = onBiometricEntrySelected,
         onCancelFlowAndFinish = onCancelFlowAndFinish,
+        onIllegalStateAndFinish = onIllegalStateAndFinish,
+        getBiometricPromptState = getBiometricPromptState,
+        onBiometricPromptStateChange = onBiometricPromptStateChange,
         getRequestDisplayInfo = requestDisplayInfo,
         getProviderInfoList = providerInfoList,
         getProviderDisplayInfo = providerDisplayInfo,
@@ -509,19 +549,8 @@ fun PrimarySelectionCardVImpl(
                                 R.string.get_dialog_title_choose_password_for
                             else if (areAllPasskeysOnPrimaryScreen)
                                 R.string.get_dialog_title_choose_passkey_for
-                            else if (primaryPageLockedEntryList.isNotEmpty() ||
-                                primaryPageCredentialEntryList.any {
-                                    it.sortedCredentialEntryList.first().credentialType !=
-                                            CredentialType.PASSWORD &&
-                                    it.sortedCredentialEntryList.first().credentialType !=
-                                            CredentialType.PASSKEY
-                                }
-                            ) // An unknown typed / locked entry exists, and we can't say it is
-                            // already saved, strictly speaking. Hence use a different title
-                            // without the mention of "saved".
+                            else
                                 R.string.get_dialog_title_choose_sign_in_for
-                            else // All entries on the primary screen are passkeys or passwords
-                                R.string.get_dialog_title_choose_saved_sign_in_for
                         },
                         requestDisplayInfo.appName
                     ),
@@ -626,7 +655,13 @@ private fun findSingleProviderIdForPrimaryPage(
     return providerId
 }
 
-/** Draws the secondary credential selection page, where all sign-in options are listed. */
+/**
+ * Draws the secondary credential selection page, where all sign-in options are listed.
+ *
+ * By default, this card has 'back' navigation whereby user can navigate back to invoke
+ * [onBackButtonClicked]. However if a different top bar with possibly a different navigation
+ * is required, then the caller of this Composable can set a [customTopBar].
+ */
 @Composable
 fun AllSignInOptionCard(
     providerInfoList: List<ProviderInfo>,
@@ -635,16 +670,24 @@ fun AllSignInOptionCard(
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
     onLog: @Composable (UiEventEnum) -> Unit,
+    customTopBar: (@Composable() () -> Unit)? = null
 ) {
     val sortedUserNameToCredentialEntryList =
         providerDisplayInfo.sortedUserNameToCredentialEntryList
     val authenticationEntryList = providerDisplayInfo.authenticationEntryList
     SheetContainerCard(topAppBar = {
-        MoreOptionTopAppBar(
-            text = stringResource(R.string.get_dialog_title_sign_in_options),
-            onNavigationIconClicked = onBackButtonClicked,
-            bottomPadding = 0.dp,
-        )
+        if (customTopBar != null) {
+            customTopBar()
+        } else {
+            MoreOptionTopAppBar(
+                    text = stringResource(R.string.get_dialog_title_sign_in_options),
+                    onNavigationIconClicked = onBackButtonClicked,
+                    bottomPadding = 0.dp,
+                    navigationIcon = Icons.Filled.ArrowBack,
+                    navigationIconContentDescription = stringResource(
+                            R.string.accessibility_back_arrow_button
+            ))
+        }
     }) {
         var isFirstSection = true
         // For username

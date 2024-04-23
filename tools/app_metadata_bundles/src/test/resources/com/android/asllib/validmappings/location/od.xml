@@ -1,0 +1,27 @@
+<bundle>
+    <long name="version" value="123"/>
+    <pbundle_as_map name="safety_labels">
+        <long name="version" value="12345"/>
+        <pbundle_as_map name="data_labels">
+            <pbundle_as_map name="data_shared">
+                <pbundle_as_map name="location">
+                    <pbundle_as_map name="precise_location">
+                        <int-array name="purposes" num="2">
+                            <item value="1"/>
+                            <item value="2"/>
+                        </int-array>
+                        <boolean name="is_sharing_optional" value="true"/>
+                        <boolean name="ephemeral" value="true"/>
+                    </pbundle_as_map>
+                    <pbundle_as_map name="approx_location">
+                        <int-array name="purposes" num="1">
+                            <item value="1"/>
+                        </int-array>
+                        <boolean name="is_sharing_optional" value="false"/>
+                        <boolean name="ephemeral" value="false"/>
+                    </pbundle_as_map>
+                </pbundle_as_map>
+            </pbundle_as_map>
+        </pbundle_as_map>
+    </pbundle_as_map>
+</bundle>

@@ -22,6 +22,8 @@ import static android.view.View.SYSTEM_UI_LAYOUT_FLAGS;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsetsController.APPEARANCE_FORCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -360,8 +362,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private boolean mIsStartingWindow;
     private int mTheme = -1;
-
-    private int mDecorCaptionShade = DECOR_CAPTION_SHADE_AUTO;
 
     private boolean mUseDecorContext = false;
 
@@ -2486,9 +2486,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
             params.setFitInsetsSides(0);
             params.setFitInsetsTypes(0);
-            if (mEdgeToEdgeEnforced) {
-                params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-            }
         }
 
         if (a.getBoolean(R.styleable.Window_windowNoTitle, false)) {
@@ -2628,15 +2625,24 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 false)) {
             params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         }
-        final int sysUiVis = decor.getSystemUiVisibility();
-        final int statusLightFlag = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        final int statusFlag = a.getBoolean(R.styleable.Window_windowLightStatusBar, false)
-                ? statusLightFlag : 0;
-        final int navLightFlag = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        final int navFlag = a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)
-                ? navLightFlag : 0;
+
+        final boolean lightStatus = a.getBoolean(R.styleable.Window_windowLightStatusBar, false);
+        final boolean lightNav = a.getBoolean(R.styleable.Window_windowLightNavigationBar, false);
+
+        // Here still sets the light bar flags via setSystemUiVisibility (even it is deprecated) to
+        // make the light bar state be able to be read from the legacy method.
         decor.setSystemUiVisibility(
-                (sysUiVis & ~(statusLightFlag | navLightFlag)) | (statusFlag | navFlag));
+                (decor.getSystemUiVisibility()
+                        & ~(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                                | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR))
+                | (lightStatus ? View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR : 0)
+                | (lightNav ? View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR : 0));
+
+        decor.getWindowInsetsController().setSystemBarsAppearanceFromResource(
+                (lightStatus ? APPEARANCE_LIGHT_STATUS_BARS : 0)
+                        | (lightNav ? APPEARANCE_LIGHT_NAVIGATION_BARS : 0),
+                APPEARANCE_LIGHT_STATUS_BARS | APPEARANCE_LIGHT_NAVIGATION_BARS);
+
         if (a.hasValue(R.styleable.Window_windowLayoutInDisplayCutoutMode)) {
             int mode = a.getInt(R.styleable.Window_windowLayoutInDisplayCutoutMode, -1);
             if (mode < LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
@@ -3945,6 +3951,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public int getNavigationBarColor() {
+        if (mEdgeToEdgeEnforced) {
+            return Color.TRANSPARENT;
+        }
         return mNavigationBarColor;
     }
 
@@ -4034,14 +4043,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setDecorCaptionShade(int decorCaptionShade) {
-        mDecorCaptionShade = decorCaptionShade;
-        if (mDecor != null) {
-            mDecor.updateDecorCaptionShade();
-        }
-    }
-
-    int getDecorCaptionShade() {
-        return mDecorCaptionShade;
+        // TODO(b/328668781): Make proper treatment to this public API per the outcome of the bug.
     }
 
     @Override

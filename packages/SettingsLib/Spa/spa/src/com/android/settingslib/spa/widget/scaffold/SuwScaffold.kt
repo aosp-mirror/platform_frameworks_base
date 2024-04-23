@@ -19,7 +19,6 @@ package com.android.settingslib.spa.widget.scaffold
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -33,6 +32,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.android.settingslib.spa.framework.theme.SettingsDimension
@@ -50,7 +51,7 @@ fun SuwScaffold(
     title: String,
     actionButton: BottomAppBarButton? = null,
     dismissButton: BottomAppBarButton? = null,
-    content: @Composable ColumnScope.() -> Unit,
+    content: @Composable () -> Unit,
 ) {
     ActivityTitle(title)
     Scaffold { innerPadding ->
@@ -59,6 +60,7 @@ fun SuwScaffold(
                 .padding(innerPadding)
                 .padding(top = SettingsDimension.itemPaddingAround)
         ) {
+            val movableContent = remember(content) { movableContentOf { content() } }
             // Use single column layout in portrait, two columns in landscape.
             val useSingleColumn = maxWidth < maxHeight
             if (useSingleColumn) {
@@ -69,7 +71,7 @@ fun SuwScaffold(
                             .verticalScroll(rememberScrollState())
                     ) {
                         Header(imageVector, title)
-                        content()
+                        movableContent()
                     }
                     BottomBar(actionButton, dismissButton)
                 }
@@ -82,8 +84,9 @@ fun SuwScaffold(
                         Column(
                             Modifier
                                 .weight(1f)
-                                .verticalScroll(rememberScrollState())) {
-                            content()
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            movableContent()
                         }
                     }
                     BottomBar(actionButton, dismissButton)

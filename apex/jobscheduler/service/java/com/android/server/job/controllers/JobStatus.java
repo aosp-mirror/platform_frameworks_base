@@ -1203,14 +1203,9 @@ public final class JobStatus {
             return ACTIVE_INDEX;
         }
 
-        final boolean isEligibleAsBackupJob = false // this exemption is being disabled for now.
-                && job.getTriggerContentUris() != null
-                && job.getRequiredNetwork() != null
-                && !job.hasLateConstraint()
-                && mJobSchedulerInternal.hasRunBackupJobsPermission(sourcePackageName, sourceUid);
-        final boolean isBackupExempt = mHasMediaBackupExemption || isEligibleAsBackupJob;
         final int bucketWithBackupExemption;
-        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX && isBackupExempt) {
+        if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
+                && mHasMediaBackupExemption) {
             // Treat it as if it's at most WORKING_INDEX (lower index grants higher quota) since
             // media backup jobs are important to the user, and the source package may not have
             // been used directly in a while.

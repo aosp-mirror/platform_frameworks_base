@@ -38,9 +38,11 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
+import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
 import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
 import static com.android.window.flags.Flags.balRequireOptInSameUid;
+import static com.android.window.flags.Flags.balRespectAppSwitchStateWhenCheckBoundByForegroundUid;
 import static com.android.window.flags.Flags.balShowToastsBlocked;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -539,6 +541,16 @@ public class BackgroundActivityStartController {
                 sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
                 sb.append("; resultIfPiSenderAllowsBal: ").append(mResultForRealCaller);
             }
+            // features
+            sb.append("; balImproveRealCallerVisibilityCheck: ")
+                    .append(balImproveRealCallerVisibilityCheck());
+            sb.append("; balRequireOptInByPendingIntentCreator: ")
+                    .append(balRequireOptInByPendingIntentCreator());
+            sb.append("; balRequireOptInSameUid: ").append(balRequireOptInSameUid());
+            sb.append("; balRespectAppSwitchStateWhenCheckBoundByForegroundUid: ")
+                    .append(balRespectAppSwitchStateWhenCheckBoundByForegroundUid());
+            sb.append("; balDontBringExistingBackgroundTaskStackToFg: ")
+                    .append(balDontBringExistingBackgroundTaskStackToFg());
             sb.append("]");
             return sb.toString();
         }

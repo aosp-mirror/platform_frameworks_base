@@ -24,6 +24,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.panel.component.anc.FakeSliceFactory
 import com.android.systemui.volume.panel.component.anc.ancSliceRepository
+import com.android.systemui.volume.panel.component.anc.domain.model.AncSlices
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -57,10 +58,10 @@ class AncSliceInteractorTest : SysuiTestCase() {
                     FakeSliceFactory.createSlice(hasError = true, hasSliceItem = true)
                 )
 
-                val slice by collectLastValue(underTest.ancSlice)
+                val slice by collectLastValue(underTest.ancSlices)
                 runCurrent()
 
-                assertThat(slice).isNull()
+                assertThat(slice).isInstanceOf(AncSlices.Unavailable::class.java)
             }
         }
     }
@@ -74,10 +75,10 @@ class AncSliceInteractorTest : SysuiTestCase() {
                     FakeSliceFactory.createSlice(hasError = false, hasSliceItem = false)
                 )
 
-                val slice by collectLastValue(underTest.ancSlice)
+                val slice by collectLastValue(underTest.ancSlices)
                 runCurrent()
 
-                assertThat(slice).isNull()
+                assertThat(slice).isInstanceOf(AncSlices.Unavailable::class.java)
             }
         }
     }
@@ -91,10 +92,10 @@ class AncSliceInteractorTest : SysuiTestCase() {
                     FakeSliceFactory.createSlice(hasError = false, hasSliceItem = true)
                 )
 
-                val slice by collectLastValue(underTest.ancSlice)
+                val slice by collectLastValue(underTest.ancSlices)
                 runCurrent()
 
-                assertThat(slice).isNotNull()
+                assertThat(slice).isInstanceOf(AncSlices.Ready::class.java)
             }
         }
     }

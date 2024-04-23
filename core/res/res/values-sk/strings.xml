@@ -664,7 +664,8 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Odtlačok prsta nebol rozpoznaný"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Odtlačok prsta nebol rozpoznaný"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"Tvár sa nedá rozpoznať. Použite odtlačok prsta."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Odtlačok prsta bol overený"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Tvár bola overená"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Tvár bola overená, stlačte tlačidlo potvrdenia"</string>
@@ -727,7 +728,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Model tváre sa nedá vytvoriť. Skúste to znova."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Boli rozpoznané tmavé okuliare. Musí vám byť vidieť celú tvár."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Bolo rozpoznané rúško. Musí vám byť vidieť celú tvár."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máte čiastočne zakrytú tvár. Musí byť viditeľná celá."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tvár sa nedá overiť. Hardvér nie je k dispozícii."</string>
@@ -833,7 +834,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť tablet alebo vymazať všetky údaje tabletu v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých jeho údajov."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamknite palubný systém alebo vymažte všetky údaje v palubnom systéme v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť telefón alebo vymazať všetky údaje v telefóne v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Sleduje počet nesprávnych hesiel zadaných pri odomykaní obrazovky a uzamkne telefón alebo vymaže z telefónu všetky dáta, ak bolo zadaných príliš veľa nesprávnych hesiel."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite tablet alebo vymažte všetky údaje tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Sledovanie počtu nesprávnych hesiel zadaných pri odomykaní obrazovky a ak je ich zadaných príliš mnoho, uzamknutie zariadenia Android TV alebo vymazanie všetkých údajov tohto používateľa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite palubný systém alebo vymažte všetky údaje tohto profilu."</string>
@@ -846,7 +847,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení tabletu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Vymazanie údajov v zariadení Android TV bez upozornenia obnovením výrobných nastavení."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Vymažte údaje palubného systému bez upozornenia obnovením výrobných nastavení."</string>
-    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez predchádzajúceho upozornenia vymazať všetky dáta obnovením výrobných nastavení telefónu."</string>
+    <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Bez predchádzajúceho upozornenia vymaže všetky dáta obnovením výrobných nastavení telefónu."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Vymazanie údajov profilu"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Vymazať údaje používateľa"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Vymažte bez upozornenia údaje tohto používateľa na tomto tablete."</string>
@@ -1931,12 +1932,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Spravované aplikáciou <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Zapnuté"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Vypnuté"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Ľubovoľný kalendár"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vypína niektoré zvuky"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Vo vašom zariadení došlo k internému problému. Môže byť nestabilné, kým neobnovíte jeho výrobné nastavenia."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Vo vašom zariadení došlo k internému problému. Ak chcete získať podrobné informácie, obráťte sa na jeho výrobcu."</string>
@@ -2399,6 +2397,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"Testovací"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Spoločný"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Obsah aplikácie bol na účely zabezpečenia skrytý v zdieľaní obrazovky"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automaticky pripojené k satelitu"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Správy môžete odosielať a prijímať bez mobilnej siete či siete Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>

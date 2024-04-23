@@ -16,19 +16,14 @@
 
 package com.android.systemui.dreams.dagger;
 
-import static com.android.systemui.dreams.dagger.DreamOverlayModule.DREAM_TOUCH_HANDLERS;
-
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import android.annotation.Nullable;
 
 import androidx.lifecycle.LifecycleOwner;
 
 import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.DreamOverlayContainerViewController;
-import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
-import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
+import com.android.systemui.dreams.touch.CommunalTouchHandler;
+import com.android.systemui.dreams.touch.dagger.CommunalTouchModule;
 import com.android.systemui.touch.TouchInsetManager;
 
 import dagger.BindsInstance;
@@ -36,17 +31,15 @@ import dagger.Subcomponent;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
-import java.util.Set;
 
-import javax.inject.Named;
 import javax.inject.Scope;
 
 /**
  * Dagger subcomponent for {@link DreamOverlayModule}.
  */
 @Subcomponent(modules = {
-        DreamTouchModule.class,
         DreamOverlayModule.class,
+        CommunalTouchModule.class
 })
 @DreamOverlayComponent.DreamOverlayScope
 public interface DreamOverlayComponent {
@@ -56,9 +49,7 @@ public interface DreamOverlayComponent {
         DreamOverlayComponent create(
                 @BindsInstance LifecycleOwner lifecycleOwner,
                 @BindsInstance ComplicationHostViewController complicationHostViewController,
-                @BindsInstance TouchInsetManager touchInsetManager,
-                @BindsInstance @Named(DREAM_TOUCH_HANDLERS) @Nullable
-                        Set<DreamTouchHandler> dreamTouchHandlers);
+                @BindsInstance TouchInsetManager touchInsetManager);
     }
 
     /** Scope annotation for singleton items within the {@link DreamOverlayComponent}. */
@@ -70,6 +61,6 @@ public interface DreamOverlayComponent {
     /** Builds a {@link DreamOverlayContainerViewController}. */
     DreamOverlayContainerViewController getDreamOverlayContainerViewController();
 
-    /** Builds a {@link DreamOverlayTouchMonitor} */
-    DreamOverlayTouchMonitor getDreamOverlayTouchMonitor();
+    /** Builds communal touch handler */
+    CommunalTouchHandler getCommunalTouchHandler();
 }

@@ -19,6 +19,7 @@ package com.android.wallpaperbackup;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.ORIENTATION_UNKNOWN;
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_INELIGIBLE;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_METADATA;
@@ -39,6 +40,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -109,22 +111,16 @@ public class WallpaperBackupAgent extends BackupAgent {
     static final String LOCK_WALLPAPER_STAGE = "wallpaper-lock-stage";
     @VisibleForTesting
     static final String WALLPAPER_INFO_STAGE = "wallpaper-info-stage";
-
     @VisibleForTesting
     static final String WALLPAPER_BACKUP_DEVICE_INFO_STAGE = "wallpaper-backup-device-info-stage";
-
     static final String EMPTY_SENTINEL = "empty";
     static final String QUOTA_SENTINEL = "quota";
-
     // Shared preferences constants.
     static final String PREFS_NAME = "wbprefs.xml";
     static final String SYSTEM_GENERATION = "system_gen";
     static final String LOCK_GENERATION = "lock_gen";
 
-    /**
-     * An approximate area threshold to compare device dimension similarity
-     */
-    static final int AREA_THRESHOLD = 50; // TODO (b/327637867): determine appropriate threshold
+    static final float DEFAULT_ACCEPTABLE_PARALLAX = 0.2f;
 
     // If this file exists, it means we exceeded our quota last time
     private File mQuotaFile;
@@ -336,7 +332,6 @@ public class WallpaperBackupAgent extends BackupAgent {
         mEventLogger.onSystemImageWallpaperBackupFailed(error);
     }
 
-
     private void backupLockWallpaperFileIfItExists(SharedPreferences sharedPrefs,
             boolean lockChanged, int lockGeneration, FullBackupDataOutput data) throws IOException {
         final File lockImageStage = new File(getFilesDir(), LOCK_WALLPAPER_STAGE);
@@ -409,6 +404,16 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
     }
 
+    private static String readText(TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        String result = "";
+        if (parser.next() == XmlPullParser.TEXT) {
+            result = parser.getText();
+            parser.nextTag();
+        }
+        return result;
+    }
+
     @VisibleForTesting
     // fullBackupFile is final, so we intercept backups here in tests.
     protected void backupFile(File file, FullBackupDataOutput data) {
@@ -438,17 +443,9 @@ public class WallpaperBackupAgent extends BackupAgent {
         boolean lockImageStageExists = lockImageStage.exists();
 
         try {
-            // Parse the device dimensions of the source device and compare with target to
-            // to identify whether we need to skip the remainder of the restore process
+            // Parse the device dimensions of the source device
             Pair<Point, Point> sourceDeviceDimensions = parseDeviceDimensions(
                     deviceDimensionsStage);
-
-            Point targetDeviceDimensions = getScreenDimensions();
-            if (sourceDeviceDimensions != null && targetDeviceDimensions != null
-                    && isSourceDeviceSignificantlySmallerThanTarget(sourceDeviceDimensions.first,
-                    targetDeviceDimensions)) {
-                Slog.d(TAG, "The source device is significantly smaller than target");
-            }
 
             // First parse the live component name so that we know for logging if we care about
             // logging errors with the image restore.
@@ -466,9 +463,10 @@ public class WallpaperBackupAgent extends BackupAgent {
             // to back up the original image on the source device, or there was no user-supplied
             // wallpaper image present.
             if (lockImageStageExists) {
-                restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK);
+                restoreFromStage(lockImageStage, infoStage, "kwp", FLAG_LOCK,
+                        sourceDeviceDimensions);
             }
-            restoreFromStage(imageStage, infoStage, "wp", sysWhich);
+            restoreFromStage(imageStage, infoStage, "wp", sysWhich, sourceDeviceDimensions);
 
             // And reset to the wallpaper service we should be using
             if (mLockHasLiveComponent) {
@@ -543,16 +541,6 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
     }
 
-    private static String readText(TypedXmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        String result = "";
-        if (parser.next() == XmlPullParser.TEXT) {
-            result = parser.getText();
-            parser.nextTag();
-        }
-        return result;
-    }
-
     @VisibleForTesting
     void updateWallpaperComponent(ComponentName wpService, int which)
             throws IOException {
@@ -578,10 +566,13 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
     }
 
-    private void restoreFromStage(File stage, File info, String hintTag, int which)
+    private void restoreFromStage(File stage, File info, String hintTag, int which,
+            Pair<Point, Point> sourceDeviceDimensions)
             throws IOException {
         if (stage.exists()) {
             if (multiCrop()) {
+                // TODO(b/332937943): implement offset adjustment by manually adjusting crop to
+                //  adhere to device aspect ratio
                 SparseArray<Rect> cropHints = parseCropHints(info, hintTag);
                 if (cropHints != null) {
                     Slog.i(TAG, "Got restored wallpaper; applying which=" + which
@@ -601,7 +592,6 @@ public class WallpaperBackupAgent extends BackupAgent {
                 }
                 return;
             }
-
             // Parse the restored info file to find the crop hint.  Note that this currently
             // relies on a priori knowledge of the wallpaper info file schema.
             Rect cropHint = parseCropHint(info, hintTag);
@@ -609,8 +599,33 @@ public class WallpaperBackupAgent extends BackupAgent {
                 Slog.i(TAG, "Got restored wallpaper; applying which=" + which
                         + "; cropHint = " + cropHint);
                 try (FileInputStream in = new FileInputStream(stage)) {
-                    mWallpaperManager.setStream(in, cropHint.isEmpty() ? null : cropHint, true,
-                            which);
+
+                    if (sourceDeviceDimensions != null && sourceDeviceDimensions.first != null) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        ParcelFileDescriptor pdf = ParcelFileDescriptor.open(stage, MODE_READ_ONLY);
+                        BitmapFactory.decodeFileDescriptor(pdf.getFileDescriptor(),
+                                null, options);
+                        Point bitmapSize = new Point(options.outWidth, options.outHeight);
+                        Point sourceDeviceSize = new Point(sourceDeviceDimensions.first.x,
+                                sourceDeviceDimensions.first.y);
+                        Point targetDeviceDimensions = getScreenDimensions();
+
+                        // TODO: for now we handle only the case where the target device has smaller
+                        // aspect ratio than the source device i.e. the target device is more narrow
+                        // than the source device
+                        if (isTargetMoreNarrowThanSource(targetDeviceDimensions,
+                                sourceDeviceSize)) {
+                            Rect adjustedCrop = findNewCropfromOldCrop(cropHint,
+                                    sourceDeviceDimensions.first, true, targetDeviceDimensions,
+                                    bitmapSize, true);
+
+                            cropHint.set(adjustedCrop);
+                        }
+                    }
+
+                    mWallpaperManager.setStream(in, cropHint.isEmpty() ? null : cropHint,
+                            true, which);
 
                     // And log the success
                     if ((which & FLAG_SYSTEM) > 0) {
@@ -629,6 +644,209 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
     }
 
+    /**
+     * This method computes the crop of the stored wallpaper to preserve its center point as the
+     * user had set it in the previous device.
+     *
+     * The algorithm involves first computing the original crop of the user (without parallax). Then
+     * manually adjusting the user's original crop to respect the current device's aspect ratio
+     * (thereby preserving the center point). Then finally, adding any leftover image real-estate
+     * (i.e. space left over on the horizontal axis) to add parallax effect. Parallax is only added
+     * if was present in the old device's settings.
+     *
+     */
+    private Rect findNewCropfromOldCrop(Rect oldCrop, Point oldDisplaySize, boolean oldRtl,
+            Point newDisplaySize, Point bitmapSize, boolean newRtl) {
+        Rect cropWithoutParallax = withoutParallax(oldCrop, oldDisplaySize, oldRtl, bitmapSize);
+        oldCrop = oldCrop.isEmpty() ? new Rect(0, 0, bitmapSize.x, bitmapSize.y) : oldCrop;
+        float oldParallaxAmount = ((float) oldCrop.width() / cropWithoutParallax.width()) - 1;
+
+        Rect newCropWithSameCenterWithoutParallax = sameCenter(newDisplaySize, bitmapSize,
+                cropWithoutParallax);
+
+        Rect newCrop = newCropWithSameCenterWithoutParallax;
+
+        // calculate the amount of left-over space there is in the image after adjusting the crop
+        // from the above operation i.e. in a rtl configuration, this is the remaining space in the
+        // image after subtracting the new crop's right edge coordinate from the image itself, and
+        // for ltr, its just the new crop's left edge coordinate (as it's the distance from the
+        // beginning of the image)
+        int widthAvailableForParallaxOnTheNewDevice =
+                (newRtl) ? newCrop.left : bitmapSize.x - newCrop.right;
+
+        // calculate relatively how much this available space is as a fraction of the total cropped
+        // image
+        float availableParallaxAmount =
+                (float) widthAvailableForParallaxOnTheNewDevice / newCrop.width();
+
+        float minAcceptableParallax = Math.min(DEFAULT_ACCEPTABLE_PARALLAX, oldParallaxAmount);
+
+        if (DEBUG) {
+            Slog.d(TAG, "- cropWithoutParallax: " + cropWithoutParallax);
+            Slog.d(TAG, "- oldParallaxAmount: " + oldParallaxAmount);
+            Slog.d(TAG, "- newCropWithSameCenterWithoutParallax: "
+                    + newCropWithSameCenterWithoutParallax);
+            Slog.d(TAG, "- widthAvailableForParallaxOnTheNewDevice: "
+                    + widthAvailableForParallaxOnTheNewDevice);
+            Slog.d(TAG, "- availableParallaxAmount: " + availableParallaxAmount);
+            Slog.d(TAG, "- minAcceptableParallax: " + minAcceptableParallax);
+            Slog.d(TAG, "- oldCrop: " + oldCrop);
+            Slog.d(TAG, "- oldDisplaySize: " + oldDisplaySize);
+            Slog.d(TAG, "- oldRtl: " + oldRtl);
+            Slog.d(TAG, "- newDisplaySize: " + newDisplaySize);
+            Slog.d(TAG, "- bitmapSize: " + bitmapSize);
+            Slog.d(TAG, "- newRtl: " + newRtl);
+        }
+        if (availableParallaxAmount >= minAcceptableParallax) {
+            // but in any case, don't put more parallax than the amount of the old device
+            float parallaxToAdd = Math.min(availableParallaxAmount, oldParallaxAmount);
+
+            int widthToAddForParallax = (int) (newCrop.width() * parallaxToAdd);
+            if (DEBUG) {
+                Slog.d(TAG, "- parallaxToAdd: " + parallaxToAdd);
+                Slog.d(TAG, "- widthToAddForParallax: " + widthToAddForParallax);
+            }
+            if (newRtl) {
+                newCrop.left -= widthToAddForParallax;
+            } else {
+                newCrop.right += widthToAddForParallax;
+            }
+        }
+        return newCrop;
+    }
+
+    /**
+     * This method computes the original crop of the user without parallax.
+     *
+     * NOTE: When the user sets the wallpaper with a specific crop, there may additional image added
+     * to the crop to support parallax. In order to determine the user's actual crop the parallax
+     * must be removed if it exists.
+     */
+    Rect withoutParallax(Rect crop, Point displaySize, boolean rtl, Point bitmapSize) {
+        // in the case an image's crop is not set, we assume the image itself is cropped
+        if (crop.isEmpty()) {
+            crop = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
+        }
+
+        if (DEBUG) {
+            Slog.w(TAG, "- crop: " + crop);
+        }
+
+        Rect adjustedCrop = new Rect(crop);
+        float suggestedDisplayRatio = (float) displaySize.x / displaySize.y;
+
+        // here we calculate the width of the wallpaper image such that it has the same aspect ratio
+        // as the given display i.e. the width of the image on a single page of the device without
+        // parallax (i.e. displaySize will correspond to the display the crop was originally set on)
+        int wallpaperWidthWithoutParallax = (int) (0.5f + (float) displaySize.x * crop.height()
+                / displaySize.y);
+        // subtracting wallpaperWidthWithoutParallax from the wallpaper crop gives the amount of
+        // parallax added
+        int widthToRemove = Math.max(0, crop.width() - wallpaperWidthWithoutParallax);
+
+        if (DEBUG) {
+            Slog.d(TAG, "- adjustedCrop: " + adjustedCrop);
+            Slog.d(TAG, "- suggestedDisplayRatio: " + suggestedDisplayRatio);
+            Slog.d(TAG, "- wallpaperWidthWithoutParallax: " + wallpaperWidthWithoutParallax);
+            Slog.d(TAG, "- widthToRemove: " + widthToRemove);
+        }
+        if (rtl) {
+            adjustedCrop.left += widthToRemove;
+        } else {
+            adjustedCrop.right -= widthToRemove;
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "- adjustedCrop: " + crop);
+        }
+        return adjustedCrop;
+    }
+
+    /**
+     * This method computes a new crop based on the given crop in order to preserve the center point
+     * of the given crop on the provided displaySize. This is only for the case where the device
+     * displaySize has a smaller aspect ratio than the cropped image.
+     *
+     * NOTE: If the width to height ratio is less in the device display than cropped image
+     * this means the aspect ratios are off and there will be distortions in the image
+     * if the image is applied to the current display (i.e. the image will be skewed ->
+     * pixels in the image will not align correctly with the same pixels in the image that are
+     * above them)
+     */
+    Rect sameCenter(Point displaySize, Point bitmapSize, Rect crop) {
+
+        // in the case an image's crop is not set, we assume the image itself is cropped
+        if (crop.isEmpty()) {
+            crop = new Rect(0, 0, bitmapSize.x, bitmapSize.y);
+        }
+
+        float screenRatio = (float) displaySize.x / displaySize.y;
+        float cropRatio = (float) crop.width() / crop.height();
+
+        Rect adjustedCrop = new Rect(crop);
+
+        if (screenRatio < cropRatio) {
+            // the screen is more narrow than the image, and as such, the image will need to be
+            // zoomed in till it fits in the vertical axis. Due to this, we need to manually adjust
+            // the image's crop in order for it to fit into the screen without having the framework
+            // do it (since the framework left aligns the image after zooming)
+
+            // Calculate the height of the adjusted wallpaper crop so it respects the aspect ratio
+            // of the device. To calculate the height, we will use the width of the current crop.
+            // This is so we find the largest height possible which also respects the device aspect
+            // ratio.
+            int heightToAdd = (int) (0.5f + crop.width() / screenRatio - crop.height());
+
+            // Calculate how much extra image space available that can be used to adjust
+            // the crop. If this amount is less than heightToAdd, from above, then that means we
+            // can't use heightToAdd. Instead we will need to use the maximum possible height, which
+            // is the height of the original bitmap. NOTE: the bitmap height may be different than
+            // the crop.
+            // since there is no guarantee to have height available on both sides
+            // (e.g. the available height might be fully at the bottom), grab the minimum
+            int availableHeight = 2 * Math.min(crop.top, bitmapSize.y - crop.bottom);
+            int actualHeightToAdd = Math.min(heightToAdd, availableHeight);
+
+            // half of the additional height is added to the top and bottom of the crop
+            adjustedCrop.top -= actualHeightToAdd / 2 + actualHeightToAdd % 2;
+            adjustedCrop.bottom += actualHeightToAdd / 2;
+
+            // Calculate the width of the adjusted crop. Initially we used the fixed width of the
+            // crop to calculate the heightToAdd, but since this height may be invalid (based on
+            // the calculation above) we calculate the width again instead of using the fixed width,
+            // using the adjustedCrop's updated height.
+            int widthToRemove = (int) (0.5f + crop.width() - adjustedCrop.height() * screenRatio);
+
+            // half of the additional width is subtracted from the left and right side of the crop
+            int widthToRemoveLeft = widthToRemove / 2;
+            int widthToRemoveRight = widthToRemove / 2 + widthToRemove % 2;
+
+            adjustedCrop.left += widthToRemoveLeft;
+            adjustedCrop.right -= widthToRemoveRight;
+
+            if (DEBUG) {
+                Slog.d(TAG, "cropRatio: " + cropRatio);
+                Slog.d(TAG, "screenRatio: " + screenRatio);
+                Slog.d(TAG, "heightToAdd: " + heightToAdd);
+                Slog.d(TAG, "actualHeightToAdd: " + actualHeightToAdd);
+                Slog.d(TAG, "availableHeight: " + availableHeight);
+                Slog.d(TAG, "widthToRemove: " + widthToRemove);
+                Slog.d(TAG, "adjustedCrop: " + adjustedCrop);
+            }
+
+            return adjustedCrop;
+        }
+
+        return adjustedCrop;
+    }
+
+    private boolean isTargetMoreNarrowThanSource(Point targetDisplaySize, Point srcDisplaySize) {
+        float targetScreenRatio = (float) targetDisplaySize.x / targetDisplaySize.y;
+        float srcScreenRatio = (float) srcDisplaySize.x / srcDisplaySize.y;
+
+        return (targetScreenRatio < srcScreenRatio);
+    }
+
     private void logRestoreErrorIfNoLiveComponent(int which, String error) {
         if (mSystemHasLiveComponent) {
             return;
@@ -644,6 +862,7 @@ public class WallpaperBackupAgent extends BackupAgent {
             mEventLogger.onLockImageWallpaperRestoreFailed(error);
         }
     }
+
     private Rect parseCropHint(File wallpaperInfo, String sectionTag) {
         Rect cropHint = new Rect();
         try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
@@ -681,7 +900,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                 if (type != XmlPullParser.START_TAG) continue;
                 String tag = parser.getName();
                 if (!sectionTag.equals(tag)) continue;
-                for (Pair<Integer, String> pair: List.of(
+                for (Pair<Integer, String> pair : List.of(
                         new Pair<>(WallpaperManager.PORTRAIT, "Portrait"),
                         new Pair<>(WallpaperManager.LANDSCAPE, "Landscape"),
                         new Pair<>(WallpaperManager.SQUARE_PORTRAIT, "SquarePortrait"),
@@ -905,22 +1124,6 @@ public class WallpaperBackupAgent extends BackupAgent {
             }
         }
         return internalDisplays;
-    }
-
-    /**
-     * This method compares the source and target dimensions, and returns true if there is a
-     * significant difference in area between them and the source dimensions are smaller than the
-     * target dimensions.
-     *
-     * @param sourceDimensions is the dimensions of the source device
-     * @param targetDimensions is the dimensions of the target device
-     */
-    @VisibleForTesting
-    boolean isSourceDeviceSignificantlySmallerThanTarget(Point sourceDimensions,
-            Point targetDimensions) {
-        int rawAreaDelta = (targetDimensions.x * targetDimensions.y)
-                - (sourceDimensions.x * sourceDimensions.y);
-        return rawAreaDelta > AREA_THRESHOLD;
     }
 
     @VisibleForTesting

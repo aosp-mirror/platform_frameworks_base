@@ -26,7 +26,7 @@ import com.android.server.SystemService;
 
 import java.util.ArrayList;
 
-public class BroadcastRadioService extends SystemService {
+public final class BroadcastRadioService extends SystemService {
     private final IRadioService mServiceImpl;
 
     public BroadcastRadioService(Context context) {

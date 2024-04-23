@@ -21,7 +21,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.util.Log
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
@@ -29,14 +28,10 @@ import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
-import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
-import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.StateToValue
-import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.math.max
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -99,9 +94,9 @@ constructor(
                     occludedToLockscreen,
                     aodToLockscreen ->
                     val translationY =
-                        if (isInTransition(aodToLockscreen.transitionState)) {
+                        if (aodToLockscreen.transitionState.isTransitioning()) {
                             aodToLockscreen.value ?: 0f
-                        } else if (isInTransition(goneToAod.transitionState)) {
+                        } else if (goneToAod.transitionState.isTransitioning()) {
                             (goneToAod.value ?: 0f) + burnInModel.translationY
                         } else {
                             burnInModel.translationY + occludedToLockscreen + keyguardTranslationY
@@ -110,10 +105,6 @@ constructor(
                 }
             }
             .distinctUntilChanged()
-    }
-
-    private fun isInTransition(state: TransitionState): Boolean {
-        return state == STARTED || state == RUNNING
     }
 
     private fun burnIn(
@@ -128,12 +119,12 @@ constructor(
                 yDimenResourceId = R.dimen.burn_in_prevention_offset_y
             ),
         ) { interpolated, burnIn ->
+            val useAltAod =
+                keyguardClockViewModel.currentClock.value?.let { clock ->
+                    clock.config.useAlternateSmartspaceAODTransition
+                } == true
             val useScaleOnly =
-                (clockController(params.clockControllerProvider)
-                    ?.get()
-                    ?.config
-                    ?.useAlternateSmartspaceAODTransition
-                    ?: false) && keyguardClockViewModel.clockSize.value == KeyguardClockSwitch.LARGE
+                useAltAod && keyguardClockViewModel.clockSize.value == ClockSize.LARGE
 
             if (useScaleOnly) {
                 BurnInModel(
@@ -164,21 +155,10 @@ constructor(
             }
         }
     }
-
-    private fun clockController(
-        provider: Provider<ClockController>?,
-    ): Provider<ClockController>? {
-        return if (MigrateClocksToBlueprint.isEnabled) {
-            Provider { keyguardClockViewModel.currentClock.value }
-        } else {
-            provider
-        }
-    }
 }
 
 /** UI-sourced parameters to pass into the various methods of [AodBurnInViewModel]. */
 data class BurnInParameters(
-    val clockControllerProvider: Provider<ClockController>? = null,
     /** System insets that keyguard needs to stay out of */
     val topInset: Int = 0,
     /** The min y-value of the visible elements on lockscreen */

@@ -42,7 +42,7 @@ constructor(
     shadeInteractor: ShadeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
-    val shadeScrimBounds: StateFlow<ShadeScrimBounds> =
+    val shadeScrimBounds: StateFlow<ShadeScrimBounds?> =
         placeholderRepository.shadeScrimBounds.asStateFlow()
 
     /**
@@ -59,8 +59,8 @@ constructor(
                 isExpandingFromHeadsUp,
             ) { shadeMode, isExpandingFromHeadsUp ->
                 ShadeScrimRounding(
-                    roundTop = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
-                    roundBottom = shadeMode != ShadeMode.Single,
+                    isTopRounded = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
+                    isBottomRounded = shadeMode != ShadeMode.Single,
                 )
             }
             .distinctUntilChanged()
@@ -72,14 +72,27 @@ constructor(
      */
     val stackHeight: StateFlow<Float> = viewHeightRepository.stackHeight.asStateFlow()
 
+    /** The height in px of the contents of the HUN. */
+    val headsUpHeight: StateFlow<Float> = viewHeightRepository.headsUpHeight.asStateFlow()
+
     /** The y-coordinate in px of top of the contents of the notification stack. */
     val stackTop: StateFlow<Float> = placeholderRepository.stackTop.asStateFlow()
+
+    /** The y-coordinate in px of bottom of the contents of the notification stack. */
+    val stackBottom: StateFlow<Float> = placeholderRepository.stackBottom.asStateFlow()
+
+    /** The height of the keyguard's available space bounds */
+    val constrainedAvailableSpace: StateFlow<Int> =
+        placeholderRepository.constrainedAvailableSpace.asStateFlow()
 
     /**
      * Whether the notification stack is scrolled to the top; i.e., it cannot be scrolled down any
      * further.
      */
     val scrolledToTop: StateFlow<Boolean> = placeholderRepository.scrolledToTop.asStateFlow()
+
+    /** The y-coordinate in px of bottom of the contents of the HUN. */
+    val headsUpTop: StateFlow<Float> = placeholderRepository.headsUpTop.asStateFlow()
 
     /**
      * The amount in px that the notification stack should scroll due to internal expansion. This
@@ -89,8 +102,8 @@ constructor(
     val syntheticScroll: Flow<Float> = viewHeightRepository.syntheticScroll.asStateFlow()
 
     /** Sets the position of the notification stack in the current scene. */
-    fun setShadeScrimBounds(bounds: ShadeScrimBounds) {
-        check(bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
+    fun setShadeScrimBounds(bounds: ShadeScrimBounds?) {
+        check(bounds == null || bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
         placeholderRepository.shadeScrimBounds.value = bounds
     }
 
@@ -99,9 +112,19 @@ constructor(
         viewHeightRepository.stackHeight.value = height
     }
 
+    /** Sets the height of heads up notification. */
+    fun setHeadsUpHeight(height: Float) {
+        viewHeightRepository.headsUpHeight.value = height
+    }
+
     /** Sets the y-coord in px of the top of the contents of the notification stack. */
-    fun setStackTop(startY: Float) {
-        placeholderRepository.stackTop.value = startY
+    fun setStackTop(stackTop: Float) {
+        placeholderRepository.stackTop.value = stackTop
+    }
+
+    /** Sets the y-coord in px of the bottom of the contents of the notification stack. */
+    fun setStackBottom(stackBottom: Float) {
+        placeholderRepository.stackBottom.value = stackBottom
     }
 
     /** Sets whether the notification stack is scrolled to the top. */
@@ -112,5 +135,13 @@ constructor(
     /** Sets the amount (px) that the notification stack should scroll due to internal expansion. */
     fun setSyntheticScroll(delta: Float) {
         viewHeightRepository.syntheticScroll.value = delta
+    }
+
+    fun setConstrainedAvailableSpace(height: Int) {
+        placeholderRepository.constrainedAvailableSpace.value = height
+    }
+
+    fun setHeadsUpTop(headsUpTop: Float) {
+        placeholderRepository.headsUpTop.value = headsUpTop
     }
 }

@@ -850,11 +850,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void showMediaOutputSwitcher(String packageName) {
+        public void showMediaOutputSwitcher(String targetPackageName, UserHandle targetUserHandle) {
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.showMediaOutputSwitcher(packageName);
+                    bar.showMediaOutputSwitcher(targetPackageName, targetUserHandle);
                 } catch (RemoteException ex) {
                 }
             }

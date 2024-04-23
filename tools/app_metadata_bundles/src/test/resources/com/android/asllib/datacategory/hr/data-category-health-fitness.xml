@@ -1,0 +1,8 @@
+<holder_of_flattened_for_testing>
+    <data-shared dataCategory="health_fitness"
+        dataType="health"
+        purposes="analytics" />
+    <data-shared dataCategory="health_fitness"
+        dataType="fitness"
+        purposes="analytics" />
+</holder_of_flattened_for_testing>

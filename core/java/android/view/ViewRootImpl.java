@@ -27,6 +27,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_LOCATION;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsSource.ID_IME;
+import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
@@ -34,14 +35,18 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
-import static android.view.View.FRAME_RATE_CATEGORY_REASON_UNKNOWN;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_BOOST;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_CONFLICTED;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_IDLE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INVALID;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_LARGE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_REQUESTED;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_SMALL;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_TOUCH;
+import static android.view.View.FRAME_RATE_CATEGORY_REASON_UNKNOWN;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_VELOCITY;
+import static android.view.View.MAX_FRAME_RATE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -69,11 +74,10 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
-import static android.view.WindowInsetsController.COMPATIBLE_APPEARANCE_FLAGS;
-import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
+import static android.view.WindowInsetsController.Appearance;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
@@ -85,8 +89,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
@@ -107,11 +110,13 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.accessibility.Flags.fixMergedContentChangeEventV2;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateVelocityMappingReadOnly;
+import static android.view.flags.Flags.toolkitFrameRateViewEnablingReadOnly;
 import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
-import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
@@ -235,6 +240,7 @@ import android.view.animation.Interpolator;
 import android.view.autofill.AutofillManager;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
+import android.view.flags.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
@@ -258,7 +264,6 @@ import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneFallbackEventHandler;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
@@ -336,13 +341,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean USE_ASYNC_PERFORM_HAPTIC_FEEDBACK = true;
 
     /**
-     * Whether the caption is drawn by the shell.
-     * @hide
-     */
-    public static final boolean CAPTION_ON_SHELL =
-            SystemProperties.getBoolean("persist.wm.debug.caption_on_shell", true);
-
-    /**
      * Whether the client (system UI) is handling the transient gesture and the corresponding
      * animation.
      * @hide
@@ -393,6 +391,26 @@ public final class ViewRootImpl implements ViewParent,
     private static final int SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS = 2500;
 
     private static final int UNSET_SYNC_ID = -1;
+
+    private static final int INFREQUENT_UPDATE_INTERVAL_MILLIS = 100;
+    private static final int INFREQUENT_UPDATE_COUNTS = 2;
+
+    /**
+     * The {@link #intermittentUpdateState()} value when the ViewRootImpl isn't intermittent.
+     */
+    public static final int INTERMITTENT_STATE_NOT_INTERMITTENT = 1;
+
+    /**
+     * The {@link #intermittentUpdateState()} value when the ViewRootImpl is transitioning either
+     * to or from intermittent to not intermittent. This indicates that the frame rate shouldn't
+     * change.
+     */
+    public static final int INTERMITTENT_STATE_IN_TRANSITION = -1;
+
+    /**
+     * The {@link #intermittentUpdateState()} value when the ViewRootImpl is intermittent.
+     */
+    public static final int INTERMITTENT_STATE_INTERMITTENT = 0;
 
     /**
      * Minimum time to wait before reporting changes to keep clear areas.
@@ -624,6 +642,15 @@ public final class ViewRootImpl implements ViewParent,
 
     // Is the stylus pointer icon enabled
     private final boolean mIsStylusPointerIconEnabled;
+
+    // VRR check for number of infrequent updates
+    private int mInfrequentUpdateCount = 0;
+    // VRR time of last update
+    private long mLastUpdateTimeMillis = 0;
+    // VRR interval since the previous
+    private int mMinusOneFrameIntervalMillis = 0;
+    // VRR interval between the previous and the frame before
+    private int mMinusTwoFrameIntervalMillis = 0;
 
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
@@ -1050,10 +1077,10 @@ public final class ViewRootImpl implements ViewParent,
 
     // The preferred frame rate category of the view that
     // could be updated on a frame-by-frame basis.
-    private int mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+    private int mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
     // The preferred frame rate category of the last frame that
     // could be used to lower frame rate after touch boost
-    private int mLastPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+    private int mLastPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
     private float mPreferredFrameRate = 0;
@@ -1070,6 +1097,7 @@ public final class ViewRootImpl implements ViewParent,
     // Used to check if there is a message in the message queue
     // for idleness handling.
     private boolean mHasIdledMessage = false;
+    private boolean mDrawnThisFrame = false;
     // Used to check if there is a conflict between different frame rate voting.
     // Take 24 and 30 as an example, 24 is not a divisor of 30.
     // We consider there is a conflict.
@@ -1155,8 +1183,11 @@ public final class ViewRootImpl implements ViewParent,
     private static boolean sToolkitFrameRateFunctionEnablingReadOnlyFlagValue;
     private static boolean sToolkitMetricsForFrameRateDecisionFlagValue;
     private static boolean sToolkitFrameRateTypingReadOnlyFlagValue;
+    private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue;
     private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
-            toolkitFrameRateVelocityMappingReadOnly();;
+            toolkitFrameRateVelocityMappingReadOnly();
+    private static boolean sToolkitEnableInvalidateCheckThreadFlagValue =
+            Flags.enableInvalidateCheckThread();
 
     static {
         sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
@@ -1164,6 +1195,8 @@ public final class ViewRootImpl implements ViewParent,
         sToolkitFrameRateTypingReadOnlyFlagValue = toolkitFrameRateTypingReadOnly();
         sToolkitFrameRateFunctionEnablingReadOnlyFlagValue =
                 toolkitFrameRateFunctionEnablingReadOnly();
+        sToolkitFrameRateViewEnablingReadOnlyFlagValue =
+                toolkitFrameRateViewEnablingReadOnly();
     }
 
     // The latest input event from the gesture that was used to resolve the pointer icon.
@@ -1439,6 +1472,7 @@ public final class ViewRootImpl implements ViewParent,
                 // Keep track of the actual window flags supplied by the client.
                 mClientWindowLayoutFlags = attrs.flags;
 
+                adjustLayoutInDisplayCutoutMode(attrs);
                 setAccessibilityFocus(null, null);
 
                 if (view instanceof RootViewSurfaceTaker) {
@@ -1522,7 +1556,9 @@ public final class ViewRootImpl implements ViewParent,
                     mOrigWindowType = mWindowAttributes.type;
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
-                    adjustLayoutParamsForCompatibility(mWindowAttributes);
+                    adjustLayoutParamsForCompatibility(mWindowAttributes,
+                            mInsetsController.getAppearanceControlled(),
+                            mInsetsController.isBehaviorControlled());
                     controlInsetsForCompatibility(mWindowAttributes);
 
                     Rect attachedFrame = new Rect();
@@ -2038,8 +2074,9 @@ public final class ViewRootImpl implements ViewParent,
             // Preserve appearance and behavior.
             final int appearance = mWindowAttributes.insetsFlags.appearance;
             final int behavior = mWindowAttributes.insetsFlags.behavior;
-            final int appearanceAndBehaviorPrivateFlags = mWindowAttributes.privateFlags
-                    & (PRIVATE_FLAG_APPEARANCE_CONTROLLED | PRIVATE_FLAG_BEHAVIOR_CONTROLLED);
+
+            // Calling this before copying prevents redundant LAYOUT_CHANGED.
+            final int layoutInDisplayCutoutModeFromCaller = adjustLayoutInDisplayCutoutMode(attrs);
 
             final int changes = mWindowAttributes.copyFrom(attrs);
             if ((changes & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
@@ -2057,12 +2094,14 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowAttributes.packageName = mBasePackageName;
             }
 
+            // Restore the layoutInDisplayCutoutMode of the caller;
+            attrs.layoutInDisplayCutoutMode = layoutInDisplayCutoutModeFromCaller;
+
             // Restore preserved flags.
             mWindowAttributes.systemUiVisibility = systemUiVisibility;
             mWindowAttributes.subtreeSystemUiVisibility = subtreeSystemUiVisibility;
             mWindowAttributes.insetsFlags.appearance = appearance;
             mWindowAttributes.insetsFlags.behavior = behavior;
-            mWindowAttributes.privateFlags |= appearanceAndBehaviorPrivateFlags;
 
             if (mWindowAttributes.preservePreviousSurfaceInsets) {
                 // Restore old surface insets.
@@ -2098,6 +2137,19 @@ public final class ViewRootImpl implements ViewParent,
             scheduleTraversals();
             setAccessibilityWindowAttributesIfNeeded();
         }
+    }
+
+    private int adjustLayoutInDisplayCutoutMode(WindowManager.LayoutParams attrs) {
+        final int originalMode = attrs.layoutInDisplayCutoutMode;
+        if ((attrs.privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
+                && attrs.isFullscreen()
+                && attrs.getFitInsetsTypes() == 0
+                && attrs.getFitInsetsSides() == 0) {
+            if (originalMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
+                attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            }
+        }
+        return originalMode;
     }
 
     void handleAppVisibility(boolean visible) {
@@ -2377,8 +2429,9 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void onDescendantInvalidated(@NonNull View child, @NonNull View descendant) {
-        // TODO: Re-enable after camera is fixed or consider targetSdk checking this
-        // checkThread();
+        if (sToolkitEnableInvalidateCheckThreadFlagValue) {
+            checkThread();
+        }
         if ((descendant.mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
             mIsAnimating = true;
         }
@@ -2627,8 +2680,10 @@ public final class ViewRootImpl implements ViewParent,
         // no longer needed if the dVRR feature is disabled.
         if (shouldEnableDvrr()) {
             try {
-                mFrameRateTransaction.setFrameRateSelectionStrategy(sc,
+                if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+                    mFrameRateTransaction.setFrameRateSelectionStrategy(sc,
                         sc.FRAME_RATE_SELECTION_STRATEGY_SELF).applyAsyncUnsafe();
+                }
             } catch (Exception e) {
                 Log.e(mTag, "Unable to set frame rate selection strategy ", e);
             }
@@ -2916,26 +2971,35 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     @VisibleForTesting
-    public static void adjustLayoutParamsForCompatibility(WindowManager.LayoutParams inOutParams) {
+    public static void adjustLayoutParamsForCompatibility(WindowManager.LayoutParams inOutParams,
+            @Appearance int appearanceControlled, boolean behaviorControlled) {
         final int sysUiVis = inOutParams.systemUiVisibility | inOutParams.subtreeSystemUiVisibility;
         final int flags = inOutParams.flags;
         final int type = inOutParams.type;
         final int adjust = inOutParams.softInputMode & SOFT_INPUT_MASK_ADJUST;
 
-        if ((inOutParams.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) == 0) {
-            inOutParams.insetsFlags.appearance &= ~COMPATIBLE_APPEARANCE_FLAGS;
-            if ((sysUiVis & SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
-                inOutParams.insetsFlags.appearance |= APPEARANCE_LOW_PROFILE_BARS;
-            }
-            if ((sysUiVis & SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0) {
-                inOutParams.insetsFlags.appearance |= APPEARANCE_LIGHT_STATUS_BARS;
-            }
-            if ((sysUiVis & SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) != 0) {
-                inOutParams.insetsFlags.appearance |= APPEARANCE_LIGHT_NAVIGATION_BARS;
-            }
+        @Appearance int appearance = inOutParams.insetsFlags.appearance;
+        if ((appearanceControlled & APPEARANCE_LOW_PROFILE_BARS) == 0) {
+            appearance &= ~APPEARANCE_LOW_PROFILE_BARS;
+            appearance |= (sysUiVis & SYSTEM_UI_FLAG_LOW_PROFILE) != 0
+                    ? APPEARANCE_LOW_PROFILE_BARS
+                    : 0;
         }
+        if ((appearanceControlled & APPEARANCE_LIGHT_STATUS_BARS) == 0) {
+            appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
+            appearance |= (sysUiVis & SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0
+                    ? APPEARANCE_LIGHT_STATUS_BARS
+                    : 0;
+        }
+        if ((appearanceControlled & APPEARANCE_LIGHT_NAVIGATION_BARS) == 0) {
+            appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
+            appearance |= (sysUiVis & SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR) != 0
+                    ? APPEARANCE_LIGHT_NAVIGATION_BARS
+                    : 0;
+        }
+        inOutParams.insetsFlags.appearance = appearance;
 
-        if ((inOutParams.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) == 0) {
+        if (!behaviorControlled) {
             if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
                     || (flags & FLAG_FULLSCREEN) != 0) {
                 inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
@@ -3162,22 +3226,6 @@ public final class ViewRootImpl implements ViewParent,
         host.dispatchApplyWindowInsets(insets);
         mAttachInfo.delayNotifyContentCaptureInsetsEvent(insets.getInsets(Type.all()));
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-    }
-
-    private boolean updateCaptionInsets() {
-        if (CAPTION_ON_SHELL) {
-            return false;
-        }
-        if (!(mView instanceof DecorView)) return false;
-        final int captionInsetsHeight = ((DecorView) mView).getCaptionInsetsHeight();
-        final Rect captionFrame = new Rect();
-        if (captionInsetsHeight != 0) {
-            captionFrame.set(mWinFrame.left, mWinFrame.top, mWinFrame.right,
-                            mWinFrame.top + captionInsetsHeight);
-        }
-        if (mAttachInfo.mCaptionInsets.equals(captionFrame)) return false;
-        mAttachInfo.mCaptionInsets.set(captionFrame);
-        return true;
     }
 
     private boolean shouldDispatchCutout() {
@@ -3485,7 +3533,9 @@ public final class ViewRootImpl implements ViewParent,
                     && !PixelFormat.formatHasAlpha(params.format)) {
                 params.format = PixelFormat.TRANSLUCENT;
             }
-            adjustLayoutParamsForCompatibility(params);
+            adjustLayoutParamsForCompatibility(params,
+                    mInsetsController.getAppearanceControlled(),
+                    mInsetsController.isBehaviorControlled());
             controlInsetsForCompatibility(params);
             if (mDispatchedSystemBarAppearance != params.insetsFlags.appearance) {
                 mDispatchedSystemBarAppearance = params.insetsFlags.appearance;
@@ -3629,9 +3679,6 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 if (alwaysConsumeSystemBarsChanged) {
                     mAttachInfo.mAlwaysConsumeSystemBars = mPendingAlwaysConsumeSystemBars;
-                    dispatchApplyInsets = true;
-                }
-                if (updateCaptionInsets()) {
                     dispatchApplyInsets = true;
                 }
                 if (dispatchApplyInsets || mLastSystemUiVisibility !=
@@ -4203,17 +4250,29 @@ public final class ViewRootImpl implements ViewParent,
         // For the variable refresh rate project.
         // We set the preferred frame rate and frame rate category at the end of performTraversals
         // when the values are applicable.
-        setPreferredFrameRate(mPreferredFrameRate);
-        setPreferredFrameRateCategory(mPreferredFrameRateCategory);
-        mFrameRateCategoryHighCount = mFrameRateCategoryHighCount > 0
-                ? mFrameRateCategoryHighCount - 1 : mFrameRateCategoryHighCount;
-        mFrameRateCategoryNormalCount = mFrameRateCategoryNormalCount > 0
-                ? mFrameRateCategoryNormalCount - 1 : mFrameRateCategoryNormalCount;
-        mFrameRateCategoryLowCount = mFrameRateCategoryLowCount > 0
-                ? mFrameRateCategoryLowCount - 1 : mFrameRateCategoryLowCount;
-        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-        mPreferredFrameRate = -1;
-        mIsFrameRateConflicted = false;
+        if (mDrawnThisFrame) {
+            mDrawnThisFrame = false;
+            updateInfrequentCount();
+            setCategoryFromCategoryCounts();
+            setPreferredFrameRate(mPreferredFrameRate);
+            setPreferredFrameRateCategory(mPreferredFrameRateCategory);
+            if (!mIsFrameRateConflicted) {
+                mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
+                mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
+                        FRAME_RATE_SETTING_REEVALUATE_TIME);
+            }
+            checkIdleness();
+            mFrameRateCategoryHighCount = mFrameRateCategoryHighCount > 0
+                    ? mFrameRateCategoryHighCount - 1 : mFrameRateCategoryHighCount;
+            mFrameRateCategoryNormalCount = mFrameRateCategoryNormalCount > 0
+                    ? mFrameRateCategoryNormalCount - 1 : mFrameRateCategoryNormalCount;
+            mFrameRateCategoryLowCount = mFrameRateCategoryLowCount > 0
+                    ? mFrameRateCategoryLowCount - 1 : mFrameRateCategoryLowCount;
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_DEFAULT;
+            mPreferredFrameRate = -1;
+            mIsFrameRateConflicted = false;
+            mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_UNKNOWN;
+        }
     }
 
     private void createSyncIfNeeded() {
@@ -6084,6 +6143,11 @@ public final class ViewRootImpl implements ViewParent,
         mAccessibilityInteractionConnectionManager.ensureNoConnection();
         mAccessibilityInteractionConnectionManager.ensureNoDirectConnection();
         removeSendWindowContentChangedCallback();
+        if (android.view.accessibility.Flags.preventLeakingViewrootimpl()
+                && mAccessibilityInteractionController != null) {
+            mAccessibilityInteractionController.destroy();
+            mAccessibilityInteractionController = null;
+        }
 
         destroyHardwareRenderer();
 
@@ -6370,6 +6434,12 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_KEEP_CLEAR_RECTS_CHANGED";
                 case MSG_REFRESH_POINTER_ICON:
                     return "MSG_REFRESH_POINTER_ICON";
+                case MSG_TOUCH_BOOST_TIMEOUT:
+                    return "MSG_TOUCH_BOOST_TIMEOUT";
+                case MSG_CHECK_INVALIDATION_IDLE:
+                    return "MSG_CHECK_INVALIDATION_IDLE";
+                case MSG_FRAME_RATE_SETTING:
+                    return "MSG_FRAME_RATE_SETTING";
             }
             return super.getMessageName(message);
         }
@@ -6634,8 +6704,6 @@ public final class ViewRootImpl implements ViewParent,
                      */
                     mIsFrameRateBoosting = false;
                     mIsTouchBoosting = false;
-                    setPreferredFrameRateCategory(Math.max(mPreferredFrameRateCategory,
-                            mLastPreferredFrameRateCategory));
                     break;
                 case MSG_CHECK_INVALIDATION_IDLE:
                     if (!mHasInvalidation && !mIsFrameRateBoosting && !mIsTouchBoosting) {
@@ -7681,7 +7749,6 @@ public final class ViewRootImpl implements ViewParent,
                     mWindowAttributes.type)) {
                 // set the frame rate to the maximum value.
                 mIsTouchBoosting = true;
-                setPreferredFrameRateCategory(mPreferredFrameRateCategory);
             }
             /**
              * We want to lower the refresh rate when MotionEvent.ACTION_UP,
@@ -9011,20 +9078,26 @@ public final class ViewRootImpl implements ViewParent,
                     mTempInsets, mTempControls, mRelayoutBundle);
             mRelayoutRequested = true;
 
+            if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
+                ActivityWindowInfo outInfo = null;
+                try {
+                    outInfo = mRelayoutBundle.getParcelable(
+                            IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
+                            ActivityWindowInfo.class);
+                    mRelayoutBundle.remove(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO);
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, "Failed to get ActivityWindowInfo from relayout Bundle", e);
+                }
+                if (outInfo != null) {
+                    mPendingActivityWindowInfo.set(outInfo);
+                }
+            }
             final int maybeSyncSeqId = mRelayoutBundle.getInt(
                     IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID);
             if (maybeSyncSeqId > 0) {
                 mSyncSeqId = maybeSyncSeqId;
             }
-            if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
-                final ActivityWindowInfo outInfo = mRelayoutBundle.getParcelable(
-                        IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
-                        ActivityWindowInfo.class);
-                if (outInfo != null) {
-                    mPendingActivityWindowInfo.set(outInfo);
-                }
-            }
-            mRelayoutBundle.clear();
+
             mWinFrameInScreen.set(mTmpFrames.frame);
             if (mTranslator != null) {
                 mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
@@ -9567,6 +9640,8 @@ public final class ViewRootImpl implements ViewParent,
             }
             mRemoved = true;
             mOnBackInvokedDispatcher.detachFromWindow();
+            removeVrrMessages();
+
             if (mAdded) {
                 dispatchDetachedFromWindow();
             }
@@ -12471,65 +12546,69 @@ public final class ViewRootImpl implements ViewParent,
         EventLog.writeEvent(LOGTAG_VIEWROOT_DRAW_EVENT, mTag, msg);
     }
 
+    /**
+     * Sets the mPreferredFrameRateCategory from the high, high_hint, normal, and low counts.
+     */
+    private void setCategoryFromCategoryCounts() {
+        switch (mPreferredFrameRateCategory) {
+            case FRAME_RATE_CATEGORY_LOW -> mFrameRateCategoryLowCount = FRAME_RATE_CATEGORY_COUNT;
+            case FRAME_RATE_CATEGORY_NORMAL ->
+                    mFrameRateCategoryNormalCount = FRAME_RATE_CATEGORY_COUNT;
+            case FRAME_RATE_CATEGORY_HIGH_HINT ->
+                    mFrameRateCategoryHighHintCount = FRAME_RATE_CATEGORY_COUNT;
+            case FRAME_RATE_CATEGORY_HIGH ->
+                    mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
+        }
+        if (mFrameRateCategoryHighCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
+        } else if (mFrameRateCategoryHighHintCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH_HINT;
+        } else if (mFrameRateCategoryNormalCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NORMAL;
+        } else if (mFrameRateCategoryLowCount > 0) {
+            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_LOW;
+        }
+    }
+
     private void setPreferredFrameRateCategory(int preferredFrameRateCategory) {
-        if (!shouldSetFrameRateCategory()
-                || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
-                && sToolkitFrameRateVelocityMappingReadOnlyFlagValue)) {
+        if (!shouldSetFrameRateCategory()) {
             return;
         }
-        int categoryFromConflictedFrameRates = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-        if (mIsFrameRateConflicted) {
-            categoryFromConflictedFrameRates = mPreferredFrameRate > 60
-                    ? FRAME_RATE_CATEGORY_HIGH : FRAME_RATE_CATEGORY_NORMAL;
-        }
 
-        int frameRateCategory = mIsTouchBoosting
-                ? FRAME_RATE_CATEGORY_HIGH_HINT
-                : Math.max(preferredFrameRateCategory, categoryFromConflictedFrameRates);
+        int frameRateCategory;
+        int frameRateReason;
+        String view;
 
-        // FRAME_RATE_CATEGORY_HIGH has a higher precedence than FRAME_RATE_CATEGORY_HIGH_HINT
-        // For now, FRAME_RATE_CATEGORY_HIGH_HINT is used for boosting with user interaction.
-        // FRAME_RATE_CATEGORY_HIGH is for boosting without user interaction
-        // (e.g., Window Initialization).
-        if (mIsFrameRateBoosting || mInsetsAnimationRunning
-                || (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
-                        && mPreferredFrameRate > 0)) {
+        if (mIsFrameRateBoosting || mInsetsAnimationRunning) {
             frameRateCategory = FRAME_RATE_CATEGORY_HIGH;
-            if (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE) {
-                // We've received a velocity, so we'll let the velocity control the
-                // frame rate unless we receive additional motion events.
-                mIsTouchBoosting = false;
-                mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_VELOCITY;
-                mFrameRateCategoryView = null;
-            } else {
-                mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_UNKNOWN;
-            }
+            frameRateReason = FRAME_RATE_CATEGORY_REASON_BOOST;
+            view = null;
+        } else if (mIsTouchBoosting && preferredFrameRateCategory < FRAME_RATE_CATEGORY_HIGH_HINT) {
+            frameRateCategory = FRAME_RATE_CATEGORY_HIGH_HINT;
+            frameRateReason = FRAME_RATE_CATEGORY_REASON_TOUCH;
+            view = null;
+        } else {
+            frameRateCategory = preferredFrameRateCategory;
+            frameRateReason = mFrameRateCategoryChangeReason;
+            view = mFrameRateCategoryView;
         }
 
         try {
-            if (mLastPreferredFrameRateCategory != frameRateCategory) {
+            if (frameRateCategory != FRAME_RATE_CATEGORY_DEFAULT
+                    && mLastPreferredFrameRateCategory != frameRateCategory) {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
-                    String reason = reasonToString(mFrameRateCategoryChangeReason);
-                    String sourceView = mFrameRateCategoryView == null ? "-"
-                            : mFrameRateCategoryView;
-                    if (preferredFrameRateCategory == FRAME_RATE_CATEGORY_HIGH_HINT) {
-                        reason = "touch boost";
-                        sourceView = "-";
-                    } else if (categoryFromConflictedFrameRates == frameRateCategory
-                            && frameRateCategory != preferredFrameRateCategory
-                            && mIsFrameRateConflicted
-                    ) {
-                        reason = "conflict";
-                        sourceView = "-";
-                    }
+                    String reason = reasonToString(frameRateReason);
+                    String sourceView = view == null ? "-" : view;
                     String category = categoryToString(frameRateCategory);
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRateCategory "
                                     + category + ", reason " + reason + ", "
                                     + sourceView);
                 }
-                mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
+                if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+                    mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
                         frameRateCategory, false).applyAsyncUnsafe();
+                }
                 mLastPreferredFrameRateCategory = frameRateCategory;
             }
         } catch (Exception e) {
@@ -12563,32 +12642,31 @@ public final class ViewRootImpl implements ViewParent,
             case FRAME_RATE_CATEGORY_REASON_VELOCITY -> str = "velocity";
             case FRAME_RATE_CATEGORY_REASON_IDLE -> str = "idle";
             case FRAME_RATE_CATEGORY_REASON_UNKNOWN -> str = "unknown";
+            case FRAME_RATE_CATEGORY_REASON_BOOST -> str = "boost";
+            case FRAME_RATE_CATEGORY_REASON_TOUCH -> str = "touch";
+            case FRAME_RATE_CATEGORY_REASON_CONFLICTED -> str = "conflicted";
             default -> str = String.valueOf(reason);
         }
         return str;
     }
 
     private void setPreferredFrameRate(float preferredFrameRate) {
-        if (!shouldSetFrameRate()) {
-            return;
-        }
-        if (mFrameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE
-                && preferredFrameRate > 0 && !sToolkitFrameRateVelocityMappingReadOnlyFlagValue) {
-            mIsTouchBoosting = false;
+        if (!shouldSetFrameRate() || preferredFrameRate < 0) {
             return;
         }
 
         try {
-            if (mLastPreferredFrameRate != preferredFrameRate
-                    && preferredFrameRate >= 0) {
+            if (mLastPreferredFrameRate != preferredFrameRate) {
                 if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
                     Trace.traceBegin(
                             Trace.TRACE_TAG_VIEW, "ViewRootImpl#setFrameRate "
                                 + preferredFrameRate + " compatibility "
                                 + mFrameRateCompatibility);
                 }
-                mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
-                    mFrameRateCompatibility).applyAsyncUnsafe();
+                if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+                    mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
+                            mFrameRateCompatibility).applyAsyncUnsafe();
+                }
                 mLastPreferredFrameRate = preferredFrameRate;
             }
         } catch (Exception e) {
@@ -12596,12 +12674,6 @@ public final class ViewRootImpl implements ViewParent,
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
-    }
-
-    private void sendDelayedEmptyMessage(int message, int delayedTime) {
-        mHandler.removeMessages(message);
-
-        mHandler.sendEmptyMessageDelayed(message, delayedTime);
     }
 
     private boolean shouldSetFrameRateCategory() {
@@ -12632,34 +12704,53 @@ public final class ViewRootImpl implements ViewParent,
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     public void votePreferredFrameRateCategory(int frameRateCategory, int reason, View view) {
-        switch (frameRateCategory) {
-            case FRAME_RATE_CATEGORY_LOW -> mFrameRateCategoryLowCount = FRAME_RATE_CATEGORY_COUNT;
-            case FRAME_RATE_CATEGORY_NORMAL ->
-                    mFrameRateCategoryNormalCount = FRAME_RATE_CATEGORY_COUNT;
-            case FRAME_RATE_CATEGORY_HIGH_HINT ->
-                    mFrameRateCategoryHighHintCount = FRAME_RATE_CATEGORY_COUNT;
-            case FRAME_RATE_CATEGORY_HIGH ->
-                    mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
-        }
-
-        int oldCategory = mPreferredFrameRateCategory;
-        if (mFrameRateCategoryHighCount > 0) {
-            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
-        } else if (mFrameRateCategoryHighHintCount > 0) {
-            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH_HINT;
-        } else if (mFrameRateCategoryNormalCount > 0) {
-            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NORMAL;
-        } else if (mFrameRateCategoryLowCount > 0) {
-            mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_LOW;
+        if (frameRateCategory > mPreferredFrameRateCategory) {
+            mPreferredFrameRateCategory = frameRateCategory;
+            mFrameRateCategoryChangeReason = reason;
+//            mFrameRateCategoryView = view == null ? "-" : view.getClass().getSimpleName();
         }
         mHasInvalidation = true;
-        checkIdleness();
-        if (mPreferredFrameRateCategory != oldCategory
-                && mPreferredFrameRateCategory == frameRateCategory
-        ) {
-            mFrameRateCategoryChangeReason = reason;
-            mFrameRateCategoryView = view == null ? "null" : view.getClass().getSimpleName();
+        mDrawnThisFrame = true;
+    }
+
+    /**
+     * Returns {@link #INTERMITTENT_STATE_INTERMITTENT} when the ViewRootImpl has only been
+     * updated intermittently, {@link #INTERMITTENT_STATE_NOT_INTERMITTENT} when it is
+     * not updated intermittently, and {@link #INTERMITTENT_STATE_IN_TRANSITION} when it
+     * is transitioning between {@link #INTERMITTENT_STATE_NOT_INTERMITTENT} and
+     * {@link #INTERMITTENT_STATE_INTERMITTENT}.
+     */
+    int intermittentUpdateState() {
+        if (mMinusOneFrameIntervalMillis + mMinusTwoFrameIntervalMillis
+                < INFREQUENT_UPDATE_INTERVAL_MILLIS) {
+            return INTERMITTENT_STATE_NOT_INTERMITTENT;
         }
+        if (mInfrequentUpdateCount == INFREQUENT_UPDATE_COUNTS) {
+            return INTERMITTENT_STATE_INTERMITTENT;
+        }
+        return INTERMITTENT_STATE_IN_TRANSITION;
+    }
+
+    /**
+     * Returns whether a View should vote for frame rate category. When the category is HIGH
+     * already, there's no need to calculate the category on the View and vote.
+     */
+    public boolean shouldCheckFrameRateCategory() {
+        return mPreferredFrameRateCategory < FRAME_RATE_CATEGORY_HIGH;
+    }
+
+    /**
+     * Returns whether a View should vote for frame rate. When the maximum frame rate has already
+     * been voted for, there's no point in calculating and voting for the frame rate. When
+     * isDirect is false, then it will return false when the velocity-calculated frame rate
+     * can be avoided.
+     * @param isDirect true when the frame rate has been set directly on the View or false if
+     *                 the calculation is based only on velocity.
+     */
+    public boolean shouldCheckFrameRate(boolean isDirect) {
+        return mPreferredFrameRate < MAX_FRAME_RATE
+                || (!isDirect && !sToolkitFrameRateVelocityMappingReadOnlyFlagValue
+                && mPreferredFrameRateCategory < FRAME_RATE_CATEGORY_HIGH);
     }
 
     /**
@@ -12685,24 +12776,47 @@ public final class ViewRootImpl implements ViewParent,
         if (frameRate <= 0) {
             return;
         }
+        if (frameRateCompatibility == FRAME_RATE_COMPATIBILITY_GTE) {
+            mIsTouchBoosting = false;
+            if (!sToolkitFrameRateVelocityMappingReadOnlyFlagValue) {
+                mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
+                mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
+                mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_VELOCITY;
+                mFrameRateCategoryView = null;
+                mHasInvalidation = true;
+                mDrawnThisFrame = true;
+                return;
+            }
+        }
+        float nextFrameRate;
+        int nextFrameRateCompatibility;
+        if (frameRate > mPreferredFrameRate) {
+            nextFrameRate = frameRate;
+            nextFrameRateCompatibility = frameRateCompatibility;
+        } else {
+            nextFrameRate = mPreferredFrameRate;
+            nextFrameRateCompatibility = mFrameRateCompatibility;
+        }
+
         if (mPreferredFrameRate > 0 && mPreferredFrameRate % frameRate != 0
                 && frameRate % mPreferredFrameRate != 0) {
             mIsFrameRateConflicted = true;
-            mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-        }
-        if (frameRate > mPreferredFrameRate) {
-            mFrameRateCompatibility = frameRateCompatibility;
+            if (nextFrameRate > 60 && mFrameRateCategoryHighCount != FRAME_RATE_CATEGORY_COUNT) {
+                mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
+                mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_CONFLICTED;
+                mFrameRateCategoryView = null;
+            } else if (mFrameRateCategoryHighCount == 0 && mFrameRateCategoryHighHintCount == 0
+                    && mFrameRateCategoryNormalCount < FRAME_RATE_CATEGORY_COUNT) {
+                mFrameRateCategoryNormalCount = FRAME_RATE_CATEGORY_COUNT;
+                mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_CONFLICTED;
+                mFrameRateCategoryView = null;
+            }
         }
 
-        mPreferredFrameRate = Math.max(mPreferredFrameRate, frameRate);
+        mPreferredFrameRate = nextFrameRate;
+        mFrameRateCompatibility = nextFrameRateCompatibility;
         mHasInvalidation = true;
-
-        if (!mIsFrameRateConflicted) {
-            mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
-            mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
-                    FRAME_RATE_SETTING_REEVALUATE_TIME);
-        }
-        checkIdleness();
+        mDrawnThisFrame = true;
     }
 
     /**
@@ -12772,7 +12886,6 @@ public final class ViewRootImpl implements ViewParent,
 
     private void boostFrameRate(int boostTimeOut) {
         mIsFrameRateBoosting = true;
-        setPreferredFrameRateCategory(mPreferredFrameRateCategory);
         mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
         mHandler.sendEmptyMessageDelayed(MSG_TOUCH_BOOST_TIMEOUT,
                 boostTimeOut);
@@ -12816,7 +12929,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean shouldEnableDvrr() {
         // uncomment this when we are ready for enabling dVRR
-        if (sToolkitFrameRateFunctionEnablingReadOnlyFlagValue) {
+        if (sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
             return sToolkitSetFrameRateReadOnlyFlagValue && isFrameRatePowerSavingsBalanced();
         }
         return false;
@@ -12829,6 +12942,37 @@ public final class ViewRootImpl implements ViewParent,
             mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
                     FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS);
             mHasIdledMessage = true;
+        }
+    }
+
+    private void removeVrrMessages() {
+        mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
+        mHandler.removeMessages(MSG_CHECK_INVALIDATION_IDLE);
+        mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
+    }
+
+    /**
+     * This function is mainly used for migrating infrequent layer logic
+     * from SurfaceFlinger to Toolkit.
+     * The infrequent layer logic includes:
+     * - NORMAL for infrequent update: FT2-FT1 > 100 && FT3-FT2 > 100.
+     * - HIGH/NORMAL based on size for frequent update: (FT3-FT2) + (FT2 - FT1) < 100.
+     * - otherwise, use the previous category value.
+     */
+    private void updateInfrequentCount() {
+        long currentTimeMillis = mAttachInfo.mDrawingTime;
+        int timeIntervalMillis =
+                (int) Math.min(Integer.MAX_VALUE, currentTimeMillis - mLastUpdateTimeMillis);
+        mMinusTwoFrameIntervalMillis = mMinusOneFrameIntervalMillis;
+        mMinusOneFrameIntervalMillis = timeIntervalMillis;
+
+        mLastUpdateTimeMillis = currentTimeMillis;
+        if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
+            int infrequentUpdateCount = mInfrequentUpdateCount;
+            mInfrequentUpdateCount = infrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
+                    ? infrequentUpdateCount : infrequentUpdateCount + 1;
+        } else {
+            mInfrequentUpdateCount = 0;
         }
     }
 }

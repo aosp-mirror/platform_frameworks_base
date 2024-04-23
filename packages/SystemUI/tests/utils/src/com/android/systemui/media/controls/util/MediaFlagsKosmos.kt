@@ -18,9 +18,5 @@ package com.android.systemui.media.controls.util
 
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.scene.shared.flag.sceneContainerFlags
 
-val Kosmos.mediaFlags by
-    Kosmos.Fixture {
-        MediaFlags(featureFlags = featureFlagsClassic, sceneContainerFlags = sceneContainerFlags)
-    }
+val Kosmos.mediaFlags by Kosmos.Fixture { MediaFlags(featureFlags = featureFlagsClassic) }

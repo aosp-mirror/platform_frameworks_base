@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "compat_logging_flags",
     package: "com.android.internal.compat.flags",
+    container: "system",
     srcs: [
         "compat_logging_flags.aconfig",
     ],

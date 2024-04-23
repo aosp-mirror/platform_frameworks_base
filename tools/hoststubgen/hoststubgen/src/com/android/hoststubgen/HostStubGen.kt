@@ -32,7 +32,6 @@ import com.android.hoststubgen.visitors.PackageRedirectRemapper
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.util.CheckClassAdapter
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
@@ -52,7 +51,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         val stats = HostStubGenStats()
 
         // Load all classes.
-        val allClasses = loadClassStructures(options.inJar.get)
+        val allClasses = ClassNodes.loadClassStructures(options.inJar.get)
 
         // Dump the classes, if specified.
         options.inputJarDumpFile.ifSet {
@@ -89,55 +88,6 @@ class HostStubGen(val options: HostStubGenOptions) {
             PrintWriter(it).use { pw -> stats.dump(pw) }
             log.i("Dump file created at $it")
         }
-    }
-
-    /**
-     * Load all the classes, without code.
-     */
-    private fun loadClassStructures(inJar: String): ClassNodes {
-        log.i("Reading class structure from $inJar ...")
-        val start = System.currentTimeMillis()
-
-        val allClasses = ClassNodes()
-
-        log.withIndent {
-            ZipFile(inJar).use { inZip ->
-                val inEntries = inZip.entries()
-
-                while (inEntries.hasMoreElements()) {
-                    val entry = inEntries.nextElement()
-
-                    BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
-                        if (entry.name.endsWith(".class")) {
-                            val cr = ClassReader(bis)
-                            val cn = ClassNode()
-                            cr.accept(cn, ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG
-                                    or ClassReader.SKIP_FRAMES)
-                            if (!allClasses.addClass(cn)) {
-                                log.w("Duplicate class found: ${cn.name}")
-                            }
-                        } else if (entry.name.endsWith(".dex")) {
-                            // Seems like it's an ART jar file. We can't process it.
-                            // It's a fatal error.
-                            throw InvalidJarFileException(
-                                    "$inJar is not a desktop jar file. It contains a *.dex file.")
-                        } else {
-                            // Unknown file type. Skip.
-                            while (bis.available() > 0) {
-                                bis.skip((1024 * 1024).toLong())
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (allClasses.size == 0) {
-            log.w("$inJar contains no *.class files.")
-        }
-
-        val end = System.currentTimeMillis()
-        log.i("Done reading class structure in %.1f second(s).", (end - start) / 1000.0)
-        return allClasses
     }
 
     /**
@@ -229,7 +179,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         val intersectingJars = mutableMapOf<String, ClassNodes>()
 
         filenames.forEach { filename ->
-            intersectingJars[filename] = loadClassStructures(filename)
+            intersectingJars[filename] = ClassNodes.loadClassStructures(filename)
         }
         return intersectingJars
     }

@@ -1,9 +1,18 @@
 package: "com.android.server.stats"
+container: "system"
 
 flag {
     name: "add_mobile_bytes_transfer_by_proc_state_puller"
     namespace: "statsd"
     description: "Adds mobile_bytes_transfer_by_proc_state atom with system server side aggregation"
     bug: "309512867"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "stats_pull_network_stats_manager_init_order_fix"
+    namespace: "statsd"
+    description: "Fix the mNetworkStatsManager initialization order"
+    bug: "331989853"
     is_fixed_read_only: true
 }

@@ -169,10 +169,7 @@ class ClockSizeTransition(
                     return@OnPreDrawListener true
                 }
 
-                anim.duration = duration
-                anim.startDelay = startDelay
-                anim.interpolator = interpolator
-                anim.addListener(
+                val listener =
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationStart(anim: Animator) {
                             assignAnimValues("start", 0f, fromVis)
@@ -183,8 +180,21 @@ class ClockSizeTransition(
                             if (sendToBack) toView.translationZ = 0f
                             toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
                         }
+
+                        override fun onAnimationPause(anim: Animator) {
+                            toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
+                        }
+
+                        override fun onAnimationResume(anim: Animator) {
+                            toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
+                        }
                     }
-                )
+
+                anim.duration = duration
+                anim.startDelay = startDelay
+                anim.interpolator = interpolator
+                anim.addListener(listener)
+                anim.addPauseListener(listener)
 
                 assignAnimValues("init", 0f, fromVis)
                 toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
@@ -213,9 +223,10 @@ class ClockSizeTransition(
             duration = CLOCK_IN_MILLIS
             startDelay = CLOCK_IN_START_DELAY_MILLIS
             interpolator = CLOCK_IN_INTERPOLATOR
-            captureSmartspace = !viewModel.useLargeClock && smartspaceViewModel.isSmartspaceEnabled
+            captureSmartspace =
+                !viewModel.isLargeClockVisible.value && smartspaceViewModel.isSmartspaceEnabled
 
-            if (viewModel.useLargeClock) {
+            if (viewModel.isLargeClockVisible.value) {
                 viewModel.currentClock.value?.let {
                     it.largeClock.layout.views.forEach { addTarget(it) }
                 }
@@ -238,7 +249,7 @@ class ClockSizeTransition(
 
             fromBounds.left = toBounds.left
             fromBounds.right = toBounds.right
-            if (viewModel.useLargeClock) {
+            if (viewModel.isLargeClockVisible.value) {
                 // Large clock shouldn't move
                 fromBounds.top = toBounds.top
                 fromBounds.bottom = toBounds.bottom
@@ -273,9 +284,10 @@ class ClockSizeTransition(
         init {
             duration = CLOCK_OUT_MILLIS
             interpolator = CLOCK_OUT_INTERPOLATOR
-            captureSmartspace = viewModel.useLargeClock && smartspaceViewModel.isSmartspaceEnabled
+            captureSmartspace =
+                viewModel.isLargeClockVisible.value && smartspaceViewModel.isSmartspaceEnabled
 
-            if (viewModel.useLargeClock) {
+            if (viewModel.isLargeClockVisible.value) {
                 addTarget(R.id.lockscreen_clock_view)
             } else {
                 viewModel.currentClock.value?.let {
@@ -298,7 +310,7 @@ class ClockSizeTransition(
 
             toBounds.left = fromBounds.left
             toBounds.right = fromBounds.right
-            if (!viewModel.useLargeClock) {
+            if (!viewModel.isLargeClockVisible.value) {
                 // Large clock shouldn't move
                 toBounds.top = fromBounds.top
                 toBounds.bottom = fromBounds.bottom
@@ -331,7 +343,7 @@ class ClockSizeTransition(
     ) : VisibilityBoundsTransition() {
         init {
             duration =
-                if (viewModel.useLargeClock) STATUS_AREA_MOVE_UP_MILLIS
+                if (viewModel.isLargeClockVisible.value) STATUS_AREA_MOVE_UP_MILLIS
                 else STATUS_AREA_MOVE_DOWN_MILLIS
             interpolator = Interpolators.EMPHASIZED
             addTarget(sharedR.id.date_smartspace_view)

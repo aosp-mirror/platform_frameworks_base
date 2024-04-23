@@ -35,12 +35,13 @@ import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeSurface;
 import com.android.systemui.shade.ShadeSurfaceImpl;
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController;
+import com.android.systemui.startable.Dependencies;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -52,6 +53,7 @@ import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
@@ -61,14 +63,16 @@ import com.android.systemui.statusbar.phone.StatusBarIconList;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import javax.inject.Provider;
-
 import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+
+import java.util.Set;
+
+import javax.inject.Provider;
 
 /**
  * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
@@ -157,6 +161,15 @@ public interface CentralSurfacesDependenciesModule {
     CoreStartable bindsStartStatusBarStateController(StatusBarStateControllerImpl sbsc);
 
     /** */
+    @Provides
+    @IntoMap
+    @Dependencies
+    @ClassKey(SysuiStatusBarStateController.class)
+    static Set<Class<? extends CoreStartable>> providesStatusBarStateControllerDeps() {
+        return Set.of(CentralSurfaces.class);
+    }
+
+    /** */
     @Binds
     StatusBarIconController provideStatusBarIconController(
             StatusBarIconControllerImpl controllerImpl);
@@ -185,10 +198,9 @@ public interface CentralSurfacesDependenciesModule {
     @Provides
     @SysUISingleton
     static ShadeSurface provideShadeSurface(
-            SceneContainerFlags sceneContainerFlags,
             Provider<ShadeSurfaceImpl> sceneContainerOn,
             Provider<NotificationPanelViewController> sceneContainerOff) {
-        if (sceneContainerFlags.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return sceneContainerOn.get();
         } else {
             return sceneContainerOff.get();

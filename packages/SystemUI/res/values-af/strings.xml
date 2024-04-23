@@ -71,7 +71,7 @@
     <string name="usb_port_enabled" msgid="531823867664717018">"USB-poort is geaktiveer om laaiers en bykomstighede te bespeur"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Aktiveer USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Kom meer te wete"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"Skermkiekie"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Skermskoot"</string>
     <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Hou Ontsluit is gedeaktiveer"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"het \'n prent gestuur"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Stoor tans skermkiekie..."</string>
@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Kennisgewingskerm."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Vinnige instellings."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Kitsinstellings en kennisgewingskerm."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Sluitskerm."</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Werksluitskerm"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Maak toe"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"volkome stilte"</string>
@@ -270,12 +271,15 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Sien alles"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gebruik Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Gekoppel"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Oudiodeling"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gestoor"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ontkoppel"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiveer"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Skakel dit môre outomaties weer aan"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Kenmerke soos Kitsdeel, Kry My Toestel en toestelligging gebruik Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth sal môre om 05:00 aanskakel"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Kenmerke soos Kitsdeel en Kry My Toestel gebruik Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth sal môreoggend aanskakel"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Oudiodeling"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Deel tans oudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batterykrag"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Oudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Kopstuk"</string>
@@ -350,6 +354,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Neem kwessie op"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Begin"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Stop"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Foutverslag"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Watter deel van jou toestelervaring is geraak?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Kies soort kwessie"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Skermopname"</string>
@@ -363,7 +368,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standaard"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Medium"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Hoog"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Gehoortoestelle"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Gehoortoestelle"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Bind nuwe toestel saam"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Klik om nuwe toestel saam te bind"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblokkeer toestelmikrofoon?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Deblokkeer toestelkamera?"</string>
@@ -430,6 +439,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laai tans vinnig • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laai tans stadig • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Laai tans • Vol oor <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Swiep links om die gemeenskaplike tutoriaal te begin"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Pasmaak"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Maak toe"</string>
@@ -442,14 +453,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Verwyder"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Voeg legstuk by"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Klaar"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Voeg legstukke by"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Kry kitstoegang tot jou gunstelingapplegstukke sonder om jou tablet te ontsluit."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Laat enige legstuk op die sluitskerm toe?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Maak instellings oop"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Hervat werkapps?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Hervat"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Wissel gebruiker"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"aftrekkieslys"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle programme en data in hierdie sessie sal uitgevee word."</string>
@@ -551,7 +564,7 @@
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"Toestel is gesluit\nKon nie staaf nie"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Klankinstellings"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Gee outomaties mediaopskrifte"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Verskaf outomaties onderskrifte vir media"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Maak wenk oor onderskrifte toe"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Onderskrifteoorlegger"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktiveer"</string>
@@ -741,7 +754,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Wissel sleutelborduitleg"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"of"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Maak soeknavraag skoon"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Kortpaaie"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Kortpadsleutels"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Soek kortpaaie"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Geen kortpaaie gevind nie"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Stelsel"</string>
@@ -766,9 +779,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Maak Assistent oop"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Sluit skerm"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Maak ’n nota"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Verrig veelvuldige stelseltake"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Gaan by verdeelde skerm in met huidige app aan die regterkant"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Gaan by verdeelde skerm in met huidige app aan die linkerkant"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Verrigting van veelvuldige take"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Gebruik verdeelde skerm met huidige app aan die regterkant"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Gebruik verdeelde skerm met huidige app aan die linkerkant"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Skakel oor van verdeelde skerm na volskerm"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Skakel oor na app regs of onder terwyl jy verdeelde skerm gebruik"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Skakel oor na app links of bo terwyl jy verdeelde skerm gebruik"</string>
@@ -889,12 +902,12 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Opletberigte"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Battery"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skermkiekies"</string>
-    <string name="notification_channel_instant" msgid="7556135423486752680">"Kitsprogramme"</string>
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Kitsapps"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"Opstelling"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Berging"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Wenke"</string>
     <string name="notification_channel_accessibility" msgid="8956203986976245820">"Toeganklikheid"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"Kitsprogramme"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Kitsapps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> loop tans"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Program is oopgemaak sonder dat dit geïnstalleer is."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Program is oopgemaak sonder dat dit geïnstalleer is. Tik om meer te wete te kom."</string>
@@ -1189,8 +1202,8 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Kies gebruiker"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# app is aktief}other{# apps is aktief}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nuwe inligting"</string>
-    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiewe programme"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Hierdie programme is aktief en werk, selfs wanneer jy hulle nie gebruik nie. Dit verbeter hul funksies, maar beïnvloed dalk ook batterylewe."</string>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiewe apps"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Hierdie apps is aktief en werk, selfs wanneer jy hulle nie gebruik nie. Dit verbeter hul funksies, maar beïnvloed dalk ook batterylewe."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stop"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Gestop"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Klaar"</string>

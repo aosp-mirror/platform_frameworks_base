@@ -1,8 +1,14 @@
 // #define LOG_NDEBUG 0
 #include "Bitmap.h"
 
+#include <android-base/unique_fd.h>
 #include <hwui/Bitmap.h>
 #include <hwui/Paint.h>
+#include <inttypes.h>
+#include <renderthread/RenderProxy.h>
+#include <string.h>
+
+#include <memory>
 
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "Gainmap.h"
@@ -23,16 +29,6 @@
 #include "SkStream.h"
 #include "SkTypes.h"
 #include "android_nio_utils.h"
-
-#ifdef __ANDROID__ // Layoutlib does not support graphic buffer, parcel or render thread
-#include <android-base/unique_fd.h>
-#include <renderthread/RenderProxy.h>
-#endif
-
-#include <inttypes.h>
-#include <string.h>
-
-#include <memory>
 
 #define DEBUG_PARCEL 0
 
@@ -1105,11 +1101,9 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle, jlong bm1Ha
 }
 
 static void Bitmap_prepareToDraw(JNIEnv* env, jobject, jlong bitmapPtr) {
-#ifdef __ANDROID__ // Layoutlib does not support render thread
     LocalScopedBitmap bitmapHandle(bitmapPtr);
     if (!bitmapHandle.valid()) return;
     android::uirenderer::renderthread::RenderProxy::prepareToDraw(bitmapHandle->bitmap());
-#endif
 }
 
 static jint Bitmap_getAllocationByteCount(JNIEnv* env, jobject, jlong bitmapPtr) {

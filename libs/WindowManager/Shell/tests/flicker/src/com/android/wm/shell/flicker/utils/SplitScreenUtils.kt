@@ -20,11 +20,11 @@ import android.app.Instrumentation
 import android.graphics.Point
 import android.os.SystemClock
 import android.tools.Rotation
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.component.ComponentNameMatcher
 import android.tools.traces.component.IComponentMatcher
 import android.tools.traces.component.IComponentNameMatcher
-import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.parsers.toFlickerComponent
 import android.view.InputDevice
@@ -179,15 +179,10 @@ object SplitScreenUtils {
         val displayBounds =
             wmHelper.currentState.layerState.displays.firstOrNull { !it.isVirtual }?.layerStackSpace
                 ?: error("Display not found")
+        val swipeXCoordinate = displayBounds.centerX() / 2
 
         // Pull down the notifications
-        device.swipe(
-            displayBounds.centerX(),
-            5,
-            displayBounds.centerX(),
-            displayBounds.bottom,
-            50 /* steps */
-        )
+        device.swipe(swipeXCoordinate, 5, swipeXCoordinate, displayBounds.bottom, 50 /* steps */)
         SystemClock.sleep(TIMEOUT_MS)
 
         // Find the target notification
@@ -210,7 +205,7 @@ object SplitScreenUtils {
         // Drag to split
         val dragStart = notificationContent.visibleCenter
         val dragMiddle = Point(dragStart.x + 50, dragStart.y)
-        val dragEnd = Point(displayBounds.width / 4, displayBounds.width / 4)
+        val dragEnd = Point(displayBounds.width() / 4, displayBounds.width() / 4)
         val downTime = SystemClock.uptimeMillis()
 
         touch(instrumentation, MotionEvent.ACTION_DOWN, downTime, downTime, TIMEOUT_MS, dragStart)
@@ -317,7 +312,7 @@ object SplitScreenUtils {
             wmHelper.currentState.layerState.displays.firstOrNull { !it.isVirtual }?.layerStackSpace
                 ?: error("Display not found")
         val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
-        dividerBar.drag(Point(displayBounds.width * 1 / 3, displayBounds.height * 2 / 3), 200)
+        dividerBar.drag(Point(displayBounds.width() * 1 / 3, displayBounds.height() * 2 / 3), 200)
 
         wmHelper
             .StateSyncBuilder()

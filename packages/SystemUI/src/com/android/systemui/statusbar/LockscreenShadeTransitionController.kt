@@ -33,9 +33,9 @@ import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
-import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -813,7 +813,7 @@ class DragDownHelper(
                 initialTouchX = x
                 isTrackpadReverseScroll =
                     !naturalScrollingSettingObserver.isNaturalScrollingEnabled &&
-                        isTrackpadScroll(true, event)
+                        isTrackpadScroll(event)
             }
             MotionEvent.ACTION_MOVE -> {
                 val h = (if (isTrackpadReverseScroll) -1 else 1) * (y - initialTouchY)
@@ -959,7 +959,7 @@ class DragDownHelper(
         anim.start()
     }
 
-    private fun stopDragging() {
+    fun stopDragging() {
         if (startingChild != null) {
             cancelChildExpansion(startingChild!!)
             startingChild = null

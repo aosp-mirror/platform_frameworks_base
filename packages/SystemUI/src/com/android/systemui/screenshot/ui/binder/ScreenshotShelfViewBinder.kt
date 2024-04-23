@@ -17,8 +17,8 @@
 package com.android.systemui.screenshot.ui.binder
 
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.lifecycle.Lifecycle
@@ -26,16 +26,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import com.android.systemui.util.children
 import kotlinx.coroutines.launch
 
 object ScreenshotShelfViewBinder {
     fun bind(
-        view: ViewGroup,
+        view: ScreenshotShelfView,
         viewModel: ScreenshotViewModel,
         layoutInflater: LayoutInflater,
+        onTouchListener: (MotionEvent) -> Boolean,
     ) {
+        view.onTouchInterceptListener = onTouchListener
+
         val previewView: ImageView = view.requireViewById(R.id.screenshot_preview)
         val previewBorder = view.requireViewById<View>(R.id.screenshot_preview_border)
         previewView.clipToOutline = true
@@ -60,31 +64,48 @@ object ScreenshotShelfViewBinder {
                     }
                     launch {
                         viewModel.previewAction.collect { onClick ->
-                            previewView.setOnClickListener { onClick?.run() }
+                            previewView.setOnClickListener { onClick?.invoke() }
                         }
                     }
                     launch {
                         viewModel.actions.collect { actions ->
-                            if (actions.isNotEmpty()) {
+                            val visibleActions = actions.filter { it.visible }
+
+                            if (visibleActions.isNotEmpty()) {
                                 view
                                     .requireViewById<View>(R.id.actions_container_background)
                                     .visibility = View.VISIBLE
                             }
-                            val viewPool = actionsContainer.children.toList()
-                            actionsContainer.removeAllViews()
-                            val actionButtons =
-                                List(actions.size) {
-                                    viewPool.getOrElse(it) {
+
+                            // Remove any buttons not in the new list, then do another pass to add
+                            // any new actions and update any that are already there.
+                            // This assumes that actions can never change order and that each action
+                            // ID is unique.
+                            val newIds = visibleActions.map { it.id }
+
+                            for (view in actionsContainer.children.toList()) {
+                                if (view.tag !in newIds) {
+                                    actionsContainer.removeView(view)
+                                }
+                            }
+
+                            for ((index, action) in visibleActions.withIndex()) {
+                                val currentView: View? = actionsContainer.getChildAt(index)
+                                if (action.id == currentView?.tag) {
+                                    // Same ID, update the display
+                                    ActionButtonViewBinder.bind(currentView, action)
+                                } else {
+                                    // Different ID. Removals have already happened so this must
+                                    // mean that the new action must be inserted here.
+                                    val actionButton =
                                         layoutInflater.inflate(
-                                            R.layout.overlay_action_chip,
+                                            R.layout.shelf_action_chip,
                                             actionsContainer,
                                             false
                                         )
-                                    }
+                                    actionsContainer.addView(actionButton, index)
+                                    ActionButtonViewBinder.bind(actionButton, action)
                                 }
-                            actionButtons.zip(actions).forEach {
-                                actionsContainer.addView(it.first)
-                                ActionButtonViewBinder.bind(it.first, it.second)
                             }
                         }
                     }

@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
@@ -57,6 +58,7 @@ import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
@@ -104,6 +106,7 @@ public final class KeyboardShortcutListSearch {
 
     private WindowManager mWindowManager;
     private EditText mSearchEditText;
+    private ImageButton mEditTextCancel;
     private String mQueryString;
     private int mCurrentCategoryIndex = 0;
     private Map<Integer, Boolean> mKeySearchResultMap = new HashMap<>();
@@ -143,7 +146,7 @@ public final class KeyboardShortcutListSearch {
     @VisibleForTesting
     KeyboardShortcutListSearch(Context context, WindowManager windowManager) {
         this.mContext = new ContextThemeWrapper(
-                context, android.R.style.Theme_DeviceDefault_Settings);
+                context, R.style.KeyboardShortcutHelper);
         this.mPackageManager = AppGlobals.getPackageManager();
         if (windowManager != null) {
             this.mWindowManager = windowManager;
@@ -853,13 +856,14 @@ public final class KeyboardShortcutListSearch {
             List<List<KeyboardShortcutMultiMappingGroup>> keyboardShortcutMultiMappingGroupList) {
         mQueryString = null;
         LayoutInflater inflater = mContext.getSystemService(LayoutInflater.class);
-        mKeyboardShortcutsBottomSheetDialog =
-                new BottomSheetDialog(mContext);
+        mKeyboardShortcutsBottomSheetDialog  = new BottomSheetDialog(mContext);
         final View keyboardShortcutsView = inflater.inflate(
                 R.layout.keyboard_shortcuts_search_view, null);
         LinearLayout shortcutsContainer = keyboardShortcutsView.findViewById(
                 R.id.keyboard_shortcuts_container);
         mNoSearchResults = keyboardShortcutsView.findViewById(R.id.shortcut_search_no_result);
+        Window keyboardShortcutsWindow = mKeyboardShortcutsBottomSheetDialog.getWindow();
+        setWindowProperties(keyboardShortcutsWindow);
         mKeyboardShortcutsBottomSheetDialog.setContentView(keyboardShortcutsView);
         setButtonsDefaultStatus(keyboardShortcutsView);
         populateCurrentAppButton();
@@ -874,25 +878,11 @@ public final class KeyboardShortcutListSearch {
         }
 
         BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
+        behavior.setDraggable(true);
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
-        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-                    @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                        if (newState == BottomSheetBehavior.STATE_DRAGGING) {
-                            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                        }
-                    }
 
-                    @Override
-                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                        // Do nothing.
-                    }
-                });
 
-        mKeyboardShortcutsBottomSheetDialog.setCanceledOnTouchOutside(true);
-        Window keyboardShortcutsWindow = mKeyboardShortcutsBottomSheetDialog.getWindow();
-        keyboardShortcutsWindow.setType(TYPE_SYSTEM_DIALOG);
         synchronized (sLock) {
             // show KeyboardShortcutsBottomSheetDialog only if it has not been dismissed already
             if (sInstance != null) {
@@ -908,6 +898,8 @@ public final class KeyboardShortcutListSearch {
             }
         }
         mSearchEditText = keyboardShortcutsView.findViewById(R.id.keyboard_shortcuts_search);
+        mEditTextCancel = keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_search_cancel);
         mSearchEditText.addTextChangedListener(
                 new TextWatcher() {
                     @Override
@@ -921,6 +913,8 @@ public final class KeyboardShortcutListSearch {
                             shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
                                     R.string.keyboard_shortcut_a11y_show_search_results));
                         }
+                        mEditTextCancel.setVisibility(
+                                TextUtils.isEmpty(mQueryString) ? View.GONE : View.VISIBLE);
                     }
 
                     @Override
@@ -933,9 +927,28 @@ public final class KeyboardShortcutListSearch {
                         // Do nothing.
                     }
                 });
-        ImageButton editTextCancel = keyboardShortcutsView.findViewById(
-                R.id.keyboard_shortcuts_search_cancel);
-        editTextCancel.setOnClickListener(v -> mSearchEditText.setText(null));
+
+        mEditTextCancel.setOnClickListener(v -> mSearchEditText.setText(null));
+    }
+
+    private static void setWindowProperties(Window keyboardShortcutsWindow) {
+        keyboardShortcutsWindow.setType(TYPE_SYSTEM_DIALOG);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.copyFrom(keyboardShortcutsWindow.getAttributes());
+        // Allows the bottom sheet dialog to render all the way to the bottom of the screen,
+        // behind the gesture navigation bar.
+        params.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        params.setFitInsetsTypes(WindowInsets.Type.statusBars());
+        keyboardShortcutsWindow.setAttributes(params);
+        keyboardShortcutsWindow.getDecorView().setOnApplyWindowInsetsListener((v, insets) -> {
+            int bottom = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+            View container = v.findViewById(R.id.keyboard_shortcuts_container);
+            container.setPadding(container.getPaddingLeft(), container.getPaddingTop(),
+                    container.getPaddingRight(), bottom);
+            return WindowInsets.CONSUMED;
+        });
+        keyboardShortcutsWindow.setWindowAnimations(
+                R.style.KeyboardShortcutHelper_BottomSheetDialogAnimation);
     }
 
     private void populateKeyboardShortcutSearchList(LinearLayout keyboardShortcutsLayout) {
@@ -1256,10 +1269,10 @@ public final class KeyboardShortcutListSearch {
         if (mContext.getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_PORTRAIT) {
             lp.width = (int) (display.getWidth() * 0.8);
-            lp.height = (int) (display.getHeight() * 0.7);
+            lp.height = (int) (display.getHeight() * 0.8);
         } else {
             lp.width = (int) (display.getWidth() * 0.7);
-            lp.height = (int) (display.getHeight() * 0.8);
+            lp.height = (int) (display.getHeight() * 0.95);
         }
         window.setGravity(Gravity.BOTTOM);
         window.setAttributes(lp);

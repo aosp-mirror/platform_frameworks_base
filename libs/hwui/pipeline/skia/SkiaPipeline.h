@@ -18,7 +18,6 @@
 
 #include <SkColorSpace.h>
 #include <SkDocument.h>
-#include <SkMultiPictureDocument.h>
 #include <SkSurface.h>
 
 #include "Lighting.h"
@@ -42,17 +41,8 @@ public:
 
     void onDestroyHardwareResources() override;
 
-    bool pinImages(std::vector<SkImage*>& mutableImages) override;
-    bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override { return false; }
-    void unpinImages() override;
-
     void renderLayers(const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
                       bool opaque, const LightInfo& lightInfo) override;
-
-    // If the given node didn't have a layer surface, or had one of the wrong size, this method
-    // creates a new one and returns true. Otherwise does nothing and returns false.
-    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                             ErrorHandler* errorHandler) override;
 
     void setSurfaceColorProperties(ColorMode colorMode) override;
     SkColorType getSurfaceColorType() const override { return mSurfaceColorType; }
@@ -63,9 +53,8 @@ public:
                      const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
                      const SkMatrix& preTransform);
 
-    static void prepareToDraw(const renderthread::RenderThread& thread, Bitmap* bitmap);
-
-    void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque);
+    bool renderLayerImpl(RenderNode* layerNode, const Rect& layerDamage);
+    virtual void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) = 0;
 
     // Sets the recording callback to the provided function and the recording mode
     // to CallbackAPI
@@ -75,19 +64,11 @@ public:
         mCaptureMode = callback ? CaptureMode::CallbackAPI : CaptureMode::None;
     }
 
-    virtual void setHardwareBuffer(AHardwareBuffer* buffer) override;
-    bool hasHardwareBuffer() override { return mHardwareBuffer != nullptr; }
-
     void setTargetSdrHdrRatio(float ratio) override;
 
 protected:
-    sk_sp<SkSurface> getBufferSkSurface(
-            const renderthread::HardwareBufferRenderParams& bufferParams);
-    void dumpResourceCacheUsage() const;
-
     renderthread::RenderThread& mRenderThread;
 
-    AHardwareBuffer* mHardwareBuffer = nullptr;
     sk_sp<SkSurface> mBufferSurface = nullptr;
     sk_sp<SkColorSpace> mBufferColorSpace = nullptr;
 
@@ -124,8 +105,6 @@ private:
     bool shouldStartNewFileCapture();
     // Set up a multi frame capture.
     bool setupMultiFrameCapture();
-
-    std::vector<sk_sp<SkImage>> mPinnedImages;
 
     // Block of properties used only for debugging to record a SkPicture and save it in a file.
     // There are three possible ways of recording drawing commands.

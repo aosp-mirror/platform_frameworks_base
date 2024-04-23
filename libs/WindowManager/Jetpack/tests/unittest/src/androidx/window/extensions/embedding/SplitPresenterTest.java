@@ -85,10 +85,12 @@ import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 import androidx.window.extensions.layout.WindowLayoutInfo;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 
@@ -106,6 +108,10 @@ import java.util.ArrayList;
 public class SplitPresenterTest {
 
     private Activity mActivity;
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Mock
     private Resources mActivityResources;
     @Mock
@@ -119,7 +125,6 @@ public class SplitPresenterTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         doReturn(new WindowLayoutInfo(new ArrayList<>())).when(mWindowLayoutComponent)
                 .getCurrentWindowLayoutInfo(anyInt(), any());
         DeviceStateManagerFoldingFeatureProducer producer =

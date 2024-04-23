@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.graphics.Point
 import android.util.MathUtils
 import android.view.View.VISIBLE
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -41,6 +42,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
@@ -132,22 +134,18 @@ constructor(
     private val isOnLockscreen: Flow<Boolean> =
         combine(
                 keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
-                keyguardTransitionInteractor
-                    .isInTransitionWhere { from, to -> from == LOCKSCREEN || to == LOCKSCREEN }
-                    .onStart { emit(false) }
+                or(
+                    keyguardTransitionInteractor.isInTransitionToState(LOCKSCREEN),
+                    keyguardTransitionInteractor.isInTransitionFromState(LOCKSCREEN),
+                ),
             ) { onLockscreen, transitioningToOrFromLockscreen ->
                 onLockscreen || transitioningToOrFromLockscreen
             }
             .distinctUntilChanged()
 
-    private val lockscreenToGoneTransitionRunning: Flow<Boolean> =
-        keyguardTransitionInteractor
-            .isInTransitionWhere { from, to -> from == LOCKSCREEN && to == GONE }
-            .onStart { emit(false) }
-
     private val alphaOnShadeExpansion: Flow<Float> =
         combineTransform(
-                lockscreenToGoneTransitionRunning,
+                keyguardTransitionInteractor.isInTransition(from = LOCKSCREEN, to = GONE),
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,
@@ -184,8 +182,12 @@ constructor(
                     .transitionValue(OCCLUDED)
                     .map { it == 1f }
                     .onStart { emit(false) },
-            ) { isIdleOnCommunal, isGone, isOccluded ->
-                isIdleOnCommunal || isGone || isOccluded
+                keyguardTransitionInteractor
+                    .transitionValue(KeyguardState.DREAMING)
+                    .map { it == 1f }
+                    .onStart { emit(false) },
+            ) { isIdleOnCommunal, isGone, isOccluded, isDreaming ->
+                isIdleOnCommunal || isGone || isOccluded || isDreaming
             }
             .distinctUntilChanged()
 
@@ -268,7 +270,9 @@ constructor(
         burnInJob?.cancel()
 
         burnInJob =
-            scope.launch { aodBurnInViewModel.movement(params).collect { burnInModel.value = it } }
+            scope.launch("$TAG#aodBurnInViewModel") {
+                aodBurnInViewModel.movement(params).collect { burnInModel.value = it }
+            }
     }
 
     val scale: Flow<BurnInScaleViewModel> =
@@ -367,5 +371,9 @@ constructor(
 
     fun setRootViewLastTapPosition(point: Point) {
         keyguardInteractor.setLastRootViewTapPosition(point)
+    }
+
+    companion object {
+        private const val TAG = "KeyguardRootViewModel"
     }
 }

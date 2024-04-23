@@ -21,6 +21,7 @@ import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialInd
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.view.layout.sections.AccessibilityActionsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
@@ -52,6 +53,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class DefaultKeyguardBlueprint
 @Inject
 constructor(
+    accessibilityActionsSection: AccessibilityActionsSection,
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
     defaultDeviceEntrySection: DefaultDeviceEntrySection,
     defaultShortcutsSection: DefaultShortcutsSection,
@@ -73,6 +75,7 @@ constructor(
 
     override val sections =
         listOfNotNull(
+            accessibilityActionsSection,
             defaultIndicationAreaSection,
             defaultShortcutsSection,
             defaultAmbientIndicationAreaSection.getOrNull(),

@@ -170,8 +170,8 @@ public class BatteryStatsNoteTest {
     public void testNoteStartWakeLocked_isolatedUid() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks, null,
-                new Handler(Looper.getMainLooper()), uidResolver);
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(MockBatteryStatsImpl.DEFAULT_CONFIG,
+                clocks, null, new Handler(Looper.getMainLooper()), uidResolver);
 
         int pid = 10;
         String name = "name";
@@ -212,8 +212,8 @@ public class BatteryStatsNoteTest {
     public void testNoteStartWakeLocked_isolatedUidRace() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks, null,
-                new Handler(Looper.getMainLooper()), uidResolver);
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(MockBatteryStatsImpl.DEFAULT_CONFIG,
+                clocks, null, new Handler(Looper.getMainLooper()), uidResolver);
 
         int pid = 10;
         String name = "name";
@@ -256,8 +256,8 @@ public class BatteryStatsNoteTest {
     public void testNoteLongPartialWakelockStart_isolatedUid() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks, null,
-                new Handler(Looper.getMainLooper()), uidResolver);
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(MockBatteryStatsImpl.DEFAULT_CONFIG,
+                clocks, null, new Handler(Looper.getMainLooper()), uidResolver);
 
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -311,8 +311,8 @@ public class BatteryStatsNoteTest {
     public void testNoteLongPartialWakelockStart_isolatedUidRace() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
         PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks, null,
-                new Handler(Looper.getMainLooper()), uidResolver);
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(MockBatteryStatsImpl.DEFAULT_CONFIG,
+                clocks, null, new Handler(Looper.getMainLooper()), uidResolver);
 
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();

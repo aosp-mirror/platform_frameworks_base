@@ -1,4 +1,5 @@
 package: "com.android.server.os"
+container: "system"
 
 flag {
     name: "proto_tombstone"

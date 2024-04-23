@@ -60,12 +60,12 @@ constructor(
     val iconLocation: Flow<IconLocation> =
         isSupported.flatMapLatest { supportsUI ->
             if (supportsUI) {
-                fingerprintPropertyInteractor.sensorLocation.map { sensorLocation ->
+                fingerprintPropertyInteractor.udfpsSensorBounds.map { bounds ->
                     IconLocation(
-                        left = (sensorLocation.centerX - sensorLocation.radius).toInt(),
-                        top = (sensorLocation.centerY - sensorLocation.radius).toInt(),
-                        right = (sensorLocation.centerX + sensorLocation.radius).toInt(),
-                        bottom = (sensorLocation.centerY + sensorLocation.radius).toInt(),
+                        left = bounds.left,
+                        top = bounds.top,
+                        right = bounds.right,
+                        bottom = bounds.bottom,
                     )
                 }
             } else {

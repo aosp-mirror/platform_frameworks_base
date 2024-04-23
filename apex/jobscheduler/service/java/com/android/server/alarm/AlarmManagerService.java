@@ -1795,6 +1795,10 @@ public class AlarmManagerService extends SystemService {
 
         mUseFrozenStateToDropListenerAlarms = Flags.useFrozenStateToDropListenerAlarms();
         mStartUserBeforeScheduledAlarms = Flags.startUserBeforeScheduledAlarms();
+        if (mStartUserBeforeScheduledAlarms) {
+            mUserWakeupStore = new UserWakeupStore();
+            mUserWakeupStore.init();
+        }
         if (mUseFrozenStateToDropListenerAlarms) {
             final ActivityManager.UidFrozenStateChangedCallback callback = (uids, frozenStates) -> {
                 final int size = frozenStates.length;
@@ -1912,10 +1916,6 @@ public class AlarmManagerService extends SystemService {
             } else {
                 Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
             }
-        }
-        if (mStartUserBeforeScheduledAlarms) {
-            mUserWakeupStore = new UserWakeupStore();
-            mUserWakeupStore.init();
         }
         publishLocalService(AlarmManagerInternal.class, new LocalService());
         publishBinderService(Context.ALARM_SERVICE, mService);
@@ -3863,7 +3863,7 @@ public class AlarmManagerService extends SystemService {
         long nextNonWakeup = 0;
         if (mAlarmStore.size() > 0) {
             long firstWakeup = mAlarmStore.getNextWakeupDeliveryTime();
-            if (mStartUserBeforeScheduledAlarms) {
+            if (mStartUserBeforeScheduledAlarms && mUserWakeupStore != null) {
                 final long firstUserWakeup = mUserWakeupStore.getNextWakeupTime();
                 if (firstUserWakeup >= 0 && firstUserWakeup < firstWakeup) {
                     firstWakeup = firstUserWakeup;

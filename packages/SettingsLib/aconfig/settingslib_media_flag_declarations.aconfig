@@ -1,4 +1,5 @@
 package: "com.android.settingslib.media.flags"
+container: "system"
 
 flag {
   name: "use_media_router2_for_info_media_manager"
@@ -19,4 +20,14 @@ flag {
     namespace: "media_solutions"
     description: "Enable Output Switcher when no media is playing."
     bug: "284227163"
+}
+
+flag {
+    name: "remove_unnecessary_route_scanning"
+    namespace: "media_solutions"
+    description: "Avoid active scan requests on UI components that only display route status information."
+    bug: "332515672"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

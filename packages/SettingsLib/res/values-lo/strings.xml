@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"ນຳໃຊ້ຢູ່, ຊ້າຍເທົ່ານັ້ນ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"ນຳໃຊ້ຢູ່, ຂວາເທົ່ານັ້ນ"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"ນຳໃຊ້ຢູ່, ຊ້າຍ ແລະ ຂວາ"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ), ຊ: ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ຂ: ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"ເຊື່ອມຕໍ່ແລ້ວ (ຮອງຮັບການແບ່ງປັນສຽງ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"ເຊື່ອມຕໍ່ແລ້ວ (ຮອງຮັບການແບ່ງປັນສຽງ), ຊ: ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ຂ: ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"ເຊື່ອມຕໍ່ແລ້ວ (ຮອງຮັບການແບ່ງປັນສຽງ), ຊ້າຍ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"ເຊື່ອມຕໍ່ແລ້ວ (ຮອງຮັບການແບ່ງປັນສຽງ), ຂວາ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ຮອງຮັບການແບ່ງປັນສຽງ"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ), ຊ້າຍເທົ່ານັ້ນ"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ), ຂວາເທົ່ານັ້ນ"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"ນຳໃຊ້ຢູ່ (ມີເດຍເທົ່ານັ້ນ), ຊ້າຍ ແລະ ຂວາ"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"ສຽງ"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"ການໂທ"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"ການໂອນຍ້າຍໄຟລ໌"</string>
@@ -476,6 +487,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"ຍັງເຫຼືອອີກ <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ຈຶ່ງຈະສາກເຕັມ"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ການສາກຖືກປັບໃຫ້ເໝາະສົມແລ້ວ"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - ກຳລັງສາກໄຟ"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - ຈະເຕັມພາຍໃນ <xliff:g id="TIME">%3$s</xliff:g>"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - ຈະສາກເຕັມພາຍໃນ <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"ຈະສາກເຕັມພາຍໃນ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"ຈະເຕັມພາຍໃນ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ກຳລັງສາກໄຟ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ກຳລັງສາກໄຟດ່ວນ"</string>
@@ -487,6 +502,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"ສາກເຕັມແລ້ວ"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"ສາກເຕັມແລ້ວ"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"ຢຸດການສາກຊົ່ວຄາວ"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"ກຳລັງສາກ"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"ກຳລັງສາກໄວ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ຄວບຄຸມໂດຍຜູ້ເບິ່ງແຍງ"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ຄວບຄຸມໂດຍການຕັ້ງຄ່າທີ່ຈຳກັດໄວ້"</string>
     <string name="disabled" msgid="8017887509554714950">"ປິດການນຳໃຊ້"</string>
@@ -643,8 +660,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ການເຄື່ອນໄຫວທັງໝົດຈະຖືກລຶບໃນຕອນອອກ"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ທ່ານສາມາດບັນທຶກ ຫຼື ລຶບການເຄື່ອນໄຫວຂອງທ່ານໃນຕອນອອກໄດ້"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ຣີເຊັດເພື່ອລຶບການເຄື່ອນໄຫວເຊດຊັນຕອນນີ້ ຫຼື ທ່ານສາມາດບັນທຶກ ຫຼື ລຶບການເຄື່ອນໄຫວໃນຕອນອອກໄດ້"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"ຖ່າຍຮູບ"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"ເລືອກຮູບ"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"ເລືອກຮູບ"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"ພະຍາຍາມປົດລັອກບໍ່ສຳເລັດຫຼາຍເທື່ອເກີນໄປ. ຂໍ້ມູນຂອງອຸປະກອນນີ້ຈະຖືກລຶບອອກ."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"ພະຍາຍາມປົດລັອກບໍ່ສຳເລັດຫຼາຍເທື່ອເກີນໄປ. ຜູ້ໃຊ້ນີ້ຈະຖືກລຶບຂໍ້ມູນອອກ."</string>
@@ -675,6 +690,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"ສັນຍານນຶ່ງຂີດ."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"ສັນຍານສອງຂີດ."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"ສັນຍານສາມຂີດ."</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"ສັນຍານໂທລະສັບ 4 ຂີດ."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"ສັນຍານເຕັມ."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"ບໍ່ມີຂໍ້ມູນ."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"ຂໍ້ມູນນຶ່ງຂີດ."</string>
@@ -684,8 +700,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ອີ​ເທີ​ເນັດ​ຕັດ​ເຊື່ອມ​ຕໍ່​ແລ້ວ."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ອີເທີເນັດ."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ບໍ່ສາມາດໂທສຽງໄດ້."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"ເລືອກຮູບໂປຣໄຟລ໌"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"ໄອຄອນຜູ້ໃຊ້ເລີ່ມຕົ້ນ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ແປ້ນພິມພາຍນອກ"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"ເລືອກຮູບແບບແປ້ນພິມ"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ຄ່າເລີ່ມຕົ້ນ"</string>

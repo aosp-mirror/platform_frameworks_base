@@ -196,11 +196,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         if (!super.setControl(control, showTypes, hideTypes)) {
             return false;
         }
-        final boolean hasLeash = control != null && control.getLeash() != null;
-        if (!hasLeash && !mIsRequestedVisibleAwaitingLeash) {
+        if (control == null && !mIsRequestedVisibleAwaitingLeash) {
             mController.setRequestedVisibleTypes(0 /* visibleTypes */, getType());
             removeSurface();
         }
+        final boolean hasLeash = control != null && control.getLeash() != null;
         if (hasLeash) {
             mIsRequestedVisibleAwaitingLeash = false;
         }

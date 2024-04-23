@@ -36,6 +36,7 @@ import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.ImageView;
 
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
@@ -51,6 +52,7 @@ import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -78,6 +80,7 @@ public class LegacyLockIconViewControllerBaseTest extends SysuiTestCase {
     protected final KosmosJavaAdapter mKosmos = new KosmosJavaAdapter(this);
     protected @Mock DeviceEntryInteractor mDeviceEntryInteractor;
     protected @Mock LockIconView mLockIconView;
+    protected @Mock ImageView mLockIcon;
     protected @Mock AnimatedStateListDrawable mIconDrawable;
     protected @Mock Context mContext;
     protected @Mock Resources mResources;
@@ -146,8 +149,10 @@ public class LegacyLockIconViewControllerBaseTest extends SysuiTestCase {
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
 
-        mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
-        mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+        if (!SceneContainerFlag.isEnabled()) {
+            mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
+            mSetFlagsRule.disableFlags(Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT);
+        }
 
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
@@ -172,8 +177,7 @@ public class LegacyLockIconViewControllerBaseTest extends SysuiTestCase {
                 mFeatureFlags,
                 mPrimaryBouncerInteractor,
                 mContext,
-                () -> mDeviceEntryInteractor,
-                mKosmos.getFakeSceneContainerFlags()
+                () -> mDeviceEntryInteractor
         );
     }
 
@@ -225,6 +229,7 @@ public class LegacyLockIconViewControllerBaseTest extends SysuiTestCase {
     protected void setupLockIconViewMocks() {
         when(mLockIconView.getResources()).thenReturn(mResources);
         when(mLockIconView.getContext()).thenReturn(mContext);
+        when(mLockIconView.getLockIcon()).thenReturn(mLockIcon);
     }
 
     protected void resetLockIconView() {

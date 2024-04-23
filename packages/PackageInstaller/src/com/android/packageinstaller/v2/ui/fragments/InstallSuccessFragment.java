@@ -60,6 +60,7 @@ public class InstallSuccessFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         View dialogView = getLayoutInflater().inflate(R.layout.install_content_view, null);
         mDialog = new AlertDialog.Builder(requireContext())
             .setTitle(mDialogData.getAppLabel())

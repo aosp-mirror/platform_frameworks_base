@@ -16,6 +16,7 @@
 package com.android.internal.widget.remotecompose.player;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -97,6 +98,7 @@ public class RemoteComposePlayer extends FrameLayout {
                             LayoutParams.MATCH_PARENT);
                     HorizontalScrollView horizontalScrollView =
                             new HorizontalScrollView(getContext());
+                    horizontalScrollView.setBackgroundColor(Color.TRANSPARENT);
                     horizontalScrollView.setFillViewport(true);
                     horizontalScrollView.addView(mInner, layoutParamsInner);
                     LayoutParams layoutParams = new LayoutParams(
@@ -113,6 +115,7 @@ public class RemoteComposePlayer extends FrameLayout {
                             LayoutParams.MATCH_PARENT,
                             LayoutParams.WRAP_CONTENT);
                     ScrollView scrollView = new ScrollView(getContext());
+                    scrollView.setBackgroundColor(Color.TRANSPARENT);
                     scrollView.setFillViewport(true);
                     scrollView.addView(mInner, layoutParamsInner);
                     LayoutParams layoutParams = new LayoutParams(
@@ -136,7 +139,9 @@ public class RemoteComposePlayer extends FrameLayout {
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
+        setBackgroundColor(Color.TRANSPARENT);
         mInner = new RemoteComposeCanvas(context, attrs, defStyleAttr);
+        mInner.setBackgroundColor(Color.TRANSPARENT);
         addView(mInner, layoutParams);
     }
 

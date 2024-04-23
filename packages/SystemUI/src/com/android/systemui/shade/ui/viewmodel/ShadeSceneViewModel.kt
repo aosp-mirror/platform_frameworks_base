@@ -33,9 +33,11 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -57,11 +59,13 @@ constructor(
     val qsSceneAdapter: QSSceneAdapter,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val notifications: NotificationsPlaceholderViewModel,
+    val brightnessMirrorViewModel: BrightnessMirrorViewModel,
     val mediaDataManager: MediaDataManager,
     shadeInteractor: ShadeInteractor,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     private val sceneInteractor: SceneInteractor,
+    private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
         combine(
@@ -103,6 +107,14 @@ constructor(
             )
 
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
+
+    /**
+     * Amount of X-axis translation to apply to various elements as the unfolded foldable is folded
+     * slightly, in pixels.
+     */
+    fun unfoldTranslationX(isOnStartSide: Boolean): Flow<Float> {
+        return unfoldTransitionInteractor.unfoldTranslationX(isOnStartSide)
+    }
 
     /** Notifies that some content in the shade was clicked. */
     fun onContentClicked() {

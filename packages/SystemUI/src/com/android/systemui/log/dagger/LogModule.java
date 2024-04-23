@@ -654,4 +654,13 @@ public class LogModule {
     public static LogBuffer provideNavbarOrientationTrackingLogBuffer(LogBufferFactory factory) {
         return factory.create("NavbarOrientationTrackingLog", 50);
     }
+
+    /** Provides a {@link LogBuffer} for use by the DeviceEntryIcon and related classes. */
+    @Provides
+    @SysUISingleton
+    @DeviceEntryIconLog
+    public static LogBuffer provideDeviceEntryIconLogBuffer(LogBufferFactory factory) {
+        return factory.create("DeviceEntryIconLog", 100);
+    }
+
 }

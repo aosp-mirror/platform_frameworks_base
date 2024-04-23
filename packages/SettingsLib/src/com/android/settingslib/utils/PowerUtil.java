@@ -16,6 +16,8 @@
 
 package com.android.settingslib.utils;
 
+import static java.lang.Math.abs;
+
 import android.content.Context;
 import android.icu.text.DateFormat;
 import android.icu.text.MeasureFormat;
@@ -33,7 +35,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-/** Utility class for keeping power related strings consistent**/
+/** Utility class for keeping power related strings consistent. **/
 public class PowerUtil {
 
     private static final long SEVEN_MINUTES_MILLIS = TimeUnit.MINUTES.toMillis(7);
@@ -212,13 +214,34 @@ public class PowerUtil {
      * @return The rounded value as a long
      */
     public static long roundTimeToNearestThreshold(long drainTime, long threshold) {
-        long time = Math.abs(drainTime);
-        long multiple = Math.abs(threshold);
+        long time = abs(drainTime);
+        long multiple = abs(threshold);
         final long remainder = time % multiple;
         if (remainder < multiple / 2) {
             return time - remainder;
         } else {
             return time - remainder + multiple;
         }
+    }
+
+    /** Gets the target time string in a short format. */
+    public static String getTargetTimeShortString(
+            Context context, long targetTimeOffsetMs, long currentTimeMs) {
+        long targetTimeMs = currentTimeMs + targetTimeOffsetMs;
+        if (targetTimeOffsetMs >= FIFTEEN_MINUTES_MILLIS) {
+            targetTimeMs = roundUpTimeToNextThreshold(targetTimeMs, FIFTEEN_MINUTES_MILLIS);
+        }
+
+        // convert the time to a properly formatted string.
+        String skeleton = android.text.format.DateFormat.getTimeFormatString(context);
+        DateFormat fmt = DateFormat.getInstanceForSkeleton(skeleton);
+        Date date = Date.from(Instant.ofEpochMilli(targetTimeMs));
+        return fmt.format(date);
+    }
+
+    private static long roundUpTimeToNextThreshold(long timeMs, long threshold) {
+        var time = abs(timeMs);
+        var multiple = abs(threshold);
+        return ((time + multiple - 1) / multiple) * multiple;
     }
 }

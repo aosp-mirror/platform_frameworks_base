@@ -235,7 +235,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Πλαίσιο σκίασης ειδοποιήσεων."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Γρήγορες ρυθμίσεις."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Γρήγορες ρυθμίσεις και πλαίσιο σκίασης ειδοποιήσεων."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Οθόνη κλειδώματος"</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"Κλείδωμα οθόνης"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Οθόνη κλειδωμένης εργασίας"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Κλείσιμο"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"πλήρης σίγαση"</string>
@@ -270,12 +270,15 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Εμφάνιση όλων"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Χρήση Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Συνδέθηκε"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Κοινή χρήση ήχου"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Αποθηκεύτηκε"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"αποσύνδεση"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ενεργοποίηση"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Αυτόματη ενεργοποίηση ξανά αύριο"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Λειτουργίες όπως το Quick Share, η Εύρεση συσκευής και η τοποθεσία της συσκευής χρησιμοποιούν Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Το Bluetooth θα ενεργοποιηθεί αύριο στις 5 π.μ."</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Λειτουργίες όπως το Quick Share και η Εύρεση συσκευής χρησιμοποιούν το Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Το Bluetooth θα ενεργοποιηθεί αύριο το πρωί"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Κοινή χρήση ήχου"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Κοινή χρήση ήχου"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Μπαταρία <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Ήχος"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Ακουστικά"</string>
@@ -350,6 +353,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Εγγραφή προβλήματος"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Έναρξη"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Διακοπή"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Αναφορά σφάλματος"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Ποιο κομμάτι της εμπειρίας συσκευής επηρεάστηκε;"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Επιλογή τύπου προβλήματος"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Εγγραφή οθόνης"</string>
@@ -363,7 +367,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Τυπική"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Μέτρια"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Υψηλή"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Συσκευές ακοής"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Συσκευές ακοής"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Σύζευξη νέας συσκευής"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Κάντε κλικ για σύζευξη νέας συσκευής"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Κατάργηση αποκλεισμού μικροφώνου συσκευής;"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Κατάργηση αποκλεισμού κάμερας συσκευής;"</string>
@@ -430,6 +438,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Γρήγορη φόρτιση • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Αργή φόρτιση • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Φόρτιση • Πλήρης φόρτιση σε <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Γραφικά στοιχεία στην οθόνη κλειδώματος"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Σύρετε προς τα αριστερά για να ξεκινήσετε τον κοινόχρηστο οδηγό"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Προσαρμογή"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Παράβλεψη"</string>
@@ -442,14 +451,14 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Κατάργηση"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Προσθήκη γραφικού στοιχείου"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Τέλος"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Προσθήκη γραφικών στοιχείων"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Αποκτήστε γρήγορα πρόσβαση στα αγαπημένα σας γραφικά στοιχεία εφαρμογών χωρίς να ξεκλειδώσετε το tablet σας."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Να επιτρέπονται όλα τα γραφικά στοιχεία στην οθόνη κλειδώματος;"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Άνοιγμα ρυθμίσεων"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Αναίρ. παύσης εφαρμ. εργασιών;"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Αναίρεση παύσης"</string>
+    <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Κλείσιμο γραφικών στοιχείων στην οθόνη κλειδώματος"</string>
+    <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Γραφικά στοιχεία στην οθόνη κλειδώματος"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Εναλλαγή χρήστη"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"αναπτυσσόμενο μενού"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Όλες οι εφαρμογές και τα δεδομένα αυτής της περιόδου σύνδεσης θα διαγραφούν."</string>
@@ -581,7 +590,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Η εφαρμογή ξεκαρφιτσώθηκε."</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Κλήση"</string>
     <string name="stream_system" msgid="7663148785370565134">"Σύστημα"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Κλήση"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ήχος κλήσης"</string>
     <string name="stream_music" msgid="2188224742361847580">"Μέσα"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Ξυπνητήρι"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Ειδοποίηση"</string>
@@ -741,7 +750,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Αλλαγή διάταξης πληκτρολογίου"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ή"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Διαγραφή ερωτήματος αναζήτησης"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Συντομεύσεις"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Συντομεύσ. πληκτρολογίου"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Αναζήτηση συντομεύσεων"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Δεν βρέθηκαν συντομεύσεις"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Σύστημα"</string>
@@ -766,9 +775,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Άνοιγμα Βοηθού"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Κλείδωμα οθόνης"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Δημιουργία σημείωσης"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Πολυδιεργασία συστήματος"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Ενεργοποίηση διαχωρισμού οθόνης με την τρέχουσα εφαρμογή στα δεξιά"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Ενεργοποίηση διαχωρισμού οθόνης με την τρέχουσα εφαρμογή στα αριστερά"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Πολυδιεργασία"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Χρήση διαχωρισμού οθόνης με την τρέχουσα εφαρμογή στα δεξιά"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Χρήση διαχωρισμού οθόνης με την τρέχουσα εφαρμογή στα αριστερά"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Εναλλαγή από διαχωρισμό οθόνης σε πλήρη οθόνη"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Εναλλαγή στην εφαρμογή δεξιά ή κάτω κατά τη χρήση διαχωρισμού οθόνης"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Εναλλαγή σε εφαρμογή αριστερά ή επάνω κατά τη χρήση διαχωρισμού οθόνης"</string>

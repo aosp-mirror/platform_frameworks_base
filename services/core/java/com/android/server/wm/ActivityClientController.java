@@ -1254,14 +1254,16 @@ class ActivityClientController extends IActivityClientController.Stub {
     private static void executeMultiWindowFullscreenRequest(int fullscreenRequest, Task requester) {
         final int targetWindowingMode;
         if (fullscreenRequest == FULLSCREEN_MODE_REQUEST_ENTER) {
-            requester.mMultiWindowRestoreWindowingMode =
-                    requester.getRequestedOverrideWindowingMode();
+            final int restoreWindowingMode = requester.getRequestedOverrideWindowingMode();
             targetWindowingMode = WINDOWING_MODE_FULLSCREEN;
+            requester.setWindowingMode(targetWindowingMode);
+            // The restore windowing mode must be set after the windowing mode is set since
+            // Task#setWindowingMode resets the restore windowing mode to WINDOWING_MODE_INVALID.
+            requester.mMultiWindowRestoreWindowingMode = restoreWindowingMode;
         } else {
             targetWindowingMode = requester.mMultiWindowRestoreWindowingMode;
-            requester.mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+            requester.setWindowingMode(targetWindowingMode);
         }
-        requester.setWindowingMode(targetWindowingMode);
         if (targetWindowingMode == WINDOWING_MODE_FULLSCREEN) {
             requester.setBounds(null);
         }

@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"使用中，僅左耳"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"使用中，僅右耳"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"使用中，左右耳"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"啟用 (只限媒體)，<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"啟用 (只限媒體)，左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> 電量，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"已連線 (支援音訊分享功能)，<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"已連線 (支援音訊分享功能)，左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> 電量，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"已連線 (支援音訊分享功能)，左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"已連線 (支援音訊分享功能)，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"啟用 (只限媒體)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"支援音訊分享功能"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"左側啟用 (只限媒體)"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"右側啟用 (只限媒體)"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"右側同時啟用 (只限媒體)"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"媒體音效"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"通話"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"檔案傳輸"</string>
@@ -476,6 +487,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充滿電"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 已優化充電"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ 充電中"</string>
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g> 前充飽"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> 前充飽"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"<xliff:g id="TIME">%1$s</xliff:g> 前充飽"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g> 前充飽"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>
@@ -487,6 +502,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"已充滿電"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"充電完成"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"目前暫停充電"</string>
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"充電中"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"快速充電"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"已由管理員停用"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"由「受限設定」控制"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
@@ -643,8 +660,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"結束時將會刪除所有活動"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"你可以在結束時儲存或刪除活動"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"重設可立即刪除工作階段活動，或者你可以在結束時儲存或刪除活動"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"拍照"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"選擇圖片"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"揀相"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"錯誤次數太多，系統將會刪除此裝置上的資料。"</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"錯誤次數太多，系統將會刪除此使用者。"</string>
@@ -675,6 +690,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"電話訊號強度為一格。"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"電話訊號強度為兩格。"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"電話訊號強度為三格。"</string>
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"手機訊號滿格。"</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"電話訊號滿格。"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"沒有數據網絡。"</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"數據網絡訊號強度為一格。"</string>
@@ -684,8 +700,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"以太網連接中斷。"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"以太網絡。"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"不啟用通話。"</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"選擇個人檔案相片"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"預設使用者圖示"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"實體鍵盤"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"選擇鍵盤配置"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"預設"</string>

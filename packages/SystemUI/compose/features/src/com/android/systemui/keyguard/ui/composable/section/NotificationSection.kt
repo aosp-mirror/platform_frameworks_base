@@ -32,8 +32,11 @@ import com.android.compose.modifiers.thenIf
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
+import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
-import com.android.systemui.notifications.ui.composable.NotificationStack
+import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
 import com.android.systemui.res.R
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
@@ -48,6 +51,7 @@ class NotificationSection
 @Inject
 constructor(
     private val viewModel: NotificationsPlaceholderViewModel,
+    private val aodBurnInViewModel: AodBurnInViewModel,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     stackScrollLayout: NotificationStackScrollLayout,
@@ -77,8 +81,12 @@ constructor(
         )
     }
 
+    /**
+     * @param burnInParams params to make this view adaptive to burn-in, `null` to disable burn-in
+     *   adjustment
+     */
     @Composable
-    fun SceneScope.Notifications(modifier: Modifier = Modifier) {
+    fun SceneScope.Notifications(burnInParams: BurnInParameters?, modifier: Modifier = Modifier) {
         val shouldUseSplitNotificationShade by
             lockscreenContentViewModel.shouldUseSplitNotificationShade.collectAsState()
         val areNotificationsVisible by
@@ -94,12 +102,24 @@ constructor(
             return
         }
 
-        NotificationStack(
+        ConstrainedNotificationStack(
             viewModel = viewModel,
             modifier =
-                modifier.fillMaxWidth().thenIf(shouldUseSplitNotificationShade) {
-                    Modifier.padding(top = splitShadeTopMargin)
-                },
+                modifier
+                    .fillMaxWidth()
+                    .thenIf(shouldUseSplitNotificationShade) {
+                        Modifier.padding(top = splitShadeTopMargin)
+                    }
+                    .let {
+                        if (burnInParams == null) {
+                            it
+                        } else {
+                            it.burnInAware(
+                                viewModel = aodBurnInViewModel,
+                                params = burnInParams,
+                            )
+                        }
+                    },
         )
     }
 }

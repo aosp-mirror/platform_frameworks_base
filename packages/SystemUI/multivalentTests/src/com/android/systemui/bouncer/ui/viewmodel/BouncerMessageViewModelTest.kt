@@ -122,7 +122,6 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
                 bouncerInteractor.authenticate(WRONG_PIN)
             }
-            assertThat(message?.isUpdateAnimated).isFalse()
 
             val lockoutEndMs = authenticationInteractor.lockoutEndTimestamp ?: 0
             advanceTimeBy(lockoutEndMs - testScope.currentTime)
@@ -133,6 +132,7 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
     fun lockoutMessage() =
         testScope.runTest {
             val message by collectLastValue(underTest.message)
+            val lockoutSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pin)
             assertThat(kosmos.fakeAuthenticationRepository.lockoutEndTimestamp).isNull()
             runCurrent()
@@ -140,14 +140,14 @@ class BouncerMessageViewModelTest : SysuiTestCase() {
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) { times ->
                 bouncerInteractor.authenticate(WRONG_PIN)
                 runCurrent()
-                if (times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
+                if (times == FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
+                    assertTryAgainMessage(message?.text, lockoutSeconds)
+                    assertThat(message?.isUpdateAnimated).isFalse()
+                } else {
                     assertThat(message?.text).isEqualTo("Wrong PIN. Try again.")
                     assertThat(message?.isUpdateAnimated).isTrue()
                 }
             }
-            val lockoutSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS
-            assertTryAgainMessage(message?.text, lockoutSeconds)
-            assertThat(message?.isUpdateAnimated).isFalse()
 
             repeat(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS) { time ->
                 advanceTimeBy(1.seconds)

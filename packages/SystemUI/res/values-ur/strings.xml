@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"اطلاعاتی شیڈ۔"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"فوری ترتیبات۔"</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"فوری ترتیبات اور اطلاعاتی شیڈ۔"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"مقفل اسکرین۔"</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"دفتری مقفل اسکرین"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"بند کریں"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"مکمل خاموشی"</string>
@@ -270,12 +271,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"سبھی دیکھیں"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"بلوٹوتھ استعمال کریں"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"منسلک ہے"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"محفوظ ہے"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"غیر منسلک کریں"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"فعال کریں"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"کل دوبارہ خودکار طور پر آن ہوگا"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"فوری اشتراک، میرا آلہ ڈھونڈیں، اور آلہ کے مقام جیسی خصوصیات بلوٹوتھ کا استعمال کرتی ہیں"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"بلوٹوتھ کل صبح 5 بجے آن ہو جائے گا"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> بیٹری"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"آڈیو"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ہیڈ سیٹ"</string>
@@ -350,6 +359,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"مسئلہ ریکارڈ کریں"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"شروع کریں"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"روکیں"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"بگ رپورٹ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"آپ کے آلے کے تجربے کا کون سا حصہ متاثر ہوا؟"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"مسئلہ کی قسم منتخب کریں"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"اسکرین ریکارڈ"</string>
@@ -363,7 +373,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"معیاری"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"متوسط"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"زیادہ"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"سماعت کے آلات"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"سماعت کے آلات"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"نئے آلے کا جوڑا بنائیں"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"نئے آلے کا جوڑا بنانے کے لیے کلک کریں"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"آلے کا مائیکروفون غیر مسدود کریں؟"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"آلے کا کیمرا غیر مسدود کریں؟"</string>
@@ -430,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • تیزی سے چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • آہستہ چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"کمیونل ٹیوٹوریل شروع کرنے کے لیے بائیں سوائپ کریں"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"حسب ضرورت بنائیں"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"برخاست کریں"</string>
@@ -442,14 +458,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ہٹائیں"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ویجیٹ شامل کریں"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ہو گیا"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ویجٹس شامل کریں"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"اپنے ٹیبلیٹ کو غیر مقفل کیے بغیر اپنے پسندیدہ ایپ ویجیٹس تک فوری رسائی حاصل کریں۔"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"مقفل اسکرین پر کسی ویجیٹ کی اجازت دیں؟"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ترتیبات کھولیں"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"ورک ایپس کو غیر موقوف کریں؟"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"غیر موقوف کریں"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"صارف سوئچ کریں"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"پل ڈاؤن مینیو"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"اس سیشن میں موجود سبھی ایپس اور ڈیٹا کو حذف کر دیا جائے گا۔"</string>
@@ -617,7 +635,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"‏%s خاموش کریں"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"‏%s غیر خاموش کریں"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> پر چل رہی ہے"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"آڈیو چلتی رہے گی"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"آڈیو اس پر چلے گی"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"‏سسٹم UI ٹیونر"</string>
     <string name="status_bar" msgid="4357390266055077437">"اسٹیٹس بار"</string>
     <string name="demo_mode" msgid="263484519766901593">"‏سسٹم UI ڈیمو موڈ"</string>
@@ -741,7 +759,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"کی بورڈ لے آؤٹ سوئچ کریں"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"یا"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"تلاش کا استفسار صاف کریں"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"شارٹ کٹس"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"کی بورڈ شارٹ کٹس"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"شارٹ کٹس تلاش کریں"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"کوئی شارٹ کٹ نہیں ملا"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"سسٹم"</string>
@@ -766,9 +784,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"اسسٹنٹ کھولیں"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"مقفل اسکرین"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"نوٹ لیں"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"سسٹم ملٹی ٹاسکنگ"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"موجودہ ایپ کے ساتھ دائیں جانب اسپلٹ اسکرین انٹر کریں"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"موجودہ ایپ کے ساتھ بائیں جانب اسپلٹ اسکرین انٹر کریں"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ملٹی ٹاسکنگ"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"دائیں جانب موجودہ ایپ کے ساتھ اسپلٹ اسکرین کا استعمال کریں"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"بائیں جانب موجودہ ایپ کے ساتھ اسپلٹ اسکرین کا استعمال کریں"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"اسپلٹ اسکرین سے پوری سکرین پر سوئچ کریں"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"اسپلٹ اسکرین کا استعمال کرتے ہوئے دائیں یا نیچے ایپ پر سوئچ کریں"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"اسپلٹ اسکرین کا استعمال کرتے ہوئے بائیں یا اوپر ایپ پر سوئچ کریں"</string>
@@ -1120,7 +1138,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"بلڈ نمبر کلپ بورڈ میں کاپی ہو گیا۔"</string>
     <string name="basic_status" msgid="2315371112182658176">"گفتگو کھولیں"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"گفتگو ویجیٹس"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"اسے اپنے ہوم اسکرین پر شامل کرنے کے لیے گفتگو پر تھپتھپائیں"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"اسے اپنی ہوم اسکرین پر شامل کرنے کے لیے گفتگو پر تھپتھپائیں"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"آپ کی حالیہ گفتگوئیں یہاں دکھائی دیں گی"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ترجیحی گفتگوئیں"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"حالیہ گفتگوئیں"</string>

@@ -16,13 +16,10 @@
 
 package com.android.systemui.volume.panel.component.spatial.ui.viewmodel
 
-import com.android.systemui.common.shared.model.Color
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
+import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
 
 data class SpatialAudioButtonViewModel(
     val model: SpatialAudioEnabledModel,
-    val button: ToggleButtonViewModel,
-    val iconColor: Color,
-    val labelColor: Color,
+    val button: ButtonViewModel,
 )

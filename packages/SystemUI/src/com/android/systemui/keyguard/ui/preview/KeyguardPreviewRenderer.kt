@@ -46,8 +46,8 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isInvisible
+import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.animation.view.LaunchableImageView
@@ -61,6 +61,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -141,6 +142,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val communalTutorialViewModel: CommunalTutorialIndicatorViewModel,
     private val defaultShortcutsSection: DefaultShortcutsSection,
+    private val keyguardClockInteractor: KeyguardClockInteractor,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
@@ -325,13 +327,12 @@ constructor(
         smartSpaceView = lockscreenSmartspaceController.buildAndConnectDateView(parentView)
 
         val topPadding: Int =
-            KeyguardPreviewSmartspaceViewModel.getLargeClockSmartspaceTopPadding(
-                previewContext.resources,
+            smartspaceViewModel.getLargeClockSmartspaceTopPadding(
+                previewInSplitShade(),
+                previewContext,
             )
-        val startPadding: Int =
-            previewContext.resources.getDimensionPixelSize(R.dimen.below_clock_padding_start)
-        val endPadding: Int =
-            previewContext.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end)
+        val startPadding: Int = smartspaceViewModel.getSmartspaceStartPadding(previewContext)
+        val endPadding: Int = smartspaceViewModel.getSmartspaceEndPadding(previewContext)
 
         smartSpaceView?.let {
             it.setPaddingRelative(startPadding, topPadding, endPadding, 0)
@@ -369,6 +370,7 @@ constructor(
             ),
         )
     }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
         val keyguardRootView = KeyguardRootView(previewContext, null)
@@ -382,7 +384,7 @@ constructor(
                     chipbarCoordinator,
                     screenOffAnimationController,
                     shadeInteractor,
-                    null, // clock provider only needed for burn in
+                    keyguardClockInteractor,
                     null, // jank monitor not required for preview mode
                     null, // device entry haptics not required preview mode
                     null, // device entry haptics not required for preview mode
@@ -411,10 +413,11 @@ constructor(
             setUpClock(previewContext, rootView)
             if (MigrateClocksToBlueprint.isEnabled) {
                 KeyguardPreviewClockViewBinder.bind(
-                    context,
+                    previewContext,
                     keyguardRootView,
                     clockViewModel,
-                    ::updateClockAppearance
+                    clockRegistry,
+                    ::updateClockAppearance,
                 )
             } else {
                 KeyguardPreviewClockViewBinder.bind(
@@ -426,7 +429,15 @@ constructor(
         }
 
         setUpSmartspace(previewContext, rootView)
-        smartSpaceView?.let { KeyguardPreviewSmartspaceViewBinder.bind(it, smartspaceViewModel) }
+
+        smartSpaceView?.let {
+            KeyguardPreviewSmartspaceViewBinder.bind(
+                previewContext,
+                it,
+                previewInSplitShade(),
+                smartspaceViewModel
+            )
+        }
         setupCommunalTutorialIndicator(keyguardRootView)
     }
 
@@ -530,7 +541,7 @@ constructor(
                     )
                 )
             layoutParams.topMargin =
-                KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
+                SystemBarUtils.getStatusBarHeight(previewContext) +
                     resources.getDimensionPixelSize(
                         com.android.systemui.customization.R.dimen.small_clock_padding_top
                     )
@@ -611,7 +622,9 @@ constructor(
     }
 
     private suspend fun updateClockAppearance(clock: ClockController) {
-        clockController.clock = clock
+        if (!MigrateClocksToBlueprint.isEnabled) {
+            clockController.clock = clock
+        }
         val colors = wallpaperColors
         if (clockRegistry.seedColor == null && colors != null) {
             // Seed color null means users do not override any color on the clock. The default
@@ -628,6 +641,11 @@ constructor(
             clock.events.onSeedColorChanged(
                 if (isWallpaperDark) lightClockColor else darkClockColor
             )
+        }
+        // In clock preview, we should have a seed color for clock
+        // before setting clock to clockEventController to avoid updateColor with seedColor == null
+        if (MigrateClocksToBlueprint.isEnabled) {
+            clockController.clock = clock
         }
     }
     private fun onClockChanged() {
@@ -703,6 +721,14 @@ constructor(
         }
         smallClockHostView.removeAllViews()
         smallClockHostView.addView(clock.smallClock.view)
+    }
+
+    /*
+     * When multi_crop_preview_ui_flag is on, we can preview portrait in split shadow direction
+     * or vice versa. So we need to decide preview direction by width and height
+     */
+    private fun previewInSplitShade(): Boolean {
+        return width > height
     }
 
     companion object {

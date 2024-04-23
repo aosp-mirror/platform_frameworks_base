@@ -662,7 +662,8 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിഞ്ഞില്ല"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിഞ്ഞില്ല"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"മുഖം തിരിച്ചറിയാനായില്ല. പകരം ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കൂ."</string>
+    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
+    <skip />
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ഫിംഗർപ്രിന്റ് പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു, സ്ഥിരീകരിക്കുക അമർത്തുക"</string>
@@ -831,7 +832,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ടാബ്‌ലെറ്റിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"സ്‌ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌തിട്ടുണ്ടെങ്കിൽ നിങ്ങളുടെ Android TV ലോക്ക് ചെയ്യുകയോ Android TV-യിലെ എല്ലാ ഡാറ്റയും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"സ്ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക. നിരവധി തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌താൽ, ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റം ലോക്ക് ചെയ്യുകയോ ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റത്തിന്റെ ഡാറ്റ മുഴുവനും മായ്ക്കുകയോ ചെയ്യുക."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് ടൈപ്പുചെയ്‌തെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ഈ എല്ലാ ഉപയോക്തൃവിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"സ്‌ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌തിട്ടുണ്ടെങ്കിൽ നിങ്ങളുടെ Android TV ലോക്ക് ചെയ്യുകയോ ഈ ഉപയോക്തൃ ഡാറ്റയെല്ലാം മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"സ്ക്രീൻ അൺലോക്ക് ചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പ് ചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിച്ച്, നിരവധി തെറ്റായ പാസ്‌വേഡുകൾ ടൈപ്പ് ചെയ്‌താൽ ഇൻഫോറ്റേയിൻമെന്റ് സിസ്‌റ്റം ലോക്ക് ചെയ്യുകയോ ഈ പ്രൊഫൈലിന്റെ ഡാറ്റ മുഴുവനും മായ്ക്കുകയോ ചെയ്യുക."</string>
@@ -1929,12 +1930,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> മാനേജ് ചെയ്യുന്നത്"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ഓണാണ്"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ഓഫാണ്"</string>
-    <!-- no translation found for zen_mode_trigger_summary_divider_text (7461583466043698862) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_summary_range_symbol_combination (1804900738798069619) -->
-    <skip />
-    <!-- no translation found for zen_mode_trigger_event_calendar_any (2086784607921121803) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"എല്ലാ കലണ്ടറിലും"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ചില ശബ്‌ദങ്ങൾ മ്യൂട്ട് ചെയ്യുന്നു"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്, ഫാക്‌ടറി വിവര പുനഃസജ്ജീകരണം ചെയ്യുന്നതുവരെ ഇതു അസ്ഥിരമായിരിക്കാനിടയുണ്ട്."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"നിങ്ങളുടെ ഉപകരണത്തിൽ ഒരു ആന്തരിക പ്രശ്‌നമുണ്ട്. വിശദാംശങ്ങൾക്കായി നിർമ്മാതാവിനെ ബന്ധപ്പെടുക."</string>
@@ -2397,6 +2395,7 @@
     <string name="profile_label_test" msgid="9168641926186071947">"ടെസ്‌റ്റ്"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"കമ്മ്യൂണൽ"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ആപ്പ് ഉള്ളടക്കം, അതിന്റെ സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് മറച്ചിരിക്കുന്നു"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"സാറ്റലൈറ്റിലേക്ക് സ്വയമേവ കണക്റ്റ് ചെയ്തു"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"മൊബൈലോ വൈഫൈ നെറ്റ്‌വർക്കോ ഇല്ലാതെ തന്നെ സന്ദേശങ്ങൾ അയയ്‌ക്കാനും സ്വീകരിക്കാനും നിങ്ങൾക്ക് കഴിയും"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>

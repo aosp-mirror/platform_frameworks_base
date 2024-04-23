@@ -288,6 +288,14 @@ public class MultiStateStats {
     }
 
     /**
+     * Copies time-in-state and timestamps from the supplied prototype. Does not
+     * copy accumulated counts.
+     */
+    public void copyStatesFrom(MultiStateStats otherStats) {
+        mCounter.copyStatesFrom(otherStats.mCounter);
+    }
+
+    /**
      * Updates the current composite state by changing one of the States supplied to the Factory
      * constructor.
      *

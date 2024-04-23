@@ -16,9 +16,9 @@ package com.android.systemui.qs;
 
 import static junit.framework.Assert.assertEquals;
 
-import android.test.suitebuilder.annotation.SmallTest;
 import android.view.View;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;

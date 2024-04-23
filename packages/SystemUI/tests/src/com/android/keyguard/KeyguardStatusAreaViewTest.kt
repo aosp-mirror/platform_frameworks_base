@@ -1,8 +1,8 @@
 package com.android.keyguard
 
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import org.junit.Assert.assertEquals
 import org.junit.Before

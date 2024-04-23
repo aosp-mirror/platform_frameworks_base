@@ -33,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
@@ -57,7 +59,7 @@ constructor(
      * @param content is the popup body
      */
     fun show(
-        expandable: Expandable,
+        expandable: Expandable?,
         title: @Composable (SystemUIDialog) -> Unit,
         content: @Composable (SystemUIDialog) -> Unit,
     ) {
@@ -68,7 +70,7 @@ constructor(
             ) {
                 PopupComposable(it, title, content)
             }
-        val controller = expandable.dialogTransitionController()
+        val controller = expandable?.dialogTransitionController()
         if (controller == null) {
             dialog.show()
         } else {
@@ -82,7 +84,8 @@ constructor(
         title: @Composable (SystemUIDialog) -> Unit,
         content: @Composable (SystemUIDialog) -> Unit,
     ) {
-        Box(Modifier.fillMaxWidth()) {
+        val paneTitle = stringResource(R.string.accessibility_volume_settings)
+        Box(Modifier.fillMaxWidth().semantics(properties = { this.paneTitle = paneTitle })) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),

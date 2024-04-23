@@ -61,7 +61,6 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams;
 import android.window.SurfaceSyncGroup;
@@ -252,16 +251,14 @@ public class WindowDecorationTests extends ShellTestCase {
                         argThat(lp -> lp.height == 64
                                 && lp.width == 300
                                 && (lp.flags & LayoutParams.FLAG_NOT_FOCUSABLE) != 0));
-        if (ViewRootImpl.CAPTION_ON_SHELL) {
-            verify(mMockView).setTaskFocusState(true);
-            verify(mMockWindowContainerTransaction).addInsetsSource(
-                    eq(taskInfo.token),
-                    any(),
-                    eq(0 /* index */),
-                    eq(WindowInsets.Type.captionBar()),
-                    eq(new Rect(100, 300, 400, 364)),
-                    any());
-        }
+        verify(mMockView).setTaskFocusState(true);
+        verify(mMockWindowContainerTransaction).addInsetsSource(
+                eq(taskInfo.token),
+                any(),
+                eq(0 /* index */),
+                eq(WindowInsets.Type.captionBar()),
+                eq(new Rect(100, 300, 400, 364)),
+                any());
 
         verify(mMockSurfaceControlStartT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);
         verify(mMockSurfaceControlFinishT).setCornerRadius(mMockTaskSurface, CORNER_RADIUS);

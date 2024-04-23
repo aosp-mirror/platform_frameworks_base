@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
@@ -24,10 +25,10 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.SceneTransitionLayoutDataSource
@@ -41,6 +42,11 @@ object Communal {
 }
 
 val sceneTransitions = transitions {
+    to(CommunalScenes.Communal, key = CommunalTransitionKeys.SimpleFade) {
+        spec = tween(durationMillis = 250)
+        fade(Communal.Elements.Scrim)
+        fade(Communal.Elements.Content)
+    }
     to(CommunalScenes.Communal) {
         spec = tween(durationMillis = 1000)
         translate(Communal.Elements.Content, Edge.Right)
@@ -69,6 +75,7 @@ fun CommunalContainer(
     viewModel: CommunalViewModel,
     dataSourceDelegator: SceneDataSourceDelegator,
     dialogFactory: SystemUIDialogFactory,
+    colors: CommunalColors,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState(CommunalScenes.Blank)
@@ -129,7 +136,7 @@ fun CommunalContainer(
                     emptyMap()
                 },
         ) {
-            CommunalScene(viewModel, dialogFactory, modifier = modifier)
+            CommunalScene(viewModel, colors, dialogFactory, modifier = modifier)
         }
     }
 }
@@ -137,15 +144,18 @@ fun CommunalContainer(
 /** Scene containing the glanceable hub UI. */
 @Composable
 private fun SceneScope.CommunalScene(
-    viewModel: BaseCommunalViewModel,
+    viewModel: CommunalViewModel,
+    colors: CommunalColors,
     dialogFactory: SystemUIDialogFactory,
     modifier: Modifier = Modifier,
 ) {
+    val backgroundColor by colors.backgroundColor.collectAsState()
+
     Box(
         modifier =
             Modifier.element(Communal.Elements.Scrim)
                 .fillMaxSize()
-                .background(LocalAndroidColorScheme.current.outlineVariant),
+                .background(Color(backgroundColor.toArgb())),
     )
     Box(modifier.element(Communal.Elements.Content)) {
         CommunalHub(viewModel = viewModel, dialogFactory = dialogFactory)

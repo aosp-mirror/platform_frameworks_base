@@ -99,7 +99,7 @@ class PinBouncerViewModel(
             .map { if (it) ActionButtonAppearance.Hidden else ActionButtonAppearance.Shown }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.Eagerly,
+                started = SharingStarted.WhileSubscribed(),
                 initialValue = ActionButtonAppearance.Hidden,
             )
 
@@ -135,8 +135,11 @@ class PinBouncerViewModel(
 
         onIntentionalUserInput()
 
-        mutablePinInput.value = pinInput.append(input)
-        tryAuthenticate(useAutoConfirm = true)
+        val maxInputLength = hintedPinLength.value ?: Int.MAX_VALUE
+        if (pinInput.getPin().size < maxInputLength) {
+            mutablePinInput.value = pinInput.append(input)
+            tryAuthenticate(useAutoConfirm = true)
+        }
     }
 
     /** Notifies that the user clicked the backspace button. */

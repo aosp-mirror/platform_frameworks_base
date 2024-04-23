@@ -1,4 +1,5 @@
 package: "com.android.server.policy"
+container: "system"
 
 flag {
     name: "support_input_wakeup_delegate"

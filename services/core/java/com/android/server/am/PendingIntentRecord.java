@@ -16,11 +16,13 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_SUCCESS;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
@@ -51,11 +53,15 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.modules.expresslog.Counter;
 import com.android.server.wm.SafeActivityOptions;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
@@ -71,12 +77,35 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     public static final int FLAG_BROADCAST_SENDER = 1 << 1;
     public static final int FLAG_SERVICE_SENDER = 1 << 2;
 
+    public static final int CANCEL_REASON_NULL = 0;
+    public static final int CANCEL_REASON_USER_STOPPED = 1 << 0;
+    public static final int CANCEL_REASON_OWNER_UNINSTALLED = 1 << 1;
+    public static final int CANCEL_REASON_OWNER_FORCE_STOPPED = 1 << 2;
+    public static final int CANCEL_REASON_OWNER_CANCELED = 1 << 3;
+    public static final int CANCEL_REASON_HOSTING_ACTIVITY_DESTROYED = 1 << 4;
+    public static final int CANCEL_REASON_SUPERSEDED = 1 << 5;
+    public static final int CANCEL_REASON_ONE_SHOT_SENT = 1 << 6;
+
+    @IntDef({
+            CANCEL_REASON_NULL,
+            CANCEL_REASON_USER_STOPPED,
+            CANCEL_REASON_OWNER_UNINSTALLED,
+            CANCEL_REASON_OWNER_FORCE_STOPPED,
+            CANCEL_REASON_OWNER_CANCELED,
+            CANCEL_REASON_HOSTING_ACTIVITY_DESTROYED,
+            CANCEL_REASON_SUPERSEDED,
+            CANCEL_REASON_ONE_SHOT_SENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CancellationReason {}
+
     final PendingIntentController controller;
     final Key key;
     final int uid;
     public final WeakReference<PendingIntentRecord> ref;
     boolean sent = false;
     boolean canceled = false;
+    @CancellationReason int cancelReason = CANCEL_REASON_NULL;
     /**
      * Map IBinder to duration specified as Pair<Long, Integer>, Long is allowlist duration in
      * milliseconds, Integer is allowlist type defined at
@@ -419,12 +448,22 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         SafeActivityOptions mergedOptions = null;
         synchronized (controller.mLock) {
             if (canceled) {
+                if (cancelReason == CANCEL_REASON_OWNER_FORCE_STOPPED
+                        && controller.mAmInternal.getUidProcessState(callingUid)
+                                == PROCESS_STATE_TOP) {
+                    Counter.logIncrementWithUid(
+                            "app.value_force_stop_cancelled_pi_sent_from_top_per_caller",
+                            callingUid);
+                    Counter.logIncrementWithUid(
+                            "app.value_force_stop_cancelled_pi_sent_from_top_per_owner",
+                            uid);
+                }
                 return ActivityManager.START_CANCELED;
             }
 
             sent = true;
             if ((key.flags & PendingIntent.FLAG_ONE_SHOT) != 0) {
-                controller.cancelIntentSender(this, true);
+                controller.cancelIntentSender(this, true, CANCEL_REASON_ONE_SHOT_SENT);
             }
 
             finalIntent = key.requestIntent != null ? new Intent(key.requestIntent) : new Intent();
@@ -687,6 +726,21 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
     }
 
+    @VisibleForTesting
+    static String cancelReasonToString(@CancellationReason int cancelReason) {
+        return switch (cancelReason) {
+            case CANCEL_REASON_NULL -> "NULL";
+            case CANCEL_REASON_USER_STOPPED -> "USER_STOPPED";
+            case CANCEL_REASON_OWNER_UNINSTALLED -> "OWNER_UNINSTALLED";
+            case CANCEL_REASON_OWNER_FORCE_STOPPED -> "OWNER_FORCE_STOPPED";
+            case CANCEL_REASON_OWNER_CANCELED -> "OWNER_CANCELED";
+            case CANCEL_REASON_HOSTING_ACTIVITY_DESTROYED -> "HOSTING_ACTIVITY_DESTROYED";
+            case CANCEL_REASON_SUPERSEDED -> "SUPERSEDED";
+            case CANCEL_REASON_ONE_SHOT_SENT -> "ONE_SHOT_SENT";
+            default -> "UNKNOWN";
+        };
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("uid="); pw.print(uid);
                 pw.print(" packageName="); pw.print(key.packageName);
@@ -707,7 +761,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
         if (sent || canceled) {
             pw.print(prefix); pw.print("sent="); pw.print(sent);
-                    pw.print(" canceled="); pw.println(canceled);
+                    pw.print(" canceled="); pw.print(canceled);
+                    pw.print(" cancelReason="); pw.println(cancelReasonToString(cancelReason));
         }
         if (mAllowlistDuration != null) {
             pw.print(prefix);

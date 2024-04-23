@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Панель уведомлений"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Быстрые настройки"</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Быстрые настройки и панель уведомлений."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Экран блокировки."</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Заблокировано"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Закрыть"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"полная тишина"</string>
@@ -270,12 +271,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Все"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Использовать"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Подключено"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Сохранено"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"отключить"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активировать"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Включить завтра автоматически"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Bluetooth используется в сервисе \"Найти устройство\", таких функциях, как Быстрая отправка, и при определении местоположения устройства"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth будет включен завтра в 05:00"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудиоустройство"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнитура"</string>
@@ -350,6 +359,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Запись неисправности"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Начать"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Остановить"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Отчет об ошибке"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"С чем связана проблема, с которой вы столкнулись?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Выберите тип проблемы"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Запись экрана"</string>
@@ -363,7 +373,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандартная"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Средняя"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Высокая"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слуховые аппараты"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слуховые аппараты"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Подключить новое устройство"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Нажмите, чтобы подключить новое устройство"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблокировать микрофон устройства?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Разблокировать камеру устройства?"</string>
@@ -430,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Быстрая зарядка • Осталось <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Медленная зарядка • Осталось <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядка • Осталось <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Чтобы ознакомиться с руководством, проведите по экрану влево"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Настроить"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Закрыть"</string>
@@ -442,14 +458,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Удалить"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Добавить виджет"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Готово"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Добавить виджеты"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Быстрый доступ к виджетам любимых приложений, даже когда планшет заблокирован"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Разрешить добавлять любые виджеты на заблокированный экран?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Открыть настройки"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Включить рабочие приложения?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Включить"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Сменить пользователя."</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"раскрывающееся меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Все приложения и данные этого профиля будут удалены."</string>
@@ -592,7 +610,7 @@
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вибрация"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Без звука"</string>
     <string name="media_device_cast" msgid="4786241789687569892">"Трансляция"</string>
-    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недоступно, когда отключен звук вызовов"</string>
+    <string name="stream_notification_unavailable" msgid="4313854556205836435">"Недоступно в беззвучном режиме"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Недоступно при включенном режиме \"Не беспокоить\"."</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Недоступно при включенном режиме \"Не беспокоить\"."</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Нажмите, чтобы включить звук."</string>
@@ -603,8 +621,8 @@
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контроль уровня шума"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Пространственное звучание"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Отключено"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Без отслеживания"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"С отслеживанием"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Без отсле­живания"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"С отсле­живанием"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Нажмите, чтобы изменить режим звонка."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"отключить звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"включить звук"</string>
@@ -674,7 +692,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус:&lt;/b&gt; уровень важности понижен"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Появляется в верхней части уведомлений о сообщениях, а также в качестве фото профиля на заблокированном экране"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране."</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Появляется в верхней части уведомлений о сообщениях, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Появляется в верхней части уведомлений о сообщениях, а также в виде фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Появляется в верхней части уведомлений о сообщениях, в виде всплывающего чата, а также в качестве фото профиля на заблокированном экране, прерывает режим \"Не беспокоить\"."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает функции разговоров."</string>
@@ -741,7 +759,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Переключение раскладки"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"или"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Удалить поисковый запрос"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Сочетания клавиш"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Быстрые клавиши"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Поиск сочетаний клавиш"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Нет сочетаний клавиш."</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Система"</string>
@@ -766,9 +784,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Открыть Ассистента"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокировать экран"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Создать заметку"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Режим многозадачности"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Включить разделение экрана с текущим приложением справа"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Включить разделение экрана с текущим приложением слева"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Многозадачность"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Разделить экран и поместить это приложение справа"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Разделить экран и поместить это приложение слева"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Изменить режим разделения экрана на полноэкранный режим"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Перейти к приложению справа или внизу на разделенном экране"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Перейти к приложению слева или вверху на разделенном экране"</string>
@@ -779,7 +797,7 @@
     <string name="input_access_emoji" msgid="8105642858900406351">"Открыть список эмодзи"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Активировать голосовой ввод"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Приложения"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Открыть Ассистента"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Ассистент"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Браузер"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Контакты"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Эл. почта"</string>
@@ -993,11 +1011,11 @@
     <string name="accessibility_floating_button_hidden_notification_text" msgid="1457021647040915658">"Чтобы вернуть ее, нажмите на уведомление."</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g>: сочетание клавиш удалено."</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# сочетание клавиш удалено}one{# сочетание клавиш удалено}few{# сочетания клавиш удалено}many{# сочетаний клавиш удалено}other{# сочетания клавиш удалено}}"</string>
-    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перенести в левый верхний угол"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перенести в правый верхний угол"</string>
-    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Перенести в левый нижний угол"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Перенести в правый нижний угол"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Перенести к краю и скрыть"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Переместить в левый верхний угол"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Переместить в правый верхний угол"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Переместить в левый нижний угол"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Переместить в правый нижний угол"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Переместить к краю и скрыть"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Вернуть из-за края и показать"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Убрать"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"включить или отключить"</string>
@@ -1119,8 +1137,8 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер сборки"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер сборки скопирован в буфер обмена."</string>
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты чатов"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на чат, чтобы добавить его на главный экран"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты разговоров"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на разговор, чтобы добавить его на главный экран"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Здесь появятся ваши недавние разговоры."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Важные разговоры"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Недавние разговоры"</string>
@@ -1287,7 +1305,7 @@
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Развернуть и показать параметры"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Свернуть"</string>
     <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Закрыть это приложение"</string>
-    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" закрыто."</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" закрыто"</string>
     <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Настроить сервис"</string>
     <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Настроить доступ"</string>
     <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Сейчас используется для телефонного звонка"</string>
@@ -1301,5 +1319,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Подсветка клавиатуры"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Уровень %1$d из %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Управление домом"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"Добавьте настройки умного дома на заставку"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"Быстрый доступ к управлению домом через заставку"</string>
 </resources>

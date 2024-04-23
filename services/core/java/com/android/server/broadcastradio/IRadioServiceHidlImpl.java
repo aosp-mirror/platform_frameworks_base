@@ -26,7 +26,6 @@ import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 
@@ -49,8 +48,8 @@ import java.util.OptionalInt;
 final class IRadioServiceHidlImpl extends IRadioService.Stub {
     private static final String TAG = "BcRadioSrvHidl";
 
-    private final com.android.server.broadcastradio.hal1.BroadcastRadioService mHal1;
-    private final com.android.server.broadcastradio.hal2.BroadcastRadioService mHal2;
+    private final com.android.server.broadcastradio.hal1.BroadcastRadioService mHal1Client;
+    private final com.android.server.broadcastradio.hal2.BroadcastRadioService mHal2Client;
 
     private final Object mLock = new Object();
 
@@ -61,10 +60,10 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
 
     IRadioServiceHidlImpl(BroadcastRadioService service) {
         mService = Objects.requireNonNull(service, "broadcast radio service cannot be null");
-        mHal1 = new com.android.server.broadcastradio.hal1.BroadcastRadioService();
-        mV1Modules = mHal1.loadModules();
+        mHal1Client = new com.android.server.broadcastradio.hal1.BroadcastRadioService();
+        mV1Modules = mHal1Client.loadModules();
         OptionalInt max = mV1Modules.stream().mapToInt(RadioManager.ModuleProperties::getId).max();
-        mHal2 = new com.android.server.broadcastradio.hal2.BroadcastRadioService(
+        mHal2Client = new com.android.server.broadcastradio.hal2.BroadcastRadioService(
                 max.isPresent() ? max.getAsInt() + 1 : 0);
     }
 
@@ -73,17 +72,17 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
             com.android.server.broadcastradio.hal1.BroadcastRadioService hal1,
             com.android.server.broadcastradio.hal2.BroadcastRadioService hal2) {
         mService = Objects.requireNonNull(service, "Broadcast radio service cannot be null");
-        mHal1 = Objects.requireNonNull(hal1,
+        mHal1Client = Objects.requireNonNull(hal1,
                 "Broadcast radio service implementation for HIDL 1 HAL cannot be null");
-        mV1Modules = mHal1.loadModules();
-        mHal2 = Objects.requireNonNull(hal2,
+        mV1Modules = mHal1Client.loadModules();
+        mHal2Client = Objects.requireNonNull(hal2,
                 "Broadcast radio service implementation for HIDL 2 HAL cannot be null");
     }
 
     @Override
     public List<RadioManager.ModuleProperties> listModules() {
         mService.enforcePolicyAccess();
-        Collection<RadioManager.ModuleProperties> v2Modules = mHal2.listModules();
+        Collection<RadioManager.ModuleProperties> v2Modules = mHal2Client.listModules();
         List<RadioManager.ModuleProperties> modules;
         synchronized (mLock) {
             modules = new ArrayList<>(mV1Modules.size() + v2Modules.size());
@@ -102,10 +101,10 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
         mService.enforcePolicyAccess();
         Objects.requireNonNull(callback, "Callback must not be null");
         synchronized (mLock) {
-            if (mHal2.hasModule(moduleId)) {
-                return mHal2.openSession(moduleId, bandConfig, withAudio, callback);
+            if (mHal2Client.hasModule(moduleId)) {
+                return mHal2Client.openSession(moduleId, bandConfig, withAudio, callback);
             } else {
-                return mHal1.openTuner(moduleId, bandConfig, withAudio, callback);
+                return mHal1Client.openTuner(moduleId, bandConfig, withAudio, callback);
             }
         }
     }
@@ -121,12 +120,12 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
         mService.enforcePolicyAccess();
 
         synchronized (mLock) {
-            if (!mHal2.hasAnyModules()) {
+            if (!mHal2Client.hasAnyModules()) {
                 Slog.w(TAG, "There are no HAL 2.0 modules registered");
                 return new AnnouncementAggregator(listener, mLock);
             }
 
-            return mHal2.addAnnouncementListener(enabledTypes, listener);
+            return mHal2Client.addAnnouncementListener(enabledTypes, listener);
         }
     }
 
@@ -139,22 +138,22 @@ final class IRadioServiceHidlImpl extends IRadioService.Stub {
                     + " without permission " + Manifest.permission.DUMP);
             return;
         }
-        IndentingPrintWriter radioPw = new IndentingPrintWriter(pw);
+        android.util.IndentingPrintWriter radioPw = new android.util.IndentingPrintWriter(pw);
         radioPw.printf("BroadcastRadioService\n");
 
         radioPw.increaseIndent();
-        radioPw.printf("HAL1: %s\n", mHal1);
+        radioPw.printf("HAL1 client: %s\n", mHal1Client);
 
         radioPw.increaseIndent();
         synchronized (mLock) {
-            radioPw.printf("Modules of HAL1: %s\n", mV1Modules);
+            radioPw.printf("Modules of HAL1 client: %s\n", mV1Modules);
         }
         radioPw.decreaseIndent();
 
-        radioPw.printf("HAL2:\n");
+        radioPw.printf("HAL2 client:\n");
 
         radioPw.increaseIndent();
-        mHal2.dumpInfo(radioPw);
+        mHal2Client.dumpInfo(radioPw);
         radioPw.decreaseIndent();
 
         radioPw.decreaseIndent();

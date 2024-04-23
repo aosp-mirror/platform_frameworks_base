@@ -20,11 +20,11 @@ package com.android.systemui.keyguard.ui.binder
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.common.ui.view.LongPressHandlingView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
-import kotlinx.coroutines.launch
 
 object KeyguardLongPressViewBinder {
     /**
@@ -64,7 +64,7 @@ object KeyguardLongPressViewBinder {
 
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
+                launch("$TAG#viewModel.isLongPressHandlingEnabled") {
                     viewModel.isLongPressHandlingEnabled.collect { isEnabled ->
                         view.setLongPressHandlingEnabled(isEnabled)
                     }
@@ -72,4 +72,6 @@ object KeyguardLongPressViewBinder {
             }
         }
     }
+
+    private const val TAG = "KeyguardLongPressViewBinder"
 }

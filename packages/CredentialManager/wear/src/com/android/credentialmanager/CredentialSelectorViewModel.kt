@@ -86,7 +86,7 @@ class CredentialSelectorViewModel @Inject constructor(
         when (uiState.value) {
             is Get.MultipleEntry -> isPrimaryScreen.value = true
             is Create, Close, is Cancel, Idle -> shouldClose.value = true
-            is Get.SingleEntry, is Get.SingleEntryPerAccount -> cancel()
+            is Get.SingleEntry, is Get.MultipleEntryPrimaryScreen -> cancel()
         }
     }
 

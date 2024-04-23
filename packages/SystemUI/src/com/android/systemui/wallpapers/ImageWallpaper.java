@@ -20,8 +20,12 @@ import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.app.WallpaperManager.SetWallpaperFlags;
 
+import static com.android.window.flags.Flags.offloadColorExtraction;
+
+import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.RecordingCanvas;
@@ -134,6 +138,12 @@ public class ImageWallpaper extends WallpaperService {
                     mLongExecutor,
                     mLock,
                     new WallpaperLocalColorExtractor.WallpaperLocalColorExtractorCallback() {
+
+                        @Override
+                        public void onColorsProcessed() {
+                            CanvasEngine.this.notifyColorsChanged();
+                        }
+
                         @Override
                         public void onColorsProcessed(List<RectF> regions,
                                 List<WallpaperColors> colors) {
@@ -183,8 +193,11 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onDestroy() {
-            getDisplayContext().getSystemService(DisplayManager.class)
-                    .unregisterDisplayListener(this);
+            Context context = getDisplayContext();
+            if (context != null) {
+                DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+                if (displayManager != null) displayManager.unregisterDisplayListener(this);
+            }
             mWallpaperLocalColorExtractor.cleanUp();
         }
 
@@ -429,6 +442,12 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         @Override
+        public @Nullable WallpaperColors onComputeColors() {
+            if (!offloadColorExtraction()) return null;
+            return mWallpaperLocalColorExtractor.onComputeColors();
+        }
+
+        @Override
         public boolean supportsLocalColorExtraction() {
             return true;
         }
@@ -462,6 +481,12 @@ public class ImageWallpaper extends WallpaperService {
                 mPagesComputed = true;
                 mWallpaperLocalColorExtractor.onPageChanged(mPages);
             }
+        }
+
+        @Override
+        public void onDimAmountChanged(float dimAmount) {
+            if (!offloadColorExtraction()) return;
+            mWallpaperLocalColorExtractor.onDimAmountChanged(dimAmount);
         }
 
         @Override

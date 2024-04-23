@@ -1,4 +1,15 @@
 package: "com.android.server.deviceidle"
+container: "system"
+
+flag {
+  name: "remove_idle_location"
+  namespace: "location"
+  description: "Remove DeviceIdleController usage of location"
+  bug: "332770178"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
 
 flag {
     name: "disable_wakelocks_in_light_idle"

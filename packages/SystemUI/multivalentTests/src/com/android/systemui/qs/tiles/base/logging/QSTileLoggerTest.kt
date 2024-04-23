@@ -104,6 +104,7 @@ class QSTileLoggerTest : SysuiTestCase() {
         underTest.logUserActionRejectedByPolicy(
             QSTileUserAction.Click(null),
             TileSpec.create("test_spec"),
+            "test_restriction",
         )
 
         assertThat(logBuffer.getStringBuffer()).contains("tile click: rejected by policy")

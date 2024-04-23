@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot.ui.viewmodel
 
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,8 +25,8 @@ import kotlinx.coroutines.flow.StateFlow
 class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager) {
     private val _preview = MutableStateFlow<Bitmap?>(null)
     val preview: StateFlow<Bitmap?> = _preview
-    private val _previewAction = MutableStateFlow<Runnable?>(null)
-    val previewAction: StateFlow<Runnable?> = _previewAction
+    private val _previewAction = MutableStateFlow<(() -> Unit)?>(null)
+    val previewAction: StateFlow<(() -> Unit)?> = _previewAction
     private val _actions = MutableStateFlow(emptyList<ActionButtonViewModel>())
     val actions: StateFlow<List<ActionButtonViewModel>> = _actions
     val showDismissButton: Boolean
@@ -35,19 +36,69 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         _preview.value = bitmap
     }
 
-    fun setPreviewAction(runnable: Runnable) {
-        _previewAction.value = runnable
+    fun setPreviewAction(onClick: () -> Unit) {
+        _previewAction.value = onClick
     }
 
-    fun addActions(actions: List<ActionButtonViewModel>) {
+    fun addAction(actionAppearance: ActionButtonAppearance, onClicked: (() -> Unit)): Int {
         val actionList = _actions.value.toMutableList()
-        actionList.addAll(actions)
+        val action = ActionButtonViewModel.withNextId(actionAppearance, onClicked)
+        actionList.add(action)
         _actions.value = actionList
+        return action.id
+    }
+
+    fun setActionVisibility(actionId: Int, visible: Boolean) {
+        val actionList = _actions.value.toMutableList()
+        val index = actionList.indexOfFirst { it.id == actionId }
+        if (index >= 0) {
+            actionList[index] =
+                ActionButtonViewModel(
+                    actionList[index].appearance,
+                    actionId,
+                    visible,
+                    actionList[index].onClicked
+                )
+            _actions.value = actionList
+        } else {
+            Log.w(TAG, "Attempted to update unknown action id $actionId")
+        }
+    }
+
+    fun updateActionAppearance(actionId: Int, appearance: ActionButtonAppearance) {
+        val actionList = _actions.value.toMutableList()
+        val index = actionList.indexOfFirst { it.id == actionId }
+        if (index >= 0) {
+            actionList[index] =
+                ActionButtonViewModel(
+                    appearance,
+                    actionId,
+                    actionList[index].visible,
+                    actionList[index].onClicked
+                )
+            _actions.value = actionList
+        } else {
+            Log.w(TAG, "Attempted to update unknown action id $actionId")
+        }
+    }
+
+    fun removeAction(actionId: Int) {
+        val actionList = _actions.value.toMutableList()
+        if (actionList.removeIf { it.id == actionId }) {
+            // Update if something was removed.
+            _actions.value = actionList
+        } else {
+            Log.w(TAG, "Attempted to remove unknown action id $actionId")
+        }
     }
 
     fun reset() {
         _preview.value = null
         _previewAction.value = null
         _actions.value = listOf()
+    }
+
+    companion object {
+        const val TAG = "ScreenshotViewModel"
     }
 }

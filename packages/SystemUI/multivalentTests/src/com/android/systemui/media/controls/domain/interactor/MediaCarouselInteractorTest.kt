@@ -30,11 +30,15 @@ import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
+import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaData
+import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
+import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -46,7 +50,13 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
 
     private val mediaFilterRepository: MediaFilterRepository = kosmos.mediaFilterRepository
+
     private val underTest: MediaCarouselInteractor = kosmos.mediaCarouselInteractor
+
+    @Before
+    fun setUp() {
+        underTest.start()
+    }
 
     @Test
     fun addUserMediaEntry_activeThenInactivate() =
@@ -56,7 +66,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             val hasActiveMedia by collectLastValue(underTest.hasActiveMedia)
             val hasAnyMedia by collectLastValue(underTest.hasAnyMedia)
 
-            val userMedia = MediaData().copy(active = true)
+            val userMedia = MediaData(active = true)
 
             mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
 
@@ -79,10 +89,11 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             val hasActiveMedia by collectLastValue(underTest.hasActiveMedia)
             val hasAnyMedia by collectLastValue(underTest.hasAnyMedia)
 
-            val userMedia = MediaData().copy(active = false)
+            val userMedia = MediaData(active = false)
             val instanceId = userMedia.instanceId
 
             mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+            mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
 
             assertThat(hasActiveMediaOrRecommendation).isFalse()
             assertThat(hasActiveMedia).isFalse()
@@ -90,6 +101,9 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
 
             assertThat(mediaFilterRepository.removeSelectedUserMediaEntry(instanceId, userMedia))
                 .isTrue()
+            mediaFilterRepository.addMediaDataLoadingState(
+                MediaDataLoadingModel.Removed(instanceId)
+            )
 
             assertThat(hasActiveMediaOrRecommendation).isFalse()
             assertThat(hasActiveMedia).isFalse()
@@ -103,6 +117,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasActiveMediaOrRecommendation)
             val hasAnyMediaOrRecommendation by
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
+            val sortedMedia by collectLastValue(underTest.sortedMedia)
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
             val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
@@ -112,17 +127,29 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                     isActive = true,
                     recommendations = MediaTestHelper.getValidRecommendationList(icon),
                 )
-            val userMedia = MediaData().copy(active = false)
+            val userMedia = MediaData(active = false)
+            val recsLoadingModel = SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
+            val mediaLoadingModel = MediaDataLoadingModel.Loaded(userMedia.instanceId)
 
             mediaFilterRepository.setRecommendation(userMediaRecommendation)
+            mediaFilterRepository.setRecommendationsLoadingState(recsLoadingModel)
 
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasAnyMediaOrRecommendation).isTrue()
+            assertThat(sortedMedia)
+                .containsExactly(MediaCommonModel.MediaRecommendations(recsLoadingModel))
 
             mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+            mediaFilterRepository.addMediaDataLoadingState(mediaLoadingModel)
 
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasAnyMediaOrRecommendation).isTrue()
+            assertThat(sortedMedia)
+                .containsExactly(
+                    MediaCommonModel.MediaRecommendations(recsLoadingModel),
+                    MediaCommonModel.MediaControl(mediaLoadingModel, true)
+                )
+                .inOrder()
         }
 
     @Test

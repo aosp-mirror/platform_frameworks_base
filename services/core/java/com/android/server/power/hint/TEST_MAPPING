@@ -1,5 +1,5 @@
 {
-  "postsubmit": [
+  "presubmit": [
     {
       "name": "FrameworksServicesTests",
       "options": [
@@ -9,6 +9,17 @@
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
+      ]
+    },
+    {
+      "name": "CtsStatsdAtomHostTestCases",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"},
+        {"include-filter": "android.cts.statsdatom.powermanager"}
+      ],
+      "file_patterns": [
+        "(/|^)ThermalManagerService.java"
       ]
     }
   ]

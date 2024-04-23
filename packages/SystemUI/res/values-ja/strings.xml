@@ -173,7 +173,7 @@
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN が正しくありません"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"パターンが正しくありません"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"パスワードが正しくありません"</string>
-    <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"間違えた回数が上限を超えました。\n<xliff:g id="NUMBER">%d</xliff:g> 秒後にもう一度お試しください。"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"試行回数が上限に達しました。\n<xliff:g id="NUMBER">%d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="work_challenge_emergency_button_text" msgid="8946588434515599288">"緊急通報"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"もう一度お試しください。入力回数: <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 回"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"データが削除されます"</string>
@@ -235,7 +235,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"通知シェード"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"クイック設定"</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"クイック設定と通知シェード。"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ロック画面"</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"ロック画面"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"仕事用プロファイルのロック画面"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"閉じる"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"サイレント"</string>
@@ -270,12 +270,15 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"すべて表示"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth を使用"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"接続しました"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"音声の共有"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"保存しました"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"接続を解除"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"有効化"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"明日自動的に ON に戻す"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"クイック共有、デバイスを探す、デバイスの位置情報などの機能は Bluetooth を使用します"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"午前 5 時に Bluetooth が ON になります"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share や「デバイスを探す」などの機能は Bluetooth を使用します"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"明日の朝に Bluetooth が ON になります"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"音声の共有"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"音声を共有中"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"オーディオ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ヘッドセット"</string>
@@ -350,6 +353,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"録音に関する問題"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"開始"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"停止"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"バグレポート"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"デバイスのどの部分が影響を受けましたか？"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"問題の種類を選択する"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"スクリーン レコード"</string>
@@ -363,7 +367,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"標準"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"中"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"高"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"補聴器"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"補聴器"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"新しいデバイスとペア設定"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"クリックすると、新しいデバイスをペア設定できます"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"デバイスのマイクのブロックを解除しますか？"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"デバイスのカメラのブロックを解除しますか？"</string>
@@ -430,6 +438,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 急速充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 低速充電中 • 完了まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 • フル充電まで <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"ロック画面のウィジェット"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"左にスワイプすると、コミュニティ チュートリアルが開始します"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"カスタマイズ"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"閉じる"</string>
@@ -442,14 +451,14 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"削除"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ウィジェットを追加"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"完了"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ウィジェットを追加"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"タブレットのロックを解除せずにお気に入りのアプリ ウィジェットにすばやくアクセスできます。"</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"ロック画面でのウィジェットを許可しますか？"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"設定を開く"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"仕事用アプリの停止解除"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"停止解除"</string>
+    <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"ロック画面のウィジェットを閉じる"</string>
+    <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ロック画面のウィジェット"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"プルダウン メニュー"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
@@ -547,7 +556,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"このデバイスは保護者によって管理されています。保護者は、あなたが使用するアプリ、あなたの現在地、デバイスの利用時間などの情報を確認したり、管理したりできます。"</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"信頼エージェントがロック解除を管理"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"認証の試行回数が上限を超えたため、デバイスがロックされました"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"認証の試行回数が上限に達したため、デバイスがロックされました"</string>
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"デバイスがロックされました\n認証に失敗しました"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"音声の設定"</string>
@@ -579,7 +588,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"アプリを固定しました"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"アプリの固定を解除しました"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"発信"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"通話"</string>
     <string name="stream_system" msgid="7663148785370565134">"システム"</string>
     <string name="stream_ring" msgid="7550670036738697526">"着信音"</string>
     <string name="stream_music" msgid="2188224742361847580">"メディア"</string>
@@ -604,7 +613,7 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"空間オーディオ"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"OFF"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"固定"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ヘッド トラッキング"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ヘ⁠ッ⁠ド ト⁠ラ⁠ッ⁠キ⁠ン⁠グ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"タップすると、着信音のモードを変更できます"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ミュート"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ミュートを解除"</string>
@@ -663,7 +672,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"サイレント"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"デフォルト"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"自動"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"着信音もバイブレーションも無効になります"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"着信音もバイブレーションも OFF になります"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"着信音もバイブレーションも無効になり会話セクションの下に表示されます"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"デバイスの設定を基に着信音またはバイブレーションが有効になります"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"デバイスの設定を基に着信音またはバイブレーションが有効になります。デフォルトでは <xliff:g id="APP_NAME">%1$s</xliff:g> からの会話がふきだしで表示されます。"</string>
@@ -741,7 +750,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"キーボード レイアウトの切り替え"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"または"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"検索クエリをクリア"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ショートカット"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"キーボード ショートカット"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ショートカットの検索"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ショートカットがありません"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"システム"</string>
@@ -766,9 +775,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"アシスタントを開く"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"画面をロック"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"メモを入力する"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"システム マルチタスク"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"分割画面にして現在のアプリを右側に設定する"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"分割画面にして現在のアプリを左側に設定する"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"マルチタスク"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"分割画面の使用（現在のアプリを右側に表示）"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"分割画面の使用（現在のアプリを左側に表示）"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"分割画面から全画面に切り替える"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"分割画面の使用時に右側または下部のアプリに切り替える"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"分割画面の使用時に左側または上部のアプリに切り替える"</string>
@@ -1301,5 +1310,5 @@
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"レベル %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ホーム コントロール"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"ホーム コントロールにスクリーンセーバーとしてすばやくアクセス"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"ホーム コントロールにスクリーンセーバーからすばやくアクセス"</string>
 </resources>

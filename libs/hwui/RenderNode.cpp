@@ -16,18 +16,6 @@
 
 #include "RenderNode.h"
 
-#include "DamageAccumulator.h"
-#include "Debug.h"
-#include "Properties.h"
-#include "TreeInfo.h"
-#include "VectorDrawable.h"
-#include "private/hwui/WebViewFunctor.h"
-#ifdef __ANDROID__
-#include "renderthread/CanvasContext.h"
-#else
-#include "DamageAccumulator.h"
-#include "pipeline/skia/SkiaDisplayList.h"
-#endif
 #include <SkPathOps.h>
 #include <gui/TraceUtils.h>
 #include <ui/FatVector.h>
@@ -36,6 +24,14 @@
 #include <atomic>
 #include <sstream>
 #include <string>
+
+#include "DamageAccumulator.h"
+#include "Debug.h"
+#include "Properties.h"
+#include "TreeInfo.h"
+#include "VectorDrawable.h"
+#include "private/hwui/WebViewFunctor.h"
+#include "renderthread/CanvasContext.h"
 
 #ifdef __ANDROID__
 #include "include/gpu/ganesh/SkImageGanesh.h"
@@ -186,7 +182,6 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
 }
 
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext and Layers
     LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
@@ -218,7 +213,6 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     // That might be us, so tell CanvasContext that this layer is in the
     // tree and should not be destroyed.
     info.canvasContext.markLayerInUse(this);
-#endif
 }
 
 /**

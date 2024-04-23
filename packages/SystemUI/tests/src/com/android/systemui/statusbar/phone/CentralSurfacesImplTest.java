@@ -25,10 +25,13 @@ import static com.android.systemui.Flags.FLAG_LIGHT_REVEAL_MIGRATION;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -99,6 +102,8 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.communal.shared.model.CommunalScenes;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentService;
@@ -118,10 +123,10 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
-import com.android.systemui.scene.shared.flag.SceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
+import com.android.systemui.settings.brightness.domain.interactor.BrightnessMirrorShowingInteractor;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
@@ -179,7 +184,9 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.volume.VolumeComponent;
@@ -323,6 +330,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
+    private final SystemSettings mSystemSettings = new FakeSettings();
     private final FakeEventLog mFakeEventLog = new FakeEventLog();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
@@ -331,7 +339,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     private final DumpManager mDumpManager = new DumpManager();
     private final ScreenLifecycle mScreenLifecycle = new ScreenLifecycle(mDumpManager);
 
-    private final SceneContainerFlags mSceneContainerFlags = new FakeSceneContainerFlags();
+    private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor =
+            mKosmos.getBrightnessMirrorShowingInteractor();
 
     @Before
     public void setup() throws Exception {
@@ -343,7 +352,9 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        if (!SceneContainerFlag.isEnabled()) {
+            mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
+        }
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -370,7 +381,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mFakeSystemClock,
                         mock(UiEventLogger.class),
                         mUserTracker,
-                        mAvalancheProvider);
+                        mAvalancheProvider,
+                        mSystemSettings);
         mVisualInterruptionDecisionProvider.start();
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
@@ -417,22 +429,25 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
         }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
-
-        mShadeController = spy(new ShadeControllerImpl(
-                mCommandQueue,
-                mMainExecutor,
-                mock(WindowRootViewVisibilityInteractor.class),
-                mKeyguardStateController,
-                mStatusBarStateController,
-                mStatusBarKeyguardViewManager,
-                mStatusBarWindowController,
-                mDeviceProvisionedController,
-                mNotificationShadeWindowController,
-                0,
-                () -> mNotificationPanelViewController,
-                () -> mAssistManager,
-                () -> mNotificationGutsManager
-        ));
+        if (SceneContainerFlag.isEnabled()) {
+            mShadeController = spy(mKosmos.getShadeController());
+        } else {
+            mShadeController = spy(new ShadeControllerImpl(
+                    mCommandQueue,
+                    mMainExecutor,
+                    mock(WindowRootViewVisibilityInteractor.class),
+                    mKeyguardStateController,
+                    mStatusBarStateController,
+                    mStatusBarKeyguardViewManager,
+                    mStatusBarWindowController,
+                    mDeviceProvisionedController,
+                    mNotificationShadeWindowController,
+                    0,
+                    () -> mNotificationPanelViewController,
+                    () -> mAssistManager,
+                    () -> mNotificationGutsManager
+            ));
+        }
         mShadeController.setNotificationShadeWindowViewController(
                 mNotificationShadeWindowViewController);
         mShadeController.setNotificationPresenter(mNotificationPresenter);
@@ -553,7 +568,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mUserTracker,
                 () -> mFingerprintManager,
                 mActivityStarter,
-                mSceneContainerFlags
+                mBrightnessMirrorShowingInteractor
         );
         mScreenLifecycle.addObserver(mCentralSurfaces.mScreenObserver);
         mCentralSurfaces.initShadeVisibilityListener();
@@ -562,8 +577,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 any(NotificationPanelViewController.class),
                 any(ShadeExpansionStateManager.class),
                 any(BiometricUnlockController.class),
-                any(ViewGroup.class),
-                any(KeyguardBypassController.class)))
+                any(ViewGroup.class)))
                 .thenReturn(mStatusBarKeyguardViewManager);
 
         when(mKeyguardViewMediator.getViewMediatorCallback()).thenReturn(
@@ -1082,6 +1096,34 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mCentralSurfaces.updateResources();
 
         verify(mStatusBarWindowController).refreshStatusBarHeight();
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void brightnesShowingChanged_flagEnabled_ScrimControllerNotified() {
+        mCentralSurfaces.registerCallbacks();
+
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
+        mTestScope.getTestScheduler().runCurrent();
+        verify(mScrimController, atLeastOnce()).transitionTo(ScrimState.BRIGHTNESS_MIRROR);
+
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(false);
+        mTestScope.getTestScheduler().runCurrent();
+        ArgumentCaptor<ScrimState> captor = ArgumentCaptor.forClass(ScrimState.class);
+        // The default is to call the one with the callback argument
+        verify(mScrimController, atLeastOnce()).transitionTo(captor.capture(), any());
+        assertThat(captor.getValue()).isNotEqualTo(ScrimState.BRIGHTNESS_MIRROR);
+    }
+
+    @Test
+    @DisableSceneContainer
+    public void brightnesShowingChanged_flagDisabled_ScrimControllerNotified() {
+        mCentralSurfaces.registerCallbacks();
+
+        mBrightnessMirrorShowingInteractor.setMirrorShowing(true);
+        mTestScope.getTestScheduler().runCurrent();
+        verify(mScrimController, never()).transitionTo(ScrimState.BRIGHTNESS_MIRROR);
+        verify(mScrimController, never()).transitionTo(eq(ScrimState.BRIGHTNESS_MIRROR), any());
     }
 
     /**

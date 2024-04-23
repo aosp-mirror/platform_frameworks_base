@@ -36,8 +36,8 @@ import com.android.server.companion.association.DisassociationProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
-import com.android.server.companion.presence.DevicePresenceProcessor;
-import com.android.server.companion.presence.ObservableUuid;
+import com.android.server.companion.devicepresence.DevicePresenceProcessor;
+import com.android.server.companion.devicepresence.ObservableUuid;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.io.PrintWriter;
@@ -85,7 +85,7 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     final int userId = getNextIntArgRequired();
                     final List<AssociationInfo> associationsForUser =
                             mAssociationStore.getActiveAssociationsByUser(userId);
-                    final int maxId = mAssociationStore.getMaxId(userId);
+                    final int maxId = mAssociationStore.getMaxId();
                     out.println("Max ID: " + maxId);
                     out.println("Association ID | Package Name | Mac Address");
                     for (AssociationInfo association : associationsForUser) {

@@ -1309,18 +1309,24 @@ public final class MediaRouter2 {
             return;
         }
 
-        RoutingController newController;
-        if (sessionInfo.isSystemSession()) {
-            newController = getSystemController();
-            newController.setRoutingSessionInfo(sessionInfo);
+        RoutingController newController = addRoutingController(sessionInfo);
+        notifyTransfer(oldController, newController);
+    }
+
+    @NonNull
+    private RoutingController addRoutingController(@NonNull RoutingSessionInfo session) {
+        RoutingController controller;
+        if (session.isSystemSession()) {
+            // mSystemController is never released, so we only need to update its status.
+            mSystemController.setRoutingSessionInfo(session);
+            controller = mSystemController;
         } else {
-            newController = new RoutingController(sessionInfo);
+            controller = new RoutingController(session);
             synchronized (mLock) {
-                mNonSystemRoutingControllers.put(newController.getId(), newController);
+                mNonSystemRoutingControllers.put(controller.getId(), controller);
             }
         }
-
-        notifyTransfer(oldController, newController);
+        return controller;
     }
 
     void updateControllerOnHandler(RoutingSessionInfo sessionInfo) {
@@ -1329,40 +1335,12 @@ public final class MediaRouter2 {
             return;
         }
 
-        if (sessionInfo.isSystemSession()) {
-            // The session info is sent from SystemMediaRoute2Provider.
-            RoutingController systemController = getSystemController();
-            systemController.setRoutingSessionInfo(sessionInfo);
-            notifyControllerUpdated(systemController);
-            return;
+        RoutingController controller =
+                getMatchingController(sessionInfo, /* logPrefix */ "updateControllerOnHandler");
+        if (controller != null) {
+            controller.setRoutingSessionInfo(sessionInfo);
+            notifyControllerUpdated(controller);
         }
-
-        RoutingController matchingController;
-        synchronized (mLock) {
-            matchingController = mNonSystemRoutingControllers.get(sessionInfo.getId());
-        }
-
-        if (matchingController == null) {
-            Log.w(
-                    TAG,
-                    "updateControllerOnHandler: Matching controller not found. uniqueSessionId="
-                            + sessionInfo.getId());
-            return;
-        }
-
-        RoutingSessionInfo oldInfo = matchingController.getRoutingSessionInfo();
-        if (!TextUtils.equals(oldInfo.getProviderId(), sessionInfo.getProviderId())) {
-            Log.w(
-                    TAG,
-                    "updateControllerOnHandler: Provider IDs are not matched. old="
-                            + oldInfo.getProviderId()
-                            + ", new="
-                            + sessionInfo.getProviderId());
-            return;
-        }
-
-        matchingController.setRoutingSessionInfo(sessionInfo);
-        notifyControllerUpdated(matchingController);
     }
 
     void releaseControllerOnHandler(RoutingSessionInfo sessionInfo) {
@@ -1371,34 +1349,47 @@ public final class MediaRouter2 {
             return;
         }
 
-        RoutingController matchingController;
-        synchronized (mLock) {
-            matchingController = mNonSystemRoutingControllers.get(sessionInfo.getId());
-        }
+        RoutingController matchingController =
+                getMatchingController(sessionInfo, /* logPrefix */ "releaseControllerOnHandler");
 
-        if (matchingController == null) {
-            if (DEBUG) {
-                Log.d(
-                        TAG,
-                        "releaseControllerOnHandler: Matching controller not found. "
-                                + "uniqueSessionId="
-                                + sessionInfo.getId());
+        if (matchingController != null) {
+            matchingController.releaseInternal(/* shouldReleaseSession= */ false);
+        }
+    }
+
+    @Nullable
+    private RoutingController getMatchingController(
+            RoutingSessionInfo sessionInfo, String logPrefix) {
+        if (sessionInfo.isSystemSession()) {
+            return getSystemController();
+        } else {
+            RoutingController controller;
+            synchronized (mLock) {
+                controller = mNonSystemRoutingControllers.get(sessionInfo.getId());
             }
-            return;
-        }
 
-        RoutingSessionInfo oldInfo = matchingController.getRoutingSessionInfo();
-        if (!TextUtils.equals(oldInfo.getProviderId(), sessionInfo.getProviderId())) {
-            Log.w(
-                    TAG,
-                    "releaseControllerOnHandler: Provider IDs are not matched. old="
-                            + oldInfo.getProviderId()
-                            + ", new="
-                            + sessionInfo.getProviderId());
-            return;
-        }
+            if (controller == null) {
+                Log.w(
+                        TAG,
+                        logPrefix
+                                + ": Matching controller not found. uniqueSessionId="
+                                + sessionInfo.getId());
+                return null;
+            }
 
-        matchingController.releaseInternal(/* shouldReleaseSession= */ false);
+            RoutingSessionInfo oldInfo = controller.getRoutingSessionInfo();
+            if (!TextUtils.equals(oldInfo.getProviderId(), sessionInfo.getProviderId())) {
+                Log.w(
+                        TAG,
+                        logPrefix
+                                + ": Provider IDs are not matched. old="
+                                + oldInfo.getProviderId()
+                                + ", new="
+                                + sessionInfo.getProviderId());
+                return null;
+            }
+            return controller;
+        }
     }
 
     void onRequestCreateControllerByManagerOnHandler(
@@ -2722,7 +2713,7 @@ public final class MediaRouter2 {
 
             List<RoutingSessionInfo> sessionInfos = getRoutingSessions();
             RoutingSessionInfo targetSession = sessionInfos.get(sessionInfos.size() - 1);
-            transfer(targetSession, route, Process.myUserHandle(), mContext.getPackageName());
+            transfer(targetSession, route, mClientUser, mContext.getPackageName());
         }
 
         @Override
@@ -3129,20 +3120,8 @@ public final class MediaRouter2 {
 
         private void onTransferred(
                 @NonNull RoutingSessionInfo oldSession, @NonNull RoutingSessionInfo newSession) {
-            if (!oldSession.isSystemSession()
-                    && !TextUtils.equals(
-                            getClientPackageName(), oldSession.getClientPackageName())) {
-                return;
-            }
-
-            if (!newSession.isSystemSession()
-                    && !TextUtils.equals(
-                            getClientPackageName(), newSession.getClientPackageName())) {
-                return;
-            }
-
-            // For successful in-session transfer, onControllerUpdated() handles it.
-            if (TextUtils.equals(oldSession.getId(), newSession.getId())) {
+            if (!isSessionRelatedToTargetPackageName(oldSession)
+                    || !isSessionRelatedToTargetPackageName(newSession)) {
                 return;
             }
 
@@ -3169,16 +3148,14 @@ public final class MediaRouter2 {
 
         private void onTransferFailed(
                 @NonNull RoutingSessionInfo session, @NonNull MediaRoute2Info route) {
-            if (!session.isSystemSession()
-                    && !TextUtils.equals(getClientPackageName(), session.getClientPackageName())) {
+            if (!isSessionRelatedToTargetPackageName(session)) {
                 return;
             }
             notifyTransferFailure(route);
         }
 
         private void onSessionUpdated(@NonNull RoutingSessionInfo session) {
-            if (!session.isSystemSession()
-                    && !TextUtils.equals(getClientPackageName(), session.getClientPackageName())) {
+            if (!isSessionRelatedToTargetPackageName(session)) {
                 return;
             }
 
@@ -3191,6 +3168,15 @@ public final class MediaRouter2 {
                 controller = new RoutingController(session);
             }
             notifyControllerUpdated(controller);
+        }
+
+        /**
+         * Returns {@code true} if the session is a system session or if its client package name
+         * matches the proxy router's target package name.
+         */
+        private boolean isSessionRelatedToTargetPackageName(@NonNull RoutingSessionInfo session) {
+            return session.isSystemSession()
+                    || TextUtils.equals(getClientPackageName(), session.getClientPackageName());
         }
 
         private void onSessionCreatedOnHandler(
@@ -3237,19 +3223,19 @@ public final class MediaRouter2 {
             }
         }
 
-        private void onSessionUpdatedOnHandler(@NonNull RoutingSessionInfo sessionInfo) {
+        private void onSessionUpdatedOnHandler(@NonNull RoutingSessionInfo updatedSession) {
             for (MediaRouter2Manager.TransferRequest request : mTransferRequests) {
                 String sessionId = request.mOldSessionInfo.getId();
-                if (!TextUtils.equals(sessionId, sessionInfo.getId())) {
+                if (!TextUtils.equals(sessionId, updatedSession.getId())) {
                     continue;
                 }
-                if (sessionInfo.getSelectedRoutes().contains(request.mTargetRoute.getId())) {
+
+                if (updatedSession.getSelectedRoutes().contains(request.mTargetRoute.getId())) {
                     mTransferRequests.remove(request);
-                    this.onTransferred(request.mOldSessionInfo, sessionInfo);
                     break;
                 }
             }
-            this.onSessionUpdated(sessionInfo);
+            this.onSessionUpdated(updatedSession);
         }
 
         private void onSessionReleasedOnHandler(@NonNull RoutingSessionInfo session) {

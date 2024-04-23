@@ -17,9 +17,6 @@
 package android.view;
 
 import static android.view.InsetsController.DEBUG;
-import static android.view.WindowInsetsController.COMPATIBLE_APPEARANCE_FLAGS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -174,9 +171,6 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
 
     @Override
     public void setSystemBarsAppearance(int appearance, int mask) {
-        if ((mask & COMPATIBLE_APPEARANCE_FLAGS) != 0) {
-            mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
-        }
         final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
         final int newAppearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
         if (insetsFlags.appearance != newAppearance) {
@@ -192,13 +186,7 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public boolean isSystemBarsAppearanceControlled() {
-        return (mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_APPEARANCE_CONTROLLED) != 0;
-    }
-
-    @Override
     public void setSystemBarsBehavior(int behavior) {
-        mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
         if (mViewRoot.mWindowAttributes.insetsFlags.behavior != behavior) {
             mViewRoot.mWindowAttributes.insetsFlags.behavior = behavior;
             mViewRoot.mWindowAttributesChanged = true;
@@ -209,11 +197,6 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     @Override
     public int getSystemBarsBehavior() {
         return mViewRoot.mWindowAttributes.insetsFlags.behavior;
-    }
-
-    @Override
-    public boolean isSystemBarsBehaviorControlled() {
-        return (mViewRoot.mWindowAttributes.privateFlags & PRIVATE_FLAG_BEHAVIOR_CONTROLLED) != 0;
     }
 
     @Override

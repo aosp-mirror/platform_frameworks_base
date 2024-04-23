@@ -25,6 +25,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
 import com.android.keyguard.LockIconViewController;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 
 import java.util.HashSet;
@@ -80,12 +81,14 @@ public class DebugDrawable extends Drawable {
                         mNotificationPanelViewController.getClockPositionResult()
                                 .stackScrollerPadding),
                 Color.YELLOW, "calculatePanelHeightShade()");
-        drawDebugInfo(canvas,
-                (int) mQsController.calculateNotificationsTopPadding(
-                        mNotificationPanelViewController.isExpandingOrCollapsing(),
-                        mNotificationPanelViewController.getKeyguardNotificationStaticPadding(),
-                        mNotificationPanelViewController.getExpandedFraction()),
-                Color.MAGENTA, "calculateNotificationsTopPadding()");
+        if (!SceneContainerFlag.isEnabled()) {
+            drawDebugInfo(canvas,
+                    (int) mQsController.calculateNotificationsTopPadding(
+                            mNotificationPanelViewController.isExpandingOrCollapsing(),
+                            mNotificationPanelViewController.getKeyguardNotificationStaticPadding(),
+                            mNotificationPanelViewController.getExpandedFraction()),
+                    Color.MAGENTA, "calculateNotificationsTopPadding()");
+        }
         drawDebugInfo(canvas, mNotificationPanelViewController.getClockPositionResult().clockY,
                 Color.GRAY, "mClockPositionResult.clockY");
         drawDebugInfo(canvas, (int) mLockIconViewController.getTop(), Color.GRAY,

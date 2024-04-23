@@ -92,6 +92,8 @@ public class MediaShellCommand extends ShellCommand {
                 runMonitor();
             } else if (cmd.equals("volume")) {
                 runVolume();
+            } else if (cmd.equals("expire-temp-engaged-sessions")) {
+                expireTempEngagedSessions();
             } else {
                 showError("Error: unknown command '" + cmd + "'");
                 return -1;
@@ -366,5 +368,9 @@ public class MediaShellCommand extends ShellCommand {
     // "volume" command for stream volume control
     private void runVolume() throws Exception {
         VolumeCtrl.run(this);
+    }
+
+    private void expireTempEngagedSessions() throws Exception {
+        mSessionService.expireTempEngagedSessions();
     }
 }

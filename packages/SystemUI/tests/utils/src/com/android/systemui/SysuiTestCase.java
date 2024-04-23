@@ -177,7 +177,7 @@ public abstract class SysuiTestCase {
         // TODO(b/292141694): build out Ravenwood support for Instrumentation
         // Ravenwood doesn't yet provide Instrumentation, so we sidestep this global configuration
         // step; any tests that rely on it are already being excluded on Ravenwood
-        if (!isRavenwoodTest()) {
+        if (!isRavenwoodTest() && !isScreenshotTest()) {
             mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
             Instrumentation inst = spy(mRealInstrumentation);
             when(inst.getContext()).thenAnswer(invocation -> {
@@ -286,6 +286,10 @@ public abstract class SysuiTestCase {
 
     public static boolean isRobolectricTest() {
         return !isRavenwoodTest() && Build.FINGERPRINT.contains("robolectric");
+    }
+
+    protected boolean isScreenshotTest() {
+        return false;
     }
 
     public static boolean isRavenwoodTest() {

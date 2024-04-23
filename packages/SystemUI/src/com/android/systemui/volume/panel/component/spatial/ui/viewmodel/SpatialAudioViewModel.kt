@@ -17,18 +17,17 @@
 package com.android.systemui.volume.panel.component.spatial.ui.viewmodel
 
 import android.content.Context
-import com.android.systemui.common.shared.model.Color
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ToggleButtonViewModel
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.toButtonViewModel
 import com.android.systemui.volume.panel.component.spatial.domain.SpatialAudioAvailabilityCriteria
 import com.android.systemui.volume.panel.component.spatial.domain.interactor.SpatialAudioComponentInteractor
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioAvailabilityModel
 import com.android.systemui.volume.panel.component.spatial.domain.model.SpatialAudioEnabledModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,13 +45,14 @@ constructor(
     @VolumePanelScope private val scope: CoroutineScope,
     availabilityCriteria: SpatialAudioAvailabilityCriteria,
     private val interactor: SpatialAudioComponentInteractor,
+    private val uiEventLogger: UiEventLogger,
 ) {
 
     val spatialAudioButton: StateFlow<ButtonViewModel?> =
         interactor.isEnabled
             .map {
-                it.toViewModel(true)
-                    .toButtonViewModel()
+                val isChecked = it is SpatialAudioEnabledModel.SpatialAudioEnabled
+                it.toViewModel(isChecked)
                     .copy(label = context.getString(R.string.volume_panel_spatial_audio_title))
             }
             .stateIn(scope, SharingStarted.Eagerly, null)
@@ -74,52 +74,49 @@ constructor(
                     }
                     .map { isEnabled ->
                         val isChecked = isEnabled == currentIsEnabled
-                        val buttonViewModel: ToggleButtonViewModel =
-                            isEnabled.toViewModel(isChecked)
-                        SpatialAudioButtonViewModel(
-                            button = buttonViewModel,
-                            model = isEnabled,
-                            iconColor =
-                                Color.Attribute(
-                                    if (isChecked)
-                                        com.android.internal.R.attr.materialColorOnPrimaryContainer
-                                    else com.android.internal.R.attr.materialColorOnSurfaceVariant
-                                ),
-                            labelColor =
-                                Color.Attribute(
-                                    if (isChecked)
-                                        com.android.internal.R.attr.materialColorOnSurface
-                                    else com.android.internal.R.attr.materialColorOutline
-                                ),
-                        )
+                        val buttonViewModel: ButtonViewModel = isEnabled.toViewModel(isChecked)
+                        SpatialAudioButtonViewModel(button = buttonViewModel, model = isEnabled)
                     }
             }
             .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     fun setEnabled(model: SpatialAudioEnabledModel) {
+        uiEventLogger.logWithPosition(
+            VolumePanelUiEvent.VOLUME_PANEL_SPATIAL_AUDIO_TOGGLE_CLICKED,
+            0,
+            null,
+            when (model) {
+                SpatialAudioEnabledModel.Disabled -> 0
+                SpatialAudioEnabledModel.SpatialAudioEnabled -> 1
+                SpatialAudioEnabledModel.HeadTrackingEnabled -> 2
+                else -> {
+                    -1
+                }
+            }
+        )
         scope.launch { interactor.setEnabled(model) }
     }
 
-    private fun SpatialAudioEnabledModel.toViewModel(isChecked: Boolean): ToggleButtonViewModel {
+    private fun SpatialAudioEnabledModel.toViewModel(isChecked: Boolean): ButtonViewModel {
         if (this is SpatialAudioEnabledModel.HeadTrackingEnabled) {
-            return ToggleButtonViewModel(
-                isChecked = isChecked,
+            return ButtonViewModel(
+                isActive = isChecked,
                 icon = Icon.Resource(R.drawable.ic_head_tracking, contentDescription = null),
                 label = context.getString(R.string.volume_panel_spatial_audio_tracking)
             )
         }
 
         if (this is SpatialAudioEnabledModel.SpatialAudioEnabled) {
-            return ToggleButtonViewModel(
-                isChecked = isChecked,
+            return ButtonViewModel(
+                isActive = isChecked,
                 icon = Icon.Resource(R.drawable.ic_spatial_audio, contentDescription = null),
                 label = context.getString(R.string.volume_panel_spatial_audio_fixed)
             )
         }
 
         if (this is SpatialAudioEnabledModel.Disabled) {
-            return ToggleButtonViewModel(
-                isChecked = isChecked,
+            return ButtonViewModel(
+                isActive = isChecked,
                 icon = Icon.Resource(R.drawable.ic_spatial_audio_off, contentDescription = null),
                 label = context.getString(R.string.volume_panel_spatial_audio_off)
             )

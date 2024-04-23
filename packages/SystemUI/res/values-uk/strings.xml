@@ -235,7 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Панель сповіщень."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Швидке налаштування."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Швидкі налаштування й панель сповіщень."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заблокований екран."</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Екран блокування завдання"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Закрити"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"без сигналів"</string>
@@ -270,12 +271,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Показати всі"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Увімкнути Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Підключено"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Збережено"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"від’єднати"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активувати"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Автоматично ввімкнути знову завтра"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Такі функції, як швидкий обмін, \"Знайти пристрій\" і визначення місцезнаходження пристрою, використовують Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth увімкнеться завтра о 5:00"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> заряду акумулятора"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Аудіопристрій"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Гарнітура"</string>
@@ -350,6 +359,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Запис помилки"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Почати"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Зупинити"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Звіт про помилку"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"На який аспект роботи пристрою вплинула проблема?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Виберіть тип проблеми"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Запис відео з екрана"</string>
@@ -363,7 +373,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандартний"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Середній"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Високий"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Слухові апарати"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слухові апарати"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Підключити новий пристрій"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Натисніть, щоб підключити новий пристрій"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Надати доступ до мікрофона?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Надати доступ до камери пристрою?"</string>
@@ -430,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Швидке заряджання • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до повного заряду"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Повільне заряджання • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до повного заряду"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Заряджання • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до повного заряду"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Проведіть пальцем уліво, щоб відкрити спільний навчальний посібник"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Налаштувати"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Закрити"</string>
@@ -442,14 +458,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Видалити"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Додати віджет"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Готово"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Додати віджети"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Отримуйте швидкий доступ до віджетів улюблених додатків, не розблоковуючи планшет."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Дозволити використовувати будь-який віджет на заблокованому екрані?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Відкрити налаштування"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Увімкнути робочі додатки?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Увімкнути"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Змінити користувача"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"спадне меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Усі додатки й дані з цього сеансу буде видалено."</string>
@@ -672,10 +690,10 @@
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Статус&lt;/b&gt;: знижено до \"Без звуку\""</string>
     <string name="notification_channel_summary_automatic_promoted" msgid="1301710305149590426">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет підвищено"</string>
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Статус&lt;/b&gt;: пріоритет знижено"</string>
-    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані"</string>
-    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується у вигляді спливаючої підказки"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, показується навіть у режимі \"Не турбувати\""</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови та як зображення профілю на заблокованому екрані, відображається як спливаючий чат, перериває режим \"Не турбувати\""</string>
+    <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані"</string>
+    <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, показується у вигляді спливаючої підказки"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, показується навіть у режимі \"Не турбувати\""</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"З’являється вгорі сповіщень про розмови і як зображення профілю на заблокованому екрані, відображається як спливаючий чат, перериває режим \"Не турбувати\""</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Пріоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не підтримує функції розмов"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ці сповіщення не можна змінити."</string>
@@ -741,7 +759,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Змінити розкладку клавіатури"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"або"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Очистити пошуковий запит"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Швидкі команди"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Комбінації клавіш"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Пошук швидких команд"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Швидк. команд не знайдено"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Система"</string>
@@ -766,9 +784,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Відкрити додаток Асистент"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокувати екран"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Створити нотатку"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Багатозадачність системи"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Розділити екран із поточним додатком праворуч"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Розділити екран із поточним додатком ліворуч"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Багатозадачність"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Розділити екран і показувати поточний додаток праворуч"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Розділити екран і показувати поточний додаток ліворуч"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Перейти з розділення екрана на весь екран"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Під час розділення екрана перемикатися на додаток праворуч або внизу"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Під час розділення екрана перемикатися на додаток ліворуч або вгорі"</string>
@@ -780,7 +798,7 @@
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Відкрити голосовий ввід"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Додатки"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Асистент"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Веб-переглядач"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Вебпереглядач"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Контакти"</string>
     <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Електронна пошта"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
@@ -899,7 +917,7 @@
     <string name="instant_apps_message" msgid="6112428971833011754">"Додаток відкрито без встановлення."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Додаток відкрито без встановлення. Торкніться, щоб дізнатися більше."</string>
     <string name="app_info" msgid="5153758994129963243">"Про додаток"</string>
-    <string name="go_to_web" msgid="636673528981366511">"Веб-переглядач"</string>
+    <string name="go_to_web" msgid="636673528981366511">"Вебпереглядач"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Мобільний трафік"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>

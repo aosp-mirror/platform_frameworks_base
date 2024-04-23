@@ -23,6 +23,7 @@ import android.content.ContentProvider;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
@@ -38,9 +39,11 @@ import android.util.Log;
 import android.view.Display;
 import android.view.ScrollCaptureResponse;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.ImageView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.WindowCompat;
 
 import com.android.internal.app.ChooserActivity;
 import com.android.internal.logging.UiEventLogger;
@@ -127,6 +130,10 @@ public class LongScreenshotActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Enable edge-to-edge explicitly.
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+
         setContentView(R.layout.long_screenshot);
 
         mPreview = requireViewById(R.id.preview);
@@ -148,6 +155,13 @@ public class LongScreenshotActivity extends Activity {
         mPreview.addOnLayoutChangeListener(
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
                         updateImageDimensions());
+
+        requireViewById(R.id.root).setOnApplyWindowInsetsListener(
+                (view, windowInsets) -> {
+                    Insets insets = windowInsets.getInsets(WindowInsets.Type.systemBars());
+                    view.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                    return WindowInsets.CONSUMED;
+                });
 
         Intent intent = getIntent();
         mScrollCaptureResponse = intent.getParcelableExtra(EXTRA_CAPTURE_RESPONSE);
@@ -335,8 +349,8 @@ public class LongScreenshotActivity extends Activity {
             // TODO: Fix transition for work profile. Omitting it in the meantime.
             mActionExecutor.launchIntentAsync(
                     ActionIntentCreator.INSTANCE.createEdit(uri, this),
-                    null,
-                    mScreenshotUserHandle, false);
+                    mScreenshotUserHandle, false,
+                    /* activityOptions */ null, /* transitionCoordinator */ null);
         } else {
             String editorPackage = getString(R.string.config_screenshotEditor);
             Intent intent = new Intent(Intent.ACTION_EDIT);
@@ -363,7 +377,8 @@ public class LongScreenshotActivity extends Activity {
 
     private void doShare(Uri uri) {
         Intent shareIntent = ActionIntentCreator.INSTANCE.createShare(uri);
-        mActionExecutor.launchIntentAsync(shareIntent, null, mScreenshotUserHandle, false);
+        mActionExecutor.launchIntentAsync(shareIntent, mScreenshotUserHandle, false,
+                /* activityOptions */ null, /* transitionCoordinator */ null);
     }
 
     private void onClicked(View v) {

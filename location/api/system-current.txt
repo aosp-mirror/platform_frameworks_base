@@ -113,13 +113,13 @@ package android.location {
   }
 
   public final class GnssMeasurementRequest implements android.os.Parcelable {
-    method @FlaggedApi(Flags.FLAG_GNSS_API_MEASUREMENT_REQUEST_WORK_SOURCE) @NonNull public android.os.WorkSource getWorkSource();
+    method @FlaggedApi("android.location.flags.gnss_api_measurement_request_work_source") @NonNull public android.os.WorkSource getWorkSource();
     method public boolean isCorrelationVectorOutputsEnabled();
   }
 
   public static final class GnssMeasurementRequest.Builder {
     method @NonNull public android.location.GnssMeasurementRequest.Builder setCorrelationVectorOutputsEnabled(boolean);
-    method @FlaggedApi(Flags.FLAG_GNSS_API_MEASUREMENT_REQUEST_WORK_SOURCE) @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.location.GnssMeasurementRequest.Builder setWorkSource(@Nullable android.os.WorkSource);
+    method @FlaggedApi("android.location.flags.gnss_api_measurement_request_work_source") @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.location.GnssMeasurementRequest.Builder setWorkSource(@Nullable android.os.WorkSource);
   }
 
   public final class GnssReflectingPlane implements android.os.Parcelable {
@@ -591,7 +591,7 @@ package android.location {
 
 package android.location.provider {
 
-  @FlaggedApi(Flags.FLAG_NEW_GEOCODER) public final class ForwardGeocodeRequest implements android.os.Parcelable {
+  @FlaggedApi("android.location.flags.new_geocoder") public final class ForwardGeocodeRequest implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getCallingAttributionTag();
     method @NonNull public String getCallingPackage();
@@ -613,7 +613,7 @@ package android.location.provider {
     method @NonNull public android.location.provider.ForwardGeocodeRequest.Builder setCallingAttributionTag(@NonNull String);
   }
 
-  @FlaggedApi(Flags.FLAG_NEW_GEOCODER) public abstract class GeocodeProviderBase {
+  @FlaggedApi("android.location.flags.new_geocoder") public abstract class GeocodeProviderBase {
     ctor public GeocodeProviderBase(@NonNull android.content.Context, @NonNull String);
     method @NonNull public final android.os.IBinder getBinder();
     method public abstract void onForwardGeocode(@NonNull android.location.provider.ForwardGeocodeRequest, @NonNull android.os.OutcomeReceiver<java.util.List<android.location.Address>,java.lang.Throwable>);
@@ -672,7 +672,7 @@ package android.location.provider {
     method public void onProviderRequestChanged(@NonNull String, @NonNull android.location.provider.ProviderRequest);
   }
 
-  @FlaggedApi(Flags.FLAG_NEW_GEOCODER) public final class ReverseGeocodeRequest implements android.os.Parcelable {
+  @FlaggedApi("android.location.flags.new_geocoder") public final class ReverseGeocodeRequest implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getCallingAttributionTag();
     method @NonNull public String getCallingPackage();

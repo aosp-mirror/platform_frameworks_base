@@ -327,14 +327,14 @@ final class LetterboxConfiguration {
                 R.dimen.config_letterboxBackgroundWallpaperBlurRadius);
         mLetterboxBackgroundWallpaperDarkScrimAlpha = mContext.getResources().getFloat(
                 R.dimen.config_letterboxBackgroundWallaperDarkScrimAlpha);
-        mLetterboxHorizontalPositionMultiplier = mContext.getResources().getFloat(
-                R.dimen.config_letterboxHorizontalPositionMultiplier);
-        mLetterboxVerticalPositionMultiplier = mContext.getResources().getFloat(
-                R.dimen.config_letterboxVerticalPositionMultiplier);
-        mLetterboxBookModePositionMultiplier = mContext.getResources().getFloat(
-                R.dimen.config_letterboxBookModePositionMultiplier);
-        mLetterboxTabletopModePositionMultiplier = mContext.getResources().getFloat(
-                R.dimen.config_letterboxTabletopModePositionMultiplier);
+        setLetterboxHorizontalPositionMultiplier(mContext.getResources().getFloat(
+                R.dimen.config_letterboxHorizontalPositionMultiplier));
+        setLetterboxVerticalPositionMultiplier(mContext.getResources().getFloat(
+                R.dimen.config_letterboxVerticalPositionMultiplier));
+        setLetterboxBookModePositionMultiplier(mContext.getResources().getFloat(
+                R.dimen.config_letterboxBookModePositionMultiplier));
+        setLetterboxTabletopModePositionMultiplier(mContext.getResources()
+                .getFloat(R.dimen.config_letterboxTabletopModePositionMultiplier));
         mIsHorizontalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsHorizontalReachabilityEnabled);
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
@@ -657,29 +657,8 @@ final class LetterboxConfiguration {
      * right side.
      */
     float getLetterboxHorizontalPositionMultiplier(boolean isInBookMode) {
-        if (isInBookMode) {
-            if (mLetterboxBookModePositionMultiplier < 0.0f
-                    || mLetterboxBookModePositionMultiplier > 1.0f) {
-                Slog.w(TAG,
-                        "mLetterboxBookModePositionMultiplier out of bounds (isInBookMode=true): "
-                        + mLetterboxBookModePositionMultiplier);
-                // Default to left position if invalid value is provided.
-                return 0.0f;
-            } else {
-                return mLetterboxBookModePositionMultiplier;
-            }
-        } else {
-            if (mLetterboxHorizontalPositionMultiplier < 0.0f
-                    || mLetterboxHorizontalPositionMultiplier > 1.0f) {
-                Slog.w(TAG,
-                        "mLetterboxBookModePositionMultiplier out of bounds (isInBookMode=false):"
-                        + mLetterboxBookModePositionMultiplier);
-                // Default to central position if invalid value is provided.
-                return 0.5f;
-            } else {
-                return mLetterboxHorizontalPositionMultiplier;
-            }
-        }
+        return isInBookMode ? mLetterboxBookModePositionMultiplier
+                : mLetterboxHorizontalPositionMultiplier;
     }
 
     /*
@@ -689,37 +668,28 @@ final class LetterboxConfiguration {
      * bottom side.
      */
     float getLetterboxVerticalPositionMultiplier(boolean isInTabletopMode) {
-        if (isInTabletopMode) {
-            return (mLetterboxTabletopModePositionMultiplier < 0.0f
-                    || mLetterboxTabletopModePositionMultiplier > 1.0f)
-                    // Default to top position if invalid value is provided.
-                    ? 0.0f : mLetterboxTabletopModePositionMultiplier;
-        } else {
-            return (mLetterboxVerticalPositionMultiplier < 0.0f
-                    || mLetterboxVerticalPositionMultiplier > 1.0f)
-                    // Default to central position if invalid value is provided.
-                    ? 0.5f : mLetterboxVerticalPositionMultiplier;
-        }
+        return isInTabletopMode ? mLetterboxTabletopModePositionMultiplier
+                : mLetterboxVerticalPositionMultiplier;
     }
 
     /**
-     * Overrides horizontal position of a center of the letterboxed app window. If given value < 0
-     * or > 1, then it and a value of {@link
-     * com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier} are ignored and
-     * central position (0.5) is used.
+     * Overrides horizontal position of a center of the letterboxed app window.
+     *
+     * @throws IllegalArgumentException If given value < 0 or > 1.
      */
     void setLetterboxHorizontalPositionMultiplier(float multiplier) {
-        mLetterboxHorizontalPositionMultiplier = multiplier;
+        mLetterboxHorizontalPositionMultiplier = assertValidMultiplier(multiplier,
+                "mLetterboxHorizontalPositionMultiplier");
     }
 
     /**
-     * Overrides vertical position of a center of the letterboxed app window. If given value < 0
-     * or > 1, then it and a value of {@link
-     * com.android.internal.R.dimen.config_letterboxVerticalPositionMultiplier} are ignored and
-     * central position (0.5) is used.
+     * Overrides vertical position of a center of the letterboxed app window.
+     *
+     * @throws IllegalArgumentException If given value < 0 or > 1.
      */
     void setLetterboxVerticalPositionMultiplier(float multiplier) {
-        mLetterboxVerticalPositionMultiplier = multiplier;
+        mLetterboxVerticalPositionMultiplier = assertValidMultiplier(multiplier,
+                "mLetterboxVerticalPositionMultiplier");
     }
 
     /**
@@ -738,6 +708,28 @@ final class LetterboxConfiguration {
     void resetLetterboxVerticalPositionMultiplier() {
         mLetterboxVerticalPositionMultiplier = mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_letterboxVerticalPositionMultiplier);
+    }
+
+    /**
+     * Sets tabletop mode position multiplier.
+     *
+     * @throws IllegalArgumentException If given value < 0 or > 1.
+     */
+    @VisibleForTesting
+    void setLetterboxTabletopModePositionMultiplier(float multiplier) {
+        mLetterboxTabletopModePositionMultiplier = assertValidMultiplier(multiplier,
+                "mLetterboxTabletopModePositionMultiplier");
+    }
+
+    /**
+     * Sets tabletop mode position multiplier.
+     *
+     * @throws IllegalArgumentException If given value < 0 or > 1.
+     */
+    @VisibleForTesting
+    void setLetterboxBookModePositionMultiplier(float multiplier) {
+        mLetterboxBookModePositionMultiplier = assertValidMultiplier(multiplier,
+                "mLetterboxBookModePositionMultiplier");
     }
 
     /*
@@ -1355,5 +1347,22 @@ final class LetterboxConfiguration {
 
     void resetUserAppAspectRatioFullscreenEnabled() {
         setUserAppAspectRatioFullscreenOverrideEnabled(false);
+    }
+
+    /**
+     * Checks whether the multiplier is between [0,1].
+     *
+     * @param multiplierName sent in the exception if multiplier is invalid, for easier debugging.
+     *
+     * @return multiplier, if valid
+     * @throws IllegalArgumentException if outside bounds.
+     */
+    private float assertValidMultiplier(float multiplier, String multiplierName)
+            throws IllegalArgumentException {
+        if (multiplier < 0.0f || multiplier > 1.0f) {
+            throw new IllegalArgumentException("Trying to set " + multiplierName
+                    + " out of bounds: " + multiplier);
+        }
+        return multiplier;
     }
 }

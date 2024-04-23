@@ -18,6 +18,7 @@ package com.android.credentialmanager
 
 import android.app.Activity
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.BiometricPrompt.AuthenticationResult
 import android.os.IBinder
 import android.text.TextUtils
 import android.util.Log
@@ -29,6 +30,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.android.credentialmanager.common.BiometricError
+import com.android.credentialmanager.common.BiometricFlowType
+import com.android.credentialmanager.common.BiometricPromptState
 import com.android.credentialmanager.common.BiometricResult
 import com.android.credentialmanager.common.BiometricState
 import com.android.credentialmanager.model.EntryInfo
@@ -39,6 +43,7 @@ import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
+import com.android.credentialmanager.createflow.isBiometricFlow
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
 import com.android.credentialmanager.logging.LifecycleEvent
@@ -124,13 +129,22 @@ class CredentialSelectorViewModel(
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
             val entryIntent = entry.fillInIntent
             entryIntent?.putExtra(Constants.IS_AUTO_SELECTED_KEY, uiState.isAutoSelectFlow)
-            if (biometricState.biometricResult != null) {
+            if (biometricState.biometricResult != null || biometricState.biometricError != null) {
                 if (uiState.isAutoSelectFlow) {
                     Log.w(Constants.LOG_TAG, "Unexpected biometric result exists when " +
                             "autoSelect is preferred.")
                 }
-                entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_TYPE,
-                    biometricState.biometricResult.biometricAuthenticationResult.authenticationType)
+                // TODO(b/333445754) : Decide whether to propagate info on prompt launch
+                if (biometricState.biometricResult != null) {
+                    entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_RESULT,
+                        biometricState.biometricResult.biometricAuthenticationResult
+                            .authenticationType)
+                } else if (biometricState.biometricError != null){
+                    entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_ERROR_CODE,
+                        biometricState.biometricError.errorCode)
+                    entryIntent?.putExtra(Constants.BIOMETRIC_AUTH_ERROR_MESSAGE,
+                        biometricState.biometricError.errorMessage)
+                }
             }
             val intentSenderRequest = IntentSenderRequest.Builder(pendingIntent)
                 .setFillInIntent(entryIntent).build()
@@ -215,7 +229,8 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
     fun getFlowOnEntrySelected(
         entry: EntryInfo,
-        authResult: BiometricPrompt.AuthenticationResult? = null
+        authResult: BiometricPrompt.AuthenticationResult? = null,
+        authError: BiometricError? = null,
     ) {
         Log.d(Constants.LOG_TAG, "credential selected: {provider=${entry.providerId}" +
             ", key=${entry.entryKey}, subkey=${entry.entrySubkey}}")
@@ -223,10 +238,11 @@ class CredentialSelectorViewModel(
             uiState.copy(
                 selectedEntry = entry,
                 providerActivityState = ProviderActivityState.READY_TO_LAUNCH,
-                biometricState = if (authResult == null) uiState.biometricState else uiState
+                biometricState = if (authResult == null && authError == null)
+                    uiState.biometricState else if (authResult != null) uiState
                     .biometricState.copy(biometricResult = BiometricResult(
-                            biometricAuthenticationResult = authResult)
-                )
+                            biometricAuthenticationResult = authResult)) else uiState
+                    .biometricState.copy(biometricError = authError)
             )
         } else {
             credManRepo.onOptionSelected(entry.providerId, entry.entryKey, entry.entrySubkey)
@@ -251,6 +267,15 @@ class CredentialSelectorViewModel(
             getCredentialUiState = uiState.getCredentialUiState?.copy(
                 currentScreenState = GetScreenState.ALL_SIGN_IN_OPTIONS
             )
+        )
+    }
+
+    fun getFlowOnMoreOptionOnlySelected() {
+        Log.d(Constants.LOG_TAG, "More Option Only selected")
+        uiState = uiState.copy(
+                getCredentialUiState = uiState.getCredentialUiState?.copy(
+                        currentScreenState = GetScreenState.ALL_SIGN_IN_OPTIONS_ONLY
+                )
         )
     }
 
@@ -292,6 +317,14 @@ class CredentialSelectorViewModel(
         )
     }
 
+    fun createFlowOnMoreOptionsOnlySelectedOnCreationSelection() {
+        uiState = uiState.copy(
+                createCredentialUiState = uiState.createCredentialUiState?.copy(
+                        currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION_ONLY,
+                )
+        )
+    }
+
     fun createFlowOnBackCreationSelectionButtonSelected() {
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
@@ -301,10 +334,24 @@ class CredentialSelectorViewModel(
     }
 
     fun createFlowOnEntrySelectedFromMoreOptionScreen(activeEntry: ActiveEntry) {
+        val isBiometricFlow = isBiometricFlow(activeEntry = activeEntry, isAutoSelectFlow = false)
+        if (isBiometricFlow) {
+            // This atomically ensures that the only edge case that *restarts* the biometric flow
+            // doesn't risk a configuration change bug on the more options page during create.
+            // Namely, it's atomic in that it happens only on a tap, and it is not possible to
+            // reproduce a tap and a rotation at the same time. However, even if it were, it would
+            // just be an alternate way to jump back into the biometric selection flow after this
+            // reset, and thus, the state machine is maintained.
+            onBiometricPromptStateChange(BiometricPromptState.INACTIVE)
+        }
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState =
-                if (uiState.createCredentialUiState?.requestDisplayInfo?.userSetDefaultProviderIds
+                // An autoselect flow never makes it to the more options screen
+                if (isBiometricFlow) {
+                    CreateScreenState.BIOMETRIC_SELECTION
+                } else if (
+                    uiState.createCredentialUiState?.requestDisplayInfo?.userSetDefaultProviderIds
                         ?.contains(activeEntry.activeProvider.id) ?: true ||
                     !(uiState.createCredentialUiState?.foundCandidateFromUserDefaultProvider
                     ?: false) ||
@@ -330,7 +377,11 @@ class CredentialSelectorViewModel(
         )
     }
 
-    fun createFlowOnEntrySelected(selectedEntry: EntryInfo) {
+    fun createFlowOnEntrySelected(
+        selectedEntry: EntryInfo,
+        authResult: AuthenticationResult? = null,
+        authError: BiometricError? = null,
+    ) {
         val providerId = selectedEntry.providerId
         val entryKey = selectedEntry.entryKey
         val entrySubkey = selectedEntry.entrySubkey
@@ -341,6 +392,11 @@ class CredentialSelectorViewModel(
             uiState = uiState.copy(
                 selectedEntry = selectedEntry,
                 providerActivityState = ProviderActivityState.READY_TO_LAUNCH,
+                biometricState = if (authResult == null && authError == null)
+                    uiState.biometricState else if (authResult != null) uiState
+                    .biometricState.copy(biometricResult = BiometricResult(
+                        biometricAuthenticationResult = authResult)) else uiState
+                    .biometricState.copy(biometricError = authError)
             )
         } else {
             credManRepo.onOptionSelected(
@@ -363,13 +419,48 @@ class CredentialSelectorViewModel(
         }
     }
 
+    /**************************************************************************/
+    /*****                     Biometric Flow Callbacks                   *****/
+    /**************************************************************************/
+
+    /**
+     * This allows falling back from the biometric prompt screen to the normal get flow by applying
+     * a reset to all necessary states involved in the fallback.
+     */
+    fun fallbackFromBiometricToNormalFlow(biometricFlowType: BiometricFlowType) {
+        onBiometricPromptStateChange(BiometricPromptState.INACTIVE)
+        when (biometricFlowType) {
+            BiometricFlowType.GET -> getFlowOnBackToPrimarySelectionScreen()
+            BiometricFlowType.CREATE -> createFlowOnUseOnceSelected()
+        }
+    }
+
+    /**
+     * This method can be used to change the [BiometricPromptState] according to the necessity.
+     * For example, if resetting, one might use [BiometricPromptState.INACTIVE], but if the flow
+     * has just launched, to avoid configuration errors, one can use
+     * [BiometricPromptState.PENDING].
+     */
+    fun onBiometricPromptStateChange(biometricPromptState: BiometricPromptState) {
+        uiState = uiState.copy(
+            biometricState = uiState.biometricState.copy(
+                biometricStatus = biometricPromptState
+            )
+        )
+    }
+
+    /**
+     * This returns the present biometric state.
+     */
+    fun getBiometricPromptState(): BiometricPromptState =
+        uiState.biometricState.biometricStatus
+
+    /**************************************************************************/
+    /*****                     Misc. Callbacks/Logs                       *****/
+    /**************************************************************************/
+
     @Composable
     fun logUiEvent(uiEventEnum: UiEventEnum) {
         this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo?.packageName)
-    }
-
-    companion object {
-        // TODO(b/326243754) : Replace/remove once all failure flows added in
-        const val TEMPORARY_FAILURE_CODE = Integer.MIN_VALUE
     }
 }

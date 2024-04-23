@@ -139,6 +139,16 @@ public final class HdmiControlManager {
     public static final String EXTRA_LOCALE = "android.hardware.hdmi.extra.LOCALE";
 
     /**
+     * Broadcast Action: Active Source status was recovered by the device.
+     * <p>Send when device becomes the current active source such that the activity
+     * HdmiCecActiveSourceLostActivity can be finished and cleared from the screen.
+     * <p>Requires {@link android.Manifest.permission#HDMI_CEC} to receive.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI =
+            "android.hardware.hdmi.action.ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI";
+    /**
      * Volume value for mute state.
      */
     public static final int AVR_VOLUME_MUTED = 101;

@@ -37,9 +37,9 @@ import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -49,7 +49,6 @@ import android.util.Slog;
 import android.view.Surface;
 
 import com.android.internal.R;
-import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,71 +62,56 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
     private static final String TAG = "FaceManager";
 
-    private static final int MSG_ENROLL_RESULT = 100;
-    private static final int MSG_ACQUIRED = 101;
-    private static final int MSG_AUTHENTICATION_SUCCEEDED = 102;
-    private static final int MSG_AUTHENTICATION_FAILED = 103;
-    private static final int MSG_ERROR = 104;
-    private static final int MSG_REMOVED = 105;
-    private static final int MSG_GET_FEATURE_COMPLETED = 106;
-    private static final int MSG_SET_FEATURE_COMPLETED = 107;
-    private static final int MSG_CHALLENGE_GENERATED = 108;
-    private static final int MSG_FACE_DETECTED = 109;
-    private static final int MSG_AUTHENTICATION_FRAME = 112;
-    private static final int MSG_ENROLLMENT_FRAME = 113;
-
     private final IFaceService mService;
     private final Context mContext;
     private final IBinder mToken = new Binder();
-    @Nullable private AuthenticationCallback mAuthenticationCallback;
-    @Nullable private FaceDetectionCallback mFaceDetectionCallback;
-    @Nullable private EnrollmentCallback mEnrollmentCallback;
-    @Nullable private RemovalCallback mRemovalCallback;
-    @Nullable private SetFeatureCallback mSetFeatureCallback;
-    @Nullable private GetFeatureCallback mGetFeatureCallback;
-    @Nullable private GenerateChallengeCallback mGenerateChallengeCallback;
-    private CryptoObject mCryptoObject;
-    private Face mRemovalFace;
     private Handler mHandler;
     private List<FaceSensorPropertiesInternal> mProps = new ArrayList<>();
+    private HandlerExecutor mExecutor;
 
-    private final IFaceServiceReceiver mServiceReceiver = new IFaceServiceReceiver.Stub() {
+    private class FaceServiceReceiver extends IFaceServiceReceiver.Stub {
+        private final FaceCallback mFaceCallback;
+
+        FaceServiceReceiver(FaceCallback faceCallback) {
+            mFaceCallback = faceCallback;
+        }
 
         @Override // binder call
         public void onEnrollResult(Face face, int remaining) {
-            mHandler.obtainMessage(MSG_ENROLL_RESULT, remaining, 0, face).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendEnrollResult(remaining));
         }
 
         @Override // binder call
         public void onAcquired(int acquireInfo, int vendorCode) {
-            mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, vendorCode).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendAcquiredResult(mContext, acquireInfo,
+                    vendorCode));
         }
 
         @Override // binder call
         public void onAuthenticationSucceeded(Face face, int userId, boolean isStrongBiometric) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId,
-                    isStrongBiometric ? 1 : 0, face).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendAuthenticatedSucceeded(face, userId,
+                    isStrongBiometric));
         }
 
         @Override // binder call
         public void onFaceDetected(int sensorId, int userId, boolean isStrongBiometric) {
-            mHandler.obtainMessage(MSG_FACE_DETECTED, sensorId, userId, isStrongBiometric)
-                    .sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendFaceDetected(sensorId, userId,
+                    isStrongBiometric));
         }
 
         @Override // binder call
         public void onAuthenticationFailed() {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_FAILED).sendToTarget();
+            mExecutor.execute(mFaceCallback::sendAuthenticatedFailed);
         }
 
         @Override // binder call
         public void onError(int error, int vendorCode) {
-            mHandler.obtainMessage(MSG_ERROR, error, vendorCode).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendErrorResult(mContext, error, vendorCode));
         }
 
         @Override // binder call
         public void onRemoved(Face face, int remaining) {
-            mHandler.obtainMessage(MSG_REMOVED, remaining, 0, face).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendRemovedResult(face, remaining));
             if (remaining == 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.FACE_UNLOCK_RE_ENROLL, 0,
@@ -137,34 +121,31 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
         @Override
         public void onFeatureSet(boolean success, int feature) {
-            mHandler.obtainMessage(MSG_SET_FEATURE_COMPLETED, feature, 0, success).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendSetFeatureCompleted(success, feature));
         }
 
         @Override
         public void onFeatureGet(boolean success, int[] features, boolean[] featureState) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = success;
-            args.arg2 = features;
-            args.arg3 = featureState;
-            mHandler.obtainMessage(MSG_GET_FEATURE_COMPLETED, args).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendGetFeatureCompleted(success, features,
+                    featureState));
         }
 
         @Override
         public void onChallengeGenerated(int sensorId, int userId, long challenge) {
-            mHandler.obtainMessage(MSG_CHALLENGE_GENERATED, sensorId, userId, challenge)
-                    .sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendChallengeGenerated(sensorId, userId,
+                    challenge));
         }
 
         @Override
         public void onAuthenticationFrame(FaceAuthenticationFrame frame) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_FRAME, frame).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendAuthenticationFrame(mContext, frame));
         }
 
         @Override
         public void onEnrollmentFrame(FaceEnrollFrame frame) {
-            mHandler.obtainMessage(MSG_ENROLLMENT_FRAME, frame).sendToTarget();
+            mExecutor.execute(() -> mFaceCallback.sendEnrollmentFrame(mContext, frame));
         }
-    };
+    }
 
     /**
      * @hide
@@ -175,7 +156,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (mService == null) {
             Slog.v(TAG, "FaceAuthenticationManagerService was null");
         }
-        mHandler = new MyHandler(context);
+        mHandler = context.getMainThreadHandler();
+        mExecutor = new HandlerExecutor(mHandler);
         if (context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
                 == PackageManager.PERMISSION_GRANTED) {
             addAuthenticatorsRegisteredCallback(new IFaceAuthenticatorsRegisteredCallback.Stub() {
@@ -193,9 +175,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      */
     private void useHandler(Handler handler) {
         if (handler != null) {
-            mHandler = new MyHandler(handler.getLooper());
-        } else if (mHandler.getLooper() != mContext.getMainLooper()) {
-            mHandler = new MyHandler(mContext.getMainLooper());
+            mHandler = handler;
+            mExecutor = new HandlerExecutor(mHandler);
+        } else if (mHandler != mContext.getMainThreadHandler()) {
+            mHandler = mContext.getMainThreadHandler();
+            mExecutor = new HandlerExecutor(mHandler);
         }
     }
 
@@ -249,13 +233,12 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
         if (mService != null) {
             try {
+                final FaceCallback faceCallback = new FaceCallback(callback, crypto);
                 useHandler(handler);
-                mAuthenticationCallback = callback;
-                mCryptoObject = crypto;
                 final long operationId = crypto != null ? crypto.getOpId() : 0;
                 Trace.beginSection("FaceManager#authenticate");
                 final long authId = mService.authenticate(
-                        mToken, operationId, mServiceReceiver, options);
+                        mToken, operationId, new FaceServiceReceiver(faceCallback), options);
                 if (cancel != null) {
                     cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
                 }
@@ -292,10 +275,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         options.setOpPackageName(mContext.getOpPackageName());
         options.setAttributionTag(mContext.getAttributionTag());
 
-        mFaceDetectionCallback = callback;
+        final FaceCallback faceCallback = new FaceCallback(callback);
 
         try {
-            final long authId = mService.detectFace(mToken, mServiceReceiver, options);
+            final long authId = mService.detectFace(mToken,
+                    new FaceServiceReceiver(faceCallback), options);
             cancel.setOnCancelListener(new OnFaceDetectionCancelListener(authId));
         } catch (RemoteException e) {
             Slog.w(TAG, "Remote exception when requesting finger detect", e);
@@ -367,11 +351,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
         if (mService != null) {
             try {
-                mEnrollmentCallback = callback;
+                final FaceCallback faceCallback = new FaceCallback(callback);
                 Trace.beginSection("FaceManager#enroll");
                 final long enrollId = mService.enroll(userId, mToken, hardwareAuthToken,
-                        mServiceReceiver, mContext.getOpPackageName(), disabledFeatures,
-                        previewSurface, debugConsent, options);
+                        new FaceServiceReceiver(faceCallback), mContext.getOpPackageName(),
+                        disabledFeatures, previewSurface, debugConsent, options);
                 if (cancel != null) {
                     cancel.setOnCancelListener(new OnEnrollCancelListener(enrollId));
                 }
@@ -419,10 +403,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
         if (mService != null) {
             try {
-                mEnrollmentCallback = callback;
+                final FaceCallback faceCallback = new FaceCallback(callback);
                 Trace.beginSection("FaceManager#enrollRemotely");
                 final long enrolId = mService.enrollRemotely(userId, mToken, hardwareAuthToken,
-                        mServiceReceiver, mContext.getOpPackageName(), disabledFeatures);
+                        new FaceServiceReceiver(faceCallback), mContext.getOpPackageName(),
+                        disabledFeatures);
                 if (cancel != null) {
                     cancel.setOnCancelListener(new OnEnrollCancelListener(enrolId));
                 }
@@ -455,9 +440,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     public void generateChallenge(int sensorId, int userId, GenerateChallengeCallback callback) {
         if (mService != null) {
             try {
-                mGenerateChallengeCallback = callback;
-                mService.generateChallenge(mToken, sensorId, userId, mServiceReceiver,
-                        mContext.getOpPackageName());
+                final FaceCallback faceCallback = new FaceCallback(callback);
+                mService.generateChallenge(mToken, sensorId, userId,
+                        new FaceServiceReceiver(faceCallback), mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -528,9 +513,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             SetFeatureCallback callback) {
         if (mService != null) {
             try {
-                mSetFeatureCallback = callback;
+                final FaceCallback faceCallback = new FaceCallback(callback);
                 mService.setFeature(mToken, userId, feature, enabled, hardwareAuthToken,
-                        mServiceReceiver, mContext.getOpPackageName());
+                        new FaceServiceReceiver(faceCallback), mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -544,8 +529,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     public void getFeature(int userId, int feature, GetFeatureCallback callback) {
         if (mService != null) {
             try {
-                mGetFeatureCallback = callback;
-                mService.getFeature(mToken, userId, feature, mServiceReceiver,
+                final FaceCallback faceCallback = new FaceCallback(callback);
+                mService.getFeature(mToken, userId, feature, new FaceServiceReceiver(faceCallback),
                         mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -566,10 +551,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     public void remove(Face face, int userId, RemovalCallback callback) {
         if (mService != null) {
             try {
-                mRemovalCallback = callback;
-                mRemovalFace = face;
-                mService.remove(mToken, face.getBiometricId(), userId, mServiceReceiver,
-                        mContext.getOpPackageName());
+                final FaceCallback faceCallback = new FaceCallback(callback, face);
+                mService.remove(mToken, face.getBiometricId(), userId,
+                        new FaceServiceReceiver(faceCallback), mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -584,8 +568,9 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     public void removeAll(int userId, @NonNull RemovalCallback callback) {
         if (mService != null) {
             try {
-                mRemovalCallback = callback;
-                mService.removeAll(mToken, userId, mServiceReceiver, mContext.getOpPackageName());
+                final FaceCallback faceCallback = new FaceCallback(callback);
+                mService.removeAll(mToken, userId, new FaceServiceReceiver(faceCallback),
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1268,203 +1253,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             Slog.d(TAG, "Cancel face detect requested for: " + mAuthRequestId);
             cancelFaceDetect(mAuthRequestId);
         }
-    }
-
-    private class MyHandler extends Handler {
-        private MyHandler(Context context) {
-            super(context.getMainLooper());
-        }
-
-        private MyHandler(Looper looper) {
-            super(looper);
-        }
-
-        @Override
-        public void handleMessage(android.os.Message msg) {
-            Trace.beginSection("FaceManager#handleMessage: " + Integer.toString(msg.what));
-            switch (msg.what) {
-                case MSG_ENROLL_RESULT:
-                    sendEnrollResult((Face) msg.obj, msg.arg1 /* remaining */);
-                    break;
-                case MSG_ACQUIRED:
-                    sendAcquiredResult(msg.arg1 /* acquire info */, msg.arg2 /* vendorCode */);
-                    break;
-                case MSG_AUTHENTICATION_SUCCEEDED:
-                    sendAuthenticatedSucceeded((Face) msg.obj, msg.arg1 /* userId */,
-                            msg.arg2 == 1 /* isStrongBiometric */);
-                    break;
-                case MSG_AUTHENTICATION_FAILED:
-                    sendAuthenticatedFailed();
-                    break;
-                case MSG_ERROR:
-                    sendErrorResult(msg.arg1 /* errMsgId */, msg.arg2 /* vendorCode */);
-                    break;
-                case MSG_REMOVED:
-                    sendRemovedResult((Face) msg.obj, msg.arg1 /* remaining */);
-                    break;
-                case MSG_SET_FEATURE_COMPLETED:
-                    sendSetFeatureCompleted((boolean) msg.obj /* success */,
-                            msg.arg1 /* feature */);
-                    break;
-                case MSG_GET_FEATURE_COMPLETED:
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    sendGetFeatureCompleted((boolean) args.arg1 /* success */,
-                            (int[]) args.arg2 /* features */,
-                            (boolean[]) args.arg3 /* featureState */);
-                    args.recycle();
-                    break;
-                case MSG_CHALLENGE_GENERATED:
-                    sendChallengeGenerated(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
-                            (long) msg.obj /* challenge */);
-                    break;
-                case MSG_FACE_DETECTED:
-                    sendFaceDetected(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
-                            (boolean) msg.obj /* isStrongBiometric */);
-                    break;
-                case MSG_AUTHENTICATION_FRAME:
-                    sendAuthenticationFrame((FaceAuthenticationFrame) msg.obj /* frame */);
-                    break;
-                case MSG_ENROLLMENT_FRAME:
-                    sendEnrollmentFrame((FaceEnrollFrame) msg.obj /* frame */);
-                    break;
-                default:
-                    Slog.w(TAG, "Unknown message: " + msg.what);
-            }
-            Trace.endSection();
-        }
-    }
-
-    private void sendSetFeatureCompleted(boolean success, int feature) {
-        if (mSetFeatureCallback == null) {
-            return;
-        }
-        mSetFeatureCallback.onCompleted(success, feature);
-    }
-
-    private void sendGetFeatureCompleted(boolean success, int[] features, boolean[] featureState) {
-        if (mGetFeatureCallback == null) {
-            return;
-        }
-        mGetFeatureCallback.onCompleted(success, features, featureState);
-    }
-
-    private void sendChallengeGenerated(int sensorId, int userId, long challenge) {
-        if (mGenerateChallengeCallback == null) {
-            return;
-        }
-        mGenerateChallengeCallback.onGenerateChallengeResult(sensorId, userId, challenge);
-    }
-
-    private void sendFaceDetected(int sensorId, int userId, boolean isStrongBiometric) {
-        if (mFaceDetectionCallback == null) {
-            Slog.e(TAG, "sendFaceDetected, callback null");
-            return;
-        }
-        mFaceDetectionCallback.onFaceDetected(sensorId, userId, isStrongBiometric);
-    }
-
-    private void sendRemovedResult(Face face, int remaining) {
-        if (mRemovalCallback == null) {
-            return;
-        }
-        mRemovalCallback.onRemovalSucceeded(face, remaining);
-    }
-
-    private void sendErrorResult(int errMsgId, int vendorCode) {
-        // emulate HAL 2.1 behavior and send real errMsgId
-        final int clientErrMsgId = errMsgId == FACE_ERROR_VENDOR
-                ? (vendorCode + FACE_ERROR_VENDOR_BASE) : errMsgId;
-        if (mEnrollmentCallback != null) {
-            mEnrollmentCallback.onEnrollmentError(clientErrMsgId,
-                    getErrorString(mContext, errMsgId, vendorCode));
-        } else if (mAuthenticationCallback != null) {
-            mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
-                    getErrorString(mContext, errMsgId, vendorCode));
-        } else if (mRemovalCallback != null) {
-            mRemovalCallback.onRemovalError(mRemovalFace, clientErrMsgId,
-                    getErrorString(mContext, errMsgId, vendorCode));
-        } else if (mFaceDetectionCallback != null) {
-            mFaceDetectionCallback.onDetectionError(errMsgId);
-            mFaceDetectionCallback = null;
-        }
-    }
-
-    private void sendEnrollResult(Face face, int remaining) {
-        if (mEnrollmentCallback != null) {
-            mEnrollmentCallback.onEnrollmentProgress(remaining);
-        }
-    }
-
-    private void sendAuthenticatedSucceeded(Face face, int userId, boolean isStrongBiometric) {
-        if (mAuthenticationCallback != null) {
-            final AuthenticationResult result =
-                    new AuthenticationResult(mCryptoObject, face, userId, isStrongBiometric);
-            mAuthenticationCallback.onAuthenticationSucceeded(result);
-        }
-    }
-
-    private void sendAuthenticatedFailed() {
-        if (mAuthenticationCallback != null) {
-            mAuthenticationCallback.onAuthenticationFailed();
-        }
-    }
-
-    private void sendAcquiredResult(int acquireInfo, int vendorCode) {
-        if (mAuthenticationCallback != null) {
-            final FaceAuthenticationFrame frame = new FaceAuthenticationFrame(
-                    new FaceDataFrame(acquireInfo, vendorCode));
-            sendAuthenticationFrame(frame);
-        } else if (mEnrollmentCallback != null) {
-            final FaceEnrollFrame frame = new FaceEnrollFrame(
-                    null /* cell */,
-                    FaceEnrollStages.UNKNOWN,
-                    new FaceDataFrame(acquireInfo, vendorCode));
-            sendEnrollmentFrame(frame);
-        }
-    }
-
-    private void sendAuthenticationFrame(@Nullable FaceAuthenticationFrame frame) {
-        if (frame == null) {
-            Slog.w(TAG, "Received null authentication frame");
-        } else if (mAuthenticationCallback != null) {
-            // TODO(b/178414967): Send additional frame data to callback
-            final int acquireInfo = frame.getData().getAcquiredInfo();
-            final int vendorCode = frame.getData().getVendorCode();
-            final int helpCode = getHelpCode(acquireInfo, vendorCode);
-            final String helpMessage = getAuthHelpMessage(mContext, acquireInfo, vendorCode);
-            mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
-
-            // Ensure that only non-null help messages are sent.
-            if (helpMessage != null) {
-                mAuthenticationCallback.onAuthenticationHelp(helpCode, helpMessage);
-            }
-        }
-    }
-
-    private void sendEnrollmentFrame(@Nullable FaceEnrollFrame frame) {
-        if (frame == null) {
-            Slog.w(TAG, "Received null enrollment frame");
-        } else if (mEnrollmentCallback != null) {
-            final FaceDataFrame data = frame.getData();
-            final int acquireInfo = data.getAcquiredInfo();
-            final int vendorCode = data.getVendorCode();
-            final int helpCode = getHelpCode(acquireInfo, vendorCode);
-            final String helpMessage = getEnrollHelpMessage(mContext, acquireInfo, vendorCode);
-            mEnrollmentCallback.onEnrollmentFrame(
-                    helpCode,
-                    helpMessage,
-                    frame.getCell(),
-                    frame.getStage(),
-                    data.getPan(),
-                    data.getTilt(),
-                    data.getDistance());
-        }
-    }
-
-    private static int getHelpCode(int acquireInfo, int vendorCode) {
-        return acquireInfo == FACE_ACQUIRED_VENDOR
-                ? vendorCode + FACE_ACQUIRED_VENDOR_BASE
-                : acquireInfo;
     }
 
     /**

@@ -1,4 +1,5 @@
 package: "com.android.systemui"
+container: "system"
 
 flag {
     name: "example_flag"
@@ -25,6 +26,21 @@ flag {
 }
 
 flag {
+   name: "refactor_keyguard_dismiss_intent"
+   namespace: "systemui"
+   description: "Update how keyguard dismiss intents are stored."
+   bug: "275069969"
+}
+
+flag {
+
+    name: "notification_heads_up_cycling"
+    namespace: "systemui"
+    description: "Heads-up notification cycling animation for the Notification Avalanche feature."
+    bug: "316404716"
+}
+
+flag {
    name: "notification_minimalism_prototype"
    namespace: "systemui"
    description: "Prototype of notification minimalism; the new 'Intermediate' lockscreen customization proposal."
@@ -39,6 +55,16 @@ flag {
    namespace: "systemui"
    description: "Pause ViewFlippers inside Notification custom layouts when the shade is closed."
    bug: "309146176"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "notification_over_expansion_clipping_fix"
+   namespace: "systemui"
+   description: "fix NSSL clipping when over-expanding; fixes split shade bug."
+   bug: "288553572"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
@@ -126,6 +152,16 @@ flag {
    description: "Fixes the app selector abruptly disappearing without an animation, when the"
         "selected task is the foreground task."
    bug: "314385883"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "pss_app_selector_recents_split_screen"
+   namespace: "systemui"
+   description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"
+   bug: "320449039"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
@@ -312,6 +348,16 @@ flag {
 }
 
 flag {
+    name: "status_bar_monochrome_icons_fix"
+    namespace: "systemui"
+    description: "Fixes the status bar icon size when drawing InsetDrawables (ie. monochrome icons)"
+    bug: "329091967"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "compose_bouncer"
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
@@ -441,10 +487,13 @@ flag {
 }
 
 flag {
-    name: "screenshot_private_profile"
+    name: "screenshot_private_profile_behavior_fix"
     namespace: "systemui"
     description: "Private profile support for screenshots"
     bug: "327613051"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -707,4 +756,61 @@ flag {
     description: "Enables the new QS UI pipeline that follows recommended architecture and uses"
       " Compose for the UI."
     bug: "325099249"
+}
+
+flag {
+  name: "remove_dream_overlay_hide_on_touch"
+  namespace: "systemui"
+  description: "Removes logic to hide the dream overlay on user interaction, as it conflicts with various transitions"
+  bug: "329091030"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "keyboard_docking_indicator"
+    namespace: "systemui"
+    description: "Glow bar indicator reveals upon keyboard docking."
+    bug: "324600132"
+}
+
+flag {
+  name: "dream_overlay_bouncer_swipe_direction_filtering"
+  namespace: "systemui"
+  description: "do not initiate bouncer swipe when the direction is opposite of the expansion"
+  bug: "333632464"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "dream_input_session_pilfer_once"
+    namespace: "systemui"
+    description: "Pilfer at most once per input session"
+    bug: "324600132"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "slice_broadcast_relay_in_background"
+    namespace: "systemui"
+    description: "Move handling of slice broadcast relay broadcasts to background threads"
+    bug: "334767208"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "register_battery_controller_receivers_in_corestartable"
+    namespace: "systemui"
+    description: "Decide whether to register the receivers in battery controller impl in the BatteryControllerStartable corestartable."
+    bug: "307517093"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

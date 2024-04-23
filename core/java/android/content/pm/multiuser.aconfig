@@ -1,4 +1,5 @@
 package: "android.multiuser"
+container: "system"
 
 flag {
     name: "save_global_and_guest_restrictions_on_system_user_xml"
@@ -168,6 +169,13 @@ flag {
     namespace: "multiuser"
     description: "Set power mode during a user switch."
     bug: "325249845"
+}
+
+flag {
+    name: "schedule_stop_of_background_user"
+    namespace: "multiuser"
+    description: "Schedule background users to be stopped at a future point."
+    bug: "330351042"
 }
 
 flag {

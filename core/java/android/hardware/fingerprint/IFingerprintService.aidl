@@ -177,13 +177,7 @@ interface IFingerprintService {
 
     //Register all available fingerprint sensors.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void registerAuthenticatorsLegacy(in FingerprintSensorConfigurations fingerprintSensorConfigurations);
-
-    // Registers all HIDL and AIDL sensors. Only HIDL sensor properties need to be provided, because
-    // AIDL sensor properties are retrieved directly from the available HALs. If no HIDL HALs exist,
-    // hidlSensors must be non-null and empty. See AuthService.java
-    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void registerAuthenticators(in List<FingerprintSensorPropertiesInternal> hidlSensors);
+    void registerAuthenticators(in FingerprintSensorConfigurations fingerprintSensorConfigurations);
 
     // Adds a callback which gets called when the service registers all of the fingerprint
     // authenticators. The callback is automatically removed after it's invoked.

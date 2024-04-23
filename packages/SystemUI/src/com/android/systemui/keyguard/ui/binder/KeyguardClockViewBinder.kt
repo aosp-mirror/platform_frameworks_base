@@ -26,17 +26,15 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.keyguard.KeyguardClockSwitch.LARGE
-import com.android.keyguard.KeyguardClockSwitch.SMALL
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.clocks.ClockController
-import com.android.systemui.shared.clocks.DEFAULT_CLOCK_ID
 import kotlinx.coroutines.launch
 
 object KeyguardClockViewBinder {
@@ -56,6 +54,7 @@ object KeyguardClockViewBinder {
                 keyguardClockInteractor.clockEventController.registerListeners(keyguardRootView)
             }
         }
+
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
@@ -63,26 +62,28 @@ object KeyguardClockViewBinder {
                     viewModel.currentClock.collect { currentClock ->
                         cleanupClockViews(currentClock, keyguardRootView, viewModel.burnInLayer)
                         addClockViews(currentClock, keyguardRootView)
-                        updateBurnInLayer(keyguardRootView, viewModel)
+                        updateBurnInLayer(keyguardRootView, viewModel, viewModel.clockSize.value)
                         applyConstraints(clockSection, keyguardRootView, true)
                     }
                 }
+
                 launch {
                     if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.clockSize.collect {
-                        updateBurnInLayer(keyguardRootView, viewModel)
+                    viewModel.clockSize.collect { clockSize ->
+                        updateBurnInLayer(keyguardRootView, viewModel, clockSize)
                         blueprintInteractor.refreshBlueprint(Type.ClockSize)
                     }
                 }
+
                 launch {
                     if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.clockShouldBeCentered.collect { clockShouldBeCentered ->
+                    viewModel.clockShouldBeCentered.collect {
                         viewModel.currentClock.value?.let {
-                            // Weather clock also has hasCustomPositionUpdatedAnimation as true
-                            // TODO(b/323020908): remove ID check
+                            // TODO(b/301502635): remove "!it.config.useCustomClockScene" when
+                            // migrate clocks to blueprint is fully rolled out
                             if (
                                 it.largeClock.config.hasCustomPositionUpdatedAnimation &&
-                                    it.config.id == DEFAULT_CLOCK_ID
+                                    !it.config.useCustomClockScene
                             ) {
                                 blueprintInteractor.refreshBlueprint(Type.DefaultClockStepping)
                             } else {
@@ -91,13 +92,13 @@ object KeyguardClockViewBinder {
                         }
                     }
                 }
+
                 launch {
                     if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                    viewModel.isAodIconsVisible.collect { isAodIconsVisible ->
+                    viewModel.isAodIconsVisible.collect {
                         viewModel.currentClock.value?.let {
-                            // Weather clock also has hasCustomPositionUpdatedAnimation as true
                             if (
-                                viewModel.useLargeClock && it.config.id == "DIGITAL_CLOCK_WEATHER"
+                                viewModel.isLargeClockVisible.value && it.config.useCustomClockScene
                             ) {
                                 blueprintInteractor.refreshBlueprint(Type.DefaultTransition)
                             }
@@ -112,18 +113,19 @@ object KeyguardClockViewBinder {
     fun updateBurnInLayer(
         keyguardRootView: ConstraintLayout,
         viewModel: KeyguardClockViewModel,
+        clockSize: ClockSize,
     ) {
         val burnInLayer = viewModel.burnInLayer
         val clockController = viewModel.currentClock.value
         clockController?.let { clock ->
-            when (viewModel.clockSize.value) {
-                LARGE -> {
+            when (clockSize) {
+                ClockSize.LARGE -> {
                     clock.smallClock.layout.views.forEach { burnInLayer?.removeView(it) }
                     if (clock.config.useAlternateSmartspaceAODTransition) {
                         clock.largeClock.layout.views.forEach { burnInLayer?.addView(it) }
                     }
                 }
-                SMALL -> {
+                ClockSize.SMALL -> {
                     clock.smallClock.layout.views.forEach { burnInLayer?.addView(it) }
                     clock.largeClock.layout.views.forEach { burnInLayer?.removeView(it) }
                 }
@@ -140,15 +142,16 @@ object KeyguardClockViewBinder {
         if (lastClock == currentClock) {
             return
         }
+
         lastClock?.let { clock ->
             clock.smallClock.layout.views.forEach {
                 burnInLayer?.removeView(it)
                 rootView.removeView(it)
             }
+
             // add large clock to burn in layer only when it will have same transition with other
-            // components in AOD
-            // otherwise, it will have a separate scale transition while other components only have
-            // translate transition
+            // components in AOD otherwise, it will have a separate scale transition while other
+            // components only have translate transition
             if (clock.config.useAlternateSmartspaceAODTransition) {
                 clock.largeClock.layout.views.forEach { burnInLayer?.removeView(it) }
             }

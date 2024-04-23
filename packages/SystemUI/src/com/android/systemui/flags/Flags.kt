@@ -153,11 +153,6 @@ object Flags {
     // TODO(b/267722622): Tracking Bug
     @JvmField val WALLPAPER_PICKER_UI_FOR_AIWP = releasedFlag("wallpaper_picker_ui_for_aiwp")
 
-    /** Whether to use a new data source for intents to run on keyguard dismissal. */
-    // TODO(b/275069969): Tracking bug.
-    @JvmField
-    val REFACTOR_KEYGUARD_DISMISS_INTENT = unreleasedFlag("refactor_keyguard_dismiss_intent")
-
     /** Whether to allow long-press on the lock screen to directly open wallpaper picker. */
     // TODO(b/277220285): Tracking bug.
     @JvmField
@@ -260,9 +255,6 @@ object Flags {
     val FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS =
         releasedFlag("filter_provisioning_network_subscriptions")
 
-    // TODO(b/292533677): Tracking Bug
-    val WIFI_TRACKER_LIB_FOR_WIFI_ICON = releasedFlag("wifi_tracker_lib_for_wifi_icon")
-
     // TODO(b/293863612): Tracking Bug
     @JvmField val INCOMPATIBLE_CHARGING_BATTERY_ICON =
         releasedFlag("incompatible_charging_battery_icon")
@@ -342,11 +334,6 @@ object Flags {
             namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
         )
 
-    @Keep
-    @JvmField
-    val WM_CAPTION_ON_SHELL =
-        sysPropBooleanFlag("persist.wm.debug.caption_on_shell", default = true)
-
     // TODO(b/256873975): Tracking Bug
     @JvmField
     @Keep
@@ -377,16 +364,6 @@ object Flags {
     val WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
         sysPropBooleanFlag("persist.wm.debug.predictive_back_always_enforce", default = false)
 
-    // TODO(b/254512728): Tracking Bug
-    @JvmField val NEW_BACK_AFFORDANCE = releasedFlag("new_back_affordance")
-
-
-    // TODO(b/270987164): Tracking Bug
-    @JvmField val TRACKPAD_GESTURE_FEATURES = releasedFlag("trackpad_gesture_features")
-
-    // TODO(b/273800936): Tracking Bug
-    @JvmField val TRACKPAD_GESTURE_COMMON = releasedFlag("trackpad_gesture_common")
-
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag("screenshot_app_clips")
 
@@ -409,13 +386,6 @@ object Flags {
     @JvmField
     val CLIPBOARD_SHARED_TRANSITIONS =
             unreleasedFlag("clipboard_shared_transitions", teamfood = true)
-
-    /**
-     * Whether the compose bouncer is enabled. This ensures ProGuard can
-     * remove unused code from our APK at compile time.
-     */
-    // TODO(b/280877228): Tracking Bug
-    @JvmField val COMPOSE_BOUNCER_ENABLED = false
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")
@@ -503,12 +473,6 @@ object Flags {
     // TODO(b/302144438): Tracking Bug
     @JvmField val DECOUPLE_REMOTE_INPUT_DELEGATE_AND_CALLBACK_UPDATE =
             unreleasedFlag("decouple_remote_input_delegate_and_callback_update")
-
-    // 2900 - CentralSurfaces-related flags
-
-    // TODO(b/285174336): Tracking Bug
-    @JvmField
-    val USE_REPOS_FOR_BOUNCER_SHOWING = releasedFlag("use_repos_for_bouncer_showing")
 
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField

@@ -312,6 +312,7 @@ public final class AutofillServiceInfo {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             try {
                 if (serviceInfo != null && isCredentialManagerAutofillService(
+                        context,
                         serviceInfo.getComponentName())) {
                     // Skip this service as it is for internal use only
                     continue;
@@ -325,11 +326,23 @@ public final class AutofillServiceInfo {
         return services;
     }
 
-    private static boolean isCredentialManagerAutofillService(ComponentName componentName) {
+    private static boolean isCredentialManagerAutofillService(Context context,
+            ComponentName componentName) {
         if (componentName == null) {
             return false;
         }
-        return componentName.equals(CREDMAN_SERVICE_COMPONENT_NAME);
+        ComponentName credAutofillService = null;
+        String credentialManagerAutofillCompName = context.getResources().getString(
+                R.string.config_defaultCredentialManagerAutofillService);
+        if (credentialManagerAutofillCompName != null && !credentialManagerAutofillCompName
+                .isEmpty()) {
+            credAutofillService = ComponentName.unflattenFromString(
+                    credentialManagerAutofillCompName);
+        } else {
+            Log.w(TAG, "Invalid CredentialAutofillService");
+        }
+
+        return componentName.equals(credAutofillService);
     }
 
     @Override

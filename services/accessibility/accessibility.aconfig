@@ -1,4 +1,5 @@
 package: "com.android.server.accessibility"
+container: "system"
 
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
@@ -48,6 +49,20 @@ flag {
 }
 
 flag {
+    name: "enable_a11y_checker_logging"
+    namespace: "accessibility"
+    description: "Whether to identify and log app a11y issues."
+    bug: "325420273"
+}
+
+flag {
+  name: "enable_hardware_shortcut_disables_warning"
+  namespace: "accessibility"
+  description: "When the user purposely enables the hardware shortcut, preemptively disables the first-time warning message."
+  bug: "287065325"
+}
+
+flag {
     name: "enable_magnification_joystick"
     namespace: "accessibility"
     description: "Whether to enable joystick controls for magnification"
@@ -73,6 +88,16 @@ flag {
     namespace: "accessibility"
     description: "Send the correct pointer id when transitioning from dragging to delegating states."
     bug: "300002193"
+}
+
+flag {
+    name: "focus_click_point_window_bounds_from_a11y_window_info"
+    namespace: "accessibility"
+    description: "Uses A11yWindowInfo bounds for focus click point bounds checking"
+    bug: "317166487"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -128,4 +153,13 @@ flag {
     namespace: "accessibility"
     description: "Sends accessibility events in TouchExplorer#onAccessibilityEvent based on internal state to keep it consistent. This reduces test flakiness."
     bug: "295575684"
+}
+flag {
+    name: "send_hover_events_based_on_event_stream"
+    namespace: "accessibility"
+    description: "Send hover enter and exit based on the state of the hover event stream rather than the internal state of the touch explorer state machine. Because of the nondeterministic nature of gesture detection when done in talkback, relying on the internal state can cause crashes."
+    bug: "314251047"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

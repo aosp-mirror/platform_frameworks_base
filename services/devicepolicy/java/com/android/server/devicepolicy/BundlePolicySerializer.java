@@ -92,7 +92,7 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
                 while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                     if (type == XmlPullParser.START_TAG
                             && parser.getName().equals(TAG_VALUE)) {
-                        values.add(parser.nextText().trim());
+                        values.add(parser.nextText());
                         count--;
                     }
                 }
@@ -111,7 +111,7 @@ final class BundlePolicySerializer extends PolicySerializer<Bundle> {
                 restrictions.putParcelableArray(key,
                         bundleList.toArray(new Bundle[bundleList.size()]));
             } else {
-                String value = parser.nextText().trim();
+                String value = parser.nextText();
                 if (ATTR_TYPE_BOOLEAN.equals(valType)) {
                     restrictions.putBoolean(key, Boolean.parseBoolean(value));
                 } else if (ATTR_TYPE_INTEGER.equals(valType)) {

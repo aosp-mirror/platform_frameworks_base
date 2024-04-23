@@ -29,11 +29,13 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.RemoteException;
+import android.view.Choreographer;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
@@ -79,7 +81,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
     private static final int POST_ANIMATION_DURATION_MS = 500;
 
     private final Rect mStartTaskRect = new Rect();
-    private final float mCornerRadius;
+    private float mCornerRadius;
 
     // The closing window properties.
     private final Rect mClosingStartRect = new Rect();
@@ -91,7 +93,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     private final PointF mInitialTouchPos = new PointF();
     private final Interpolator mPostAnimationInterpolator = Interpolators.EMPHASIZED;
-    private final Interpolator mProgressInterpolator = Interpolators.STANDARD_DECELERATE;
+    private final Interpolator mProgressInterpolator = Interpolators.BACK_GESTURE;
     private final Interpolator mVerticalMoveInterpolator = new DecelerateInterpolator();
     private final Matrix mTransformMatrix = new Matrix();
 
@@ -117,6 +119,11 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
                 new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_TASK);
         mBackground = background;
         mContext = context;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
     }
 
     private static float mapRange(float value, float min, float max) {
@@ -192,7 +199,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
         applyTransform(mClosingTarget.leash, mClosingCurrentRect, mCornerRadius);
         applyTransform(mEnteringTarget.leash, mEnteringCurrentRect, mCornerRadius);
-        mTransaction.apply();
+        applyTransaction();
 
         mBackground.onBackProgressed(progress);
     }
@@ -242,6 +249,11 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
                 .setCornerRadius(leash, cornerRadius);
     }
 
+    private void applyTransaction() {
+        mTransaction.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        mTransaction.apply();
+    }
+
     private void finishAnimation() {
         if (mEnteringTarget != null) {
             mEnteringTarget.leash.release();
@@ -255,8 +267,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         if (mBackground != null) {
             mBackground.removeBackground(mTransaction);
         }
-
-        mTransaction.apply();
+        applyTransaction();
         mBackInProgress = false;
         mTransformMatrix.reset();
         mClosingCurrentRect.setEmpty();
@@ -303,7 +314,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
             if (progress > 1 - UPDATE_SYSUI_FLAGS_THRESHOLD) {
                 mBackground.resetStatusBarCustomization();
             }
-            mTransaction.apply();
+            applyTransaction();
         });
 
         valueAnimator.addListener(new AnimatorListenerAdapter() {

@@ -18,8 +18,6 @@ package android.tracing.perfetto;
 
 import android.util.proto.ProtoInputStream;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 /**
  * Templated base class meant to be derived by embedders to create a custom data
  * source.
@@ -73,7 +71,25 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      */
     public final void trace(
             TraceFunction<DataSourceInstanceType, TlsStateType, IncrementalStateType> fun) {
-        nativeTrace(mNativeObj, fun);
+        boolean startedIterator = nativePerfettoDsTraceIterateBegin(mNativeObj);
+
+        if (!startedIterator) {
+            return;
+        }
+
+        try {
+            do {
+                int instanceIndex = nativeGetPerfettoDsInstanceIndex(mNativeObj);
+
+                TracingContext<DataSourceInstanceType, TlsStateType, IncrementalStateType> ctx =
+                        new TracingContext<>(this, instanceIndex);
+                fun.trace(ctx);
+
+                ctx.flush();
+            } while (nativePerfettoDsTraceIterateNext(mNativeObj));
+        } finally {
+            nativePerfettoDsTraceIterateBreak(mNativeObj);
+        }
     }
 
     /**
@@ -87,9 +103,7 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
      * Override this method to create a custom TlsState object for your DataSource. A new instance
      * will be created per trace instance per thread.
      *
-     * NOTE: Should only be called from native side.
      */
-    @VisibleForTesting
     public TlsStateType createTlsState(CreateTlsStateArgs<DataSourceInstanceType> args) {
         return null;
     }
@@ -97,9 +111,8 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
     /**
      * Override this method to create and use a custom IncrementalState object for your DataSource.
      *
-     * NOTE: Should only be called from native side.
      */
-    protected IncrementalStateType createIncrementalState(
+    public IncrementalStateType createIncrementalState(
             CreateIncrementalStateArgs<DataSourceInstanceType> args) {
         return null;
     }
@@ -154,8 +167,6 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
             long dataSourcePtr, int bufferExhaustedPolicy);
 
     private static native long nativeCreate(DataSource thiz, String name);
-    private static native void nativeTrace(
-            long nativeDataSourcePointer, TraceFunction traceFunction);
     private static native void nativeFlushAll(long nativeDataSourcePointer);
     private static native long nativeGetFinalizer();
 
@@ -163,4 +174,9 @@ public abstract class DataSource<DataSourceInstanceType extends DataSourceInstan
             long dataSourcePtr, int dsInstanceIdx);
     private static native void nativeReleasePerfettoInstanceLocked(
             long dataSourcePtr, int dsInstanceIdx);
+
+    private static native boolean nativePerfettoDsTraceIterateBegin(long dataSourcePtr);
+    private static native boolean nativePerfettoDsTraceIterateNext(long dataSourcePtr);
+    private static native void nativePerfettoDsTraceIterateBreak(long dataSourcePtr);
+    private static native int nativeGetPerfettoDsInstanceIndex(long dataSourcePtr);
 }

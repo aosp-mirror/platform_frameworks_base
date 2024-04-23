@@ -258,6 +258,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
         Settings.Secure.SEARCH_ALL_ENTRYPOINTS_ENABLED,
         Settings.Secure.HUB_MODE_TUTORIAL_STATE,
+        Settings.Secure.GLANCEABLE_HUB_ENABLED,
         Settings.Secure.STYLUS_BUTTONS_ENABLED,
         Settings.Secure.STYLUS_HANDWRITING_ENABLED,
         Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
@@ -271,6 +272,7 @@ public class SecureSettings {
         Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
         Settings.Secure.AUDIO_DEVICE_INVENTORY,
         Settings.Secure.SCREEN_RESOLUTION_MODE,
-        Settings.Secure.ACCESSIBILITY_FLOATING_MENU_TARGETS
+        Settings.Secure.ACCESSIBILITY_FLOATING_MENU_TARGETS,
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL
     };
 }

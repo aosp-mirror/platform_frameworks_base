@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"सिर्फ़ बाईं तरफ़ वाला चालू है"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"सिर्फ़ दाईं तरफ़ वाला चालू है"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"बाईं और दाईं तरफ़ वाला चालू है"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"चालू है (सिर्फ़ मीडिया के लिए), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"चालू है (सिर्फ़ मीडिया के लिए), बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बैटरी, दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है), बायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> बैटरी, दायां हेडसेट: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> बैटरी"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है), बायां हेडसेट<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"कनेक्ट हो गया (ऑडियो शेयर करने की सुविधा काम करती है), दायां हेडसेट <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"चालू है (सिर्फ़ मीडिया के लिए)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ऑडियो शेयर करने की सुविधा काम करती है"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"चालू है (सिर्फ़ मीडिया के लिए), सिर्फ़ बाएं कान की मशीन"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"चालू है (सिर्फ़ मीडिया के लिए), सिर्फ़ दाएं कान की मशीन"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"चालू है (सिर्फ़ मीडिया के लिए), बाएं और दाएं कान की मशीन"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"मीडिया ऑडियो"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फ़ोन कॉल"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फ़ाइल स्थानांतरण"</string>
@@ -181,7 +192,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
     <string name="tts_settings" msgid="8130616705989351312">"लेख से बोली सेटिंग"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"लिखे गए शब्दों को सुनने की सुविधा"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलने की दर"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलने की स्पीड"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"कृत्रिम बोली के लहजे को प्रभावित करता है"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में बैटरी पूरी चार्ज हो जाएगी"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग को ऑप्टिमाइज़ किया गया"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज हो रही है"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"तेज़ चार्ज हो रही है"</string>
@@ -487,12 +506,16 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"बैटरी चार्ज हो गई"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"बैटरी पूरी चार्ज है"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"फ़ोन को चार्ज होने से रोक दिया गया है"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"इसका नियंत्रण एडमिन के पास है"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"इसे पाबंदी मोड वाली सेटिंग से कंट्रोल किया जाता है"</string>
     <string name="disabled" msgid="8017887509554714950">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमति नहीं है"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"अज्ञात ऐप्लिकेशन इंस्टॉल करने की अनुमति देना"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"अनजान ऐप्लिकेशन इंस्टॉल करने की अनुमति"</string>
     <string name="home" msgid="973834627243661438">"सेटिंग का होम पेज"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -515,7 +538,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"सिस्टम की भाषाओं का इस्तेमाल करें"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> के लिए सेटिंग खोलने में विफल रहा"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"इनपुट का यह तरीका, आपके पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा के साथ-साथ उस सभी डेटा को इकट्ठा कर सकता है जिसे आप लिखते हैं. यह <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ऐप्लिकेशन से आता है. इनपुट के इस तरीके का इस्तेमाल करें?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"नोट: पुनः बूट करने के बाद, यह ऐप्लिकेशन तब तक शुरू नहीं हो सकता है जब तक कि आप अपना फ़ोन अनलॉक ना कर लें"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"ध्यान दें: डिवाइस को फिर से चालू करने पर, यह ऐप्लिकेशन तब तक शुरू नहीं होगा, जब तक आप अपना फ़ोन अनलॉक न कर लें"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS रजिस्ट्रेशन की स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"रजिस्टर है"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"रजिस्टर नहीं है"</string>
@@ -594,7 +617,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबंधित प्रोफ़ाइल"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"नया उपयोगकर्ता जोड़ें?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"नए उपयोगकर्ता जोड़कर इस डिवाइस को दूसरे लोगों के साथ शेयर किया जा सकता है. हर उपयोगकर्ता के पास अपनी जगह होती है, जिसमें वे ऐप्लिकेशन, वॉलपेपर, और दूसरी चीज़ों में मनमुताबिक बदलाव कर सकते हैं. उपयोगकर्ता, वाई-फ़ाई जैसी डिवाइस सेटिंग में भी बदलाव कर सकते हैं. इसका असर हर किसी पर पड़ता है.\n\nजब किसी नए उपयोगकर्ता को जोड़ा जाता है, तो उसे अपनी जगह सेट अप करनी होती है.\n\nकोई भी उपयोगकर्ता, दूसरे सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है. ऐसा भी हो सकता है कि सुलभता सेटिंग और सेवाएं नए उपयोगकर्ता को ट्रांसफ़र न हो पाएं."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"कोई नया उपयोगकर्ता जोड़ने पर, उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता, बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"जब किसी नए उपयोगकर्ता को जोड़ा जाता है, तो उस व्यक्ति को डिवाइस में अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता, बाकी सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकता है."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"क्या इस व्यक्ति को एडमिन बनाना है?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"एडमिन के पास अन्य लोगों के मुकाबले खास अधिकार होते हैं. एडमिन के पास ये अधिकार होते हैं: सभी लोगों को मैनेज करना, इस डिवाइस को अपडेट या रीसेट करना, सेटिंग में बदलाव करना, इंस्टॉल किए गए सभी ऐप्लिकेशन देखना, और अन्य लोगों को एडमिन के खास अधिकार देना या उन्हें वापस लेना."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"एडमिन बनाएं"</string>
@@ -616,7 +639,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"नया उपयोगकर्ता जोड़ा नहीं जा सका"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नया मेहमान खाता नहीं बनाया जा सका"</string>
     <string name="user_nickname" msgid="262624187455825083">"निकनेम"</string>
-    <string name="edit_user_info_message" msgid="6677556031419002895">"आपकी चुनी गई फ़ोटो और नाम, उन सभी लोगों को दिखेगा जो इस डिवाइस का इस्तेमाल करते हैं."</string>
+    <string name="edit_user_info_message" msgid="6677556031419002895">"आपका नाम और चुनी गई फ़ोटो, इस डिवाइस का इस्तेमाल करने वाले हर व्यक्ति को दिखेगी."</string>
     <string name="user_add_user" msgid="7876449291500212468">"उपयोगकर्ता जोड़ें"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"मेहमान जोड़ें"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"मेहमान को हटाएं"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहर निकलने पर, सभी गतिविधियां मिट जाएंगी"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"बाहर निकलने पर, गतिविधि को मिटाया या सेव किया जा सकता है"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"सेशन की गतिविधि को अभी मिटाने के लिए, रीसेट करें. इसके अलावा, बाहर निकलने पर, गतिविधि को मिटाया या सेव किया जा सकता है"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"फ़ोटो खींचें"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"कोई इमेज चुनें"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"फ़ोटो चुनें"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"कई बार गलत कोशिशें की गई हैं. इस डिवाइस का डेटा मिटा दिया जाएगा."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"कई बार गलत कोशिशें की गई हैं. इस उपयोगकर्ता को मिटा दिया जाएगा."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"फ़ोन एक बार."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"फ़ोन दो बार."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"फोन तीन बार."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"फ़ोन सि‍ग्‍नल पूरा."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"कोई डेटा नहीं."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"डेटा एक बार."</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ईथरनेट डिस्‍कनेक्‍ट किया गया."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ईथरनेट."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"वॉइस कॉल की सुविधा उपलब्ध नहीं है."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफ़ाइल फ़ोटो चुनें"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"उपयोगकर्ता के लिए डिफ़ॉल्ट आइकॉन"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"फ़िज़िकल कीबोर्ड"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"कीबोर्ड का लेआउट चुनें"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"डिफ़ॉल्ट"</string>

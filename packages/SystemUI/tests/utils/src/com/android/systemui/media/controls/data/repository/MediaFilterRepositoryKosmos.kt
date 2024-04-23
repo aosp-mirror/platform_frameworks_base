@@ -17,5 +17,6 @@
 package com.android.systemui.media.controls.data.repository
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.time.systemClock
 
-val Kosmos.mediaFilterRepository by Kosmos.Fixture { MediaFilterRepository() }
+val Kosmos.mediaFilterRepository by Kosmos.Fixture { MediaFilterRepository(systemClock) }

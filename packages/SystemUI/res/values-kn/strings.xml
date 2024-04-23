@@ -235,9 +235,10 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"ಅಧಿಸೂಚನೆಯ ಛಾಯೆ."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಯ ಪರದೆ."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ಲಾಕ್‌ ಸ್ಕ್ರೀನ್."</string>
+    <!-- no translation found for accessibility_desc_lock_screen (409034672704273634) -->
+    <skip />
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ಕೆಲಸದ ಲಾಕ್ ಪರದೆ"</string>
-    <string name="accessibility_desc_close" msgid="8293708213442107755">"ಮುಚ್ಚು"</string>
+    <string name="accessibility_desc_close" msgid="8293708213442107755">"ಮುಚ್ಚಿ"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ಸಂಪೂರ್ಣ ನಿಶ್ಯಬ್ಧ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ."</string>
@@ -270,12 +271,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ಬ್ಲೂಟೂತ್ ಬಳಸಿ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ಡಿಸ್‌ಕನೆಕ್ಟ್ ಮಾಡಿ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"ನಾಳೆ ಪುನಃ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಮಾಡಿ"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"ಕ್ವಿಕ್ ಶೇರ್, Find My Device ನಂತಹ ಫೀಚರ್‌ಗಳು ಹಾಗೂ ಸಾಧನದ ಸ್ಥಳವು ಬ್ಲೂಟೂತ್ ಅನ್ನು ಬಳಸುತ್ತವೆ"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"ಬ್ಲೂಟೂತ್ ನಾಳೆ ಬೆಳಗ್ಗೆ 5 ಗಂಟೆಗೆ ಆನ್ ಆಗುತ್ತದೆ"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ಆಡಿಯೋ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ಹೆಡ್‌ಸೆಟ್"</string>
@@ -329,7 +338,7 @@
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳು"</string>
     <string name="quick_settings_work_mode_paused_state" msgid="6681788236383735976">"ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ನೈಟ್ ಲೈಟ್"</string>
-    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ಸೂರ್ಯಾಸ್ತದಲ್ಲಿ"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ಸೂರ್ಯಾಸ್ತಕ್ಕೆ ಆನ್"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ಸೂರ್ಯೋದಯದವರೆಗೆ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> ಸಮಯದಲ್ಲಿ"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> ವರೆಗೂ"</string>
@@ -350,6 +359,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"ರೆಕಾರ್ಡ್ ದೋಷ"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"ನಿಲ್ಲಿಸಿ"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"ಬಗ್ ವರದಿ ಮಾಡುವಿಕೆ"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"ಸಾಧನ ಬಳಸುವಾಗ ನೀವು ಯಾವ ರೀತಿಯ ಸಮಸ್ಯೆ ಎದುರಿಸುತ್ತೀರಿ?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"ಸಮಸ್ಯೆಯ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡ್"</string>
@@ -363,7 +373,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"ಪ್ರಮಾಣಿತ"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"ಮಧ್ಯಮ"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"ಹೆಚ್ಚು"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"ಹಿಯರಿಂಗ್ ಸಾಧನಗಳು"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ಹಿಯರಿಂಗ್ ಸಾಧನಗಳು"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ಹೊಸ ಸಾಧನವನ್ನು ಪೇರ್ ಮಾಡಿ"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ಹೊಸ ಸಾಧನವನ್ನು ಜೋಡಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ಸಾಧನದ ಮೈಕ್ರೋಫೋನ್ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ಸಾಧನದ ಕ್ಯಾಮರಾ ನಿರ್ಬಂಧವನ್ನು ತೆಗೆಯಬೇಕೆ?"</string>
@@ -430,6 +444,8 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ವೇಗವಾಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
+    <!-- no translation found for accessibility_action_open_communal_hub (3081702792413787849) -->
+    <skip />
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ಸಮುದಾಯದ ಟ್ಯುಟೋರಿಯಲ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಎಡಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"ವಜಾಗೊಳಿಸಿ"</string>
@@ -442,14 +458,16 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"ತೆಗೆದುಹಾಕಿ"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"ವಿಜೆಟ್ ಅನ್ನು ಸೇರಿಸಿ"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"ಮುಗಿದಿದೆ"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"ವಿಜೆಟ್‌ಗಳನ್ನು ಸೇರಿಸಿ"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡದೆಯೇ ನಿಮ್ಮ ಮೆಚ್ಚಿನ ಆ್ಯಪ್ ವಿಜೆಟ್‌ಗಳಿಗೆ ತ್ವರಿತ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಪಡೆಯಿರಿ."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಯಾವುದೇ ವಿಜೆಟ್ ಅನ್ನು ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"ಕೆಲಸದ ಆ್ಯಪ್ ವಿರಾಮ ರದ್ದುಮಾಡಬೇಕೇ"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"ವಿರಾಮವನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
+    <!-- no translation found for accessibility_action_label_close_communal_hub (6790396569621032333) -->
+    <skip />
+    <!-- no translation found for accessibility_content_description_for_communal_hub (1670220840599380118) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ಪುಲ್‌ಡೌನ್ ಮೆನು"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ಈ ಸೆಶನ್‌ನಲ್ಲಿನ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
@@ -547,7 +565,7 @@
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ. ನೀವು ಬಳಸುವ ಆ್ಯಪ್‌ಗಳು, ನಿಮ್ಮ ಸ್ಥಳ ಮತ್ತು ನಿಮ್ಮ ವೀಕ್ಷಣಾ ಅವಧಿಯಂತಹ ಮಾಹಿತಿಯನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನೋಡಬಹುದು ಮತ್ತು ನಿರ್ವಹಿಸಬಹುದು."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ನಿಂದ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ, ಹಲವಾರು ದೃಢೀಕರಣ ಪ್ರಯತ್ನಗಳು"</string>
+    <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"ಹಲವಾರು ದೃಢೀಕರಣ ಪ್ರಯತ್ನಗಳನ್ನು ಮಾಡಿರುವ ಕಾರಣ ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="keyguard_indication_after_adaptive_auth_lock" msgid="2323400645470712787">"ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ\nದೃಢೀಕರಣ ವಿಫಲವಾಗಿದೆ"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"ಸೌಂಡ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
@@ -617,7 +635,7 @@
     <string name="volume_panel_hint_mute" msgid="6962563028495243738">"%s ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s ಅನ್‌ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> ನಲ್ಲಿ ಪ್ಲೇ ಆಗು..."</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ಇಲ್ಲಿ ಆಡಿಯೋ ಪ್ಲೇ..."</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ಇದರಲ್ಲಿ ಪ್ಲೇ ಆಗುತ್ತದೆ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"ಸಿಸ್ಟಂ UI ಟ್ಯೂನರ್"</string>
     <string name="status_bar" msgid="4357390266055077437">"ಸ್ಥಿತಿ ಪಟ್ಟಿ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ಸಿಸ್ಟಂ UI ಡೆಮೋ ಮೋಡ್"</string>
@@ -741,7 +759,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ಕೀಬೋರ್ಡ್‌ ಲೇಔಟ್‌ ಬದಲಾಯಿಸಿ"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ಅಥವಾ"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"ಹುಡುಕಾಟದ ಪ್ರಶ್ನೆಯನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಹುಡುಕಿ"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ಯಾವುದೇ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳಿಲ್ಲ"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ಸಿಸ್ಟಂ"</string>
@@ -766,9 +784,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"assistant ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"ಟಿಪ್ಪಣಿಯನ್ನು ತೆಗೆದುಕೊಳ್ಳಿ"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"ಸಿಸ್ಟಂ ಮಲ್ಟಿಟಾಸ್ಕಿಂಗ್"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"RHS ಗೆ ಇರುವ ಪ್ರಸ್ತುತ ಆ್ಯಪ್ ಸಹಾಯದಿಂದ ಸ್ಕ್ರೀನ್ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್ ನಮೂದಿಸಿ"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"LHS ಗೆ ಇರುವ ಪ್ರಸ್ತುತ ಆ್ಯಪ್ ಸಹಾಯದಿಂದ ಸ್ಕ್ರೀನ್ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್ ನಮೂದಿಸಿ"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ಮಲ್ಟಿಟಾಸ್ಕಿಂಗ್"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"ಬಲಭಾಗದಲ್ಲಿ ಪ್ರಸ್ತುತ ಆ್ಯಪ್ ಮೂಲಕ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಬಳಸಿ"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ಎಡಭಾಗದಲ್ಲಿ ಪ್ರಸ್ತುತ ಆ್ಯಪ್ ಮೂಲಕ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಬಳಸಿ"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"ಸ್ಕ್ರೀನ್ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್‌ನಿಂದ ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ಗೆ ಬದಲಿಸಿ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"ಪರದೆ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್ ಬಳಸುವಾಗ ಬಲಭಾಗ ಅಥವಾ ಕೆಳಭಾಗದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗೆ ಬದಲಿಸಿ"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"ಪರದೆ ಬೇರ್ಪಡಿಸಿ ಮೋಡ್ ಬಳಸುವಾಗ ಎಡಭಾಗ ಅಥವಾ ಮೇಲ್ಭಾಗದಲ್ಲಿರುವ ಆ್ಯಪ್‌ಗೆ ಬದಲಿಸಿ"</string>
@@ -864,7 +882,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ಪವರ್ ಮೆನು"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"ಲಾಕ್ ಪರದೆ"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"ಲಾಕ್ ಸ್ಕ್ರೀನ್"</string>
     <string name="finder_active" msgid="7907846989716941952">"ಪವರ್ ಆಫ್ ಆಗಿರುವಾಗಲೂ ನೀವು Find My Device ಮೂಲಕ ಈ ಫೋನ್ ಅನ್ನು ಪತ್ತೆ ಮಾಡಬಹುದು"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"ಶಟ್ ಡೌನ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ಕಾಳಜಿಯ ಹಂತಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
@@ -1300,6 +1318,6 @@
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ಕೀಬೋರ್ಡ್ ಬ್ಯಾಕ್‌ಲೈಟ್"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ರಲ್ಲಿ %1$d ಮಟ್ಟ"</string>
-    <string name="home_controls_dream_label" msgid="6567105701292324257">"ಹೋಮ್ ನಿಯಂತ್ರಣಗಳು"</string>
-    <string name="home_controls_dream_description" msgid="4644150952104035789">"ಹೋಮ್ ನಿಯಂತ್ರಣವನ್ನು ಸ್ಕ್ರೀನ್‌ಸೇವರ್‌ನಂತೆ ತ್ವರಿತವಾಗಿ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
+    <string name="home_controls_dream_label" msgid="6567105701292324257">"ಮನೆ ನಿಯಂತ್ರಣಗಳು"</string>
+    <string name="home_controls_dream_description" msgid="4644150952104035789">"ಮನೆ ನಿಯಂತ್ರಣವನ್ನು ಸ್ಕ್ರೀನ್‌ಸೇವರ್‌ನಂತೆ ಬೇಗ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಿ"</string>
 </resources>

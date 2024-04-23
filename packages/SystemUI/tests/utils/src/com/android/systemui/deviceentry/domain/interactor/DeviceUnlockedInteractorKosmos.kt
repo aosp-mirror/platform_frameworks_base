@@ -18,14 +18,20 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.deviceentry.data.repository.deviceEntryRepository
+import com.android.systemui.keyguard.domain.interactor.trustInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.power.domain.interactor.powerInteractor
 
 val Kosmos.deviceUnlockedInteractor by Fixture {
     DeviceUnlockedInteractor(
         applicationScope = applicationCoroutineScope,
         authenticationInteractor = authenticationInteractor,
         deviceEntryRepository = deviceEntryRepository,
+        trustInteractor = trustInteractor,
+        faceAuthInteractor = deviceEntryFaceAuthInteractor,
+        fingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
+        powerInteractor = powerInteractor,
     )
 }

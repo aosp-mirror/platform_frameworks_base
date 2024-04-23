@@ -31,9 +31,10 @@ import android.os.Process;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.RavenwoodFlagsValueProvider;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.KernelCpuSpeedReader;
@@ -46,7 +47,6 @@ import com.android.server.power.optimization.Flags;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -55,17 +55,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
 @SuppressWarnings("GuardedBy")
 public class SystemServicePowerCalculatorTest {
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    @Rule(order = 0)
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    @Rule(order = 1)
+    public final CheckFlagsRule mCheckFlagsRule = RavenwoodRule.isOnRavenwood()
+            ? RavenwoodFlagsValueProvider.createAllOnCheckFlagsRule()
+            : DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final double PRECISION = 0.000001;
     private static final int APP_UID1 = 100;
     private static final int APP_UID2 = 200;
 
-    @Rule
+    @Rule(order = 2)
     public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule()
             .setAveragePower(PowerProfile.POWER_CPU_ACTIVE, 720)
             .setCpuScalingPolicy(0, new int[]{0, 1}, new int[]{100, 200})

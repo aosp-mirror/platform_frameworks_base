@@ -28,6 +28,7 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
@@ -38,6 +39,7 @@ import androidx.test.uiautomator.UiDevice;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -46,8 +48,10 @@ import java.util.concurrent.TimeUnit;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-@android.platform.test.annotations.IgnoreUnderRavenwood
+@android.platform.test.annotations.DisabledOnRavenwood(reason = "Integration test")
 public class BatteryStatsUserLifecycleTests {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static final long POLL_INTERVAL_MS = 500;
     private static final long USER_REMOVE_TIMEOUT_MS = 5_000;
@@ -65,6 +69,10 @@ public class BatteryStatsUserLifecycleTests {
 
     @BeforeClass
     public static void setUpOnce() {
+        if (RavenwoodRule.isOnRavenwood()) {
+            return;
+        }
+
         assumeTrue(UserManager.getMaxSupportedUsers() > 1);
     }
 
@@ -87,7 +95,7 @@ public class BatteryStatsUserLifecycleTests {
 
         final boolean[] userStopped = new boolean[1];
         CountDownLatch stopUserLatch = new CountDownLatch(1);
-        mIam.stopUser(mTestUserId, true, new IStopUserCallback.Stub() {
+        mIam.stopUserWithCallback(mTestUserId, new IStopUserCallback.Stub() {
             @Override
             public void userStopped(int userId) throws RemoteException {
                 userStopped[0] = true;

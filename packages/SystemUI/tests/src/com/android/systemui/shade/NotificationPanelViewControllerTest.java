@@ -46,6 +46,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.graphics.Point;
 import android.os.PowerManager;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -62,6 +63,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
+import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
@@ -1287,6 +1289,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    @DisableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
     public void shadeExpanded_whenHunIsPresent() {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
         assertThat(mNotificationPanelViewController.isExpanded()).isTrue();

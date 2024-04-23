@@ -1084,6 +1084,10 @@ final class LetterboxUiController {
                     || mUserAspectRatio == USER_MIN_ASPECT_RATIO_FULLSCREEN);
     }
 
+    boolean hasFullscreenOverride() {
+        return isSystemOverrideToFullscreenEnabled() || shouldApplyUserFullscreenOverride();
+    }
+
     float getUserMinAspectRatio() {
         switch (mUserAspectRatio) {
             case USER_MIN_ASPECT_RATIO_DISPLAY_SIZE:
@@ -1304,7 +1308,8 @@ final class LetterboxUiController {
         }
 
         final boolean shouldShowLetterboxUi =
-                (mActivityRecord.isInLetterboxAnimation() || isSurfaceVisible(mainWindow))
+                (mActivityRecord.isInLetterboxAnimation() || mActivityRecord.isVisible()
+                        || mActivityRecord.isVisibleRequested())
                 && mainWindow.areAppWindowBoundsLetterboxed()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
@@ -1314,12 +1319,6 @@ final class LetterboxUiController {
         mLastShouldShowLetterboxUi = shouldShowLetterboxUi;
 
         return shouldShowLetterboxUi;
-    }
-
-    @VisibleForTesting
-    boolean isSurfaceVisible(WindowState mainWindow) {
-        return mainWindow.isOnScreen() && (mActivityRecord.isVisible()
-                || mActivityRecord.isVisibleRequested());
     }
 
     private Color getLetterboxBackgroundColor() {

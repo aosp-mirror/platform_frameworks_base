@@ -75,7 +75,7 @@ constructor(
 
     fun initialize(parentAnimator: ShadeFoldAnimator) {
         this.parentAnimator =
-            parentAnimator as NotificationPanelViewController.ShadeFoldAnimatorImpl?
+            parentAnimator as? NotificationPanelViewController.ShadeFoldAnimatorImpl?
     }
 
     /** Forces the keyguard into AOD or Doze */

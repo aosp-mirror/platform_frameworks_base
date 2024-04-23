@@ -21,12 +21,14 @@ import android.view.WindowInsets
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Flags.communalHub
+import com.android.systemui.common.ui.view.onApplyWindowInsets
+import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
@@ -46,10 +48,9 @@ import kotlinx.coroutines.launch
 class SharedNotificationContainerBinder
 @Inject
 constructor(
-    private val sceneContainerFlags: SceneContainerFlags,
     private val controller: NotificationStackScrollLayoutController,
     private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    private val notificationStackViewBinder: NotificationStackViewBinder,
+    private val notificationScrollViewBinder: NotificationScrollViewBinder,
     @Main private val mainImmediateDispatcher: CoroutineDispatcher,
 ) {
 
@@ -127,7 +128,7 @@ constructor(
                             .collect { controller.setMaxDisplayedNotifications(it) }
                     }
 
-                    if (!sceneContainerFlags.isEnabled()) {
+                    if (!SceneContainerFlag.isEnabled) {
                         launch {
                             viewModel.bounds.collect {
                                 val animate =
@@ -137,10 +138,12 @@ constructor(
                         }
                     }
 
-                    launch {
-                        burnInParams
-                            .flatMapLatest { params -> viewModel.translationY(params) }
-                            .collect { y -> controller.setTranslationY(y) }
+                    if (!SceneContainerFlag.isEnabled) {
+                        launch {
+                            burnInParams
+                                .flatMapLatest { params -> viewModel.translationY(params) }
+                                .collect { y -> controller.setTranslationY(y) }
+                        }
                     }
 
                     launch { viewModel.translationX.collect { x -> controller.translationX = x } }
@@ -161,29 +164,23 @@ constructor(
                 }
             }
 
-        if (sceneContainerFlags.isEnabled()) {
-            disposables += notificationStackViewBinder.bindWhileAttached()
+        if (SceneContainerFlag.isEnabled) {
+            disposables += notificationScrollViewBinder.bindWhileAttached()
         }
 
         controller.setOnHeightChangedRunnable { viewModel.notificationStackChanged() }
         disposables += DisposableHandle { controller.setOnHeightChangedRunnable(null) }
 
-        view.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
-            val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            burnInParams.update { current ->
-                current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+        disposables +=
+            view.onApplyWindowInsets { _: View, insets: WindowInsets ->
+                val insetTypes = WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+                burnInParams.update { current ->
+                    current.copy(topInset = insets.getInsetsIgnoringVisibility(insetTypes).top)
+                }
+                insets
             }
-            insets
-        }
-        disposables += DisposableHandle { view.setOnApplyWindowInsetsListener(null) }
 
-        // Required to capture keyguard media changes and ensure the notification count is correct
-        val layoutChangeListener =
-            View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-                viewModel.notificationStackChanged()
-            }
-        view.addOnLayoutChangeListener(layoutChangeListener)
-        disposables += DisposableHandle { view.removeOnLayoutChangeListener(layoutChangeListener) }
+        disposables += view.onLayoutChanged { viewModel.notificationStackChanged() }
 
         return disposables
     }

@@ -16,10 +16,11 @@
 
 package com.android.credentialmanager.ui.screens.multiple
 
+import androidx.compose.foundation.layout.Spacer
 import com.android.credentialmanager.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,8 @@ import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
 import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.ui.components.BottomSpacer
+import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
 
 /**
  * Screen that shows multiple credentials to select from.
@@ -45,7 +48,7 @@ import com.android.credentialmanager.model.CredentialType
 @OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun MultiCredentialsFoldScreen(
-    credentialSelectorUiState: CredentialSelectorUiState.Get.SingleEntryPerAccount,
+    credentialSelectorUiState: CredentialSelectorUiState.Get.MultipleEntryPrimaryScreen,
     columnState: ScalingLazyColumnState,
     flowEngine: FlowEngine,
 ) {
@@ -58,42 +61,52 @@ fun MultiCredentialsFoldScreen(
         val credentials = credentialSelectorUiState.sortedEntries
         item {
             var title = stringResource(R.string.choose_sign_in_title)
-            if (credentials.all{ it.credentialType == CredentialType.PASSKEY }) {
+
+            if (credentials.isEmpty()) {
+                title = stringResource(R.string.choose_sign_in_title)
+            } else if (credentials.all{ it.credentialType == CredentialType.PASSKEY }) {
                 title = stringResource(R.string.choose_passkey_title)
             } else if (credentials.all { it.credentialType == CredentialType.PASSWORD }) {
                 title = stringResource(R.string.choose_password_title)
             }
 
             SignInHeader(
-                icon = null,
+                icon = credentialSelectorUiState.icon,
                 title = title,
-                modifier = Modifier
-                    .padding(top = 6.dp),
             )
         }
 
         credentials.forEach { credential: CredentialEntryInfo ->
-                item {
-                    CredentialsScreenChip(
-                        label = credential.userName,
-                        onClick = { selectEntry(credential, false) },
-                        secondaryLabel = credential.credentialTypeDisplayName,
-                        icon = credential.icon,
-                    )
-                }
+            item {
+                CredentialsScreenChip(
+                    label = credential.userName,
+                    onClick = { selectEntry(credential, false) },
+                    secondaryLabel = credential.credentialTypeDisplayName,
+                    icon = credential.icon,
+                )
+                CredentialsScreenChipSpacer()
             }
+        }
 
         credentialSelectorUiState.authenticationEntryList.forEach { authenticationEntryInfo ->
             item {
                 LockedProviderChip(authenticationEntryInfo) {
-                    selectEntry(authenticationEntryInfo, false) }
+                    selectEntry(authenticationEntryInfo, false)
+                }
+                CredentialsScreenChipSpacer()
             }
         }
+
+        item {
+            Spacer(modifier = Modifier.size(8.dp))
+        }
+
         item {
             SignInOptionsChip { flowEngine.openSecondaryScreen() }
         }
         item {
             DismissChip { flowEngine.cancel() }
+            BottomSpacer()
         }
     }
 }

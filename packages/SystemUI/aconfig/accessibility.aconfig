@@ -1,4 +1,5 @@
 package: "com.android.systemui"
+container: "system"
 
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
@@ -28,6 +29,16 @@ flag {
     namespace: "accessibility"
     description: "Adds an animation for when the FAB is displaced by an IME becoming visible."
     bug: "281150010"
+}
+
+flag {
+    name: "floating_menu_narrow_target_content_observer"
+    namespace: "accessibility"
+    description: "stops the FAB from monitoring enabled services to trigger target content changes."
+    bug: "331740049"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

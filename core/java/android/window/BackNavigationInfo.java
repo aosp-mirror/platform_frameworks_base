@@ -72,8 +72,17 @@ public final class BackNavigationInfo implements Parcelable {
     /**
      * Key to access the boolean value passed in {#mOnBackNavigationDone} result bundle
      * that represents if back navigation has been triggered.
+     * @hide
      */
-    public static final String KEY_TRIGGER_BACK = "TriggerBack";
+    public static final String KEY_NAVIGATION_FINISHED = "NavigationFinished";
+
+    /**
+     * Key to access the boolean value passed in {#mOnBackNavigationDone} result bundle
+     * that represents if back gesture has been triggered.
+     * @hide
+     */
+    public static final String KEY_GESTURE_FINISHED = "GestureFinished";
+
 
     /**
      * Defines the type of back destinations a back even can lead to. This is used to define the
@@ -192,7 +201,21 @@ public final class BackNavigationInfo implements Parcelable {
     public void onBackNavigationFinished(boolean triggerBack) {
         if (mOnBackNavigationDone != null) {
             Bundle result = new Bundle();
-            result.putBoolean(KEY_TRIGGER_BACK, triggerBack);
+            result.putBoolean(KEY_NAVIGATION_FINISHED, triggerBack);
+            mOnBackNavigationDone.sendResult(result);
+        }
+    }
+
+    /**
+     * Callback to be called when the back gesture is finished in order to notify the server that
+     * it can ask app to start rendering.
+     * @hide
+     * @param triggerBack Boolean indicating if back gesture has been triggered.
+     */
+    public void onBackGestureFinished(boolean triggerBack) {
+        if (mOnBackNavigationDone != null) {
+            Bundle result = new Bundle();
+            result.putBoolean(KEY_GESTURE_FINISHED, triggerBack);
             mOnBackNavigationDone.sendResult(result);
         }
     }

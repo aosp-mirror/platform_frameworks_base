@@ -44,6 +44,8 @@ public final class HapticFeedbackVibrationProvider {
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_PHYSICAL_EMULATION);
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
+    private static final VibrationAttributes COMMUNICATION_REQUEST_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_COMMUNICATION_REQUEST);
 
     private final VibratorInfo mVibratorInfo;
     private final boolean mHapticTextHandleEnabled;
@@ -120,7 +122,6 @@ public final class HapticFeedbackVibrationProvider {
                 return getKeyboardVibration(effectId);
 
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
-            case HapticFeedbackConstants.ENTRY_BUMP:
             case HapticFeedbackConstants.DRAG_CROSSING:
                 return getVibration(
                         effectId,
@@ -131,6 +132,7 @@ public final class HapticFeedbackVibrationProvider {
             case HapticFeedbackConstants.EDGE_RELEASE:
             case HapticFeedbackConstants.CALENDAR_DATE:
             case HapticFeedbackConstants.CONFIRM:
+            case HapticFeedbackConstants.BIOMETRIC_CONFIRM:
             case HapticFeedbackConstants.GESTURE_START:
             case HapticFeedbackConstants.SCROLL_ITEM_FOCUS:
             case HapticFeedbackConstants.SCROLL_LIMIT:
@@ -143,6 +145,7 @@ public final class HapticFeedbackVibrationProvider {
                 return getVibration(effectId, VibrationEffect.EFFECT_HEAVY_CLICK);
 
             case HapticFeedbackConstants.REJECT:
+            case HapticFeedbackConstants.BIOMETRIC_REJECT:
                 return getVibration(effectId, VibrationEffect.EFFECT_DOUBLE_CLICK);
 
             case HapticFeedbackConstants.SAFE_MODE_ENABLED:
@@ -207,6 +210,10 @@ public final class HapticFeedbackVibrationProvider {
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
                 attrs = createKeyboardVibrationAttributes(fromIme);
                 break;
+            case HapticFeedbackConstants.BIOMETRIC_CONFIRM:
+            case HapticFeedbackConstants.BIOMETRIC_REJECT:
+                attrs = COMMUNICATION_REQUEST_VIBRATION_ATTRIBUTES;
+                break;
             default:
                 attrs = TOUCH_VIBRATION_ATTRIBUTES;
         }
@@ -223,6 +230,23 @@ public final class HapticFeedbackVibrationProvider {
         }
 
         return flags == 0 ? attrs : new VibrationAttributes.Builder(attrs).setFlags(flags).build();
+    }
+
+    /**
+     * Returns true if given haptic feedback is restricted to system apps with permission
+     * {@code android.permission.VIBRATE_SYSTEM_CONSTANTS}.
+     *
+     * @param effectId the haptic feedback effect ID to check.
+     * @return true if the haptic feedback is restricted, false otherwise.
+     */
+    public boolean isRestrictedHapticFeedback(int effectId) {
+        switch (effectId) {
+            case HapticFeedbackConstants.BIOMETRIC_CONFIRM:
+            case HapticFeedbackConstants.BIOMETRIC_REJECT:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /** Dumps relevant state. */

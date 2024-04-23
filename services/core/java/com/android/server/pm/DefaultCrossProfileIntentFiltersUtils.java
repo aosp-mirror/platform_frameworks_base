@@ -25,6 +25,7 @@ import static com.android.server.pm.CrossProfileIntentFilter.FLAG_IS_PACKAGE_FOR
 
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
+import android.nfc.NfcAdapter;
 import android.provider.AlarmClock;
 import android.provider.MediaStore;
 
@@ -361,6 +362,7 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addCategory(Intent.CATEGORY_DEFAULT)
                     .build();
 
+
     public static List<DefaultCrossProfileIntentFilter> getDefaultManagedProfileFilters() {
         List<DefaultCrossProfileIntentFilter> filters =
                 new ArrayList<DefaultCrossProfileIntentFilter>();
@@ -637,6 +639,33 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addDataType("video/*")
                     .build();
 
+    /** NFC TAG intent is always resolved by the primary user. */
+    static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_NFC_TAG_DISCOVERED =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */0,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(NfcAdapter.ACTION_TAG_DISCOVERED)
+                    .build();
+
+    /** NFC TAG intent is always resolved by the primary user. */
+    static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_NFC_TECH_DISCOVERED =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */0,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(NfcAdapter.ACTION_TECH_DISCOVERED)
+                    .build();
+
+    /** NFC TAG intent is always resolved by the primary user. */
+    static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_NFC_NDEF_DISCOVERED =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */0,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(NfcAdapter.ACTION_NDEF_DISCOVERED)
+                    .build();
+
     public static List<DefaultCrossProfileIntentFilter> getDefaultCloneProfileFilters() {
         return Arrays.asList(
                 PARENT_TO_CLONE_SEND_ACTION,
@@ -652,7 +681,10 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 CLONE_TO_PARENT_SMS_MMS,
                 CLONE_TO_PARENT_PHOTOPICKER_SELECTION,
                 CLONE_TO_PARENT_ACTION_PICK_IMAGES,
-                CLONE_TO_PARENT_ACTION_PICK_IMAGES_WITH_DATA_TYPES
+                CLONE_TO_PARENT_ACTION_PICK_IMAGES_WITH_DATA_TYPES,
+                PARENT_TO_CLONE_NFC_TAG_DISCOVERED,
+                PARENT_TO_CLONE_NFC_TECH_DISCOVERED,
+                PARENT_TO_CLONE_NFC_NDEF_DISCOVERED
         );
     }
 

@@ -1105,9 +1105,12 @@ public class ZenModeHelper {
      * {@link ZenRule#equals} or {@link AutomaticZenRule#equals}, for various reasons:
      * <ul>
      *     <li>some metadata-related fields are not considered
-     *     <li>some fields (like {@code condition} are always reset, and ignored for this result
+     *     <li>some fields (like {@code condition} are normally reset, and ignored for this result
      *     <li>an app may provide changes that are not actually applied, as described above
      * </ul>
+     *
+     * <p>The rule's {@link ZenRule#condition} is cleared (meaning that an active rule will be
+     * deactivated) unless the update has origin == {@link ZenModeConfig#UPDATE_ORIGIN_USER}.
      */
     private boolean populateZenRule(String pkg, AutomaticZenRule azr, ZenRule rule,
                          @ConfigChangeOrigin int origin, boolean isNew) {
@@ -1122,11 +1125,20 @@ public class ZenModeHelper {
                 modified = true;
             }
 
-            rule.condition = null;
             if (!Objects.equals(rule.conditionId, azr.getConditionId())) {
                 rule.conditionId = azr.getConditionId();
                 modified = true;
             }
+            boolean shouldPreserveCondition = Flags.modesApi() && Flags.modesUi()
+                    && !isNew && origin == UPDATE_ORIGIN_USER
+                    && rule.enabled == azr.isEnabled()
+                    && rule.conditionId != null && rule.condition != null
+                    && rule.conditionId.equals(rule.condition.id);
+            if (!shouldPreserveCondition) {
+                // Do not update 'modified'. If only this changes we treat it as a no-op updateAZR.
+                rule.condition = null;
+            }
+
             if (rule.enabled != azr.isEnabled()) {
                 rule.enabled = azr.isEnabled();
                 rule.snoozing = false;
@@ -1493,9 +1505,13 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             if (zenMode == Global.ZEN_MODE_OFF) {
                 newConfig.manualRule = null;
-                for (ZenRule automaticRule : newConfig.automaticRules.values()) {
-                    if (automaticRule.isAutomaticActive()) {
-                        automaticRule.snoozing = true;
+                if (!Flags.modesUi() || origin != UPDATE_ORIGIN_USER) {
+                    // User deactivation of DND means just turning off the manual DND rule.
+                    // For API calls (different origin) keep old behavior of snoozing all rules.
+                    for (ZenRule automaticRule : newConfig.automaticRules.values()) {
+                        if (automaticRule.isAutomaticActive()) {
+                            automaticRule.snoozing = true;
+                        }
                     }
                 }
             } else {

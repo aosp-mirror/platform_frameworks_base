@@ -25,7 +25,6 @@ import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PRO
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_OWN_FOCUS;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
@@ -38,6 +37,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.flags.Flags.FLAG_SENSITIVE_CONTENT_APP_PROTECTION;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
@@ -82,6 +82,7 @@ import android.os.InputConfig;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -101,6 +102,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManagerGlobal;
 import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
@@ -241,15 +243,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.handleTaskFocusChange(tappedTask, null /* window */);
 
         verify(mWm.mAtmService).setFocusedTask(tappedTask.mTaskId, null);
-    }
-
-    @Test
-    public void testDismissKeyguardCanWakeUp() {
-        doReturn(true).when(mWm).checkCallingPermission(anyString(), anyString());
-        doReturn(true).when(mWm.mAtmService.mKeyguardController).isShowingDream();
-        doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
-        mWm.dismissKeyguard(null, "test-dismiss-keyguard");
-        verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
     }
 
     @Test
@@ -556,6 +549,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .hasListener(eq(windowContextToken));
         doReturn(TYPE_INPUT_METHOD).when(mWm.mWindowContextListenerController)
                 .getWindowType(eq(windowContextToken));
+        doReturn(true).when(mWm.mUmInternal).isUserVisible(anyInt(), anyInt());
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
                 UserHandle.USER_SYSTEM, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
@@ -1169,7 +1163,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             invocationOnMock.callRealMethod();
             return null;
         }).when(surface).lockCanvas(any());
-        mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId);
+        mWm.mAccessibilityController
+                .recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded(displayId);
         waitUntilHandlersIdle();
         try {
             verify(surface).lockCanvas(any());
@@ -1177,7 +1172,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
             clearInvocations(surface);
             // Invalidate and redraw.
             mWm.mAccessibilityController.onDisplaySizeChanged(mDisplayContent);
-            mWm.mAccessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId);
+            mWm.mAccessibilityController
+                    .recomputeMagnifiedRegionAndDrawMagnifiedRegionBorderIfNeeded(displayId);
             // Turn off magnification to release surface.
             mWm.mAccessibilityController.setMagnificationCallbacks(displayId, null);
             waitUntilHandlersIdle();
@@ -1306,6 +1302,25 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final ActivityWindowInfo activityWindowInfo3 = outBundle.getParcelable(
                 IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO, ActivityWindowInfo.class);
         assertEquals(activityWindowInfo2, activityWindowInfo3);
+    }
+
+    @Test
+    public void testAddOverlayWindowToUnassignedDisplay_notAllowed_ForVisibleBackgroundUsers() {
+        doReturn(true).when(() -> UserManager.isVisibleBackgroundUsersEnabled());
+        int uid = 100000; // uid for non-system user
+        Session session = createTestSession(mAtm, 1234 /* pid */, uid);
+        DisplayContent dc = createNewDisplay();
+        int displayId = dc.getDisplayId();
+        int userId = UserHandle.getUserId(uid);
+        doReturn(false).when(mWm.mUmInternal).isUserVisible(eq(userId), eq(displayId));
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                LayoutParams.TYPE_APPLICATION_OVERLAY);
+
+        int result = mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, displayId,
+                userId, WindowInsets.Type.defaultVisible(), null, new InsetsState(),
+                new InsetsSourceControl.Array(), new Rect(), new float[1]);
+
+        assertThat(result).isEqualTo(WindowManagerGlobal.ADD_INVALID_DISPLAY);
     }
 
     class TestResultReceiver implements IResultReceiver {

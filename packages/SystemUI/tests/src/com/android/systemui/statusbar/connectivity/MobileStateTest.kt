@@ -15,8 +15,8 @@
  */
 package com.android.systemui.statusbar.connectivity
 
-import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
+import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import junit.framework.Assert.assertFalse

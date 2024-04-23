@@ -582,7 +582,9 @@ java_library {
     srcs: [
         "com/android/internal/protolog/ProtoLogImpl.java",
         "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
-        ":perfetto_trace_javastream_protos",
+    ],
+    static_libs: [
+        "perfetto_trace_javastream_protos_jarjar",
     ],
 }
 

@@ -22,12 +22,9 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Chip
@@ -35,11 +32,12 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.wear.compose.material.ChipColors
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.wear.compose.material.ChipDefaults
-import androidx.wear.compose.material.Text
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.ui.components.WearButtonText
+import com.android.credentialmanager.common.ui.components.WearSecondaryLabel
 import com.android.credentialmanager.model.get.AuthenticationEntryInfo
-import com.android.credentialmanager.ui.components.CredentialsScreenChip.TOPPADDING
 
 /* Used as credential suggestion or user action chip. */
 @Composable
@@ -49,36 +47,61 @@ fun CredentialsScreenChip(
     secondaryLabel: String? = null,
     icon: Drawable? = null,
     isAuthenticationEntryLocked: Boolean = false,
+    textAlign: TextAlign = TextAlign.Center,
     modifier: Modifier = Modifier,
-    colors: ChipColors = ChipDefaults.secondaryChipColors(),
+    colors: ChipColors = ChipDefaults.secondaryChipColors()
 ) {
+        return CredentialsScreenChip(
+                    onClick,
+                    text = {
+                        WearButtonText(
+                            text = label,
+                            textAlign = textAlign,
+                            maxLines = if (secondaryLabel != null) 1 else 2
+                        )
+                    },
+                    secondaryLabel,
+                    icon,
+                    isAuthenticationEntryLocked,
+                    modifier,
+                    colors
+        )
+}
+
+
+
+/* Used as credential suggestion or user action chip. */
+@Composable
+fun CredentialsScreenChip(
+    onClick: () -> Unit,
+    text: @Composable () -> Unit,
+    secondaryLabel: String? = null,
+    icon: Drawable? = null,
+    isAuthenticationEntryLocked: Boolean = false,
+    modifier: Modifier = Modifier,
+    colors: ChipColors = ChipDefaults.primaryChipColors(),
+    ) {
     val labelParam: (@Composable RowScope.() -> Unit) =
         {
-            Text(
-                text = label,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = if (secondaryLabel != null) 1 else 2,
-            )
+            text()
         }
 
     val secondaryLabelParam: (@Composable RowScope.() -> Unit)? =
         secondaryLabel?.let {
             {
                 Row {
-                    Text(
+                    WearSecondaryLabel(
                         text = secondaryLabel,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
                     )
 
                     if (isAuthenticationEntryLocked)
-                        // TODO(b/324465527) change this to lock icon and correct size once figma mocks are
-                        // updated
+                    // TODO(b/324465527) change this to lock icon and correct size once figma mocks are
+                    // updated
                         Icon(
                             bitmap = checkNotNull(icon?.toBitmap()?.asImageBitmap()),
                             // Decorative purpose only.
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(10.dp),
                             tint = Color.Unspecified
                         )
                 }
@@ -92,7 +115,7 @@ fun CredentialsScreenChip(
                     bitmap = it,
                     // Decorative purpose only.
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(24.dp),
                     tint = Color.Unspecified
                 )
             }
@@ -117,9 +140,6 @@ fun CredentialsScreenChipPreview() {
         onClick = { },
         secondaryLabel = "beckett_bakery@gmail.com",
         icon = null,
-        modifier = Modifier
-            .clipToBounds()
-            .padding(top = 2.dp)
     )
 }
 
@@ -127,9 +147,8 @@ fun CredentialsScreenChipPreview() {
 fun SignInOptionsChip(onClick: () -> Unit) {
     CredentialsScreenChip(
         label = stringResource(R.string.dialog_sign_in_options_button),
+        textAlign = TextAlign.Start,
         onClick = onClick,
-        modifier = Modifier
-            .padding(top = TOPPADDING)
     )
 }
 
@@ -142,10 +161,13 @@ fun SignInOptionsChipPreview() {
 @Composable
 fun ContinueChip(onClick: () -> Unit) {
     CredentialsScreenChip(
-        label = stringResource(R.string.dialog_continue_button),
         onClick = onClick,
-        modifier = Modifier
-            .padding(top = TOPPADDING),
+        text = {
+            WearButtonText(
+                text = stringResource(R.string.dialog_continue_button),
+                textAlign = TextAlign.Center,
+            )
+        },
         colors = ChipDefaults.primaryChipColors(),
     )
 }
@@ -161,21 +183,8 @@ fun DismissChip(onClick: () -> Unit) {
     CredentialsScreenChip(
         label = stringResource(R.string.dialog_dismiss_button),
         onClick = onClick,
-        modifier = Modifier
-            .padding(top = TOPPADDING),
     )
 }
-
-@Composable
-fun SignInOnPhoneChip(onClick: () -> Unit) {
-    CredentialsScreenChip(
-        label = stringResource(R.string.sign_in_on_phone_button),
-        onClick = onClick,
-        modifier = Modifier
-            .padding(top = TOPPADDING),
-    )
-}
-
 @Composable
 fun LockedProviderChip(
     authenticationEntryInfo: AuthenticationEntryInfo,
@@ -191,9 +200,9 @@ fun LockedProviderChip(
         label = authenticationEntryInfo.title,
         icon = authenticationEntryInfo.icon,
         secondaryLabel = secondaryLabel,
+        textAlign = TextAlign.Start,
         isAuthenticationEntryLocked = !authenticationEntryInfo.isUnlockedAndEmpty,
         onClick = onClick,
-        modifier = Modifier.padding(top = TOPPADDING),
     )
 }
 
@@ -201,9 +210,5 @@ fun LockedProviderChip(
 @Composable
 fun DismissChipPreview() {
     DismissChip({})
-}
-
-private object CredentialsScreenChip {
-    val TOPPADDING = 8.dp
 }
 

@@ -150,6 +150,7 @@ import android.window.ScreenCapture;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.foldables.FoldLockSettingAvailabilityProvider;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
@@ -547,6 +548,17 @@ public final class DisplayManagerService extends SystemService {
         }
     };
 
+    private final DisplayModeDirector.DisplayDeviceConfigProvider mDisplayDeviceConfigProvider =
+            displayId -> {
+                synchronized (mSyncRoot) {
+                    final DisplayDevice device = getDeviceForDisplayLocked(displayId);
+                    if (device == null) {
+                        return null;
+                    }
+                    return device.getDisplayDeviceConfig();
+                }
+            };
+
     private final BrightnessSynchronizer mBrightnessSynchronizer;
 
     private final DeviceConfigParameterProvider mConfigParameterProvider;
@@ -596,9 +608,10 @@ public final class DisplayManagerService extends SystemService {
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
-                foldSettingProvider,
+                foldSettingProvider, new FoldGracePeriodProvider(),
                 mDisplayDeviceRepo, new LogicalDisplayListener(), mSyncRoot, mHandler, mFlags);
-        mDisplayModeDirector = new DisplayModeDirector(context, mHandler, mFlags);
+        mDisplayModeDirector = new DisplayModeDirector(
+                context, mHandler, mFlags, mDisplayDeviceConfigProvider);
         mBrightnessSynchronizer = new BrightnessSynchronizer(mContext,
                 mFlags.isBrightnessIntRangeUserPerceptionEnabled());
         Resources resources = mContext.getResources();
@@ -756,6 +769,7 @@ public final class DisplayManagerService extends SystemService {
             mContext.getSystemService(DeviceStateManager.class).registerCallback(
                     new HandlerExecutor(mHandler), new DeviceStateListener());
 
+            mLogicalDisplayMapper.onWindowManagerReady();
             scheduleTraversalLocked(false);
         }
     }
@@ -2762,6 +2776,7 @@ public final class DisplayManagerService extends SystemService {
                             + requestedRefreshRate + " on Display: " + displayId);
                 }
             }
+
             mDisplayModeDirector.getAppRequestObserver().setAppRequest(
                     displayId, requestedModeId, requestedMinRefreshRate, requestedMaxRefreshRate);
 

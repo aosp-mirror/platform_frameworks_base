@@ -16,10 +16,12 @@
 
 package android.os.storage;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.UserInfo;
+import android.multiuser.Flags;
 import android.os.IInstalld;
 import android.os.IVold;
 import android.os.ParcelFileDescriptor;
@@ -201,4 +203,18 @@ public abstract class StorageManagerInternal {
      */
     public abstract int enableFsverity(IInstalld.IFsveritySetupAuthToken authToken, String filePath,
             String packageName) throws IOException;
+
+    /**
+     * Registers a {@link ICeStorageLockEventListener} for receiving CE storage lock events.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE)
+    public abstract void registerStorageLockEventListener(
+            @NonNull ICeStorageLockEventListener listener);
+
+    /**
+     * Unregisters the {@link ICeStorageLockEventListener} which was registered previously
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_BIOMETRICS_TO_UNLOCK_PRIVATE_SPACE)
+    public abstract void unregisterStorageLockEventListener(
+            @NonNull ICeStorageLockEventListener listener);
 }

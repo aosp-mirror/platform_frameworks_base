@@ -523,6 +523,9 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
         }
+        if ((flags & FLAG_CONFIG_AT_END) != 0) {
+            sb.append(sb.length() == 0 ? "" : "|").append("CONFIG_AT_END");
+        }
         if ((flags & FLAG_MOVED_TO_TOP) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("MOVE_TO_TOP");
         }
@@ -537,6 +540,11 @@ public final class TransitionInfo implements Parcelable {
             @NonNull TransitionInfo info) {
         // If the change has no parent (it is root), then it is independent
         if (change.getParent() == null) return true;
+
+        if (change.getLastParent() != null && !change.getLastParent().equals(change.getParent())) {
+            // If the change has been reparented, then it's independent.
+            return true;
+        }
 
         // non-visibility changes will just be folded into the parent change, so they aren't
         // independent either.

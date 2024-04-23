@@ -37,13 +37,14 @@ public class PendingInsetsController implements WindowInsetsController {
     private final ArrayList<PendingRequest> mRequests = new ArrayList<>();
     private @Appearance int mAppearance;
     private @Appearance int mAppearanceMask;
+    private @Appearance int mAppearanceFromResource;
+    private @Appearance int mAppearanceFromResourceMask;
     private @Behavior int mBehavior = KEEP_BEHAVIOR;
     private boolean mAnimationsDisabled;
     private final InsetsState mDummyState = new InsetsState();
     private InsetsController mReplayedInsetsController;
     private ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
             = new ArrayList<>();
-    private int mCaptionInsetsHeight = 0;
     private int mImeCaptionBarInsetsHeight = 0;
     private WindowInsetsAnimationControlListener mLoggingListener;
     private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
@@ -79,16 +80,21 @@ public class PendingInsetsController implements WindowInsetsController {
     }
 
     @Override
+    public void setSystemBarsAppearanceFromResource(int appearance, int mask) {
+        if (mReplayedInsetsController != null) {
+            mReplayedInsetsController.setSystemBarsAppearanceFromResource(appearance, mask);
+        } else {
+            mAppearanceFromResource = (mAppearanceFromResource & ~mask) | (appearance & mask);
+            mAppearanceFromResourceMask |= mask;
+        }
+    }
+
+    @Override
     public int getSystemBarsAppearance() {
         if (mReplayedInsetsController != null) {
             return mReplayedInsetsController.getSystemBarsAppearance();
         }
-        return mAppearance;
-    }
-
-    @Override
-    public void setCaptionInsetsHeight(int height) {
-        mCaptionInsetsHeight = height;
+        return mAppearance | (mAppearanceFromResource & ~mAppearanceMask);
     }
 
     @Override
@@ -171,8 +177,9 @@ public class PendingInsetsController implements WindowInsetsController {
         if (mAppearanceMask != 0) {
             controller.setSystemBarsAppearance(mAppearance, mAppearanceMask);
         }
-        if (mCaptionInsetsHeight != 0) {
-            controller.setCaptionInsetsHeight(mCaptionInsetsHeight);
+        if (mAppearanceFromResourceMask != 0) {
+            controller.setSystemBarsAppearanceFromResource(
+                    mAppearanceFromResource, mAppearanceFromResourceMask);
         }
         if (mImeCaptionBarInsetsHeight != 0) {
             controller.setImeCaptionBarInsetsHeight(mImeCaptionBarInsetsHeight);
@@ -199,6 +206,8 @@ public class PendingInsetsController implements WindowInsetsController {
         mBehavior = KEEP_BEHAVIOR;
         mAppearance = 0;
         mAppearanceMask = 0;
+        mAppearanceFromResource = 0;
+        mAppearanceFromResourceMask = 0;
         mAnimationsDisabled = false;
         mLoggingListener = null;
         mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();

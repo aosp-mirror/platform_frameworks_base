@@ -56,7 +56,8 @@ import java.util.List;
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class LocalBluetoothProfileManagerTest {
     private final static long HISYNCID = 10;
-
+    @Mock
+    private LocalBluetoothManager mBtManager;
     @Mock
     private CachedBluetoothDeviceManager mDeviceManager;
     @Mock
@@ -77,13 +78,21 @@ public class LocalBluetoothProfileManagerTest {
         MockitoAnnotations.initMocks(this);
         mContext = spy(RuntimeEnvironment.application);
         mLocalBluetoothAdapter = LocalBluetoothAdapter.getInstance();
-        mEventManager = spy(new BluetoothEventManager(mLocalBluetoothAdapter, mDeviceManager,
-                mContext, /* handler= */ null, /* userHandle= */ null));
+        mEventManager =
+                spy(
+                        new BluetoothEventManager(
+                                mLocalBluetoothAdapter,
+                                mBtManager,
+                                mDeviceManager,
+                                mContext,
+                                /* handler= */ null,
+                                /* userHandle= */ null));
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         when(mDeviceManager.findDevice(mDevice)).thenReturn(mCachedBluetoothDevice);
         when(mCachedBluetoothDevice.getDevice()).thenReturn(mDevice);
-        mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
-                mDeviceManager, mEventManager);
+        mProfileManager =
+                new LocalBluetoothProfileManager(
+                        mContext, mLocalBluetoothAdapter, mDeviceManager, mEventManager);
     }
 
     /**

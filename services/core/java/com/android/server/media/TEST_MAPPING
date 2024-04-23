@@ -2,9 +2,7 @@
   "presubmit": [
     {
       "name": "CtsMediaBetterTogetherTestCases"
-    }
-  ],
-  "postsubmit": [
+    },
     {
       "name": "MediaRouterServiceTests"
     }

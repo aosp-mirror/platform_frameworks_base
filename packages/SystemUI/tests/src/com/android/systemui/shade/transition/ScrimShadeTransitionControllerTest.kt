@@ -1,15 +1,14 @@
 package com.android.systemui.shade.transition
 
-import android.platform.test.annotations.DisableFlags
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -70,7 +69,7 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun onPanelExpansionChanged_setsFractionEqualToEventFraction() {
         underTest.onPanelExpansionChanged(DEFAULT_EXPANSION_EVENT)
 
@@ -78,7 +77,7 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
+    @DisableSceneContainer
     fun onPanelStateChanged_forwardsToScrimTransitionController() {
         startLegacyPanelExpansion()
 

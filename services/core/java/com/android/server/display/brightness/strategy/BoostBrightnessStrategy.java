@@ -53,6 +53,11 @@ public class BoostBrightnessStrategy implements DisplayBrightnessStrategy {
     }
 
     @Override
+    public int getReason() {
+        return BrightnessReason.REASON_BOOST;
+    }
+
+    @Override
     public void dump(PrintWriter writer) {}
 
     @Override

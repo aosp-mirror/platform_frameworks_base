@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.INVALID_DISPLAY
@@ -115,6 +116,57 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     @Test
     fun isActiveTask_notExistingTaskReturnsFalse() {
         assertThat(repo.isActiveTask(99)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_noActiveTasks() {
+        // Not an active task
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_singleActiveTask() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        // The only active task
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isTrue()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_multipleActiveTasks() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        repo.addActiveTask(DEFAULT_DISPLAY, 2)
+        // Not the only task
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+        // Not the only task
+        assertThat(repo.isActiveTask(2)).isTrue()
+        assertThat(repo.isOnlyActiveTask(2)).isFalse()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
+    }
+
+    @Test
+    fun isOnlyActiveTask_multipleDisplays() {
+        repo.addActiveTask(DEFAULT_DISPLAY, 1)
+        repo.addActiveTask(DEFAULT_DISPLAY, 2)
+        repo.addActiveTask(SECOND_DISPLAY, 3)
+        // Not the only task on DEFAULT_DISPLAY
+        assertThat(repo.isActiveTask(1)).isTrue()
+        assertThat(repo.isOnlyActiveTask(1)).isFalse()
+        // Not the only task on DEFAULT_DISPLAY
+        assertThat(repo.isActiveTask(2)).isTrue()
+        assertThat(repo.isOnlyActiveTask(2)).isFalse()
+        // The only active task on SECOND_DISPLAY
+        assertThat(repo.isActiveTask(3)).isTrue()
+        assertThat(repo.isOnlyActiveTask(3)).isTrue()
+        // Not an active task
+        assertThat(repo.isActiveTask(99)).isFalse()
+        assertThat(repo.isOnlyActiveTask(99)).isFalse()
     }
 
     @Test
@@ -405,6 +457,127 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         assertThat(listener.stashedOnDefaultDisplay).isFalse()
         assertThat(listener.stashedOnSecondaryDisplay).isTrue()
     }
+
+    @Test
+    fun removeFreeformTask_removesTaskBoundsBeforeMaximize() {
+        val taskId = 1
+        repo.saveBoundsBeforeMaximize(taskId, Rect(0, 0, 200, 200))
+        repo.removeFreeformTask(taskId)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isNull()
+    }
+
+    @Test
+    fun saveBoundsBeforeMaximize_boundsSavedByTaskId() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeMaximize(taskId, bounds)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isEqualTo(bounds)
+    }
+
+    @Test
+    fun removeBoundsBeforeMaximize_returnsNullAfterBoundsRemoved() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeMaximize(taskId, bounds)
+        repo.removeBoundsBeforeMaximize(taskId)
+        assertThat(repo.removeBoundsBeforeMaximize(taskId)).isNull()
+    }
+
+    @Test
+    fun minimizeTaskNotCalled_noTasksMinimized() {
+        assertThat(repo.isMinimizedTask(taskId = 0)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+    }
+
+    @Test
+    fun minimizeTask_onlyThatTaskIsMinimized() {
+        repo.minimizeTask(displayId = 0, taskId = 0)
+
+        assertThat(repo.isMinimizedTask(taskId = 0)).isTrue()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+    @Test
+    fun unminimizeTask_taskNoLongerMinimized() {
+        repo.minimizeTask(displayId = 0, taskId = 0)
+        repo.unminimizeTask(displayId = 0, taskId = 0)
+
+        assertThat(repo.isMinimizedTask(taskId = 0)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+    @Test
+    fun unminimizeTask_nonExistentTask_doesntCrash() {
+        repo.unminimizeTask(displayId = 0, taskId = 0)
+
+        assertThat(repo.isMinimizedTask(taskId = 0)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+
+    @Test
+    fun updateVisibleFreeformTasks_toVisible_taskIsUnminimized() {
+        repo.minimizeTask(displayId = 10, taskId = 2)
+
+        repo.updateVisibleFreeformTasks(displayId = 10, taskId = 2, visible = true)
+
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+    @Test
+    fun isDesktopModeShowing_noActiveTasks_returnsFalse() {
+        assertThat(repo.isDesktopModeShowing(displayId = 0)).isFalse()
+    }
+
+    @Test
+    fun isDesktopModeShowing_noTasksVisible_returnsFalse() {
+        repo.addActiveTask(displayId = 0, taskId = 1)
+        repo.addActiveTask(displayId = 0, taskId = 2)
+
+        assertThat(repo.isDesktopModeShowing(displayId = 0)).isFalse()
+    }
+
+    @Test
+    fun isDesktopModeShowing_tasksActiveAndVisible_returnsTrue() {
+        repo.addActiveTask(displayId = 0, taskId = 1)
+        repo.addActiveTask(displayId = 0, taskId = 2)
+        repo.updateVisibleFreeformTasks(displayId = 0, taskId = 1, visible = true)
+
+        assertThat(repo.isDesktopModeShowing(displayId = 0)).isTrue()
+    }
+
+    @Test
+    fun getActiveNonMinimizedTasksOrderedFrontToBack_returnsFreeformTasksInCorrectOrder() {
+        repo.addActiveTask(displayId = 0, taskId = 1)
+        repo.addActiveTask(displayId = 0, taskId = 2)
+        repo.addActiveTask(displayId = 0, taskId = 3)
+        // The front-most task will be the one added last through addOrMoveFreeformTaskToTop
+        repo.addOrMoveFreeformTaskToTop(taskId = 3)
+        repo.addOrMoveFreeformTaskToTop(taskId = 2)
+        repo.addOrMoveFreeformTaskToTop(taskId = 1)
+
+        assertThat(repo.getActiveNonMinimizedTasksOrderedFrontToBack(displayId = 0)).isEqualTo(
+                listOf(1, 2, 3))
+    }
+
+    @Test
+    fun getActiveNonMinimizedTasksOrderedFrontToBack_minimizedTaskNotIncluded() {
+        repo.addActiveTask(displayId = 0, taskId = 1)
+        repo.addActiveTask(displayId = 0, taskId = 2)
+        repo.addActiveTask(displayId = 0, taskId = 3)
+        // The front-most task will be the one added last through addOrMoveFreeformTaskToTop
+        repo.addOrMoveFreeformTaskToTop(taskId = 3)
+        repo.addOrMoveFreeformTaskToTop(taskId = 2)
+        repo.addOrMoveFreeformTaskToTop(taskId = 1)
+        repo.minimizeTask(displayId = 0, taskId = 2)
+
+        assertThat(repo.getActiveNonMinimizedTasksOrderedFrontToBack(displayId = 0)).isEqualTo(
+                listOf(1, 3))
+    }
+
 
     class TestListener : DesktopModeTaskRepository.ActiveTasksListener {
         var activeChangesOnDefaultDisplay = 0

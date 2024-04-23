@@ -67,7 +67,9 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
+import static com.android.server.wm.ActivityTaskManagerService.isPip2ExperimentEnabled;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
@@ -607,6 +609,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         ProtoLog.v(WM_DEBUG_WINDOW_ORGANIZER, "Apply window transaction, syncId=%d", syncId);
         mService.deferWindowLayout();
         mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
+        final boolean shouldDeferTransitionReady = transition != null && !t.isEmpty()
+                && (transition.isCollecting() || Flags.alwaysDeferTransitionWhenApplyWct());
+        if (shouldDeferTransitionReady) {
+            transition.deferTransitionReady();
+        }
         try {
             final ArraySet<WindowContainer<?>> haveConfigChanges = new ArraySet<>();
             if (transition != null) {
@@ -759,6 +766,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
             }
         } finally {
+            if (shouldDeferTransitionReady) {
+                transition.continueTransitionReady();
+            }
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             mService.continueWindowLayout();
         }
@@ -828,18 +838,21 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
+        final boolean wasPrevFocusableAndVisible = tr.isFocusableAndVisible();
+
         int effects = applyChanges(tr, c);
         final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
 
         if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
             if (tr.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, c.getHidden())) {
-                effects = TRANSACT_EFFECTS_LIFECYCLE;
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
             }
         }
 
         if ((c.getChangeMask() & CHANGE_FORCE_TRANSLUCENT) != 0) {
-            tr.setForceTranslucent(c.getForceTranslucent());
-            effects = TRANSACT_EFFECTS_LIFECYCLE;
+            if (tr.setForceTranslucent(c.getForceTranslucent())) {
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
 
         if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_DRAG_RESIZING) != 0) {
@@ -872,14 +885,28 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 boolean canEnterPip = activity.checkEnterPictureInPictureState(
                         "applyTaskChanges", true /* beforeStopping */);
                 if (canEnterPip) {
-                    canEnterPip = mService.mActivityClientController
-                            .requestPictureInPictureMode(activity);
+                    mService.mTaskSupervisor.beginDeferResume();
+                    try {
+                        canEnterPip = mService.mActivityClientController
+                                .requestPictureInPictureMode(activity);
+                    } finally {
+                        mService.mTaskSupervisor.endDeferResume();
+                        if (canEnterPip && !isPip2ExperimentEnabled()) {
+                            // Wait until the transaction is applied to only resume once.
+                            effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                        }
+                    }
                 }
                 if (!canEnterPip) {
                     // Restore the flag to its previous state when the activity cannot enter PIP.
                     activity.supportsEnterPipOnTaskSwitch = lastSupportsEnterPipOnTaskSwitch;
                 }
             }
+        }
+
+        // Activity in this Task may resume/pause when enter/exit pip.
+        if (wasPrevFocusableAndVisible != tr.isFocusableAndVisible()) {
+            effects |= TRANSACT_EFFECTS_LIFECYCLE;
         }
 
         return effects;
@@ -946,8 +973,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
         if ((c.getChangeMask() & CHANGE_FORCE_TRANSLUCENT) != 0) {
-            taskFragment.setForceTranslucent(c.getForceTranslucent());
-            effects = TRANSACT_EFFECTS_LIFECYCLE;
+            if (taskFragment.setForceTranslucent(c.getForceTranslucent())) {
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
         }
 
         effects |= applyChanges(taskFragment, c);
@@ -997,7 +1025,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 final Task task = wc.asTask();
-
+                if (task.isVisibleRequested() || task.isVisible()) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
                 if (task.isLeafTask()) {
                     mService.mTaskSupervisor
                             .removeTask(task, true, REMOVE_FROM_RECENTS, "remove-task"
@@ -1082,14 +1112,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 launchOpts.remove(WindowContainerTransaction.HierarchyOp.LAUNCH_KEY_TASK_ID);
                 final SafeActivityOptions safeOptions =
                         SafeActivityOptions.fromBundle(launchOpts, caller.mPid, caller.mUid);
-                if (transition != null) {
-                    transition.deferTransitionReady();
-                }
                 waitAsyncStart(() -> mService.mTaskSupervisor.startActivityFromRecents(
                         caller.mPid, caller.mUid, taskId, safeOptions));
-                if (transition != null) {
-                    transition.continueTransitionReady();
-                }
                 break;
             }
             case HIERARCHY_OP_TYPE_REORDER:
@@ -1167,17 +1191,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
                 }
                 final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
-                if (transition != null) {
-                    transition.deferTransitionReady();
-                }
                 int res = waitAsyncStart(() -> mService.mAmInternal.sendIntentSender(
                         hop.getPendingIntent().getTarget(),
                         hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
                         hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
                         null /* requiredPermission */, options));
-                if (transition != null) {
-                    transition.continueTransitionReady();
-                }
                 if (ActivityManager.isStartResultSuccessful(res)) {
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
@@ -1225,17 +1243,32 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 ActivityRecord pipActivity = pipTask.getActivity(
                         (activity) -> activity.pictureInPictureArgs != null);
 
+                if (pipActivity.isState(RESUMED)) {
+                    // schedulePauseActivity() call uses this flag when entering PiP after Recents
+                    // swipe-up TO_FRONT transition. In this case the state of the activity is
+                    // RESUMED until ActivityRecord#makeActiveIfNeeded() makes it PAUSING followed
+                    // by the scheduling for PAUSE. See moveActivityToPinnedRootTask()'s call into
+                    // resumeFocusedTasksTopActivities().
+                    pipActivity.mAutoEnteringPip =
+                            pipActivity.pictureInPictureArgs.isAutoEnterEnabled();
+                }
                 Rect entryBounds = hop.getBounds();
                 mService.mRootWindowContainer.moveActivityToPinnedRootTask(
                         pipActivity, null /* launchIntoPipHostActivity */,
                         "moveActivityToPinnedRootTask", null /* transition */, entryBounds);
 
-                // Continue the pausing process after potential task reparenting.
                 if (pipActivity.isState(PAUSING) && pipActivity.mPauseSchedulePendingForPip) {
+                    // Continue the pausing process. This must be done after moving PiP activity to
+                    // a potentially new pinned task (multi-activity case). This case is only
+                    // triggered if TaskFragment#startPausing() deems this an auto-enter case;
+                    // i.e. we enter this flow during button-nav auto-enter but not gesture-nav
+                    // auto-enter PiP for example.
                     pipActivity.getTask().schedulePauseActivity(
                             pipActivity, false /* userLeaving */,
                             false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
                 }
+                // Reset auto-entering PiP info since any internal state updates are finished.
+                pipActivity.mAutoEnteringPip = false;
 
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
@@ -1367,10 +1400,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final IBinder callerActivityToken = operation.getActivityToken();
                 final Intent activityIntent = operation.getActivityIntent();
                 final Bundle activityOptions = operation.getBundle();
-                final int result = mService.getActivityStartController()
+                final int result = waitAsyncStart(() -> mService.getActivityStartController()
                         .startActivityInTaskFragment(taskFragment, activityIntent, activityOptions,
                                 callerActivityToken, caller.mUid, caller.mPid,
-                                errorCallbackToken);
+                                errorCallbackToken));
                 if (!isStartResultSuccessful(result)) {
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
                             opType, convertStartFailureToThrowable(result, activityIntent));
@@ -1528,33 +1561,39 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case OP_TYPE_SET_ISOLATED_NAVIGATION: {
-                final boolean isolatedNav = operation.isIsolatedNav();
+                final boolean isolatedNav = operation.getBooleanValue();
                 taskFragment.setIsolatedNav(isolatedNav);
                 break;
             }
             case OP_TYPE_REORDER_TO_BOTTOM_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    task.mChildren.remove(taskFragment);
-                    task.mChildren.add(0, taskFragment);
-                    if (!taskFragment.hasChild()) {
-                        // Ensure that the child layers are updated if the TaskFragment is empty.
-                        task.assignChildLayers();
+                    if (task.mChildren.peekFirst() != taskFragment) {
+                        task.mChildren.remove(taskFragment);
+                        task.mChildren.add(0, taskFragment);
+                        if (!taskFragment.hasChild()) {
+                            // Ensure that the child layers are updated if the TaskFragment is
+                            // empty.
+                            task.assignChildLayers();
+                        }
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
                     }
-                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
                 break;
             }
             case OP_TYPE_REORDER_TO_TOP_OF_TASK: {
                 final Task task = taskFragment.getTask();
                 if (task != null) {
-                    task.mChildren.remove(taskFragment);
-                    task.mChildren.add(taskFragment);
-                    if (!taskFragment.hasChild()) {
-                        // Ensure that the child layers are updated if the TaskFragment is empty.
-                        task.assignChildLayers();
+                    if (task.mChildren.peekLast() != taskFragment) {
+                        task.mChildren.remove(taskFragment);
+                        task.mChildren.add(taskFragment);
+                        if (!taskFragment.hasChild()) {
+                            // Ensure that the child layers are updated if the TaskFragment is
+                            // empty.
+                            task.assignChildLayers();
+                        }
+                        effects |= TRANSACT_EFFECTS_LIFECYCLE;
                     }
-                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
                 break;
             }
@@ -1567,14 +1606,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case OP_TYPE_SET_DIM_ON_TASK: {
-                final boolean dimOnTask = operation.isDimOnTask();
+                final boolean dimOnTask = operation.getBooleanValue();
                 taskFragment.setEmbeddedDimArea(dimOnTask ? EMBEDDED_DIM_AREA_PARENT_TASK
                         : EMBEDDED_DIM_AREA_TASK_FRAGMENT);
                 break;
             }
             case OP_TYPE_SET_MOVE_TO_BOTTOM_IF_CLEAR_WHEN_LAUNCH: {
-                taskFragment.setMoveToBottomIfClearWhenLaunch(
-                        operation.isMoveToBottomIfClearWhenLaunch());
+                taskFragment.setMoveToBottomIfClearWhenLaunch(operation.getBooleanValue());
                 break;
             }
             case OP_TYPE_SET_DECOR_SURFACE_BOOSTED: {
@@ -2277,6 +2315,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         TaskFragmentOrganizerToken organizerToken = creationParams.getOrganizer();
         taskFragment.setTaskFragmentOrganizer(organizerToken,
                 ownerActivity.getUid(), ownerActivity.info.processName);
+        if (mTaskFragmentOrganizerController.isSystemOrganizer(organizerToken.asBinder())) {
+            taskFragment.setOverrideOrientation(creationParams.getOverrideOrientation());
+        }
         final int position;
         if (creationParams.getPairedPrimaryFragmentToken() != null) {
             // When there is a paired primary TaskFragment, we want to place the new TaskFragment

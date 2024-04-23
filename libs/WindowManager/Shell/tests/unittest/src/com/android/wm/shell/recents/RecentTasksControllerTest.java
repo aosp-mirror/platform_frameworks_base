@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -45,16 +46,21 @@ import static java.lang.Integer.MAX_VALUE;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
@@ -70,6 +76,7 @@ import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -99,6 +106,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private ActivityTaskManager mActivityTaskManager;
     @Mock
     private DisplayInsetsController mDisplayInsetsController;
+    @Mock
+    private IRecentTasksListener mRecentTasksListener;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private ShellTaskOrganizer mShellTaskOrganizer;
     private RecentTasksController mRecentTasksController;
@@ -426,6 +438,85 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS})
+    public void onTaskAdded_desktopModeRunningAppsEnabled_triggersOnRunningTaskAppeared()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskAdded(taskInfo);
+
+        verify(mRecentTasksListener).onRunningTaskAppeared(taskInfo);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS)
+    public void onTaskAdded_desktopModeRunningAppsDisabled_doesNotTriggerOnRunningTaskAppeared()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskAdded(taskInfo);
+
+        verify(mRecentTasksListener, never()).onRunningTaskAppeared(any());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS})
+    public void taskWindowingModeChanged_desktopRunningAppsEnabled_triggersOnRunningTaskChanged()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskWindowingModeChanged(taskInfo);
+
+        verify(mRecentTasksListener).onRunningTaskChanged(taskInfo);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS)
+    public void
+            taskWindowingModeChanged_desktopRunningAppsDisabled_doesNotTriggerOnRunningTaskChanged()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskWindowingModeChanged(taskInfo);
+
+        verify(mRecentTasksListener, never()).onRunningTaskChanged(any());
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
+            Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS})
+    public void onTaskRemoved_desktopModeRunningAppsEnabled_triggersOnRunningTaskVanished()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskRemoved(taskInfo);
+
+        verify(mRecentTasksListener).onRunningTaskVanished(taskInfo);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS)
+    public void onTaskRemoved_desktopModeRunningAppsDisabled_doesNotTriggerOnRunningTaskVanished()
+            throws Exception {
+        mRecentTasksControllerReal.registerRecentTasksListener(mRecentTasksListener);
+        ActivityManager.RunningTaskInfo taskInfo = makeRunningTaskInfo(/* taskId= */10);
+
+        mRecentTasksControllerReal.onTaskRemoved(taskInfo);
+
+        verify(mRecentTasksListener, never()).onRunningTaskVanished(any());
+    }
+
+    @Test
     public void getNullSplitBoundsNonSplitTask() {
         SplitBounds sb = mRecentTasksController.getSplitBoundsForTaskId(3);
         assertNull("splitBounds should be null for non-split task", sb);
@@ -471,6 +562,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private ActivityManager.RunningTaskInfo makeRunningTaskInfo(int taskId) {
         ActivityManager.RunningTaskInfo info = new ActivityManager.RunningTaskInfo();
         info.taskId = taskId;
+        info.realActivity = new ComponentName("testPackage", "testClass");
         return info;
     }
 

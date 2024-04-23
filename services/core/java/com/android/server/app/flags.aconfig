@@ -1,4 +1,5 @@
 package: "android.server.app"
+container: "system"
 
 flag {
     name: "game_default_frame_rate"

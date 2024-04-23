@@ -137,6 +137,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppCompatTaskInfo;
 import android.app.AppGlobals;
+import android.app.CameraCompatTaskInfo;
 import android.app.IActivityController;
 import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
@@ -3537,9 +3538,9 @@ class Task extends TaskFragment {
         appCompatTaskInfo.topActivityEligibleForLetterboxEducation = isTopActivityResumed
                 && top.isEligibleForLetterboxEducation();
         // Whether the direct top activity requested showing camera compat control.
-        appCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
+        appCompatTaskInfo.cameraCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
                 ? top.getCameraCompatControlState()
-                : AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+                : CameraCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
@@ -4682,9 +4683,10 @@ class Task extends TaskFragment {
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        // Calling Task#setWindowingMode() for leaf task since this is the a specialization of
+        // Calling Task#setWindowingMode() for leaf task since this is a specialization of
         // {@link #setWindowingMode(int)} for root task.
         if (!isRootTask()) {
+            mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
             super.setWindowingMode(windowingMode);
             return;
         }
@@ -4728,6 +4730,9 @@ class Task extends TaskFragment {
             return;
         }
 
+        // Reset multi-window restore windowing mode.
+        mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
+
         final ActivityRecord topActivity = getTopNonFinishingActivity();
 
         // For now, assume that the root task's windowing mode is what will actually be used
@@ -4744,14 +4749,6 @@ class Task extends TaskFragment {
             // transferring the transform on the leash to the task, reset this state once we're
             // moving out of pip
             setCanAffectSystemUiFlags(true);
-            // Turn on userLeaveHint so other app can enter PiP mode.
-            mTaskSupervisor.mUserLeaving = true;
-            // Allow entering PiP from current top most activity when we are leaving PiP.
-            final Task topFocused = mRootWindowContainer.getTopDisplayFocusedRootTask();
-            if (topFocused != null) {
-                final ActivityRecord ar = topFocused.getTopResumedActivity();
-                enableEnterPipOnTaskSwitch(ar, null /* toFrontTask */, ar, null /* opts */);
-            }
             mRootWindowContainer.notifyActivityPipModeChanged(this, null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED) {
@@ -4809,6 +4806,14 @@ class Task extends TaskFragment {
                                 topActivity.getSyncTransaction());
                     }
                     lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
+                    // If the reparent is not included in transition, make sure the visibility of
+                    // task is still updated by core. Otherwise if the task is collected (e.g.
+                    // rotation change) after leaving this scope, the visibility operation will be
+                    // put in sync transaction, then it is not synced with reparent.
+                    if (com.android.window.flags.Flags.removePrepareSurfaceInPlacement()
+                            && lastParentBeforePip.mSyncState == SYNC_STATE_NONE) {
+                        lastParentBeforePip.prepareSurfaces();
+                    }
                 }
                 if (isPip2ExperimentEnabled) {
                     super.setWindowingMode(windowingMode);

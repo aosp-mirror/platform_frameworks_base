@@ -1,4 +1,5 @@
 package: "com.android.media.flags"
+container: "system"
 
 flag {
     name: "enable_rlp_callbacks_in_media_router2"
@@ -21,13 +22,6 @@ flag {
     namespace: "media_solutions"
     description: "Use Audio Policies implementation for device and Bluetooth route controllers."
     bug: "280576228"
-}
-
-flag {
-    name: "disable_screen_off_broadcast_receiver"
-    namespace: "media_solutions"
-    description: "Disables the broadcast receiver that prevents scanning when the screen is off."
-    bug: "304234628"
 }
 
 flag {
@@ -107,6 +101,16 @@ flag {
 }
 
 flag {
+    name: "enable_mr2_service_non_main_bg_thread"
+    namespace: "media_solutions"
+    description: "Enables the use of a background thread in the media routing framework, instead of using the main thread."
+    bug: "310145678"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_screen_off_scanning"
     is_exported: true
     namespace: "media_solutions"
@@ -119,4 +123,14 @@ flag {
     namespace: "media_solutions"
     description: "Enables apps owning a MediaBrowserService to disconnect all connected browsers."
     bug: "185136506"
+}
+
+flag {
+    name: "enable_prevention_of_manager_scans_when_no_apps_scan"
+    namespace: "media_solutions"
+    description: "Prevents waking up route providers when no apps are scanning, even if SysUI or Settings are scanning."
+    bug: "319604673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

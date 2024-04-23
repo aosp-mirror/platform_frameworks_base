@@ -235,7 +235,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Panel oznámení."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Rychlé nastavení."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Rychlé nastavení a panel oznámení"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Obrazovka uzamčení"</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"Obrazovka uzamčení"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Obrazovka uzamčení pracovního profilu"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zavřít"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"úplné ticho"</string>
@@ -270,12 +270,20 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Zobrazit vše"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Použít Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Připojeno"</string>
+    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
+    <skip />
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Uloženo"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"odpojit"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivovat"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Zítra znovu automaticky zapnout"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="8267380591344023327">"Funkce jako Quick Share, Najdi moje zařízení a vyhledávání zařízení používají Bluetooth"</string>
-    <string name="turn_on_bluetooth_auto_info_enabled" msgid="4802071533678400330">"Bluetooth se zapne zítra v 5:00"</string>
+    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
+    <skip />
+    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
+    <skip />
+    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Sluchátka"</string>
@@ -350,6 +358,7 @@
     <string name="qs_record_issue_label" msgid="8166290137285529059">"Zaznamenat problém"</string>
     <string name="qs_record_issue_start" msgid="2979831312582567056">"Spustit"</string>
     <string name="qs_record_issue_stop" msgid="3531747965741982657">"Ukončit"</string>
+    <string name="qs_record_issue_bug_report" msgid="8229031766918650079">"Zpráva o chybě"</string>
     <string name="qs_record_issue_dropdown_header" msgid="5995983175678658329">"Co v zařízení bylo ovlivněno?"</string>
     <string name="qs_record_issue_dropdown_prompt" msgid="2526949919167046219">"Vyberte druh problém"</string>
     <string name="qs_record_issue_dropdown_screenrecord" msgid="6396141928484257626">"Záznam obrazovky"</string>
@@ -363,7 +372,11 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standardní"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Střední"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Vysoká"</string>
-    <!-- no translation found for quick_settings_hearing_devices_label (7277170419679404129) -->
+    <string name="quick_settings_hearing_devices_label" msgid="7277170419679404129">"Naslouchátka"</string>
+    <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Naslouchátka"</string>
+    <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Spárovat nové zařízení"</string>
+    <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknutím spárujete nové zařízení"</string>
+    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
     <skip />
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Odblokovat mikrofon zařízení?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Odblokovat fotoaparát zařízení?"</string>
@@ -430,6 +443,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Rychlé nabíjení • Plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Pomalé nabíjení • Plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíjení • Plně nabito za <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="accessibility_action_open_communal_hub" msgid="3081702792413787849">"Widgety na obrazovce uzamčení"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Přejetím doleva spustíte komunitní výukový program"</string>
     <string name="cta_tile_button_to_open_widget_editor" msgid="3871562362382963878">"Přizpůsobit"</string>
     <string name="cta_tile_button_to_dismiss" msgid="3377597875997861754">"Zavřít"</string>
@@ -442,14 +456,14 @@
     <string name="button_to_remove_widget" msgid="3948204829181214098">"Odstranit"</string>
     <string name="hub_mode_add_widget_button_text" msgid="4831464661209971729">"Přidat widget"</string>
     <string name="hub_mode_editing_exit_button_text" msgid="3704686734192264771">"Hotovo"</string>
-    <!-- no translation found for label_for_button_in_empty_state_cta (7314975555382055823) -->
-    <skip />
-    <!-- no translation found for title_for_empty_state_cta (6161654421223450530) -->
-    <skip />
+    <string name="label_for_button_in_empty_state_cta" msgid="7314975555382055823">"Přidat widgety"</string>
+    <string name="title_for_empty_state_cta" msgid="6161654421223450530">"Získejte rychlý přístup ke svým oblíbeným widgetům aplikací bez odemykání tabletu."</string>
     <string name="dialog_title_to_allow_any_widget" msgid="1004820948962675644">"Povolit jakýkoli widget na obrazovce uzamčení?"</string>
     <string name="button_text_to_open_settings" msgid="1987729256950941628">"Otevřít nastavení"</string>
     <string name="work_mode_off_title" msgid="5794818421357835873">"Zrušit pozastavení pracovních aplikací?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Zrušit pozastavení"</string>
+    <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Zavřít widgety na obrazovce uzamčení"</string>
+    <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Widgety na obrazovce uzamčení"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Přepnout uživatele"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rozbalovací nabídka"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Veškeré aplikace a data v této relaci budou vymazána."</string>
@@ -594,7 +608,7 @@
     <string name="media_device_cast" msgid="4786241789687569892">"Odesílání"</string>
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Nedostupné, protože vyzvánění je ztlumené"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Nedostupné, protože je zapnutý režim Nerušit"</string>
-    <string name="stream_media_unavailable" msgid="6823020894438959853">"Nedostupné, protože je zapnutý režim Nerušit"</string>
+    <string name="stream_media_unavailable" msgid="6823020894438959853">"Nedostupné – je zapnutý režim Nerušit"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Klepnutím zapnete zvuk."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Klepnutím aktivujete režim vibrací. Služby přístupnosti mohou být ztlumeny."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Klepnutím vypnete zvuk. Služby přístupnosti mohou být ztlumeny."</string>
@@ -603,7 +617,7 @@
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Omezení hluku"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Prostorový zvuk"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Vypnuto"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Pevné"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Pevný"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Sledování hlavy"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Klepnutím změníte režim vyzvánění"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"vypnout zvuk"</string>
@@ -676,7 +690,7 @@
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, má podobu bubliny"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, deaktivuje režim Nerušit"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Zobrazuje se v horní části sekce konverzací a na obrazovce uzamčení se objevuje jako profilová fotka, má podobu bubliny a deaktivuje režim Nerušit"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritní"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tato oznámení nelze upravit."</string>
     <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Upozornění na hovor nelze upravit."</string>
@@ -741,7 +755,7 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Přepnout rozložení klávesnice"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"nebo"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Vymazat vyhledávaný dotaz"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Zkratky"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Klávesové zkratky"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Vyhledat zkratky"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Žádné zkratky nenalezeny"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Systém"</string>
@@ -766,9 +780,9 @@
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otevřít Asistenta"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Uzamknout obrazovku"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Vytvořit poznámku"</string>
-    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Systémový multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Přepnout na rozdělenou obrazovku s aktuálními aplikacemi napravo"</string>
-    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Přepnout na rozdělenou obrazovku s aktuálními aplikacemi nalevo"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
+    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Použít rozdělenou obrazovku se stávající aplikací vpravo"</string>
+    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Použít rozdělenou obrazovku se stávající aplikací vlevo"</string>
     <string name="system_multitasking_full_screen" msgid="336048080383640562">"Přepnout z rozdělené obrazovky na celou obrazovku"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Přechod na aplikaci vpravo nebo dole v režimu rozdělené obrazovky"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Přechod na aplikaci vlevo nebo nahoře v režimu rozdělené obrazovky"</string>
@@ -1143,7 +1157,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Poslouchá"</string>
     <string name="game_status" msgid="1340694320630973259">"Hraji hru"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Přátelé"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Proberem to večer?"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Probereme to večer?"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah se brzy zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
@@ -1265,7 +1279,7 @@
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Nainstalovat pracovní telefonní aplikaci"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Zrušit"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Přizpůsobit obrazovku uzamčení"</string>
-    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Pokud chcete upravit obrazovku uzamčení, odemkněte zařízení"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Obrazovku uzamčení upravíte, když zařízení odemknete"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Síť Wi-Fi není dostupná"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera je blokována"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera a mikrofon jsou blokovány"</string>

@@ -40,7 +40,7 @@ import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
 import com.android.settingslib.spa.gallery.page.LoadingBarPageProvider
 import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
-import com.android.settingslib.spa.gallery.page.SettingsPagerPageProvider
+import com.android.settingslib.spa.gallery.scaffold.NonScrollablePagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.ListPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePageProvider
@@ -48,10 +48,12 @@ import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
+import com.android.settingslib.spa.gallery.scaffold.PagerMainPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SearchScaffoldPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SuwScaffoldPageProvider
 import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.CopyablePageProvider
+import com.android.settingslib.spa.gallery.scaffold.ScrollablePagerPageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.slice.SpaSliceBroadcastReceiver
 
@@ -84,7 +86,9 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 ArgumentPageProvider,
                 SliderPageProvider,
                 SpinnerPageProvider,
-                SettingsPagerPageProvider,
+                PagerMainPageProvider,
+                NonScrollablePagerPageProvider,
+                ScrollablePagerPageProvider,
                 FooterPageProvider,
                 IllustrationPageProvider,
                 CategoryPageProvider,

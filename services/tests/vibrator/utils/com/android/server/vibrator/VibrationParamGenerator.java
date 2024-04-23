@@ -42,7 +42,10 @@ public final class VibrationParamGenerator {
         return vibrationParamList.toArray(new VibrationParam[0]);
     }
 
-    private static VibrationParam generateVibrationParam(int type, float scale) {
+    /**
+     * Generates a {@link VibrationParam} with the specified type and scale.
+     */
+    public static VibrationParam generateVibrationParam(int type, float scale) {
         ScaleParam scaleParam = new ScaleParam();
         scaleParam.typesMask = type;
         scaleParam.scale = scale;

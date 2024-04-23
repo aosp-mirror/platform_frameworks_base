@@ -22,6 +22,7 @@ import android.media.session.PlaybackState
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
@@ -35,7 +36,6 @@ import com.android.systemui.volume.mediaControllerRepository
 import com.android.systemui.volume.mediaDeviceSessionInteractor
 import com.android.systemui.volume.mediaOutputActionsInteractor
 import com.android.systemui.volume.mediaOutputInteractor
-import com.android.systemui.volume.panel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -62,10 +62,10 @@ class MediaOutputViewModelTest : SysuiTestCase() {
                 MediaOutputViewModel(
                     applicationContext,
                     testScope.backgroundScope,
-                    volumePanelViewModel,
                     mediaOutputActionsInteractor,
                     mediaDeviceSessionInteractor,
                     mediaOutputInteractor,
+                    uiEventLogger,
                 )
 
             with(context.orCreateTestableResources) {

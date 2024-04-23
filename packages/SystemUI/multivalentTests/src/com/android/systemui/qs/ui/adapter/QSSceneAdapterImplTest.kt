@@ -35,6 +35,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSComponent
 import com.android.systemui.qs.dagger.QSSceneComponent
+import com.android.systemui.settings.brightness.MirrorController
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -495,5 +496,34 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             shadeRepository.setShadeMode(ShadeMode.Split)
             runCurrent()
             verify(qsImpl!!).setInSplitShade(true)
+        }
+
+    @Test
+    fun requestCloseCustomizer() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            underTest.requestCloseCustomizer()
+            verify(qsImpl!!).closeCustomizer()
+        }
+
+    @Test
+    fun setBrightnessMirrorController() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+
+            underTest.inflate(context)
+            runCurrent()
+
+            val mirrorController = mock<MirrorController>()
+            underTest.setBrightnessMirrorController(mirrorController)
+
+            verify(qsImpl!!).setBrightnessMirrorController(mirrorController)
+
+            underTest.setBrightnessMirrorController(null)
+            verify(qsImpl!!).setBrightnessMirrorController(null)
         }
 }

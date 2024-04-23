@@ -28,6 +28,7 @@ import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataMod
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfigProvider
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModelAdapter
+import com.android.systemui.qs.tiles.viewmodel.StubQSTileViewModel
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -57,7 +58,9 @@ constructor(
         val viewModel: QSTileViewModel =
             when (val spec = TileSpec.create(tileSpec)) {
                 is TileSpec.CustomTileSpec -> createCustomTileViewModel(spec)
-                is TileSpec.PlatformTileSpec -> tileMap[tileSpec]?.get()
+                // when using the stub, we default to old tile rather than adding the stub
+                is TileSpec.PlatformTileSpec ->
+                    tileMap[tileSpec]?.get()?.takeIf { it !is StubQSTileViewModel }
                 is TileSpec.Invalid -> null
             }
                 ?: return null

@@ -106,13 +106,24 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"פועל: שמאל בלבד"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"פועל: ימין בלבד"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"פועל: ימין ושמאל"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"פעיל (מדיה בלבד), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> סוללה"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"פעיל (מדיה בלבד), שמאל: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> סוללה, ימין: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> סוללה"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"מחובר (תמיכה בשיתוף אודיו), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> סוללה"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"מחובר (תמיכה בשיתוף אודיו), שמאל: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> סוללה, ימין: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> סוללה"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"מחובר (תמיכה בשיתוף אודיו), שמאל <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"מחובר (תמיכה בשיתוף אודיו), ימין <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"פעיל (מדיה בלבד)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"תמיכה בשיתוף אודיו"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"פעיל (מדיה בלבד), שמאל בלבד"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"פעיל (מדיה בלבד), ימין בלבד"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"פעיל (מדיה בלבד), שמאל וימין"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"העברת קבצים"</string>
-    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"מכשיר קלט"</string>
+    <string name="bluetooth_profile_hid" msgid="2969922922664315866">"התקן קלט"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"גישה לאינטרנט"</string>
-    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"אישור גישה אל אנשי קשר והיסטוריית שיחות"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"המידע ישמש להודעות על שיחות ועוד"</string>
+    <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"אישור גישה אל אנשי הקשר והיסטוריית השיחות"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"המידע הזה ישמש למשל כדי להשמיע התראות על שיחות נכנסות"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"שיתוף חיבור לאינטרנט"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"הודעות טקסט"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"‏גישה ל-SIM"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – הטעינה עברה אופטימיזציה"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"‫<xliff:g id="LEVEL">%1$s</xliff:g> – בטעינה"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"לא ידוע"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"בטעינה"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"הסוללה נטענת מהר"</string>
@@ -487,6 +506,10 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"הסוללה טעונה"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"טעונה במלואה"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"הטעינה הושהתה"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"נמצא בשליטת מנהל מערכת"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"בשליטה של הגדרה מוגבלת"</string>
     <string name="disabled" msgid="8017887509554714950">"מושבת"</string>
@@ -552,7 +575,7 @@
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"הטאבלט הזה"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"הרמקול של אביזר העגינה"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"רמקול של אביזר העגינה"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"מכשיר חיצוני"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"המכשיר המחובר"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"הטלפון הזה"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"כל הפעילות תימחק ביציאה"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"אפשר לשמור או למחוק את הפעילות שלך ביציאה"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"ניתן לאפס כדי למחוק את הפעילות מהסשן כעת, או לשמור או למחוק את הפעילות ביציאה"</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"צילום תמונה"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"לבחירת תמונה"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"בחירת תמונה"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"נעשו יותר מדי ניסיונות שגויים. הנתונים במכשיר יימחקו."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"נעשו יותר מדי ניסיונות שגויים. המשתמש הזה יימחק."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"פס אחד של טלפון."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"שני פסים של טלפון."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"שלושה פסים של טלפון."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"אות הטלפון מלא."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"אין נתונים."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"פס אחד של נתונים."</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"אתרנט מנותק."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"אתרנט."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"אין שיחות."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"בחירה של תמונת פרופיל"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"סמל המשתמש שמוגדר כברירת מחדל"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"מקלדת פיזית"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"בחירה של פריסת המקלדת"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ברירת מחדל"</string>

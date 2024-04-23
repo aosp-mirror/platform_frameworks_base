@@ -210,7 +210,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
         )
         testDispatcher = UnconfinedTestDispatcher()
         testScope = TestScope(testDispatcher)
-        mediaFilterRepository = MediaFilterRepository()
+        mediaFilterRepository = MediaFilterRepository(clock)
         mediaDataRepository = MediaDataRepository(mediaFlags, dumpManager)
         mediaDataProcessor =
             MediaDataProcessor(

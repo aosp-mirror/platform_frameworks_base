@@ -205,7 +205,7 @@ constructor(
                 chipbarCoordinator,
                 screenOffAnimationController,
                 shadeInteractor,
-                { keyguardStatusViewController!!.getClockController() },
+                clockInteractor,
                 interactionJankMonitor,
                 deviceEntryHapticsInteractor,
                 vibratorHelper,

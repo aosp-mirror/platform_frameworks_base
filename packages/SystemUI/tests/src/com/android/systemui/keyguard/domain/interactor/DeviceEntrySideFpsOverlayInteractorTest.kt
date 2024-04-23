@@ -32,20 +32,24 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -69,6 +73,8 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
 
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
     private val bouncerRepository = FakeKeyguardBouncerRepository()
     private val biometricSettingsRepository = FakeBiometricSettingsRepository()
     private val deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
@@ -78,11 +84,10 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
 
     private lateinit var underTest: DeviceEntrySideFpsOverlayInteractor
 
-    private val testScope = TestScope(StandardTestDispatcher())
-
     @Before
     fun setup() {
         mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
+
         primaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 bouncerRepository,
@@ -100,6 +105,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 faceAuthInteractor
             )
+
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
                 mock(StatusBarStateController::class.java),
@@ -114,11 +120,13 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 { mock(KeyguardTransitionInteractor::class.java) },
                 testScope.backgroundScope,
             )
+
         underTest =
             DeviceEntrySideFpsOverlayInteractor(
                 testScope.backgroundScope,
                 mContext,
                 deviceEntryFingerprintAuthRepository,
+                kosmos.sceneInteractor,
                 primaryBouncerInteractor,
                 alternateBouncerInteractor,
                 keyguardUpdateMonitor
@@ -138,7 +146,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 fpsDetectionRunning = true,
                 isUnlockingWithFpAllowed = true
             )
-            assertThat(showIndicatorForDeviceEntry).isEqualTo(true)
+            assertThat(showIndicatorForDeviceEntry).isTrue()
         }
 
     @Test
@@ -154,7 +162,61 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 fpsDetectionRunning = true,
                 isUnlockingWithFpAllowed = true
             )
-            assertThat(showIndicatorForDeviceEntry).isEqualTo(false)
+            assertThat(showIndicatorForDeviceEntry).isFalse()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun updatesShowIndicatorForDeviceEntry_onBouncerSceneActive() =
+        testScope.runTest {
+            underTest =
+                DeviceEntrySideFpsOverlayInteractor(
+                    testScope.backgroundScope,
+                    mContext,
+                    deviceEntryFingerprintAuthRepository,
+                    kosmos.sceneInteractor,
+                    primaryBouncerInteractor,
+                    alternateBouncerInteractor,
+                    keyguardUpdateMonitor
+                )
+
+            val showIndicatorForDeviceEntry by
+                collectLastValue(underTest.showIndicatorForDeviceEntry)
+            runCurrent()
+
+            updateBouncerScene(
+                isActive = true,
+                fpsDetectionRunning = true,
+                isUnlockingWithFpAllowed = true
+            )
+            assertThat(showIndicatorForDeviceEntry).isTrue()
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun updatesShowIndicatorForDeviceEntry_onBouncerSceneInactive() =
+        testScope.runTest {
+            underTest =
+                DeviceEntrySideFpsOverlayInteractor(
+                    testScope.backgroundScope,
+                    mContext,
+                    deviceEntryFingerprintAuthRepository,
+                    kosmos.sceneInteractor,
+                    primaryBouncerInteractor,
+                    alternateBouncerInteractor,
+                    keyguardUpdateMonitor
+                )
+
+            val showIndicatorForDeviceEntry by
+                collectLastValue(underTest.showIndicatorForDeviceEntry)
+            runCurrent()
+
+            updateBouncerScene(
+                isActive = false,
+                fpsDetectionRunning = true,
+                isUnlockingWithFpAllowed = true
+            )
+            assertThat(showIndicatorForDeviceEntry).isFalse()
         }
 
     @Test
@@ -170,7 +232,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 fpsDetectionRunning = false,
                 isUnlockingWithFpAllowed = true
             )
-            assertThat(showIndicatorForDeviceEntry).isEqualTo(false)
+            assertThat(showIndicatorForDeviceEntry).isFalse()
         }
     }
 
@@ -187,7 +249,39 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 fpsDetectionRunning = true,
                 isUnlockingWithFpAllowed = false
             )
-            assertThat(showIndicatorForDeviceEntry).isEqualTo(false)
+            assertThat(showIndicatorForDeviceEntry).isFalse()
+        }
+    }
+
+    @Test
+    fun updatesShowIndicatorForDeviceEntry_fromBouncerScene_whenFpsDetectionNotRunning() {
+        testScope.runTest {
+            val showIndicatorForDeviceEntry by
+                collectLastValue(underTest.showIndicatorForDeviceEntry)
+            runCurrent()
+
+            updateBouncerScene(
+                isActive = true,
+                fpsDetectionRunning = false,
+                isUnlockingWithFpAllowed = true
+            )
+            assertThat(showIndicatorForDeviceEntry).isFalse()
+        }
+    }
+
+    @Test
+    fun updatesShowIndicatorForDeviceEntry_fromBouncerScene_onUnlockingWithFpDisallowed() {
+        testScope.runTest {
+            val showIndicatorForDeviceEntry by
+                collectLastValue(underTest.showIndicatorForDeviceEntry)
+            runCurrent()
+
+            updateBouncerScene(
+                isActive = true,
+                fpsDetectionRunning = true,
+                isUnlockingWithFpAllowed = false
+            )
+            assertThat(showIndicatorForDeviceEntry).isFalse()
         }
     }
 
@@ -204,7 +298,7 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
                 fpsDetectionRunning = true,
                 isUnlockingWithFpAllowed = true
             )
-            assertThat(showIndicatorForDeviceEntry).isEqualTo(false)
+            assertThat(showIndicatorForDeviceEntry).isFalse()
         }
     }
 
@@ -216,10 +310,10 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             runCurrent()
 
             bouncerRepository.setAlternateVisible(true)
-            assertThat(showIndicatorForDeviceEntry).isEqualTo(true)
+            assertThat(showIndicatorForDeviceEntry).isTrue()
 
             bouncerRepository.setAlternateVisible(false)
-            assertThat(showIndicatorForDeviceEntry).isEqualTo(false)
+            assertThat(showIndicatorForDeviceEntry).isFalse()
         }
 
     @Test
@@ -265,5 +359,26 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
             R.bool.config_show_sidefps_hint_on_bouncer,
             true
         )
+    }
+
+    private fun TestScope.updateBouncerScene(
+        isActive: Boolean,
+        fpsDetectionRunning: Boolean,
+        isUnlockingWithFpAllowed: Boolean,
+    ) {
+        kosmos.sceneInteractor.changeScene(
+            if (isActive) Scenes.Bouncer else Scenes.Lockscreen,
+            "reason"
+        )
+
+        whenever(keyguardUpdateMonitor.isFingerprintDetectionRunning)
+            .thenReturn(fpsDetectionRunning)
+        whenever(keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)
+            .thenReturn(isUnlockingWithFpAllowed)
+        mContext.orCreateTestableResources.addOverride(
+            R.bool.config_show_sidefps_hint_on_bouncer,
+            true
+        )
+        runCurrent()
     }
 }

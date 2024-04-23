@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -119,7 +120,7 @@ constructor(
         }
 
         val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToDreaming") {
             keyguardInteractor.isAbleToDream
                 .filterRelevantKeyguardState()
                 .sampleCombine(
@@ -149,7 +150,7 @@ constructor(
     }
 
     private fun listenForLockscreenToPrimaryBouncer() {
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { isBouncerShowing -> isBouncerShowing }
                 .collect {
@@ -162,7 +163,7 @@ constructor(
     }
 
     private fun listenForLockscreenToAlternateBouncer() {
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToAlternateBouncer") {
             keyguardInteractor.alternateBouncerShowing
                 .filterRelevantKeyguardStateAnd { isAlternateBouncerShowing ->
                     isAlternateBouncerShowing
@@ -174,7 +175,7 @@ constructor(
     /* Starts transitions when manually dragging up the bouncer from the lockscreen. */
     private fun listenForLockscreenToPrimaryBouncerDragging() {
         var transitionId: UUID? = null
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
             shadeRepository.legacyShadeExpansion
                 .sampleCombine(
                     startedKeyguardTransitionStep,
@@ -258,7 +259,7 @@ constructor(
     }
 
     fun dismissKeyguard() {
-        scope.launch { startTransitionTo(KeyguardState.GONE) }
+        scope.launch("$TAG#dismissKeyguard") { startTransitionTo(KeyguardState.GONE) }
     }
 
     private fun listenForLockscreenToGone() {
@@ -266,7 +267,7 @@ constructor(
             return
         }
 
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToGone") {
             keyguardInteractor.isKeyguardGoingAway
                 .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
                 .collect {
@@ -281,7 +282,7 @@ constructor(
     private fun listenForLockscreenToGoneDragging() {
         if (KeyguardWmStateRefactor.isEnabled) {
             // When the refactor is enabled, we no longer use isKeyguardGoingAway.
-            scope.launch {
+            scope.launch("$TAG#listenForLockscreenToGoneDragging") {
                 swipeToDismissInteractor.dismissFling
                     .filterNotNull()
                     .filterRelevantKeyguardState()
@@ -292,7 +293,7 @@ constructor(
 
     private fun listenForLockscreenToOccludedOrDreaming() {
         if (KeyguardWmStateRefactor.isEnabled) {
-            scope.launch {
+            scope.launch("$TAG#listenForLockscreenToOccludedOrDreaming") {
                 keyguardOcclusionInteractor.showWhenLockedActivityInfo
                     .filterRelevantKeyguardStateAnd { it.isOnTop }
                     .collect { taskInfo ->
@@ -306,7 +307,7 @@ constructor(
                     }
             }
         } else {
-            scope.launch {
+            scope.launch("$TAG#listenForLockscreenToOccludedOrDreaming") {
                 keyguardInteractor.isKeyguardOccluded
                     .filterRelevantKeyguardStateAnd { isOccluded -> isOccluded }
                     .collect { startTransitionTo(KeyguardState.OCCLUDED) }
@@ -315,7 +316,7 @@ constructor(
     }
 
     private fun listenForLockscreenToAodOrDozing() {
-        scope.launch {
+        scope.launch("$TAG#listenForLockscreenToAodOrDozing") {
             listenForSleepTransition(
                 modeOnCanceledFromStartedStep = { startedStep ->
                     if (
@@ -367,7 +368,7 @@ constructor(
     }
 
     companion object {
-        const val TAG = "FromLockscreenTransitionInteractor"
+        private const val TAG = "FromLockscreenTransitionInteractor"
         private val DEFAULT_DURATION = 400.milliseconds
         val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds

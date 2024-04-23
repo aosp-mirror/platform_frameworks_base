@@ -141,8 +141,12 @@ object FooterViewBinder {
             }
         }
 
-        // NOTE: The manage/history button is always visible as long as the footer is visible, no
-        //  need to update the visibility here.
+        launch {
+            viewModel.manageOrHistoryButton.isVisible.collect { isVisible ->
+                // NOTE: This visibility change is never animated.
+                footer.setManageOrHistoryButtonVisible(isVisible.value)
+            }
+        }
     }
 
     private suspend fun bindMessage(

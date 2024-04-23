@@ -106,6 +106,17 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiivne, ainult vasak"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiivne, ainult parem"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiivne, vasak ja parem"</string>
+    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktiivne (ainult meedia), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> aku täituvus"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktiivne (ainult meedia), V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> aku täituvus, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> aku täituvus"</string>
+    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Ühendatud (toetab heli jagamist), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> aku täituvus"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Ühendatud (toetab heli jagamist), V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> aku täituvus, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> aku täituvus"</string>
+    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Ühendatud (toetab heli jagamist), vasak <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Ühendatud (toetab heli jagamist), parem <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktiivne (ainult meedia)"</string>
+    <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Toetab heli jagamist"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktiivne (ainult meedia), ainult vasak"</string>
+    <string name="bluetooth_hearing_aid_media_only_right_active" msgid="3854140683042617230">"Aktiivne (ainult meedia), ainult parem"</string>
+    <string name="bluetooth_hearing_aid_media_only_left_and_right_active" msgid="1299913413062528417">"Aktiivne (ainult meedia), vasak ja parem"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Meediaheli"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonikõned"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failiedastus"</string>
@@ -476,6 +487,14 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – täislaadimiseks kulub <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – laadimine on optimeeritud"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – laadimine"</string>
+    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
+    <skip />
+    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
+    <skip />
+    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
+    <skip />
+    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
+    <skip />
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tundmatu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laadimine"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Kiirlaadimine"</string>
@@ -483,10 +502,14 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Juhtmevaba laadimine"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Laadimine"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ei lae"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Ühendatud, kuid ei laadita"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Ühendatud, kuid ei laeta"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Laetud"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Täielikult laetud"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Laadimine on ootele pandud"</string>
+    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
+    <skip />
+    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
+    <skip />
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Juhib administraator"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Haldavad piiranguga seaded"</string>
     <string name="disabled" msgid="8017887509554714950">"Keelatud"</string>
@@ -643,8 +666,6 @@
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Kõik tegevused kustutatakse väljumisel"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Võite tegevused väljumisel salvestada või kustutada."</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Seansi tegevuste kohe kustutamiseks lähtestage; või salvestage või kustutage need väljumisel."</string>
-    <string name="user_image_take_photo" msgid="467512954561638530">"Pildistage"</string>
-    <string name="user_image_choose_photo" msgid="1363820919146782908">"Valige pilt"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Valige foto"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Liiga palju valesid katseid. Selle seadme andmed kustutatakse."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Liiga palju valesid katseid. See kasutaja kustutatakse."</string>
@@ -675,6 +696,8 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"Telefonisignaal: üks pulk."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"Telefonisignaal: kaks pulka."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"Telefonisignaal: kolm pulka."</string>
+    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
+    <skip />
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"Telefonisignaal on tugev."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"Andmed puuduvad."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Andmesignaal: üks pulk."</string>
@@ -684,8 +707,6 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Etherneti-ühendus on katkestatud."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Helistamine pole võimalik."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Valige profiilipilt"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"Vaikekasutajaikoon"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Füüsiline klaviatuur"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Klaviatuuri paigutuse valimine"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Vaikimisi"</string>

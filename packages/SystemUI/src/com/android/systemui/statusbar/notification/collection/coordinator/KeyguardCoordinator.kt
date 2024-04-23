@@ -18,6 +18,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.os.SystemProperties
 import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
@@ -340,12 +341,41 @@ constructor(
 
             var hasFilteredAnyNotifs = false
 
+            /**
+             * the [notificationMinimalismPrototype] will now show seen notifications on the locked
+             * shade by default, but this property read allows that to be quickly disabled for
+             * testing
+             */
+            private val minimalismShowOnLockedShade
+                get() =
+                    SystemProperties.getBoolean(
+                        "persist.notification_minimalism_prototype.show_on_locked_shade",
+                        true
+                    )
+
+            /**
+             * Encapsulates a definition of "being on the keyguard". Note that these two definitions
+             * are wildly different: [StatusBarState.KEYGUARD] is when on the lock screen and does
+             * not include shade or occluded states, whereas [KeyguardRepository.isKeyguardShowing]
+             * is any state where the keyguard has not been dismissed, including locked shade and
+             * occluded lock screen.
+             *
+             * Returning false for locked shade and occluded states means that this filter will
+             * allow seen notifications to appear in the locked shade.
+             */
+            private fun isOnKeyguard(): Boolean =
+                if (notificationMinimalismPrototype() && minimalismShowOnLockedShade) {
+                    statusBarStateController.state == StatusBarState.KEYGUARD
+                } else {
+                    keyguardRepository.isKeyguardShowing()
+                }
+
             override fun shouldFilterOut(entry: NotificationEntry, now: Long): Boolean =
                 when {
                     // Don't apply filter if the setting is disabled
                     !unseenFilterEnabled -> false
                     // Don't apply filter if the keyguard isn't currently showing
-                    !keyguardRepository.isKeyguardShowing() -> false
+                    !isOnKeyguard() -> false
                     // Don't apply the filter if the notification is unseen
                     unseenNotifications.contains(entry) -> false
                     // Don't apply the filter to (non-promoted) group summaries

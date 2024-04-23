@@ -31,7 +31,6 @@ import android.credentials.selection.ProviderData;
 import android.credentials.selection.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.PermissionUtils;
 import android.util.Slog;
@@ -50,7 +49,7 @@ import java.util.Set;
 public final class CreateRequestSession extends RequestSession<CreateCredentialRequest,
         ICreateCredentialCallback, CreateCredentialResponse>
         implements ProviderSession.ProviderInternalCallback<CreateCredentialResponse> {
-    private static final String TAG = "CreateRequestSession";
+    private static final String TAG = CredentialManager.TAG;
     private final Set<ComponentName> mPrimaryProviders;
 
     CreateRequestSession(@NonNull Context context, RequestSession.SessionLifetime sessionCallback,
@@ -164,7 +163,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     }
 
     @Override
-    public void onUiCancellation(boolean isUserCancellation, ResultReceiver resultReceiver) {
+    public void onUiCancellation(boolean isUserCancellation) {
         String exception = CreateCredentialException.TYPE_USER_CANCELED;
         String message = "User cancelled the selector";
         if (!isUserCancellation) {

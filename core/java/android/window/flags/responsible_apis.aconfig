@@ -1,4 +1,5 @@
 package: "com.android.window.flags"
+container: "system"
 
 flag {
     name: "bal_require_opt_in_by_pending_intent_creator"

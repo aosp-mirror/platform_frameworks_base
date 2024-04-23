@@ -64,6 +64,7 @@ constructor(
     private var interactionJankMonitor: InteractionJankMonitor =
         InteractionJankMonitor.getInstance(),
 ) : ActivityTransitionAnimator.Controller {
+    override val isLaunching: Boolean = true
 
     /** The container to which we will add the ghost view and expanding background. */
     override var transitionContainer = ghostedView.rootView as ViewGroup

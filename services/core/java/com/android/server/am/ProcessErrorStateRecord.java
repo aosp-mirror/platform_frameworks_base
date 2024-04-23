@@ -66,7 +66,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -79,9 +79,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * The error state of the process, such as if it's crashing/ANR etc.
  */
 class ProcessErrorStateRecord {
-    private static final DateTimeFormatter DROPBOX_TIME_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ");
-
     final ProcessRecord mApp;
     private final ActivityManagerService mService;
 
@@ -355,9 +352,18 @@ class ProcessErrorStateRecord {
             synchronized (mProcLock) {
                 latencyTracker.waitingOnProcLockEnded();
                 setNotResponding(true);
+
+                ZonedDateTime timestamp = null;
+                if (timeoutRecord != null && timeoutRecord.mEndUptimeMillis > 0) {
+                    long millisSinceEndUptimeMs = anrTime - timeoutRecord.mEndUptimeMillis;
+                    timestamp = Instant.now().minusMillis(millisSinceEndUptimeMs)
+                                    .atZone(ZoneId.systemDefault());
+                }
+
                 volatileDropboxEntriyStates =
                         ActivityManagerService.VolatileDropboxEntryStates
-                                .withProcessFrozenState(mApp.mOptRecord.isFrozen());
+                                .withProcessFrozenStateAndTimestamp(
+                                        mApp.mOptRecord.isFrozen(), timestamp);
             }
 
             // Log the ANR to the event log.
@@ -450,13 +456,6 @@ class ProcessErrorStateRecord {
             info.append("ErrorId: ").append(errorId.toString()).append("\n");
         }
         info.append("Frozen: ").append(mApp.mOptRecord.isFrozen()).append("\n");
-        if (timeoutRecord != null && timeoutRecord.mEndUptimeMillis > 0) {
-            long millisSinceEndUptimeMs = anrTime - timeoutRecord.mEndUptimeMillis;
-            String formattedTime = DROPBOX_TIME_FORMATTER.format(
-                    Instant.now().minusMillis(millisSinceEndUptimeMs)
-                            .atZone(ZoneId.systemDefault()));
-            info.append("Timestamp: ").append(formattedTime).append("\n");
-        }
 
         // Retrieve controller with max ANR delay from AnrControllers
         // Note that we retrieve the controller before dumping stacks because dumping stacks can

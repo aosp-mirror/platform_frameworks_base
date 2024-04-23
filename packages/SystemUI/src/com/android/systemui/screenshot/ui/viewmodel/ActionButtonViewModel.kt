@@ -16,11 +16,20 @@
 
 package com.android.systemui.screenshot.ui.viewmodel
 
-import android.graphics.drawable.Drawable
-
 data class ActionButtonViewModel(
-    val icon: Drawable?,
-    val name: CharSequence?,
-    val description: CharSequence,
-    val onClicked: (() -> Unit)?
-)
+    val appearance: ActionButtonAppearance,
+    val id: Int,
+    val visible: Boolean,
+    val onClicked: (() -> Unit)?,
+) {
+    companion object {
+        private var nextId = 0
+
+        private fun getId() = nextId.also { nextId += 1 }
+
+        fun withNextId(
+            appearance: ActionButtonAppearance,
+            onClicked: (() -> Unit)?
+        ): ActionButtonViewModel = ActionButtonViewModel(appearance, getId(), true, onClicked)
+    }
+}

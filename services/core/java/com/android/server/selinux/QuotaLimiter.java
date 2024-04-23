@@ -34,10 +34,10 @@ public class QuotaLimiter {
 
     private final Clock mClock;
     private final Duration mWindowSize;
-    private final int mMaxPermits;
 
-    private long mCurrentWindow = 0;
-    private int mPermitsGranted = 0;
+    private int mMaxPermits;
+    private long mCurrentWindow;
+    private int mPermitsGranted;
 
     @VisibleForTesting
     QuotaLimiter(Clock clock, Duration windowSize, int maxPermits) {
@@ -74,5 +74,9 @@ public class QuotaLimiter {
         }
 
         return false;
+    }
+
+    public void setMaxPermits(int maxPermits) {
+        this.mMaxPermits = maxPermits;
     }
 }

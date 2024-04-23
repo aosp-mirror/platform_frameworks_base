@@ -44,10 +44,7 @@ import org.junit.runner.RunWith
 class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     val kosmos =
         testKosmos().apply {
-            fakeFeatureFlagsClassic.apply {
-                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-            }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
     val testScope = kosmos.testScope
 
@@ -58,6 +55,7 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT)
         whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(false)
         sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(false)
     }

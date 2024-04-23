@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCandidateCredentialsException;
@@ -92,7 +93,7 @@ public final class CredentialManagerService
         extends AbstractMasterSystemService<
         CredentialManagerService, CredentialManagerServiceImpl> {
 
-    private static final String TAG = "CredManSysService";
+    private static final String TAG = CredentialManager.TAG;
     private static final String PERMISSION_DENIED_ERROR = "permission_denied";
     private static final String PERMISSION_DENIED_WRITE_SECURE_SETTINGS_ERROR =
             "Caller is missing WRITE_SECURE_SETTINGS permission";

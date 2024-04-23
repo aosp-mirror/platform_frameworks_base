@@ -77,6 +77,22 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
     /**
+     * Default value for {@code MAX_TASK_LIMIT}.
+     */
+    @VisibleForTesting
+    public static final int DEFAULT_MAX_TASK_LIMIT = 4;
+
+    // TODO(b/335131008): add a config-overlay field for the max number of tasks in Desktop Mode
+    /**
+     * Flag declaring the maximum number of Tasks to show in Desktop Mode at any one time.
+     *
+     * <p> The limit does NOT affect Picture-in-Picture, Bubbles, or System Modals (like a screen
+     * recording window, or Bluetooth pairing window).
+     */
+    private static final int MAX_TASK_LIMIT = SystemProperties.getInt(
+            "persist.wm.debug.desktop_max_task_limit", DEFAULT_MAX_TASK_LIMIT);
+
+    /**
      * Return {@code true} if desktop windowing is enabled
      */
     public static boolean isEnabled() {
@@ -121,6 +137,13 @@ public class DesktopModeStatus {
     @VisibleForTesting
     public static boolean enforceDeviceRestrictions() {
         return ENFORCE_DEVICE_RESTRICTIONS;
+    }
+
+    /**
+     * Return the maximum limit on the number of Tasks to show in Desktop Mode at any one time.
+     */
+    static int getMaxTaskLimit() {
+        return MAX_TASK_LIMIT;
     }
 
     /**

@@ -291,7 +291,7 @@ public class AmbientState implements Dumpable {
         mOverExpansion = overExpansion;
     }
 
-    float getOverExpansion() {
+    public float getOverExpansion() {
         return mOverExpansion;
     }
 
@@ -742,7 +742,7 @@ public class AmbientState implements Dumpable {
         pw.println("mHideSensitive=" + mHideSensitive);
         pw.println("mShadeExpanded=" + mShadeExpanded);
         pw.println("mClearAllInProgress=" + mClearAllInProgress);
-        pw.println("mStatusBarState=" + mStatusBarState);
+        pw.println("mStatusBarState=" + StatusBarState.toString(mStatusBarState));
         pw.println("mExpansionChanging=" + mExpansionChanging);
         pw.println("mPanelFullWidth=" + mIsSmallScreen);
         pw.println("mPulsing=" + mPulsing);

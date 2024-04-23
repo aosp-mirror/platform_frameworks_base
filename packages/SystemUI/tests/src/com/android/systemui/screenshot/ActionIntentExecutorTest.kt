@@ -64,7 +64,7 @@ class ActionIntentExecutorTest : SysuiTestCase() {
             val intent = Intent(Intent.ACTION_EDIT).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
             val userHandle = myUserHandle()
 
-            actionIntentExecutor.launchIntent(intent, null, userHandle, false)
+            actionIntentExecutor.launchIntent(intent, userHandle, false, null, null)
             scheduler.advanceUntilIdle()
 
             verify(activityManagerWrapper)

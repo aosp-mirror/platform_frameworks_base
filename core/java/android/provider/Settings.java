@@ -686,25 +686,6 @@ public final class Settings {
             "android.settings.MANAGE_APP_LONG_RUNNING_JOBS";
 
     /**
-     * Activity Action: Show settings to allow configuration of
-     * {@link Manifest.permission#RUN_BACKUP_JOBS} permission.
-     *
-     * Input: Optionally, the Intent's data URI can specify the application package name to
-     * directly invoke the management GUI specific to the package name. For example
-     * "package:com.my.app".
-     * <p>
-     * Output: When a package data uri is passed as input, the activity result is set to
-     * {@link android.app.Activity#RESULT_OK} if the permission was granted to the app. Otherwise,
-     * the result is set to {@link android.app.Activity#RESULT_CANCELED}.
-     *
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_BACKUP_TASKS_SETTINGS_SCREEN)
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_REQUEST_RUN_BACKUP_JOBS =
-            "android.settings.REQUEST_RUN_BACKUP_JOBS";
-
-    /**
      * Activity Action: Show settings to allow configuration of cross-profile access for apps
      *
      * Input: Optionally, the Intent's data URI can specify the application package name to
@@ -8005,6 +7986,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String ACCESSIBILITY_BOUNCE_KEYS = "accessibility_bounce_keys";
 
         /**
@@ -8016,6 +7998,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String ACCESSIBILITY_SLOW_KEYS = "accessibility_slow_keys";
 
         /**
@@ -8025,6 +8008,7 @@ public final class Settings {
          *
          * @hide
          */
+        @Readable
         public static final String ACCESSIBILITY_STICKY_KEYS = "accessibility_sticky_keys";
 
         /**
@@ -9015,6 +8999,16 @@ public final class Settings {
         @Readable
         public static final String ACCESSIBILITY_DISPLAY_DALTONIZER =
                 "accessibility_display_daltonizer";
+
+        /**
+         * Integer property that determines the saturation level of color correction. Default value
+         * is defined in Settings config.xml.
+         * [0-10] inclusive where 0 would look as if color space adustment is not applied at all.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL =
+                "accessibility_display_daltonizer_saturation_level";
 
         /**
          * Setting that specifies whether automatic click when the mouse pointer stops moving is
@@ -10225,6 +10219,13 @@ public final class Settings {
                 "screensaver_complications_enabled";
 
         /**
+         * Defines the enabled state for the glanceable hub.
+         *
+         * @hide
+         */
+        public static final String GLANCEABLE_HUB_ENABLED = "glanceable_hub_enabled";
+
+        /**
          * Whether home controls are enabled to be shown over the screensaver by the user.
          *
          * @hide
@@ -10970,12 +10971,28 @@ public final class Settings {
                 "biometric_debug_enabled";
 
         /**
-         * Whether or not virtual sensors are enabled.
+         * Whether or not both fingerprint and face virtual sensors are enabled.
          * @hide
          */
         @TestApi
         @Readable
         public static final String BIOMETRIC_VIRTUAL_ENABLED = "biometric_virtual_enabled";
+
+        /**
+         * Whether or not fingerprint virtual sensors are enabled.
+         * @hide
+         */
+        @FlaggedApi("com.android.server.biometrics.face_vhal_feature")
+        public static final String BIOMETRIC_FINGERPRINT_VIRTUAL_ENABLED =
+                "biometric_fingerprint_virtual_enabled";
+
+        /**
+         * Whether or not face virtual sensors are enabled.
+         * @hide
+         */
+        @FlaggedApi("com.android.server.biometrics.face_vhal_feature")
+        public static final String BIOMETRIC_FACE_VIRTUAL_ENABLED =
+                "biometric_face_virtual_enabled";
 
         /**
          * Whether or not biometric is allowed on Keyguard.

@@ -19,12 +19,12 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import android.tools.Rotation
 import android.tools.flicker.assertions.FlickerTest
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.helpers.WindowUtils
+import android.tools.traces.component.ComponentNameMatcher
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.pip.common.PipTransition
@@ -34,7 +34,10 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/** Test Pip launch. To run this test: `atest WMShellFlickerTests:PipKeyboardTest` */
+/**
+ * Test Pip launch. To run this test:
+ * `atest WMShellFlickerTestsPip3:MovePipOnImeVisibilityChangeTest`
+ */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

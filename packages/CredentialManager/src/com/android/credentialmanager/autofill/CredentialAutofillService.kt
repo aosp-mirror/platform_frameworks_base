@@ -32,6 +32,7 @@ import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
+import android.os.ResultReceiver
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
 import android.service.autofill.Field
@@ -46,9 +47,9 @@ import android.service.autofill.SaveRequest
 import android.service.credentials.CredentialProviderService
 import android.util.Log
 import android.content.Intent
+import android.os.IBinder
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillManager
-import android.view.autofill.IAutoFillManagerClient
 import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
 import androidx.autofill.inline.v1.InlineSuggestionUi
@@ -94,7 +95,7 @@ class CredentialAutofillService : AutofillService() {
             request: FillRequest,
             cancellationSignal: CancellationSignal,
             callback: FillCallback,
-            autofillCallback: IAutoFillManagerClient
+            autofillCallback: IBinder
     ) {
         val context = request.fillContexts
         val structure = context[context.size - 1].structure
@@ -109,17 +110,19 @@ class CredentialAutofillService : AutofillService() {
         }
         val sessionId = clientState.getInt(SESSION_ID_KEY)
         val requestId = clientState.getInt(REQUEST_ID_KEY)
+        val resultReceiver = clientState.getParcelable(
+                CredentialManager.EXTRA_AUTOFILL_RESULT_RECEIVER, ResultReceiver::class.java)
         Log.i(TAG, "Autofill sessionId: $sessionId, autofill requestId: $requestId")
-        if (sessionId == 0 || requestId == 0) {
-            Log.i(TAG, "Session Id or request Id not found")
-            callback.onFailure("Session Id or request Id not found")
+        if (sessionId == 0 || requestId == 0 || resultReceiver == null) {
+            Log.i(TAG, "Session Id or request Id or resultReceiver not found")
+            callback.onFailure("Session Id or request Id or resultReceiver not found")
             return
         }
 
         val responseClientState = Bundle()
         responseClientState.putBoolean(WEBVIEW_REQUESTED_CREDENTIAL_KEY, false)
         val getCredRequest: GetCredentialRequest? = getCredManRequest(structure, sessionId,
-                requestId, responseClientState)
+                requestId, resultReceiver, responseClientState)
         // TODO(b/324635774): Use callback for validating. If the request is coming
         // directly from the view, there should be a corresponding callback, otherwise
         // we should fail fast,
@@ -157,7 +160,7 @@ class CredentialAutofillService : AutofillService() {
                 CancellationSignal(),
                 Executors.newSingleThreadExecutor(),
                 outcome,
-                autofillCallback.asBinder()
+                autofillCallback
         )
     }
 
@@ -531,6 +534,7 @@ class CredentialAutofillService : AutofillService() {
             structure: AssistStructure,
             sessionId: Int,
             requestId: Int,
+            resultReceiver: ResultReceiver,
             responseClientState: Bundle
     ): GetCredentialRequest? {
         val credentialOptions: MutableList<CredentialOption> = mutableListOf()
@@ -540,6 +544,9 @@ class CredentialAutofillService : AutofillService() {
             val dataBundle = Bundle()
             dataBundle.putInt(SESSION_ID_KEY, sessionId)
             dataBundle.putInt(REQUEST_ID_KEY, requestId)
+            dataBundle.putParcelable(CredentialManager.EXTRA_AUTOFILL_RESULT_RECEIVER,
+                    resultReceiver)
+
             return GetCredentialRequest.Builder(dataBundle)
                     .setCredentialOptions(credentialOptions)
                     .build()

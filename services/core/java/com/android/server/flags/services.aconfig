@@ -1,8 +1,19 @@
 package: "com.android.server.flags"
+container: "system"
 
 flag {
      namespace: "wear_frameworks"
      name: "enable_odp_feature_guard"
      description: "Enable guard based on system feature to prevent OnDevicePersonalization service from starting on form factors."
      bug: "322249125"
+}
+
+flag {
+    namespace: "input"
+    name: "new_bugreport_keyboard_shortcut"
+    description: "Enable META+CTRL+BACKSPACE keyboard shortcut for taking a bug report"
+    bug: "335607520"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

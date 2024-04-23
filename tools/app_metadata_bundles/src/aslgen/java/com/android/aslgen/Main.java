@@ -16,8 +16,8 @@
 
 package com.android.aslgen;
 
-import com.android.asllib.AndroidSafetyLabel;
-import com.android.asllib.AndroidSafetyLabel.Format;
+import com.android.asllib.AslConverter;
+import com.android.asllib.AslConverter.Format;
 import com.android.asllib.util.MalformedXmlException;
 
 import org.xml.sax.SAXException;
@@ -41,9 +41,8 @@ public class Main {
 
         String inFile = null;
         String outFile = null;
-        Format inFormat = Format.NULL;
-        Format outFormat = Format.NULL;
-
+        Format inFormat = AslConverter.Format.NULL;
+        Format outFormat = AslConverter.Format.NULL;
 
         // Except for "--help", all arguments require a value currently.
         // So just make sure we have an even number and
@@ -79,11 +78,11 @@ public class Main {
             throw new IllegalArgumentException("output file is required");
         }
 
-        if (inFormat == Format.NULL) {
+        if (inFormat == AslConverter.Format.NULL) {
             throw new IllegalArgumentException("input format is required");
         }
 
-        if (outFormat == Format.NULL) {
+        if (outFormat == AslConverter.Format.NULL) {
             throw new IllegalArgumentException("output format is required");
         }
 
@@ -92,24 +91,23 @@ public class Main {
         System.out.println("in format: " + inFormat);
         System.out.println("out format: " + outFormat);
 
-        var asl = AndroidSafetyLabel.readFromStream(new FileInputStream(inFile), inFormat);
-        asl.writeToStream(new FileOutputStream(outFile), outFormat);
+        var asl = AslConverter.readFromStream(new FileInputStream(inFile), inFormat);
+        AslConverter.writeToStream(new FileOutputStream(outFile), asl, outFormat);
     }
 
     private static Format getFormat(String argValue) {
         if ("hr".equals(argValue)) {
-            return Format.HUMAN_READABLE;
+            return AslConverter.Format.HUMAN_READABLE;
         } else if ("od".equals(argValue)) {
-            return Format.ON_DEVICE;
+            return AslConverter.Format.ON_DEVICE;
         } else {
-            return Format.NULL;
+            return AslConverter.Format.NULL;
         }
     }
 
     private static void showUsage() {
-        AndroidSafetyLabel.test();
         System.err.println(
-                "Usage:\n"
-        );
+                "Usage: aslgen --in-path [input-file] --out-path [output-file] --in-format [hr|od]"
+                        + " --out-format [hr|od]");
     }
 }

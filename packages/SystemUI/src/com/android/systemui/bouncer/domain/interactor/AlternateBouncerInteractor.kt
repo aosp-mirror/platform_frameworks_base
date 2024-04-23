@@ -27,9 +27,9 @@ import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.android.systemui.util.time.SystemClock
 import dagger.Lazy
 import javax.inject.Inject
@@ -78,15 +78,14 @@ constructor(
             bouncerRepository.alternateBouncerUIAvailable
         }
     private val isDozingOrAod: Flow<Boolean> =
-        keyguardTransitionInteractor
-            .get()
-            .transitions
-            .map {
-                it.to == KeyguardState.DOZING ||
-                    it.to == KeyguardState.AOD ||
-                    ((it.from == KeyguardState.DOZING || it.from == KeyguardState.AOD) &&
-                        it.transitionState != TransitionState.FINISHED)
-            }
+        or(
+                keyguardTransitionInteractor.get().transitionValue(KeyguardState.DOZING).map {
+                    it > 0f
+                },
+                keyguardTransitionInteractor.get().transitionValue(KeyguardState.AOD).map {
+                    it > 0f
+                },
+            )
             .distinctUntilChanged()
 
     /**

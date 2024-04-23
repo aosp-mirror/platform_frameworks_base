@@ -15,20 +15,21 @@
  */
 package com.android.credentialmanager.ui.screens.multiple
 
+import com.android.credentialmanager.ui.components.CredentialsScreenChip
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Text
-import com.android.credentialmanager.ui.components.SignInHeader
 import com.android.credentialmanager.CredentialSelectorUiState.Get.MultipleEntry
 import com.android.credentialmanager.FlowEngine
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.ui.components.WearButtonText
+import com.android.credentialmanager.common.ui.components.WearSecondaryLabel
 import com.android.credentialmanager.model.get.CredentialEntryInfo
-import com.android.credentialmanager.ui.components.CredentialsScreenChip
+import com.android.credentialmanager.ui.components.CredentialsScreenChipSpacer
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.compose.layout.ScalingLazyColumn
 import com.google.android.horologist.compose.layout.ScalingLazyColumnState
@@ -55,20 +56,17 @@ fun MultiCredentialsFlattenScreen(
     ) {
         item {
             // make this credential specific if all credentials are same
-            SignInHeader(
-                icon = null,
-                title = stringResource(R.string.sign_in_options_title),
+            WearButtonText(
+                text = stringResource(R.string.sign_in_options_title),
+                textAlign = TextAlign.Start,
             )
         }
 
         credentialSelectorUiState.accounts.forEach { userNameEntries ->
             item {
-                Text(
+                WearSecondaryLabel(
                     text = userNameEntries.userName,
-                    modifier = Modifier
-                        .padding(top = 6.dp)
-                        .padding(horizontal = 10.dp),
-                    style = MaterialTheme.typography.title3
+                    modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
                 )
             }
 
@@ -79,21 +77,20 @@ fun MultiCredentialsFlattenScreen(
                         onClick = { selectEntry(credential, false) },
                         secondaryLabel = credential.credentialTypeDisplayName,
                         icon = credential.icon,
+                        textAlign = TextAlign.Start
                     )
+
+                    CredentialsScreenChipSpacer()
                 }
             }
         }
         item {
-            Text(
+            WearSecondaryLabel(
                 text = stringResource(R.string.provider_list_title),
-                modifier = Modifier
-                    .padding(top = 6.dp)
-                    .padding(horizontal = 10.dp),
-                style = MaterialTheme.typography.title3
+                modifier = Modifier.padding(top = 12.dp, bottom = 4.dp)
             )
         }
-
-        credentialSelectorUiState.actionEntryList.forEach {actionEntry ->
+        credentialSelectorUiState.actionEntryList.forEach { actionEntry ->
             item {
                     CredentialsScreenChip(
                         label = actionEntry.title,
@@ -101,9 +98,8 @@ fun MultiCredentialsFlattenScreen(
                         secondaryLabel = null,
                         icon = actionEntry.icon,
                     )
+                    CredentialsScreenChipSpacer()
             }
         }
     }
 }
-
-

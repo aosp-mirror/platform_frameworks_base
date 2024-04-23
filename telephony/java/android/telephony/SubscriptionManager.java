@@ -3137,7 +3137,7 @@ public class SubscriptionManager {
             if (useRootLocale) {
                 configurationKey.setLocale(Locale.ROOT);
             }
-            cacheKey = Pair.create(context.getPackageName(), configurationKey);
+            cacheKey = Pair.create(context.getPackageName() + ", subid=" + subId, configurationKey);
             synchronized (sResourcesCache) {
                 Resources cached = sResourcesCache.get(cacheKey);
                 if (cached != null) {
@@ -4610,6 +4610,31 @@ public class SubscriptionManager {
             case SubscriptionManager.USAGE_SETTING_DATA_CENTRIC: return "DATA_CENTRIC";
             default:
                 return "UNKNOWN(" + usageSetting + ")";
+        }
+    }
+
+    /**
+     * Set owner for this subscription.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @param groupOwner The group owner to assign to the subscription
+     *
+     * @throws SecurityException if caller is not authorized.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setGroupOwner(int subscriptionId, @NonNull String groupOwner) {
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                iSub.setGroupOwner(subscriptionId, groupOwner);
+            } else {
+                throw new IllegalStateException("[setGroupOwner]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
         }
     }
 

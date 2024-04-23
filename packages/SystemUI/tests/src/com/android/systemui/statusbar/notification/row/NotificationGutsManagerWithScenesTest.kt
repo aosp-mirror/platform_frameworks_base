@@ -45,6 +45,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.statusbar.statusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.concurrency.fakeExecutor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager
@@ -55,7 +56,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractorFactory.creat
 import com.android.systemui.scene.data.repository.WindowRootViewVisibilityRepository
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.shade.shadeControllerSceneImpl
@@ -93,6 +93,7 @@ import org.mockito.invocation.InvocationOnMock
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
+@EnableSceneContainer
 class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
     private val testNotificationChannel =
         NotificationChannel(
@@ -143,8 +144,6 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        val sceneContainerFlags = kosmos.fakeSceneContainerFlags
-        sceneContainerFlags.enabled = true
         allowTestableLooperAsMainThread()
         helper = NotificationTestHelper(mContext, mDependency)
         Mockito.`when`(accessibilityManager.isTouchExplorationEnabled).thenReturn(false)
@@ -156,9 +155,9 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
                 headsUpManager,
                 create().powerInteractor,
                 activeNotificationsInteractor,
-                sceneContainerFlags,
-                { sceneInteractor },
-            )
+            ) {
+                sceneInteractor
+            }
         gutsManager =
             NotificationGutsManager(
                 mContext,
