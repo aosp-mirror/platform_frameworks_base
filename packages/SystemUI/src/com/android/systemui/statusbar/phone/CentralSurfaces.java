@@ -37,6 +37,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.RemoteAnimationRunnerCompat;
@@ -50,7 +51,7 @@ import com.android.systemui.util.Compile;
 import java.io.PrintWriter;
 
 /** */
-public interface CentralSurfaces extends Dumpable, LifecycleOwner {
+public interface CentralSurfaces extends Dumpable, LifecycleOwner, CoreStartable {
     boolean MULTIUSER_DEBUG = false;
     // Should match the values in PhoneWindowManager
     String SYSTEM_DIALOG_REASON_KEY = "reason";
@@ -181,6 +182,9 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
         }
         return contextForUser.getPackageManager();
     }
+
+    /** Default impl for CoreStartable. */
+    default void start() {}
 
     boolean updateIsKeyguard();
 

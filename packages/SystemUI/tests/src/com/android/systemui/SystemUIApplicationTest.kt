@@ -27,7 +27,6 @@ import com.android.systemui.dump.dumpManager
 import com.android.systemui.flags.systemPropertiesHelper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.process.processWrapper
-import com.android.systemui.startable.Dependencies
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import javax.inject.Provider
@@ -56,6 +55,19 @@ class SystemUIApplicationTest : SysuiTestCase() {
     @Mock private lateinit var bootCompleteCache: BootCompleteCacheImpl
     @Mock private lateinit var initController: InitController
 
+    class StartableA : TestableStartable()
+    class StartableB : TestableStartable()
+    class StartableC : TestableStartable()
+    class StartableD : TestableStartable()
+    class StartableE : TestableStartable()
+
+    val dependencyMap: Map<Class<*>, Set<Class<out CoreStartable>>> =
+        mapOf(
+            StartableC::class.java to setOf(StartableA::class.java),
+            StartableD::class.java to setOf(StartableA::class.java, StartableB::class.java),
+            StartableE::class.java to setOf(StartableD::class.java, StartableB::class.java),
+        )
+
     private val startableA = StartableA()
     private val startableB = StartableB()
     private val startableC = StartableC()
@@ -76,6 +88,7 @@ class SystemUIApplicationTest : SysuiTestCase() {
         whenever(sysuiComponent.provideBootCacheImpl()).thenReturn(bootCompleteCache)
         whenever(sysuiComponent.createDumpManager()).thenReturn(kosmos.dumpManager)
         whenever(sysuiComponent.initController).thenReturn(initController)
+        whenever(sysuiComponent.startableDependencies).thenReturn(dependencyMap)
         kosmos.processWrapper.systemUser = true
 
         app.setContextAvailableCallback(contextAvailableCallback)
@@ -168,13 +181,4 @@ class SystemUIApplicationTest : SysuiTestCase() {
             startOrder++
         }
     }
-
-    class StartableA : TestableStartable()
-    class StartableB : TestableStartable()
-
-    @Dependencies(StartableA::class) class StartableC : TestableStartable()
-
-    @Dependencies(StartableA::class, StartableB::class) class StartableD : TestableStartable()
-
-    @Dependencies(StartableD::class, StartableB::class) class StartableE : TestableStartable()
 }
