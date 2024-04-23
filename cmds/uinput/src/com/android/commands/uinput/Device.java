@@ -223,7 +223,7 @@ public class Device {
                         break;
                     }
                     long offsetMicros = args.argl1;
-                    if (mLastInjectTimestampMicros == -1 || offsetMicros == -1) {
+                    if (mLastInjectTimestampMicros == -1) {
                         // There's often a delay of a few milliseconds between the time specified to
                         // Handler.sendMessageAtTime and the handler actually being called, due to
                         // the way threads are scheduled. We don't take this into account when
@@ -239,6 +239,9 @@ public class Device {
                         // To prevent this, we need to use the time at which we scheduled this first
                         // batch, rather than the actual current time.
                         mLastInjectTimestampMicros = args.argl2 / 1000;
+                    } else if (offsetMicros == -1) {
+                        // No timestamp offset is specified for this event, so use the current time.
+                        mLastInjectTimestampMicros = SystemClock.uptimeNanos() / 1000;
                     } else {
                         mLastInjectTimestampMicros += offsetMicros;
                     }
