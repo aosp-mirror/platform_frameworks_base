@@ -27,6 +27,7 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -51,6 +52,7 @@ public final class ContextualSearchManager {
      */
     public static final String EXTRA_ENTRYPOINT =
             "android.app.contextualsearch.extra.ENTRYPOINT";
+
     /**
      * Key to get the flag_secure value from the extras of the activity launched by contextual
      * search. The value will be true if flag_secure is found in any of the visible activities.
@@ -58,12 +60,14 @@ public final class ContextualSearchManager {
      */
     public static final String EXTRA_FLAG_SECURE_FOUND =
             "android.app.contextualsearch.extra.FLAG_SECURE_FOUND";
+
     /**
      * Key to get the screenshot from the extras of the activity launched by contextual search.
      * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
      */
     public static final String EXTRA_SCREENSHOT =
             "android.app.contextualsearch.extra.SCREENSHOT";
+
     /**
      * Key to check whether managed profile is visible from the extras of the activity launched by
      * contextual search. The value will be true if any one of the visible apps is managed.
@@ -71,6 +75,7 @@ public final class ContextualSearchManager {
      */
     public static final String EXTRA_IS_MANAGED_PROFILE_VISIBLE =
             "android.app.contextualsearch.extra.IS_MANAGED_PROFILE_VISIBLE";
+
     /**
      * Key to get the list of visible packages from the extras of the activity launched by
      * contextual search.
@@ -78,6 +83,18 @@ public final class ContextualSearchManager {
      */
     public static final String EXTRA_VISIBLE_PACKAGE_NAMES =
             "android.app.contextualsearch.extra.VISIBLE_PACKAGE_NAMES";
+
+    /**
+     * Key to get the time the user made the invocation request, based on
+     * {@link SystemClock#uptimeMillis()}.
+     * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * TODO: un-hide in W
+     *
+     * @hide
+     */
+    public static final String EXTRA_INVOCATION_TIME_MS =
+            "android.app.contextualsearch.extra.INVOCATION_TIME_MS";
 
     /**
      * Key to get the binder token from the extras of the activity launched by contextual search.
