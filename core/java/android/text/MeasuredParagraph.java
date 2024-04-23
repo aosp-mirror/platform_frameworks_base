@@ -30,6 +30,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.text.LineBreakConfig;
 import android.graphics.text.MeasuredText;
+import android.icu.lang.UCharacter;
+import android.icu.lang.UCharacterDirection;
 import android.icu.text.Bidi;
 import android.text.AutoGrowArray.ByteArray;
 import android.text.AutoGrowArray.FloatArray;
@@ -711,7 +713,12 @@ public class MeasuredParagraph {
                 // check the paragraph count here and replace the CR letters and re-calculate
                 // BiDi again.
                 for (int i = 0; i < mTextLength; ++i) {
-                    if (mCopiedBuffer[i] == '\r') {
+                    if (Character.isSurrogate(mCopiedBuffer[i])) {
+                        // All block separators are in BMP.
+                        continue;
+                    }
+                    if (UCharacter.getDirection(mCopiedBuffer[i])
+                            == UCharacterDirection.BLOCK_SEPARATOR) {
                         mCopiedBuffer[i] = OBJECT_REPLACEMENT_CHARACTER;
                     }
                 }
