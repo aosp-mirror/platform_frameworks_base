@@ -23,6 +23,7 @@ import android.tools.flicker.assertors.assertions.AppLayerIsVisibleAtStart
 import android.tools.flicker.assertors.assertions.AppWindowHasDesktopModeInitialBoundsAtTheEnd
 import android.tools.flicker.assertors.assertions.AppWindowOnTopAtEnd
 import android.tools.flicker.assertors.assertions.AppWindowOnTopAtStart
+import android.tools.flicker.assertors.assertions.AppWindowRemainInsideDisplayBounds
 import android.tools.flicker.assertors.assertions.LauncherWindowMovesToTop
 import android.tools.flicker.config.AssertionTemplates
 import android.tools.flicker.config.FlickerConfigEntry
@@ -113,6 +114,31 @@ class DesktopModeFlickerScenarios {
                                 LauncherWindowMovesToTop()
                             )
                             .associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
+            )
+
+        val CORNER_RESIZE =
+            FlickerConfigEntry(
+                scenarioId = ScenarioId("CORNER_RESIZE"),
+                extractor =
+                ShellTransitionScenarioExtractor(
+                    transitionMatcher =
+                    object : ITransitionMatcher {
+                        override fun findAll(
+                            transitions: Collection<Transition>
+                        ): Collection<Transition> {
+                            return transitions.filter {
+                                it.type == TransitionType.CHANGE
+                            }
+                        }
+                    }
+                ),
+                assertions =
+                AssertionTemplates.COMMON_ASSERTIONS +
+                        listOf(
+                            AppLayerIsVisibleAlways(Components.DESKTOP_MODE_APP),
+                            AppWindowOnTopAtEnd(Components.DESKTOP_MODE_APP),
+                            AppWindowRemainInsideDisplayBounds(Components.DESKTOP_MODE_APP),
+                        ).associateBy({ it }, { AssertionInvocationGroup.BLOCKING }),
             )
     }
 }
