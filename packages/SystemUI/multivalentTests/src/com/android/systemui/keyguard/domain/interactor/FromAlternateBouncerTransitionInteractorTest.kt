@@ -46,11 +46,12 @@ import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.testKosmos
-import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.reset
@@ -124,6 +125,8 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             )
             kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
             kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(true)
+            runCurrent()
+
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.OCCLUDED,
                 to = KeyguardState.ALTERNATE_BOUNCER,
@@ -132,8 +135,7 @@ class FromAlternateBouncerTransitionInteractorTest : SysuiTestCase() {
             reset(transitionRepository)
 
             kosmos.fakeKeyguardBouncerRepository.setAlternateVisible(false)
-            runCurrent()
-            testScope.testScheduler.advanceTimeBy(200) // advance past delay
+            advanceTimeBy(200) // advance past delay
 
             assertThat(transitionRepository)
                 .startedTransition(

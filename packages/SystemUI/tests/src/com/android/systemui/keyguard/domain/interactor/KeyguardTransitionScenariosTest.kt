@@ -897,6 +897,31 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    fun alternateBouncerToGone() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to ALTERNATE_BOUNCER
+            bouncerRepository.setAlternateVisible(true)
+            runTransitionAndSetWakefulness(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.ALTERNATE_BOUNCER
+            )
+
+            // GIVEN the keyguard is going away
+            keyguardRepository.setKeyguardGoingAway(true)
+            runCurrent()
+
+            assertThat(transitionRepository)
+                .startedTransition(
+                    ownerName = "FromAlternateBouncerTransitionInteractor",
+                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    to = KeyguardState.GONE,
+                    animatorAssertion = { it.isNotNull() },
+                )
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     fun alternateBouncerToGlanceableHub() =
         testScope.runTest {
             // GIVEN a prior transition has run to ALTERNATE_BOUNCER

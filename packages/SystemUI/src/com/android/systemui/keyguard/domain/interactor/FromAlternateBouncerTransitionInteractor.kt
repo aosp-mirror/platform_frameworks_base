@@ -27,7 +27,6 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
-import com.android.systemui.util.kotlin.sample as sampleUtil
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -157,12 +156,8 @@ constructor(
                         }
                     }
                 )
-                .sampleUtil(finishedKeyguardState)
-                .collect { keyguardState ->
-                    if (keyguardState == KeyguardState.ALTERNATE_BOUNCER) {
-                        startTransitionTo(KeyguardState.GONE)
-                    }
-                }
+                .filterRelevantKeyguardState()
+                .collect { startTransitionTo(KeyguardState.GONE) }
         }
     }
 
