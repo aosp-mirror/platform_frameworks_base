@@ -253,8 +253,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         @Override
         public void onStatusBarTrackpadEvent(MotionEvent event) {
-            verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () ->
-                    mShadeViewControllerLazy.get().handleExternalTouch(event));
+            verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () -> {
+                if (SceneContainerFlag.isEnabled()) {
+                    int action = event.getActionMasked();
+                    if (action == ACTION_DOWN) {
+                        mSceneInteractor.get().onRemoteUserInteractionStarted(
+                                "trackpad swipe");
+                    } else if (action == ACTION_UP) {
+                        mSceneInteractor.get().changeScene(
+                                Scenes.Shade, "short trackpad swipe");
+                    }
+                    mStatusBarWinController.getWindowRootView().dispatchTouchEvent(event);
+                } else {
+                    mShadeViewControllerLazy.get().handleExternalTouch(event);
+                }
+            });
         }
 
         @Override
