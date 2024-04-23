@@ -34,11 +34,14 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Queue;
+
+import platform.test.runner.parameterized.Parameter;
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 /**
  * Parameterized unit test for Events.logEvent.
@@ -51,7 +54,7 @@ import java.util.Queue;
  * either SysuiTestCase or SysUiBaseFragmentTest.
  *
  */
-@RunWith(Parameterized.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @SmallTest
 public class EventsTest extends SysuiTestCase {
     private FakeMetricsLogger mLegacyLogger;
@@ -66,23 +69,23 @@ public class EventsTest extends SysuiTestCase {
     }
 
     // Parameters for calling writeEvent with arbitrary args.
-    @Parameterized.Parameter
+    @Parameter
     public int mTag;
 
-    @Parameterized.Parameter(1)
+    @Parameter(1)
     public Object[] mArgs;
 
     // Expect returned string exactly matches.
-    @Parameterized.Parameter(2)
+    @Parameter(2)
     public String mExpectedMessage;
 
     // Expect these MetricsLogger calls.
 
-    @Parameterized.Parameter(3)
+    @Parameter(3)
     public int[] mExpectedMetrics;
 
     // Expect this UiEvent (use null if there isn't one).
-    @Parameterized.Parameter(4)
+    @Parameter(4)
     public UiEventLogger.UiEventEnum mUiEvent;
 
     @Test
@@ -108,7 +111,10 @@ public class EventsTest extends SysuiTestCase {
         }
     }
 
-    @Parameterized.Parameters(name = "{index}: {2}")
+    /**
+     * Collection of parameters for the test.
+     */
+    @Parameters(name = "{index}: {2}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {Events.EVENT_SETTINGS_CLICK, null,
@@ -217,4 +223,3 @@ public class EventsTest extends SysuiTestCase {
         });
     }
 }
-
