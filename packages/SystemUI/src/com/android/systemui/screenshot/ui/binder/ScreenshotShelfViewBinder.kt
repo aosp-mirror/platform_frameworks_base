@@ -30,6 +30,7 @@ import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.SwipeGestureListener
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import com.android.systemui.util.children
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 object ScreenshotShelfViewBinder {
@@ -60,7 +61,8 @@ object ScreenshotShelfViewBinder {
             onDismissalRequested(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL, null)
         }
 
-        view.repeatWhenAttached {
+        // use immediate dispatcher to ensure screenshot bitmap is set before animation
+        view.repeatWhenAttached(Dispatchers.Main.immediate) {
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
@@ -96,9 +98,9 @@ object ScreenshotShelfViewBinder {
                             // ID is unique.
                             val newIds = visibleActions.map { it.id }
 
-                            for (view in actionsContainer.children.toList()) {
-                                if (view.tag !in newIds) {
-                                    actionsContainer.removeView(view)
+                            for (child in actionsContainer.children.toList()) {
+                                if (child.tag !in newIds) {
+                                    actionsContainer.removeView(child)
                                 }
                             }
 
