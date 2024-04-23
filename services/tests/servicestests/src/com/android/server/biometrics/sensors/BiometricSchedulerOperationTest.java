@@ -20,6 +20,7 @@ import static android.testing.TestableLooper.RunWithLooper;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.eq;
@@ -29,7 +30,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
+import android.hardware.biometrics.BiometricConstants;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -71,6 +74,8 @@ public class BiometricSchedulerOperationTest {
     private InterruptableMonitor<FakeHal> mInterruptableClientMonitor;
     @Mock
     private BaseClientMonitor mNonInterruptableClientMonitor;
+    @Mock
+    private ClientMonitorCallbackConverter mListener;
     @Mock
     private ClientMonitorCallback mClientCallback;
     @Mock
@@ -435,17 +440,18 @@ public class BiometricSchedulerOperationTest {
     }
 
     @Test
-    public void cancelWatchdogWhenStarted() {
+    public void cancelWatchdogWhenStarted() throws RemoteException {
         cancelWatchdog(true);
     }
 
     @Test
-    public void cancelWatchdogWithoutStarting() {
+    public void cancelWatchdogWithoutStarting() throws RemoteException {
         cancelWatchdog(false);
     }
 
-    private void cancelWatchdog(boolean start) {
+    private void cancelWatchdog(boolean start) throws RemoteException {
         when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getListener()).thenReturn(mListener);
 
         mInterruptableOperation.start(mOnStartCallback);
         if (start) {
@@ -461,6 +467,8 @@ public class BiometricSchedulerOperationTest {
 
         assertThat(mInterruptableOperation.isFinished()).isTrue();
         assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        verify(mInterruptableClientMonitor.getListener()).onError(anyInt(), anyInt(), eq(
+                BiometricConstants.BIOMETRIC_ERROR_CANCELED), eq(0));
         verify(mOnStartCallback).onClientFinished(eq(mInterruptableClientMonitor), eq(false));
         verify(mInterruptableClientMonitor).destroy();
     }
