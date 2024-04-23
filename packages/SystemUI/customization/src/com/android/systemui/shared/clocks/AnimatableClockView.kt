@@ -97,6 +97,8 @@ class AnimatableClockView @JvmOverloads constructor(
     @VisibleForTesting var textAnimatorFactory: (Layout, () -> Unit) -> TextAnimator =
         { layout, invalidateCb ->
             TextAnimator(layout, NUM_CLOCK_FONT_ANIMATION_STEPS, invalidateCb) }
+
+    // Used by screenshot tests to provide stability
     @VisibleForTesting var isAnimationEnabled: Boolean = true
     @VisibleForTesting var timeOverrideInMillis: Long? = null
 
@@ -242,15 +244,8 @@ class AnimatableClockView @JvmOverloads constructor(
         }
 
         logger.d({ "onDraw($str1)"}) { str1 = text.toString() }
-        // Use textAnimator to render text if animation is enabled.
-        // Otherwise default to using standard draw functions.
-        if (isAnimationEnabled) {
-            // intentionally doesn't call super.onDraw here or else the text will be rendered twice
-            textAnimator?.draw(canvas)
-        } else {
-            super.onDraw(canvas)
-        }
-
+        // intentionally doesn't call super.onDraw here or else the text will be rendered twice
+        textAnimator?.draw(canvas)
         canvas.restore()
     }
 
@@ -318,7 +313,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = lockScreenWeight,
             textSize = -1f,
             color = lockScreenColor,
-            animate = isAnimationEnabled,
+            animate = true,
             duration = APPEAR_ANIM_DURATION,
             interpolator = Interpolators.EMPHASIZED_DECELERATE,
             delay = 0,
@@ -327,7 +322,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateFoldAppear(animate: Boolean = true) {
-        if (isAnimationEnabled && textAnimator == null) {
+        if (textAnimator == null) {
             return
         }
         logger.d("animateFoldAppear")
@@ -344,7 +339,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = dozingWeightInternal,
             textSize = -1f,
             color = dozingColor,
-            animate = animate && isAnimationEnabled,
+            animate = animate,
             interpolator = Interpolators.EMPHASIZED_DECELERATE,
             duration = ANIMATION_DURATION_FOLD_TO_AOD.toLong(),
             delay = 0,
@@ -363,7 +358,7 @@ class AnimatableClockView @JvmOverloads constructor(
                 weight = if (isDozing()) dozingWeight else lockScreenWeight,
                 textSize = -1f,
                 color = null,
-                animate = isAnimationEnabled,
+                animate = true,
                 duration = CHARGE_ANIM_DURATION_PHASE_1,
                 delay = 0,
                 onAnimationEnd = null
@@ -373,7 +368,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = if (isDozing()) lockScreenWeight else dozingWeight,
             textSize = -1f,
             color = null,
-            animate = isAnimationEnabled,
+            animate = true,
             duration = CHARGE_ANIM_DURATION_PHASE_0,
             delay = chargeAnimationDelay.toLong(),
             onAnimationEnd = startAnimPhase2
@@ -386,7 +381,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = if (isDozing) dozingWeight else lockScreenWeight,
             textSize = -1f,
             color = if (isDozing) dozingColor else lockScreenColor,
-            animate = animate && isAnimationEnabled,
+            animate = animate,
             duration = DOZE_ANIM_DURATION,
             delay = 0,
             onAnimationEnd = null
@@ -445,9 +440,6 @@ class AnimatableClockView @JvmOverloads constructor(
                 onAnimationEnd = onAnimationEnd
             )
             textAnimator?.glyphFilter = glyphFilter
-            if (color != null && !isAnimationEnabled) {
-                setTextColor(color)
-            }
         } else {
             // when the text animator is set, update its start values
             onTextAnimatorInitialized = Runnable {
@@ -462,9 +454,6 @@ class AnimatableClockView @JvmOverloads constructor(
                     onAnimationEnd = onAnimationEnd
                 )
                 textAnimator?.glyphFilter = glyphFilter
-                if (color != null && !isAnimationEnabled) {
-                    setTextColor(color)
-                }
             }
         }
     }
@@ -482,7 +471,7 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = weight,
             textSize = textSize,
             color = color,
-            animate = animate && isAnimationEnabled,
+            animate = animate,
             interpolator = null,
             duration = duration,
             delay = delay,
