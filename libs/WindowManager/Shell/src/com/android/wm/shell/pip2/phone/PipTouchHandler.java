@@ -208,6 +208,7 @@ public class PipTouchHandler {
                 new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
                         mTouchState, this::updateMovementBounds, pipUiEventLogger,
                         menuController, mainExecutor, mPipPerfHintController);
+        mPipBoundsState.addOnAspectRatioChangedCallback(this::updateMinMaxSize);
 
         if (PipUtils.isPip2ExperimentEnabled()) {
             shellInit.addInitCallback(this::onInit, this);
