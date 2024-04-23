@@ -12413,7 +12413,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (Flags.headlessDeviceOwnerSingleUserEnabled()) {
             // Block this method if the device is in headless main user mode
             Preconditions.checkCallAuthorization(
-                    getHeadlessDeviceOwnerModeForDeviceOwner()
+                    !mInjector.userManagerIsHeadlessSystemUserMode()
+                            || getHeadlessDeviceOwnerModeForDeviceOwner()
                             != HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER,
                     "createAndManageUser was called while in headless single user mode");
         }
@@ -23472,10 +23473,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean hasAdminPolicy(int adminPolicy, String callerPackageName) {
-        CallerIdentity caller = getCallerIdentity(callerPackageName);
-        ActiveAdmin deviceAdmin = getActiveAdminWithPolicyForUidLocked(
-                null, adminPolicy, caller.getUid());
-        return deviceAdmin != null;
+        synchronized (getLockObject()) {
+            CallerIdentity caller = getCallerIdentity(callerPackageName);
+            ActiveAdmin deviceAdmin = getActiveAdminWithPolicyForUidLocked(
+                    null, adminPolicy, caller.getUid());
+            return deviceAdmin != null;
+        }
     }
 
     /**
