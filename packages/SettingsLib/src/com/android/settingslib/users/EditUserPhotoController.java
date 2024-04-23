@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.multiuser.Flags;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
@@ -58,6 +59,9 @@ public class EditUserPhotoController {
 
     private static final String IMAGES_DIR = "multi_user";
     private static final String NEW_USER_PHOTO_FILE_NAME = "NewUserPhoto.png";
+
+    private static final String AVATAR_PICKER_ACTION = "com.android.avatarpicker"
+            + ".FULL_SCREEN_ACTIVITY";
 
     private final Activity mActivity;
     private final ActivityStarter mActivityStarter;
@@ -105,7 +109,6 @@ public class EditUserPhotoController {
                 onPhotoCropped(data.getData());
                 return true;
             }
-
         }
         return false;
     }
@@ -115,7 +118,13 @@ public class EditUserPhotoController {
     }
 
     private void showAvatarPicker() {
-        Intent intent = new Intent(mImageView.getContext(), AvatarPickerActivity.class);
+        Intent intent;
+        if (Flags.avatarSync()) {
+            intent = new Intent(AVATAR_PICKER_ACTION);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+        } else {
+            intent = new Intent(mImageView.getContext(), AvatarPickerActivity.class);
+        }
         intent.putExtra(AvatarPickerActivity.EXTRA_FILE_AUTHORITY, mFileAuthority);
         mActivityStarter.startActivityForResult(intent, REQUEST_CODE_PICK_AVATAR);
     }

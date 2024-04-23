@@ -21,6 +21,7 @@
 #include <android-base/file.h>
 #include <android-base/hex.h>
 #include <android-base/unique_fd.h>
+#include <bionic/macros.h>
 #include <elf.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -35,10 +36,45 @@
 #include <fstream>
 #include <vector>
 
+using android::base::borrowed_fd;
 using android::base::HexString;
 using android::base::ReadFullyAtOffset;
 
 namespace android {
+
+bool punchWithBlockAlignment(borrowed_fd fd, uint64_t start, uint64_t length, uint64_t blockSize) {
+    uint64_t end;
+    if (__builtin_add_overflow(start, length, &end)) {
+        ALOGE("Overflow occurred when calculating end");
+        return false;
+    }
+
+    start = align_up(start, blockSize);
+    end = align_down(end, blockSize);
+
+    uint64_t alignedLength;
+    if (__builtin_sub_overflow(end, start, &alignedLength)) {
+        ALOGE("Overflow occurred when calculating length");
+        return false;
+    }
+
+    if (alignedLength < blockSize) {
+        ALOGW("Skipping punching hole as aligned length is less than block size");
+        return false;
+    }
+
+    ALOGD("Punching hole in file - start: %" PRIu64 " len:%" PRIu64 "", start, alignedLength);
+
+    int result =
+            fallocate(fd.get(), FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, start, alignedLength);
+    if (result < 0) {
+        ALOGE("fallocate failed to punch hole, error:%d", errno);
+        return false;
+    }
+
+    return true;
+}
+
 bool punchHoles(const char *filePath, const uint64_t offset,
                 const std::vector<Elf64_Phdr> &programHeaders) {
     struct stat64 beforePunch;
@@ -96,6 +132,8 @@ bool punchHoles(const char *filePath, const uint64_t offset,
             continue;
         }
 
+        // if we have a uncompressed file which is being opened from APK, use the offset to
+        // punch native lib inside Apk.
         uint64_t punchStartOffset;
         if (__builtin_add_overflow(offset, punchOffset, &punchStartOffset)) {
             ALOGE("Overflow occurred when calculating length");
@@ -144,12 +182,7 @@ bool punchHoles(const char *filePath, const uint64_t offset,
             position = uncheckedChunkEnd;
         }
 
-        // if we have a uncompressed file which is being opened from APK, use the offset to
-        // punch native lib inside Apk.
-        int result = fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, punchStartOffset,
-                               punchLen);
-        if (result < 0) {
-            ALOGE("fallocate failed to punch hole, error:%d", errno);
+        if (!punchWithBlockAlignment(fd, punchStartOffset, punchLen, blockSize)) {
             return false;
         }
     }
@@ -298,13 +331,7 @@ bool punchHolesInZip(const char *filePath, uint64_t offset, uint16_t extraFieldL
                 return false;
             }
 
-            ALOGD("Punching hole in apk start: %" PRIu64 " len:%" PRIu64 "", punchOffset, punchLen);
-
-            // Punch hole for this entire stretch.
-            int result = fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, punchOffset,
-                                   punchLen);
-            if (result < 0) {
-                ALOGE("fallocate failed to punch hole inside apk, error:%d", errno);
+            if (!punchWithBlockAlignment(fd, punchOffset, punchLen, blockSize)) {
                 return false;
             }
         }

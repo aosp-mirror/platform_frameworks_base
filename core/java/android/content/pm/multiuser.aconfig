@@ -56,3 +56,11 @@ flag {
     description: "Add support to lock private space automatically after a time period"
     bug: "303201022"
 }
+
+flag {
+    name: "avatar_sync"
+    namespace: "multiuser"
+    description: "Implement new Avatar Picker outside of SetttingsLib with ability to select avatars from Google Account and synchronise to any changes."
+    bug: "296829976"
+    is_fixed_read_only: true
+}
