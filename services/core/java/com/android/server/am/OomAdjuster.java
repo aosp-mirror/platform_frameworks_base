@@ -2746,6 +2746,11 @@ public class OomAdjuster {
                         }
                     }
 
+                    if (newAdj == clientAdj && app.isolated) {
+                        // Make bound isolated processes have slightly worse score than their client
+                        newAdj = clientAdj + 1;
+                    }
+
                     if (adj >  newAdj) {
                         adj = newAdj;
                         if (state.setCurRawAdj(adj, dryRun)) {
