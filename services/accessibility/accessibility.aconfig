@@ -118,6 +118,16 @@ flag {
 }
 
 flag {
+    name: "manager_avoid_receiver_timeout"
+    namespace: "accessibility"
+    description: "Avoid broadcast receiver timeout by offloading potentially slow operations to the background thread."
+    bug: "333890389"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "pinch_zoom_zero_min_span"
     namespace: "accessibility"
     description: "Whether to set min span of ScaleGestureDetector to zero."
