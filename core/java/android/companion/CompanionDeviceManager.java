@@ -1884,7 +1884,7 @@ public final class CompanionDeviceManager {
             mLocalOut = new ParcelFileDescriptor.AutoCloseOutputStream(localFd);
 
             try {
-                mService.attachSystemDataTransport(mContext.getPackageName(),
+                mService.attachSystemDataTransport(mContext.getOpPackageName(),
                         mContext.getUserId(), mAssociationId, remoteFd);
             } catch (RemoteException e) {
                 throw new IOException("Failed to configure transport", e);
@@ -1921,9 +1921,9 @@ public final class CompanionDeviceManager {
             mStopped = true;
 
             try {
-                mService.detachSystemDataTransport(mContext.getPackageName(),
+                mService.detachSystemDataTransport(mContext.getOpPackageName(),
                         mContext.getUserId(), mAssociationId);
-            } catch (RemoteException e) {
+            } catch (RemoteException | IllegalArgumentException e) {
                 Log.w(TAG, "Failed to detach transport", e);
             }
 
