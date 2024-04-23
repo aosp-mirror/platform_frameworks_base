@@ -406,6 +406,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         verify(tracker).onActivityResumedWhileVisible(mWpc);
         assertTrue(tracker.hasResumedActivity(mWpc.mUid));
 
+        mAtm.mTopApp = null;
         activity.makeFinishingLocked();
         activity.setState(PAUSING, "test");
 
