@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.phone.ui
 
 import android.os.UserHandle
 import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY
-import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl.EXTERNAL_SLOT_SUFFIX
+import com.android.systemui.statusbar.phone.StatusBarIconHolder
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController.TAG_PRIMARY
+import com.android.systemui.statusbar.phone.ui.StatusBarIconControllerImpl.EXTERNAL_SLOT_SUFFIX
 import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry
 import com.android.systemui.statusbar.pipeline.icons.shared.model.BindableIcon
 import com.android.systemui.statusbar.pipeline.icons.shared.model.ModernStatusBarViewCreator
@@ -42,7 +43,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
 
     private lateinit var iconList: StatusBarIconList
     private lateinit var commandQueueCallbacks: CommandQueue.Callbacks
-    private val iconGroup: StatusBarIconController.IconManager = mock()
+    private val iconGroup: IconManager = mock()
 
     @Mock private lateinit var commandQueue: CommandQueue
 

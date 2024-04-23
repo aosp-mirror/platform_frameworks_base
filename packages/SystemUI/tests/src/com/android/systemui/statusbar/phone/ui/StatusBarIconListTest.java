@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.phone.ui;
 
-import static com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY;
+import static com.android.systemui.statusbar.phone.ui.StatusBarIconController.TAG_PRIMARY;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
@@ -29,7 +29,9 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.phone.StatusBarIconList.Slot;
+import com.android.systemui.statusbar.phone.StatusBarIconHolder;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconList;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconList.Slot;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -22,6 +22,7 @@ import android.app.StatusBarManager
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.XmlResourceParser
+import android.graphics.Insets
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.view.Display
@@ -35,7 +36,6 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.app.animation.Interpolators
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
@@ -46,6 +46,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeHeaderController.Companion.DEFAULT_CLOCK_INTENT
 import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
 import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
@@ -53,9 +54,10 @@ import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONS
 import com.android.systemui.shade.carrier.ShadeCarrierGroup
 import com.android.systemui.shade.carrier.ShadeCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
-import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.StatusOverlayHoverListenerFactory
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.NextAlarmController
@@ -83,7 +85,6 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
-import android.graphics.Insets
 import org.mockito.junit.MockitoJUnit
 
 private val EMPTY_CHANGES = ConstraintsChanges()
@@ -95,8 +96,8 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     @Mock(answer = Answers.RETURNS_MOCKS) private lateinit var view: MotionLayout
     @Mock private lateinit var statusIcons: StatusIconContainer
     @Mock private lateinit var statusBarIconController: StatusBarIconController
-    @Mock private lateinit var iconManagerFactory: StatusBarIconController.TintedIconManager.Factory
-    @Mock private lateinit var iconManager: StatusBarIconController.TintedIconManager
+    @Mock private lateinit var iconManagerFactory: TintedIconManager.Factory
+    @Mock private lateinit var iconManager: TintedIconManager
     @Mock private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
     @Mock
     private lateinit var mShadeCarrierGroupControllerBuilder: ShadeCarrierGroupController.Builder
@@ -145,12 +146,14 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         whenever<TextView>(view.requireViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
 
-        whenever<ShadeCarrierGroup>(view.requireViewById(R.id.carrier_group)).thenReturn(carrierGroup)
+        whenever<ShadeCarrierGroup>(view.requireViewById(R.id.carrier_group))
+            .thenReturn(carrierGroup)
 
         whenever<BatteryMeterView>(view.requireViewById(R.id.batteryRemainingIcon))
             .thenReturn(batteryMeterView)
 
-        whenever<StatusIconContainer>(view.requireViewById(R.id.statusIcons)).thenReturn(statusIcons)
+        whenever<StatusIconContainer>(view.requireViewById(R.id.statusIcons))
+            .thenReturn(statusIcons)
         whenever<View>(view.requireViewById(R.id.hover_system_icons_container))
             .thenReturn(systemIconsHoverContainer)
 
@@ -933,14 +936,14 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
 
     private fun mockInsetsProvider(insets: Pair<Int, Int> = 0 to 0, cornerCutout: Boolean = false) {
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
-                .thenReturn(
-                        Insets.of(
-                                /* left= */ insets.first,
-                                /* top= */ 0,
-                                /* right= */ insets.second,
-                                /* bottom= */ 0
-                        )
+            .thenReturn(
+                Insets.of(
+                    /* left= */ insets.first,
+                    /* top= */ 0,
+                    /* right= */ insets.second,
+                    /* bottom= */ 0
                 )
+            )
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(cornerCutout)
     }
 

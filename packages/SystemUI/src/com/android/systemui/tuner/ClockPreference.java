@@ -21,7 +21,7 @@ import android.util.AttributeSet;
 import androidx.preference.DropDownPreference;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
 
 public class ClockPreference extends DropDownPreference implements TunerService.Tunable {
