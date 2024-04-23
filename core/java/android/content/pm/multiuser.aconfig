@@ -113,6 +113,16 @@ flag {
     is_fixed_read_only: true
 }
 
+flag {
+    name: "fix_avatar_picker_read_back_order"
+    namespace: "multiuser"
+    description: "Talkback focus doesn't move to the 'If you change your Google Account picture…' after swiping next to move the focus from 'Choose a picture'"
+    bug: "330835921"
+    metadata {
+    	purpose: PURPOSE_BUGFIX
+  }
+}
+
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
     name: "enable_private_space_features"
