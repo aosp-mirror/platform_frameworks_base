@@ -78,7 +78,8 @@ public class DatabaseUtilsTest {
         final int sel = STATEMENT_SELECT;
         assertEquals(sel, getSqlStatementType("SELECT"));
         assertEquals(sel, getSqlStatementType("  SELECT"));
-        assertEquals(sel, getSqlStatementType(" \n SELECT"));
+        assertEquals(sel, getSqlStatementType(" \n\r\f\t SELECT"));
+        assertEquals(sel, getSqlStatementType(" \n\r\f\t SEL"));
 
         final int upd = STATEMENT_UPDATE;
         assertEquals(upd, getSqlStatementType("UPDATE"));
@@ -95,6 +96,9 @@ public class DatabaseUtilsTest {
         assertEquals(othr, getSqlStatementType("SE LECT"));
         assertEquals(othr, getSqlStatementType("-- cmt\n SE"));
         assertEquals(othr, getSqlStatementType("WITH"));
+        assertEquals(othr, getSqlStatementType("-"));
+        assertEquals(othr, getSqlStatementType("--"));
+        assertEquals(othr, getSqlStatementType("*/* foo */ SEL"));
 
         // Verify that leading line-comments are skipped.
         assertEquals(sel, getSqlStatementType("-- cmt\n SELECT"));
