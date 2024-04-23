@@ -176,6 +176,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 mImeDispatcher.registerOnBackInvokedCallback(priority, callback);
                 return;
             }
+            if ((callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback
+                    || callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
+                    && !isOnBackInvokedCallbackEnabled()) {
+                // Fall back to compat back key injection if legacy back behaviour should be used.
+                return;
+            }
             if (!mOnBackInvokedCallbacks.containsKey(priority)) {
                 mOnBackInvokedCallbacks.put(priority, new ArrayList<>());
             }
