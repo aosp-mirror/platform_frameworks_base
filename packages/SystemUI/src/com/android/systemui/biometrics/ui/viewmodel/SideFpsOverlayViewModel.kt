@@ -30,7 +30,6 @@ import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
 import com.airbnb.lottie.model.KeyPath
 import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.Utils
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
 import com.android.systemui.biometrics.domain.model.SideFpsSensorLocation
@@ -38,7 +37,6 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.LottieCallback
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.DeviceEntrySideFpsOverlayInteractor
-import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -54,11 +52,9 @@ class SideFpsOverlayViewModel
 @Inject
 constructor(
     @Application private val applicationContext: Context,
-    biometricStatusInteractor: BiometricStatusInteractor,
     deviceEntrySideFpsOverlayInteractor: DeviceEntrySideFpsOverlayInteractor,
     displayStateInteractor: DisplayStateInteractor,
     sfpsSensorInteractor: SideFpsSensorInteractor,
-    sideFpsProgressBarViewModel: SideFpsProgressBarViewModel
 ) {
     /** Contains properties of the side fingerprint sensor indicator */
     data class OverlayViewProperties(
