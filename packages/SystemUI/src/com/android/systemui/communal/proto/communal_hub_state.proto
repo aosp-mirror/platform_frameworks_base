@@ -1,0 +1,39 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+
+package com.android.systemui.communal;
+
+option java_multiple_files = true;
+
+// Represents the state of communal hub for backup & restore.
+message CommunalHubState {
+    // Widgets in the communal hub.
+    repeated CommunalWidgetItem widgets = 1;
+
+    // Represents a widget in the communal hub.
+    message CommunalWidgetItem {
+        // Id of the widget.
+        int32 widget_id = 1;
+
+        // Component name of the widget.
+        string component_name = 2;
+
+        // Rank or order of the widget in the communal hub.
+        int32 rank = 3;
+    }
+}

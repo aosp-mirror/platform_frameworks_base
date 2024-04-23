@@ -28,8 +28,9 @@ import android.os.ParcelFileDescriptor
 import android.os.UserHandle
 import android.util.Log
 import com.android.app.tracing.traceSection
-import com.android.systemui.Flags.communalHub
 import com.android.systemui.backup.BackupHelper.Companion.ACTION_RESTORE_FINISHED
+import com.android.systemui.communal.data.backup.CommunalBackupHelper
+import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.domain.backup.CommunalPrefsBackupHelper
 import com.android.systemui.controls.controller.AuxiliaryPersistenceWrapper
 import com.android.systemui.controls.controller.ControlsFavoritePersistenceWrapper
@@ -59,6 +60,7 @@ open class BackupHelper : BackupAgentHelper() {
             "systemui.keyguard.quickaffordance.shared_preferences"
         private const val COMMUNAL_PREFS_BACKUP_KEY =
             "systemui.communal.shared_preferences"
+        private const val COMMUNAL_STATE_BACKUP_KEY = "systemui.communal_state"
         val controlsDataLock = Any()
         const val ACTION_RESTORE_FINISHED = "com.android.systemui.backup.RESTORE_FINISHED"
         const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
@@ -89,6 +91,10 @@ open class BackupHelper : BackupAgentHelper() {
                     userId = userHandle.identifier,
                 )
             )
+            addHelper(
+                COMMUNAL_STATE_BACKUP_KEY,
+                CommunalBackupHelper(userHandle, CommunalBackupUtils(context = this)),
+            )
         }
     }
 
@@ -116,7 +122,7 @@ open class BackupHelper : BackupAgentHelper() {
     }
 
     private fun communalEnabled(): Boolean {
-        return resources.getBoolean(R.bool.config_communalServiceEnabled) && communalHub()
+        return resources.getBoolean(R.bool.config_communalServiceEnabled)
     }
 
     /**
