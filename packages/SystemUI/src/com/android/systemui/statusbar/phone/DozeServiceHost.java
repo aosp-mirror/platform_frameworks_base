@@ -37,9 +37,9 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
-import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -84,7 +84,6 @@ public final class DozeServiceHost implements DozeHost {
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final HeadsUpManager mHeadsUpManager;
-    private final FeatureFlagsClassic mFeatureFlags;
     private final BatteryController mBatteryController;
     private final ScrimController mScrimController;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
@@ -110,7 +109,6 @@ public final class DozeServiceHost implements DozeHost {
             WakefulnessLifecycle wakefulnessLifecycle,
             SysuiStatusBarStateController statusBarStateController,
             DeviceProvisionedController deviceProvisionedController,
-            FeatureFlagsClassic featureFlags,
             HeadsUpManager headsUpManager, BatteryController batteryController,
             ScrimController scrimController,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
@@ -135,7 +133,6 @@ public final class DozeServiceHost implements DozeHost {
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mAssistManagerLazy = assistManagerLazy;
         mDozeScrimController = dozeScrimController;
-        mFeatureFlags = featureFlags;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mPulseExpansionHandler = pulseExpansionHandler;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -236,8 +233,14 @@ public final class DozeServiceHost implements DozeHost {
     void updateDozing() {
         Assert.isMainThread();
 
-        boolean dozing =
-                mDozingRequested && mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        boolean dozing;
+        if (SceneContainerFlag.isEnabled()) {
+            dozing = mDozingRequested && mDozeInteractor.canDozeFromCurrentScene();
+        } else {
+            dozing = mDozingRequested
+                    && mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        }
+
         // When in wake-and-unlock we may not have received a change to StatusBarState
         // but we still should not be dozing, manually set to false.
         if (mBiometricUnlockControllerLazy.get().getMode()

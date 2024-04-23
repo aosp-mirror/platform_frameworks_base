@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
@@ -127,6 +128,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationsController mNotificationsController;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
+    @Mock private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private TunerService mTunerService;
@@ -927,6 +929,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotificationGutsManager,
                 mNotificationsController,
                 mVisibilityProvider,
+                mNotificationWakeUpCoordinator,
                 mHeadsUpManager,
                 mNotificationRoundnessManager,
                 mTunerService,

@@ -41,7 +41,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
-import com.android.systemui.flags.FakeFeatureFlagsClassic;
+import com.android.systemui.flags.DisableSceneContainer;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -98,13 +98,11 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private DozeHost.Callback mCallback;
     @Mock private DozeInteractor mDozeInteractor;
 
-    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mDozeServiceHost = new DozeServiceHost(mDozeLog, mPowerManager, mWakefullnessLifecycle,
-                mStatusBarStateController, mDeviceProvisionedController, mFeatureFlags,
+                mStatusBarStateController, mDeviceProvisionedController,
                 mHeadsUpManager, mBatteryController, mScrimController,
                 () -> mBiometricUnlockController, () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mPulseExpansionHandler, mNotificationShadeWindowController,
@@ -119,6 +117,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void testStartStopDozing() {
         mDozeServiceHost.addCallback(mCallback);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);

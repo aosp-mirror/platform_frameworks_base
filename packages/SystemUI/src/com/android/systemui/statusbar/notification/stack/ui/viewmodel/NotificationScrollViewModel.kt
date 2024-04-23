@@ -20,7 +20,9 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
@@ -29,11 +31,13 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_DELAYED_STACK_FADE_IN
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.util.kotlin.FlowDumperImpl
-import javax.inject.Inject
+import dagger.Lazy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 @SysUISingleton
@@ -44,6 +48,9 @@ constructor(
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
     sceneInteractor: SceneInteractor,
+    // TODO(b/336364825) Remove Lazy when SceneContainerFlag is released -
+    // while the flag is off, creating this object too early results in a crash
+    keyguardInteractor: Lazy<KeyguardInteractor>,
 ) : FlowDumperImpl(dumpManager) {
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
@@ -138,4 +145,13 @@ constructor(
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =
         sceneInteractor.currentScene.map { it == Scenes.Shade }.dumpWhileCollecting("isScrollable")
+
+    /** Whether the notification stack is displayed in doze mode. */
+    val isDozing: Flow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            keyguardInteractor.get().isDozing.dumpWhileCollecting("isDozing")
+        }
+    }
 }

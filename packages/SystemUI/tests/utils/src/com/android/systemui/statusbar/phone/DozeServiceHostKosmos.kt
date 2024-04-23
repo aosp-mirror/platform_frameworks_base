@@ -16,9 +16,45 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.os.powerManager
+import com.android.keyguard.keyguardUpdateMonitor
+import com.android.systemui.assist.assistManager
+import com.android.systemui.biometrics.authController
+import com.android.systemui.doze.dozeLog
+import com.android.systemui.keyguard.domain.interactor.dozeInteractor
+import com.android.systemui.keyguard.wakefulnessLifecycle
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.plugins.statusbar.statusBarStateController
+import com.android.systemui.shade.domain.interactor.shadeLockscreenInteractor
+import com.android.systemui.statusbar.notificationShadeWindowController
+import com.android.systemui.statusbar.policy.batteryController
+import com.android.systemui.statusbar.policy.deviceProvisionedController
+import com.android.systemui.statusbar.policy.headsUpManager
+import com.android.systemui.statusbar.pulseExpansionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.mockito.Mockito.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
-val Kosmos.dozeServiceHost: DozeServiceHost by Kosmos.Fixture { mock(DozeServiceHost::class.java) }
+val Kosmos.dozeServiceHost: DozeServiceHost by
+    Kosmos.Fixture {
+        DozeServiceHost(
+            dozeLog,
+            powerManager,
+            wakefulnessLifecycle,
+            statusBarStateController,
+            deviceProvisionedController,
+            headsUpManager,
+            batteryController,
+            scrimController,
+            { biometricUnlockController },
+            { assistManager },
+            dozeScrimController,
+            keyguardUpdateMonitor,
+            pulseExpansionHandler,
+            notificationShadeWindowController,
+            notificationWakeUpCoordinator,
+            authController,
+            notificationIconAreaController,
+            shadeLockscreenInteractor,
+            dozeInteractor,
+        )
+    }
