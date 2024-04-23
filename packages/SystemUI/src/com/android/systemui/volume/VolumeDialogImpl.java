@@ -118,7 +118,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.haptics.slider.HapticSliderViewBinder;
-import com.android.systemui.haptics.slider.SeekableSliderHapticPlugin;
+import com.android.systemui.haptics.slider.SeekbarHapticPlugin;
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig;
 import com.android.systemui.media.dialog.MediaOutputDialogManager;
 import com.android.systemui.plugins.VolumeDialog;
@@ -2640,7 +2640,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
-        private SeekableSliderHapticPlugin mHapticPlugin;
+        private SeekbarHapticPlugin mHapticPlugin;
         private int mProgressHapticsType = PROGRESS_HAPTICS_DISABLED;
 
         void setIcon(int iconRes, Resources.Theme theme) {
@@ -2658,7 +2658,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 com.android.systemui.util.time.SystemClock systemClock) {
             if (mHapticPlugin != null) return;
 
-            mHapticPlugin = new SeekableSliderHapticPlugin(
+            mHapticPlugin = new SeekbarHapticPlugin(
                 vibratorHelper,
                 systemClock,
                 sSliderHapticFeedbackConfig);

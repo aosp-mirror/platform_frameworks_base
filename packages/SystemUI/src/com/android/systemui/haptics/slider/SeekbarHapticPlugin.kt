@@ -30,12 +30,12 @@ import kotlinx.coroutines.launch
 /**
  * A plugin added to a manager of a [android.widget.SeekBar] that adds dynamic haptic feedback.
  *
- * A [SeekableSliderEventProducer] is used as the producer of slider events, a
+ * A [SliderStateProducer] is used as the producer of slider events, a
  * [SliderHapticFeedbackProvider] is used as the listener of slider states to play haptic feedback
- * depending on the state, and a [SeekableSliderTracker] is used as the state machine handler that
+ * depending on the state, and a [SliderStateTracker] is used as the state machine handler that
  * tracks and manipulates the slider state.
  */
-class SeekableSliderHapticPlugin
+class SeekbarHapticPlugin
 @JvmOverloads
 constructor(
     vibratorHelper: VibratorHelper,
@@ -46,7 +46,7 @@ constructor(
 
     private val velocityTracker = VelocityTracker.obtain()
 
-    private val sliderEventProducer = SeekableSliderEventProducer()
+    private val sliderEventProducer = SliderStateProducer()
 
     private val sliderHapticFeedbackProvider =
         SliderHapticFeedbackProvider(
@@ -56,7 +56,7 @@ constructor(
             systemClock,
         )
 
-    private var sliderTracker: SeekableSliderTracker? = null
+    private var sliderTracker: SliderStateTracker? = null
 
     private var pluginScope: CoroutineScope? = null
 
@@ -86,7 +86,7 @@ constructor(
     fun startInScope(scope: CoroutineScope) {
         if (sliderTracker != null) stop()
         sliderTracker =
-            SeekableSliderTracker(
+            SliderStateTracker(
                 sliderHapticFeedbackProvider,
                 sliderEventProducer,
                 scope,
@@ -116,28 +116,52 @@ constructor(
     /** onStartTrackingTouch event from the slider's [android.widget.SeekBar] */
     fun onStartTrackingTouch(seekBar: SeekBar) {
         if (isTracking) {
-            sliderEventProducer.onStartTrackingTouch(seekBar)
+            sliderEventProducer.onStartTracking(true)
         }
     }
 
     /** onProgressChanged event from the slider's [android.widget.SeekBar] */
     fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
         if (isTracking) {
-            sliderEventProducer.onProgressChanged(seekBar, progress, fromUser)
+            if (sliderTracker?.currentState == SliderState.IDLE && !fromUser) {
+                // This case translates to the slider starting to track program changes
+                sliderEventProducer.resetWithProgress(normalizeProgress(seekBar, progress))
+                sliderEventProducer.onStartTracking(false)
+            } else {
+                sliderEventProducer.onProgressChanged(
+                    fromUser,
+                    normalizeProgress(seekBar, progress),
+                )
+            }
         }
+    }
+
+    /**
+     * Normalize the integer progress of a SeekBar to the range from 0F to 1F.
+     *
+     * @param[seekBar] The SeekBar that reports a progress.
+     * @param[progress] The integer progress of the SeekBar within its min and max values.
+     * @return The progress in the range from 0F to 1F.
+     */
+    private fun normalizeProgress(seekBar: SeekBar, progress: Int): Float {
+        if (seekBar.max == seekBar.min) {
+            return 1.0f
+        }
+        val range = seekBar.max - seekBar.min
+        return (progress - seekBar.min) / range.toFloat()
     }
 
     /** onStopTrackingTouch event from the slider's [android.widget.SeekBar] */
     fun onStopTrackingTouch(seekBar: SeekBar) {
         if (isTracking) {
-            sliderEventProducer.onStopTrackingTouch(seekBar)
+            sliderEventProducer.onStopTracking(true)
         }
     }
 
-    /** onArrowUp event recorded */
-    fun onArrowUp() {
+    /** Programmatic changes have stopped */
+    private fun onStoppedTrackingProgram() {
         if (isTracking) {
-            sliderEventProducer.onArrowUp()
+            sliderEventProducer.onStopTracking(false)
         }
     }
 
@@ -146,7 +170,7 @@ constructor(
      *
      * This event is used to estimate the key-up event based on a running a timer as a waiting
      * coroutine in the [pluginScope]. A key-up event in a slider corresponds to an onArrowUp event.
-     * Therefore, [onArrowUp] must be called after the timeout.
+     * Therefore, [onStoppedTrackingProgram] must be called after the timeout.
      */
     fun onKeyDown() {
         if (!isTracking) return
@@ -158,7 +182,7 @@ constructor(
         keyUpJob =
             pluginScope?.launch {
                 delay(KEY_UP_TIMEOUT)
-                onArrowUp()
+                onStoppedTrackingProgram()
             }
     }
 

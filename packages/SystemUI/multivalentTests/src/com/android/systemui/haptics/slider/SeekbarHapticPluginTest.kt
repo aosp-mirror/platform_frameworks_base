@@ -44,14 +44,14 @@ import org.mockito.junit.MockitoRule
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
-class SeekableSliderHapticPluginTest : SysuiTestCase() {
+class SeekbarHapticPluginTest : SysuiTestCase() {
 
     private val kosmos = Kosmos()
 
     @Rule @JvmField val mMockitoRule: MockitoRule = MockitoJUnit.rule()
     @Mock private lateinit var vibratorHelper: VibratorHelper
     private val seekBar = SeekBar(mContext)
-    private lateinit var plugin: SeekableSliderHapticPlugin
+    private lateinit var plugin: SeekbarHapticPlugin
 
     @Before
     fun setup() {
@@ -142,7 +142,7 @@ class SeekableSliderHapticPluginTest : SysuiTestCase() {
 
     private fun createPlugin() {
         plugin =
-            SeekableSliderHapticPlugin(
+            SeekbarHapticPlugin(
                 vibratorHelper,
                 kosmos.fakeSystemClock,
             )
