@@ -91,6 +91,7 @@ import android.util.DisplayMetrics;
 import android.util.Dumpable;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -2005,9 +2006,11 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(new FontManagerService.Lifecycle(context, safeMode));
             t.traceEnd();
 
-            t.traceBegin("StartTextServicesManager");
-            mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
-            t.traceEnd();
+            if (!isWatch || !android.server.Flags.removeTextService()) {
+                t.traceBegin("StartTextServicesManager");
+                mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
+                t.traceEnd();
+            }
 
             if (!disableSystemTextClassifier) {
                 t.traceBegin("StartTextClassificationManagerService");
