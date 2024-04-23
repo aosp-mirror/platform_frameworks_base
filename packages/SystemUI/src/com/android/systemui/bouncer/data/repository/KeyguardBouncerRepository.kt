@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.data.repository
 
 import android.os.Build
 import android.util.Log
+import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
@@ -89,6 +90,9 @@ interface KeyguardBouncerRepository {
     val alternateBouncerVisible: StateFlow<Boolean>
     val alternateBouncerUIAvailable: StateFlow<Boolean>
 
+    /** Last shown security mode of the primary bouncer (ie: pin/pattern/password/SIM) */
+    val lastShownSecurityMode: StateFlow<KeyguardSecurityModel.SecurityMode>
+
     /** Action that should be run right after the bouncer is dismissed. */
     var bouncerDismissActionModel: BouncerDismissActionModel?
 
@@ -123,6 +127,8 @@ interface KeyguardBouncerRepository {
     fun setAlternateVisible(isVisible: Boolean)
 
     fun setAlternateBouncerUIAvailable(isAvailable: Boolean)
+
+    fun setLastShownSecurityMode(securityMode: KeyguardSecurityModel.SecurityMode)
 }
 
 @SysUISingleton
@@ -181,6 +187,11 @@ constructor(
 
     private val _showMessage = MutableStateFlow<BouncerShowMessageModel?>(null)
     override val showMessage = _showMessage.asStateFlow()
+    private val _lastShownSecurityMode =
+        MutableStateFlow(KeyguardSecurityModel.SecurityMode.Invalid)
+    override val lastShownSecurityMode: StateFlow<KeyguardSecurityModel.SecurityMode> =
+        _lastShownSecurityMode.asStateFlow()
+
     private val _resourceUpdateRequests = MutableStateFlow(false)
     override val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
 
@@ -262,6 +273,10 @@ constructor(
         _isBackButtonEnabled.value = isBackButtonEnabled
     }
 
+    override fun setLastShownSecurityMode(securityMode: KeyguardSecurityModel.SecurityMode) {
+        _lastShownSecurityMode.value = securityMode
+    }
+
     /** Sets up logs for state flows. */
     private fun setUpLogging() {
         if (!Build.IS_DEBUGGABLE) {
@@ -307,6 +322,10 @@ constructor(
             .launchIn(applicationScope)
         alternateBouncerUIAvailable
             .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
+            .launchIn(applicationScope)
+        lastShownSecurityMode
+            .map { it.name }
+            .logDiffsForTable(buffer, "", "lastShownSecurityMode", null)
             .launchIn(applicationScope)
     }
 
