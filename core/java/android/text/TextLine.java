@@ -477,7 +477,12 @@ public class TextLine {
             }
             drawBounds.setEmpty();
             float w = measure(mLen, false, fmi, drawBounds, lineInfo);
-            float boundsWidth = drawBounds.width();
+            float boundsWidth;
+            if (w >= 0) {
+                boundsWidth = Math.max(drawBounds.right, w) - Math.min(0, drawBounds.left);
+            } else {
+                boundsWidth = Math.max(drawBounds.right, 0) - Math.min(w, drawBounds.left);
+            }
             if (Math.abs(w) > boundsWidth) {
                 return w;
             } else {
