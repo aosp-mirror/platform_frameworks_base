@@ -19,13 +19,9 @@
 
     <View
         android:id="@+id/panel"
+        style="@style/AuthCredentialPanelStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="?androidprv:attr/materialColorSurfaceBright"
-        android:clickable="true"
-        android:clipToOutline="true"
-        android:importantForAccessibility="no"
-        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/rightGuideline"
         app:layout_constraintStart_toStartOf="@+id/leftGuideline"
