@@ -31,6 +31,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
+import com.android.systemui.dreams.SystemDialogsCloser;
 import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.homecontrols.DreamActivityProvider;
 import com.android.systemui.dreams.homecontrols.DreamActivityProviderImpl;
@@ -144,6 +145,15 @@ public interface DreamModule {
         // If we decide to bring this back, we should gate it on a config that can be changed in
         // an overlay.
         return Optional.empty();
+    }
+
+    /**
+     * Provides an implementation for {@link SystemDialogsCloser} that calls
+     * {@link Context.closeSystemDialogs}.
+     */
+    @Provides
+    static SystemDialogsCloser providesSystemDialogsCloser(Context context) {
+        return () -> context.closeSystemDialogs();
     }
 
     /** */

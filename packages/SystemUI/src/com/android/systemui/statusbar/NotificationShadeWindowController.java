@@ -86,6 +86,9 @@ public interface NotificationShadeWindowController extends RemoteInputController
     /** Sets the state of whether the bouncer is showing or not. */
     default void setBouncerShowing(boolean showing) {}
 
+    /** Sets the state of whether the glanceable hub is showing or not. */
+    default void setGlanceableHubShowing(boolean showing) {}
+
     /** Sets the state of whether the backdrop is showing or not. */
     default void setBackdropShowing(boolean showing) {}
 

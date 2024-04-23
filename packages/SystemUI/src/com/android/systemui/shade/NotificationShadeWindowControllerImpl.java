@@ -448,6 +448,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 || mScreenOffAnimationController.shouldIgnoreKeyguardTouches()) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+        } else if (state.glanceableHubShowing) {
+            mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
+            mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
             // Make sure to remove FLAG_ALT_FOCUSABLE_IM when keyguard needs input.
@@ -611,6 +614,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 state.panelVisible,
                 state.shadeOrQsExpanded,
                 state.notificationShadeFocusable,
+                state.glanceableHubShowing,
                 state.bouncerShowing,
                 state.keyguardFadingAway,
                 state.keyguardGoingAway,
@@ -736,6 +740,12 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     @Override
     public void setBouncerShowing(boolean showing) {
         mCurrentState.bouncerShowing = showing;
+        apply(mCurrentState);
+    }
+
+    @Override
+    public void setGlanceableHubShowing(boolean showing) {
+        mCurrentState.glanceableHubShowing = showing;
         apply(mCurrentState);
     }
 

@@ -42,4 +42,7 @@ interface IDreamOverlayClient {
 
     /** Called when the dream has ended. */
     void endDream();
+
+    /** Called when the dream is coming to the front. */
+    void comeToFront();
 }
