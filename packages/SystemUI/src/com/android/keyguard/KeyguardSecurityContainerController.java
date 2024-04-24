@@ -577,6 +577,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         SecurityMode securityMode = whitelistIpcs(() -> mSecurityModel.getSecurityMode(
                 mSelectedUserInteractor.getSelectedUserId()));
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
+        mPrimaryBouncerInteractor.get().setLastShownPrimarySecurityScreen(securityMode);
         showSecurityScreen(securityMode);
     }
 

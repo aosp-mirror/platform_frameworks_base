@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode.PIN
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode.Pattern
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -88,7 +89,9 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
         overrideResource(kg_trust_agent_disabled, "Trust agent is unavailable")
     }
 
-    suspend fun TestScope.init() {
+    suspend fun TestScope.init(
+        fingerprintAuthCurrentlyAllowed: Boolean = true,
+    ) {
         kosmos.fakeUserRepository.setSelectedUserInfo(PRIMARY_USER)
         mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         underTest =
@@ -107,12 +110,37 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
                 faceAuthRepository = kosmos.fakeDeviceEntryFaceAuthRepository,
                 securityModel = securityModel
             )
-        biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
+        biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(
+            fingerprintAuthCurrentlyAllowed
+        )
         kosmos.fakeDeviceEntryFingerprintAuthRepository.setLockedOut(false)
         kosmos.fakeFingerprintPropertyRepository.supportsSideFps()
         kosmos.fakeKeyguardBouncerRepository.setPrimaryShow(true)
         runCurrent()
     }
+
+    @Test
+    fun initialMessage_pin() =
+        testScope.runTest {
+            init(fingerprintAuthCurrentlyAllowed = false)
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
+            kosmos.fakeKeyguardBouncerRepository.setLastShownSecurityMode(
+                KeyguardSecurityModel.SecurityMode.PIN
+            )
+            assertThat(bouncerMessage).isNotNull()
+            assertThat(primaryResMessage(bouncerMessage)).isEqualTo("Enter PIN")
+        }
+
+    @Test
+    fun onPrimaryAuthMethodChangeFromPinToPattern_initialMessageUpdates() =
+        testScope.runTest {
+            init(fingerprintAuthCurrentlyAllowed = false)
+            val bouncerMessage by collectLastValue(underTest.bouncerMessage)
+            whenever(securityModel.getSecurityMode(PRIMARY_USER_ID)).thenReturn(Pattern)
+            kosmos.fakeKeyguardBouncerRepository.setLastShownSecurityMode(Pattern)
+            assertThat(bouncerMessage).isNotNull()
+            assertThat(primaryResMessage(bouncerMessage)).isEqualTo("Draw pattern")
+        }
 
     @Test
     fun onIncorrectSecurityInput_providesTheAppropriateValueForBouncerMessage() =

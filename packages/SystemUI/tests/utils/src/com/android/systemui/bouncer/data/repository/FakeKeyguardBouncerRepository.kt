@@ -1,5 +1,6 @@
 package com.android.systemui.bouncer.data.repository
 
+import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
@@ -50,6 +51,8 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
     override var lastAlternateBouncerVisibleTime: Long = 0L
     private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
     override val alternateBouncerUIAvailable = _isAlternateBouncerUIAvailable.asStateFlow()
+    override val lastShownSecurityMode: MutableStateFlow<KeyguardSecurityModel.SecurityMode> =
+        MutableStateFlow(KeyguardSecurityModel.SecurityMode.Invalid)
     override var bouncerDismissActionModel: BouncerDismissActionModel? = null
 
     override fun setPrimaryScrimmed(isScrimmed: Boolean) {
@@ -110,6 +113,10 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
 
     override fun setIsBackButtonEnabled(isBackButtonEnabled: Boolean) {
         _isBackButtonEnabled.value = isBackButtonEnabled
+    }
+
+    override fun setLastShownSecurityMode(securityMode: KeyguardSecurityModel.SecurityMode) {
+        lastShownSecurityMode.value = securityMode
     }
 }
 

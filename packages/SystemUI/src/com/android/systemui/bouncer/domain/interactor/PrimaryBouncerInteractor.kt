@@ -103,6 +103,8 @@ constructor(
     val resourceUpdateRequests: Flow<Boolean> = repository.resourceUpdateRequests.filter { it }
     val keyguardPosition: Flow<Float> = repository.keyguardPosition.filterNotNull()
     val panelExpansionAmount: Flow<Float> = repository.panelExpansionAmount
+    val lastShownSecurityMode: Flow<KeyguardSecurityModel.SecurityMode> =
+        repository.lastShownSecurityMode
 
     /** 0f = bouncer fully hidden. 1f = bouncer fully visible. */
     val bouncerExpansion: Flow<Float> =
@@ -382,6 +384,10 @@ constructor(
     /** Returns whether the primary bouncer is currently showing. */
     fun isBouncerShowing(): Boolean {
         return isShowing.value
+    }
+
+    fun setLastShownPrimarySecurityScreen(securityMode: KeyguardSecurityModel.SecurityMode) {
+        repository.setLastShownSecurityMode(securityMode)
     }
 
     /** Whether we want to wait to show the bouncer in case passive auth succeeds. */
