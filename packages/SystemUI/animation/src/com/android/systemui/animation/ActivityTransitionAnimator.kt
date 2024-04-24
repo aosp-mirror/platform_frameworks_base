@@ -599,6 +599,12 @@ class ActivityTransitionAnimator(
             )
         }
 
+        init {
+            // We do this check here to cover all entry points, including Launcher which doesn't
+            // call startIntentWithAnimation()
+            if (!controller.isLaunching) TransitionAnimator.checkReturnAnimationFrameworkFlag()
+        }
+
         @UiThread
         internal fun postTimeouts() {
             if (timeoutHandler != null) {
@@ -637,7 +643,28 @@ class ActivityTransitionAnimator(
                 return
             }
 
-            startAnimation(apps, nonApps, callback)
+            val window = findRootTaskIfPossible(apps)
+            if (window == null) {
+                Log.i(TAG, "Aborting the animation as no window is opening")
+                callback?.invoke()
+
+                if (DEBUG_TRANSITION_ANIMATION) {
+                    Log.d(
+                        TAG,
+                        "Calling controller.onTransitionAnimationCancelled() [no window opening]"
+                    )
+                }
+                controller.onTransitionAnimationCancelled()
+                listener?.onTransitionAnimationCancelled()
+                return
+            }
+
+            val navigationBar =
+                nonApps?.firstOrNull {
+                    it.windowType == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
+                }
+
+            startAnimation(window, navigationBar, callback)
         }
 
         private fun findRootTaskIfPossible(
@@ -646,9 +673,17 @@ class ActivityTransitionAnimator(
             if (apps == null) {
                 return null
             }
+
+            val targetMode =
+                if (controller.isLaunching) {
+                    RemoteAnimationTarget.MODE_OPENING
+                } else {
+                    RemoteAnimationTarget.MODE_CLOSING
+                }
             var candidate: RemoteAnimationTarget? = null
+
             for (it in apps) {
-                if (it.mode == RemoteAnimationTarget.MODE_OPENING) {
+                if (it.mode == targetMode) {
                     if (activityTransitionUseLargestWindow()) {
                         if (
                             candidate == null ||
@@ -673,47 +708,31 @@ class ActivityTransitionAnimator(
                     }
                 }
             }
+
             return candidate
         }
 
         private fun startAnimation(
-            apps: Array<out RemoteAnimationTarget>?,
-            nonApps: Array<out RemoteAnimationTarget>?,
+            window: RemoteAnimationTarget,
+            navigationBar: RemoteAnimationTarget?,
             iCallback: IRemoteAnimationFinishedCallback?
         ) {
             if (TransitionAnimator.DEBUG) {
                 Log.d(TAG, "Remote animation started")
             }
 
-            val window = findRootTaskIfPossible(apps)
-            if (window == null) {
-                Log.i(TAG, "Aborting the animation as no window is opening")
-                iCallback?.invoke()
-
-                if (DEBUG_TRANSITION_ANIMATION) {
-                    Log.d(
-                        TAG,
-                        "Calling controller.onTransitionAnimationCancelled() [no window opening]"
-                    )
-                }
-                controller.onTransitionAnimationCancelled()
-                listener?.onTransitionAnimationCancelled()
-                return
-            }
-
-            val navigationBar =
-                nonApps?.firstOrNull {
-                    it.windowType == WindowManager.LayoutParams.TYPE_NAVIGATION_BAR
-                }
-
             val windowBounds = window.screenSpaceBounds
             val endState =
-                TransitionAnimator.State(
-                    top = windowBounds.top,
-                    bottom = windowBounds.bottom,
-                    left = windowBounds.left,
-                    right = windowBounds.right
-                )
+                if (controller.isLaunching) {
+                    TransitionAnimator.State(
+                        top = windowBounds.top,
+                        bottom = windowBounds.bottom,
+                        left = windowBounds.left,
+                        right = windowBounds.right
+                    )
+                } else {
+                    controller.createAnimatorState()
+                }
             val windowBackgroundColor =
                 window.taskInfo?.let { callback.getBackgroundColor(it) } ?: window.backgroundColor
 
@@ -721,24 +740,29 @@ class ActivityTransitionAnimator(
             // instead of recomputing isExpandingFullyAbove here.
             val isExpandingFullyAbove =
                 transitionAnimator.isExpandingFullyAbove(controller.transitionContainer, endState)
-            val endRadius =
-                if (isExpandingFullyAbove) {
-                    // Most of the time, expanding fully above the root view means expanding in full
-                    // screen.
-                    ScreenDecorationsUtils.getWindowCornerRadius(context)
-                } else {
-                    // This usually means we are in split screen mode, so 2 out of 4 corners will
-                    // have
-                    // a radius of 0.
-                    0f
-                }
-            endState.topCornerRadius = endRadius
-            endState.bottomCornerRadius = endRadius
+            if (controller.isLaunching) {
+                val endRadius = getWindowRadius(isExpandingFullyAbove)
+                endState.topCornerRadius = endRadius
+                endState.bottomCornerRadius = endRadius
+            }
 
             // We animate the opening window and delegate the view expansion to [this.controller].
             val delegate = this.controller
             val controller =
                 object : Controller by delegate {
+                    override fun createAnimatorState(): TransitionAnimator.State {
+                        if (isLaunching) return delegate.createAnimatorState()
+                        val windowRadius = getWindowRadius(isExpandingFullyAbove)
+                        return TransitionAnimator.State(
+                            top = windowBounds.top,
+                            bottom = windowBounds.bottom,
+                            left = windowBounds.left,
+                            right = windowBounds.right,
+                            topCornerRadius = windowRadius,
+                            bottomCornerRadius = windowRadius
+                        )
+                    }
+
                     override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
                         listener?.onTransitionAnimationStart()
 
@@ -795,6 +819,18 @@ class ActivityTransitionAnimator(
                 )
         }
 
+        private fun getWindowRadius(isExpandingFullyAbove: Boolean): Float {
+            return if (isExpandingFullyAbove) {
+                // Most of the time, expanding fully above the root view means
+                // expanding in full screen.
+                ScreenDecorationsUtils.getWindowCornerRadius(context)
+            } else {
+                // This usually means we are in split screen mode, so 2 out of 4
+                // corners will have a radius of 0.
+                0f
+            }
+        }
+
         private fun applyStateToWindow(
             window: RemoteAnimationTarget,
             state: TransitionAnimator.State,
@@ -842,20 +878,41 @@ class ActivityTransitionAnimator(
                 windowCropF.bottom.roundToInt()
             )
 
+            val windowAnimationDelay =
+                if (controller.isLaunching) {
+                    TIMINGS.contentAfterFadeInDelay
+                } else {
+                    TIMINGS.contentBeforeFadeOutDelay
+                }
+            val windowAnimationDuration =
+                if (controller.isLaunching) {
+                    TIMINGS.contentAfterFadeInDuration
+                } else {
+                    TIMINGS.contentBeforeFadeOutDuration
+                }
+            val windowProgress =
+                TransitionAnimator.getProgress(
+                    TIMINGS,
+                    linearProgress,
+                    windowAnimationDelay,
+                    windowAnimationDuration
+                )
+
             // The alpha of the opening window. If it opens above the expandable, then it should
             // fade in progressively. Otherwise, it should be fully opaque and will be progressively
             // revealed as the window background color layer above the window fades out.
             val alpha =
                 if (controller.isBelowAnimatingWindow) {
-                    val windowProgress =
-                        TransitionAnimator.getProgress(
-                            TIMINGS,
-                            linearProgress,
-                            TIMINGS.contentAfterFadeInDelay,
-                            TIMINGS.contentAfterFadeInDuration
+                    if (controller.isLaunching) {
+                        INTERPOLATORS.contentAfterFadeInInterpolator.getInterpolation(
+                            windowProgress
                         )
-
-                    INTERPOLATORS.contentAfterFadeInInterpolator.getInterpolation(windowProgress)
+                    } else {
+                        1 -
+                            INTERPOLATORS.contentBeforeFadeOutInterpolator.getInterpolation(
+                                windowProgress
+                            )
+                    }
                 } else {
                     1f
                 }
