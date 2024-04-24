@@ -8676,15 +8676,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mDisplayContent == null) {
             return;
         }
-        final Rect parentAppBounds = newParentConfiguration.windowConfiguration.getAppBounds();
+        final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
         int rotation = newParentConfiguration.windowConfiguration.getRotation();
         if (rotation == ROTATION_UNDEFINED && !isFixedRotationTransforming()) {
             rotation = mDisplayContent.getRotation();
         }
         if (!mResolveConfigHint.mUseOverrideInsetsForStableBounds
-                || getCompatDisplayInsets() != null
-                || isFloating(parentWindowingMode) || parentAppBounds == null
-                || parentAppBounds.isEmpty() || rotation == ROTATION_UNDEFINED) {
+                || getCompatDisplayInsets() != null || isFloating(parentWindowingMode)
+                || rotation == ROTATION_UNDEFINED) {
             // If the insets configuration decoupled logic is not enabled for the app, or the app
             // already has a compat override, or the context doesn't contain enough info to
             // calculate the override, skip the override.
@@ -8703,7 +8702,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // the value if not calculated yet.
         Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
         if (outAppBounds == null || outAppBounds.isEmpty()) {
-            inOutConfig.windowConfiguration.setAppBounds(parentAppBounds);
+            inOutConfig.windowConfiguration.setAppBounds(parentBounds);
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
             outAppBounds.inset(nonDecorInsets);
         }
@@ -8714,14 +8713,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
         if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
             final int overrideScreenWidthDp = (int) (outAppBounds.width() / density + 0.5f);
-            inOutConfig.screenWidthDp =
-                    Math.min(overrideScreenWidthDp, newParentConfiguration.screenWidthDp);
+            inOutConfig.screenWidthDp = overrideScreenWidthDp;
         }
         if (inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
-            final int overrideScreenHeightDp =
-                    (int) (outAppBounds.height() / density + 0.5f);
-            inOutConfig.screenHeightDp =
-                    Math.min(overrideScreenHeightDp, newParentConfiguration.screenHeightDp);
+            final int overrideScreenHeightDp = (int) (outAppBounds.height() / density + 0.5f);
+            inOutConfig.screenHeightDp = overrideScreenHeightDp;
         }
         if (inOutConfig.smallestScreenWidthDp
                 == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
