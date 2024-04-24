@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.content.Context
+import android.graphics.Rect
 import android.os.PowerManager
 import android.os.SystemClock
 import android.view.GestureDetector
@@ -214,6 +215,32 @@ constructor(
             containerView.resources.getDimensionPixelSize(
                 R.dimen.communal_right_edge_swipe_region_width
             )
+
+        val topEdgeSwipeRegionWidth =
+            containerView.resources.getDimensionPixelSize(
+                R.dimen.communal_top_edge_swipe_region_height
+            )
+        val bottomEdgeSwipeRegionWidth =
+            containerView.resources.getDimensionPixelSize(
+                R.dimen.communal_bottom_edge_swipe_region_height
+            )
+
+        // BouncerSwipeTouchHandler has a larger gesture area than we want, set an exclusion area so
+        // the gesture area doesn't overlap with widgets.
+        // TODO(b/323035776): adjust gesture areaa for portrait mode
+        containerView.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                val exclusionRect =
+                    Rect(
+                        0,
+                        topEdgeSwipeRegionWidth,
+                        containerView.right,
+                        containerView.bottom - bottomEdgeSwipeRegionWidth
+                    )
+
+                containerView.systemGestureExclusionRects = listOf(exclusionRect)
+            }
+        }
 
         collectFlow(
             containerView,
