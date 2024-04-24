@@ -18,7 +18,10 @@ license {
 cc_library_shared {
     name: "libmedia_jni",
 
-    defaults: ["libcodec2-internal-defaults"],
+    defaults: [
+        "aconfig_lib_cc_static_link.defaults",
+        "libcodec2-internal-defaults",
+    ],
     min_sdk_version: "",
 
     srcs: [
