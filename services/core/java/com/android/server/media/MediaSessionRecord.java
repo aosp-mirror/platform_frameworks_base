@@ -1057,6 +1057,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         return -1;
     }
 
+    @NonNull
     private PlaybackInfo getVolumeAttributes() {
         int volumeType;
         AudioAttributes attributes;
@@ -1850,6 +1851,7 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
             return mFlags;
         }
 
+        @NonNull
         @Override
         public PlaybackInfo getVolumeAttributes() {
             return MediaSessionRecord.this.getVolumeAttributes();
