@@ -59,6 +59,7 @@ import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -2056,7 +2057,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private int adjustLayoutInDisplayCutoutMode(WindowManager.LayoutParams attrs) {
         final int originalMode = attrs.layoutInDisplayCutoutMode;
-        if ((attrs.privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
+        if ((attrs.privateFlags & (PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED
+                | PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)) != 0
                 && attrs.isFullscreen()
                 && attrs.getFitInsetsTypes() == 0
                 && attrs.getFitInsetsSides() == 0) {
