@@ -94,24 +94,41 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Холбогдсон (утас байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Холбогдсон (медиа байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Холбогдсон (утас эсвэл медиа байхгүй), батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Идэвхтэй, батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Идэвхтэй, Зүүн: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Баруун: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level (2685517576209066008) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered (4961338936672922617) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered_left (5521405563527657515) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7165552824664523336) -->
+    <skip />
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Зүүн: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Баруун: Батарей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Зүүн тал <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Баруун тал <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_battery_level_untethered (1616774716076301755) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left (5725764679536058365) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right (8377995536997790142) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Идэвхтэй"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Хадгалсан"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Идэвхтэй, зөвхөн зүүн тал"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Идэвхтэй, зөвхөн баруун тал"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Идэвхтэй, зүүн болон баруун тал"</string>
-    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Идэвхтэй (зөвхөн медиа), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей"</string>
-    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Идэвхтэй (зөвхөн медиа), З: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батарей, Б: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батарей"</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Холбогдсон (аудио хуваалцахыг дэмждэг), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батарей"</string>
-    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Холбогдсон (аудио хуваалцахыг дэмждэг), З: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батарей, Б: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батарей"</string>
-    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Холбогдсон (аудио хуваалцахыг дэмждэг), зүүн <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Холбогдсон (аудио хуваалцахыг дэмждэг), баруун <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (7772517511061834073) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (7444753133664620926) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (5968584103507988820) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (803110681688633362) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (7707464334346454950) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (8941549024377771038) -->
+    <skip />
+    <!-- no translation found for bluetooth_no_battery_level_lea_support (5721725041048434075) -->
+    <skip />
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Идэвхтэй (зөвхөн медиа)"</string>
     <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Аудио хуваалцахыг дэмждэг"</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Идэвхтэй (зөвхөн медиа), зөвхөн зүүн"</string>

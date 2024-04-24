@@ -94,24 +94,41 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"Połączono (bez telefonu), bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> – <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"Połączono (bez multimediów), bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> – <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Połączono (bez telefonu i multimediów), bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> – <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktywne, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterii"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktywna, L: bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P: bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level (2685517576209066008) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered (4961338936672922617) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered_left (5521405563527657515) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7165552824664523336) -->
+    <skip />
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> naładowania baterii"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P: bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Po lewej <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Po prawej <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_battery_level_untethered (1616774716076301755) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left (5725764679536058365) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right (8377995536997790142) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Urządzenie aktywne"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Zapisano"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktywne, tylko lewa strona"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktywne, tylko prawa strona"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktywny, lewa i prawa strona"</string>
-    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"Aktywne (tylko multimedia), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> naładowania baterii"</string>
-    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"Aktywne (tylko multimedia), lewa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> naładowania baterii, prawa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> naładowania baterii"</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"Połączone (obsługa udostępniania dźwięku), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> naładowania baterii"</string>
-    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"Połączone (obsługa udostępniania dźwięku), lewa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> naładowania baterii, prawa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> naładowania baterii"</string>
-    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"Połączone (obsługa udostępniania dźwięku), lewa <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"Połączone (obsługa udostępniania dźwięku), prawa <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (7772517511061834073) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (7444753133664620926) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (5968584103507988820) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (803110681688633362) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (7707464334346454950) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (8941549024377771038) -->
+    <skip />
+    <!-- no translation found for bluetooth_no_battery_level_lea_support (5721725041048434075) -->
+    <skip />
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"Aktywne (tylko multimedia)"</string>
     <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"Obsługa udostępniania dźwięku"</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"Aktywne (tylko multimedia), tylko lewa"</string>
