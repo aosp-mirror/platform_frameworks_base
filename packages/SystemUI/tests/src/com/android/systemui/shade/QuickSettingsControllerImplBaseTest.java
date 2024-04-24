@@ -31,7 +31,6 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityManager;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardStatusView;
@@ -169,7 +168,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     protected FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     protected FakeShadeRepository mShadeRepository = new FakeShadeRepository();
 
-    protected InteractionJankMonitor mInteractionJankMonitor;
     protected SysuiStatusBarStateController mStatusBarStateController;
     protected ShadeInteractor mShadeInteractor;
 
@@ -190,7 +188,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mPanelViewControllerLazy.get()).thenReturn(mNotificationPanelViewController);
         mStatusBarStateController = mKosmos.getStatusBarStateController();
-        mInteractionJankMonitor = mKosmos.getInteractionJankMonitor();
 
         mKosmos.getFakeDeviceProvisioningRepository().setDeviceProvisioned(true);
         FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
@@ -322,7 +319,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,
-                mInteractionJankMonitor,
+                () -> mKosmos.getInteractionJankMonitor(),
                 mShadeLogger,
                 mDumpManager,
                 mock(DeviceEntryFaceAuthInteractor.class),

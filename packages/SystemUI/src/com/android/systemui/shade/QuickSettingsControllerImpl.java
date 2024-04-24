@@ -19,7 +19,6 @@ package com.android.systemui.shade;
 
 import static android.view.WindowInsets.Type.ime;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE;
 import static com.android.systemui.Flags.centralizedStatusBarHeightFix;
 import static com.android.systemui.classifier.Classifier.QS_COLLAPSE;
 import static com.android.systemui.shade.NotificationPanelViewController.COUNTER_PANEL_OPEN_QS;
@@ -57,6 +56,7 @@ import androidx.annotation.NonNull;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.Cuj;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -153,7 +153,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private final CastController mCastController;
     private final SplitShadeStateController mSplitShadeStateController;
-    private final InteractionJankMonitor mInteractionJankMonitor;
+    private final Lazy<InteractionJankMonitor> mInteractionJankMonitorLazy;
     private final ShadeRepository mShadeRepository;
     private final ShadeInteractor mShadeInteractor;
     private final ActiveNotificationsInteractor mActiveNotificationsInteractor;
@@ -324,7 +324,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             AccessibilityManager accessibilityManager,
             LockscreenGestureLogger lockscreenGestureLogger,
             MetricsLogger metricsLogger,
-            InteractionJankMonitor interactionJankMonitor,
+            Lazy<InteractionJankMonitor> interactionJankMonitorLazy,
             ShadeLogger shadeLog,
             DumpManager dumpManager,
             DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
@@ -375,7 +375,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mShadeLog = shadeLog;
         mDeviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor;
         mCastController = castController;
-        mInteractionJankMonitor = interactionJankMonitor;
+        mInteractionJankMonitorLazy = interactionJankMonitorLazy;
         mShadeRepository = shadeRepository;
         mShadeInteractor = shadeInteractor;
         mActiveNotificationsInteractor = activeNotificationsInteractor;
@@ -2312,44 +2312,46 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     }
 
     void beginJankMonitoring(boolean isFullyCollapsed) {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
         // TODO (b/265193930): remove dependency on NPVC
         InteractionJankMonitor.Configuration.Builder builder =
                 InteractionJankMonitor.Configuration.Builder.withView(
-                        InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE,
+                        Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE,
                         mPanelView).setTag(isFullyCollapsed ? "Expand" : "Collapse");
-        mInteractionJankMonitor.begin(builder);
+        monitor.begin(builder);
     }
 
     void endJankMonitoring() {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
-        InteractionJankMonitor.getInstance().end(
-                InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        monitor.end(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
     }
 
     void cancelJankMonitoring() {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
-        InteractionJankMonitor.getInstance().cancel(
-                InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        monitor.cancel(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
     }
 
     void traceQsJank(boolean startTracing, boolean wasCancelled) {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
         if (startTracing) {
-            mInteractionJankMonitor.begin(mPanelView, CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+            monitor.begin(mPanelView, Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
         } else {
             if (wasCancelled) {
-                mInteractionJankMonitor.cancel(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+                monitor.cancel(Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
             } else {
-                mInteractionJankMonitor.end(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+                monitor.end(Cuj.CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
             }
         }
     }

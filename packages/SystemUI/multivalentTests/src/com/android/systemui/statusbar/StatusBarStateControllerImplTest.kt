@@ -96,7 +96,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization?) : SysuiTes
             object :
                 StatusBarStateControllerImpl(
                     uiEventLogger,
-                    kosmos.interactionJankMonitor,
+                    { kosmos.interactionJankMonitor },
                     JavaAdapter(testScope.backgroundScope),
                     { kosmos.shadeInteractor },
                     { kosmos.deviceUnlockedInteractor },

@@ -31,10 +31,10 @@ import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.jank.interactionJankMonitor
-import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -53,6 +53,7 @@ class BackPanelControllerTest : SysuiTestCase() {
     companion object {
         private const val START_X: Float = 0f
     }
+    private val kosmos = testKosmos()
     private lateinit var mBackPanelController: BackPanelController
     private lateinit var testableLooper: TestableLooper
     private var triggerThreshold: Float = 0.0f
@@ -61,7 +62,7 @@ class BackPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var windowManager: WindowManager
     @Mock private lateinit var configurationController: ConfigurationController
     @Mock private lateinit var latencyTracker: LatencyTracker
-    private val interactionJankMonitor = Kosmos().interactionJankMonitor
+    private val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
     @Mock private lateinit var layoutParams: WindowManager.LayoutParams
     @Mock private lateinit var backCallback: NavigationEdgeBackPlugin.BackCallback
 
