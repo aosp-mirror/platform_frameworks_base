@@ -777,18 +777,24 @@ public final class BatteryService extends SystemService {
                     + ", info:" + mHealthInfo.toString());
         }
 
-        mHandler.post(() -> broadcastBatteryChangedIntent(intent, mBatteryChangedOptions));
+        mHandler.post(() -> broadcastBatteryChangedIntent(mContext,
+                intent, mBatteryChangedOptions));
     }
 
-    private static void broadcastBatteryChangedIntent(Intent intent, Bundle options) {
+    private static void broadcastBatteryChangedIntent(Context context, Intent intent,
+            Bundle options) {
         // TODO (293959093): It is important that SystemUI receives this broadcast as soon as
         // possible. Ideally, it should be using binder callbacks but until then, dispatch this
         // as a foreground broadcast to SystemUI.
         final Intent fgIntent = new Intent(intent);
         fgIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         fgIntent.setPackage(sSystemUiPackage);
-        ActivityManager.broadcastStickyIntent(fgIntent, AppOpsManager.OP_NONE,
-                options, UserHandle.USER_ALL);
+        if (com.android.server.flags.Flags.pkgTargetedBatteryChangedNotSticky()) {
+            context.sendBroadcastAsUser(fgIntent, UserHandle.ALL, null, options);
+        } else {
+            ActivityManager.broadcastStickyIntent(fgIntent, AppOpsManager.OP_NONE,
+                    options, UserHandle.USER_ALL);
+        }
 
         ActivityManager.broadcastStickyIntent(intent, new String[] {sSystemUiPackage},
                 AppOpsManager.OP_NONE, options, UserHandle.USER_ALL);
