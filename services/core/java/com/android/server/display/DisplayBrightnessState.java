@@ -45,6 +45,7 @@ public final class DisplayBrightnessState {
     private final float mCustomAnimationRate;
 
     private final BrightnessEvent mBrightnessEvent;
+    private final int mBrightnessAdjustmentFlag;
 
     private DisplayBrightnessState(Builder builder) {
         mBrightness = builder.getBrightness();
@@ -58,6 +59,7 @@ public final class DisplayBrightnessState {
         mCustomAnimationRate = builder.getCustomAnimationRate();
         mShouldUpdateScreenBrightnessSetting = builder.shouldUpdateScreenBrightnessSetting();
         mBrightnessEvent = builder.getBrightnessEvent();
+        mBrightnessAdjustmentFlag = builder.getBrightnessAdjustmentFlag();
     }
 
     /**
@@ -138,6 +140,14 @@ public final class DisplayBrightnessState {
         return mBrightnessEvent;
     }
 
+    /**
+     * Gets the flag representing the reason for the brightness adjustment. This can be
+     * automatic(e.g. because of the change in the lux), or user initiated(e.g. moving the slider)
+     */
+    public int getBrightnessAdjustmentFlag() {
+        return mBrightnessAdjustmentFlag;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -157,6 +167,7 @@ public final class DisplayBrightnessState {
                 .append(mShouldUpdateScreenBrightnessSetting);
         stringBuilder.append("\n    mBrightnessEvent:")
                 .append(Objects.toString(mBrightnessEvent, "null"));
+        stringBuilder.append("\n    mBrightnessAdjustmentFlag:").append(mBrightnessAdjustmentFlag);
         return stringBuilder.toString();
     }
 
@@ -187,7 +198,8 @@ public final class DisplayBrightnessState {
                 && mCustomAnimationRate == otherState.getCustomAnimationRate()
                 && mShouldUpdateScreenBrightnessSetting
                     == otherState.shouldUpdateScreenBrightnessSetting()
-                && Objects.equals(mBrightnessEvent, otherState.getBrightnessEvent());
+                && Objects.equals(mBrightnessEvent, otherState.getBrightnessEvent())
+                && mBrightnessAdjustmentFlag == otherState.getBrightnessAdjustmentFlag();
     }
 
     @Override
@@ -195,7 +207,7 @@ public final class DisplayBrightnessState {
         return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
                 mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mMinBrightness,
                 mCustomAnimationRate,
-                mShouldUpdateScreenBrightnessSetting, mBrightnessEvent);
+                mShouldUpdateScreenBrightnessSetting, mBrightnessEvent, mBrightnessAdjustmentFlag);
     }
 
     /**
@@ -222,6 +234,8 @@ public final class DisplayBrightnessState {
 
         private BrightnessEvent mBrightnessEvent;
 
+        public int mBrightnessAdjustmentFlag = 0;
+
         /**
          * Create a builder starting with the values from the specified {@link
          * DisplayBrightnessState}.
@@ -242,6 +256,7 @@ public final class DisplayBrightnessState {
             builder.setShouldUpdateScreenBrightnessSetting(
                     state.shouldUpdateScreenBrightnessSetting());
             builder.setBrightnessEvent(state.getBrightnessEvent());
+            builder.setBrightnessAdjustmentFlag(state.getBrightnessAdjustmentFlag());
             return builder;
         }
 
@@ -418,7 +433,6 @@ public final class DisplayBrightnessState {
             return new DisplayBrightnessState(this);
         }
 
-
         /**
          * This is used to get the BrightnessEvent object from its builder
          */
@@ -432,6 +446,22 @@ public final class DisplayBrightnessState {
          */
         public Builder setBrightnessEvent(BrightnessEvent brightnessEvent) {
             mBrightnessEvent = brightnessEvent;
+            return this;
+        }
+
+        /**
+         * This is used to get the brightness adjustment flag from its builder
+         */
+        public int getBrightnessAdjustmentFlag() {
+            return mBrightnessAdjustmentFlag;
+        }
+
+
+        /**
+         * This is used to set the brightness adjustment flag
+         */
+        public Builder setBrightnessAdjustmentFlag(int brightnessAdjustmentFlag) {
+            mBrightnessAdjustmentFlag = brightnessAdjustmentFlag;
             return this;
         }
     }

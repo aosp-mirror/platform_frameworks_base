@@ -174,6 +174,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private static final int SET_SCREEN_BRIGHTNESS_OVERRIDE = 1;
     private static final int SET_USER_ACTIVITY_TIMEOUT = 2;
     private static final int MSG_SEND_SLEEP_TRANSITION = 3;
+    private static final int PINNED_TASK_ABORT_TIMEOUT = 1000;
 
     static final String TAG_TASKS = TAG + POSTFIX_TASKS;
     static final String TAG_STATES = TAG + POSTFIX_STATES;
@@ -294,6 +295,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
     };
+
+    // TODO: b/335866033 Remove the abort PiP on timeout once PiP2 flag is on.
+    @Nullable private Runnable mMaybeAbortPipEnterRunnable = null;
 
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
 
@@ -2272,7 +2276,66 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         resumeFocusedTasksTopActivities();
 
         notifyActivityPipModeChanged(r.getTask(), r);
+
+        if (!isPip2ExperimentEnabled()) {
+            // TODO: b/335866033 Remove the abort PiP on timeout once PiP2 flag is on.
+            // Set up a timeout callback to potentially abort PiP enter if in an inconsistent state.
+            scheduleTimeoutAbortPipEnter(rootTask);
+        }
     }
+
+    private void scheduleTimeoutAbortPipEnter(Task rootTask) {
+        if (mMaybeAbortPipEnterRunnable != null) {
+            // If there is an abort enter PiP check pending already remove it and abort
+            // immediately since we are trying to enter PiP in an inconsistent state
+            mHandler.removeCallbacks(mMaybeAbortPipEnterRunnable);
+            mMaybeAbortPipEnterRunnable.run();
+        }
+        // Snapshot a throwable early on to display the callstack upon abort later on timeout.
+        final Throwable enterPipThrowable = new Throwable();
+        // Set up a timeout to potentially roll back the task change to PINNED mode
+        // by aborting PiP.
+        mMaybeAbortPipEnterRunnable = new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mService.mGlobalLock) {
+                    if (mTransitionController.inTransition()) {
+                        // If this task is a part an active transition aborting PiP might break
+                        // it; so run the timeout callback directly once idle.
+
+                        final Runnable expectedMaybeAbortAtTimeout = mMaybeAbortPipEnterRunnable;
+                        mTransitionController.mStateValidators.add(() -> {
+                            // If a second PiP transition comes in, it runs the abort runnable for
+                            // the first transition pre-emptively, so we need to avoid calling
+                            // the same runnable twice when validating states.
+                            if (expectedMaybeAbortAtTimeout != mMaybeAbortPipEnterRunnable) return;
+                            mMaybeAbortPipEnterRunnable = null;
+                            run();
+                        });
+                        return;
+                    } else {
+                        mMaybeAbortPipEnterRunnable = null;
+                    }
+                    mService.deferWindowLayout();
+                    final ActivityRecord top = rootTask.getTopMostActivity();
+                    final ActivityManager.RunningTaskInfo beforeTaskInfo =
+                            rootTask.getTaskInfo();
+                    if (top != null && !top.inPinnedWindowingMode()
+                            && rootTask.abortPipEnter(top)) {
+                        Slog.wtf(TAG, "Enter PiP was aborted via a scheduled timeout"
+                                        + "task_state_before=" + beforeTaskInfo
+                                        + "task_state_after=" + rootTask.getTaskInfo(),
+                                enterPipThrowable);
+                    }
+                    mService.continueWindowLayout();
+                }
+            }
+        };
+        mHandler.postDelayed(mMaybeAbortPipEnterRunnable, PINNED_TASK_ABORT_TIMEOUT);
+        Slog.d(TAG, "a delayed check for potentially aborting PiP if "
+                + "in a wrong state is scheduled.");
+    }
+
 
     /**
      * Notifies when an activity enters or leaves PIP mode.
@@ -2403,14 +2466,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return false;
         }
 
-        return resumeFocusedTasksTopActivitiesUnchecked(targetRootTask, target, targetOptions,
-                deferPause);
-    }
-
-    @VisibleForTesting
-    boolean resumeFocusedTasksTopActivitiesUnchecked(
-            Task targetRootTask, ActivityRecord target, ActivityOptions targetOptions,
-            boolean deferPause) {
         boolean result = false;
         if (targetRootTask != null && (targetRootTask.isTopRootTaskInDisplayArea()
                 || getTopDisplayFocusedRootTask() == targetRootTask)) {
@@ -2898,6 +2953,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void scheduleDestroyAllActivities(String reason) {
         mDestroyAllActivitiesReason = reason;
         mService.mH.post(mDestroyAllActivitiesRunnable);
+    }
+
+    void removeAllMaybeAbortPipEnterRunnable() {
+        if (mMaybeAbortPipEnterRunnable == null) {
+            return;
+        }
+        mHandler.removeCallbacks(mMaybeAbortPipEnterRunnable);
+        mMaybeAbortPipEnterRunnable = null;
     }
 
     // Tries to put all activity tasks to sleep. Returns true if all tasks were

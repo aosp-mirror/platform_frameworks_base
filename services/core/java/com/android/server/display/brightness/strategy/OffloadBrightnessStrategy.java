@@ -16,11 +16,11 @@
 
 package com.android.server.display.brightness.strategy;
 
-import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManager;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
+import com.android.server.display.brightness.StrategyExecutionRequest;
 import com.android.server.display.brightness.StrategySelectionNotifyRequest;
 import com.android.server.display.feature.DisplayManagerFlags;
 
@@ -42,7 +42,7 @@ public class OffloadBrightnessStrategy implements DisplayBrightnessStrategy {
 
     @Override
     public DisplayBrightnessState updateBrightness(
-            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest) {
+            StrategyExecutionRequest strategyExecutionRequest) {
         float offloadBrightness = mOffloadScreenBrightness;
         if (mDisplayManagerFlags.isRefactorDisplayPowerControllerEnabled()) {
             // We reset the offload brightness to invalid so that there is no stale value lingering

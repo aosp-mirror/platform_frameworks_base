@@ -425,6 +425,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private int[] mSCBMReason;
     private boolean[] mSCBMStarted;
 
+    private boolean[] mCarrierRoamingNtnMode = null;
+
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
      * type and APN setting. This is the cache to prevent redundant callbacks to the listeners.
@@ -723,6 +725,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mECBMStarted = copyOf(mECBMStarted, mNumPhones);
             mSCBMReason = copyOf(mSCBMReason, mNumPhones);
             mSCBMStarted = copyOf(mSCBMStarted, mNumPhones);
+            mCarrierRoamingNtnMode = copyOf(mCarrierRoamingNtnMode, mNumPhones);
             // ds -> ss switch.
             if (mNumPhones < oldNumPhones) {
                 cutListToSize(mCellInfo, mNumPhones);
@@ -781,6 +784,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mECBMStarted[i] = false;
                 mSCBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
                 mSCBMStarted[i] = false;
+                mCarrierRoamingNtnMode[i] = false;
             }
         }
     }
@@ -854,6 +858,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mECBMStarted = new boolean[numPhones];
         mSCBMReason = new int[numPhones];
         mSCBMStarted = new boolean[numPhones];
+        mCarrierRoamingNtnMode = new boolean[numPhones];
 
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
@@ -897,6 +902,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mECBMStarted[i] = false;
             mSCBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
             mSCBMStarted[i] = false;
+            mCarrierRoamingNtnMode[i] = false;
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1519,6 +1525,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                     TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS,
                                     mSCBMReason[r.phoneId]);
                         }
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnModeChanged(
+                                mCarrierRoamingNtnMode[r.phoneId]);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -3510,6 +3524,41 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
         handleRemoveListLocked();
+    }
+
+    /**
+     * Notify external listeners that carrier roaming non-terrestrial network mode changed.
+     * @param subId subscription ID.
+     * @param active {@code true} If the device is connected to carrier roaming
+     *                           non-terrestrial network or was connected within the
+     *                           {CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT}
+     *                           duration, {code false} otherwise.
+     */
+    public void notifyCarrierRoamingNtnModeChanged(int subId, boolean active) {
+        if (!checkNotifyPermission("notifyCarrierRoamingNtnModeChanged")) {
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyCarrierRoamingNtnModeChanged: subId=" + subId + " active=" + active);
+        }
+
+        synchronized (mRecords) {
+            int phoneId = getPhoneIdFromSubId(subId);
+            mCarrierRoamingNtnMode[phoneId] = active;
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED)
+                        && idMatch(r, subId, phoneId)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnModeChanged(active);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
     }
 
     @NeverCompile // Avoid size overhead of debugging code.

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
@@ -69,7 +70,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANI
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
-import static com.android.server.wm.ActivityTaskManagerService.isPip2ExperimentEnabled;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
@@ -838,8 +838,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     private int applyTaskChanges(Task tr, WindowContainerTransaction.Change c) {
-        final boolean wasPrevFocusableAndVisible = tr.isFocusableAndVisible();
-
         int effects = applyChanges(tr, c);
         final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
 
@@ -860,6 +858,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         final int childWindowingMode = c.getActivityWindowingMode();
+        if (!ActivityTaskManagerService.isPip2ExperimentEnabled()
+                && tr.getWindowingMode() == WINDOWING_MODE_PINNED
+                && (childWindowingMode == WINDOWING_MODE_PINNED
+                || childWindowingMode == WINDOWING_MODE_UNDEFINED)) {
+            // If setActivityWindowingMode requested to match its pinned task's windowing mode,
+            // remove any inconsistency checking timeout callbacks for PiP.
+            Slog.d(TAG, "Task and activity windowing modes match, so remove any timeout "
+                    + "abort PiP callbacks scheduled if needed; task_win_mode="
+                    + tr.getWindowingMode() + ", activity_win_mode=" + childWindowingMode);
+            mService.mRootWindowContainer.removeAllMaybeAbortPipEnterRunnable();
+        }
         if (childWindowingMode > -1) {
             tr.forAllActivities(a -> { a.setWindowingMode(childWindowingMode); });
         }
@@ -885,28 +894,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 boolean canEnterPip = activity.checkEnterPictureInPictureState(
                         "applyTaskChanges", true /* beforeStopping */);
                 if (canEnterPip) {
-                    mService.mTaskSupervisor.beginDeferResume();
-                    try {
-                        canEnterPip = mService.mActivityClientController
-                                .requestPictureInPictureMode(activity);
-                    } finally {
-                        mService.mTaskSupervisor.endDeferResume();
-                        if (canEnterPip && !isPip2ExperimentEnabled()) {
-                            // Wait until the transaction is applied to only resume once.
-                            effects |= TRANSACT_EFFECTS_LIFECYCLE;
-                        }
-                    }
+                    canEnterPip = mService.mActivityClientController
+                            .requestPictureInPictureMode(activity);
                 }
                 if (!canEnterPip) {
                     // Restore the flag to its previous state when the activity cannot enter PIP.
                     activity.supportsEnterPipOnTaskSwitch = lastSupportsEnterPipOnTaskSwitch;
                 }
             }
-        }
-
-        // Activity in this Task may resume/pause when enter/exit pip.
-        if (wasPrevFocusableAndVisible != tr.isFocusableAndVisible()) {
-            effects |= TRANSACT_EFFECTS_LIFECYCLE;
         }
 
         return effects;

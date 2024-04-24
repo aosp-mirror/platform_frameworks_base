@@ -124,18 +124,6 @@ constructor(
         }
     }
 
-    fun startToGlanceableHubTransition() {
-        scope.launch {
-            KeyguardWmStateRefactor.isUnexpectedlyInLegacyMode()
-            if (
-                transitionInteractor.startedKeyguardState.replayCache.last() ==
-                    KeyguardState.DREAMING
-            ) {
-                startTransitionTo(KeyguardState.GLANCEABLE_HUB)
-            }
-        }
-    }
-
     @OptIn(FlowPreview::class)
     private fun listenForDreamingToOccluded() {
         if (KeyguardWmStateRefactor.isEnabled) {

@@ -147,4 +147,11 @@
         <include layout="@layout/screenshot_work_profile_first_run" />
         <include layout="@layout/screenshot_detection_notice" />
     </FrameLayout>
+    <ImageView
+        android:id="@+id/screenshot_flash"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:elevation="12dp"
+        android:src="@android:color/white"/>
 </com.android.systemui.screenshot.ui.ScreenshotShelfView>

@@ -117,9 +117,9 @@ constructor(
             hydrateSystemUiState()
             collectFalsingSignals()
             respondToFalsingDetections()
-            hydrateWindowFocus()
             hydrateInteractionState()
             handleBouncerOverscroll()
+            hydrateWindowController()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -403,6 +403,40 @@ constructor(
         }
     }
 
+    private fun hydrateWindowController() {
+        applicationScope.launch {
+            sceneInteractor.transitionState
+                .mapNotNull { transitionState ->
+                    (transitionState as? ObservableTransitionState.Idle)?.scene
+                }
+                .distinctUntilChanged()
+                .collect { sceneKey ->
+                    windowController.setNotificationShadeFocusable(sceneKey != Scenes.Gone)
+                }
+        }
+
+        applicationScope.launch {
+            deviceEntryInteractor.isDeviceEntered.collect { isDeviceEntered ->
+                windowController.setKeyguardShowing(!isDeviceEntered)
+            }
+        }
+
+        applicationScope.launch {
+            sceneInteractor.currentScene
+                .map { it == Scenes.Bouncer }
+                .distinctUntilChanged()
+                .collect { isBouncerShowing ->
+                    windowController.setBouncerShowing(isBouncerShowing)
+                }
+        }
+
+        applicationScope.launch {
+            occlusionInteractor.invisibleDueToOcclusion.collect { invisibleDueToOcclusion ->
+                windowController.setKeyguardOccluded(invisibleDueToOcclusion)
+            }
+        }
+    }
+
     /** Collects and reports signals into the falsing system. */
     private fun collectFalsingSignals() {
         applicationScope.launch {
@@ -461,20 +495,6 @@ constructor(
                     awaitClose { falsingManager.removeFalsingBeliefListener(listener) }
                 }
                 .collect { switchToScene(Scenes.Lockscreen, "Falsing detected.") }
-        }
-    }
-
-    /** Keeps the focus state of the window view up-to-date. */
-    private fun hydrateWindowFocus() {
-        applicationScope.launch {
-            sceneInteractor.transitionState
-                .mapNotNull { transitionState ->
-                    (transitionState as? ObservableTransitionState.Idle)?.scene
-                }
-                .distinctUntilChanged()
-                .collect { sceneKey ->
-                    windowController.setNotificationShadeFocusable(sceneKey != Scenes.Gone)
-                }
         }
     }
 

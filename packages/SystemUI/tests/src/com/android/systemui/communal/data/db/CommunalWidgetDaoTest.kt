@@ -21,6 +21,7 @@ import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.lifecycle.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
@@ -224,6 +225,42 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 .inOrder()
         }
 
+    @Test
+    fun restoreCommunalHubState() =
+        testScope.runTest {
+            // Set up db
+            listOf(widgetInfo1, widgetInfo2, widgetInfo3).forEach { addWidget(it) }
+
+            // Restore db to fake state
+            communalWidgetDao.restoreCommunalHubState(fakeState)
+
+            // Verify db matches new state
+            val expected = mutableMapOf<CommunalItemRank, CommunalWidgetItem>()
+            fakeState.widgets.forEachIndexed { index, fakeWidget ->
+                // Auto-generated uid continues after the initial 3 widgets and starts at 4
+                val uid = index + 4L
+                val rank = CommunalItemRank(uid = uid, rank = fakeWidget.rank)
+                val widget =
+                    CommunalWidgetItem(
+                        uid = uid,
+                        widgetId = fakeWidget.widgetId,
+                        componentName = fakeWidget.componentName,
+                        itemId = rank.uid,
+                    )
+                expected[rank] = widget
+            }
+            val widgets by collectLastValue(communalWidgetDao.getWidgets())
+            assertThat(widgets).containsExactlyEntriesIn(expected)
+        }
+
+    private fun addWidget(metadata: FakeWidgetMetadata, priority: Int? = null) {
+        communalWidgetDao.addWidget(
+            widgetId = metadata.widgetId,
+            provider = metadata.provider,
+            priority = priority ?: metadata.priority,
+        )
+    }
+
     data class FakeWidgetMetadata(
         val widgetId: Int,
         val provider: ComponentName,
@@ -273,5 +310,22 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 componentName = widgetInfo3.provider.flattenToString(),
                 itemId = communalItemRankEntry3.uid,
             )
+        val fakeState =
+            CommunalHubState().apply {
+                widgets =
+                    listOf(
+                            CommunalHubState.CommunalWidgetItem().apply {
+                                widgetId = 1
+                                componentName = "pk_name/fake_widget_1"
+                                rank = 1
+                            },
+                            CommunalHubState.CommunalWidgetItem().apply {
+                                widgetId = 2
+                                componentName = "pk_name/fake_widget_2"
+                                rank = 2
+                            },
+                        )
+                        .toTypedArray()
+            }
     }
 }

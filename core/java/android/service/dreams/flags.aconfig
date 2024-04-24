@@ -19,3 +19,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "dream_tracks_focus"
+  namespace: "communal"
+  description: "This flag enables the ability for dreams to track whether or not they have focus"
+  bug: "331798001"
+}

@@ -16,6 +16,8 @@
 
 package com.android.systemui.communal.dagger
 
+import android.content.Context
+import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalDatabaseModule
 import com.android.systemui.communal.data.repository.CommunalMediaRepositoryModule
 import com.android.systemui.communal.data.repository.CommunalPrefsRepositoryModule
@@ -77,6 +79,14 @@ interface CommunalModule {
                     initialSceneKey = CommunalScenes.Blank
                 )
             return SceneDataSourceDelegator(applicationScope, config)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesCommunalBackupUtils(
+            @Application context: Context,
+        ): CommunalBackupUtils {
+            return CommunalBackupUtils(context)
         }
     }
 }

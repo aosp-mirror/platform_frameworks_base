@@ -28,9 +28,10 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.Flags;
@@ -41,7 +42,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
-
 
 import org.junit.After;
 import org.junit.Before;

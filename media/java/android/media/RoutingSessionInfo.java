@@ -84,7 +84,6 @@ public final class RoutingSessionInfo implements Parcelable {
      *
      * @hide
      */
-    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
     @IntDef(value = {TRANSFER_REASON_FALLBACK, TRANSFER_REASON_SYSTEM_REQUEST, TRANSFER_REASON_APP})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TransferReason {}
@@ -382,14 +381,12 @@ public final class RoutingSessionInfo implements Parcelable {
     }
 
     /** @hide */
-    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
     @Nullable
     public UserHandle getTransferInitiatorUserHandle() {
         return mTransferInitiatorUserHandle;
     }
 
     /** @hide */
-    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
     @Nullable
     public String getTransferInitiatorPackageName() {
         return mTransferInitiatorPackageName;

@@ -28,6 +28,7 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -77,9 +78,12 @@ import java.util.concurrent.atomic.AtomicInteger;
     private final AtomicInteger mNextAvailableId = new AtomicInteger();
 
     /**
-     * The next available message sequence number
+     * The next available message sequence number. We choose a random
+     * number to start with to avoid collisions and limit the bound to
+     * half of the max value to avoid overflow.
      */
-    private final AtomicInteger mNextAvailableMessageSequenceNumber = new AtomicInteger();
+    private final AtomicInteger mNextAvailableMessageSequenceNumber =
+            new AtomicInteger(new Random().nextInt(Integer.MAX_VALUE / 2));
 
     /*
      * An executor and the future object for scheduling timeout timers

@@ -299,6 +299,7 @@ public class SystemUIApplication extends Application implements
         int serviceIndex = 0;
 
         do {
+            startedAny = false;
             queue = nextQueue;
             nextQueue = new ArrayDeque<>(startables.size());
 

@@ -2311,8 +2311,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             mService.setLastResumedActivityUncheckLocked(mTopResumedActivity, reason);
         }
         scheduleTopResumedActivityStateIfNeeded();
-
-        mService.updateTopApp(mTopResumedActivity);
+        // If the device is not sleeping and there is no top resumed, do not update top app because
+        // it may be an intermediate state while moving a task to front. The actual top will be set
+        // when TaskFragment#setResumedActivity is called.
+        if (mTopResumedActivity != null || mService.isSleepingLocked()) {
+            mService.updateTopApp(mTopResumedActivity);
+        }
 
         return mTopResumedActivity;
     }

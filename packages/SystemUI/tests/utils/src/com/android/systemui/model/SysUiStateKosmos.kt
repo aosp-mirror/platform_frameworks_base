@@ -19,10 +19,13 @@ package com.android.systemui.model
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.settings.displayTracker
+import org.mockito.Mockito.spy
 
 val Kosmos.sysUiState by Fixture {
-    SysUiState(
-        displayTracker,
-        sceneContainerPlugin,
+    spy(
+        SysUiState(
+            displayTracker,
+            sceneContainerPlugin,
+        )
     )
 }

@@ -24,6 +24,7 @@ import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.statusbar.IStatusBarService
+import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardViewController
@@ -152,6 +153,7 @@ data class TestMocksModule(
     @get:Provides val displayMetrics: DisplayMetrics = mock(),
     @get:Provides val metricsLogger: MetricsLogger = mock(),
     @get:Provides val userManager: UserManager = mock(),
+    @get:Provides val lockPatternUtils: LockPatternUtils = mock(),
 
     // system server mocks
     @get:Provides val mockStatusBarService: IStatusBarService = mock(),

@@ -87,6 +87,7 @@ import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.HomeTransitionObserver;
+import com.android.wm.shell.transition.MixedTransitionHandler;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
@@ -373,8 +374,9 @@ public abstract class WMShellModule {
     //
 
     @WMSingleton
+    @DynamicOverride
     @Provides
-    static DefaultMixedHandler provideDefaultMixedHandler(
+    static MixedTransitionHandler provideMixedTransitionHandler(
             ShellInit shellInit,
             Optional<SplitScreenController> splitScreenOptional,
             @Nullable PipTransitionController pipTransitionController,
@@ -655,7 +657,6 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            DefaultMixedHandler defaultMixedHandler,
             Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional) {
         return new Object();
     }

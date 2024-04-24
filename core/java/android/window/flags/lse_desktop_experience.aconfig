@@ -57,3 +57,10 @@ flag {
     description: "Enables desktop wallpaper activity to show wallpaper in the desktop mode"
     bug: "309014605"
 }
+
+flag {
+    name: "enable_desktop_windowing_immersive_handle_hiding"
+    namespace: "lse_desktop_experience"
+    description: "Hides the App Handle when in fullscreen immersive mode"
+    bug: "336368019"
+}

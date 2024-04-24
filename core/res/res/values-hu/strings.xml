@@ -662,8 +662,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Az ujjlenyomat nem ismerhető fel"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Az ujjlenyomat nem ismerhető fel"</string>
-    <!-- no translation found for fingerprint_dialog_use_fingerprint_instead (5590293588784953188) -->
-    <skip />
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"Sikertelen arcfelismerés. Használja ujjlenyomatát."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Ujjlenyomat hitelesítve"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Arc hitelesítve"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Arc hitelesítve; nyomja meg a Megerősítés lehetőséget"</string>
@@ -1897,7 +1896,8 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"PIN-kód kérése a kitűzés feloldásához"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Feloldási minta kérése a kitűzés feloldásához"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Jelszó kérése a rögzítés feloldásához"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"A rendszergazda által telepítve"</string>
+    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
+    <skip />
     <string name="package_updated_device_owner" msgid="7560272363805506941">"A rendszergazda által frissítve"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"A rendszergazda által törölve"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
@@ -2394,6 +2394,8 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"3. munkahelyi"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Teszt"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Közös"</string>
+    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
+    <skip />
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"A biztonság érdekében a képernyőmegosztástól elrejtett alkalmazástartalom"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatikusan csatlakozva a műholdhoz"</string>

@@ -23,6 +23,7 @@ import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.widgets.CommunalWidgetHost
 import com.android.systemui.communal.widgets.CommunalWidgetModule.Companion.DEFAULT_WIDGETS
 import com.android.systemui.dagger.qualifiers.Application
@@ -116,6 +117,10 @@ interface CommunalWidgetDao {
     @Query("UPDATE communal_item_rank_table SET rank = :order WHERE uid = :itemUid")
     fun updateItemRank(itemUid: Long, order: Int)
 
+    @Query("DELETE FROM communal_widget_table") fun clearCommunalWidgetsTable()
+
+    @Query("DELETE FROM communal_item_rank_table") fun clearCommunalItemRankTable()
+
     @Transaction
     fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {
         widgetIdToPriorityMap.forEach { (id, priority) ->
@@ -128,9 +133,18 @@ interface CommunalWidgetDao {
 
     @Transaction
     fun addWidget(widgetId: Int, provider: ComponentName, priority: Int): Long {
-        return insertWidget(
+        return addWidget(
             widgetId = widgetId,
             componentName = provider.flattenToString(),
+            priority = priority,
+        )
+    }
+
+    @Transaction
+    fun addWidget(widgetId: Int, componentName: String, priority: Int): Long {
+        return insertWidget(
+            widgetId = widgetId,
+            componentName = componentName,
             itemId = insertItemRank(priority),
         )
     }
@@ -144,5 +158,14 @@ interface CommunalWidgetDao {
         deleteItemRankById(widget.itemId)
         deleteWidgets(widget)
         return true
+    }
+
+    /** Wipes current database and restores the snapshot represented by [state]. */
+    @Transaction
+    fun restoreCommunalHubState(state: CommunalHubState) {
+        clearCommunalWidgetsTable()
+        clearCommunalItemRankTable()
+
+        state.widgets.forEach { addWidget(it.widgetId, it.componentName, it.rank) }
     }
 }

@@ -88,6 +88,7 @@ import android.telecom.TelecomManager;
 import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.autofill.AutofillManagerInternal;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
@@ -155,6 +156,7 @@ class TestPhoneWindowManager {
     @Mock private AudioManagerInternal mAudioManagerInternal;
     @Mock private SearchManager mSearchManager;
     @Mock private RoleManager mRoleManager;
+    @Mock private AccessibilityManager mAccessibilityManager;
 
     @Mock private Display mDisplay;
     @Mock private DisplayRotation mDisplayRotation;
@@ -305,6 +307,9 @@ class TestPhoneWindowManager {
                 eq(SensorPrivacyManager.class));
         doReturn(mSearchManager).when(mContext).getSystemService(eq(SearchManager.class));
         doReturn(mRoleManager).when(mContext).getSystemService(eq(RoleManager.class));
+        doReturn(mAccessibilityManager).when(mContext).getSystemService(
+                eq(AccessibilityManager.class));
+        doReturn(false).when(mAccessibilityManager).isEnabled();
         doReturn(false).when(mPackageManager).hasSystemFeature(any());
         try {
             doThrow(new PackageManager.NameNotFoundException("test")).when(mPackageManager)
@@ -602,7 +607,7 @@ class TestPhoneWindowManager {
     }
 
     void overrideEnableBugReportTrigger(boolean enable) {
-        mPhoneWindowManager.mEnableShiftMenuBugReports = enable;
+        mPhoneWindowManager.mEnableBugReportKeyboardShortcut = enable;
     }
 
     void overrideStartActivity() {
@@ -746,12 +751,14 @@ class TestPhoneWindowManager {
                 eq(displayId), eq(mImeTargetWindowToken));
     }
 
-    void assertTakeBugreport() {
+    void assertTakeBugreport(boolean wasCalled) throws RemoteException {
         mTestLooper.dispatchAll();
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext).sendOrderedBroadcastAsUser(intentCaptor.capture(), any(), any(), any(),
-                any(), anyInt(), any(), any());
-        Assert.assertTrue(intentCaptor.getValue().getAction() == Intent.ACTION_BUG_REPORT);
+        if (wasCalled) {
+            verify(mActivityManagerService).requestInteractiveBugReport();
+        } else {
+            verify(mActivityManagerService, never()).requestInteractiveBugReport();
+        }
+
     }
 
     void assertTogglePanel() throws RemoteException {

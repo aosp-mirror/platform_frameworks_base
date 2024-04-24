@@ -49,6 +49,7 @@ import android.hardware.biometrics.BiometricRequestConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.OperationState;
 import android.hardware.biometrics.events.AuthenticationAcquiredInfo;
 import android.hardware.biometrics.events.AuthenticationErrorInfo;
 import android.hardware.biometrics.events.AuthenticationFailedInfo;
@@ -391,8 +392,8 @@ public class FingerprintAuthenticationClientTest {
         verify(mBiometricContext).subscribe(mOperationContextCaptor.capture(),
                 mStartHalConsumerCaptor.capture(), mContextInjector.capture(), any());
 
-        mStartHalConsumerCaptor.getValue().accept(mOperationContextCaptor
-                .getValue().toAidlContext());
+        final OperationContextExt operationContext = mOperationContextCaptor.getValue();
+        mStartHalConsumerCaptor.getValue().accept(operationContext.toAidlContext());
         final ArgumentCaptor<OperationContext> captor =
                 ArgumentCaptor.forClass(OperationContext.class);
 
@@ -400,16 +401,20 @@ public class FingerprintAuthenticationClientTest {
 
         OperationContext opContext = captor.getValue();
 
-        assertThat(opContext).isSameInstanceAs(
-                mOperationContextCaptor.getValue().toAidlContext());
+        assertThat(opContext).isSameInstanceAs(operationContext.toAidlContext());
 
+        opContext.operationState = new OperationState();
+        opContext.operationState.setFingerprintOperationState(
+                new OperationState.FingerprintOperationState());
         mContextInjector.getValue().accept(opContext);
 
         verify(mHal).onContextChanged(same(opContext));
+        verify(mHal, times(2)).setIgnoreDisplayTouches(
+                opContext.operationState.getFingerprintOperationState().isHardwareIgnoringTouches);
 
         client.stopHalOperation();
 
-        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
+        verify(mBiometricContext).unsubscribe(same(operationContext));
     }
 
     @Test

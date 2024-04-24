@@ -219,6 +219,7 @@ public class PipTouchHandler {
                 mMotionHelper, pipTaskOrganizer, mPipBoundsAlgorithm.getSnapAlgorithm(),
                 this::onAccessibilityShowMenu, this::updateMovementBounds,
                 this::animateToUnStashedState, mainExecutor);
+        mPipBoundsState.addOnAspectRatioChangedCallback(this::updateMinMaxSize);
 
         // TODO(b/181599115): This should really be initializes as part of the pip controller, but
         // until all PIP implementations derive from the controller, just initialize the touch handler

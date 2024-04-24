@@ -38,7 +38,6 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.WindowManagerGlobal;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -599,28 +598,6 @@ public class InputMethodServiceTest {
         verifyFullscreenMode(() -> setOrientation(2),
                 false /* expected */,
                 false /* orientationPortrait */);
-    }
-
-    @Test
-    public void switchesKeyboardLayout_withShortcut_onlyIfImeVisible() throws Exception {
-        setShowImeWithHardKeyboard(true /* enabled */);
-
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
-        assertThat(mInputMethodService.onKeyDown(KeyEvent.KEYCODE_SPACE,
-                new KeyEvent(0 /* downTime */, 0 /* eventTime */, KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_SPACE, 0 /* repeat */,
-                        KeyEvent.META_CTRL_LEFT_ON | KeyEvent.META_CTRL_ON))).isFalse();
-
-        verifyInputViewStatusOnMainSync(
-                () -> assertThat(mActivity.showImeWithInputMethodManager(0 /* flags */)).isTrue(),
-                true /* expected */,
-                true /* inputViewStarted */);
-
-        assertThat(mInputMethodService.isInputViewShown()).isTrue();
-        assertThat(mInputMethodService.onKeyDown(KeyEvent.KEYCODE_SPACE,
-                new KeyEvent(0 /* downTime */, 0 /* eventTime */, KeyEvent.ACTION_DOWN,
-                        KeyEvent.KEYCODE_SPACE, 0 /* repeat */,
-                        KeyEvent.META_CTRL_LEFT_ON | KeyEvent.META_CTRL_ON))).isTrue();
     }
 
     /**

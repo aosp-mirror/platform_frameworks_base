@@ -44,11 +44,13 @@ import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.settings.fakeUserTracker
+import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
@@ -59,6 +61,7 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -264,6 +267,26 @@ class CommunalViewModelTest : SysuiTestCase() {
             // dismiss the popup directly
             underTest.onHidePopupAfterDismissCta()
             assertThat(isPopupOnDismissCtaShowing).isEqualTo(false)
+        }
+
+    @Test
+    fun canChangeScene_shadeNotExpanded() =
+        testScope.runTest {
+            // On keyguard without any shade expansion.
+            kosmos.fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            kosmos.fakeShadeRepository.setLockscreenShadeExpansion(0f)
+            runCurrent()
+            assertThat(underTest.canChangeScene()).isTrue()
+        }
+
+    @Test
+    fun canChangeScene_shadeExpanded() =
+        testScope.runTest {
+            // On keyguard with shade fully expanded.
+            kosmos.fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            kosmos.fakeShadeRepository.setLockscreenShadeExpansion(1f)
+            runCurrent()
+            assertThat(underTest.canChangeScene()).isFalse()
         }
 
     private suspend fun setIsMainUser(isMainUser: Boolean) {

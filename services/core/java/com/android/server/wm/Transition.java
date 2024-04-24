@@ -1429,20 +1429,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 }
             }
             if (mTransientLaunches != null) {
-                InsetsControlTarget prevImeTarget = dc.getImeTarget(
-                        DisplayContent.IME_TARGET_CONTROL);
-                InsetsControlTarget newImeTarget = null;
                 TaskDisplayArea transientTDA = null;
-                // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
-                // so re-compute in case the IME target is changed after transition.
                 for (int t = 0; t < mTransientLaunches.size(); ++t) {
                     if (mTransientLaunches.keyAt(t).getDisplayContent() == dc) {
-                        newImeTarget = dc.computeImeTarget(true /* updateImeTarget */);
+                        if (hasVisibleTransientLaunch) {
+                            updateImeForVisibleTransientLaunch(dc);
+                        }
                         transientTDA = mTransientLaunches.keyAt(i).getTaskDisplayArea();
                         break;
                     }
                 }
-                if (mRecentsDisplayId != INVALID_DISPLAY && prevImeTarget == newImeTarget) {
+                if (!hasVisibleTransientLaunch && mRecentsDisplayId == dc.mDisplayId) {
                     // Restore IME icon only when moving the original app task to front from
                     // recents, in case IME icon may missing if the moving task has already been
                     // the current focused task.
@@ -1538,6 +1535,35 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             return candidateActivity;
         }
         return null;
+    }
+
+    /**
+     * Transient-launch activities cannot be IME target (see {@link WindowState#canBeImeTarget}),
+     * so re-compute in case the IME target is changed after transition.
+     */
+    private void updateImeForVisibleTransientLaunch(@NonNull DisplayContent dc) {
+        final WindowState imeTarget = dc.computeImeTarget(true /* updateImeTarget */);
+        final WindowState imeWindow = dc.mInputMethodWindow;
+        if (imeWindow == null || imeTarget == null
+                || !mController.hasCollectingRotationChange(dc, dc.getRotation())) {
+            return;
+        }
+        // Drop the insets leash if it is still controlled by previous (invisible) app. This avoids
+        // showing IME with old rotation on an app with new rotation if IME parent is updated
+        // but insets leash hasn't been refreshed, i.e. DisplayContent#updateImeParent is called
+        // but InsetsStateController#notifyControlTargetChanged still waits for IME to redraw.
+        final InsetsSourceProvider sourceProvider = imeWindow.getControllableInsetProvider();
+        if (sourceProvider == null || sourceProvider.mControl == null
+                || !sourceProvider.isClientVisible()
+                || imeTarget == sourceProvider.getControlTarget()) {
+            return;
+        }
+        final SurfaceControl imeInsetsLeash = sourceProvider.mControl.getLeash();
+        final InsetsControlTarget controlTarget = sourceProvider.getControlTarget();
+        if (imeInsetsLeash != null && controlTarget != null && controlTarget.getWindow() != null
+                && !controlTarget.getWindow().mToken.isVisible()) {
+            dc.getSyncTransaction().reparent(imeInsetsLeash, null);
+        }
     }
 
     void abort() {

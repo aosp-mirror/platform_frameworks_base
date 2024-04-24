@@ -25,6 +25,7 @@ import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.communal.CommunalDreamStartable
+import com.android.systemui.communal.CommunalBackupRestoreStartable
 import com.android.systemui.communal.CommunalSceneStartable
 import com.android.systemui.communal.log.CommunalLoggerStartable
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostStartable
@@ -338,6 +339,13 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(CommunalAppWidgetHostStartable::class)
     abstract fun bindCommunalAppWidgetHostStartable(
         impl: CommunalAppWidgetHostStartable
+    ): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(CommunalBackupRestoreStartable::class)
+    abstract fun bindCommunalBackupRestoreStartable(
+        impl: CommunalBackupRestoreStartable
     ): CoreStartable
 
     @Binds

@@ -94,7 +94,7 @@ public interface SysUIComponent {
         Builder setTaskViewFactory(Optional<TaskViewFactory> t);
 
         @BindsInstance
-        Builder setTransitions(ShellTransitions t);
+        Builder setShellTransitions(ShellTransitions t);
 
         @BindsInstance
         Builder setKeyguardTransitions(KeyguardTransitions k);

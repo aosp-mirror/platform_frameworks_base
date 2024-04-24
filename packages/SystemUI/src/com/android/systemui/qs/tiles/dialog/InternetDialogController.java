@@ -747,7 +747,7 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         return summary;
     }
 
-    private void startActivity(Intent intent, View view) {
+    void startActivity(Intent intent, View view) {
         ActivityTransitionAnimator.Controller controller =
                 mDialogTransitionAnimator.createActivityTransitionController(view);
 

@@ -23,7 +23,7 @@ import com.android.systemui.media.controls.ui.viewmodel.MediaCommonViewModel
 class MediaViewModelListUpdateCallback(
     private val old: List<MediaCommonViewModel>,
     private val new: List<MediaCommonViewModel>,
-    private val onAdded: (MediaCommonViewModel) -> Unit,
+    private val onAdded: (MediaCommonViewModel, Int) -> Unit,
     private val onUpdated: (MediaCommonViewModel) -> Unit,
     private val onRemoved: (MediaCommonViewModel) -> Unit,
     private val onMoved: (MediaCommonViewModel, Int, Int) -> Unit,
@@ -31,7 +31,7 @@ class MediaViewModelListUpdateCallback(
 
     override fun onInserted(position: Int, count: Int) {
         for (i in position until position + count) {
-            onAdded(new[i])
+            onAdded(new[i], i)
         }
     }
 

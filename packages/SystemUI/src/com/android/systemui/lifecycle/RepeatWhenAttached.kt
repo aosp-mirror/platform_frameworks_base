@@ -17,6 +17,7 @@
 
 package com.android.systemui.lifecycle
 
+import android.os.Trace
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.annotation.MainThread
@@ -73,7 +74,7 @@ fun View.repeatWhenAttached(
         Dispatchers.Main + createCoroutineTracingContext() + coroutineContext
     val traceName =
         if (Compile.IS_DEBUG && coroutineTracing()) {
-            traceSectionName()
+            inferTraceSectionName()
         } else {
             DEFAULT_TRACE_NAME
         }
@@ -197,16 +198,21 @@ private fun isFrameInteresting(frame: StackWalker.StackFrame): Boolean =
     frame.className != CURRENT_CLASS_NAME && frame.className != JAVA_ADAPTER_CLASS_NAME
 
 /** Get a name for the trace section include the name of the call site. */
-private fun traceSectionName(): String {
-    val interestingFrame =
-        StackWalker.getInstance().walk { stream ->
-            stream.filter(::isFrameInteresting).limit(5).findFirst()
+private fun inferTraceSectionName(): String {
+    try {
+        Trace.traceBegin(Trace.TRACE_TAG_APP, "RepeatWhenAttachedKt#inferTraceSectionName")
+        val interestingFrame =
+            StackWalker.getInstance().walk { stream ->
+                stream.filter(::isFrameInteresting).limit(5).findFirst()
+            }
+        if (interestingFrame.isPresent) {
+            val f = interestingFrame.get()
+            return "${f.className}#${f.methodName}:${f.lineNumber} [$DEFAULT_TRACE_NAME]"
+        } else {
+            return DEFAULT_TRACE_NAME
         }
-    if (interestingFrame.isPresent) {
-        val frame = interestingFrame.get()
-        return "${frame.className}#${frame.methodName}:${frame.lineNumber} [$DEFAULT_TRACE_NAME]"
-    } else {
-        return DEFAULT_TRACE_NAME
+    } finally {
+        Trace.traceEnd(Trace.TRACE_TAG_APP)
     }
 }
 

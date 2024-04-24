@@ -35,6 +35,10 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
+import com.android.systemui.ambient.touch.scrim.ScrimController
+import com.android.systemui.ambient.touch.scrim.ScrimManager
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutEngine
 import com.android.systemui.complication.dagger.ComplicationComponent
@@ -43,6 +47,8 @@ import com.android.systemui.dreams.dagger.DreamOverlayComponent
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth
@@ -114,6 +120,14 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Mock lateinit var mUiEventLogger: UiEventLogger
 
+    @Mock lateinit var mScrimManager: ScrimManager
+
+    @Mock lateinit var mScrimController: ScrimController
+
+    @Mock lateinit var mCommunalInteractor: CommunalInteractor
+
+    @Mock lateinit var mSystemDialogsCloser: SystemDialogsCloser
+
     @Mock lateinit var mDreamOverlayCallbackController: DreamOverlayCallbackController
 
     @Captor var mViewCaptor: ArgumentCaptor<View>? = null
@@ -141,6 +155,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         whenever(mAmbientTouchComponent.getTouchMonitor()).thenReturn(mTouchMonitor)
         whenever(mDreamOverlayContainerViewController.containerView)
             .thenReturn(mDreamOverlayContainerView)
+        whenever(mScrimManager.getCurrentController()).thenReturn(mScrimController)
         mWindowParams = WindowManager.LayoutParams()
         mService =
             DreamOverlayService(
@@ -154,6 +169,9 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 mAmbientTouchComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor,
+                mScrimManager,
+                mCommunalInteractor,
+                mSystemDialogsCloser,
                 mUiEventLogger,
                 mTouchInsetManager,
                 LOW_LIGHT_COMPONENT,
@@ -561,6 +579,64 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                     WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
             )
             .isTrue()
+    }
+
+    // Tests that the bouncer closes when DreamOverlayService is told that the dream is coming to
+    // the front.
+    @Test
+    fun testBouncerRetractedWhenDreamComesToFront() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            true /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        whenever(mDreamOverlayContainerViewController.isBouncerShowing()).thenReturn(true)
+        mService!!.onComeToFront()
+        Mockito.verify(mScrimController).expand(any())
+    }
+
+    // Tests that glanceable hub is hidden when DreamOverlayService is told that the dream is
+    // coming to the front.
+    @Test
+    fun testGlanceableHubHiddenWhenDreamComesToFront() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            true /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        mService!!.onComeToFront()
+        Mockito.verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Blank), nullable())
+    }
+
+    // Tests that system dialogs (e.g. notification shade) closes when DreamOverlayService is told
+    // that the dream is coming to the front.
+    @Test
+    fun testSystemDialogsClosedWhenDreamComesToFront() {
+        val client = client
+
+        // Inform the overlay service of dream starting.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            true /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+
+        mService!!.onComeToFront()
+        Mockito.verify(mSystemDialogsCloser).closeSystemDialogs()
     }
 
     companion object {

@@ -17,6 +17,7 @@
 package com.android.wm.shell.taskview;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -48,6 +49,23 @@ import java.util.concurrent.Executor;
  * TaskView} to {@link TaskViewTaskController} interactions are done via direct method calls.
  *
  * The reverse communication is done via the {@link TaskViewBase} interface.
+ *
+ * <ul>
+ *     <li>The entry point for an activity based task view is {@link
+ *     TaskViewTaskController#startActivity(PendingIntent, Intent, ActivityOptions, Rect)}</li>
+ *
+ *     <li>The entry point for an activity (represented by {@link ShortcutInfo}) based task view
+ *     is {@link TaskViewTaskController#startShortcutActivity(ShortcutInfo, ActivityOptions, Rect)}
+ *     </li>
+ *
+ *     <li>The entry point for a root-task based task view is {@link
+ *     TaskViewTaskController#startRootTask(ActivityManager.RunningTaskInfo, SurfaceControl,
+ *     WindowContainerTransaction)}.
+ *     This method is special as it doesn't create a root task and instead expects that the
+ *     launch root task is already created and started. This method just attaches the taskInfo to
+ *     the TaskView.
+ *     </li>
+ * </ul>
  */
 public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
 
@@ -155,8 +173,8 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
      * <p>The owner of this container must be allowed to access the shortcut information,
      * as defined in {@link LauncherApps#hasShortcutHostPermission()} to use this method.
      *
-     * @param shortcut the shortcut used to launch the activity.
-     * @param options options for the activity.
+     * @param shortcut     the shortcut used to launch the activity.
+     * @param options      options for the activity.
      * @param launchBounds the bounds (window size and position) that the activity should be
      *                     launched in, in pixels and in screen coordinates.
      */
@@ -183,10 +201,10 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
      * Launch a new activity.
      *
      * @param pendingIntent Intent used to launch an activity.
-     * @param fillInIntent Additional Intent data, see {@link Intent#fillIn Intent.fillIn()}
-     * @param options options for the activity.
-     * @param launchBounds the bounds (window size and position) that the activity should be
-     *                     launched in, in pixels and in screen coordinates.
+     * @param fillInIntent  Additional Intent data, see {@link Intent#fillIn Intent.fillIn()}
+     * @param options       options for the activity.
+     * @param launchBounds  the bounds (window size and position) that the activity should be
+     *                      launched in, in pixels and in screen coordinates.
      */
     public void startActivity(@NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
             @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
@@ -206,6 +224,35 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    /**
+     * Attaches the given root task {@code taskInfo} in the task view.
+     *
+     * <p> Since {@link ShellTaskOrganizer#createRootTask(int, int,
+     * ShellTaskOrganizer.TaskListener)} does not use the shell transitions flow, this method is
+     * used as an entry point for an already-created root-task in the task view.
+     *
+     * @param taskInfo the task info of the root task.
+     * @param leash    the {@link android.content.pm.ShortcutInfo.Surface} of the root task
+     * @param wct      The Window container work that should happen as part of this set up.
+     */
+    public void startRootTask(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+            @Nullable WindowContainerTransaction wct) {
+        if (wct == null) {
+            wct = new WindowContainerTransaction();
+        }
+        // This method skips the regular flow where an activity task is launched as part of a new
+        // transition in taskview and then transition is intercepted using the launchcookie.
+        // The task here is already created and running, it just needs to be reparented, resized
+        // and tracked correctly inside taskview. Which is done by calling
+        // prepareOpenAnimationInternal() and then manually enqueuing the resulting window container
+        // transaction.
+        prepareOpenAnimationInternal(true /* newTask */, mTransaction /* startTransaction */,
+                null /* finishTransaction */, taskInfo, leash, wct);
+        mTransaction.apply();
+        mTaskViewTransitions.startInstantTransition(TRANSIT_CHANGE, wct);
     }
 
     private void prepareActivityOptions(ActivityOptions options, Rect launchBounds) {
@@ -342,7 +389,6 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         final SurfaceControl taskLeash = mTaskLeash;
         handleAndNotifyTaskRemoval(mTaskInfo);
 
-        // Unparent the task when this surface is destroyed
         mTransaction.reparent(taskLeash, null).apply();
         resetTaskInfo();
     }
@@ -597,6 +643,15 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             @NonNull SurfaceControl.Transaction finishTransaction,
             ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
             WindowContainerTransaction wct) {
+        prepareOpenAnimationInternal(newTask, startTransaction, finishTransaction, taskInfo, leash,
+                wct);
+    }
+
+    private void prepareOpenAnimationInternal(final boolean newTask,
+            SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction,
+            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+            WindowContainerTransaction wct) {
         mPendingInfo = null;
         mTaskInfo = taskInfo;
         mTaskToken = mTaskInfo.token;
@@ -608,10 +663,12 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             // Also reparent on finishTransaction since the finishTransaction will reparent back
             // to its "original" parent by default.
             Rect boundsOnScreen = mTaskViewBase.getCurrentBoundsOnScreen();
-            finishTransaction.reparent(mTaskLeash, mSurfaceControl)
-                    .setPosition(mTaskLeash, 0, 0)
-                    // TODO: maybe once b/280900002 is fixed this will be unnecessary
-                    .setWindowCrop(mTaskLeash, boundsOnScreen.width(), boundsOnScreen.height());
+            if (finishTransaction != null) {
+                finishTransaction.reparent(mTaskLeash, mSurfaceControl)
+                        .setPosition(mTaskLeash, 0, 0)
+                        // TODO: maybe once b/280900002 is fixed this will be unnecessary
+                        .setWindowCrop(mTaskLeash, boundsOnScreen.width(), boundsOnScreen.height());
+            }
             mTaskViewTransitions.updateBoundsState(this, boundsOnScreen);
             mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
             wct.setBounds(mTaskToken, boundsOnScreen);
@@ -632,6 +689,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             mTaskViewBase.setResizeBgColor(startTransaction, backgroundColor);
         }
 
+        mTaskViewBase.onTaskAppeared(mTaskInfo, mTaskLeash);
         if (mListener != null) {
             final int taskId = mTaskInfo.taskId;
             final ComponentName baseActivity = mTaskInfo.baseActivity;

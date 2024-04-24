@@ -35,6 +35,7 @@ class NotificationShadeWindowState(
     @JvmField var shadeOrQsExpanded: Boolean = false,
     @JvmField var notificationShadeFocusable: Boolean = false,
     @JvmField var bouncerShowing: Boolean = false,
+    @JvmField var glanceableHubShowing: Boolean = false,
     @JvmField var keyguardFadingAway: Boolean = false,
     @JvmField var keyguardGoingAway: Boolean = false,
     @JvmField var qsExpanded: Boolean = false,
@@ -79,6 +80,7 @@ class NotificationShadeWindowState(
             shadeOrQsExpanded.toString(),
             notificationShadeFocusable.toString(),
             bouncerShowing.toString(),
+            glanceableHubShowing.toString(),
             keyguardFadingAway.toString(),
             keyguardGoingAway.toString(),
             qsExpanded.toString(),
@@ -119,6 +121,7 @@ class NotificationShadeWindowState(
             panelVisible: Boolean,
             panelExpanded: Boolean,
             notificationShadeFocusable: Boolean,
+            glanceableHubShowing: Boolean,
             bouncerShowing: Boolean,
             keyguardFadingAway: Boolean,
             keyguardGoingAway: Boolean,
@@ -149,6 +152,7 @@ class NotificationShadeWindowState(
                 this.panelVisible = panelVisible
                 this.shadeOrQsExpanded = panelExpanded
                 this.notificationShadeFocusable = notificationShadeFocusable
+                this.glanceableHubShowing = glanceableHubShowing
                 this.bouncerShowing = bouncerShowing
                 this.keyguardFadingAway = keyguardFadingAway
                 this.keyguardGoingAway = keyguardGoingAway
@@ -197,6 +201,7 @@ class NotificationShadeWindowState(
                 "panelVisible",
                 "panelExpanded",
                 "notificationShadeFocusable",
+                "glanceableHubShowing",
                 "bouncerShowing",
                 "keyguardFadingAway",
                 "keyguardGoingAway",

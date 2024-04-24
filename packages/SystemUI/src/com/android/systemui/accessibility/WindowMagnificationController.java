@@ -726,11 +726,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         int windowWidth = mMagnificationFrame.width() + 2 * mMirrorSurfaceMargin;
         int windowHeight = mMagnificationFrame.height() + 2 * mMirrorSurfaceMargin;
 
-        // TODO delete TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, it shouldn't be needed anymore
-
+        // TODO: b/335440685 - Move to TYPE_ACCESSIBILITY_OVERLAY after the issues with
+        // that type preventing swipe to navigate are resolved.
         LayoutParams params = new LayoutParams(
                 windowWidth, windowHeight,
-                LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
                 LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT);

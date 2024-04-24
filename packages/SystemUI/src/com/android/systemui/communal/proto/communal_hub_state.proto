@@ -14,11 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.panel.component.mediaoutput.shared.model
+syntax = "proto3";
 
-import android.media.session.PlaybackState
+package com.android.systemui.communal;
 
-data class SessionWithPlayback(
-    val session: MediaDeviceSession,
-    val playback: PlaybackState,
-)
+option java_multiple_files = true;
+
+// Represents the state of communal hub for backup & restore.
+message CommunalHubState {
+    // Widgets in the communal hub.
+    repeated CommunalWidgetItem widgets = 1;
+
+    // Represents a widget in the communal hub.
+    message CommunalWidgetItem {
+        // Id of the widget.
+        int32 widget_id = 1;
+
+        // Component name of the widget.
+        string component_name = 2;
+
+        // Rank or order of the widget in the communal hub.
+        int32 rank = 3;
+    }
+}
