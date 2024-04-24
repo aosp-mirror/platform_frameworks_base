@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරයතුර භාවිතා කරන්න"</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ සුරැකි මුරපදය භාවිතා කරන්න"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා ඔබේ ගිණුම භාවිතා කරන්න"</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> සමඟින් <xliff:g id="APP_NAME">%1$s</xliff:g> වෙත පුරනය වීමට ඔබේ තිර අගුල භාවිත කරන්න"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා පුරනය වීමේ විකල්ප අගුළු හරින්න"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරකින ලද මුරයතුරක් තෝරන්න"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා සුරකින ලද මුරපදයක් තෝරන්න"</string>

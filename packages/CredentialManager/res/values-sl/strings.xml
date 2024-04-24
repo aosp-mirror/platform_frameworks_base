@@ -48,7 +48,7 @@
     <string name="passwords" msgid="5419394230391253816">"gesel"</string>
     <string name="sign_ins" msgid="4710739369149469208">"prijave"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"podatkov za prijavo"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"Mesto shranjevanja: <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Mesto shranjevanja za: <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>"</string>
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Želite ustvariti ključ za dostop v drugi napravi?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Želite shraniti geslo v drugi napravi?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Želite shraniti prijavo v drugi napravi?"</string>
@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Uporaba shranjenega ključa za dostop za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Uporaba shranjenega gesla za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Uporaba vašega računa za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Uporabite zaklepanje zaslona za prijavo v aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g> z uporabniškim imenom <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Odklepanje možnosti prijave za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Izberite shranjeni ključ za dostop za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Izberite shranjeno geslo za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
