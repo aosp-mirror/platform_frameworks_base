@@ -30,9 +30,9 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UptimeMillisLong;
 import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.Notification;
@@ -677,46 +677,46 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      * Data container class to help track certain fgs info for time-restricted types.
      */
     static class TimeLimitedFgsInfo {
-        @UptimeMillisLong
+        @ElapsedRealtimeLong
         private long mFirstFgsStartTime;
-        @UptimeMillisLong
+        @ElapsedRealtimeLong
         private long mLastFgsStartTime;
-        @UptimeMillisLong
+        @ElapsedRealtimeLong
         private long mTimeLimitExceededAt = Long.MIN_VALUE;
         private long mTotalRuntime = 0;
 
-        TimeLimitedFgsInfo(@UptimeMillisLong long startTime) {
+        TimeLimitedFgsInfo(@ElapsedRealtimeLong long startTime) {
             mFirstFgsStartTime = startTime;
             mLastFgsStartTime = startTime;
         }
 
-        @UptimeMillisLong
+        @ElapsedRealtimeLong
         public long getFirstFgsStartTime() {
             return mFirstFgsStartTime;
         }
 
-        public void setLastFgsStartTime(@UptimeMillisLong long startTime) {
+        public void setLastFgsStartTime(@ElapsedRealtimeLong long startTime) {
             mLastFgsStartTime = startTime;
         }
 
-        @UptimeMillisLong
+        @ElapsedRealtimeLong
         public long getLastFgsStartTime() {
             return mLastFgsStartTime;
         }
 
         public void updateTotalRuntime() {
-            mTotalRuntime += SystemClock.uptimeMillis() - mLastFgsStartTime;
+            mTotalRuntime += SystemClock.elapsedRealtime() - mLastFgsStartTime;
         }
 
         public long getTotalRuntime() {
             return mTotalRuntime;
         }
 
-        public void setTimeLimitExceededAt(@UptimeMillisLong long timeLimitExceededAt) {
+        public void setTimeLimitExceededAt(@ElapsedRealtimeLong long timeLimitExceededAt) {
             mTimeLimitExceededAt = timeLimitExceededAt;
         }
 
-        @UptimeMillisLong
+        @ElapsedRealtimeLong
         public long getTimeLimitExceededAt() {
             return mTimeLimitExceededAt;
         }
@@ -1858,8 +1858,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     /**
      * Called when a time-limited FGS starts.
      */
-    public TimeLimitedFgsInfo createTimeLimitedFgsInfo(long nowUptime) {
-        return new TimeLimitedFgsInfo(nowUptime);
+    public TimeLimitedFgsInfo createTimeLimitedFgsInfo(@ElapsedRealtimeLong long nowRealtime) {
+        return new TimeLimitedFgsInfo(nowRealtime);
     }
 
     /**
