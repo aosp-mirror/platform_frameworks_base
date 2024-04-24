@@ -167,7 +167,7 @@ final class SettingsState {
     private static final String STORAGE_MIGRATION_FLAG =
             "core_experiments_team_internal/com.android.providers.settings.storage_test_mission_1";
     private static final String STORAGE_MIGRATION_MARKER_FILE =
-            "/metadata/aconfig/storage_test_mission_1";
+            "/metadata/aconfig_test_missions/mission_1";
 
     /**
      * This tag is applied to all aconfig default value-loaded flags.
