@@ -30,6 +30,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.UserHandle
+import android.platform.test.annotations.DisableFlags
 import android.provider.Settings
 import android.view.View
 import android.widget.FrameLayout
@@ -785,6 +786,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_SMARTSPACE_LOCKSCREEN_VIEWMODEL)
     fun testWakefulnessLifecycleDispatch_wake_setsSmartspaceScreenOnTrue() {
         // Connect session
         connectSession()
@@ -801,6 +803,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_SMARTSPACE_LOCKSCREEN_VIEWMODEL)
     fun testWakefulnessLifecycleDispatch_sleep_setsSmartspaceScreenOnFalse() {
         // Connect session
         connectSession()

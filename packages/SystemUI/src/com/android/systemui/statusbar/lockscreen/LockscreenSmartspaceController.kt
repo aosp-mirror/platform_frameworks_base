@@ -40,6 +40,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags.smartspaceLockscreenViewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -466,7 +467,9 @@ constructor(
         configurationController.addCallback(configChangeListener)
         statusBarStateController.addCallback(statusBarStateListener)
         bypassController.registerOnBypassStateChangedListener(bypassStateChangedListener)
-        wakefulnessLifecycle.addObserver(wakefulnessLifecycleObserver)
+        if (!smartspaceLockscreenViewmodel()) {
+            wakefulnessLifecycle.addObserver(wakefulnessLifecycleObserver)
+        }
 
         datePlugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
         weatherPlugin?.registerSmartspaceEventNotifier { e -> session?.notifySmartspaceEvent(e) }
@@ -509,7 +512,9 @@ constructor(
         configurationController.removeCallback(configChangeListener)
         statusBarStateController.removeCallback(statusBarStateListener)
         bypassController.unregisterOnBypassStateChangedListener(bypassStateChangedListener)
-        wakefulnessLifecycle.removeObserver(wakefulnessLifecycleObserver)
+        if (!smartspaceLockscreenViewmodel()) {
+            wakefulnessLifecycle.removeObserver(wakefulnessLifecycleObserver)
+        }
         session = null
 
         datePlugin?.registerSmartspaceEventNotifier(null)
