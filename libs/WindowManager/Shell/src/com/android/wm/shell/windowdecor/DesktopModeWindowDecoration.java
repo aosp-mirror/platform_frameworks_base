@@ -52,6 +52,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.window.WindowContainerTransaction;
 
@@ -340,11 +341,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
 
         if (captionLayoutId == R.layout.desktop_mode_app_controls_window_decor) {
-            // If the app is requesting to customize the caption bar, allow input to fall through
-            // to the windows below so that the app can respond to input events on their custom
-            // content.
-            relayoutParams.mAllowCaptionInputFallthrough =
-                    TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo);
+            if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
+                // If the app is requesting to customize the caption bar, allow input to fall
+                // through to the windows below so that the app can respond to input events on
+                // their custom content.
+                relayoutParams.mInputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_SPY;
+            }
             // Report occluding elements as bounding rects to the insets system so that apps can
             // draw in the empty space in the center:
             //   First, the "app chip" section of the caption bar (+ some extra margins).
@@ -359,6 +361,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
+        } else if (captionLayoutId == R.layout.desktop_mode_focused_window_decor) {
+            // The focused decor (fullscreen/split) does not need to handle input because input in
+            // the App Handle is handled by the InputMonitor in DesktopModeWindowDecorViewModel.
+            relayoutParams.mInputFeatures
+                    |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
         }
         if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ taskInfo.isFocused)) {
             relayoutParams.mShadowRadiusId = taskInfo.isFocused
