@@ -173,6 +173,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.HwBinder;
 import android.os.IBinder;
 import android.os.Looper;
@@ -683,6 +684,9 @@ public class AudioService extends IAudioService.Stub
     private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
 
+    // Handler for broadcast receiver
+    // TODO(b/335513647) combine handlers
+    private final HandlerThread mBroadcastHandlerThread;
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
@@ -1118,6 +1122,9 @@ public class AudioService extends IAudioService.Stub
         mAudioPolicy = audioPolicy;
         mPlatformType = AudioSystem.getPlatformType(context);
 
+        mBroadcastHandlerThread = new HandlerThread("AudioService Broadcast");
+        mBroadcastHandlerThread.start();
+
         mDeviceBroker = new AudioDeviceBroker(mContext, this, mAudioSystem);
 
         mIsSingleVolume = AudioSystem.isSingleVolume(context);
@@ -1504,7 +1511,8 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(ACTION_CHECK_MUSIC_ACTIVE);
         intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 
-        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null,
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null,
+                mBroadcastHandlerThread.getThreadHandler(),
                 Context.RECEIVER_EXPORTED);
 
         SubscriptionManager subscriptionManager = mContext.getSystemService(
