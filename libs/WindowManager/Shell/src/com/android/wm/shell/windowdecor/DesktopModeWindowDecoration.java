@@ -44,6 +44,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.Log;
 import android.util.Size;
 import android.view.Choreographer;
@@ -158,7 +159,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
+        Trace.beginSection("DesktopModeWindowDecoration#loadAppInfo");
         loadAppInfo();
+        Trace.endSection();
     }
 
     void setCaptionListeners(
@@ -204,6 +207,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
+        Trace.beginSection("DesktopModeWindowDecoration#relayout");
         if (isHandleMenuActive()) {
             mHandleMenu.relayout(startT);
         }
@@ -215,16 +219,22 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-inner");
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
+        Trace.endSection();
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-applyWCT");
         mTaskOrganizer.applyTransaction(wct);
+        Trace.endSection();
 
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
             // Nothing is set up in this case including the decoration surface.
+            Trace.endSection(); // DesktopModeWindowDecoration#relayout
             return;
         }
+
         if (oldRootView != mResult.mRootView) {
             if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) {
                 mWindowDecorViewHolder = new DesktopModeFocusedWindowDecorationViewHolder(
@@ -252,7 +262,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 throw new IllegalArgumentException("Unexpected layout resource id");
             }
         }
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-binding");
         mWindowDecorViewHolder.bindData(mTaskInfo);
+        Trace.endSection();
 
         if (!mTaskInfo.isFocused) {
             closeHandleMenu();
@@ -268,11 +280,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 updateExclusionRegion();
             }
             closeDragResizeListener();
+            Trace.endSection(); // DesktopModeWindowDecoration#relayout
             return;
         }
 
         if (oldDecorationSurface != mDecorationContainerSurface || mDragResizeListener == null) {
             closeDragResizeListener();
+            Trace.beginSection("DesktopModeWindowDecoration#relayout-DragResizeInputListener");
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
                     mHandler,
@@ -283,6 +297,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mSurfaceControlBuilderSupplier,
                     mSurfaceControlTransactionSupplier,
                     mDisplayController);
+            Trace.endSection();
         }
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
@@ -307,6 +322,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mMaximizeMenu.positionMenu(calculateMaximizeMenuPosition(), startT);
             }
         }
+        Trace.endSection(); // DesktopModeWindowDecoration#relayout
     }
 
     @VisibleForTesting

@@ -33,6 +33,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Trace;
 import android.view.Display;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -378,6 +379,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             startT.unsetColor(mTaskSurface);
         }
 
+        Trace.beginSection("CaptionViewHostLayout");
         if (mCaptionWindowManager == null) {
             // Put caption under a container surface because ViewRootImpl sets the destination frame
             // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
@@ -412,6 +414,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             }
             mViewHost.relayout(lp);
         }
+        Trace.endSection(); // CaptionViewHostLayout
     }
 
     private Rect calculateBoundingRect(@NonNull OccludingCaptionElement element,
