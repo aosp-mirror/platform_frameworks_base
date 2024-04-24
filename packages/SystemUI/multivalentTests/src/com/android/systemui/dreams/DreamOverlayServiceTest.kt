@@ -17,41 +17,52 @@ package com.android.systemui.dreams
 
 import android.content.ComponentName
 import android.content.Intent
-import android.os.RemoteException
 import android.service.dreams.IDreamOverlay
 import android.service.dreams.IDreamOverlayCallback
 import android.service.dreams.IDreamOverlayClient
 import android.service.dreams.IDreamOverlayClientCallback
+import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.WindowManagerImpl
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.ambient.touch.scrim.ScrimController
 import com.android.systemui.ambient.touch.scrim.ScrimManager
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
+import com.android.systemui.communal.data.repository.FakeCommunalRepository
+import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutEngine
 import com.android.systemui.complication.dagger.ComplicationComponent
 import com.android.systemui.dreams.complication.HideComplicationTouchHandler
 import com.android.systemui.dreams.dagger.DreamOverlayComponent
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,20 +70,24 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import org.mockito.invocation.InvocationOnMock
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
 class DreamOverlayServiceTest : SysuiTestCase() {
     private val mFakeSystemClock = FakeSystemClock()
     private val mMainExecutor = FakeExecutor(mFakeSystemClock)
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     @Mock lateinit var mLifecycleOwner: DreamOverlayLifecycleOwner
 
-    @Mock lateinit var mLifecycleRegistry: LifecycleRegistry
+    private lateinit var lifecycleRegistry: FakeLifecycleRegistry
 
-    lateinit var mWindowParams: WindowManager.LayoutParams
+    private lateinit var mWindowParams: WindowManager.LayoutParams
 
     @Mock lateinit var mDreamOverlayCallback: IDreamOverlayCallback
 
@@ -124,22 +139,29 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
     @Mock lateinit var mScrimController: ScrimController
 
-    @Mock lateinit var mCommunalInteractor: CommunalInteractor
-
     @Mock lateinit var mSystemDialogsCloser: SystemDialogsCloser
 
     @Mock lateinit var mDreamOverlayCallbackController: DreamOverlayCallbackController
 
+    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
+    private lateinit var communalRepository: FakeCommunalRepository
+
     @Captor var mViewCaptor: ArgumentCaptor<View>? = null
-    var mService: DreamOverlayService? = null
+    private lateinit var mService: DreamOverlayService
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+
+        lifecycleRegistry = FakeLifecycleRegistry(mLifecycleOwner)
+        bouncerRepository = kosmos.fakeKeyguardBouncerRepository
+        communalRepository = kosmos.fakeCommunalRepository
+
         whenever(mDreamOverlayComponent.getDreamOverlayContainerViewController())
             .thenReturn(mDreamOverlayContainerViewController)
         whenever(mComplicationComponent.getComplicationHostViewController())
             .thenReturn(mComplicationHostViewController)
-        whenever(mLifecycleOwner.registry).thenReturn(mLifecycleRegistry)
+        whenever(mLifecycleOwner.registry).thenReturn(lifecycleRegistry)
         whenever(mComplicationComponentFactory.create(any(), any(), any(), any()))
             .thenReturn(mComplicationComponent)
         whenever(mComplicationComponent.getVisibilityController())
@@ -170,26 +192,29 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 mStateController,
                 mKeyguardUpdateMonitor,
                 mScrimManager,
-                mCommunalInteractor,
+                kosmos.communalInteractor,
                 mSystemDialogsCloser,
                 mUiEventLogger,
                 mTouchInsetManager,
                 LOW_LIGHT_COMPONENT,
                 HOME_CONTROL_PANEL_DREAM_COMPONENT,
                 mDreamOverlayCallbackController,
+                kosmos.keyguardInteractor,
                 WINDOW_NAME
             )
     }
 
-    @get:Throws(RemoteException::class)
-    val client: IDreamOverlayClient
+    private val client: IDreamOverlayClient
         get() {
-            val proxy = mService!!.onBind(Intent())
+            mService.onCreate()
+            TestableLooper.get(this).processAllMessages()
+
+            val proxy = mService.onBind(Intent())
             val overlay = IDreamOverlay.Stub.asInterface(proxy)
             val callback = Mockito.mock(IDreamOverlayClientCallback::class.java)
             overlay.getClient(callback)
             val clientCaptor = ArgumentCaptor.forClass(IDreamOverlayClient::class.java)
-            Mockito.verify(callback).onDreamOverlayClient(clientCaptor.capture())
+            verify(callback).onDreamOverlayClient(clientCaptor.capture())
             return clientCaptor.value
         }
 
@@ -205,9 +230,8 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Mockito.verify(mUiEventLogger)
-            .log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_ENTER_START)
-        Mockito.verify(mUiEventLogger)
+        verify(mUiEventLogger).log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_ENTER_START)
+        verify(mUiEventLogger)
             .log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START)
     }
 
@@ -223,7 +247,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Mockito.verify(mWindowManager).addView(any(), any())
+        verify(mWindowManager).addView(any(), any())
     }
 
     // Validates that {@link DreamOverlayService} properly handles the case where the dream's
@@ -242,14 +266,14 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Mockito.verify(mWindowManager).addView(any(), any())
-        Mockito.verify(mStateController).setOverlayActive(false)
-        Mockito.verify(mStateController).setLowLightActive(false)
-        Mockito.verify(mStateController).setEntryAnimationsFinished(false)
-        Mockito.verify(mStateController, Mockito.never()).setOverlayActive(true)
-        Mockito.verify(mUiEventLogger, Mockito.never())
+        verify(mWindowManager).addView(any(), any())
+        verify(mStateController).setOverlayActive(false)
+        verify(mStateController).setLowLightActive(false)
+        verify(mStateController).setEntryAnimationsFinished(false)
+        verify(mStateController, Mockito.never()).setOverlayActive(true)
+        verify(mUiEventLogger, Mockito.never())
             .log(DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START)
-        Mockito.verify(mDreamOverlayCallbackController, Mockito.never()).onStartDream()
+        verify(mDreamOverlayCallbackController, Mockito.never()).onStartDream()
     }
 
     @Test
@@ -264,7 +288,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Mockito.verify(mDreamOverlayContainerViewController).init()
+        verify(mDreamOverlayContainerViewController).init()
     }
 
     @Test
@@ -282,7 +306,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Mockito.verify(mDreamOverlayContainerViewParent).removeView(mDreamOverlayContainerView)
+        verify(mDreamOverlayContainerViewParent).removeView(mDreamOverlayContainerView)
     }
 
     @Test
@@ -297,7 +321,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Truth.assertThat(mService!!.shouldShowComplications()).isTrue()
+        assertThat(mService.shouldShowComplications()).isTrue()
     }
 
     @Test
@@ -312,8 +336,8 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Truth.assertThat(mService!!.dreamComponent).isEqualTo(LOW_LIGHT_COMPONENT)
-        Mockito.verify(mStateController).setLowLightActive(true)
+        assertThat(mService.dreamComponent).isEqualTo(LOW_LIGHT_COMPONENT)
+        verify(mStateController).setLowLightActive(true)
     }
 
     @Test
@@ -328,8 +352,8 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Truth.assertThat(mService!!.dreamComponent).isEqualTo(HOME_CONTROL_PANEL_DREAM_COMPONENT)
-        Mockito.verify(mStateController).setHomeControlPanelActive(true)
+        assertThat(mService.dreamComponent).isEqualTo(HOME_CONTROL_PANEL_DREAM_COMPONENT)
+        verify(mStateController).setHomeControlPanelActive(true)
     }
 
     @Test
@@ -346,19 +370,19 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         mMainExecutor.runAllReady()
 
         // Verify view added.
-        Mockito.verify(mWindowManager).addView(mViewCaptor!!.capture(), any())
+        verify(mWindowManager).addView(mViewCaptor!!.capture(), any())
 
         // Service destroyed.
-        mService!!.onEndDream()
+        mService.onEndDream()
         mMainExecutor.runAllReady()
 
         // Verify view removed.
-        Mockito.verify(mWindowManager).removeView(mViewCaptor!!.value)
+        verify(mWindowManager).removeView(mViewCaptor!!.value)
 
         // Verify state correctly set.
-        Mockito.verify(mStateController).setOverlayActive(false)
-        Mockito.verify(mStateController).setLowLightActive(false)
-        Mockito.verify(mStateController).setEntryAnimationsFinished(false)
+        verify(mStateController).setOverlayActive(false)
+        verify(mStateController).setLowLightActive(false)
+        verify(mStateController).setEntryAnimationsFinished(false)
     }
 
     @Test
@@ -391,7 +415,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         // Schedule the endDream call in the middle of the startDream implementation, as any
         // ordering is possible.
-        Mockito.doAnswer { invocation: InvocationOnMock? ->
+        Mockito.doAnswer {
                 client.endDream()
                 null
             }
@@ -427,37 +451,37 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         mMainExecutor.runAllReady()
 
         // Verify view added.
-        Mockito.verify(mWindowManager).addView(mViewCaptor!!.capture(), any())
+        verify(mWindowManager).addView(mViewCaptor!!.capture(), any())
 
         // Service destroyed.
-        mService!!.onDestroy()
+        mService.onDestroy()
         mMainExecutor.runAllReady()
 
         // Verify view removed.
-        Mockito.verify(mWindowManager).removeView(mViewCaptor!!.value)
+        verify(mWindowManager).removeView(mViewCaptor!!.value)
 
         // Verify state correctly set.
-        Mockito.verify(mKeyguardUpdateMonitor).removeCallback(any())
-        Mockito.verify(mLifecycleRegistry).currentState = Lifecycle.State.DESTROYED
-        Mockito.verify(mStateController).setOverlayActive(false)
-        Mockito.verify(mStateController).setLowLightActive(false)
-        Mockito.verify(mStateController).setEntryAnimationsFinished(false)
+        verify(mKeyguardUpdateMonitor).removeCallback(any())
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.DESTROYED)
+        verify(mStateController).setOverlayActive(false)
+        verify(mStateController).setLowLightActive(false)
+        verify(mStateController).setEntryAnimationsFinished(false)
     }
 
     @Test
     fun testDoNotRemoveViewOnDestroyIfOverlayNotStarted() {
         // Service destroyed without ever starting dream.
-        mService!!.onDestroy()
+        mService.onDestroy()
         mMainExecutor.runAllReady()
 
         // Verify no view is removed.
-        Mockito.verify(mWindowManager, Mockito.never()).removeView(any())
+        verify(mWindowManager, Mockito.never()).removeView(any())
 
         // Verify state still correctly set.
-        Mockito.verify(mKeyguardUpdateMonitor).removeCallback(any())
-        Mockito.verify(mLifecycleRegistry).currentState = Lifecycle.State.DESTROYED
-        Mockito.verify(mStateController).setOverlayActive(false)
-        Mockito.verify(mStateController).setLowLightActive(false)
+        verify(mKeyguardUpdateMonitor).removeCallback(any())
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.DESTROYED)
+        verify(mStateController).setOverlayActive(false)
+        verify(mStateController).setLowLightActive(false)
     }
 
     @Test
@@ -465,7 +489,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         val client = client
 
         // Destroy the service.
-        mService!!.onDestroy()
+        mService.onDestroy()
         mMainExecutor.runAllReady()
 
         // Inform the overlay service of dream starting.
@@ -476,15 +500,15 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             false /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        Mockito.verify(mWindowManager, Mockito.never()).addView(any(), any())
+        verify(mWindowManager, Mockito.never()).addView(any(), any())
     }
 
     @Test
     fun testNeverRemoveDecorViewIfNotAdded() {
         // Service destroyed before dream started.
-        mService!!.onDestroy()
+        mService.onDestroy()
         mMainExecutor.runAllReady()
-        Mockito.verify(mWindowManager, Mockito.never()).removeView(any())
+        verify(mWindowManager, Mockito.never()).removeView(any())
     }
 
     @Test
@@ -501,11 +525,11 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         mMainExecutor.runAllReady()
 
         // Verify that a new window is added.
-        Mockito.verify(mWindowManager).addView(mViewCaptor!!.capture(), any())
+        verify(mWindowManager).addView(mViewCaptor!!.capture(), any())
         val windowDecorView = mViewCaptor!!.value
 
         // Assert that the overlay is not showing complications.
-        Truth.assertThat(mService!!.shouldShowComplications()).isFalse()
+        assertThat(mService.shouldShowComplications()).isFalse()
         Mockito.clearInvocations(mDreamOverlayComponent)
         Mockito.clearInvocations(mAmbientTouchComponent)
         Mockito.clearInvocations(mWindowManager)
@@ -522,16 +546,16 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         mMainExecutor.runAllReady()
 
         // Assert that the overlay is showing complications.
-        Truth.assertThat(mService!!.shouldShowComplications()).isTrue()
+        assertThat(mService.shouldShowComplications()).isTrue()
 
         // Verify that the old overlay window has been removed, and a new one created.
-        Mockito.verify(mWindowManager).removeView(windowDecorView)
-        Mockito.verify(mWindowManager).addView(any(), any())
+        verify(mWindowManager).removeView(windowDecorView)
+        verify(mWindowManager).addView(any(), any())
 
         // Verify that new instances of overlay container view controller and overlay touch monitor
         // are created.
-        Mockito.verify(mDreamOverlayComponent).getDreamOverlayContainerViewController()
-        Mockito.verify(mAmbientTouchComponent).getTouchMonitor()
+        verify(mDreamOverlayComponent).getDreamOverlayContainerViewController()
+        verify(mAmbientTouchComponent).getTouchMonitor()
     }
 
     @Test
@@ -546,15 +570,15 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             true /*shouldShowComplication*/
         )
         mMainExecutor.runAllReady()
-        mService!!.onWakeUp()
-        Mockito.verify(mDreamOverlayContainerViewController).wakeUp()
-        Mockito.verify(mDreamOverlayCallbackController).onWakeUp()
+        mService.onWakeUp()
+        verify(mDreamOverlayContainerViewController).wakeUp()
+        verify(mDreamOverlayCallbackController).onWakeUp()
     }
 
     @Test
     fun testWakeUpBeforeStartDoesNothing() {
-        mService!!.onWakeUp()
-        Mockito.verify(mDreamOverlayContainerViewController, Mockito.never()).wakeUp()
+        mService.onWakeUp()
+        verify(mDreamOverlayContainerViewController, Mockito.never()).wakeUp()
     }
 
     @Test
@@ -572,8 +596,8 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         val paramsCaptor = ArgumentCaptor.forClass(WindowManager.LayoutParams::class.java)
 
         // Verify that a new window is added.
-        Mockito.verify(mWindowManager).addView(any(), paramsCaptor.capture())
-        Truth.assertThat(
+        verify(mWindowManager).addView(any(), paramsCaptor.capture())
+        assertThat(
                 paramsCaptor.value.privateFlags and
                     WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS ==
                     WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS
@@ -598,7 +622,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         whenever(mDreamOverlayContainerViewController.isBouncerShowing()).thenReturn(true)
         mService!!.onComeToFront()
-        Mockito.verify(mScrimController).expand(any())
+        verify(mScrimController).expand(any())
     }
 
     // Tests that glanceable hub is hidden when DreamOverlayService is told that the dream is
@@ -617,7 +641,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         mMainExecutor.runAllReady()
 
         mService!!.onComeToFront()
-        Mockito.verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Blank), nullable())
+        assertThat(communalRepository.currentScene.value).isEqualTo(CommunalScenes.Blank)
     }
 
     // Tests that system dialogs (e.g. notification shade) closes when DreamOverlayService is told
@@ -636,7 +660,197 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         mMainExecutor.runAllReady()
 
         mService!!.onComeToFront()
-        Mockito.verify(mSystemDialogsCloser).closeSystemDialogs()
+        verify(mSystemDialogsCloser).closeSystemDialogs()
+    }
+
+    @Test
+    fun testLifecycle_createdAfterConstruction() {
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.CREATED)
+    }
+
+    @Test
+    fun testLifecycle_resumedAfterDreamStarts() {
+        val client = client
+
+        // Inform the overlay service of dream starting. Do not show dream complications.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.mLifecycles)
+            .containsExactly(
+                Lifecycle.State.CREATED,
+                Lifecycle.State.STARTED,
+                Lifecycle.State.RESUMED
+            )
+    }
+
+    @Test
+    fun testLifecycle_destroyedAfterOnDestroy() {
+        val client = client
+
+        // Inform the overlay service of dream starting. Do not show dream complications.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        mService.onDestroy()
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.mLifecycles)
+            .containsExactly(
+                Lifecycle.State.CREATED,
+                Lifecycle.State.STARTED,
+                Lifecycle.State.RESUMED,
+                Lifecycle.State.DESTROYED
+            )
+    }
+
+    @Test
+    fun testNotificationShadeShown_setsLifecycleState() {
+        val client = client
+
+        // Inform the overlay service of dream starting. Do not show dream complications.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+        val callbackCaptor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCaptor.capture())
+
+        // Notification shade opens.
+        callbackCaptor.value.onShadeExpandedChanged(true)
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes from resumed back to started when the notification shade shows.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+        // Notification shade closes.
+        callbackCaptor.value.onShadeExpandedChanged(false)
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes back to RESUMED.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+    }
+
+    @Test
+    fun testBouncerShown_setsLifecycleState() {
+        val client = client
+
+        // Inform the overlay service of dream starting. Do not show dream complications.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+
+        // Bouncer shows.
+        bouncerRepository.setPrimaryShow(true)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes from resumed back to started when the notification shade shows.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+        // Bouncer closes.
+        bouncerRepository.setPrimaryShow(false)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes back to RESUMED.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+    }
+
+    @Test
+    fun testCommunalVisible_setsLifecycleState() {
+        val client = client
+
+        // Inform the overlay service of dream starting. Do not show dream complications.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+        val transitionState: MutableStateFlow<ObservableTransitionState> =
+            MutableStateFlow(ObservableTransitionState.Idle(CommunalScenes.Blank))
+        communalRepository.setTransitionState(transitionState)
+
+        // Communal becomes visible.
+        transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Communal)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes from resumed back to started when the notification shade shows.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+        // Communal closes.
+        transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Blank)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes back to RESUMED.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+    }
+
+    // Verifies the dream's lifecycle
+    @Test
+    fun testLifecycleStarted_whenAnyOcclusion() {
+        val client = client
+
+        // Inform the overlay service of dream starting. Do not show dream complications.
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+        val transitionState: MutableStateFlow<ObservableTransitionState> =
+            MutableStateFlow(ObservableTransitionState.Idle(CommunalScenes.Blank))
+        communalRepository.setTransitionState(transitionState)
+
+        // Communal becomes visible.
+        transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Communal)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes from resumed back to started when the notification shade shows.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
+
+        // Communal closes.
+        transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Blank)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Lifecycle state goes back to RESUMED.
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.RESUMED)
+    }
+
+    internal class FakeLifecycleRegistry(provider: LifecycleOwner) : LifecycleRegistry(provider) {
+        val mLifecycles: MutableList<State> = ArrayList()
+
+        override var currentState: State
+            get() = mLifecycles[mLifecycles.size - 1]
+            set(state) {
+                mLifecycles.add(state)
+            }
     }
 
     companion object {
