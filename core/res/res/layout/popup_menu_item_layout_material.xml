@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2023 The Android Open Source Project
+<!-- Copyright (C) 2024 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -12,60 +12,69 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
+
+     Forked from the popup_menu_item_layout.xml for material support. When you edit this file, you
+     may also need to update that file.
 -->
 
-<!-- Keep in sync with popup_menu_item_layout.xml (which only differs in the title and shortcut
-    position). -->
 <com.android.internal.view.menu.ListMenuItemView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minWidth="112dip"
-    android:maxWidth="280dip"
+    android:minWidth="196dip"
     android:orientation="vertical" >
 
     <ImageView
         android:id="@+id/group_divider"
         android:layout_width="match_parent"
         android:layout_height="1dip"
-        android:layout_marginTop="8dip"
-        android:layout_marginBottom="8dip"
+        android:layout_marginTop="4dip"
+        android:layout_marginBottom="4dip"
         android:background="@drawable/list_divider_material" />
 
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="48dip"
-        android:layout_marginEnd="12dip"
+        android:layout_height="?attr/dropdownListPreferredItemHeight"
+        android:paddingEnd="16dip"
         android:duplicateParentState="true" >
 
         <!-- Icon will be inserted here. -->
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="18dip"
-            android:textAppearance="?attr/textAppearanceLargePopupMenu"
-            android:singleLine="true"
-            android:duplicateParentState="true"
-            android:textAlignment="viewStart" />
-
-        <Space
+        <!-- The title and summary have some gap between them,
+        and this 'group' should be centered vertically. -->
+        <RelativeLayout
             android:layout_width="0dip"
-            android:layout_height="1dip"
-            android:layout_weight="1"/>
-
-        <TextView
-            android:id="@+id/shortcut"
-            android:layout_width="wrap_content"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="16dip"
-            android:textAppearance="?attr/textAppearanceSmallPopupMenu"
-            android:singleLine="true"
-            android:duplicateParentState="true"
-            android:textAlignment="viewEnd" />
+            android:duplicateParentState="true">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:textAppearance="?attr/textAppearanceLargePopupMenu"
+                android:singleLine="true"
+                android:duplicateParentState="true"
+                android:ellipsize="marquee"
+                android:fadingEdge="horizontal"
+                android:textAlignment="viewStart" />
+
+            <TextView
+                android:id="@+id/shortcut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/title"
+                android:layout_alignParentStart="true"
+                android:textAppearance="?attr/textAppearanceSmallPopupMenu"
+                android:singleLine="true"
+                android:duplicateParentState="true"
+                android:textAlignment="viewStart" />
+
+        </RelativeLayout>
 
         <ImageView
             android:id="@+id/submenuarrow"
