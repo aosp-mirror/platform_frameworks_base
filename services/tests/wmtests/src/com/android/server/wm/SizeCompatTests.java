@@ -4484,6 +4484,21 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPortraitAppInTabletop_notSplitScreen() {
+        final int dw = 2400;
+        setUpDisplaySizeWithApp(dw, 2000);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        final int initialWidth = mActivity.getBounds().width();
+
+        setFoldablePosture(true /* isHalfFolded */, true /* isTabletop */);
+
+        final int finalWidth = mActivity.getBounds().width();
+        assertEquals(initialWidth, finalWidth);
+        assertNotEquals(finalWidth, getExpectedSplitSize(dw));
+    }
+
+    @Test
     public void testUpdateResolvedBoundsHorizontalPosition_bookModeEnabled() {
         // Set up a display in landscape with a fixed-orientation PORTRAIT app
         setUpDisplaySizeWithApp(2800, 1400);
