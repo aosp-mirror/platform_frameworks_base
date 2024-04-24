@@ -24,7 +24,6 @@ import android.os.Handler
 import android.os.Looper
 import android.service.quicksettings.Tile
 import android.text.TextUtils
-import android.view.View
 import android.widget.Switch
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN
@@ -32,6 +31,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.systemui.Flags.recordIssueQsTile
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -113,11 +113,11 @@ constructor(
         }
 
     @VisibleForTesting
-    public override fun handleClick(view: View?) {
+    public override fun handleClick(expandable: Expandable?) {
         if (issueRecordingState.isRecording) {
             stopIssueRecordingService()
         } else {
-            mUiHandler.post { showPrompt(view) }
+            mUiHandler.post { showPrompt(expandable) }
         }
     }
 
@@ -143,7 +143,7 @@ constructor(
             )
             .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
 
-    private fun showPrompt(view: View?) {
+    private fun showPrompt(expandable: Expandable?) {
         val dialog: AlertDialog =
             delegateFactory
                 .create {
@@ -156,12 +156,11 @@ constructor(
             ActivityStarter.OnDismissAction {
                 // We animate from the touched view only if we are not on the keyguard, given
                 // that if we are we will dismiss it which will also collapse the shade.
-                if (view != null && !keyguardStateController.isShowing) {
-                    dialogTransitionAnimator.showFromView(
-                        dialog,
-                        view,
-                        DialogCuj(CUJ_SHADE_DIALOG_OPEN, TILE_SPEC)
-                    )
+                if (expandable != null && !keyguardStateController.isShowing) {
+                    expandable
+                        .dialogTransitionController(DialogCuj(CUJ_SHADE_DIALOG_OPEN, TILE_SPEC))
+                        ?.let { dialogTransitionAnimator.show(dialog, it) }
+                        ?: dialog.show()
                 } else {
                     dialog.show()
                 }

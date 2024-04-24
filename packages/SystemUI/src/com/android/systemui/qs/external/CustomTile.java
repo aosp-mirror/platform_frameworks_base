@@ -41,7 +41,6 @@ import android.service.quicksettings.TileService;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.IWindowManager;
-import android.view.View;
 import android.view.WindowManagerGlobal;
 import android.widget.Switch;
 
@@ -52,6 +51,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -99,7 +99,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
     @Nullable
     private CharSequence mDefaultLabel;
     @Nullable
-    private View mViewClicked;
+    private Expandable mExpandableClicked;
 
     private final Context mUserContext;
 
@@ -347,7 +347,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
                     mService.onStartListening();
                 }
             } else {
-                mViewClicked = null;
+                mExpandableClicked = null;
                 mService.onStopListening();
                 if (mIsTokenGranted && !mIsShowingDialog) {
                     try {
@@ -409,11 +409,11 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable Expandable expandable) {
         if (mTile.getState() == Tile.STATE_UNAVAILABLE) {
             return;
         }
-        mViewClicked = view;
+        mExpandableClicked = expandable;
         try {
             if (DEBUG) Log.d(TAG, "Adding token");
             mWindowManager.addWindowToken(mToken, TYPE_QS_DIALOG,
@@ -541,11 +541,9 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener,
             Log.i(TAG, "The activity is starting");
 
             ActivityTransitionAnimator.Controller controller =
-                    mViewClicked == null ? null :
-                    ActivityTransitionAnimator.Controller.fromView(
-                            mViewClicked,
-                            InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE
-                    );
+                    mExpandableClicked == null ? null :
+                            mExpandableClicked.activityTransitionController(
+                                    InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE);
             mActivityStarter.startPendingIntentMaybeDismissingKeyguard(
                     pendingIntent,
                     /* intentSentUiThreadCallback= */ null,

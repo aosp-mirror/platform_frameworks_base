@@ -17,11 +17,11 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
@@ -51,23 +51,23 @@ public interface BatteryController extends DemoMode,
      *
      * Can pass the view that triggered the request.
      */
-    void setPowerSaveMode(boolean powerSave, @Nullable View view);
+    void setPowerSaveMode(boolean powerSave, @Nullable Expandable expandable);
 
     /**
      * Gets a reference to the last view used when called {@link #setPowerSaveMode}.
      */
     @Nullable
-    default WeakReference<View> getLastPowerSaverStartView() {
+    default WeakReference<Expandable> getLastPowerSaverStartExpandable() {
         return null;
     }
 
     /**
      * Clears the last view used when called {@link #setPowerSaveMode}.
      *
-     * Immediately after calling this, a call to {@link #getLastPowerSaverStartView()} should return
-     * {@code null}.
+     * Immediately after calling this, a call to {@link #getLastPowerSaverStartExpandable()} should
+     * return {@code null}.
      */
-    default void clearLastPowerSaverStartView() {}
+    default void clearLastPowerSaverStartExpandable() {}
 
     /**
      * Returns {@code true} if the device is currently plugged in.

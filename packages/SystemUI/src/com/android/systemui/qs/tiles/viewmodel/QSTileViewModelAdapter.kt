@@ -19,10 +19,10 @@ package com.android.systemui.qs.tiles.viewmodel
 import android.content.Context
 import android.os.UserHandle
 import android.util.Log
-import android.view.View
 import androidx.annotation.GuardedBy
 import com.android.internal.logging.InstanceId
 import com.android.systemui.Dumpable
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.qs.QSTile
@@ -126,21 +126,21 @@ constructor(
         synchronized(callbacks) { callbacks.clear() }
     }
 
-    override fun click(view: View?) {
+    override fun click(expandable: Expandable?) {
         if (isActionSupported(QSTileState.UserAction.CLICK)) {
-            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(view))
+            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(expandable))
         }
     }
 
-    override fun secondaryClick(view: View?) {
+    override fun secondaryClick(expandable: Expandable?) {
         if (isActionSupported(QSTileState.UserAction.CLICK)) {
-            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(view))
+            qsTileViewModel.onActionPerformed(QSTileUserAction.Click(expandable))
         }
     }
 
-    override fun longClick(view: View?) {
+    override fun longClick(expandable: Expandable?) {
         if (isActionSupported(QSTileState.UserAction.LONG_CLICK)) {
-            qsTileViewModel.onActionPerformed(QSTileUserAction.LongClick(view))
+            qsTileViewModel.onActionPerformed(QSTileUserAction.LongClick(expandable))
         }
     }
 

@@ -22,7 +22,6 @@ import android.testing.TestableLooper
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
@@ -30,6 +29,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.flags.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.FakeSharedPreferences
@@ -100,6 +100,8 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     @Mock private lateinit var bluetoothTileDialogDelegate: BluetoothTileDialogDelegate
 
     @Mock private lateinit var sysuiDialog: SystemUIDialog
+    @Mock private lateinit var expandable: Expandable
+    @Mock private lateinit var controller: DialogTransitionAnimator.Controller
 
     private val sharedPreferences = FakeSharedPreferences()
 
@@ -157,6 +159,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             .thenReturn(getMutableStateFlow(false))
         whenever(audioSharingInteractor.audioSharingButtonStateUpdate)
             .thenReturn(getMutableStateFlow(AudioSharingButtonState.Gone))
+        whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
     }
 
     @Test
@@ -164,16 +167,16 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(null)
 
-            verify(mDialogTransitionAnimator, never()).showFromView(any(), any(), any(), any())
+            verify(mDialogTransitionAnimator, never()).show(any(), any(), any())
         }
     }
 
     @Test
     fun testShowDialog_animated() {
         testScope.runTest {
-            bluetoothTileDialogViewModel.showDialog(LinearLayout(mContext))
+            bluetoothTileDialogViewModel.showDialog(expandable)
 
-            verify(mDialogTransitionAnimator).showFromView(any(), any(), nullable(), anyBoolean())
+            verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
         }
     }
 
@@ -181,10 +184,9 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     fun testShowDialog_animated_callInBackgroundThread() {
         testScope.runTest {
             backgroundExecutor.execute {
-                bluetoothTileDialogViewModel.showDialog(LinearLayout(mContext))
+                bluetoothTileDialogViewModel.showDialog(expandable)
 
-                verify(mDialogTransitionAnimator)
-                    .showFromView(any(), any(), nullable(), anyBoolean())
+                verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
             }
         }
     }
