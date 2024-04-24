@@ -75,6 +75,10 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        // set layer to make alpha animation of brightness slider nicer - otherwise elements
+        // of slider are animated separately and it doesn't look good. See b/329244723
+        setLayerType(LAYER_TYPE_HARDWARE, null);
+
         mQSPanelContainer = findViewById(R.id.expanded_qs_scroll_view);
         mQSPanel = findViewById(R.id.quick_settings_panel);
         mHeader = findViewById(R.id.header);

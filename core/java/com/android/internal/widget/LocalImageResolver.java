@@ -132,7 +132,11 @@ public class LocalImageResolver {
 
         // Fallback to straight drawable load if we fail with more efficient approach.
         try {
-            return icon.loadDrawable(context);
+            final Drawable iconDrawable = icon.loadDrawable(context);
+            if (iconDrawable == null) {
+                Log.w(TAG, "Couldn't load drawable for icon: " + icon);
+            }
+            return iconDrawable;
         } catch (Resources.NotFoundException e) {
             return null;
         }
@@ -233,8 +237,7 @@ public class LocalImageResolver {
             });
 
         // ImageDecoder documentation is misleading a bit - it'll throw NotFoundException
-        // in some cases despite it not saying so. Rethrow it as an IOException to keep
-        // our API contract.
+        // in some cases despite it not saying so.
         } catch (IOException | Resources.NotFoundException e) {
             Log.d(TAG, "Couldn't use ImageDecoder for drawable, falling back to non-resized load.");
             return null;

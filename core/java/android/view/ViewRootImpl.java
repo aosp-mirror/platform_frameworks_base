@@ -12714,7 +12714,7 @@ public final class ViewRootImpl implements ViewParent,
         if (frameRateCategory > mPreferredFrameRateCategory) {
             mPreferredFrameRateCategory = frameRateCategory;
             mFrameRateCategoryChangeReason = reason;
-//            mFrameRateCategoryView = view == null ? "-" : view.getClass().getSimpleName();
+            // mFrameRateCategoryView = view == null ? "-" : view.getClass().getSimpleName();
         }
         mHasInvalidation = true;
         mDrawnThisFrame = true;

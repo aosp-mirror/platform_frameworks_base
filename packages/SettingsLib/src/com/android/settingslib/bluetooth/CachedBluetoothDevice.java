@@ -1476,30 +1476,13 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                     }
                 }
 
-                // Try to show left/right information if can not get it from battery for hearing
+                // Try to show left/right information for hearing
                 // aids specifically.
                 boolean isActiveAshaHearingAid = mIsActiveDeviceHearingAid;
                 boolean isActiveLeAudioHearingAid = mIsActiveDeviceLeAudio
                         && isConnectedHapClientDevice();
                 if (isActiveAshaHearingAid || isActiveLeAudioHearingAid) {
-                    final Set<CachedBluetoothDevice> memberDevices = getMemberDevice();
-                    final CachedBluetoothDevice subDevice = getSubDevice();
-                    if (memberDevices.stream().anyMatch(m -> m.isConnected())) {
-                        stringRes = R.string.bluetooth_hearing_aid_left_and_right_active;
-                    } else if (subDevice != null && subDevice.isConnected()) {
-                        stringRes = R.string.bluetooth_hearing_aid_left_and_right_active;
-                    } else {
-                        int deviceSide = getDeviceSide();
-                        if (deviceSide == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT) {
-                            stringRes = R.string.bluetooth_hearing_aid_left_and_right_active;
-                        } else if (deviceSide == HearingAidInfo.DeviceSide.SIDE_LEFT) {
-                            stringRes = R.string.bluetooth_hearing_aid_left_active;
-                        } else if (deviceSide == HearingAidInfo.DeviceSide.SIDE_RIGHT) {
-                            stringRes = R.string.bluetooth_hearing_aid_right_active;
-                        } else {
-                            stringRes = R.string.bluetooth_active_no_battery_level;
-                        }
-                    }
+                    return getHearingDeviceSummary(leftBattery, rightBattery, shortSummary);
                 }
             }
         }
@@ -1565,6 +1548,62 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                     lowBatteryColorRes);
         }
         return spannableBuilder;
+    }
+
+    private CharSequence getHearingDeviceSummary(int leftBattery, int rightBattery,
+            boolean shortSummary) {
+
+        CachedBluetoothDevice memberDevice = getMemberDevice().stream().filter(
+                CachedBluetoothDevice::isConnected).findFirst().orElse(null);
+        if (memberDevice == null && mSubDevice != null && mSubDevice.isConnected()) {
+            memberDevice = mSubDevice;
+        }
+
+        CachedBluetoothDevice leftDevice = null;
+        CachedBluetoothDevice rightDevice = null;
+        final int deviceSide = getDeviceSide();
+        if (deviceSide == HearingAidInfo.DeviceSide.SIDE_LEFT) {
+            leftDevice = this;
+            rightDevice = memberDevice;
+        } else if (deviceSide == HearingAidInfo.DeviceSide.SIDE_RIGHT) {
+            leftDevice = memberDevice;
+            rightDevice = this;
+        } else if (deviceSide == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT) {
+            leftDevice = this;
+            rightDevice = this;
+        }
+
+        if (leftBattery < 0 && leftDevice != null) {
+            leftBattery = leftDevice.getBatteryLevel();
+        }
+        if (rightBattery < 0 && rightDevice != null) {
+            rightBattery = rightDevice.getBatteryLevel();
+        }
+
+        if (leftDevice != null && rightDevice != null) {
+            if (leftBattery >= 0 && rightBattery >= 0 && !shortSummary) {
+                return mContext.getString(R.string.bluetooth_active_battery_level_untethered,
+                        Utils.formatPercentage(leftBattery), Utils.formatPercentage(rightBattery));
+            } else {
+                return mContext.getString(R.string.bluetooth_hearing_aid_left_and_right_active);
+            }
+        } else if (leftDevice != null) {
+            if (leftBattery >= 0 && !shortSummary) {
+                return mContext.getString(R.string.bluetooth_active_battery_level_untethered_left,
+                        Utils.formatPercentage(leftBattery));
+            } else {
+                return mContext.getString(R.string.bluetooth_hearing_aid_left_active);
+            }
+        } else if (rightDevice != null) {
+            if (rightBattery >= 0 && !shortSummary) {
+                return mContext.getString(R.string.bluetooth_active_battery_level_untethered_right,
+                        Utils.formatPercentage(rightBattery));
+            } else {
+                return mContext.getString(R.string.bluetooth_hearing_aid_right_active);
+            }
+        }
+
+        return mContext.getString(R.string.bluetooth_active_no_battery_level);
     }
 
     private void addBatterySpan(SpannableStringBuilder builder,

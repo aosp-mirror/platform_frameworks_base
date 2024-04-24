@@ -16,7 +16,7 @@
 
 package com.android.systemui.screenshot.dagger;
 
-import static com.android.systemui.Flags.screenshotShelfUi;
+import static com.android.systemui.Flags.screenshotShelfUi2;
 
 import android.app.Service;
 import android.view.accessibility.AccessibilityManager;
@@ -99,7 +99,7 @@ public abstract class ScreenshotModule {
     static ScreenshotViewProxy.Factory providesScreenshotViewProxyFactory(
             ScreenshotShelfViewProxy.Factory shelfScreenshotViewProxyFactory,
             LegacyScreenshotViewProxy.Factory legacyScreenshotViewProxyFactory) {
-        if (screenshotShelfUi()) {
+        if (screenshotShelfUi2()) {
             return shelfScreenshotViewProxyFactory;
         } else {
             return legacyScreenshotViewProxyFactory;

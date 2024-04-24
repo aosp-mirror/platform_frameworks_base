@@ -19,12 +19,16 @@ package com.android.internal.systemui.lint
 import com.android.tools.lint.checks.infrastructure.TestFiles.LibraryReferenceTestFile
 import java.io.File
 
+internal val libraryNames =
+    arrayOf(
+        "framework.jar",
+        "androidx.annotation_annotation-nodeps.jar",
+        "kotlinx-coroutines-core.jar",
+    )
+
 /*
  * This file contains stubs of framework APIs and System UI classes for testing purposes only. The
  * stubs are not used in the lint detectors themselves.
  */
 internal val androidStubs =
-    arrayOf(
-        LibraryReferenceTestFile(File("framework.jar").canonicalFile),
-        LibraryReferenceTestFile(File("androidx.annotation_annotation-nodeps.jar").canonicalFile),
-    )
+    libraryNames.map { LibraryReferenceTestFile(File(it).canonicalFile) }.toTypedArray()

@@ -2358,9 +2358,9 @@ public class BubbleStackView extends FrameLayout
         } else {
             index = getBubbleIndex(mExpandedBubble);
         }
-        PointF p = mPositioner.getExpandedBubbleXY(index, getState());
+        PointF bubbleXY = mPositioner.getExpandedBubbleXY(index, getState());
         final float translationY = mPositioner.getExpandedViewY(mExpandedBubble,
-                mPositioner.showBubblesVertically() ? p.y : p.x);
+                mPositioner.showBubblesVertically() ? bubbleXY.y : bubbleXY.x);
         mExpandedViewContainer.setTranslationX(0f);
         mExpandedViewContainer.setTranslationY(translationY);
         mExpandedViewContainer.setAlpha(1f);
@@ -2371,40 +2371,42 @@ public class BubbleStackView extends FrameLayout
                 ? mStackAnimationController.getStackPosition().y
                 : mStackAnimationController.getStackPosition().x;
         final float bubbleWillBeAt = showVertically
-                ? p.y
-                : p.x;
+                ? bubbleXY.y
+                : bubbleXY.x;
         final float distanceAnimated = Math.abs(bubbleWillBeAt - relevantStackPosition);
 
         // Wait for the path animation target to reach its end, and add a small amount of extra time
         // if the bubble is moving a lot horizontally.
-        long startDelay = 0L;
+        final long startDelay;
 
         // Should not happen since we lay out before expanding, but just in case...
         if (getWidth() > 0) {
             startDelay = (long)
                     (ExpandedAnimationController.EXPAND_COLLAPSE_TARGET_ANIM_DURATION * 1.2f
                             + (distanceAnimated / getWidth()) * 30);
+        } else {
+            startDelay = 0L;
         }
 
         // Set the pivot point for the scale, so the expanded view animates out from the bubble.
         if (showVertically) {
             float pivotX;
             if (mStackOnLeftOrWillBe) {
-                pivotX = p.x + mBubbleSize + mExpandedViewPadding;
+                pivotX = bubbleXY.x + mBubbleSize + mExpandedViewPadding;
             } else {
-                pivotX = p.x - mExpandedViewPadding;
+                pivotX = bubbleXY.x - mExpandedViewPadding;
             }
             mExpandedViewContainerMatrix.setScale(
                     1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                     1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                     pivotX,
-                    p.y + mBubbleSize / 2f);
+                    bubbleXY.y + mBubbleSize / 2f);
         } else {
             mExpandedViewContainerMatrix.setScale(
                     1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                     1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
-                    p.x + mBubbleSize / 2f,
-                    p.y + mBubbleSize + mExpandedViewPadding);
+                    bubbleXY.x + mBubbleSize / 2f,
+                    bubbleXY.y + mBubbleSize + mExpandedViewPadding);
         }
         mExpandedViewContainer.setAnimationMatrix(mExpandedViewContainerMatrix);
 

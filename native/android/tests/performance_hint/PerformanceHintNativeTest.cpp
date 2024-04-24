@@ -30,9 +30,7 @@
 #include <memory>
 #include <vector>
 
-using aidl::android::hardware::power::SessionConfig;
-using aidl::android::hardware::power::SessionTag;
-using aidl::android::hardware::power::WorkDuration;
+namespace hal = aidl::android::hardware::power;
 using aidl::android::os::IHintManager;
 using aidl::android::os::IHintSession;
 using ndk::ScopedAStatus;
@@ -45,7 +43,7 @@ class MockIHintManager : public IHintManager {
 public:
     MOCK_METHOD(ScopedAStatus, createHintSessionWithConfig,
                 (const SpAIBinder& token, const ::std::vector<int32_t>& tids, int64_t durationNanos,
-                 SessionTag tag, std::optional<SessionConfig>* config,
+                 hal::SessionTag tag, std::optional<hal::SessionConfig>* config,
                  std::shared_ptr<IHintSession>* _aidl_return),
                 (override));
     MOCK_METHOD(ScopedAStatus, getHintSessionPreferredRate, (int64_t * _aidl_return), (override));
@@ -71,7 +69,7 @@ public:
     MOCK_METHOD(ScopedAStatus, setMode, (int32_t mode, bool enabled), (override));
     MOCK_METHOD(ScopedAStatus, close, (), (override));
     MOCK_METHOD(ScopedAStatus, reportActualWorkDuration2,
-                (const ::std::vector<WorkDuration>& workDurations), (override));
+                (const ::std::vector<hal::WorkDuration>& workDurations), (override));
     MOCK_METHOD(SpAIBinder, asBinder, (), (override));
     MOCK_METHOD(bool, isRemote, (), (override));
 };
@@ -95,7 +93,7 @@ public:
         return APerformanceHint_getManager();
     }
     APerformanceHintSession* createSession(APerformanceHintManager* manager,
-                                           int64_t targetDuration = 56789L) {
+                                           int64_t targetDuration = 56789L, bool isHwui = false) {
         mMockSession = ndk::SharedRefBase::make<NiceMock<MockIHintSession>>();
         int64_t sessionId = 123;
         std::vector<int32_t> tids;
@@ -104,8 +102,8 @@ public:
 
         ON_CALL(*mMockIHintManager,
                 createHintSessionWithConfig(_, Eq(tids), Eq(targetDuration), _, _, _))
-                .WillByDefault(DoAll(SetArgPointee<4>(
-                                             std::make_optional<SessionConfig>({.id = sessionId})),
+                .WillByDefault(DoAll(SetArgPointee<4>(std::make_optional<hal::SessionConfig>(
+                                             {.id = sessionId})),
                                      SetArgPointee<5>(std::shared_ptr<IHintSession>(mMockSession)),
                                      [] { return ScopedAStatus::ok(); }));
 
@@ -124,6 +122,10 @@ public:
         ON_CALL(*mMockSession, reportActualWorkDuration2(_)).WillByDefault([] {
             return ScopedAStatus::ok();
         });
+        if (isHwui) {
+            return APerformanceHint_createSessionInternal(manager, tids.data(), tids.size(),
+                                                          targetDuration, SessionTag::HWUI);
+        }
         return APerformanceHint_createSession(manager, tids.data(), tids.size(), targetDuration);
     }
 
@@ -131,7 +133,7 @@ public:
     std::shared_ptr<NiceMock<MockIHintSession>> mMockSession = nullptr;
 };
 
-bool equalsWithoutTimestamp(WorkDuration lhs, WorkDuration rhs) {
+bool equalsWithoutTimestamp(hal::WorkDuration lhs, hal::WorkDuration rhs) {
     return lhs.workPeriodStartTimestampNanos == rhs.workPeriodStartTimestampNanos &&
             lhs.cpuDurationNanos == rhs.cpuDurationNanos &&
             lhs.gpuDurationNanos == rhs.gpuDurationNanos && lhs.durationNanos == rhs.durationNanos;
@@ -194,6 +196,16 @@ TEST_F(PerformanceHintTest, TestUpdatedSessionCreation) {
     APerformanceHint_closeSession(session);
 }
 
+TEST_F(PerformanceHintTest, TestHwuiSessionCreation) {
+    EXPECT_CALL(*mMockIHintManager,
+                createHintSessionWithConfig(_, _, _, hal::SessionTag::HWUI, _, _))
+            .Times(1);
+    APerformanceHintManager* manager = createManager();
+    APerformanceHintSession* session = createSession(manager, 56789L, true);
+    ASSERT_TRUE(session);
+    APerformanceHint_closeSession(session);
+}
+
 TEST_F(PerformanceHintTest, SetThreads) {
     APerformanceHintManager* manager = createManager();
 
@@ -249,8 +261,8 @@ MATCHER_P(WorkDurationEq, expected, "") {
         return false;
     }
     for (int i = 0; i < expected.size(); ++i) {
-        WorkDuration expectedWorkDuration = expected[i];
-        WorkDuration actualWorkDuration = arg[i];
+        hal::WorkDuration expectedWorkDuration = expected[i];
+        hal::WorkDuration actualWorkDuration = arg[i];
         if (!equalsWithoutTimestamp(expectedWorkDuration, actualWorkDuration)) {
             *result_listener << "WorkDuration at [" << i << "] is different: "
                              << "Expected: " << expectedWorkDuration.toString()
@@ -273,7 +285,7 @@ TEST_F(PerformanceHintTest, TestAPerformanceHint_reportActualWorkDuration2) {
 
     usleep(2); // Sleep for longer than preferredUpdateRateNanos.
     struct TestPair {
-        WorkDuration duration;
+        hal::WorkDuration duration;
         int expectedResult;
     };
     std::vector<TestPair> testPairs{
@@ -282,7 +294,7 @@ TEST_F(PerformanceHintTest, TestAPerformanceHint_reportActualWorkDuration2) {
             {{1, -20, 1, 13, -8}, EINVAL},
     };
     for (auto&& pair : testPairs) {
-        std::vector<WorkDuration> actualWorkDurations;
+        std::vector<hal::WorkDuration> actualWorkDurations;
         actualWorkDurations.push_back(pair.duration);
 
         EXPECT_CALL(*mMockSession, reportActualWorkDuration2(WorkDurationEq(actualWorkDurations)))

@@ -419,6 +419,7 @@ public class ViewFrameRateTest {
             FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY
     })
     public void frameRateAndCategory() throws Throwable {
+        mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
         waitForFrameRateCategoryToSettle();
         mActivityRule.runOnUiThread(() -> {
             mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_LOW);

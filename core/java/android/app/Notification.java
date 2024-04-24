@@ -93,7 +93,10 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
+import android.text.style.UnderlineSpan;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -3166,9 +3169,6 @@ public class Notification implements Parcelable
             Log.e(TAG, "warning: " + cs.getClass().getCanonicalName()
                     + " instance is a custom Parcelable and not allowed in Notification");
             return cs.toString();
-        }
-        if (Flags.cleanUpSpansAndNewLines()) {
-            return stripStyling(cs);
         }
 
         return removeTextSizeSpans(cs);
@@ -8285,9 +8285,6 @@ public class Notification implements Parcelable
          */
         public BigTextStyle bigText(CharSequence cs) {
             mBigText = safeCharSequence(cs);
-            if (Flags.cleanUpSpansAndNewLines()) {
-                mBigText = cleanUpNewLines(mBigText);
-            }
             return this;
         }
 
@@ -8358,6 +8355,9 @@ public class Notification implements Parcelable
 
             // Replace the text with the big text, but only if the big text is not empty.
             CharSequence bigTextText = mBuilder.processLegacyText(mBigText);
+            if (Flags.cleanUpSpansAndNewLines()) {
+                bigTextText = cleanUpNewLines(stripStyling(bigTextText));
+            }
             if (!TextUtils.isEmpty(bigTextText)) {
                 p.text(bigTextText);
             }
@@ -9273,11 +9273,43 @@ public class Notification implements Parcelable
              */
             public void ensureColorContrastOrStripStyling(int backgroundColor) {
                 if (Flags.cleanUpSpansAndNewLines()) {
-                    mText = stripStyling(mText);
+                    mText = stripNonStyleSpans(mText);
                 } else {
                     ensureColorContrast(backgroundColor);
                 }
             }
+
+            private CharSequence stripNonStyleSpans(CharSequence text) {
+
+                if (text instanceof Spanned) {
+                    Spanned ss = (Spanned) text;
+                    Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+                    SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+                    for (Object span : spans) {
+                        final Object resultSpan;
+                        if (span instanceof StyleSpan
+                                || span instanceof StrikethroughSpan
+                                || span instanceof UnderlineSpan) {
+                            resultSpan = span;
+                        } else if (span instanceof TextAppearanceSpan) {
+                            final TextAppearanceSpan originalSpan = (TextAppearanceSpan) span;
+                            resultSpan = new TextAppearanceSpan(
+                                    null,
+                                    originalSpan.getTextStyle(),
+                                    -1,
+                                    null,
+                                    null);
+                        } else {
+                            continue;
+                        }
+                        builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
+                                ss.getSpanFlags(span));
+                    }
+                    return builder;
+                }
+                return text;
+            }
+
             /**
              * Updates TextAppearance spans in the message text so it has sufficient contrast
              * against its background.

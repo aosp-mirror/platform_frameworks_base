@@ -43,7 +43,6 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP_TO_SPLIT;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 
-import android.animation.Animator;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
@@ -348,9 +347,16 @@ public class PipTransition extends PipTransitionController {
 
     @Override
     public void end() {
-        Animator animator = mPipAnimationController.getCurrentAnimator();
-        if (animator != null && animator.isRunning()) {
-            animator.end();
+        end(null);
+    }
+
+    @Override
+    public void end(@Nullable Runnable onTransitionEnd) {
+        if (mPipAnimationController.isAnimating()) {
+            mPipAnimationController.getCurrentAnimator().end();
+        }
+        if (onTransitionEnd != null) {
+            onTransitionEnd.run();
         }
     }
 

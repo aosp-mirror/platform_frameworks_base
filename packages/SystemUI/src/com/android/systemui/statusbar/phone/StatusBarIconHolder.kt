@@ -169,16 +169,19 @@ open class StatusBarIconHolder private constructor() {
      * StatusBarIconController will register all available bindable icons on init (see
      * [BindableIconsRepository]), and will ignore any call to setIcon for these.
      *
-     * [initializer] a view creator that can bind the relevant view models to the created view.
+     * @property initializer a view creator that can bind the relevant view models to the created
+     *   view.
+     * @property slot the name of the slot that this holder is used for.
      */
-    class BindableIconHolder(val initializer: ModernStatusBarViewCreator) : StatusBarIconHolder() {
+    class BindableIconHolder(val initializer: ModernStatusBarViewCreator, val slot: String) :
+        StatusBarIconHolder() {
         override var type: Int = TYPE_BINDABLE
 
         /** This is unused, as bindable icons use their own view binders to control visibility */
         override var isVisible: Boolean = true
 
         override fun toString(): String {
-            return ("StatusBarIconHolder(type=BINDABLE)")
+            return ("StatusBarIconHolder(type=BINDABLE, slot=$slot)")
         }
     }
 }

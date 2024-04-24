@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume
+package com.android.systemui.bluetooth
 
-import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
+import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.volume.data.repository.FakeAudioRepository
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.audioRepository by Kosmos.Fixture { FakeAudioRepository() }
-val Kosmos.audioModeInteractor by Kosmos.Fixture { AudioModeInteractor(audioRepository) }
+var Kosmos.cachedBluetoothDeviceManager: CachedBluetoothDeviceManager by Kosmos.Fixture { mock {} }

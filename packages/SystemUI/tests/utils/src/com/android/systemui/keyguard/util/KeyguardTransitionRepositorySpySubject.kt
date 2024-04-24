@@ -28,7 +28,7 @@ import com.google.common.truth.Subject
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertAbout
 import junit.framework.Assert.assertEquals
-import kotlin.test.fail
+import org.junit.Assert.fail
 import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify

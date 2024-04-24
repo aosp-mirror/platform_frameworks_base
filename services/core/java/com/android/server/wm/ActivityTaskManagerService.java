@@ -3736,6 +3736,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return false;
         }
 
+        // If the app is using auto-enter, and it explicitly requests entering PiP while pausing,
+        // return false immediately since auto-enter should take in place instead.
+        if (fromClient && r.isState(PAUSING) && params.isAutoEnterEnabled()) {
+            Slog.w(TAG, "Skip client enterPictureInPictureMode request while pausing,"
+                    + " auto-enter-pip is enabled");
+            return false;
+        }
+
         if (isPip2ExperimentEnabled()) {
             // If PiP2 flag is on and request to enter PiP comes in,
             // we request a direct transition TRANSIT_PIP from Shell to get the right entry bounds.

@@ -25,11 +25,12 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
- * Slider tracker attached to a seekable slider.
+ * Slider tracker attached to a slider.
  *
- * The tracker runs a state machine to execute actions on touch-based events typical of a seekable
- * slider such as [android.widget.SeekBar]. Coroutines responsible for running the state machine,
- * collecting slider events and maintaining waiting states are run on the provided [CoroutineScope].
+ * The tracker runs a state machine to execute actions on touch-based events typical of a general
+ * slider (including a [android.widget.SeekBar]). Coroutines responsible for running the state
+ * machine, collecting slider events and maintaining waiting states are run on the provided
+ * [CoroutineScope].
  *
  * @param[sliderStateListener] Listener of the slider state.
  * @param[sliderEventProducer] Producer of slider events arising from the slider.
@@ -37,7 +38,7 @@ import kotlinx.coroutines.launch
  *   events and the launch of timer jobs.
  * @property[config] Configuration parameters of the slider tracker.
  */
-class SeekableSliderTracker(
+class SliderStateTracker(
     sliderStateListener: SliderStateListener,
     sliderEventProducer: SliderEventProducer,
     trackerScope: CoroutineScope,
@@ -79,7 +80,7 @@ class SeekableSliderTracker(
             // This will disambiguate between an imprecise touch that acquires the slider handle,
             // and a select and jump operation in the slider track.
             setState(SliderState.WAIT)
-        } else if (newEventType == SliderEventType.PROGRESS_CHANGE_BY_PROGRAM) {
+        } else if (newEventType == SliderEventType.STARTED_TRACKING_PROGRAM) {
             val state =
                 if (bookendReached(currentProgress)) SliderState.ARROW_HANDLE_REACHED_BOOKEND
                 else SliderState.ARROW_HANDLE_MOVED_ONCE
@@ -227,7 +228,7 @@ class SeekableSliderTracker(
                 }
                 SliderEventType.PROGRESS_CHANGE_BY_PROGRAM ->
                     SliderState.ARROW_HANDLE_MOVES_CONTINUOUSLY
-                SliderEventType.ARROW_UP -> SliderState.IDLE
+                SliderEventType.STOPPED_TRACKING_PROGRAM -> SliderState.IDLE
                 else -> SliderState.ARROW_HANDLE_MOVED_ONCE
             }
         setState(nextState)
@@ -237,7 +238,7 @@ class SeekableSliderTracker(
         val reachedBookend = bookendReached(currentProgress)
         val nextState =
             when (newEventType) {
-                SliderEventType.ARROW_UP -> SliderState.IDLE
+                SliderEventType.STOPPED_TRACKING_PROGRAM -> SliderState.IDLE
                 SliderEventType.STARTED_TRACKING_TOUCH -> {
                     // Launching the timer and going to WAIT
                     timerJob = launchTimer()

@@ -597,6 +597,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
+        if (mPipTransitionState.isEnteringPip()
+                && !mPipTransitionState.getInSwipePipToHomeTransition()) {
+            // If we are still entering PiP with Shell playing enter animation, jump-cut to
+            // the end of the enter animation and reschedule exitPip to run after enter-PiP
+            // has finished its transition and allowed the client to draw in PiP mode.
+            mPipTransitionController.end(() -> {
+                exitPip(animationDurationMs, requestEnterSplit);
+            });
+            return;
+        }
+
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "exitPip: %s, state=%s", mTaskInfo.topActivity, mPipTransitionState);
         final WindowContainerTransaction wct = new WindowContainerTransaction();

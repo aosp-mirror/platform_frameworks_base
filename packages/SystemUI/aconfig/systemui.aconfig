@@ -497,7 +497,7 @@ flag {
 }
 
 flag {
-    name: "screenshot_shelf_ui"
+    name: "screenshot_shelf_ui2"
     namespace: "systemui"
     description: "Use new shelf UI flow for screenshots"
     bug: "329659738"
@@ -773,6 +773,13 @@ flag {
     namespace: "systemui"
     description: "Glow bar indicator reveals upon keyboard docking."
     bug: "324600132"
+}
+
+flag {
+    name: "keyboard_shortcut_helper_rewrite"
+    namespace: "systemui"
+    description: "A new implementation of the keyboards shortcuts helper sheet."
+    bug: "327364197"
 }
 
 flag {

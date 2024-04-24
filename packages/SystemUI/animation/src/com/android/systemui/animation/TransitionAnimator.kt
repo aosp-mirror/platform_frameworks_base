@@ -59,6 +59,13 @@ class TransitionAnimator(private val timings: Timings, private val interpolators
                 1.0f
             )
         }
+
+        internal fun checkReturnAnimationFrameworkFlag() {
+            check(returnAnimationFrameworkLibrary()) {
+                "isLaunching cannot be false when the returnAnimationFrameworkLibrary flag is " +
+                    "disabled"
+            }
+        }
     }
 
     private val transitionContainerLocation = IntArray(2)
@@ -556,12 +563,6 @@ class TransitionAnimator(private val timings: Timings, private val interpolators
                 drawable.alpha = (alpha * 0xFF).roundToInt()
                 drawable.setXfermode(null)
             }
-        }
-    }
-
-    private fun checkReturnAnimationFrameworkFlag() {
-        check(returnAnimationFrameworkLibrary()) {
-            "isLaunching cannot be false when the returnAnimationFrameworkLibrary flag is disabled"
         }
     }
 }

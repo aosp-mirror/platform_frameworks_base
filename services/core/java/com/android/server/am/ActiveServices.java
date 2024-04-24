@@ -2422,8 +2422,6 @@ public final class ActiveServices {
                                     getTimeLimitedFgsType(foregroundServiceType);
                             final TimeLimitedFgsInfo fgsTypeInfo = fgsInfo.get(timeLimitedFgsType);
                             if (fgsTypeInfo != null) {
-                                // TODO(b/330399444): check to see if all time book-keeping for
-                                //  time limited types should use elapsedRealtime instead of uptime
                                 final long before24Hr = Math.max(0,
                                             SystemClock.elapsedRealtime() - (24 * 60 * 60 * 1000));
                                 final long lastTimeOutAt = fgsTypeInfo.getTimeLimitExceededAt();
@@ -3757,7 +3755,7 @@ public final class ActiveServices {
         }
 
         traceInstant("FGS start: ", sr);
-        final long nowUptime = SystemClock.uptimeMillis();
+        final long nowRealtime = SystemClock.elapsedRealtime();
 
         // Fetch/create/update the fgs info for the time-limited type.
         SparseArray<TimeLimitedFgsInfo> fgsInfo = mTimeLimitedFgsInfo.get(sr.appInfo.uid);
@@ -3768,10 +3766,10 @@ public final class ActiveServices {
         final int timeLimitedFgsType = getTimeLimitedFgsType(sr.foregroundServiceType);
         TimeLimitedFgsInfo fgsTypeInfo = fgsInfo.get(timeLimitedFgsType);
         if (fgsTypeInfo == null) {
-            fgsTypeInfo = sr.createTimeLimitedFgsInfo(nowUptime);
+            fgsTypeInfo = sr.createTimeLimitedFgsInfo(nowRealtime);
             fgsInfo.put(timeLimitedFgsType, fgsTypeInfo);
         }
-        fgsTypeInfo.setLastFgsStartTime(nowUptime);
+        fgsTypeInfo.setLastFgsStartTime(nowRealtime);
 
         // We'll cancel the previous ANR timer and start a fresh one below.
         mFGSAnrTimer.cancel(sr);
@@ -3845,14 +3843,14 @@ public final class ActiveServices {
                 final TimeLimitedFgsInfo fgsTypeInfo = fgsInfo.get(fgsType);
                 if (fgsTypeInfo != null) {
                     // Update total runtime for the time-limited fgs type and mark it as timed out.
-                    final long nowUptime = SystemClock.uptimeMillis();
+                    final long nowRealtime = SystemClock.elapsedRealtime();
                     fgsTypeInfo.updateTotalRuntime();
-                    fgsTypeInfo.setTimeLimitExceededAt(nowUptime);
+                    fgsTypeInfo.setTimeLimitExceededAt(nowRealtime);
 
                     logFGSStateChangeLocked(sr,
                             FOREGROUND_SERVICE_STATE_CHANGED__STATE__TIMED_OUT,
-                            nowUptime > fgsTypeInfo.getLastFgsStartTime()
-                                    ? (int) (nowUptime - fgsTypeInfo.getLastFgsStartTime()) : 0,
+                            nowRealtime > fgsTypeInfo.getLastFgsStartTime()
+                                    ? (int) (nowRealtime - fgsTypeInfo.getLastFgsStartTime()) : 0,
                             FGS_STOP_REASON_UNKNOWN,
                             FGS_TYPE_POLICY_CHECK_UNKNOWN,
                             FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA,

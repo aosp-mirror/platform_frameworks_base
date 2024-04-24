@@ -905,13 +905,11 @@ final class LetterboxUiController {
     // Note that we check the task rather than the parent as with ActivityEmbedding the parent might
     // be a TaskFragment, and its windowing mode is always MULTI_WINDOW, even if the task is
     // actually fullscreen.
-    private boolean isDisplayFullScreenAndInPosture(DeviceStateController.DeviceState state,
-            boolean isTabletop) {
+    private boolean isDisplayFullScreenAndInPosture(boolean isTabletop) {
         Task task = mActivityRecord.getTask();
-        return mActivityRecord.mDisplayContent != null
-                && mActivityRecord.mDisplayContent.getDisplayRotation().isDeviceInPosture(state,
-                    isTabletop)
-                && task != null
+        return mActivityRecord.mDisplayContent != null && task != null
+                && mActivityRecord.mDisplayContent.getDisplayRotation().isDeviceInPosture(
+                        DeviceStateController.DeviceState.HALF_FOLDED, isTabletop)
                 && task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
     }
 
@@ -939,16 +937,14 @@ final class LetterboxUiController {
     }
 
     private boolean isFullScreenAndBookModeEnabled() {
-        return isDisplayFullScreenAndInPosture(
-                DeviceStateController.DeviceState.HALF_FOLDED, false /* isTabletop */)
+        return isDisplayFullScreenAndInPosture(/* isTabletop */ false)
                 && mLetterboxConfiguration.getIsAutomaticReachabilityInBookModeEnabled();
     }
 
     float getVerticalPositionMultiplier(Configuration parentConfiguration) {
         // Don't check resolved configuration because it may not be updated yet during
         // configuration change.
-        boolean tabletopMode = isDisplayFullScreenAndInPosture(
-                DeviceStateController.DeviceState.HALF_FOLDED, true /* isTabletop */);
+        boolean tabletopMode = isDisplayFullScreenAndInPosture(/* isTabletop */ true);
         return isVerticalReachabilityEnabled(parentConfiguration)
                 // Using the last global dynamic position to avoid "jumps" when moving
                 // between apps or activities.
@@ -981,16 +977,15 @@ final class LetterboxUiController {
     }
 
     private boolean shouldUseSplitScreenAspectRatio(@NonNull Configuration parentConfiguration) {
-        final boolean isBookMode = isDisplayFullScreenAndInPosture(
-                DeviceStateController.DeviceState.HALF_FOLDED,
-                /* isTabletop */ false);
+        final boolean isBookMode = isDisplayFullScreenAndInPosture(/* isTabletop */ false);
         final boolean isNotCenteredHorizontally = getHorizontalPositionMultiplier(
                 parentConfiguration) != LETTERBOX_POSITION_MULTIPLIER_CENTER;
-        final boolean isTabletopMode = isDisplayFullScreenAndInPosture(
-                DeviceStateController.DeviceState.HALF_FOLDED,
-                /* isTabletop */ true);
+        final boolean isTabletopMode = isDisplayFullScreenAndInPosture(/* isTabletop */ true);
+        final boolean isLandscape = isFixedOrientationLandscape(
+                mActivityRecord.getOverrideOrientation());
+
         // Don't resize to split screen size when in book mode if letterbox position is centered
-        return ((isBookMode && isNotCenteredHorizontally) || isTabletopMode)
+        return (isBookMode && isNotCenteredHorizontally || isTabletopMode && isLandscape)
                     || isCameraCompatSplitScreenAspectRatioAllowed()
                         && isCameraCompatTreatmentActive();
     }
@@ -1647,17 +1642,13 @@ final class LetterboxUiController {
         if (isHorizontalReachabilityEnabled()) {
             int letterboxPositionForHorizontalReachability = getLetterboxConfiguration()
                     .getLetterboxPositionForHorizontalReachability(
-                            isDisplayFullScreenAndInPosture(
-                                    DeviceStateController.DeviceState.HALF_FOLDED,
-                                    false /* isTabletop */));
+                            isDisplayFullScreenAndInPosture(/* isTabletop */ false));
             positionToLog = letterboxHorizontalReachabilityPositionToLetterboxPosition(
                     letterboxPositionForHorizontalReachability);
         } else if (isVerticalReachabilityEnabled()) {
             int letterboxPositionForVerticalReachability = getLetterboxConfiguration()
                     .getLetterboxPositionForVerticalReachability(
-                            isDisplayFullScreenAndInPosture(
-                                    DeviceStateController.DeviceState.HALF_FOLDED,
-                                    true /* isTabletop */));
+                            isDisplayFullScreenAndInPosture(/* isTabletop */ true));
             positionToLog = letterboxVerticalReachabilityPositionToLetterboxPosition(
                     letterboxPositionForVerticalReachability);
         }

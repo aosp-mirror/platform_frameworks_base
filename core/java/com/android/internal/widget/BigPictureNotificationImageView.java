@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
@@ -126,11 +127,19 @@ public class BigPictureNotificationImageView extends ImageView implements
 
     private Drawable loadImage(Icon icon) {
         if (icon == null) return null;
+
         Drawable drawable = LocalImageResolver.resolveImage(icon, mContext, mMaximumDrawableWidth,
                 mMaximumDrawableHeight);
-        if (drawable == null) {
-            return icon.loadDrawable(mContext);
+        if (drawable != null) {
+            return drawable;
         }
-        return drawable;
+
+        drawable = icon.loadDrawable(mContext);
+        if (drawable != null) {
+            return drawable;
+        }
+
+        Log.e(TAG, "Couldn't load drawable for icon: " + icon);
+        return null;
     }
 }

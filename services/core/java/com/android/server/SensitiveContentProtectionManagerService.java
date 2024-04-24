@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.permission.flags.Flags.sensitiveContentImprovements;
+import static android.permission.flags.Flags.sensitiveContentMetricsBugfix;
 import static android.permission.flags.Flags.sensitiveNotificationAppProtection;
 import static android.provider.Settings.Global.DISABLE_SCREEN_SHARE_PROTECTIONS_FOR_APPS_AND_NOTIFICATIONS;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
@@ -93,7 +94,7 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
     private boolean mProjectionActive = false;
 
     private static class MediaProjectionSession {
-        private final int mUid;
+        private final int mUid; // UID of app that started projection session
         private final long mSessionId;
         private final boolean mIsExempted;
         private final ArraySet<String> mAllSeenNotificationKeys = new ArraySet<>();
@@ -320,6 +321,12 @@ public final class SensitiveContentProtectionManagerService extends SystemServic
             }
 
             mProjectionActive = true;
+
+            if (sensitiveContentMetricsBugfix()) {
+                mWindowManager.setBlockScreenCaptureForAppsSessionId(
+                        mMediaProjectionSession.mSessionId);
+            }
+
             if (sensitiveNotificationAppProtection()) {
                 updateAppsThatShouldBlockScreenCapture();
             }

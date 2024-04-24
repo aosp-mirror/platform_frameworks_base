@@ -24,7 +24,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
-import com.android.systemui.haptics.slider.SeekableSliderHapticPlugin
+import com.android.systemui.haptics.slider.SeekbarHapticPlugin
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.BrightnessMirrorController
@@ -93,7 +93,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
                 brightnessSliderView,
                 mFalsingManager,
                 uiEventLogger,
-                SeekableSliderHapticPlugin(vibratorHelper, systemClock),
+                SeekbarHapticPlugin(vibratorHelper, systemClock),
                 activityStarter,
             )
         mController.init()

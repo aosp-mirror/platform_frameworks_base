@@ -169,7 +169,6 @@ android_library {
         "androidx.compose.material_material-icons-extended",
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
-        "androidx.test.rules",
     ],
     libs: [
         "keepanno-annotations",
@@ -192,6 +191,7 @@ android_library {
     lint: {
         extra_check_modules: ["SystemUILintChecker"],
         warning_checks: ["MissingApacheLicenseDetector"],
+        baseline_filename: "lint-baseline.xml",
     },
 }
 
@@ -426,6 +426,7 @@ android_app {
     kotlincflags: ["-Xjvm-default=all"],
     optimize: {
         shrink_resources: false,
+        optimized_shrink_resources: false,
         proguard_flags_files: ["proguard.flags"],
     },
 
@@ -515,6 +516,7 @@ systemui_optimized_java_defaults {
                 optimize: true,
                 shrink: true,
                 shrink_resources: true,
+                optimized_shrink_resources: true,
                 ignore_warnings: false,
                 proguard_compatibility: false,
             },

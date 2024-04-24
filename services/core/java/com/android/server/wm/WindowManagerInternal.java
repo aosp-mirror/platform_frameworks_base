@@ -1044,6 +1044,13 @@ public abstract class WindowManagerInternal {
             int[] fromOrientations, int[] toOrientations);
 
     /**
+     * Set current screen capture session id that will be used during sensitive content protections.
+     *
+     * @param sessionId Session id for this screen capture protection
+     */
+    public abstract void setBlockScreenCaptureForAppsSessionId(long sessionId);
+
+    /**
      * Set whether screen capture should be disabled for all windows of a specific app windows based
      * on sensitive content protections.
      *

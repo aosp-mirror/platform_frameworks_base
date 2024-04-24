@@ -37,6 +37,15 @@ public interface DemoMode extends DemoModeCommandReceiver {
         return NO_COMMANDS;
     }
 
+    /** Something simple enough to be recognizable in dumpsys logs */
+    default String logName() {
+        if (this.getClass().isAnonymousClass()) {
+            return getClass().getName();
+        } else {
+            return getClass().getSimpleName();
+        }
+    }
+
     String ACTION_DEMO = "com.android.systemui.demo";
 
     String EXTRA_COMMAND = "command";

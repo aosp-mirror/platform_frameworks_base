@@ -631,6 +631,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
+        final WindowProcessController caller = mAtm.mProcessMap.getProcess(r.launchedFromPid);
+        if (caller != null && caller.mInstrumenting) {
+            return;
+        }
+
         final long diff = launchTime - lastLaunchTime;
         if (diff < RAPID_ACTIVITY_LAUNCH_MS) {
             mRapidActivityLaunchCount++;

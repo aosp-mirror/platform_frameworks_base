@@ -22,6 +22,8 @@ enum class SliderEventType {
     NOTHING,
     /* The slider has captured a touch input and is tracking touch events. */
     STARTED_TRACKING_TOUCH,
+    /* The slider started tracking programmatic value changes */
+    STARTED_TRACKING_PROGRAM,
     /* The slider progress is changing due to user touch input. */
     PROGRESS_CHANGE_BY_USER,
     /* The slider progress is changing programmatically. */
@@ -29,5 +31,5 @@ enum class SliderEventType {
     /* The slider has stopped tracking touch events. */
     STOPPED_TRACKING_TOUCH,
     /* The external (not touch) stimulus that was modifying the slider progress has stopped. */
-    ARROW_UP,
+    STOPPED_TRACKING_PROGRAM,
 }

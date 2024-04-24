@@ -288,13 +288,16 @@ public class BadgedImageView extends ConstraintLayout {
 
     /** Sets the position of the dot and badge, animating them out and back in if requested. */
     void animateDotBadgePositions(boolean onLeft) {
-        mOnLeft = onLeft;
-
-        if (onLeft != getDotOnLeft() && shouldDrawDot()) {
-            animateDotScale(0f /* showDot */, () -> {
-                invalidate();
-                animateDotScale(1.0f, null /* after */);
-            });
+        if (onLeft != getDotOnLeft()) {
+            if (shouldDrawDot()) {
+                animateDotScale(0f /* showDot */, () -> {
+                    mOnLeft = onLeft;
+                    invalidate();
+                    animateDotScale(1.0f, null /* after */);
+                });
+            } else {
+                mOnLeft = onLeft;
+            }
         }
         // TODO animate badge
         showBadge();
