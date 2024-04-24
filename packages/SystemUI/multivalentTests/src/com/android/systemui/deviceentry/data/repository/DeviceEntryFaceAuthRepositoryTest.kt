@@ -656,7 +656,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun authenticateFallbacksToDetectionWhenUserIsAlreadyTrustedByTrustManager() =
+    fun authenticateFallbacksToDetectionWhenKeyguardIsAlreadyDismissible() =
         testScope.runTest {
             whenever(faceManager.sensorPropertiesInternal)
                 .thenReturn(listOf(createFaceSensorProperties(supportsFaceDetection = true)))
@@ -665,7 +665,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             initCollectors()
             allPreconditionsToRunFaceAuthAreTrue()
 
-            trustRepository.setCurrentUserTrusted(true)
+            keyguardRepository.setKeyguardDismissible(true)
             assertThat(canFaceAuthRun()).isFalse()
             underTest.requestAuthenticate(
                 FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER,
