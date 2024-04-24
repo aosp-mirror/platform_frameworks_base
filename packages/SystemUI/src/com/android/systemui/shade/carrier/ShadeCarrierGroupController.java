@@ -199,7 +199,7 @@ public class ShadeCarrierGroupController {
 
         for (int i = 0; i < SIM_SLOTS; i++) {
             mInfos[i] = new CellSignalState(
-                    true,
+                    false,
                     R.drawable.ic_shade_no_calling_sms,
                     context.getText(AccessibilityContentDescriptions.NO_CALLING).toString(),
                     "",
