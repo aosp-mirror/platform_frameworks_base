@@ -33942,7 +33942,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return; // can't vote if not connected
         }
         float velocity = mFrameContentVelocity;
-        float frameRate = mPreferredFrameRate;
+        final float frameRate = mPreferredFrameRate;
         ViewParent parent = mParent;
         if (velocity <= 0 && Float.isNaN(frameRate)) {
             // The most common case is when nothing is set, so this special case is called
@@ -33982,13 +33982,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             if (velocityFrameRate > 0f || frameRate > 0f) {
                 int compatibility;
+                float frameRateToSet;
                 if (frameRate >= velocityFrameRate) {
                     compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                    frameRateToSet = frameRate;
                 } else {
                     compatibility = FRAME_RATE_COMPATIBILITY_GTE;
-                    frameRate = velocityFrameRate;
+                    frameRateToSet = velocityFrameRate;
                 }
-                viewRootImpl.votePreferredFrameRate(frameRate, compatibility);
+                viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
             }
         }
 
@@ -34052,7 +34054,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_VIEW_VELOCITY_API)
     public void setFrameContentVelocity(float pixelsPerSecond) {
-        if (viewVelocityApi()) {
+        if (mAttachInfo != null && mAttachInfo.mViewVelocityApi) {
             mFrameContentVelocity = Math.abs(pixelsPerSecond);
 
             if (sToolkitMetricsForFrameRateDecisionFlagValue) {
@@ -34070,8 +34072,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_VIEW_VELOCITY_API)
     public float getFrameContentVelocity() {
-        if (viewVelocityApi()) {
-            return (mFrameContentVelocity < 0f) ? 0f : mFrameContentVelocity;
+        if (mAttachInfo != null && mAttachInfo.mViewVelocityApi) {
+            return Math.max(mFrameContentVelocity, 0f);
         }
         return 0;
     }
