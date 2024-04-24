@@ -21,7 +21,7 @@
         android:viewportHeight="48">
 <path
     android:pathData="M2,22L302,22A2,2 0,0 1,304 24L304,24A2,2 0,0 1,302 26L2,26A2,2 0,0 1,0 24L0,24A2,2 0,0 1,2 22z"
-    android:fillColor="@color/brightness_slider_track"/>
+    android:fillColor="?androidprv:attr/customColorShadeInactive"/>
 <path
     android:pathData="M24,0L205.71,0A24,24 0,0 1,229.71 24L229.71,24A24,24 0,0 1,205.71 48L24,48A24,24 0,0 1,0 24L0,24A24,24 0,0 1,24 0z"
     android:fillColor="?attr/shadeActive"/>
