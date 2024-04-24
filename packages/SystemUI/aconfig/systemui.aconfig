@@ -497,7 +497,7 @@ flag {
 }
 
 flag {
-    name: "screenshot_shelf_ui"
+    name: "screenshot_shelf_ui2"
     namespace: "systemui"
     description: "Use new shelf UI flow for screenshots"
     bug: "329659738"
