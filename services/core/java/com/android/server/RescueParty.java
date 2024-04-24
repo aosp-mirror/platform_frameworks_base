@@ -494,10 +494,10 @@ public class RescueParty {
     private static void executeRescueLevelInternalOld(Context context, int level, @Nullable
             String failedPackage) throws Exception {
 
-        if (level <= LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS) {
-            // Disabling flag resets on master branch for trunk stable launch.
-            // TODO(b/287618292): Re-enable them after the trunk stable is launched and we
-            // figured out a way to reset flags without interfering with trunk development.
+        // Note: DeviceConfig reset is disabled currently and would be enabled using the flag,
+        // after we have figured out a way to reset flags without interfering with trunk
+        // development. TODO: b/287618292 For enabling flag resets.
+        if (!Flags.allowRescuePartyFlagResets() && level <= LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS) {
             return;
         }
 
@@ -572,12 +572,16 @@ public class RescueParty {
                 level, levelToString(level));
         switch (level) {
             case RESCUE_LEVEL_SCOPED_DEVICE_CONFIG_RESET:
-                // Temporary disable deviceConfig reset
-                // resetDeviceConfig(context, /*isScoped=*/true, failedPackage);
+                // Enable deviceConfig reset behind flag
+                if (Flags.allowRescuePartyFlagResets()) {
+                    resetDeviceConfig(context, /*isScoped=*/true, failedPackage);
+                }
                 break;
             case RESCUE_LEVEL_ALL_DEVICE_CONFIG_RESET:
-                // Temporary disable deviceConfig reset
-                // resetDeviceConfig(context, /*isScoped=*/false, failedPackage);
+                // Enable deviceConfig reset behind flag
+                if (Flags.allowRescuePartyFlagResets()) {
+                    resetDeviceConfig(context, /*isScoped=*/false, failedPackage);
+                }
                 break;
             case RESCUE_LEVEL_WARM_REBOOT:
                 executeWarmReboot(context, level, failedPackage);
