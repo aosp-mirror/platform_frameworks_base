@@ -2204,7 +2204,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
         @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
-        boolean mUseLegacyInsetsForStableBounds;
+        boolean mUseOverrideInsetsForStableBounds;
     }
 
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
@@ -2237,11 +2237,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             @NonNull Configuration parentConfig, @Nullable ConfigOverrideHint overrideHint) {
         DisplayInfo overrideDisplayInfo = null;
         ActivityRecord.CompatDisplayInsets compatInsets = null;
-        boolean useLegacyInsetsForStableBounds = false;
+        boolean useOverrideInsetsForStableBounds = false;
         if (overrideHint != null) {
             overrideDisplayInfo = overrideHint.mTmpOverrideDisplayInfo;
             compatInsets = overrideHint.mTmpCompatInsets;
-            useLegacyInsetsForStableBounds = overrideHint.mUseLegacyInsetsForStableBounds;
+            useOverrideInsetsForStableBounds = overrideHint.mUseOverrideInsetsForStableBounds;
             if (overrideDisplayInfo != null) {
                 // Make sure the screen related configs can be computed by the provided
                 // display info.
@@ -2321,7 +2321,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // The non decor inset are areas that could never be removed in Honeycomb. See
                 // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
                 calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, mTmpFullBounds, di,
-                        useLegacyInsetsForStableBounds);
+                        useOverrideInsetsForStableBounds);
             } else {
                 // Apply the given non-decor and stable insets to calculate the corresponding bounds
                 // for screen size of configuration.

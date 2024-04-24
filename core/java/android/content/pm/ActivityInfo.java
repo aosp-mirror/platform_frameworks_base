@@ -1548,6 +1548,26 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long INSETS_DECOUPLED_CONFIGURATION_ENFORCED = 151861875L;
 
     /**
+     * When enabled, the activity will receive configuration decoupled from system bar insets.
+     *
+     * <p>This will only apply if the activity is targeting SDK level 34 or earlier versions.
+     *
+     * <p>This will only in effect if the device is trying to provide a different value by default
+     * other than the legacy value, i.e., the
+     * {@code Flags.allowsScreenSizeDecoupledFromStatusBarAndCutout()} is set to true.
+     *
+     * <p>If the {@code Flags.insetsDecoupledConfiguration()} is also set to true, all apps
+     * targeting SDK level 35 or later, and apps with this override flag will receive the insets
+     * decoupled configuration.
+     *
+     * @hide
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    public static final long OVERRIDE_ENABLE_INSETS_DECOUPLED_CONFIGURATION = 327313645L;
+
+    /**
      * Optional set of a certificates identifying apps that are allowed to embed this activity. From
      * the "knownActivityEmbeddingCerts" attribute.
      */
