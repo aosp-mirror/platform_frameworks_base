@@ -25,7 +25,6 @@ import com.android.server.notification.Flags.vibrateWhileUnlocked
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.communalHub
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
@@ -53,7 +52,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
-        SceneContainerFlag.getMainAconfigFlag() dependsOn MIGRATE_KEYGUARD_STATUS_BAR_VIEW
 
         // ComposeLockscreen dependencies
         ComposeLockscreen.token dependsOn KeyguardBottomAreaRefactor.token
