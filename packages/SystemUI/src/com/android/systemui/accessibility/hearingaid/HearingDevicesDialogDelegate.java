@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.Visibility;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -208,6 +209,10 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         }
         mMainHandler.post(() -> {
             mDeviceListAdapter.refreshDeviceItemList(mHearingDeviceItemList);
+            final List<BluetoothHapPresetInfo> presetInfos =
+                    mPresetsController.getAllPresetInfo();
+            final int activePresetIndex = mPresetsController.getActivePresetIndex();
+            refreshPresetInfoAdapter(presetInfos, activePresetIndex);
             mPresetSpinner.setVisibility(
                     (activeHearingDevice != null && !mPresetInfoAdapter.isEmpty()) ? VISIBLE
                             : GONE);
@@ -295,10 +300,23 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
                 mHearingDeviceItemList);
         mPresetsController.setActiveHearingDevice(activeHearingDevice);
 
-        mPresetInfoAdapter = new ArrayAdapter<>(dialog.getContext(),
-                android.R.layout.simple_spinner_dropdown_item);
-        mPresetInfoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mPresetInfoAdapter = new ArrayAdapter<String>(dialog.getContext(),
+                R.layout.hearing_devices_preset_spinner_selected,
+                R.id.hearing_devices_preset_option_text);
+        mPresetInfoAdapter.setDropDownViewResource(
+                R.layout.hearing_devices_preset_dropdown_item);
         mPresetSpinner.setAdapter(mPresetInfoAdapter);
+
+        // disable redundant Touch & Hold accessibility action for Switch Access
+        mPresetSpinner.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(@NonNull View host,
+                    @NonNull AccessibilityNodeInfo info) {
+                info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
+                super.onInitializeAccessibilityNodeInfo(host, info);
+            }
+        });
+
         mPresetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

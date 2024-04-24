@@ -1768,10 +1768,10 @@
     <dimen name="bluetooth_dialog_scroll_view_min_height_with_auto_on">350dp</dimen>
 
     <!-- Hearing devices dialog related dimensions -->
+    <dimen name="hearing_devices_layout_margin">12dp</dimen>
     <dimen name="hearing_devices_preset_spinner_height">72dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_margin">24dp</dimen>
     <dimen name="hearing_devices_preset_spinner_text_padding_start">20dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_text_padding_end">80dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_text_padding_vertical">15dp</dimen>
     <dimen name="hearing_devices_preset_spinner_arrow_size">24dp</dimen>
     <dimen name="hearing_devices_preset_spinner_background_radius">28dp</dimen>
 

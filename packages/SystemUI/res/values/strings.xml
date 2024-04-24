@@ -911,8 +911,10 @@
     <string name="quick_settings_pair_hearing_devices">Pair new device</string>
     <!-- QuickSettings: Content description of the hearing devices dialog pair new device [CHAR LIMIT=NONE] -->
     <string name="accessibility_hearing_device_pair_new_device">Click to pair new device</string>
-    <!-- Message when selecting hearing aids presets failed. [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Message when selecting hearing aids presets failed. [CHAR LIMIT=NONE] -->
     <string name="hearing_devices_presets_error">Couldn\'t update preset</string>
+    <!-- QuickSettings: Title for hearing aids presets. Preset is a set of hearing aid settings. User can apply different settings in different environments (e.g. Outdoor, Restaurant, Home) [CHAR LIMIT=40]-->
+    <string name="hearing_devices_preset_label">Preset</string>
 
     <!--- Title of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=150] -->
     <string name="sensor_privacy_start_use_mic_dialog_title">Unblock device microphone?</string>
