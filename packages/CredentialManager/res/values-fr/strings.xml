@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Utiliser votre clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Utiliser votre mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Utiliser votre compte pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Utiliser le verrouillage de l\'écran pour se connecter à <xliff:g id="APP_NAME">%1$s</xliff:g> avec <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Déverrouiller les options de connexion pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Choisir une clé d\'accès enregistrée pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Choisir un mot de passe enregistré pour <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
