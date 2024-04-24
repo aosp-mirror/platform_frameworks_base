@@ -85,6 +85,7 @@ constructor(
             onDismissalRequested = { event, velocity -> requestDismissal(event, velocity) },
             onDismissalCancelled = { animationController.getSwipeReturnAnimation().start() }
         )
+        view.updateInsets(windowManager.currentWindowMetrics.windowInsets)
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         debugLog(DEBUG_WINDOW) { "adding OnComputeInternalInsetsListener" }
@@ -106,7 +107,9 @@ constructor(
         isPendingSharedTransition = false
         viewModel.reset()
     }
-    override fun updateInsets(insets: WindowInsets) {}
+    override fun updateInsets(insets: WindowInsets) {
+        view.updateInsets(insets)
+    }
     override fun updateOrientation(insets: WindowInsets) {}
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
