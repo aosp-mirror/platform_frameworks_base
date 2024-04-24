@@ -881,7 +881,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Teisalda üles paremale"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Teisalda alla vasakule"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Teisalda alla paremale"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Teisalda serva ja kuva"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Teisalda serva ja peida"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Teisalda servast eemale ja kuva"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Eemalda"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"lülita"</string>
@@ -1063,7 +1063,7 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Kuva kõik"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Võrkude vahetamiseks katkestage Etherneti-ühendus"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Seadme kasutuskogemuse parandamiseks võivad rakendused ja teenused siiski alati otsida WiFi-võrke isegi siis, kui WiFi on väljas. Seda saab muuta WiFi-skannimise seadetes. "<annotation id="link">"Muuda"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Lennureżiimi väljalülitamine"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Lülita lennukireżiim välja"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> soovib kiirseadetesse lisada järgmise paani"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Lisa paan"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ära lisa paani"</string>
@@ -1124,7 +1124,7 @@
     <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Vähemalt üks seade on saadaval"</string>
     <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Valige märkmete tegemise vaikerakendus, et kasutada märkmete tegemise otseteed"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Valige rakendus"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pikalt puudutamise otsetee"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Puudutage otseteed pikalt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Tühista"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Vaheta ekraane kohe"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Telefoni lahtivoltimine"</string>

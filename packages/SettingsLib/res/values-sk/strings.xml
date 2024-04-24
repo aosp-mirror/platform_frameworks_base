@@ -136,7 +136,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Použiť pre vstup"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Použiť pre načúvadlá"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Používať s profilom LE_AUDIO"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Párovať"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Spárovať"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"PÁROVAŤ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Zrušiť"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Párovaním udelíte zariadeniam po pripojení prístup k svojim kontaktom a histórii hovorov."</string>
@@ -476,7 +476,7 @@
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Nabíja sa"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Rýchle nabíjanie"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Pomalé nabíjanie"</string>
-    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Nabíja sa bezdrôtovo"</string>
+    <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Bezdrôtové nabíjanie"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Nabíja sa"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Nenabíja sa"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Pripojené, nenabíja sa"</string>
@@ -528,7 +528,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Budíky a pripomenutia"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Povoliť nastavovanie budíkov a pripomenutí"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Budíky a pripomenutia"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Povoľte tejto aplikácii nastavovať budíky a plánovať akcie s časovým obmedzením. Aplikácii to umožní pracovať na pozadí, čo môže zvýšiť spotrebu batérie.\n\nAk je toto povolenie vypnuté, existujúce budíky a udalosti s časovým obmedzením naplánované touto aplikáciu nebudú fungovať."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Povoľte tejto aplikácii nastavovať budíky a plánovať akcie s časovým obmedzením. Aplikácii to umožní pracovať na pozadí, čo môže zvýšiť spotrebu batérie.\n\nAk je toto povolenie vypnuté, existujúce budíky a udalosti s časovým obmedzením naplánované touto aplikáciou nebudú fungovať."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"plán, budík, pripomenutie, hodiny"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Zapnúť"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Zapnite režim bez vyrušení"</string>

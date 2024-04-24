@@ -209,7 +209,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"အ​ကြောင်းကြားစာအကွက်"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"အမြန်လုပ် အပြင်အဆင်"</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"‘အမြန်ဆက်တင်များ’ နှင့် ‘အကြောင်းကြားစာအကွက်’။"</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"မျက်နှာပြင် သော့ပိတ်ရန်"</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"အလုပ်သုံး လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"ပိတ်ရန်"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"လုံးဝ အသံပိတ်ထားရန်"</string>
@@ -501,7 +501,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"အက်ပ်ကို ပင်ဖြုတ်လိုက်သည်"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"ဖုန်းခေါ်ရန်"</string>
     <string name="stream_system" msgid="7663148785370565134">"စနစ်"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"အသံမြည်စေသည်"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"ဖုန်းမြည်သံ"</string>
     <string name="stream_music" msgid="2188224742361847580">"မီဒီယာ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"နှိုးစက်"</string>
     <string name="stream_notification" msgid="7930294049046243939">"အကြောင်းကြားချက်"</string>
@@ -510,7 +510,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"အများသုံးနိုင်မှု"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"အသံမြည်သည်"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"တုန်ခါသည်"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံတိတ်သည်"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"အသံပိတ်ရန်"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s။ အသံပြန်ဖွင့်ရန် တို့ပါ။"</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
@@ -576,7 +576,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;အခြေအနေ-&lt;/b&gt; အဆင့်လျှော့ထားသည်"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင် ပြ၍ လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ် ပြသည်"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင် ပြ၍ လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ် ပြကာ ပူဖောင်းကွက်အဖြစ် မြင်ရသည်"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းနှင့် ပရိုဖိုင်ပုံအဖြစ် လော့ခ်မျက်နှာပြင်တွင် ပြသည်။ ပူဖောင်းကွက်အဖြစ် မြင်ရပြီး ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းတွင်နှင့် လော့ခ်မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံအဖြစ်  ပြသည်။ ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"စကားဝိုင်း အကြောင်းကြားချက်များ၏ ထိပ်ပိုင်းနှင့် ပရိုဖိုင်ပုံအဖြစ် လော့ခ်မျက်နှာပြင်တွင် ပြသည်။ ပူဖောင်းကွက်အဖြစ် မြင်ရပြီး ‘မနှောင့်ယှက်ရ’ ကို ကြားဖြတ်သည်"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ဦးစားပေး"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> က စကားဝိုင်းဝန်ဆောင်မှုများကို မပံ့ပိုးပါ"</string>
@@ -758,7 +758,7 @@
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ဆက်တင်များ၏ အစီအစဉ်ကို တည်းဖြတ်ပါ။"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ပါဝါမီနူး"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်ချထားချိန် မျက်နှာပြင်"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"သင့်စက်ကို ပလတ်ဖြုတ်ပါ"</string>
@@ -998,7 +998,7 @@
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"သိမ်း၍မရပါ။"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"အနည်းဆုံး အက္ခရာ ၄ လုံး သုံးရန်"</string>
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"အက္ခရာ <xliff:g id="LENGTH">%1$d</xliff:g> လုံးအောက် သုံးရန်"</string>
-    <string name="build_number_clip_data_label" msgid="3623176728412560914">"တည်ဆောက်မှုနံပါတ်"</string>
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"တည်ဆောက်ပုံအမှတ်"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"တည်ဆောက်မှုနံပါတ်ကို ကလစ်ဘုတ်သို့ မိတ္တူကူးပြီးပါပြီ။"</string>
     <string name="basic_status" msgid="2315371112182658176">"စကားဝိုင်းကို ဖွင့်ရန်"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"စကားဝိုင်း ဝိဂျက်များ"</string>

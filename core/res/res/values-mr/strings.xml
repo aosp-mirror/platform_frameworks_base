@@ -594,7 +594,7 @@
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अ‍ॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"स्क्रीन लॉक क्लिष्टतेची विनंती करा"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"अ‍ॅपला स्क्रीन लॉक क्लिष्टता पातळी (उच्च, मध्यम, खालची किंवा काहीही नाही) जाणून घेऊ देते, जी लांबीची संभाव्य रेंज आणि स्क्रीन लॉकचा प्रकार सूचित करते. अ‍ॅप वापरकर्त्यांना असेदेखील सुचवू शकते की त्यांनी स्क्रीन लॉक ठरावीक पातळीपर्यंत अपडेट करावे, परंतु वापरकर्ते त्याकडे मोकळेपणाने दुर्लक्ष करू शकतात आणि तेथून नेव्हिगेट करू शकतात. स्क्रीन लॉक प्लेनटेक्स्टमध्ये स्टोअर केले जात नसल्यामुळे अ‍ॅपला नेमका पासवर्ड माहीत नसतो याची नोंद घ्या."</string>
-    <string name="permlab_postNotification" msgid="4875401198597803658">"सूचना दाखवा"</string>
+    <string name="permlab_postNotification" msgid="4875401198597803658">"नोटिफिकेशन दाखवा"</string>
     <string name="permdesc_postNotification" msgid="5974977162462877075">"ॲपला सूचना दाखवू देते"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"स्क्रीन सुरू करा"</string>
     <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"अ‍ॅपला स्क्रीन सुरू करण्याची परवानगी देते."</string>
@@ -1732,7 +1732,7 @@
     <string name="owner_name" msgid="8713560351570795743">"मालक"</string>
     <string name="guest_name" msgid="8502103277839834324">"अतिथी"</string>
     <string name="error_message_title" msgid="4082495589294631966">"एरर"</string>
-    <string name="error_message_change_not_allowed" msgid="843159705042381454">"या बदलास आपल्या प्रशासकाद्वारे अनुमती नाही"</string>
+    <string name="error_message_change_not_allowed" msgid="843159705042381454">"या बदलासाठी तुमच्या अ‍ॅडमिनची अनुमती नाही"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ही क्रिया हाताळण्यासाठी कोणताही ॲप्लिकेशन आढळला नाही"</string>
     <string name="revoke" msgid="5526857743819590458">"मागे घ्‍या"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>

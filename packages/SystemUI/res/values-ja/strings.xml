@@ -153,7 +153,7 @@
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN が正しくありません"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"パターンが正しくありません"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"パスワードが正しくありません"</string>
-    <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"間違えた回数が上限を超えました。\n<xliff:g id="NUMBER">%d</xliff:g> 秒後にもう一度お試しください。"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"試行回数が上限に達しました。\n<xliff:g id="NUMBER">%d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"もう一度お試しください。入力回数: <xliff:g id="ATTEMPTS_0">%1$d</xliff:g>/<xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g> 回"</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"データが削除されます"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"パターンをあと 1 回間違えると、このデバイスのデータが削除されます。"</string>
@@ -404,7 +404,7 @@
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"共有、録画、キャスト中は、画面に表示される内容やデバイスで再生される内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"アプリの共有、録画、キャスト中は、そのアプリで表示または再生される内容に <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"開始"</string>
-    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"キャスト開始しますか？"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"キャストを開始しますか？"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"キャスト中は、画面に表示される内容やデバイスで再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"アプリのキャスト中は、そのアプリで表示または再生される内容に Android がアクセスできるため、パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"キャストを開始"</string>
@@ -499,7 +499,7 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"アプリを固定しました"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"アプリの固定を解除しました"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"発信"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"通話"</string>
     <string name="stream_system" msgid="7663148785370565134">"システム"</string>
     <string name="stream_ring" msgid="7550670036738697526">"着信音"</string>
     <string name="stream_music" msgid="2188224742361847580">"メディア"</string>
@@ -565,7 +565,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"サイレント"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"デフォルト"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"自動"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"着信音もバイブレーションも無効になります"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"着信音もバイブレーションも OFF になります"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"着信音もバイブレーションも無効になり会話セクションの下に表示されます"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"デバイスの設定を基に着信音またはバイブレーションが有効になります"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"デバイスの設定を基に着信音またはバイブレーションが有効になります。デフォルトでは <xliff:g id="APP_NAME">%1$s</xliff:g> からの会話がふきだしで表示されます。"</string>
@@ -663,8 +663,8 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"画面をロック"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"クイックメモのためにメモアプリを表示"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"システム マルチタスク"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"分割画面にして現在のアプリを右側に設定"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"分割画面にして現在のアプリを左側に設定"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"分割画面にして現在のアプリを右側に配置"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"分割画面にして現在のアプリを左側に配置"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"分割画面から全画面に切り替え"</string>
     <string name="system_multitasking_replace" msgid="844285282472557186">"分割画面中: アプリを順に置換"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"入力"</string>

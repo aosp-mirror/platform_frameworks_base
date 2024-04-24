@@ -102,7 +102,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktyvus, tik kairysis"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktyvus, tik dešinysis"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktyvus, kairysis ir dešinysis"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Laikmenos garsas"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Medijos garsas"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefono skambučiai"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Failo perkėlimas"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Įvesties įrenginys"</string>
@@ -528,7 +528,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Signalai ir priminimai"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Leisti nustatyti signalus ir priminimus"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Signalai ir priminimai"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Leisti šiai programai nustatyti signalus ir suplanuoti veiksmus, kuriems svarbus laiko veiksnys. Dėl to programa gali veikti fone ir sunaudoti daugiau akumuliatoriaus energijos.\n\nJei šis leidimas išjungtas, šios programos suplanuoti esami signalai ir laiku pagrįsti įvykiai neveiks."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Leiskite šiai programai nustatyti signalus ir suplanuoti veiksmus, kuriems svarbus laiko veiksnys. Dėl to programa gali veikti fone ir sunaudoti daugiau akumuliatoriaus energijos.\n\nJei šis leidimas išjungtas, šios programos suplanuoti esami signalai ir laiku pagrįsti įvykiai neveiks."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"tvarkaraštis, signalas, priminimas, laikrodis"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Įjungti"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Netrukdymo režimo įjungimas"</string>

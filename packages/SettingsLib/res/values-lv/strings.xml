@@ -136,7 +136,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Izmantot ievadei"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"Izmantot dzirdes aparātiem"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Izmantot LE_AUDIO profilam"</string>
-    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Izveidot pāri"</string>
+    <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Savienot pārī"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SAVIENOT PĀRĪ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Atcelt"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Veicot savienošanu pārī, šī ierīce savienojuma laikā varēs piekļūt jūsu kontaktpersonām un zvanu vēsturei."</string>
@@ -455,7 +455,7 @@
     <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"Ņemot vērā lietojumu, darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="4113180890060388350">"Darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="5883041507426914446">"līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Iespējams, akumulators izlādēsies līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Atlicis: mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Atlicis: mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -487,7 +487,7 @@
     <string name="disabled" msgid="8017887509554714950">"Atspējots"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Atļauts"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nav atļauts"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalēt nez. lietotnes"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Nezināmu lietotņu instalēšana"</string>
     <string name="home" msgid="973834627243661438">"Iestatījumu sākumekrāns"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -514,7 +514,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"IMS reģistrācijas statuss"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Reģistrēts"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Nav reģistrēts"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Nepieejams"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Nepieejama"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC ir atlasīts nejaušā secībā"</string>
     <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{Nav pievienota neviena ierīce}=1{Pievienota viena ierīce}zero{Pievienotas # ierīces}one{Pievienota # ierīce}other{Pievienotas # ierīces}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Vairāk laika."</string>
@@ -611,7 +611,7 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Noņemt"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Notiek viesa sesijas atiestatīšana…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vai atiestatīt viesa sesiju?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tādējādi tiks sākta jauna viesa sesijas un visas pašreizējās sesijas lietotnes un dati tiks dzēsti"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Tādējādi tiks sākta jauna viesa sesija un visas pašreizējās sesijas lietotnes un dati tiks dzēsti"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vai iziet no viesa režīma?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Tādējādi tiks dzēstas pašreizējās viesa sesijas lietotnes un dati."</string>
     <string name="grant_admin" msgid="4323199171790522574">"Jā, iestatīt kā administratoru"</string>

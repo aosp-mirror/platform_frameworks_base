@@ -502,7 +502,7 @@
     <string name="stream_voice_call" msgid="7468348170702375660">"Chiamata"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Suoneria"</string>
-    <string name="stream_music" msgid="2188224742361847580">"Supporti multimediali"</string>
+    <string name="stream_music" msgid="2188224742361847580">"Contenuti multimediali"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Sveglia"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notifica"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
@@ -881,7 +881,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Sposta in alto a destra"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Sposta in basso a sinistra"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Sposta in basso a destra"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Sposta fino a bordo e nascondi"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Sposta fino al bordo e nascondi"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Sposta fuori da bordo e mostra"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Rimuovi"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"attiva/disattiva"</string>

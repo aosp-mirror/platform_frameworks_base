@@ -234,7 +234,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Isikrini sikhiyelwe ngomumo we-landscape."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Isikrini sikhiyelwe ngomumo we-portrait."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Isikhwama soswidi"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Isigcini sihenqo"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Isigciniskrini"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"I-Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ungaphazamisi"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"I-Bluetooth"</string>
@@ -877,11 +877,11 @@
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Hlehlisa"</string>
     <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Isinqamuleli se-<xliff:g id="FEATURE_NAME">%s</xliff:g> sisusiwe"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Isinqamuleli esingu-# sisusiwe}one{Izinqamuleli ezingu-# zisusiwe}other{Izinqamuleli ezingu-# zisusiwe}}"</string>
-    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Hamba phezulu kwesokunxele"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Hambisa phezulu kwesokunxele"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Hamba phezulu ngakwesokudla"</string>
-    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Hamba phansi ngakwesokunxele"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Hamba phansi ngakwesokudla"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Hamba onqenqemeni ufihle"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Hambisa phansi ngakwesokunxele"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Hambisa phansi ngakwesokudla"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Hambisa onqenqemeni ufihle"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Phuma onqenqemeni ubonise"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Susa"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"guqula"</string>

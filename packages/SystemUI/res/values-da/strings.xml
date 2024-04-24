@@ -501,14 +501,14 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Appen er frigjort"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Ring op"</string>
     <string name="stream_system" msgid="7663148785370565134">"System"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Ring"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Ringetone"</string>
     <string name="stream_music" msgid="2188224742361847580">"Medie"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarm"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notifikation"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Tonesignalfrekvens (DTMF)"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Hjælpefunktioner"</string>
-    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ring"</string>
+    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Ringetone"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Vibration"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Slå lyden fra"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tryk for at slå lyden til."</string>
@@ -1029,7 +1029,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Indhold dukker snart op"</string>
     <string name="missed_call" msgid="4228016077700161689">"Ubesvaret opkald"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Se dine seneste beskeder, mistede opkald og statusopdateringer"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Se dine seneste beskeder, ubesvarede opkald og statusopdateringer"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Samtale"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Sat på pause af Forstyr ikke"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> har sendt en besked: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
