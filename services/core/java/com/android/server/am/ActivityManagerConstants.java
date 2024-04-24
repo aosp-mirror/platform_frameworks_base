@@ -2473,6 +2473,9 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  "); pw.print(KEY_PSS_TO_RSS_THRESHOLD_MODIFIER);
         pw.print("="); pw.println(PSS_TO_RSS_THRESHOLD_MODIFIER);
 
+        pw.print("  "); pw.print(KEY_MAX_PREVIOUS_TIME);
+        pw.print("="); pw.println(MAX_PREVIOUS_TIME);
+
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
             pw.print("  mOverrideMaxCachedProcesses="); pw.println(mOverrideMaxCachedProcesses);
