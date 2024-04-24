@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.controls.shared.model
+package com.android.systemui.statusbar.notification.collection.provider
 
-/** Models any type of media. */
-sealed class MediaCommonModel {
-    data class MediaControl(
-        val mediaLoadedModel: MediaDataLoadingModel.Loaded,
-        val canBeRemoved: Boolean = false,
-    ) : MediaCommonModel()
+import com.android.systemui.kosmos.Kosmos
 
-    data class MediaRecommendations(val recsLoadingModel: SmartspaceMediaLoadingModel) :
-        MediaCommonModel()
-}
+val Kosmos.visualStabilityProvider by Kosmos.Fixture { VisualStabilityProvider() }

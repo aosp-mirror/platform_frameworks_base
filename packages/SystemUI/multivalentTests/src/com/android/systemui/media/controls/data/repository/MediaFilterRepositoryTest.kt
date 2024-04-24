@@ -267,6 +267,35 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
                 .inOrder()
         }
 
+    @Test
+    fun loadMediaFromRec() =
+        testScope.runTest {
+            val isMediaFromRec by collectLastValue(underTest.isMediaFromRec)
+            val instanceId1 = InstanceId.fakeInstanceId(123)
+            val instanceId2 = InstanceId.fakeInstanceId(456)
+            val data =
+                MediaData(
+                    active = true,
+                    instanceId = instanceId1,
+                    packageName = PACKAGE_NAME,
+                    isPlaying = true
+                )
+            val newData = MediaData(active = true, instanceId = instanceId2)
+
+            assertThat(isMediaFromRec).isFalse()
+
+            underTest.setMediaFromRecPackageName(PACKAGE_NAME)
+            underTest.addSelectedUserMediaEntry(data)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId1))
+
+            assertThat(isMediaFromRec).isTrue()
+
+            underTest.addSelectedUserMediaEntry(newData)
+            underTest.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId2))
+
+            assertThat(isMediaFromRec).isFalse()
+        }
+
     private fun createMediaData(
         app: String,
         playing: Boolean,
@@ -288,5 +317,6 @@ class MediaFilterRepositoryTest : SysuiTestCase() {
         private const val REMOTE = MediaData.PLAYBACK_CAST_LOCAL
         private const val KEY = "KEY"
         private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
+        private const val PACKAGE_NAME = "com.android.example"
     }
 }

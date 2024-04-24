@@ -133,6 +133,9 @@ constructor(
                 initialValue = emptyList(),
             )
 
+    /** Whether the current change in media was done by clicking on a recommendation */
+    val isMediaFromRec: StateFlow<Boolean> = mediaFilterRepository.isMediaFromRec
+
     override fun start() {
         if (!mediaFlags.isMediaControlsRefactorEnabled()) {
             return

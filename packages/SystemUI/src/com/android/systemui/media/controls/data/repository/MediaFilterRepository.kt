@@ -72,6 +72,11 @@ class MediaFilterRepository @Inject constructor(private val systemClock: SystemC
     val sortedMedia: StateFlow<Map<MediaSortKeyModel, MediaCommonModel>> =
         _sortedMedia.asStateFlow()
 
+    private val _isMediaFromRec: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isMediaFromRec: StateFlow<Boolean> = _isMediaFromRec.asStateFlow()
+
+    private var mediaFromRecPackageName: String? = null
+
     fun addMediaEntry(key: String, data: MediaData) {
         val entries = LinkedHashMap<String, MediaData>(_allUserEntries.value)
         entries[key] = data
@@ -161,6 +166,12 @@ class MediaFilterRepository @Inject constructor(private val systemClock: SystemC
                 )
 
             if (mediaDataLoadingModel is MediaDataLoadingModel.Loaded) {
+                val isMediaFromRec = isMediaFromRec(it)
+
+                _isMediaFromRec.value = isMediaFromRec
+                if (isMediaFromRec) {
+                    mediaFromRecPackageName = null
+                }
                 sortedMap[sortKey] =
                     MediaCommonModel.MediaControl(mediaDataLoadingModel, canBeRemoved(it))
             }
@@ -195,7 +206,15 @@ class MediaFilterRepository @Inject constructor(private val systemClock: SystemC
         _sortedMedia.value = sortedMap
     }
 
+    fun setMediaFromRecPackageName(packageName: String) {
+        mediaFromRecPackageName = packageName
+    }
+
     private fun canBeRemoved(data: MediaData): Boolean {
         return data.isPlaying?.let { !it } ?: data.isClearable && !data.active
+    }
+
+    private fun isMediaFromRec(data: MediaData): Boolean {
+        return data.isPlaying == true && mediaFromRecPackageName == data.packageName
     }
 }
