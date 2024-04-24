@@ -46,7 +46,6 @@ import android.content.res.Configuration;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.widget.Toast;
 
@@ -56,7 +55,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.UiThread;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -100,7 +98,8 @@ final class DisplayRotationCompatPolicy {
     // camera id by a package name when determining rotation; 2) get a package name by a camera id
     // when camera connection is closed and we need to clean up our records.
     @GuardedBy("this")
-    private final CameraIdPackageNameBiMap mCameraIdPackageBiMap = new CameraIdPackageNameBiMap();
+    private final CameraIdPackageNameBiMapping mCameraIdPackageBiMap =
+            new CameraIdPackageNameBiMapping();
     @GuardedBy("this")
     private final Set<String> mScheduledToBeRemovedCameraIdSet = new ArraySet<>();
     @GuardedBy("this")
@@ -515,55 +514,5 @@ final class DisplayRotationCompatPolicy {
             return false;
         }
         return topActivity.mLetterboxUiController.isRefreshAfterRotationRequested();
-    }
-
-    private static class CameraIdPackageNameBiMap {
-
-        private final Map<String, String> mPackageToCameraIdMap = new ArrayMap<>();
-        private final Map<String, String> mCameraIdToPackageMap = new ArrayMap<>();
-
-        boolean isEmpty() {
-            return mCameraIdToPackageMap.isEmpty();
-        }
-
-        void put(String packageName, String cameraId) {
-            // Always using the last connected camera ID for the package even for the concurrent
-            // camera use case since we can't guess which camera is more important anyway.
-            removePackageName(packageName);
-            removeCameraId(cameraId);
-            mPackageToCameraIdMap.put(packageName, cameraId);
-            mCameraIdToPackageMap.put(cameraId, packageName);
-        }
-
-        boolean containsPackageName(String packageName) {
-            return mPackageToCameraIdMap.containsKey(packageName);
-        }
-
-        @Nullable
-        String getCameraId(String packageName) {
-            return mPackageToCameraIdMap.get(packageName);
-        }
-
-        void removeCameraId(String cameraId) {
-            String packageName = mCameraIdToPackageMap.get(cameraId);
-            if (packageName == null) {
-                return;
-            }
-            mPackageToCameraIdMap.remove(packageName, cameraId);
-            mCameraIdToPackageMap.remove(cameraId, packageName);
-        }
-
-        String getSummaryForDisplayRotationHistoryRecord() {
-            return "{ mPackageToCameraIdMap=" + mPackageToCameraIdMap + " }";
-        }
-
-        private void removePackageName(String packageName) {
-            String cameraId = mPackageToCameraIdMap.get(packageName);
-            if (cameraId == null) {
-                return;
-            }
-            mPackageToCameraIdMap.remove(packageName, cameraId);
-            mCameraIdToPackageMap.remove(cameraId, packageName);
-        }
     }
 }
