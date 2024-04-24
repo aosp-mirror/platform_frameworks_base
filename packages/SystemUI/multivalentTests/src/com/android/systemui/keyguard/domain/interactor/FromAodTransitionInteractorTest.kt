@@ -36,7 +36,6 @@ import android.os.PowerManager
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.internal.widget.lockPatternUtils
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -54,16 +53,15 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
-import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 
@@ -93,6 +91,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         // Transition to AOD and set the power interactor asleep.
         powerInteractor.setAsleepForTest()
         runBlocking {
+            kosmos.fakeKeyguardRepository.setKeyguardShowing(false)
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.AOD,
@@ -108,7 +107,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     fun testTransitionToLockscreen_onWakeup() =
         testScope.runTest {
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // Under default conditions, we should transition to LOCKSCREEN when waking up.
             assertThat(transitionRepository)
@@ -124,7 +123,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.keyguardOcclusionRepository.setShowWhenLockedActivityInfo(true)
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // Waking with a SHOW_WHEN_LOCKED activity on top should transition to OCCLUDED.
             assertThat(transitionRepository)
@@ -140,7 +139,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             powerInteractor.onCameraLaunchGestureDetected()
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // We should head back to GONE since we started there.
             assertThat(transitionRepository)
@@ -154,7 +153,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
             powerInteractor.onCameraLaunchGestureDetected()
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // We should head back to GONE since we started there.
             assertThat(transitionRepository)
@@ -191,7 +190,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             reset(transitionRepository)
             powerInteractor.onCameraLaunchGestureDetected()
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // We should head back to GONE since we started there.
             assertThat(transitionRepository)
@@ -225,7 +224,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             reset(transitionRepository)
             powerInteractor.onCameraLaunchGestureDetected()
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // We should go to OCCLUDED - we came from GONE, but we finished in AOD, so this is no
             // longer an insecure camera launch and it would be bad if we unlocked now.
@@ -266,7 +265,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             reset(transitionRepository)
             powerInteractor.onCameraLaunchGestureDetected()
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // We should head back to GONE since we started there.
             assertThat(transitionRepository)
@@ -286,7 +285,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             assertThat(transitionRepository).noTransitionsStarted()
 
             underTest.dismissAod()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.AOD, to = KeyguardState.GONE)
@@ -297,7 +296,7 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
             powerInteractor.setAwakeForTest()
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // Waking up from AOD while occluded should transition to OCCLUDED.
             assertThat(transitionRepository)
@@ -307,11 +306,10 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun testTransitionToGone_onWakeUpFromAod_dismissibleKeyguard_securityNone() =
         testScope.runTest {
-            whenever(kosmos.lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true)
+            kosmos.fakeKeyguardRepository.setKeyguardShowing(false)
             kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
             powerInteractor.setAwakeForTest()
-            testScope.testScheduler.advanceTimeBy(100) // account for debouncing
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
             // We should head back to GONE since we started there.
             assertThat(transitionRepository)
@@ -319,15 +317,13 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun testTransitionToGone_onWakeUpFromAod_dismissibleKeyguard_securitySwipe() =
+    fun testTransitionToLockscreen_onWakeUpFromAod_dismissibleKeyguard_securitySwipe() =
         testScope.runTest {
-            whenever(kosmos.lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false)
+            kosmos.fakeKeyguardRepository.setKeyguardShowing(true)
             kosmos.fakeKeyguardRepository.setKeyguardDismissible(true)
             powerInteractor.setAwakeForTest()
-            testScope.testScheduler.advanceTimeBy(100) // account for debouncing
-            runCurrent()
+            advanceTimeBy(100) // account for debouncing
 
-            // We should head back to GONE since we started there.
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.AOD, to = KeyguardState.LOCKSCREEN)
         }
