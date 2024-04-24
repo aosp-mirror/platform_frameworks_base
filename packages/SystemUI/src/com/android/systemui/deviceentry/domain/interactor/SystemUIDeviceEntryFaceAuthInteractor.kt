@@ -37,6 +37,7 @@ import com.android.systemui.deviceentry.shared.model.ErrorFaceAuthenticationStat
 import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -241,6 +242,12 @@ constructor(
     override fun onWalletLaunched() {
         if (facePropertyRepository.sensorInfo.value?.strength == SensorStrength.STRONG) {
             runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_OCCLUDING_APP_REQUESTED, true)
+        }
+    }
+
+    override fun onDeviceUnfolded() {
+        if (facePropertyRepository.supportedPostures.contains(DevicePosture.OPENED)) {
+            runFaceAuth(FaceAuthUiEvent.FACE_AUTH_UPDATED_POSTURE_CHANGED, true)
         }
     }
 
