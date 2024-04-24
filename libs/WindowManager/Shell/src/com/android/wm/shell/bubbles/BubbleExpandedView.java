@@ -446,6 +446,8 @@ public class BubbleExpandedView extends LinearLayout {
             mManageButton.setVisibility(GONE);
         } else {
             mTaskView = bubbleTaskView.getTaskView();
+            // reset the insets that might left after TaskView is shown in BubbleBarExpandedView
+            mTaskView.setCaptionInsets(null);
             bubbleTaskView.setDelegateListener(mTaskViewListener);
 
             // set a fixed width so it is not recalculated as part of a rotation. the width will be
