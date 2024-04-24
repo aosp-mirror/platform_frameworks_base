@@ -358,6 +358,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Vytvoriť snímku obrazovky"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Je možné vytvoriť snímku obrazovky."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Ukážka, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vydávanie sa za stavový riadok"</string>

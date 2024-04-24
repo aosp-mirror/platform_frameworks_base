@@ -356,6 +356,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ota kuvakaappaus"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Voi ottaa kuvakaappauksen näytöstä."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Esikatselu, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"poista tilapalkki käytöstä tai muokkaa tilapalkkia"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Antaa sovelluksen poistaa tilapalkin käytöstä ja lisätä tai poistaa järjestelmäkuvakkeita."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"sijaita tilapalkissa"</string>
@@ -841,7 +843,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Lukita ruudun"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Hallinnoida, milloin ja miten näyttö lukittuu."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Pyyhkiä kaikki tiedot"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Tyhjentää tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Tyhjentää Android TV ‑laitteen tiedot ilman varoitusta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Poistaa infotainment-järjestelmän datan ilman varoitusta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Tyhjentää puhelimen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
