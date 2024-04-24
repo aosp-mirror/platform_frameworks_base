@@ -412,7 +412,7 @@ public class BookStyleStateTransitions {
                 /* stickyKeepInnerUntil45Degrees */ true,
                 PreferredScreen.INNER,
                 /* setStickyKeepOuterUntil90Degrees */ null,
-                /* setStickyKeepInnerUntil45Degrees */ false
+                /* setStickyKeepInnerUntil45Degrees */ null
         ));
         DEFAULT_STATE_TRANSITIONS.add(new StateTransition(
                 HingeAngle.ANGLE_45_TO_90,
@@ -492,7 +492,7 @@ public class BookStyleStateTransitions {
                 /* stickyKeepInnerUntil45Degrees */ true,
                 PreferredScreen.INNER,
                 /* setStickyKeepOuterUntil90Degrees */ null,
-                /* setStickyKeepInnerUntil45Degrees */ false
+                /* setStickyKeepInnerUntil45Degrees */ null
         ));
         DEFAULT_STATE_TRANSITIONS.add(new StateTransition(
                 HingeAngle.ANGLE_45_TO_90,
