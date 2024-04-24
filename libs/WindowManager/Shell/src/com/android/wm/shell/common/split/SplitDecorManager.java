@@ -109,7 +109,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     }
 
     /** Inflates split decor surface on the root surface. */
-    public void inflate(Context context, SurfaceControl rootLeash, Rect rootBounds) {
+    public void inflate(Context context, SurfaceControl rootLeash) {
         if (mIconLeash != null && mViewHost != null) {
             return;
         }
@@ -128,8 +128,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 0 /* width */, 0 /* height */, TYPE_APPLICATION_OVERLAY,
                 FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT);
-        lp.width = rootBounds.width();
-        lp.height = rootBounds.height();
+        lp.width = mIconSize;
+        lp.height = mIconSize;
         lp.token = new Binder();
         lp.setTitle(TAG);
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
