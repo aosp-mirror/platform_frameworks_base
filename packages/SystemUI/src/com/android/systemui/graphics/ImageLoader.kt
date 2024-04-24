@@ -339,7 +339,7 @@ constructor(
                 }
                 // Fallback to non-ImageDecoder load if the attempt failed (e.g. the resource
                 // is a Vector drawable which ImageDecoder doesn't support.)
-                ?: icon.loadDrawable(context)
+                ?: loadIconDrawable(icon, context)
             }
             Icon.TYPE_BITMAP -> {
                 BitmapDrawable(context.resources, icon.bitmap)
@@ -357,13 +357,21 @@ constructor(
             }
             else -> {
                 // We don't recognize this icon, just fallback.
-                icon.loadDrawable(context)
+                loadIconDrawable(icon, context)
             }
         }?.let { drawable ->
             // Icons carry tint which we need to propagate down to a Drawable.
             tintDrawable(icon, drawable)
             drawable
         }
+    }
+
+    @WorkerThread
+    fun loadIconDrawable(icon: Icon, context: Context): Drawable? {
+        icon.loadDrawable(context)?.let { return it }
+
+        Log.w(TAG, "Failed to load drawable for $icon")
+        return null
     }
 
     /**
