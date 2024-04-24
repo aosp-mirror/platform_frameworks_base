@@ -473,7 +473,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private final DisplayPolicy mDisplayPolicy;
     private final DisplayRotation mDisplayRotation;
-    @Nullable final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
+
+    @Nullable
+    final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
+    @Nullable
+    final CameraStateMonitor mCameraStateMonitor;
+
     DisplayFrames mDisplayFrames;
     final DisplayUpdater mDisplayUpdater;
 
@@ -1247,11 +1252,23 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         onDisplayChanged(this);
         updateDisplayAreaOrganizers();
 
-        mDisplayRotationCompatPolicy =
-                // Not checking DeviceConfig value here to allow enabling via DeviceConfig
-                // without the need to restart the device.
-                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime()
-                        ? new DisplayRotationCompatPolicy(this) : null;
+        // Not checking DeviceConfig value here to allow enabling via DeviceConfig
+        // without the need to restart the device.
+        final boolean shouldCreateDisplayRotationCompatPolicy =
+                mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
+        if (shouldCreateDisplayRotationCompatPolicy) {
+            mCameraStateMonitor = new CameraStateMonitor(this, mWmService.mH);
+            mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
+                    this, mWmService.mH, mCameraStateMonitor);
+
+            mCameraStateMonitor.startListeningToCameraState();
+        } else {
+            // These are to satisfy the `final` check.
+            mCameraStateMonitor = null;
+            mDisplayRotationCompatPolicy = null;
+        }
+
+
         mRotationReversionController = new DisplayRotationReversionController(this);
 
         mInputMonitor = new InputMonitor(mWmService, this);
@@ -3452,6 +3469,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         if (mDisplayRotationCompatPolicy != null) {
             mDisplayRotationCompatPolicy.dispose();
+        }
+        if (mCameraStateMonitor != null) {
+            mCameraStateMonitor.dispose();
         }
     }
 
