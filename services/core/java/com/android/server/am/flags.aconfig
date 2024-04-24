@@ -95,3 +95,14 @@ flag {
     bug: "315468967"
     is_fixed_read_only: true
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "trace_receiver_registration"
+    description: "Add tracing for broadcast receiver registration and un-registration"
+    bug: "336385821"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
