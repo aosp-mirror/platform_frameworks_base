@@ -72,4 +72,8 @@
         <item name="android:textColor">@color/material_dynamic_secondary80</item>
     </style>
 
+    <style name="ShortcutHelperTheme" parent="@style/ShortcutHelperThemeCommon">
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
 </resources>
