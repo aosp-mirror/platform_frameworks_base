@@ -147,6 +147,9 @@ filegroup {
         "tests/src/**/systemui/bluetooth/qsdialog/BluetoothTileDialogViewModelTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/DeviceItemFactoryTest.kt",
         "tests/src/**/systemui/bluetooth/qsdialog/DeviceItemInteractorTest.kt",
+        // TODO(b/322324387): Fails to start due to missing ScreenshotActivity
+        "tests/src/**/systemui/bouncer/ui/composable/BouncerContentTest.kt",
+        "tests/src/**/systemui/bouncer/ui/composable/PatternBouncerTest.kt",
         "tests/src/**/systemui/broadcast/UserBroadcastDispatcherTest.kt",
         "tests/src/**/systemui/charging/WiredChargingRippleControllerTest.kt",
         "tests/src/**/systemui/clipboardoverlay/ClipboardModelTest.kt",
@@ -487,6 +490,8 @@ android_library {
         "SystemUI-res",
         "WifiTrackerLib",
         "PlatformAnimationLib",
+        "PlatformMotionTestingCompose",
+        "ScreenshotComposeUtilsLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SystemUICustomizationLib",
