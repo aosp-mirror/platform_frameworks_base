@@ -1312,7 +1312,7 @@ public final class DisplayPowerControllerTest {
         when(mHolder.hbmController.getHighBrightnessMode()).thenReturn(
                 BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR);
         when(mHolder.hbmController.getHdrBrightnessValue()).thenReturn(PowerManager.BRIGHTNESS_MAX);
-        when(mHolder.hdrClamper.getMaxBrightness()).thenReturn(clampedBrightness);
+        when(mHolder.hdrClamper.clamp(PowerManager.BRIGHTNESS_MAX)).thenReturn(clampedBrightness);
         when(mHolder.hdrClamper.getTransitionRate()).thenReturn(transitionRate);
 
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
