@@ -61,6 +61,8 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DATE_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.WEATHER_SMARTSPACE_DATA_PLUGIN
+import com.android.systemui.smartspace.ui.binder.SmartspaceViewBinder
+import com.android.systemui.smartspace.ui.viewmodel.SmartspaceViewModel
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -99,6 +101,7 @@ constructor(
         private val bypassController: KeyguardBypassController,
         private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
         private val wakefulnessLifecycle: WakefulnessLifecycle,
+        private val smartspaceViewModelFactory: SmartspaceViewModel.Factory,
         private val dumpManager: DumpManager,
         private val execution: Execution,
         @Main private val uiExecutor: Executor,
@@ -334,7 +337,12 @@ constructor(
             throw RuntimeException("Cannot build date view when not decoupled")
         }
 
-        val view = buildView(parent, datePlugin)
+        val view =
+            buildView(
+                surfaceName = SmartspaceViewModel.SURFACE_DATE_VIEW,
+                parent = parent,
+                plugin = datePlugin
+            )
         connectSession()
 
         return view
@@ -353,7 +361,12 @@ constructor(
             throw RuntimeException("Cannot build weather view when not decoupled")
         }
 
-        val view = buildView(parent, weatherPlugin)
+        val view =
+            buildView(
+                surfaceName = SmartspaceViewModel.SURFACE_WEATHER_VIEW,
+                parent = parent,
+                plugin = weatherPlugin
+            )
         connectSession()
 
         return view
@@ -369,16 +382,23 @@ constructor(
             throw RuntimeException("Cannot build view when not enabled")
         }
 
-        val view = buildView(parent, plugin, configPlugin)
+        val view =
+            buildView(
+                surfaceName = SmartspaceViewModel.SURFACE_GENERAL_VIEW,
+                parent = parent,
+                plugin = plugin,
+                configPlugin = configPlugin
+            )
         connectSession()
 
         return view
     }
 
     private fun buildView(
-            parent: ViewGroup,
-            plugin: BcSmartspaceDataPlugin?,
-            configPlugin: BcSmartspaceConfigPlugin? = null
+        surfaceName: String,
+        parent: ViewGroup,
+        plugin: BcSmartspaceDataPlugin?,
+        configPlugin: BcSmartspaceConfigPlugin? = null
     ): View? {
         if (plugin == null) {
             return null
@@ -425,6 +445,14 @@ constructor(
         return (ssView as View).apply {
             setTag(R.id.tag_smartspace_view, Any())
             addOnAttachStateChangeListener(stateChangeListener)
+
+            if (smartspaceLockscreenViewmodel()) {
+                val viewModel = smartspaceViewModelFactory.create(surfaceName)
+                SmartspaceViewBinder.bind(
+                    smartspaceView = ssView,
+                    viewModel = viewModel,
+                )
+            }
         }
     }
 

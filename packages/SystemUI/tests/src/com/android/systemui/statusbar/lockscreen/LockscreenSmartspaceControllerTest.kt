@@ -50,11 +50,14 @@ import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.smartspace.ui.viewmodel.SmartspaceViewModel
+import com.android.systemui.smartspace.viewmodel.smartspaceViewModelFactory
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecution
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -183,6 +186,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var weatherSmartspaceView: SmartspaceView
     private lateinit var smartspaceView: SmartspaceView
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    private lateinit var smartspaceViewModelFactory: SmartspaceViewModel.Factory
 
     private val clock = FakeSystemClock()
     private val executor = FakeExecutor(clock)
@@ -235,6 +239,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             clock,
             dumpManager
         )
+        smartspaceViewModelFactory = testKosmos().smartspaceViewModelFactory
 
         controller = LockscreenSmartspaceController(
                 context,
@@ -252,6 +257,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 keyguardBypassController,
                 keyguardUpdateMonitor,
                 wakefulnessLifecycle,
+                smartspaceViewModelFactory,
                 dumpManager,
                 execution,
                 executor,
