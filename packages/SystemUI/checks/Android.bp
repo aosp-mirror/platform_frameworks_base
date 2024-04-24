@@ -40,6 +40,7 @@ java_test_host {
     data: [
         ":framework",
         ":androidx.annotation_annotation-nodeps",
+        ":kotlinx-coroutines-core",
     ],
     static_libs: [
         "SystemUILintChecker",
