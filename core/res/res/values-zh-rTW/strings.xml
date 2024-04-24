@@ -356,6 +356,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"擷取螢幕畫面"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"可以擷取螢幕畫面。"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"預覽，<xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"以狀態列顯示"</string>
@@ -828,7 +830,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住平板電腦或全部清除平板電腦中的資料。"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監控螢幕解鎖時密碼輸入錯誤的次數；如果錯誤次數過多，會鎖住平板電腦或清除平板電腦的所有資料。"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"監控螢幕解鎖密碼輸入錯誤的次數。如果輸入錯誤的次數超過上限，系統會將 Android TV 裝置鎖定，或清除 Android TV 裝置的所有資料。"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"監控密碼輸入錯誤的次數。解鎖螢幕時，如果密碼輸入錯誤次數過多，系統就會鎖住資訊娛樂系統或清除資訊娛樂系統的所有資料。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住手機或清除手機的所有資料。"</string>

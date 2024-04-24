@@ -357,6 +357,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Prendre une capture d\'écran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Peut prendre des captures d\'écran."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Aperçu, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"remplacer la barre d\'état"</string>
@@ -829,7 +831,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les codes d\'accès de verrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Contrôler les tentatives de déverrouillage de l\'écran"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller la tablette ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Contrôler le nombre de mots de passe incorrects saisis pour déverrouiller l\'écran, et verrouiller la tablette ou effacer toutes ses données si trop de mots de passe incorrects sont saisis"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Contrôle le nombre de fois qu\'un mot de passe incorrect est saisi lors du déverrouillage de l\'écran, et verrouille votre appareil Android TV ou en efface toutes les données si le nombre maximal de mots de passe incorrects autorisé est dépassé."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le système d\'infoloisirs ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller le téléphone ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>

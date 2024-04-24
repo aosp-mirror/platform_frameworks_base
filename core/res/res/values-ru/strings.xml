@@ -358,6 +358,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Создавать скриншоты"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Создавать снимки экрана."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g>: предпросмотр"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"Отключение/изменение строки состояния"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Приложение сможет отключать строку состояния, а также добавлять и удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Замена строки состояния"</string>
@@ -830,7 +832,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Настройка правил для паролей"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролировать длину и символы при вводе пароля и PIN-кода."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Отслеживание попыток разблокировать экран"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует планшетный ПК или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Отслеживать попытки ввода пароля при разблокировке экрана и блокировать планшет или удалять с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Блокировать устройство Android TV или удалять с него все ваши данные при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Блокировать информационно-развлекательную систему или удалять из нее все данные, если совершено слишком много неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Отслеживать попытки ввода пароля при разблокировке экрана и блокировать телефон или удалять с него все данные, если было сделано слишком много таких попыток."</string>
@@ -843,7 +845,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Блокировка экрана"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Управлять способом и временем блокировки экрана."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Удаление всех данных"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Удалять все данные на планшетном ПК без предупреждения путем сброса настроек."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Удалять все данные на планшете без предупреждения путем сброса настроек."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Удалять данные с устройства Android TV без предупреждения, выполняя восстановление заводских настроек."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Сбрасывать настройки без предупреждения, таким образом удаляя все данные из информационно-развлекательной системы."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Удалять все данные на телефоне без предупреждения путем сброса настроек."</string>

@@ -357,6 +357,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fer una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pot fer una captura de la pantalla."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Previsualitza, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparèixer a la barra d\'estat"</string>
