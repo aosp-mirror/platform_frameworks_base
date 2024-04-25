@@ -88,7 +88,7 @@ constructor(
     }
 
     @Composable
-    fun SceneScope.LargeClock(modifier: Modifier = Modifier) {
+    fun SceneScope.LargeClock(burnInParams: BurnInParameters, modifier: Modifier = Modifier) {
         val currentClock by viewModel.currentClock.collectAsState()
         if (currentClock?.largeClock?.view == null) {
             return
@@ -129,7 +129,13 @@ constructor(
                     update = {
                         it.ensureClockViewExists(checkNotNull(currentClock).largeClock.view)
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .burnInAware(
+                                viewModel = aodBurnInViewModel,
+                                params = burnInParams,
+                                isClock = true
+                            )
                 )
             }
         }
