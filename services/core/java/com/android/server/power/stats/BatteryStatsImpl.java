@@ -463,11 +463,17 @@ public class BatteryStatsImpl extends BatteryStats {
     public static class BatteryStatsConfig {
         static final int RESET_ON_UNPLUG_HIGH_BATTERY_LEVEL_FLAG = 1 << 0;
         static final int RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG = 1 << 1;
-        static final long DEFAULT_POWER_STATS_COLLECTION_THROTTLE_PERIOD =
-                TimeUnit.HOURS.toMillis(1);
 
         private final int mFlags;
-        private SparseLongArray mPowerStatsThrottlePeriods;
+        private final Long mDefaultPowerStatsThrottlePeriod;
+        private final Map<String, Long> mPowerStatsThrottlePeriods;
+
+        @VisibleForTesting
+        public BatteryStatsConfig() {
+            mFlags = 0;
+            mDefaultPowerStatsThrottlePeriod = 0L;
+            mPowerStatsThrottlePeriods = Map.of();
+        }
 
         private BatteryStatsConfig(Builder builder) {
             int flags = 0;
@@ -478,6 +484,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 flags |= RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG;
             }
             mFlags = flags;
+            mDefaultPowerStatsThrottlePeriod = builder.mDefaultPowerStatsThrottlePeriod;
             mPowerStatsThrottlePeriods = builder.mPowerStatsThrottlePeriods;
         }
 
@@ -485,7 +492,7 @@ public class BatteryStatsImpl extends BatteryStats {
          * Returns whether a BatteryStats reset should occur on unplug when the battery level is
          * high.
          */
-        boolean shouldResetOnUnplugHighBatteryLevel() {
+        public boolean shouldResetOnUnplugHighBatteryLevel() {
             return (mFlags & RESET_ON_UNPLUG_HIGH_BATTERY_LEVEL_FLAG)
                     == RESET_ON_UNPLUG_HIGH_BATTERY_LEVEL_FLAG;
         }
@@ -494,14 +501,18 @@ public class BatteryStatsImpl extends BatteryStats {
          * Returns whether a BatteryStats reset should occur on unplug if the battery charge a
          * significant amount since it has been plugged in.
          */
-        boolean shouldResetOnUnplugAfterSignificantCharge() {
+        public boolean shouldResetOnUnplugAfterSignificantCharge() {
             return (mFlags & RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG)
                     == RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG;
         }
 
-        long getPowerStatsThrottlePeriod(@BatteryConsumer.PowerComponent int powerComponent) {
-            return mPowerStatsThrottlePeriods.get(powerComponent,
-                    DEFAULT_POWER_STATS_COLLECTION_THROTTLE_PERIOD);
+        /**
+         * Returns  the minimum amount of time (in millis) to wait between passes
+         * of power stats collection for the specified power component.
+         */
+        public long getPowerStatsThrottlePeriod(String powerComponentName) {
+            return mPowerStatsThrottlePeriods.getOrDefault(powerComponentName,
+                    mDefaultPowerStatsThrottlePeriod);
         }
 
         /**
@@ -510,18 +521,19 @@ public class BatteryStatsImpl extends BatteryStats {
         public static class Builder {
             private boolean mResetOnUnplugHighBatteryLevel;
             private boolean mResetOnUnplugAfterSignificantCharge;
-            private SparseLongArray mPowerStatsThrottlePeriods;
+            public static final long DEFAULT_POWER_STATS_THROTTLE_PERIOD =
+                    TimeUnit.HOURS.toMillis(1);
+            public static final long DEFAULT_POWER_STATS_THROTTLE_PERIOD_CPU =
+                    TimeUnit.MINUTES.toMillis(1);
+            private long mDefaultPowerStatsThrottlePeriod = DEFAULT_POWER_STATS_THROTTLE_PERIOD;
+            private final Map<String, Long> mPowerStatsThrottlePeriods = new HashMap<>();
 
             public Builder() {
                 mResetOnUnplugHighBatteryLevel = true;
                 mResetOnUnplugAfterSignificantCharge = true;
-                mPowerStatsThrottlePeriods = new SparseLongArray();
-                setPowerStatsThrottlePeriodMillis(BatteryConsumer.POWER_COMPONENT_CPU,
-                        TimeUnit.MINUTES.toMillis(1));
-                setPowerStatsThrottlePeriodMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
-                        TimeUnit.HOURS.toMillis(1));
-                setPowerStatsThrottlePeriodMillis(BatteryConsumer.POWER_COMPONENT_WIFI,
-                        TimeUnit.HOURS.toMillis(1));
+                setPowerStatsThrottlePeriodMillis(BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_CPU),
+                        DEFAULT_POWER_STATS_THROTTLE_PERIOD_CPU);
             }
 
             /**
@@ -553,9 +565,18 @@ public class BatteryStatsImpl extends BatteryStats {
              * Sets the minimum amount of time (in millis) to wait between passes
              * of power stats collection for the specified power component.
              */
-            public Builder setPowerStatsThrottlePeriodMillis(
-                    @BatteryConsumer.PowerComponent int powerComponent, long periodMs) {
-                mPowerStatsThrottlePeriods.put(powerComponent, periodMs);
+            public Builder setPowerStatsThrottlePeriodMillis(String powerComponentName,
+                    long periodMs) {
+                mPowerStatsThrottlePeriods.put(powerComponentName, periodMs);
+                return this;
+            }
+
+            /**
+             * Sets the minimum amount of time (in millis) to wait between passes
+             * of power stats collection for any components not configured explicitly.
+             */
+            public Builder setDefaultPowerStatsThrottlePeriodMillis(long periodMs) {
+                mDefaultPowerStatsThrottlePeriod = periodMs;
                 return this;
             }
         }
@@ -1586,8 +1607,7 @@ public class BatteryStatsImpl extends BatteryStats {
     protected final Constants mConstants;
 
     @VisibleForTesting
-    @GuardedBy("this")
-    protected BatteryStatsConfig mBatteryStatsConfig;
+    protected final BatteryStatsConfig mBatteryStatsConfig;
 
     @GuardedBy("this")
     private AlarmManager mAlarmManager = null;
@@ -1930,6 +1950,11 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public Clock getClock() {
             return mClock;
+        }
+
+        @Override
+        public long getPowerStatsCollectionThrottlePeriod(String powerComponentName) {
+            return mBatteryStatsConfig.getPowerStatsThrottlePeriod(powerComponentName);
         }
 
         @Override
@@ -11167,19 +11192,14 @@ public class BatteryStatsImpl extends BatteryStats {
                 mConstants.MAX_HISTORY_FILES, mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator,
                 mClock, mMonotonicClock, traceDelegate, eventLogger);
 
-        mCpuPowerStatsCollector = new CpuPowerStatsCollector(mPowerStatsCollectorInjector,
-                mBatteryStatsConfig.getPowerStatsThrottlePeriod(
-                        BatteryConsumer.POWER_COMPONENT_CPU));
+        mCpuPowerStatsCollector = new CpuPowerStatsCollector(mPowerStatsCollectorInjector);
         mCpuPowerStatsCollector.addConsumer(this::recordPowerStats);
 
         mMobileRadioPowerStatsCollector = new MobileRadioPowerStatsCollector(
-                mPowerStatsCollectorInjector, mBatteryStatsConfig.getPowerStatsThrottlePeriod(
-                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO));
+                mPowerStatsCollectorInjector);
         mMobileRadioPowerStatsCollector.addConsumer(this::recordPowerStats);
 
-        mWifiPowerStatsCollector = new WifiPowerStatsCollector(
-                mPowerStatsCollectorInjector, mBatteryStatsConfig.getPowerStatsThrottlePeriod(
-                BatteryConsumer.POWER_COMPONENT_WIFI));
+        mWifiPowerStatsCollector = new WifiPowerStatsCollector(mPowerStatsCollectorInjector);
         mWifiPowerStatsCollector.addConsumer(this::recordPowerStats);
 
         mStartCount++;

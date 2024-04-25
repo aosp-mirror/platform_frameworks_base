@@ -59,6 +59,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         KernelCpuStatsReader getKernelCpuStatsReader();
         ConsumedEnergyRetriever getConsumedEnergyRetriever();
         IntSupplier getVoltageSupplier();
+        long getPowerStatsCollectionThrottlePeriod(String powerComponentName);
 
         default int getDefaultCpuPowerBrackets() {
             return DEFAULT_CPU_POWER_BRACKETS;
@@ -94,9 +95,11 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private int mLastVoltageMv;
     private long[] mLastConsumedEnergyUws;
 
-    public CpuPowerStatsCollector(Injector injector, long throttlePeriodMs) {
-        super(injector.getHandler(), throttlePeriodMs, injector.getUidResolver(),
-                injector.getClock());
+    CpuPowerStatsCollector(Injector injector) {
+        super(injector.getHandler(), injector.getPowerStatsCollectionThrottlePeriod(
+                        BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_CPU)),
+                injector.getUidResolver(), injector.getClock());
         mInjector = injector;
     }
 

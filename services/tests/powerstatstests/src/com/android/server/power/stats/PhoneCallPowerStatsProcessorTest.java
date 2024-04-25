@@ -98,6 +98,11 @@ public class PhoneCallPowerStatsProcessorTest {
                 }
 
                 @Override
+                public long getPowerStatsCollectionThrottlePeriod(String powerComponentName) {
+                    return 0;
+                }
+
+                @Override
                 public PackageManager getPackageManager() {
                     return mPackageManager;
                 }
@@ -175,7 +180,7 @@ public class PhoneCallPowerStatsProcessorTest {
         aggregatedPowerStats.setDeviceState(STATE_POWER, POWER_STATE_OTHER, 0);
         aggregatedPowerStats.setDeviceState(STATE_SCREEN, SCREEN_STATE_ON, 0);
 
-        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector, 0);
+        MobileRadioPowerStatsCollector collector = new MobileRadioPowerStatsCollector(mInjector);
         collector.setEnabled(true);
 
         // Initial empty ModemActivityInfo.
