@@ -922,7 +922,7 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
-     * Handles a message deliveyr status from a Context Hub.
+     * Handles a message delivery status from a Context Hub.
      *
      * @param messageDeliveryStatus     The message delivery status to deliver.
      */
