@@ -48,6 +48,12 @@ class ConfigurationInteractor @Inject constructor(private val repository: Config
             }
         }
 
+    /** Returns the unadjusted screen size. */
+    val maxBounds: Flow<Rect> =
+        repository.configurationValues
+            .map { Rect(it.windowConfiguration.maxBounds) }
+            .distinctUntilChanged()
+
     /**
      * Returns screen size adjusted to rotation, so returned screen sizes are stable across all
      * rotations, could be useful if you need to react to screen resize (e.g. fold/unfold on
