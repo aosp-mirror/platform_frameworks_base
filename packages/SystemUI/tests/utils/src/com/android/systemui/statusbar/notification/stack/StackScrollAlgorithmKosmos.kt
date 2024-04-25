@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.statusbar.policy.AvalancheController
 import com.android.systemui.util.mockito.mock
 
 var Kosmos.stackScrollAlgorithmSectionProvider by Fixture {
@@ -26,4 +27,8 @@ var Kosmos.stackScrollAlgorithmSectionProvider by Fixture {
 
 var Kosmos.stackScrollAlgorithmBypassController by Fixture {
     mock<StackScrollAlgorithm.BypassController>()
+}
+
+var Kosmos.avalancheController by Fixture {
+    mock<AvalancheController>()
 }
