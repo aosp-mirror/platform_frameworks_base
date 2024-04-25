@@ -53,8 +53,6 @@ public class ScreenshotHelper {
 
     public ScreenshotHelper(Context context) {
         mContext = context;
-        IntentFilter filter = new IntentFilter(ACTION_USER_SWITCHED);
-        mContext.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
     }
 
     /**
@@ -108,6 +106,8 @@ public class ScreenshotHelper {
     public void takeScreenshotInternal(ScreenshotRequest request, @NonNull Handler handler,
             @Nullable Consumer<Uri> completionConsumer, long timeoutMs) {
         synchronized (mScreenshotLock) {
+            mContext.registerReceiver(mBroadcastReceiver,
+                new IntentFilter(ACTION_USER_SWITCHED), Context.RECEIVER_EXPORTED);
 
             final Runnable mScreenshotTimeout = () -> {
                 synchronized (mScreenshotLock) {
@@ -222,6 +222,11 @@ public class ScreenshotHelper {
             mContext.unbindService(mScreenshotConnection);
             mScreenshotConnection = null;
             mScreenshotService = null;
+        }
+        try {
+            mContext.unregisterReceiver(mBroadcastReceiver);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Attempted to remove broadcast receiver twice");
         }
     }
 
