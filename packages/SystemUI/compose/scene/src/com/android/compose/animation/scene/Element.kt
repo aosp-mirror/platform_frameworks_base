@@ -24,6 +24,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -55,8 +56,14 @@ import kotlinx.coroutines.launch
 internal class Element(val key: ElementKey) {
     /** The mapping between a scene and the state this element has in that scene, if any. */
     // TODO(b/316901148): Make this a normal map instead once we can make sure that new transitions
-    // are first seen by composition then layout/drawing code. See 316901148#comment2 for details.
+    // are first seen by composition then layout/drawing code. See b/316901148#comment2 for details.
     val sceneStates = SnapshotStateMap<SceneKey, SceneState>()
+
+    /**
+     * The last transition that was used when computing the state (size, position and alpha) of this
+     * element in any scene, or `null` if it was last laid out when idle.
+     */
+    var lastTransition: TransitionState.Transition? = null
 
     override fun toString(): String {
         return "Element(key=$key)"
@@ -65,8 +72,32 @@ internal class Element(val key: ElementKey) {
     /** The last and target state of this element in a given scene. */
     @Stable
     class SceneState(val scene: SceneKey) {
+        /**
+         * The *target* state of this element in this scene, i.e. the state of this element when we
+         * are idle on this scene.
+         */
         var targetSize by mutableStateOf(SizeUnspecified)
         var targetOffset by mutableStateOf(Offset.Unspecified)
+
+        /** The last state this element had in this scene. */
+        var lastOffset = Offset.Unspecified
+        var lastScale = Scale.Unspecified
+        var lastAlpha = AlphaUnspecified
+
+        /** The state of this element in this scene right before the last interruption (if any). */
+        var offsetBeforeInterruption = Offset.Unspecified
+        var scaleBeforeInterruption = Scale.Unspecified
+        var alphaBeforeInterruption = AlphaUnspecified
+
+        /**
+         * The delta values to add to this element state to have smoother interruptions. These
+         * should be multiplied by the
+         * [current interruption progress][TransitionState.Transition.interruptionProgress] so that
+         * they nicely animate from their values down to 0.
+         */
+        var offsetInterruptionDelta = Offset.Zero
+        var scaleInterruptionDelta = Scale.Zero
+        var alphaInterruptionDelta = 0f
 
         /**
          * The attached [ElementNode] a Modifier.element() for a given element and scene. During
@@ -78,12 +109,15 @@ internal class Element(val key: ElementKey) {
 
     companion object {
         val SizeUnspecified = IntSize(Int.MAX_VALUE, Int.MAX_VALUE)
+        val AlphaUnspecified = Float.MAX_VALUE
     }
 }
 
 data class Scale(val scaleX: Float, val scaleY: Float, val pivot: Offset = Offset.Unspecified) {
     companion object {
         val Default = Scale(1f, 1f, Offset.Unspecified)
+        val Zero = Scale(0f, 0f, Offset.Zero)
+        val Unspecified = Scale(Float.MAX_VALUE, Float.MAX_VALUE, Offset.Unspecified)
     }
 }
 
@@ -212,6 +246,10 @@ internal class ElementNode(
         val isOtherSceneOverscrolling = overscrollScene != null && overscrollScene != scene.key
         val isNotPartOfAnyOngoingTransitions = transitions.isNotEmpty() && transition == null
         if (isNotPartOfAnyOngoingTransitions || isOtherSceneOverscrolling) {
+            sceneState.lastOffset = Offset.Unspecified
+            sceneState.lastScale = Scale.Unspecified
+            sceneState.lastAlpha = Element.AlphaUnspecified
+
             val placeable = measurable.measure(constraints)
             return layout(placeable.width, placeable.height) {}
         }
@@ -233,7 +271,7 @@ internal class ElementNode(
 
     override fun ContentDrawScope.draw() {
         val transition = elementTransition(element, layoutImpl.state.currentTransitions)
-        val drawScale = getDrawScale(layoutImpl, scene, element, transition)
+        val drawScale = getDrawScale(layoutImpl, scene, element, transition, sceneState)
         if (drawScale == Scale.Default) {
             drawContent()
         } else {
@@ -276,8 +314,116 @@ private fun elementTransition(
     element: Element,
     transitions: List<TransitionState.Transition>,
 ): TransitionState.Transition? {
-    return transitions.fastLastOrNull { transition ->
-        transition.fromScene in element.sceneStates || transition.toScene in element.sceneStates
+    val transition =
+        transitions.fastLastOrNull { transition ->
+            transition.fromScene in element.sceneStates || transition.toScene in element.sceneStates
+        }
+
+    val previousTransition = element.lastTransition
+    element.lastTransition = transition
+
+    if (transition != previousTransition && transition != null && previousTransition != null) {
+        // The previous transition was interrupted by another transition.
+        prepareInterruption(element)
+    }
+
+    if (transition == null && previousTransition != null) {
+        // The transition was just finished.
+        element.sceneStates.values.forEach { sceneState ->
+            sceneState.offsetInterruptionDelta = Offset.Zero
+            sceneState.scaleInterruptionDelta = Scale.Zero
+            sceneState.alphaInterruptionDelta = 0f
+        }
+    }
+
+    return transition
+}
+
+private fun prepareInterruption(element: Element) {
+    // We look for the last unique state of this element so that we animate the delta with its
+    // future state.
+    val sceneStates = element.sceneStates.values
+    var lastUniqueState: Element.SceneState? = null
+    for (sceneState in sceneStates) {
+        val offset = sceneState.lastOffset
+
+        // If the element was placed in this scene...
+        if (offset != Offset.Unspecified) {
+            // ... and it is the first (and potentially the only) scene where the element was
+            // placed, save the state for later.
+            if (lastUniqueState == null) {
+                lastUniqueState = sceneState
+            } else {
+                // The element was placed in multiple scenes: we abort the interruption for this
+                // element.
+                // TODO(b/290930950): Better support cases where a shared element animation is
+                // disabled and the same element is drawn/placed in multiple scenes at the same
+                // time.
+                lastUniqueState = null
+                break
+            }
+        }
+    }
+
+    val lastOffset = lastUniqueState?.lastOffset ?: Offset.Unspecified
+    val lastScale = lastUniqueState?.lastScale ?: Scale.Unspecified
+    val lastAlpha = lastUniqueState?.lastAlpha ?: Element.AlphaUnspecified
+
+    // Store the state of the element before the interruption and reset the deltas.
+    sceneStates.forEach { sceneState ->
+        sceneState.offsetBeforeInterruption = lastOffset
+        sceneState.scaleBeforeInterruption = lastScale
+        sceneState.alphaBeforeInterruption = lastAlpha
+
+        sceneState.offsetInterruptionDelta = Offset.Zero
+        sceneState.scaleInterruptionDelta = Scale.Zero
+        sceneState.alphaInterruptionDelta = 0f
+    }
+}
+
+/**
+ * Compute what [value] should be if we take the
+ * [interruption progress][TransitionState.Transition.interruptionProgress] of [transition] into
+ * account.
+ */
+private inline fun <T> computeInterruptedValue(
+    layoutImpl: SceneTransitionLayoutImpl,
+    transition: TransitionState.Transition?,
+    value: T,
+    unspecifiedValue: T,
+    zeroValue: T,
+    getValueBeforeInterruption: () -> T,
+    setValueBeforeInterruption: (T) -> Unit,
+    getInterruptionDelta: () -> T,
+    setInterruptionDelta: (T) -> Unit,
+    diff: (a: T, b: T) -> T, // a - b
+    add: (a: T, b: T, bProgress: Float) -> T, // a + (b * bProgress)
+): T {
+    val valueBeforeInterruption = getValueBeforeInterruption()
+
+    // If the value before the interruption is specified, it means that this is the first time we
+    // compute [value] right after an interruption.
+    if (valueBeforeInterruption != unspecifiedValue) {
+        // Compute and store the delta between the value before the interruption and the current
+        // value.
+        setInterruptionDelta(diff(valueBeforeInterruption, value))
+
+        // Reset the value before interruption now that we processed it.
+        setValueBeforeInterruption(unspecifiedValue)
+    }
+
+    val delta = getInterruptionDelta()
+    return if (delta == zeroValue || transition == null) {
+        // There was no interruption or there is no transition: just return the value.
+        value
+    } else {
+        // Add `delta * interruptionProgress` to the value so that we animate to value.
+        val interruptionProgress = transition.interruptionProgress(layoutImpl)
+        if (interruptionProgress == 0f) {
+            value
+        } else {
+            add(value, delta, interruptionProgress)
+        }
     }
 }
 
@@ -417,20 +563,47 @@ private fun elementAlpha(
     scene: Scene,
     element: Element,
     transition: TransitionState.Transition?,
+    sceneState: Element.SceneState,
 ): Float {
-    return computeValue(
-            layoutImpl,
-            scene,
-            element,
-            transition,
-            sceneValue = { 1f },
-            transformation = { it.alpha },
-            idleValue = 1f,
-            currentValue = { 1f },
-            isSpecified = { true },
-            ::lerp,
-        )
-        .fastCoerceIn(0f, 1f)
+    val alpha =
+        computeValue(
+                layoutImpl,
+                scene,
+                element,
+                transition,
+                sceneValue = { 1f },
+                transformation = { it.alpha },
+                idleValue = 1f,
+                currentValue = { 1f },
+                isSpecified = { true },
+                ::lerp,
+            )
+            .fastCoerceIn(0f, 1f)
+
+    val interruptedAlpha = interruptedAlpha(layoutImpl, transition, sceneState, alpha)
+    sceneState.lastAlpha = interruptedAlpha
+    return interruptedAlpha
+}
+
+private fun interruptedAlpha(
+    layoutImpl: SceneTransitionLayoutImpl,
+    transition: TransitionState.Transition?,
+    sceneState: Element.SceneState,
+    alpha: Float,
+): Float {
+    return computeInterruptedValue(
+        layoutImpl,
+        transition,
+        value = alpha,
+        unspecifiedValue = Element.AlphaUnspecified,
+        zeroValue = 0f,
+        getValueBeforeInterruption = { sceneState.alphaBeforeInterruption },
+        setValueBeforeInterruption = { sceneState.alphaBeforeInterruption = it },
+        getInterruptionDelta = { sceneState.alphaInterruptionDelta },
+        setInterruptionDelta = { sceneState.alphaInterruptionDelta = it },
+        diff = { a, b -> a - b },
+        add = { a, b, bProgress -> a + b * bProgress },
+    )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -480,24 +653,70 @@ private fun ApproachMeasureScope.measure(
         )
 }
 
-private fun getDrawScale(
+private fun ContentDrawScope.getDrawScale(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
     element: Element,
     transition: TransitionState.Transition?,
+    sceneState: Element.SceneState,
 ): Scale {
-    return computeValue(
-        layoutImpl,
-        scene,
-        element,
-        transition,
-        sceneValue = { Scale.Default },
-        transformation = { it.drawScale },
-        idleValue = Scale.Default,
-        currentValue = { Scale.Default },
-        isSpecified = { true },
-        ::lerp,
-    )
+    val scale =
+        computeValue(
+            layoutImpl,
+            scene,
+            element,
+            transition,
+            sceneValue = { Scale.Default },
+            transformation = { it.drawScale },
+            idleValue = Scale.Default,
+            currentValue = { Scale.Default },
+            isSpecified = { true },
+            ::lerp,
+        )
+
+    fun Offset.specifiedOrCenter(): Offset {
+        return this.takeIf { isSpecified } ?: center
+    }
+
+    val interruptedScale =
+        computeInterruptedValue(
+            layoutImpl,
+            transition,
+            value = scale,
+            unspecifiedValue = Scale.Unspecified,
+            zeroValue = Scale.Zero,
+            getValueBeforeInterruption = { sceneState.scaleBeforeInterruption },
+            setValueBeforeInterruption = { sceneState.scaleBeforeInterruption = it },
+            getInterruptionDelta = { sceneState.scaleInterruptionDelta },
+            setInterruptionDelta = { sceneState.scaleInterruptionDelta = it },
+            diff = { a, b ->
+                Scale(
+                    scaleX = a.scaleX - b.scaleX,
+                    scaleY = a.scaleY - b.scaleY,
+                    pivot =
+                        if (a.pivot.isUnspecified && b.pivot.isUnspecified) {
+                            Offset.Unspecified
+                        } else {
+                            a.pivot.specifiedOrCenter() - b.pivot.specifiedOrCenter()
+                        }
+                )
+            },
+            add = { a, b, bProgress ->
+                Scale(
+                    scaleX = a.scaleX + b.scaleX * bProgress,
+                    scaleY = a.scaleY + b.scaleY * bProgress,
+                    pivot =
+                        if (a.pivot.isUnspecified && b.pivot.isUnspecified) {
+                            Offset.Unspecified
+                        } else {
+                            a.pivot.specifiedOrCenter() + b.pivot.specifiedOrCenter() * bProgress
+                        }
+                )
+            }
+        )
+
+    sceneState.lastScale = interruptedScale
+    return interruptedScale
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -524,6 +743,8 @@ private fun ApproachMeasureScope.place(
 
         // No need to place the element in this scene if we don't want to draw it anyways.
         if (!shouldPlaceElement(layoutImpl, scene, element, transition)) {
+            sceneState.lastOffset = Offset.Unspecified
+            sceneState.offsetBeforeInterruption = Offset.Unspecified
             return
         }
 
@@ -542,15 +763,37 @@ private fun ApproachMeasureScope.place(
                 ::lerp,
             )
 
-        val offset = (targetOffset - currentOffset).round()
-        if (isElementOpaque(scene, element, transition)) {
+        val interruptedOffset =
+            computeInterruptedValue(
+                layoutImpl,
+                transition,
+                value = targetOffset,
+                unspecifiedValue = Offset.Unspecified,
+                zeroValue = Offset.Zero,
+                getValueBeforeInterruption = { sceneState.offsetBeforeInterruption },
+                setValueBeforeInterruption = { sceneState.offsetBeforeInterruption = it },
+                getInterruptionDelta = { sceneState.offsetInterruptionDelta },
+                setInterruptionDelta = { sceneState.offsetInterruptionDelta = it },
+                diff = { a, b -> a - b },
+                add = { a, b, bProgress -> a + b * bProgress },
+            )
+
+        sceneState.lastOffset = interruptedOffset
+
+        val offset = (interruptedOffset - currentOffset).round()
+        if (
+            isElementOpaque(scene, element, transition) &&
+                interruptedAlpha(layoutImpl, transition, sceneState, alpha = 1f) == 1f
+        ) {
+            sceneState.lastAlpha = 1f
+
             // TODO(b/291071158): Call placeWithLayer() if offset != IntOffset.Zero and size is not
             // animated once b/305195729 is fixed. Test that drawing is not invalidated in that
             // case.
             placeable.place(offset)
         } else {
             placeable.placeWithLayer(offset) {
-                alpha = elementAlpha(layoutImpl, scene, element, transition)
+                alpha = elementAlpha(layoutImpl, scene, element, transition, sceneState)
                 compositingStrategy = CompositingStrategy.ModulateAlpha
             }
         }
