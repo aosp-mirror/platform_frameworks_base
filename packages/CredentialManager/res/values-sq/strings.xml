@@ -48,7 +48,7 @@
     <string name="passwords" msgid="5419394230391253816">"fjalëkalime"</string>
     <string name="sign_ins" msgid="4710739369149469208">"identifikimet"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informacionet e identifikimit"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"Ruaj <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> te"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Të ruhet <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> te"</string>
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Të krijohet çelësi i kalimit në një pajisje tjetër?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Të ruhet fjalëkalimi në një pajisje tjetër?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Të ruhet identifikimi në një pajisje tjetër?"</string>
