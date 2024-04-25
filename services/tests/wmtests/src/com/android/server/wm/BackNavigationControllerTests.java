@@ -53,6 +53,7 @@ import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -531,7 +532,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         Task task = createTopTaskWithActivity();
         WindowState appWindow = task.getTopVisibleAppMainWindow();
         WindowOnBackInvokedDispatcher dispatcher =
-                new WindowOnBackInvokedDispatcher(context);
+                new WindowOnBackInvokedDispatcher(context, Looper.getMainLooper());
         spyOn(appWindow.mSession);
         doAnswer(invocation -> {
             appWindow.setOnBackInvokedCallbackInfo(invocation.getArgument(1));
@@ -741,6 +742,10 @@ public class BackNavigationControllerTests extends WindowTestsBase {
 
             @Override
             public void onBackInvoked() {
+            }
+
+            @Override
+            public void setTriggerBack(boolean triggerBack) {
             }
         };
     }

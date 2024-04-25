@@ -20,6 +20,8 @@ import static android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT;
 import static android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
@@ -32,10 +34,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IWindow;
 import android.view.IWindowSession;
+import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -87,6 +91,8 @@ public class WindowOnBackInvokedDispatcherTest {
             /* triggerBack = */ false,
             /* swipeEdge = */ BackEvent.EDGE_LEFT,
             /* departingAnimationTarget = */ null);
+    private final MotionEvent mMotionEvent =
+            MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100, 100, 0);
 
     @Before
     public void setUp() throws Exception {
@@ -95,7 +101,7 @@ public class WindowOnBackInvokedDispatcherTest {
         doReturn(true).when(mApplicationInfo).isOnBackInvokedCallbackEnabled();
         doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
 
-        mDispatcher = new WindowOnBackInvokedDispatcher(mContext);
+        mDispatcher = new WindowOnBackInvokedDispatcher(mContext, Looper.getMainLooper());
         mDispatcher.attachToWindow(mWindowSession, mWindow, null);
     }
 
@@ -376,5 +382,37 @@ public class WindowOnBackInvokedDispatcherTest {
         waitForIdle();
         verify(mCallback1, never()).onBackInvoked();
         verify(mCallback1).onBackCancelled();
+    }
+
+    @Test
+    public void updatesDispatchingState() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
+        OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
+
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+        waitForIdle();
+        assertTrue(mDispatcher.isDispatching());
+
+        callbackInfo.getCallback().onBackInvoked();
+        waitForIdle();
+        assertFalse(mDispatcher.isDispatching());
+    }
+
+    @Test
+    public void handlesMotionEvent() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
+        OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
+
+        mDispatcher.onMotionEvent(mMotionEvent);
+        assertFalse(mDispatcher.mTouchTracker.isActive());
+
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+        waitForIdle();
+        assertTrue(mDispatcher.isDispatching());
+        assertTrue(mDispatcher.mTouchTracker.isActive());
+
+        mDispatcher.onMotionEvent(mMotionEvent);
+        waitForIdle();
+        verify(mCallback1).onBackProgressed(any());
     }
 }

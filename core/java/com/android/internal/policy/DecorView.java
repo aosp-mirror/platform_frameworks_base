@@ -521,6 +521,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
 
         ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.getOnBackInvokedDispatcher().onMotionEvent(event);
+            // Intercept touch if back dispatching is active.
+            if (viewRootImpl.getOnBackInvokedDispatcher().isDispatching()) {
+                return true;
+            }
+        }
         if (viewRootImpl != null && mWearGestureInterceptionDetector != null) {
             boolean wasIntercepting = mWearGestureInterceptionDetector.isIntercepting();
             boolean intercepting = mWearGestureInterceptionDetector.onInterceptTouchEvent(event);
@@ -2125,6 +2132,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         super.onConfigurationChanged(newConfig);
 
         initializeElevation();
+
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.getOnBackInvokedDispatcher().onConfigurationChanged(newConfig);
+        }
     }
 
     @Override
