@@ -359,7 +359,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             return;
         }
 
-        setLifecycleStateLocked(Lifecycle.State.RESUMED);
+        // Set lifecycle to resumed only if there's nothing covering the dream, ex. shade, bouncer,
+        // or hub. These updates can come in before onStartDream runs.
+        updateLifecycleStateLocked();
         mStateController.setOverlayActive(true);
         final ComponentName dreamComponent = getDreamComponent();
         mStateController.setLowLightActive(

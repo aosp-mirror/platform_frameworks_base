@@ -689,6 +689,31 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             )
     }
 
+    // Verifies that the touch handling lifecycle is STARTED even if the dream starts while not
+    // focused.
+    @Test
+    fun testLifecycle_dreamNotFocusedOnStart_isStarted() {
+        val transitionState: MutableStateFlow<ObservableTransitionState> =
+            MutableStateFlow(ObservableTransitionState.Idle(CommunalScenes.Blank))
+        communalRepository.setTransitionState(transitionState)
+
+        // Communal becomes visible.
+        transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Communal)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Start dreaming.
+        val client = client
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
+    }
+
     @Test
     fun testLifecycle_destroyedAfterOnDestroy() {
         val client = client
