@@ -435,7 +435,8 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @Override
     public boolean isTelephonyTimeZoneDetectionFeatureSupported() {
-        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        return getConfigBoolean(com.android.internal.R.bool.config_enableTelephonyTimeZoneDetection)
+                && mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }
 
     @Override

@@ -2314,6 +2314,7 @@
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneProvider" />
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
+  <java-symbol type="bool" name="config_enableTelephonyTimeZoneDetection" />
   <java-symbol type="bool" name="config_supportTelephonyTimeZoneFallback" />
   <java-symbol type="bool" name="config_autoResetAirplaneMode" />
   <java-symbol type="string" name="config_notificationAccessConfirmationActivity" />
