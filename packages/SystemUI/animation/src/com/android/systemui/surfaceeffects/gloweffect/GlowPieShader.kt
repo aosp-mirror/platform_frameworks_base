@@ -199,7 +199,7 @@ class GlowPieShader : RuntimeShader(GLOW_PIE_SHADER_COMP) {
         setColorUniform("in_colors2", colors[2])
     }
 
-    fun setAngles(vararg angles: Float) {
+    fun setAngle(vararg angles: Float) {
         if (angles.size != NUM_PIE) {
             Log.wtf(TAG, "The number of angles must be $NUM_PIE")
             return

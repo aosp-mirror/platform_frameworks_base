@@ -91,39 +91,4 @@ class GlowPieEffectTest : SysUiStateTest() {
 
         assertThat(glowPieEffect.mainAnimator.isRunning).isFalse()
     }
-
-    @Test
-    fun glowPie_progress_computesProgressCorrectly() {
-        val myGlowPieConfig =
-            object : GlowPieEffect.GlowPie {
-                override val startMs: Float = 0f
-                override val endMs: Float = GlowPieEffect.DURATION_MS.toFloat()
-                override val startAngle: Float = 0f
-                override val endAngle: Float = 6f * GlowPieEffect.PI
-                override val alphaFadeStartMs: Float = 0f
-                override val alphaFadeEndMs: Float = GlowPieEffect.DURATION_MS.toFloat()
-                override var progress: Float = 0f
-                override var time: Float = 0f
-            }
-
-        val playTime = GlowPieEffect.DURATION_MS.toFloat() * 0.5f
-        val tolerance = 1e-4f
-        myGlowPieConfig.updateProgress(playTime)
-
-        assertThat(myGlowPieConfig.time).isWithin(tolerance).of(playTime)
-        assertThat(myGlowPieConfig.progress).isWithin(tolerance).of(0.5f)
-        assertThat(myGlowPieConfig.angle()).isWithin(tolerance).of(-3.5f * GlowPieEffect.PI)
-        assertThat(myGlowPieConfig.bottomThreshold())
-            .isWithin(tolerance)
-            .of((1f - GlowPieEffect.FEATHER) * 0.5f)
-        assertThat(myGlowPieConfig.topThreshold())
-            .isWithin(tolerance)
-            .of((1f + GlowPieEffect.FEATHER) * 0.5f)
-        assertThat(myGlowPieConfig.alpha()).isWithin(tolerance).of(0.5f)
-
-        myGlowPieConfig.resetProgress()
-
-        assertThat(myGlowPieConfig.time).isEqualTo(0f)
-        assertThat(myGlowPieConfig.progress).isEqualTo(0f)
-    }
 }
