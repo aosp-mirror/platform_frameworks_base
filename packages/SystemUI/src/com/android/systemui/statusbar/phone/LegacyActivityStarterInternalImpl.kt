@@ -131,7 +131,12 @@ constructor(
 
         val runnable = Runnable {
             assistManagerLazy.get().hideAssist()
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            intent.flags =
+                if (intent.flags and Intent.FLAG_ACTIVITY_REORDER_TO_FRONT != 0) {
+                    Intent.FLAG_ACTIVITY_NEW_TASK
+                } else {
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
             intent.addFlags(flags)
             val result = intArrayOf(ActivityManager.START_CANCELED)
             activityTransitionAnimator.startIntentWithAnimation(
