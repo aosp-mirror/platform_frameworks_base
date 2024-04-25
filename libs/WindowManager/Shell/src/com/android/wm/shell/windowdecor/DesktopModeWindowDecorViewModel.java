@@ -1037,7 +1037,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue,
                         mRootTaskDisplayAreaOrganizer);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
-        windowDecoration.createResizeVeil();
 
         final DragPositioningCallback dragPositioningCallback;
         if (!DesktopModeStatus.isVeiledResizeEnabled()) {

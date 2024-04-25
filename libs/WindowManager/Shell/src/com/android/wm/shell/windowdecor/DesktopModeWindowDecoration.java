@@ -487,7 +487,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Create the resize veil for this task. Note the veil's visibility is View.GONE by default
      * until a resize event calls showResizeVeil below.
      */
-    void createResizeVeil() {
+    private void createResizeVeilIfNeeded() {
+        if (mResizeVeil != null) return;
         mResizeVeil = new ResizeVeil(mContext, mDisplayController, mAppIconBitmap, mTaskInfo,
                 mTaskSurface, mSurfaceControlTransactionSupplier);
     }
@@ -496,6 +497,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Show the resize veil.
      */
     public void showResizeVeil(Rect taskBounds) {
+        createResizeVeilIfNeeded();
         mResizeVeil.showVeil(mTaskSurface, taskBounds);
     }
 
@@ -503,6 +505,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Show the resize veil.
      */
     public void showResizeVeil(SurfaceControl.Transaction tx, Rect taskBounds) {
+        createResizeVeilIfNeeded();
         mResizeVeil.showVeil(tx, mTaskSurface, taskBounds, false /* fadeIn */);
     }
 
