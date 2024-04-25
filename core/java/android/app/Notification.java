@@ -5709,6 +5709,7 @@ public class Notification implements Parcelable
                 TemplateBindResult result) {
             p.headerless(resId == getBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource()
+                    || resId == getCompactHeadsUpBaseLayoutResource()
                     || resId == getMessagingLayoutResource()
                     || resId == R.layout.notification_template_material_media);
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
@@ -6594,6 +6595,36 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Construct a RemoteViews for the final compact heads-up notification layout.
+         * @hide
+         */
+        public RemoteViews createCompactHeadsUpContentView() {
+            // TODO(b/336225281): re-evaluate custom view usage.
+            if (useExistingRemoteView(mN.headsUpContentView)) {
+                return fullyCustomViewRequiresDecoration(false /* fromStyle */)
+                        ? minimallyDecoratedHeadsUpContentView(mN.headsUpContentView)
+                        : mN.headsUpContentView;
+            } else if (mStyle != null) {
+                final RemoteViews styleView = mStyle.makeCompactHeadsUpContentView();
+                if (styleView != null) {
+                    return styleView;
+                }
+            }
+
+            final StandardTemplateParams p = mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .fillTextsFrom(this);
+            // Notification text is shown as secondary header text
+            // for the minimal hun when it is provided.
+            // Time(when and chronometer) is not shown for the minimal hun.
+            p.headerTextSecondary(p.mText).text(null).hideTime(true);
+
+            return applyStandardTemplate(
+                    getCompactHeadsUpBaseLayoutResource(), p,
+                    null /* result */);
+        }
+
+        /**
          * Construct a RemoteViews representing the heads up notification layout.
          *
          * @deprecated For performance and system health reasons, this API is no longer required to
@@ -7269,6 +7300,10 @@ public class Notification implements Parcelable
             return R.layout.notification_template_material_heads_up_base;
         }
 
+        private int getCompactHeadsUpBaseLayoutResource() {
+            return R.layout.notification_template_material_compact_heads_up_base;
+        }
+
         private int getBigBaseLayoutResource() {
             return R.layout.notification_template_material_big_base;
         }
@@ -7791,6 +7826,16 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+            return null;
+        }
+
+        /**
+         * Construct a Style-specific RemoteViews for the final compact HUN layout.
+         * return null to use the standard compact heads up view.
+         * @hide
+         */
+        @Nullable
+        public RemoteViews makeCompactHeadsUpContentView() {
             return null;
         }
 
@@ -9106,6 +9151,16 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
+        @Nullable
+        @Override
+        public RemoteViews makeCompactHeadsUpContentView() {
+            // TODO(b/336229954): Apply minimal HUN treatment to Messaging Notifications.
+            return makeHeadsUpContentView(false);
+        }
+
+        /**
+         * @hide
+         */
         @Override
         public void reduceImageSizes(Context context) {
             super.reduceImageSizes(context);
@@ -10270,6 +10325,16 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             return makeCallLayout(StandardTemplateParams.VIEW_TYPE_HEADS_UP);
+        }
+
+        /**
+         * @hide
+         */
+        @Nullable
+        @Override
+        public RemoteViews makeCompactHeadsUpContentView() {
+            // TODO(b/336228700): Apply minimal HUN treatment for Call Style.
+            return makeHeadsUpContentView(false);
         }
 
         /**
