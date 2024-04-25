@@ -50,6 +50,8 @@ import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import kotlinx.coroutines.flow.StateFlowKt;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,8 +59,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import kotlinx.coroutines.flow.StateFlowKt;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

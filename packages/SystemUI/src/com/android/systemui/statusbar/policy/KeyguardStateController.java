@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.IActivityTaskManager;
 
-import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.KeyguardStateController.Callback;
 

@@ -33,9 +33,9 @@ import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.BatteryController;

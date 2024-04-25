@@ -34,9 +34,9 @@ import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
-import javax.inject.Inject;
-
 import kotlinx.coroutines.Job;
+
+import javax.inject.Inject;
 
 /** Controller for {@link OperatorNameView}. */
 public class OperatorNameViewController extends ViewController<OperatorNameView> {

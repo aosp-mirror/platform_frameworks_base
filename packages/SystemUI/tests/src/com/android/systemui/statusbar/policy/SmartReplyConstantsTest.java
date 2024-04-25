@@ -21,7 +21,6 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.app.RemoteInput;
-import android.os.Handler;
 import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;

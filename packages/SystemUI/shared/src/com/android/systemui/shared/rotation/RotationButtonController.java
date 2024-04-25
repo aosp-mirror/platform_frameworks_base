@@ -17,7 +17,6 @@
 package com.android.systemui.shared.rotation;
 
 import static android.content.pm.PackageManager.FEATURE_PC;
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
@@ -38,8 +37,6 @@ import android.content.IntentFilter;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.HandlerExecutor;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemProperties;

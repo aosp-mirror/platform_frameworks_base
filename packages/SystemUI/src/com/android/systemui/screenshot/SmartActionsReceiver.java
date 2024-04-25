@@ -31,7 +31,6 @@ import android.util.Log;
 
 import javax.inject.Inject;
 
-
 /**
  * Executes the smart action tapped by the user in the notification.
  */

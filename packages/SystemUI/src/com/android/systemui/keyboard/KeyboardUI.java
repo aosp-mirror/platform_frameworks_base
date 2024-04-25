@@ -50,8 +50,8 @@ import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.settings.SecureSettings;
 

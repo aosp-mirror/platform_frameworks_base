@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.notification.row;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -36,8 +34,6 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.IOException;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

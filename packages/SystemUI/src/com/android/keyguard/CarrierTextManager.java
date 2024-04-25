@@ -49,6 +49,8 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiReposito
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
+import kotlinx.coroutines.Job;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -57,8 +59,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.Job;
 
 /**
  * Controller that generates text including the carrier names and/or the status of all the SIM

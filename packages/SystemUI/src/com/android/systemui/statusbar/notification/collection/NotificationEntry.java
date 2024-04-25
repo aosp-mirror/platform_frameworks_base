@@ -71,13 +71,13 @@ import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
 import com.android.systemui.util.ListenerSet;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.flow.StateFlow;
 import kotlinx.coroutines.flow.StateFlowKt;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a notification that the system UI knows about

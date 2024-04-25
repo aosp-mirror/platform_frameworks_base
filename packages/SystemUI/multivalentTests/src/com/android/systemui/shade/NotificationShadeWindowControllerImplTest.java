@@ -79,11 +79,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import java.util.List;
-import java.util.concurrent.Executor;
-
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
+
+import java.util.List;
+import java.util.concurrent.Executor;
 
 @RunWith(ParameterizedAndroidJunit4.class)
 @RunWithLooper(setAsMainLooper = true)

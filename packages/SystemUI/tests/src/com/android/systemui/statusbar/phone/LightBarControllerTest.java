@@ -55,6 +55,8 @@ import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepositor
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,8 +65,6 @@ import org.mockito.ArgumentCaptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

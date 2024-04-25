@@ -57,11 +57,11 @@ import com.android.systemui.util.Assert;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Implementation of DozeHost for SystemUI.

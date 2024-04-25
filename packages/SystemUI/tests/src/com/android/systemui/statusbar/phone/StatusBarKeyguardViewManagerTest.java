@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,8 +36,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;

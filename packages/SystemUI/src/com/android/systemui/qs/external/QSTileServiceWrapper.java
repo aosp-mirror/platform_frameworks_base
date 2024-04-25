@@ -21,7 +21,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-
 public class QSTileServiceWrapper {
     private static final String TAG = "IQSTileServiceWrapper";
 

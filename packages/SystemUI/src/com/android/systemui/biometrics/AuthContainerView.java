@@ -87,6 +87,8 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -95,8 +97,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Provider;
-
-import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Top level container/controller for the BiometricPrompt UI.

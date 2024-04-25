@@ -30,7 +30,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.res.R.drawable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -42,6 +41,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R.drawable;
 
 import javax.inject.Inject;
 import javax.inject.Named;

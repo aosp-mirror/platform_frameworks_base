@@ -26,11 +26,11 @@ import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Handles suppressing doze on:

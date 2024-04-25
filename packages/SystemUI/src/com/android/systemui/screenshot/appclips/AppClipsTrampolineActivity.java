@@ -48,13 +48,13 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IAppClipsService;
-import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.notetask.NoteTaskEntryPoint;
+import com.android.systemui.res.R;
 
 import java.util.concurrent.Executor;
 

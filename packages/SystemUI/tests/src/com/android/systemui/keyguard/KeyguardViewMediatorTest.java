@@ -133,6 +133,10 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.flow.Flow;
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -142,10 +146,6 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.flow.Flow;
-import kotlinx.coroutines.test.TestScope;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
