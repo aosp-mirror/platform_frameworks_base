@@ -250,7 +250,10 @@ constructor(
             listOf(
                     *gatingConditionsForAuthAndDetect(),
                     Pair(isLockedOut.isFalse(), "isNotInLockOutState"),
-                    Pair(trustRepository.isCurrentUserTrusted.isFalse(), "currentUserIsNotTrusted"),
+                    Pair(
+                        keyguardRepository.isKeyguardDismissible.isFalse(),
+                        "keyguardIsNotDismissible"
+                    ),
                     Pair(
                         biometricSettingsRepository.isFaceAuthCurrentlyAllowed,
                         "isFaceAuthCurrentlyAllowed"
@@ -273,7 +276,7 @@ constructor(
                     Pair(
                         biometricSettingsRepository.isFaceAuthCurrentlyAllowed
                             .isFalse()
-                            .or(trustRepository.isCurrentUserTrusted),
+                            .or(keyguardRepository.isKeyguardDismissible),
                         "faceAuthIsNotCurrentlyAllowedOrCurrentUserIsTrusted"
                     ),
                     // We don't want to run face detect if fingerprint can be used to unlock the

@@ -59,7 +59,7 @@
         android:layout_marginTop="@dimen/overlay_border_width_neg"
         android:layout_marginEnd="@dimen/overlay_border_width_neg"
         android:layout_marginBottom="@dimen/screenshot_shelf_vertical_margin"
-        android:elevation="8dp"
+        android:elevation="4dp"
         android:background="@drawable/overlay_border"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/screenshot_preview"
@@ -72,7 +72,7 @@
         android:layout_marginStart="@dimen/overlay_border_width"
         android:layout_marginBottom="@dimen/overlay_border_width"
         android:layout_gravity="center"
-        android:elevation="8dp"
+        android:elevation="4dp"
         android:contentDescription="@string/screenshot_edit_description"
         android:scaleType="fitEnd"
         android:background="@drawable/overlay_preview_background"
@@ -85,14 +85,14 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:visibility="gone"
-        android:elevation="9dp"
+        android:elevation="5dp"
         app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview_border"/>
     <FrameLayout
         android:id="@+id/screenshot_dismiss_button"
         android:layout_width="@dimen/overlay_dismiss_button_tappable_size"
         android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
-        android:elevation="11dp"
+        android:elevation="7dp"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/screenshot_preview"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview"
@@ -147,4 +147,11 @@
         <include layout="@layout/screenshot_work_profile_first_run" />
         <include layout="@layout/screenshot_detection_notice" />
     </FrameLayout>
+    <ImageView
+        android:id="@+id/screenshot_flash"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:elevation="12dp"
+        android:src="@android:color/white"/>
 </com.android.systemui.screenshot.ui.ScreenshotShelfView>
