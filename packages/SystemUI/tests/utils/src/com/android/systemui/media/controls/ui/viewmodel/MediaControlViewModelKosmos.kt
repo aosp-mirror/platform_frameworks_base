@@ -17,8 +17,8 @@
 package com.android.systemui.media.controls.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaControlInteractor
 import com.android.systemui.media.controls.util.mediaUiEventLogger
@@ -26,9 +26,9 @@ import com.android.systemui.media.controls.util.mediaUiEventLogger
 val Kosmos.mediaControlViewModel by
     Kosmos.Fixture {
         MediaControlViewModel(
-            applicationScope = applicationCoroutineScope,
             applicationContext = applicationContext,
             backgroundDispatcher = testDispatcher,
+            backgroundExecutor = fakeExecutor,
             interactor = mediaControlInteractor,
             logger = mediaUiEventLogger,
         )

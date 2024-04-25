@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
@@ -32,6 +33,7 @@ val Kosmos.mediaCarouselViewModel by
             applicationScope = applicationCoroutineScope,
             applicationContext = applicationContext,
             backgroundDispatcher = testDispatcher,
+            backgroundExecutor = fakeExecutor,
             visualStabilityProvider = visualStabilityProvider,
             interactor = mediaCarouselInteractor,
             controlInteractorFactory = mediaControlInteractorFactory,

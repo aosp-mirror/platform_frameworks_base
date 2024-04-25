@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.util.Utils
 import com.android.systemui.util.kotlin.pairwiseBy
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +51,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Background private val backgroundExecutor: Executor,
     private val visualStabilityProvider: VisualStabilityProvider,
     private val interactor: MediaCarouselInteractor,
     private val controlInteractorFactory: MediaControlInteractorFactory,
@@ -142,9 +144,9 @@ constructor(
 
     private fun createMediaControlViewModel(instanceId: InstanceId): MediaControlViewModel {
         return MediaControlViewModel(
-            applicationScope = applicationScope,
             applicationContext = applicationContext,
             backgroundDispatcher = backgroundDispatcher,
+            backgroundExecutor = backgroundExecutor,
             interactor = controlInteractorFactory.create(instanceId),
             logger = logger,
         )
