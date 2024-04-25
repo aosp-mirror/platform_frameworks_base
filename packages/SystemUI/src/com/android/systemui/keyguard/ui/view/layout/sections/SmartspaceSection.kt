@@ -42,10 +42,10 @@ constructor(
     val context: Context,
     val keyguardClockViewModel: KeyguardClockViewModel,
     val keyguardSmartspaceViewModel: KeyguardSmartspaceViewModel,
-    val keyguardSmartspaceInteractor: KeyguardSmartspaceInteractor,
+    private val keyguardSmartspaceInteractor: KeyguardSmartspaceInteractor,
     val smartspaceController: LockscreenSmartspaceController,
     val keyguardUnlockAnimationController: KeyguardUnlockAnimationController,
-    val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
+    private val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
 ) : KeyguardSection() {
     private var smartspaceView: View? = null
     private var weatherView: View? = null
@@ -61,12 +61,10 @@ constructor(
         weatherView = smartspaceController.buildAndConnectWeatherView(constraintLayout)
         dateView = smartspaceController.buildAndConnectDateView(constraintLayout)
         pastVisibility = smartspaceView?.visibility ?: View.GONE
-        if (keyguardSmartspaceViewModel.isSmartspaceEnabled) {
-            constraintLayout.addView(smartspaceView)
-            if (keyguardSmartspaceViewModel.isDateWeatherDecoupled) {
-                constraintLayout.addView(weatherView)
-                constraintLayout.addView(dateView)
-            }
+        constraintLayout.addView(smartspaceView)
+        if (keyguardSmartspaceViewModel.isDateWeatherDecoupled) {
+            constraintLayout.addView(weatherView)
+            constraintLayout.addView(dateView)
         }
         keyguardUnlockAnimationController.lockscreenSmartspace = smartspaceView
         smartspaceVisibilityListener = OnGlobalLayoutListener {
@@ -205,13 +203,9 @@ constructor(
 
         constraintSet.apply {
             val weatherVisibility =
-                when (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) {
-                    true -> ConstraintSet.GONE
-                    false ->
-                        when (keyguardSmartspaceViewModel.isWeatherEnabled) {
-                            true -> ConstraintSet.VISIBLE
-                            false -> ConstraintSet.GONE
-                        }
+                when (keyguardSmartspaceViewModel.isWeatherVisible.value) {
+                    true -> ConstraintSet.VISIBLE
+                    false -> ConstraintSet.GONE
                 }
             setVisibility(sharedR.id.weather_smartspace_view, weatherVisibility)
             setAlpha(
