@@ -34,6 +34,7 @@ java_genrule {
 
         "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
         "--stats-file $(location hoststubgen_framework-minus-apex_stats.csv) " +
+        "--supported-api-list-file $(location hoststubgen_framework-minus-apex_apis.csv) " +
 
         "--out-impl-jar $(location ravenwood.jar) " +
 
@@ -58,6 +59,7 @@ java_genrule {
 
         "hoststubgen_framework-minus-apex.log",
         "hoststubgen_framework-minus-apex_stats.csv",
+        "hoststubgen_framework-minus-apex_apis.csv",
     ],
     visibility: ["//visibility:private"],
 }
@@ -90,6 +92,18 @@ genrule {
     ],
 }
 
+genrule {
+    name: "framework-minus-apex.ravenwood.apis",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":framework-minus-apex.ravenwood-base{hoststubgen_framework-minus-apex_apis.csv}",
+    ],
+    out: [
+        "hoststubgen_framework-minus-apex_apis.csv",
+    ],
+}
+
 java_library {
     name: "services.core-for-hoststubgen",
     installable: false, // host only jar.
@@ -108,6 +122,7 @@ java_genrule {
 
         "--debug-log $(location hoststubgen_services.core.log) " +
         "--stats-file $(location hoststubgen_services.core_stats.csv) " +
+        "--supported-api-list-file $(location hoststubgen_services.core_apis.csv) " +
 
         "--out-impl-jar $(location ravenwood.jar) " +
 
@@ -132,6 +147,7 @@ java_genrule {
 
         "hoststubgen_services.core.log",
         "hoststubgen_services.core_stats.csv",
+        "hoststubgen_services.core_apis.csv",
     ],
     visibility: ["//visibility:private"],
 }
@@ -158,6 +174,18 @@ genrule {
     ],
     out: [
         "hoststubgen_services.core_stats.csv",
+    ],
+}
+
+genrule {
+    name: "services.core.ravenwood.apis",
+    defaults: ["ravenwood-internal-only-visibility-genrule"],
+    cmd: "cp $(in) $(out)",
+    srcs: [
+        ":services.core.ravenwood-base{hoststubgen_services.core_apis.csv}",
+    ],
+    out: [
+        "hoststubgen_services.core_apis.csv",
     ],
 }
 
