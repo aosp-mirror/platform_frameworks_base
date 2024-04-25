@@ -957,12 +957,15 @@
   <java-symbol type="string" name="scCellularNetworkSecurityTitle" />
   <java-symbol type="string" name="scCellularNetworkSecurityLearnMore" />
   <java-symbol type="string" name="scIdentifierDisclosureIssueSummary" />
+  <java-symbol type="string" name="scIdentifierDisclosureIssueSummaryNotification" />
   <java-symbol type="string" name="scIdentifierDisclosureIssueTitle" />
+  <java-symbol type="string" name="scNullCipherIssueActionGotIt" />
   <java-symbol type="string" name="scNullCipherIssueActionLearnMore" />
   <java-symbol type="string" name="scNullCipherIssueActionSettings" />
   <java-symbol type="string" name="scNullCipherIssueEncryptedSummary" />
   <java-symbol type="string" name="scNullCipherIssueEncryptedTitle" />
   <java-symbol type="string" name="scNullCipherIssueNonEncryptedSummary" />
+  <java-symbol type="string" name="scNullCipherIssueNonEncryptedSummaryNotification" />
   <java-symbol type="string" name="scNullCipherIssueNonEncryptedTitle" />
   <java-symbol type="string" name="selected" />
   <java-symbol type="string" name="sendText" />
