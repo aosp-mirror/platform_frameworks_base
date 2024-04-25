@@ -6419,7 +6419,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             nextEnabledImeIds[i] = nextEnabledImes.get(i).getId();
                         }
                         settings.putEnabledInputMethodsStr(InputMethodUtils.concatEnabledImeIds(
-                                settings.getEnabledInputMethodsStr(), nextEnabledImeIds));
+                                "", nextEnabledImeIds));
 
                         // Reset selected IME.
                         settings.putSelectedInputMethod(nextIme);
