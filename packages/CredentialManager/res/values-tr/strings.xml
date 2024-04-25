@@ -73,7 +73,7 @@
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"<xliff:g id="APP_NAME">%1$s</xliff:g> için oturum açma bilgileriniz kullanılsın mı?"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"<xliff:g id="APP_NAME">%1$s</xliff:g> için oturum açma seçeneklerine izin verilsin mi?"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> için kayıtlı bir geçiş anahtarı kullanın"</string>
-    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> için kayıtlı bir şifre kullanın"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> için kayıtlı bir şifre seçin"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> için kayıtlı oturum açma bilgilerini kullanın"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> için oturum açma bilgilerini seçin"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"<xliff:g id="APP_NAME">%1$s</xliff:g> için bir seçim yapmak ister misiniz?"</string>
