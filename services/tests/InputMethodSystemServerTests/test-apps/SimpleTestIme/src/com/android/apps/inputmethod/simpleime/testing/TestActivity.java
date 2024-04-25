@@ -77,6 +77,7 @@ public class TestActivity extends Activity {
         mEditText = new EditText(this);
         mEditText.setContentDescription("Input box");
         rootView.addView(mEditText, new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+        rootView.setFitsSystemWindows(true);
         setContentView(rootView);
         mEditText.requestFocus();
         sLastCreatedInstance = new WeakReference<>(this);
