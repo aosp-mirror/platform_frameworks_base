@@ -87,7 +87,7 @@ constructor(
             controllerFactory.create(
                 displaySelector = { minByOrNull { it.naturalWidth } },
                 effectFactory = { LinearSideLightRevealEffect(it.isVerticalRotation()) },
-                overlayContainerName = SURFACE_CONTAINER_NAME
+                overlayContainerName = OVERLAY_TITLE
             )
         controller.init()
 
@@ -182,7 +182,7 @@ constructor(
     private companion object {
         const val TAG = "FoldLightRevealOverlayAnimation"
         const val WAIT_FOR_ANIMATION_TIMEOUT_MS = 2000L
-        const val SURFACE_CONTAINER_NAME = "fold-overlay-container"
+        const val OVERLAY_TITLE = "fold-animation-overlay"
         val ANIMATION_DURATION: Long
             get() = SystemProperties.getLong("persist.fold_animation_duration", 200L)
     }
