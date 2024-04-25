@@ -2425,7 +2425,7 @@ public final class ActiveServices {
                                 final long before24Hr = Math.max(0,
                                             SystemClock.elapsedRealtime() - (24 * 60 * 60 * 1000));
                                 final long lastTimeOutAt = fgsTypeInfo.getTimeLimitExceededAt();
-                                if (fgsTypeInfo.getFirstFgsStartTime() < before24Hr
+                                if (fgsTypeInfo.getFirstFgsStartRealtime() < before24Hr
                                         || (lastTimeOutAt != Long.MIN_VALUE
                                             && r.app.mState.getLastTopTime() > lastTimeOutAt)) {
                                     // Reset the time limit info for this fgs type if it has been
