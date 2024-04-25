@@ -844,7 +844,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloccare lo schermo"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Controlla come e quando si blocca lo schermo."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Cancellare tutti i dati"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Cancella i dati del tablet senza preavviso eseguendo un ripristino dati di fabbrica."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Cancella i dati del tablet senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Consente di cancellare i dati del dispositivo Android TV senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Cancella i dati del sistema di infotainment senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>

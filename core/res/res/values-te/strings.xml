@@ -843,7 +843,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"స్క్రీన్‌ను లాక్ చేయడానికి"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"స్క్రీన్‌ను ఎలా మరియు ఎప్పుడు లాక్ చేయాలనే దాన్ని నియంత్రిస్తుంది."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"మొత్తం డేటాను ఎరేజ్ చేయడానికి"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే టాబ్లెట్ డేటాను ఎరేజ్ చేయండి."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"\'ఫ్యాక్టరీ డేటా రీసెట్‌\'ను అమలు చేయడం ద్వారా వార్నింగ్‌తో పని లేకుండా టాబ్లెట్ డేటాను ఎరేజ్ చేయండి."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"హెచ్చరించకుండానే మీ Android TV పరికరం డేటాను ఫ్యాక్టరీ డేటా రీసెట్ ద్వారా తొలగిస్తుంది."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా, హెచ్చరిక లేకుండానే సమాచారంతో కూడిన వినోదం సిస్టమ్ డేటాను తొలగించి ఫ్యాక్టరీ రీసెట్ చేయబడుతుంది."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే ఫోన్ డేటాను ఎరేజ్ చేస్తుంది."</string>
