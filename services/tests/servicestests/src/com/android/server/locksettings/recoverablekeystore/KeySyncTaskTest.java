@@ -89,6 +89,7 @@ public class KeySyncTaskTest {
     private static final String WRAPPING_KEY_ALIAS = "KeySyncTaskTest/WrappingKey";
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
     private static final int TEST_USER_ID = 1000;
+    private static final int TEST_USER_ID_2 = 1002;
     private static final int TEST_RECOVERY_AGENT_UID = 10009;
     private static final int TEST_RECOVERY_AGENT_UID2 = 10010;
     private static final byte[] TEST_VAULT_HANDLE =
@@ -821,6 +822,48 @@ public class KeySyncTaskTest {
 
         verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
         verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID2);
+    }
+
+    @Test
+    public void run_unlock_keepsRemoteLskfVerificationCounter() throws Exception {
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(TEST_USER_ID, 5);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(TEST_USER_ID_2, 4);
+        mKeySyncTask = new KeySyncTask(
+          mRecoverableKeyStoreDb,
+          mRecoverySnapshotStorage,
+          mSnapshotListenersStorage,
+          TEST_USER_ID,
+          CREDENTIAL_TYPE_PIN,
+          "12345".getBytes(),
+          /*credentialUpdated=*/ false,
+          mPlatformKeyManager,
+          mTestOnlyInsecureCertificateHelper,
+          mMockScrypt);
+        mKeySyncTask.run();
+
+        assertThat(mRecoverableKeyStoreDb.getBadRemoteGuessCounter(TEST_USER_ID)).isEqualTo(5);
+        assertThat(mRecoverableKeyStoreDb.getBadRemoteGuessCounter(TEST_USER_ID_2)).isEqualTo(4);
+    }
+
+    @Test
+    public void run_secretChange_resetsRemoteLskfVerificationCounter() throws Exception {
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(TEST_USER_ID, 5);
+        mRecoverableKeyStoreDb.setBadRemoteGuessCounter(TEST_USER_ID_2, 4);
+        mKeySyncTask = new KeySyncTask(
+          mRecoverableKeyStoreDb,
+          mRecoverySnapshotStorage,
+          mSnapshotListenersStorage,
+          TEST_USER_ID,
+          CREDENTIAL_TYPE_PIN,
+          "12345".getBytes(),
+          /*credentialUpdated=*/ true,
+          mPlatformKeyManager,
+          mTestOnlyInsecureCertificateHelper,
+          mMockScrypt);
+        mKeySyncTask.run();
+
+        assertThat(mRecoverableKeyStoreDb.getBadRemoteGuessCounter(TEST_USER_ID)).isEqualTo(0);
+        assertThat(mRecoverableKeyStoreDb.getBadRemoteGuessCounter(TEST_USER_ID_2)).isEqualTo(4);
     }
 
     @Test
