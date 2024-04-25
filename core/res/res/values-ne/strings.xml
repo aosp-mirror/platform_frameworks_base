@@ -352,7 +352,7 @@
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"जेस्चरहरू सम्बन्धी कार्य गर्नुहोस्"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ट्याप, स्वाइप गर्न, थिच्न र अन्य जेस्चरहरू सम्बन्धी कार्य गर्न सक्छ"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"फिंगरप्रिन्टका जेस्चरहरू"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"यसले यन्त्रक‍ो फिंगरप्रिन्टसम्बन्धी सेन्सरमा गरिएका इसाराहरूलाई खिच्‍न सक्छ।"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"यसले यन्त्रक‍ो फिंगरप्रिन्टसम्बन्धी सेन्सरमा गरिएका जेस्चर खिच्‍न सक्छ।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रिनसट लिनुहोस्"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिस्प्लेको स्क्रिनसट लिन सकिन्छ।"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"प्रिभ्यू, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
@@ -828,14 +828,14 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्क्रिन अनलक गर्न गरिएको प्रयासको अनुगमन गर्ने"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप भएको संख्या निरीक्षण गर्नुहोस् र यदि निकै धेरै गलत पासवर्डहरू टाइप भएका छन भने ट्याब्लेट लक गर्नुहोस् वा ट्याब्लेटका सबै डेटा मेट्नुहोस्।"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप गरिन्छ भन्ने कुराको रेकर्ड राख्नुहोस् र धेरै पटक गलत पासवर्ड टाइप गरिएका खण्डमा ट्याबलेट लक गर्नुहोस् वा यसका सबै डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप गरेको सङ्ख्या निरीक्षण गर्नुहोस्, र धेरै पटक गलत पासवर्डहरू टाइप गरिएको खण्डमा आफ्नो Android टिभी यन्त्र लक गर्नुहोस् वा डिभाइसमा भएको सम्पूर्ण डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप गरिन्छ भन्ने कुरा निगरानी गर्नुहोस् र अत्यन्तै धेरै पटक गलत पासवर्ड टाइप गरिएका खण्डमा यो इन्फोटेनमेन्ट प्रणाली लक गर्नुहोस् वा यस इन्फोटेनमेन्ट प्रणालीका सबै डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप भएको छ हेर्नुहोस् र निकै धेरै पटक गलत पासवर्ड टाइप भएको भने फोन लक गर्नुहोस् वा फोनका सबै डेटा मेट्नुहोस्।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा ट्याब्लेट लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप गरिन्छ भन्ने कुराको रेकर्ड राख्नुहोस् र धेरै पटक गलत पासवर्ड टाइप गरिएका खण्डमा ट्याबलेट लक गर्नुहोस् वा प्रयोगकर्ताका सबै डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप गरेको सङ्ख्या निरीक्षण गर्नुहोस्, र धेरै पटक गलत पासवर्डहरू टाइप गरिएको खण्डमा आफ्नो Android टिभी यन्त्र लक गर्नुहोस् वा यो प्रयोगकर्ताको सम्पूर्ण डेटा मेटाउनुहोस्।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप गरिन्छ भन्ने कुरा निगरानी गर्नुहोस् र अत्यन्तै धेरै पटक गलत पासवर्ड टाइप गरिएका खण्डमा यो इन्फोटेनमेन्ट प्रणाली लक गर्नुहोस् वा यस प्रोफाइलका सबै डेटा मेटाउनुहोस्।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा फोन लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"स्क्रिन अनलक गर्दा कति पटक गलत पासवर्ड टाइप गरिन्छ भन्ने कुराको रेकर्ड राख्नुहोस् र धेरै पटक गलत पासवर्ड टाइप गरिएका खण्डमा फोन लक गर्नुहोस् वा प्रयोगकर्ताका सबै डेटा मेटाउनुहोस्।"</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"स्क्रिन लक परिवर्तन गर्ने"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"स्क्रिन लक परिवर्तन गर्नुहोस्।"</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"स्क्रिन लक गर्ने"</string>
