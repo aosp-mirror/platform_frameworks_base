@@ -649,6 +649,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         for (CachedBluetoothDevice cbd : mMemberDevices) {
             cbd.setName(name);
         }
+        if (mSubDevice != null) {
+            mSubDevice.setName(name);
+        }
     }
 
     /**
