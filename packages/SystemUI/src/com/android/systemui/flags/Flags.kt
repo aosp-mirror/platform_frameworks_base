@@ -178,7 +178,7 @@ object Flags {
 
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
-    @JvmField val KEYGUARD_TALKBACK_FIX = releasedFlag("keyguard_talkback_fix")
+    @JvmField val KEYGUARD_TALKBACK_FIX = unreleasedFlag("keyguard_talkback_fix")
 
     // TODO(b/287268101): Tracking bug.
     @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
