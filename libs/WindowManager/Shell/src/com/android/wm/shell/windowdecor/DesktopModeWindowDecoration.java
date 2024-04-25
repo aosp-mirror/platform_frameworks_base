@@ -649,10 +649,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     @Override
-    void releaseViews() {
+    void releaseViews(WindowContainerTransaction wct) {
         closeHandleMenu();
         closeMaximizeMenu();
-        super.releaseViews();
+        super.releaseViews(wct);
     }
 
     /**

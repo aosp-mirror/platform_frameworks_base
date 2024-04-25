@@ -42,6 +42,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.quality.Strictness.LENIENT;
@@ -64,6 +65,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams;
 import android.window.SurfaceSyncGroup;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
@@ -610,30 +612,166 @@ public class WindowDecorationTests extends ShellTestCase {
         mockitoSession.finishMocking();
     }
 
-
     @Test
-    public void testInsetsRemovedWhenCaptionIsHidden() {
+    public void testRelayout_captionHidden_insetsRemoved() {
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController)
                 .getDisplay(Display.DEFAULT_DISPLAY);
 
-        mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(false);
-
-        final ActivityManager.TaskDescription.Builder taskDescriptionBuilder =
-                new ActivityManager.TaskDescription.Builder();
         final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
                 .setDisplayId(Display.DEFAULT_DISPLAY)
-                .setTaskDescriptionBuilder(taskDescriptionBuilder)
                 .setVisible(true)
+                .setBounds(new Rect(0, 0, 1000, 1000))
                 .build();
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
+        // Run it once so that insets are added.
+        mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(true);
+        windowDecor.relayout(taskInfo);
+
+        // Run it again so that insets are removed.
+        mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(false);
         windowDecor.relayout(taskInfo);
 
         verify(mMockWindowContainerTransaction).removeInsetsSource(eq(taskInfo.token), any(),
                 eq(0) /* index */, eq(captionBar()));
         verify(mMockWindowContainerTransaction).removeInsetsSource(eq(taskInfo.token), any(),
                 eq(0) /* index */, eq(mandatorySystemGestures()));
+    }
+
+    @Test
+    public void testRelayout_captionHidden_neverWasVisible_insetsNotRemoved() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true)
+                .setBounds(new Rect(0, 0, 1000, 1000))
+                .build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+
+        // Hidden from the beginning, so no insets were ever added.
+        mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(false);
+        windowDecor.relayout(taskInfo);
+
+        // Never added.
+        verify(mMockWindowContainerTransaction, never()).addInsetsSource(eq(taskInfo.token), any(),
+                eq(0) /* index */, eq(captionBar()), any(), any());
+        verify(mMockWindowContainerTransaction, never()).addInsetsSource(eq(taskInfo.token), any(),
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
+        // No need to remove them if they were never added.
+        verify(mMockWindowContainerTransaction, never()).removeInsetsSource(eq(taskInfo.token),
+                any(), eq(0) /* index */, eq(captionBar()));
+        verify(mMockWindowContainerTransaction, never()).removeInsetsSource(eq(taskInfo.token),
+                any(), eq(0) /* index */, eq(mandatorySystemGestures()));
+    }
+
+    @Test
+    public void testClose_withExistingInsets_insetsRemoved() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true)
+                .setBounds(new Rect(0, 0, 1000, 1000))
+                .build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+
+        // Relayout will add insets.
+        mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(true);
+        windowDecor.relayout(taskInfo);
+        verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
+                eq(0) /* index */, eq(captionBar()), any(), any());
+        verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
+
+        windowDecor.close();
+
+        // Insets should be removed.
+        verify(mMockWindowContainerTransaction).removeInsetsSource(eq(taskInfo.token), any(),
+                eq(0) /* index */, eq(captionBar()));
+        verify(mMockWindowContainerTransaction).removeInsetsSource(eq(taskInfo.token), any(),
+                eq(0) /* index */, eq(mandatorySystemGestures()));
+    }
+
+    @Test
+    public void testClose_withoutExistingInsets_insetsNotRemoved() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+
+        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true)
+                .setBounds(new Rect(0, 0, 1000, 1000))
+                .build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+
+        windowDecor.close();
+
+        // No need to remove insets.
+        verify(mMockWindowContainerTransaction, never()).removeInsetsSource(eq(taskInfo.token),
+                any(), eq(0) /* index */, eq(captionBar()));
+        verify(mMockWindowContainerTransaction, never()).removeInsetsSource(eq(taskInfo.token),
+                any(), eq(0) /* index */, eq(mandatorySystemGestures()));
+    }
+
+    @Test
+    public void testRelayout_captionFrameChanged_insetsReapplied() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+        mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(true);
+        final WindowContainerToken token = TestRunningTaskInfoBuilder.createMockWCToken();
+        final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true);
+
+        // Relayout twice with different bounds.
+        final ActivityManager.RunningTaskInfo firstTaskInfo =
+                builder.setToken(token).setBounds(new Rect(0, 0, 1000, 1000)).build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(firstTaskInfo);
+        windowDecor.relayout(firstTaskInfo);
+        final ActivityManager.RunningTaskInfo secondTaskInfo =
+                builder.setToken(token).setBounds(new Rect(50, 50, 1000, 1000)).build();
+        windowDecor.relayout(secondTaskInfo);
+
+        // Insets should be applied twice.
+        verify(mMockWindowContainerTransaction, times(2)).addInsetsSource(eq(token), any(),
+                eq(0) /* index */, eq(captionBar()), any(), any());
+        verify(mMockWindowContainerTransaction, times(2)).addInsetsSource(eq(token), any(),
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
+    }
+
+    @Test
+    public void testRelayout_captionFrameUnchanged_insetsNotApplied() {
+        final Display defaultDisplay = mock(Display.class);
+        doReturn(defaultDisplay).when(mMockDisplayController)
+                .getDisplay(Display.DEFAULT_DISPLAY);
+        mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(true);
+        final WindowContainerToken token = TestRunningTaskInfoBuilder.createMockWCToken();
+        final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
+                .setDisplayId(Display.DEFAULT_DISPLAY)
+                .setVisible(true);
+
+        // Relayout twice with the same bounds.
+        final ActivityManager.RunningTaskInfo firstTaskInfo =
+                builder.setToken(token).setBounds(new Rect(0, 0, 1000, 1000)).build();
+        final TestWindowDecoration windowDecor = createWindowDecoration(firstTaskInfo);
+        windowDecor.relayout(firstTaskInfo);
+        final ActivityManager.RunningTaskInfo secondTaskInfo =
+                builder.setToken(token).setBounds(new Rect(0, 0, 1000, 1000)).build();
+        windowDecor.relayout(secondTaskInfo);
+
+        // Insets should only need to be applied once.
+        verify(mMockWindowContainerTransaction, times(1)).addInsetsSource(eq(token), any(),
+                eq(0) /* index */, eq(captionBar()), any(), any());
+        verify(mMockWindowContainerTransaction, times(1)).addInsetsSource(eq(token), any(),
+                eq(0) /* index */, eq(mandatorySystemGestures()), any(), any());
     }
 
     @Test
@@ -763,6 +901,7 @@ public class WindowDecorationTests extends ShellTestCase {
 
         void relayout(ActivityManager.RunningTaskInfo taskInfo,
                 boolean applyStartTransactionOnDraw) {
+            mRelayoutParams.mRunningTaskInfo = taskInfo;
             mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
             relayout(mRelayoutParams, mMockSurfaceControlStartT, mMockSurfaceControlFinishT,
                     mMockWindowContainerTransaction, mMockView, mRelayoutResult);
