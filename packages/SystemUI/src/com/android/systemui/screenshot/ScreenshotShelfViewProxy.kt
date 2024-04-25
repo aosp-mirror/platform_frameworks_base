@@ -31,6 +31,7 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.core.animation.doOnEnd
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.res.R
@@ -77,7 +78,13 @@ constructor(
     private val animationController = ScreenshotAnimationController(view)
 
     init {
-        ScreenshotShelfViewBinder.bind(view, viewModel, LayoutInflater.from(context))
+        ScreenshotShelfViewBinder.bind(
+            view,
+            viewModel,
+            LayoutInflater.from(context),
+            onDismissalRequested = { event, velocity -> requestDismissal(event, velocity) },
+            onDismissalCancelled = { animationController.getSwipeReturnAnimation().start() }
+        )
         addPredictiveBackListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         setOnKeyListener { requestDismissal(SCREENSHOT_DISMISSED_OTHER) }
         debugLog(DEBUG_WINDOW) { "adding OnComputeInternalInsetsListener" }
@@ -103,7 +110,10 @@ constructor(
     override fun updateOrientation(insets: WindowInsets) {}
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
-        return animationController.getEntranceAnimation()
+        val entrance = animationController.getEntranceAnimation(screenRect, showFlash)
+        // reset the timeout when animation finishes
+        entrance.doOnEnd { callbacks?.onUserInteraction() }
+        return entrance
     }
 
     override fun addQuickShareChip(quickShareAction: Notification.Action) {}
@@ -111,6 +121,10 @@ constructor(
     override fun setChipIntents(imageData: SavedImageData) {}
 
     override fun requestDismissal(event: ScreenshotEvent?) {
+        requestDismissal(event, null)
+    }
+
+    private fun requestDismissal(event: ScreenshotEvent?, velocity: Float?) {
         debugLog(DEBUG_DISMISS) { "screenshot dismissal requested: $event" }
 
         // If we're already animating out, don't restart the animation
@@ -119,7 +133,7 @@ constructor(
             return
         }
         event?.let { logger.log(it, 0, packageName) }
-        val animator = animationController.getExitAnimation()
+        val animator = animationController.getSwipeDismissAnimation(velocity)
         animator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animator: Animator) {
