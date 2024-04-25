@@ -30,6 +30,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.flags.Flags;
 
 import com.android.internal.R;
 
@@ -124,7 +125,12 @@ public class BigPictureNotificationImageView extends ImageView implements
     public void setImageDrawable(@Nullable Drawable drawable) {
         if (drawable instanceof BitmapDrawable bitmapDrawable) {
             if (bitmapDrawable.getBitmap() == null) {
-                Log.e(TAG, "setting BitmapDrawable with null Bitmap (invalid image file?)");
+                if (Flags.bigPictureStyleDiscardEmptyIconBitmapDrawables()) {
+                    Log.e(TAG, "discarding BitmapDrawable with null Bitmap (invalid image file?)");
+                    drawable = null;
+                } else {
+                    Log.e(TAG, "setting BitmapDrawable with null Bitmap (invalid image file?)");
+                }
             }
         }
 
