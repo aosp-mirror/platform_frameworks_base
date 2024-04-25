@@ -45,6 +45,8 @@ final class OnDeviceIntelligenceShellCommand extends ShellCommand {
                 return getConfiguredServices();
             case "set-model-broadcasts":
                 return setBroadcastKeys();
+            case "set-deviceconfig-namespace":
+                return setDeviceConfigNamespace();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -69,6 +71,10 @@ final class OnDeviceIntelligenceShellCommand extends ShellCommand {
                         + "[ReceiverPackageName] "
                         + "[DURATION] To set the names of broadcast intent keys that are to be "
                         + "emitted for cts tests.");
+        pw.println(
+                "  set-deviceconfig-namespace [DeviceConfigNamespace] "
+                        + "[DURATION] To set the device config namespace "
+                        + "to use for cts tests.");
     }
 
     private int setTemporaryServices() {
@@ -116,6 +122,18 @@ final class OnDeviceIntelligenceShellCommand extends ShellCommand {
                 + modelLoadedKey
                 + " \n and \n OnDeviceTrustedInferenceService set to " + modelUnloadedKey
                 + "\n and Package name set to : " + receiverPackageName
+                + " for " + duration + "ms");
+        return 0;
+    }
+
+    private int setDeviceConfigNamespace() {
+        final PrintWriter out = getOutPrintWriter();
+        final String configNamespace = getNextArg();
+
+        final int duration = Integer.parseInt(getNextArgRequired());
+        mService.setTemporaryDeviceConfigNamespace(configNamespace, duration);
+        out.println("OnDeviceIntelligence DeviceConfig Namespace temporarily set to "
+                + configNamespace
                 + " for " + duration + "ms");
         return 0;
     }

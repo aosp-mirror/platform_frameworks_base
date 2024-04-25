@@ -120,6 +120,11 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
      */
     public static final String MODEL_UNLOADED_BUNDLE_KEY = "model_unloaded";
 
+    /**
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_UPDATE_BUNDLE_KEY = "device_config_update";
+
     private IRemoteStorageService mRemoteStorageService;
 
     /**
