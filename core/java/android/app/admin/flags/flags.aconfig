@@ -244,10 +244,13 @@ flag {
 }
 
 flag {
-  name: "dmrh_can_set_app_restriction"
+  name: "dmrh_set_app_restrictions"
   namespace: "enterprise"
   description: "Allow DMRH to set application restrictions (both on the profile and the parent)"
   bug: "328758346"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {

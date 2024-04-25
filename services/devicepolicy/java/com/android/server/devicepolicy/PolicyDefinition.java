@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 final class PolicyDefinition<V> {
@@ -81,6 +82,10 @@ final class PolicyDefinition<V> {
     // are some special APIs to handle user restriction policies and this is the way we can identify
     // them.
     private static final int POLICY_FLAG_USER_RESTRICTION_POLICY = 1 << 4;
+
+    // Only invoke the policy enforcer callback when the policy value changes, and do not invoke the
+    // callback in other cases such as device reboots.
+    private static final int POLICY_FLAG_SKIP_ENFORCEMENT_IF_UNCHANGED = 1 << 5;
 
     private static final MostRestrictive<Boolean> FALSE_MORE_RESTRICTIVE = new MostRestrictive<>(
             List.of(new BooleanPolicyValue(false), new BooleanPolicyValue(true)));
@@ -231,11 +236,11 @@ final class PolicyDefinition<V> {
                     // Don't need to take in a resolution mechanism since its never used, but might
                     // need some refactoring to not always assume a non-null mechanism.
                     new MostRecent<>(),
-                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_NON_COEXISTABLE_POLICY,
-                    // Application restrictions are now stored and retrieved from DPMS, so no
-                    // enforcing is required, however DPMS calls into UM to set restrictions for
-                    // backwards compatibility.
-                    (Bundle value, Context context, Integer userId, PolicyKey policyKey) -> true,
+                    // Only invoke the enforcement callback during policy change and not other state
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE
+                            | POLICY_FLAG_NON_COEXISTABLE_POLICY
+                            | POLICY_FLAG_SKIP_ENFORCEMENT_IF_UNCHANGED,
+                    PolicyEnforcerCallbacks::setApplicationRestrictions,
                     new BundlePolicySerializer());
 
     /**
@@ -581,6 +586,10 @@ final class PolicyDefinition<V> {
         return (mPolicyFlags & POLICY_FLAG_USER_RESTRICTION_POLICY) != 0;
     }
 
+    boolean shouldSkipEnforcementIfNotChanged() {
+        return (mPolicyFlags & POLICY_FLAG_SKIP_ENFORCEMENT_IF_UNCHANGED) != 0;
+    }
+
     @Nullable
     PolicyValue<V> resolvePolicy(LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminsPolicy) {
         return mResolutionMechanism.resolve(adminsPolicy);
@@ -610,7 +619,7 @@ final class PolicyDefinition<V> {
      * {@link Object#equals} implementation.
      */
     private PolicyDefinition(
-            PolicyKey key,
+            @NonNull  PolicyKey key,
             ResolutionMechanism<V> resolutionMechanism,
             QuadFunction<V, Context, Integer, PolicyKey, Boolean> policyEnforcerCallback,
             PolicySerializer<V> policySerializer) {
@@ -622,11 +631,12 @@ final class PolicyDefinition<V> {
      * {@link Object#equals} and {@link Object#hashCode()} implementation.
      */
     private PolicyDefinition(
-            PolicyKey policyKey,
+            @NonNull  PolicyKey policyKey,
             ResolutionMechanism<V> resolutionMechanism,
             int policyFlags,
             QuadFunction<V, Context, Integer, PolicyKey, Boolean> policyEnforcerCallback,
             PolicySerializer<V> policySerializer) {
+        Objects.requireNonNull(policyKey);
         mPolicyKey = policyKey;
         mResolutionMechanism = resolutionMechanism;
         mPolicyFlags = policyFlags;

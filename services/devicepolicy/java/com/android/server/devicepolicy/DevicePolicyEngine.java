@@ -217,7 +217,7 @@ final class DevicePolicyEngine {
     <V> void setLocalPolicy(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @Nullable PolicyValue<V> value,
+            @NonNull PolicyValue<V> value,
             int userId,
             boolean skipEnforcePolicy) {
         Objects.requireNonNull(policyDefinition);
@@ -313,6 +313,7 @@ final class DevicePolicyEngine {
         }
         updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
         write();
+        applyToInheritableProfiles(policyDefinition, enforcingAdmin, value, userId);
     }
 
     // TODO: add more documentation on broadcasts/callbacks to use to get current enforced values
@@ -400,7 +401,7 @@ final class DevicePolicyEngine {
      * else remove the policy from child.
      */
     private <V> void applyToInheritableProfiles(PolicyDefinition<V> policyDefinition,
-            EnforcingAdmin enforcingAdmin, PolicyValue<V> value, int userId) {
+            EnforcingAdmin enforcingAdmin, @Nullable PolicyValue<V> value, int userId) {
         if (policyDefinition.isInheritable()) {
             Binder.withCleanCallingIdentity(() -> {
                 List<UserInfo> userInfos = mUserManager.getProfiles(userId);
@@ -1742,14 +1743,17 @@ final class DevicePolicyEngine {
         }
     }
 
-    <V> void reapplyAllPoliciesLocked() {
+    <V> void reapplyAllPoliciesOnBootLocked() {
         for (PolicyKey policy : mGlobalPolicies.keySet()) {
             PolicyState<?> policyState = mGlobalPolicies.get(policy);
             // Policy definition and value will always be of the same type
             PolicyDefinition<V> policyDefinition =
                     (PolicyDefinition<V>) policyState.getPolicyDefinition();
-            PolicyValue<V> policyValue = (PolicyValue<V>) policyState.getCurrentResolvedPolicy();
-            enforcePolicy(policyDefinition, policyValue, UserHandle.USER_ALL);
+            if (!policyDefinition.shouldSkipEnforcementIfNotChanged()) {
+                PolicyValue<V> policyValue =
+                        (PolicyValue<V>) policyState.getCurrentResolvedPolicy();
+                enforcePolicy(policyDefinition, policyValue, UserHandle.USER_ALL);
+            }
         }
         for (int i = 0; i < mLocalPolicies.size(); i++) {
             int userId = mLocalPolicies.keyAt(i);
@@ -1758,10 +1762,11 @@ final class DevicePolicyEngine {
                 // Policy definition and value will always be of the same type
                 PolicyDefinition<V> policyDefinition =
                         (PolicyDefinition<V>) policyState.getPolicyDefinition();
-                PolicyValue<V> policyValue =
-                        (PolicyValue<V>) policyState.getCurrentResolvedPolicy();
-                enforcePolicy(policyDefinition, policyValue, userId);
-
+                if (!policyDefinition.shouldSkipEnforcementIfNotChanged()) {
+                    PolicyValue<V> policyValue =
+                            (PolicyValue<V>) policyState.getCurrentResolvedPolicy();
+                    enforcePolicy(policyDefinition, policyValue, userId);
+                }
             }
         }
     }

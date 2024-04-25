@@ -3350,7 +3350,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 break;
             case SystemService.PHASE_SYSTEM_SERVICES_READY:
                 synchronized (getLockObject()) {
-                    mDevicePolicyEngine.reapplyAllPoliciesLocked();
+                    mDevicePolicyEngine.reapplyAllPoliciesOnBootLocked();
                 }
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
@@ -11442,7 +11442,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             setBackwardsCompatibleAppRestrictions(
                     caller, packageName, restrictions, caller.getUserHandle());
-        } else if (Flags.dmrhCanSetAppRestriction()) {
+        } else if (Flags.dmrhSetAppRestrictions()) {
             final boolean isRoleHolder;
             if (who != null) {
                 // DO or PO
@@ -11483,10 +11483,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             new BundlePolicyValue(restrictions),
                             affectedUserId);
                 }
-                Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
-                changeIntent.setPackage(packageName);
-                changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                mContext.sendBroadcastAsUser(changeIntent, UserHandle.of(affectedUserId));
             } else {
                 mInjector.binderWithCleanCallingIdentity(() -> {
                     mUserManager.setApplicationRestrictions(packageName, restrictions,
@@ -12844,7 +12840,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return Bundle.EMPTY;
             }
             return policies.get(enforcingAdmin).getValue();
-        } else if (Flags.dmrhCanSetAppRestriction()) {
+        } else if (Flags.dmrhSetAppRestrictions()) {
             final boolean isRoleHolder;
             if (who != null) {
                 // Caller is DO or PO. They cannot call this on parent
@@ -15771,8 +15767,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
                             userId);
             List<Bundle> restrictions = new ArrayList<>();
-            for (EnforcingAdmin admin : policies.keySet()) {
-                restrictions.add(policies.get(admin).getValue());
+            for (PolicyValue<Bundle> policyValue: policies.values()) {
+                Bundle value = policyValue.getValue();
+                // Probably not necessary since setApplicationRestrictions only sets non-empty
+                // Bundle, but just in case.
+                if (value != null && !value.isEmpty()) {
+                    restrictions.add(value);
+                }
             }
 
             return mInjector.binderWithCleanCallingIdentity(() -> {
