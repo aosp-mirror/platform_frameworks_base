@@ -935,7 +935,6 @@ public class SettingsBackupTest {
                         Settings.System.VOLUME_VOICE, // deprecated since API 2?
                         Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                         Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
-                        Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                         Settings.System.SCREEN_BRIGHTNESS_FOR_ALS,
                         Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE,
                         Settings.System.WEAR_TTS_PREWARM_ENABLED,
