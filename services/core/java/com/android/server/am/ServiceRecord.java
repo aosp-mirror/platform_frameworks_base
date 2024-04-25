@@ -683,6 +683,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         private long mLastFgsStartTime;
         @UptimeMillisLong
         private long mTimeLimitExceededAt = Long.MIN_VALUE;
+        @UptimeMillisLong
         private long mTotalRuntime = 0;
 
         TimeLimitedFgsInfo(@UptimeMillisLong long startTime) {
@@ -705,9 +706,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
 
         public void updateTotalRuntime() {
-            mTotalRuntime += SystemClock.elapsedRealtime() - mLastFgsStartTime;
+            mTotalRuntime += SystemClock.uptimeMillis() - mLastFgsStartTime;
         }
 
+        @UptimeMillisLong
         public long getTotalRuntime() {
             return mTotalRuntime;
         }
