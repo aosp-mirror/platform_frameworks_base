@@ -12974,7 +12974,8 @@ public final class ViewRootImpl implements ViewParent,
         mMinusOneFrameIntervalMillis = timeIntervalMillis;
 
         mLastUpdateTimeMillis = currentTimeMillis;
-        if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
+        if (timeIntervalMillis + mMinusTwoFrameIntervalMillis
+                >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
             int infrequentUpdateCount = mInfrequentUpdateCount;
             mInfrequentUpdateCount = infrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
                     ? infrequentUpdateCount : infrequentUpdateCount + 1;
