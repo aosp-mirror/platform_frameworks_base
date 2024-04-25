@@ -1489,6 +1489,29 @@ public final class InputManagerGlobal {
     }
 
     /**
+     * @see InputManager#addUniqueIdAssociationByDescriptor(String, String)
+     */
+    public void addUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor,
+                                                   @NonNull String displayUniqueId) {
+        try {
+            mIm.addUniqueIdAssociationByDescriptor(inputDeviceDescriptor, displayUniqueId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#removeUniqueIdAssociationByDescriptor(String)
+     */
+    public void removeUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor) {
+        try {
+            mIm.removeUniqueIdAssociationByDescriptor(inputDeviceDescriptor);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @see InputManager#getInputDeviceBluetoothAddress(int)
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
