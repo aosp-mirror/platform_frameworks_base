@@ -1954,8 +1954,6 @@
     <string name="group_system_cycle_back">Cycle backward through recent apps</string>
     <!-- User visible title for the keyboard shortcut that accesses list of all apps and search. [CHAR LIMIT=70] -->
     <string name="group_system_access_all_apps_search">Open apps list</string>
-    <!-- User visible title for the keyboard shortcut that hides and (re)showes taskbar. [CHAR LIMIT=70] -->
-    <string name="group_system_hide_reshow_taskbar">Show taskbar</string>
     <!-- User visible title for the keyboard shortcut that accesses [system] settings. [CHAR LIMIT=70] -->
     <string name="group_system_access_system_settings">Open settings</string>
     <!-- User visible title for the keyboard shortcut that accesses Assistant app. [CHAR LIMIT=70] -->
