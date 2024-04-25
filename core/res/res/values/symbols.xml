@@ -1117,6 +1117,7 @@
   <java-symbol type="string" name="accessibility_label_private_profile" />
   <java-symbol type="string" name="accessibility_label_clone_profile" />
   <java-symbol type="string" name="accessibility_label_communal_profile" />
+  <java-symbol type="string" name="private_space_biometric_prompt_title" />
   <java-symbol type="string" name="mediasize_unknown_portrait" />
   <java-symbol type="string" name="mediasize_unknown_landscape" />
   <java-symbol type="string" name="mediasize_iso_a0" />
