@@ -2745,6 +2745,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED,
                 SecureSettingsProto.Zen.SETTINGS_SUGGESTION_VIEWED);
+        dumpSetting(s, p,
+                Settings.Secure.CHARGE_OPTIMIZATION_MODE,
+                SecureSettingsProto.CHARGE_OPTIMIZATION_MODE);
         p.end(zenToken);
 
         // Please insert new settings using the same order as in SecureSettingsProto.

@@ -731,7 +731,9 @@ message SecureSettingsProto {
     }
     optional Zen zen = 71;
 
+    optional SettingProto charge_optimization_mode = 101 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 101;
+    // Next tag = 102;
 }
