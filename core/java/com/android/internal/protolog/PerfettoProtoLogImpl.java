@@ -131,7 +131,8 @@ public class PerfettoProtoLogImpl implements IProtoLog {
             Runnable cacheUpdater
     ) {
         Producer.init(InitArguments.DEFAULTS);
-        mDataSource.register(DataSourceParams.DEFAULTS);
+        mDataSource.register(new DataSourceParams(
+                DataSourceParams.PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT));
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
         this.mLogGroups = logGroups;
