@@ -315,6 +315,13 @@ flag {
 }
 
 flag {
+    name: "backup_connected_apps_settings"
+    namespace: "enterprise"
+    description: "backup and restore connected work and personal apps user settings across devices"
+    bug: "175067666"
+}
+
+flag {
     name: "headless_single_user_compatibility_fix"
     namespace: "enterprise"
     description: "Fix for compatibility issue introduced from using single_user mode on pre-Android V builds"
