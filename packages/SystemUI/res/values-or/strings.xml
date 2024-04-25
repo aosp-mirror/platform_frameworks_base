@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"ବର୍ତ୍ତମାନର ଆପ୍ସ ମଧ୍ୟରେ ଆଗକୁ ଯାଆନ୍ତୁ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"ବର୍ତ୍ତମାନର ଆପ୍ସ ମଧ୍ୟରେ ପଛକୁ ଯାଆନ୍ତୁ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ଆପ୍ସ ତାଲିକା ଖୋଲନ୍ତୁ"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"ଟାସ୍କବାର ଦେଖାନ୍ତୁ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ସେଟିଂସ ଖୋଲନ୍ତୁ"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ଖୋଲନ୍ତୁ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ଲକ ସ୍କ୍ରିନ"</string>
@@ -830,7 +829,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"କ୍ଵିକ ସେଟିଂସ ଖୋଲନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"ଦ୍ରୁତ ସେଟିଂସ୍ ବନ୍ଦ କରନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> ଭାବରେ ସାଇନ୍‌ ଇନ୍‌ କରିଛନ୍ତି"</string>
-    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ଉପଯୋଗକର୍ତ୍ତା ବାଛନ୍ତୁ"</string>
+    <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ୟୁଜର ବାଛନ୍ତୁ"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"କୌଣସି ଇଣ୍ଟରନେଟ୍‌ କନେକ୍ସନ୍ ନାହିଁ"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ସେଟିଙ୍ଗ ଖୋଲନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ସେଟିଂସର କ୍ରମ ଏଡିଟ କରନ୍ତୁ।"</string>

@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Navigasi apl terbaharu ke arah kanan"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Navigasi apl terbaharu ke arah kiri"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Buka senarai apl"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Tunjukkan bar tugas"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Buka tetapan"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Buka Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Kunci skrin"</string>

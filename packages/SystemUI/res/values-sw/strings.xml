@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Nenda mbele kwenye programu ulizofungua awali"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Rudi nyuma kwenye programu ulizofungua awali"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Fungua orodha ya programu"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Onyesha upauzana"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Fungua mipangilio"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Fungua programu ya Mratibu wa Google"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Funga skrini"</string>

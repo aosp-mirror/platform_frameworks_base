@@ -289,7 +289,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Utilisateur"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Réseaux accessibles"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Réseaux disponibles"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Aucun réseau accessible"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Aucun réseau Wi-Fi à proximité"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Activation en cours…"</string>
@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Parcourir les applications récentes"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Parcourir les applications récentes en sens inverse"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ouvrir la liste des applications"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Afficher la barre des tâches"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ouvrir les paramètres"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Ouvrir l\'Assistant"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Écran de verrouillage"</string>

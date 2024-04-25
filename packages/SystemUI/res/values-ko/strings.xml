@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"최근 앱 간 앞으로 순환"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"최근 앱 간 뒤로 순환"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"앱 목록 열기"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"태스크 바 표시"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"설정 열기"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"어시스턴트 열기"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"잠금 화면"</string>

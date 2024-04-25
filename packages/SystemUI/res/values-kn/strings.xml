@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"ಇತ್ತೀಚೆಗೆ ಬಳಸಿದ ಆ್ಯಪ್‌ಗಳ ಸಹಾಯದಿಂದ ಮುಂದಕ್ಕೆ ಹೋಗಿ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"ಇತ್ತೀಚೆಗೆ ಬಳಸಿದ ಆ್ಯಪ್‌ಗಳ ಸಹಾಯದಿಂದ ಹಿಂದಕ್ಕೆ ಹೋಗಿ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ಆ್ಯಪ್‌ಗಳ ಪಟ್ಟಿಯನ್ನು ತೆರೆಯಿರಿ"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"ಟಾಸ್ಕ್‌ಬಾರ್ ಅನ್ನು ತೋರಿಸಿ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ಸೆಟ್ಟಿಂಗ್‍ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"assistant ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಮಾಡಿ"</string>
