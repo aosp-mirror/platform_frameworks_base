@@ -392,6 +392,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     Scenes.Gone,
                     Scenes.Lockscreen,
                     Scenes.Bouncer,
+                    Scenes.Gone,
                     Scenes.Shade,
                     Scenes.QuickSettings,
                 )

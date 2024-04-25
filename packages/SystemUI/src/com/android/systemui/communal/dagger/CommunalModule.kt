@@ -76,7 +76,12 @@ interface CommunalModule {
             val config =
                 SceneContainerConfig(
                     sceneKeys = listOf(CommunalScenes.Blank, CommunalScenes.Communal),
-                    initialSceneKey = CommunalScenes.Blank
+                    initialSceneKey = CommunalScenes.Blank,
+                    navigationDistances =
+                        mapOf(
+                            CommunalScenes.Blank to 0,
+                            CommunalScenes.Communal to 1,
+                        ),
                 )
             return SceneDataSourceDelegator(applicationScope, config)
         }
