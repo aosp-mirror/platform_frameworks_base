@@ -4831,7 +4831,7 @@
 
      See android.credentials.CredentialManager
     -->
-    <string name="config_defaultCredentialManagerAutofillService" translatable="false"></string>
+    <string name="config_defaultCredentialManagerAutofillService" translatable="false">com.android.credentialmanager/com.android.credentialmanager.autofill.CredentialAutofillService</string>
 
     <!-- The component name(s), flattened to a string, for the system's credential manager
       provider services. These services allow retrieving and storing credentials.
