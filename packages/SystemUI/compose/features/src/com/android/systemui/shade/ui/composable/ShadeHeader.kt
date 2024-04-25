@@ -372,6 +372,20 @@ private fun BatteryIcon(
             val batteryIcon = BatteryMeterView(context, null)
             batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ON)
 
+            val themedContext =
+                ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings_Header)
+            val fg = Utils.getColorAttrDefaultColor(themedContext, android.R.attr.textColorPrimary)
+            val bg =
+                Utils.getColorAttrDefaultColor(
+                    themedContext,
+                    android.R.attr.textColorPrimaryInverse,
+                )
+
+            // [BatteryMeterView.updateColors] is an old method that was built to distinguish
+            // between dual-tone colors and single-tone. The current icon is only single-tone, so
+            // the final [fg] is the only one we actually need
+            batteryIcon.updateColors(fg, bg, fg)
+
             val batteryMaterViewController =
                 createBatteryMeterViewController(batteryIcon, StatusBarLocation.QS)
             batteryMaterViewController.init()
