@@ -7560,8 +7560,14 @@ public final class ActiveServices {
             super(Objects.requireNonNull(am).mHandler, msg, label);
         }
 
-        void start(@NonNull ProcessRecord proc, long millis) {
-            start(proc, proc.getPid(), proc.uid, millis);
+        @Override
+        public int getPid(@NonNull ProcessRecord proc) {
+            return proc.getPid();
+        }
+
+        @Override
+        public int getUid(@NonNull ProcessRecord proc) {
+            return proc.uid;
         }
     }
 
@@ -7571,11 +7577,14 @@ public final class ActiveServices {
             super(Objects.requireNonNull(am).mHandler, msg, label);
         }
 
-        void start(@NonNull ServiceRecord service, long millis) {
-            start(service,
-                    (service.app != null) ? service.app.getPid() : 0,
-                    service.appInfo.uid,
-                    millis);
+        @Override
+        public int getPid(@NonNull ServiceRecord service) {
+            return (service.app != null) ? service.app.getPid() : 0;
+        }
+
+        @Override
+        public int getUid(@NonNull ServiceRecord service) {
+            return (service.appInfo != null) ? service.appInfo.uid : 0;
         }
     }
 
