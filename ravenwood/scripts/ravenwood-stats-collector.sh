@@ -17,8 +17,9 @@
 
 set -e
 
-# Output file
-out=/tmp/ravenwood-stats-all.csv
+# Output files
+stats=/tmp/ravenwood-stats-all.csv
+apis=/tmp/ravenwood-apis-all.csv
 
 # Where the input files are.
 path=$ANDROID_BUILD_TOP/out/host/linux-x86/testcases/ravenwood-stats-checker/x86_64/
@@ -41,12 +42,28 @@ dump() {
     sed -e '1d' -e "s/^/$jar,/"  $file
 }
 
-collect() {
-    echo 'Jar,PackageName,ClassName,SupportedMethods,TotalMethods'
-    dump "framework-minus-apex"  hoststubgen_framework-minus-apex_stats.csv
-    dump "service.core"  hoststubgen_services.core_stats.csv
+collect_stats() {
+    local out="$1"
+    {
+        echo 'Jar,PackageName,ClassName,SupportedMethods,TotalMethods'
+        dump "framework-minus-apex"  hoststubgen_framework-minus-apex_stats.csv
+        dump "service.core"  hoststubgen_services.core_stats.csv
+    } > "$out"
+
+    echo "Stats CVS created at $out"
 }
 
-collect >$out
+collect_apis() {
+    local out="$1"
+    {
+        echo 'Jar,PackageName,ClassName,MethodName,Descriptor'
+        dump "framework-minus-apex"  hoststubgen_framework-minus-apex_apis.csv
+        dump "service.core"  hoststubgen_services.core_apis.csv
+    } > "$out"
 
-echo "Full dump CVS created at $out"
+    echo "API CVS created at $out"
+}
+
+
+collect_stats $stats
+collect_apis $apis
