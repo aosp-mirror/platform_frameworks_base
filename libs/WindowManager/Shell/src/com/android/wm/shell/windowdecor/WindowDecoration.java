@@ -404,17 +404,21 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         lp.setTrustedOverlay();
         lp.inputFeatures = params.mInputFeatures;
         if (mViewHost == null) {
+            Trace.beginSection("CaptionViewHostLayout-new");
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
                     mCaptionWindowManager);
             if (params.mApplyStartTransactionOnDraw) {
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
             }
             mViewHost.setView(outResult.mRootView, lp);
+            Trace.endSection();
         } else {
+            Trace.beginSection("CaptionViewHostLayout-relayout");
             if (params.mApplyStartTransactionOnDraw) {
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
             }
             mViewHost.relayout(lp);
+            Trace.endSection();
         }
         Trace.endSection(); // CaptionViewHostLayout
     }
