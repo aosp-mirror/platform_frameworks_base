@@ -313,10 +313,14 @@ public class WallpaperCropper {
                 adjustedCrop.right -= widthToRemove / 2 + widthToRemove % 2;
             }
         } else {
-            // TODO (b/281648899) the third case is not always correct, fix that.
+            // Note: the third case when MODE == BALANCE, -W + sqrt(W * H * R), is the width to add
+            // so that, when removing the appropriate height, we get a bitmap of aspect ratio R and
+            // total surface of W * H. In other words it is the width to add to get the desired
+            // aspect ratio R, while preserving the total number of pixels W * H.
             int widthToAdd = mode == REMOVE ? 0
                     : mode == ADD ? (int) (0.5 + crop.height() * screenRatio - crop.width())
-                    : (int) (0.5 + crop.height() - crop.width());
+                    : (int) (0.5 - crop.width()
+                            + Math.sqrt(crop.width() * crop.height() * screenRatio));
             int availableWidth = bitmapSize.x - crop.width();
             if (availableWidth >= widthToAdd) {
                 int widthToAddLeft = widthToAdd / 2;
