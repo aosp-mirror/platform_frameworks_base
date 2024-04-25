@@ -99,15 +99,17 @@ public class WallpaperCropper {
 
     /**
      * Given the dimensions of the original wallpaper image, some optional suggested crops
-     * (either defined by the user, or coming from a backup), and whether the device is RTL,
+     * (either defined by the user, or coming from a backup), and whether the device has RTL layout,
      * generate a crop for the current display. This is done through the following process:
      * <ul>
-     *     <li> If no suggested crops are provided, center the full image on the display. </li>
+     *     <li> If no suggested crops are provided, in most cases render the full image left-aligned
+     *     (or right-aligned if RTL) and use any additional width for parallax up to
+     *     {@link #MAX_PARALLAX}. There are exceptions, see comments in "Case 1" of this function.
      *     <li> If there is a suggested crop the given displaySize, reuse the suggested crop and
-     *     adjust it using {@link #getAdjustedCrop}. </li>
+     *     adjust it using {@link #getAdjustedCrop}.
      *     <li> If there are suggested crops, but not for the orientation of the given displaySize,
      *     reuse one of the suggested crop for another orientation and adjust if using
-     *     {@link #getAdjustedCrop}. </li>
+     *     {@link #getAdjustedCrop}.
      * </ul>
      *
      * @param displaySize     The dimensions of the surface where we want to render the wallpaper
@@ -270,16 +272,12 @@ public class WallpaperCropper {
      * Adjust a given crop:
      * <ul>
      *     <li>If parallax = true, make sure we have a parallax of at most {@link #MAX_PARALLAX},
-     *     by removing content from the right (or left if RTL) if necessary.
-     *     </li>
+     *     by removing content from the right (or left if RTL layout) if necessary.
      *     <li>If parallax = false, make sure we do not have additional width for parallax. If we
      *     have additional width for parallax, remove half of the additional width on both sides.
-     *     </li>
      *     <li>Make sure the crop fills the screen, i.e. that the width/height ratio of the crop
-     *     is at least the width/height ratio of the screen. If it is less, add width to the crop
-     *     (if possible on both sides) to fill the screen. If not enough width available, remove
-     *     height to the crop.
-     *     </li>
+     *     is at least the width/height ratio of the screen. This is done accordingly to the
+     *     {@code mode} used, which can be either {@link #ADD}, {@link #REMOVE} or {@link #BALANCE}.
      * </ul>
      */
     @VisibleForTesting
