@@ -349,6 +349,7 @@ import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
@@ -454,13 +455,12 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Use WMShell for app transition.
      */
-    public static final String ENABLE_SHELL_TRANSITIONS = "persist.wm.debug.shell_transit";
+    private static final String ENABLE_SHELL_TRANSITIONS = "persist.wm.debug.shell_transit";
 
     /**
      * @see #ENABLE_SHELL_TRANSITIONS
      */
-    public static final boolean sEnableShellTransitions =
-            SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, true);
+    public static final boolean sEnableShellTransitions = getShellTransitEnabled();
 
     /**
      * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
@@ -10229,5 +10229,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         uid);
             }
         }
+    }
+
+    private static boolean getShellTransitEnabled() {
+        android.content.pm.FeatureInfo autoFeature = SystemConfig.getInstance()
+                .getAvailableFeatures().get(PackageManager.FEATURE_AUTOMOTIVE);
+        if (autoFeature != null && autoFeature.version >= 0) {
+            return SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, true);
+        }
+        return true;
     }
 }

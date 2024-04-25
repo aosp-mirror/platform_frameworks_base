@@ -43,9 +43,11 @@ import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SH
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
+import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.IBinder;
@@ -124,8 +126,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     static final String TAG = "ShellTransitions";
 
     /** Set to {@code true} to enable shell transitions. */
-    public static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+    public static final boolean ENABLE_SHELL_TRANSITIONS = getShellTransitEnabled();
     public static final boolean SHELL_TRANSITIONS_ROTATION = ENABLE_SHELL_TRANSITIONS
             && SystemProperties.getBoolean("persist.wm.debug.shell_transit_rotate", false);
 
@@ -1616,5 +1617,17 @@ public class Transitions implements RemoteCallable<Transitions>,
                 pw.println(transition.mHandler);
             }
         }
+    }
+
+    private static boolean getShellTransitEnabled() {
+        try {
+            if (AppGlobals.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_AUTOMOTIVE, 0)) {
+                return SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+            }
+        } catch (RemoteException re) {
+            Log.w(TAG, "Error getting system features");
+        }
+        return true;
     }
 }
