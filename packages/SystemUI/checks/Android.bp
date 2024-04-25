@@ -39,7 +39,7 @@ java_test_host {
     srcs: ["tests/**/*.kt"],
     data: [
         ":framework",
-        ":androidx.annotation_annotation-nodeps",
+        ":androidx.annotation_annotation",
         ":kotlinx-coroutines-core",
     ],
     static_libs: [
