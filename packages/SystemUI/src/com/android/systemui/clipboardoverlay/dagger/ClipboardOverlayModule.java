@@ -25,17 +25,17 @@ import android.hardware.display.DisplayManager;
 import android.view.Display;
 import android.view.LayoutInflater;
 
-import com.android.systemui.res.R;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayView;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.DisplayTracker;
+
+import dagger.Module;
+import dagger.Provides;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 import javax.inject.Qualifier;
-
-import dagger.Module;
-import dagger.Provides;
 
 /** Module for {@link com.android.systemui.clipboardoverlay}. */
 @Module

@@ -68,12 +68,12 @@ constructor(
             object : AccessibilityDelegate() {
                 private val accessibilityAuthenticateHint =
                     AccessibilityNodeInfo.AccessibilityAction(
-                        AccessibilityNodeInfoCompat.ACTION_CLICK,
+                        AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
                         resources.getString(R.string.accessibility_authenticate_hint)
                     )
                 private val accessibilityEnterHint =
                     AccessibilityNodeInfo.AccessibilityAction(
-                        AccessibilityNodeInfoCompat.ACTION_CLICK,
+                        AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
                         resources.getString(R.string.accessibility_enter_hint)
                     )
                 override fun onInitializeAccessibilityNodeInfo(
@@ -261,10 +261,10 @@ constructor(
         return lockIconState
     }
 
-    enum class IconType {
-        LOCK,
-        UNLOCK,
-        FINGERPRINT,
+    enum class IconType(val contentDescriptionResId: Int) {
+        LOCK(R.string.accessibility_lock_icon),
+        UNLOCK(R.string.accessibility_unlock_button),
+        FINGERPRINT(R.string.accessibility_fingerprint_label),
     }
 
     enum class AccessibilityHintType {

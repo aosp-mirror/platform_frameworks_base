@@ -957,12 +957,15 @@
   <java-symbol type="string" name="scCellularNetworkSecurityTitle" />
   <java-symbol type="string" name="scCellularNetworkSecurityLearnMore" />
   <java-symbol type="string" name="scIdentifierDisclosureIssueSummary" />
+  <java-symbol type="string" name="scIdentifierDisclosureIssueSummaryNotification" />
   <java-symbol type="string" name="scIdentifierDisclosureIssueTitle" />
+  <java-symbol type="string" name="scNullCipherIssueActionGotIt" />
   <java-symbol type="string" name="scNullCipherIssueActionLearnMore" />
   <java-symbol type="string" name="scNullCipherIssueActionSettings" />
   <java-symbol type="string" name="scNullCipherIssueEncryptedSummary" />
   <java-symbol type="string" name="scNullCipherIssueEncryptedTitle" />
   <java-symbol type="string" name="scNullCipherIssueNonEncryptedSummary" />
+  <java-symbol type="string" name="scNullCipherIssueNonEncryptedSummaryNotification" />
   <java-symbol type="string" name="scNullCipherIssueNonEncryptedTitle" />
   <java-symbol type="string" name="selected" />
   <java-symbol type="string" name="sendText" />
@@ -1528,6 +1531,7 @@
   <java-symbol type="layout" name="number_picker" />
   <java-symbol type="layout" name="permissions_package_list_item" />
   <java-symbol type="layout" name="popup_menu_item_layout" />
+  <java-symbol type="layout" name="popup_menu_item_layout_material" />
   <java-symbol type="layout" name="popup_menu_header_item_layout" />
   <java-symbol type="layout" name="remote_views_adapter_default_loading_view" />
   <java-symbol type="layout" name="search_bar" />
@@ -2313,6 +2317,7 @@
   <java-symbol type="string" name="config_primaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_enableSecondaryLocationTimeZoneProvider" />
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
+  <java-symbol type="bool" name="config_enableTelephonyTimeZoneDetection" />
   <java-symbol type="bool" name="config_supportTelephonyTimeZoneFallback" />
   <java-symbol type="bool" name="config_autoResetAirplaneMode" />
   <java-symbol type="string" name="config_notificationAccessConfirmationActivity" />
@@ -2337,6 +2342,7 @@
   <java-symbol type="layout" name="notification_material_action_tombstone" />
   <java-symbol type="layout" name="notification_template_material_base" />
   <java-symbol type="layout" name="notification_template_material_heads_up_base" />
+  <java-symbol type="layout" name="notification_template_material_compact_heads_up_base" />
   <java-symbol type="layout" name="notification_template_material_big_base" />
   <java-symbol type="layout" name="notification_template_material_big_picture" />
   <java-symbol type="layout" name="notification_template_material_inbox" />
@@ -5407,4 +5413,7 @@
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
 
   <java-symbol type="integer" name="config_defaultMinEmergencyGestureTapDurationMillis" />
+  <!-- Back swipe thresholds -->
+  <java-symbol type="dimen" name="navigation_edge_action_progress_threshold" />
+  <java-symbol type="dimen" name="back_progress_non_linear_factor" />
 </resources>

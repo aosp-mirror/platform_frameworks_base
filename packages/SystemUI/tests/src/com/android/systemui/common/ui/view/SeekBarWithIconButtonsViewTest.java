@@ -33,9 +33,9 @@ import android.widget.SeekBar;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView.OnSeekBarWithIconButtonsChangeListener;
+import com.android.systemui.res.R;
 
 import org.junit.Before;
 import org.junit.Test;

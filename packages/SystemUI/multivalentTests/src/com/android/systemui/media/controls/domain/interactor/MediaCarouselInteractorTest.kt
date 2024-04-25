@@ -20,6 +20,7 @@ import android.R
 import android.graphics.drawable.Icon
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
@@ -29,7 +30,9 @@ import com.android.systemui.media.controls.MediaTestHelper
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaRecommendationsInteractor
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
+import com.android.systemui.media.controls.domain.pipeline.interactor.mediaRecommendationsInteractor
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
@@ -50,6 +53,8 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
 
     private val mediaFilterRepository: MediaFilterRepository = kosmos.mediaFilterRepository
+    private val mediaRecommendationsInteractor: MediaRecommendationsInteractor =
+        kosmos.mediaRecommendationsInteractor
 
     private val underTest: MediaCarouselInteractor = kosmos.mediaCarouselInteractor
 
@@ -226,7 +231,29 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
     fun hasActiveMediaOrRecommendation_nothingSet_returnsFalse() =
         testScope.runTest { assertThat(underTest.hasActiveMediaOrRecommendation.value).isFalse() }
 
+    @Test
+    fun loadMediaFromRec() =
+        testScope.runTest {
+            val isMediaFromRec by collectLastValue(underTest.isMediaFromRec)
+            val instanceId = InstanceId.fakeInstanceId(123)
+            val data = MediaData(active = true, instanceId = instanceId, packageName = PACKAGE_NAME)
+
+            assertThat(isMediaFromRec).isFalse()
+
+            mediaRecommendationsInteractor.switchToMediaControl(PACKAGE_NAME)
+            mediaFilterRepository.addSelectedUserMediaEntry(data)
+            mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
+
+            assertThat(isMediaFromRec).isFalse()
+
+            mediaFilterRepository.addSelectedUserMediaEntry(data.copy(isPlaying = true))
+            mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
+
+            assertThat(isMediaFromRec).isTrue()
+        }
+
     companion object {
         private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
+        private const val PACKAGE_NAME = "com.android.example"
     }
 }

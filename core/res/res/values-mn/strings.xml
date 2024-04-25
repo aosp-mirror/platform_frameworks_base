@@ -356,6 +356,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Дэлгэцийн зургийг дарах"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дэлгэцийн зургийг дарах боломжтой."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Урьдчилан үзэх, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"статус самбарыг идэвхгүй болгох болон өөрчлөх"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Апп нь статус самбарыг идэвхгүй болгох эсвэл систем дүрсийг нэмэх, хасах боломжтой."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"статусын хэсэг болох"</string>
@@ -828,7 +830,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Дэлгэцийн түгжээг тайлах оролдлогыг хянах"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал таблетыг түгжих болон таблетын бүх датаг арилгана"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Дэлгэцийн түгжээг тайлах үед нууц үгийг буруу оруулах тоог хянах ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал таблетыг түгжинэ эсвэл таблетын бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Дэлгэцийн түгжээг тайлахаар буруу оруулсан нууц үгийн тоог хянаж, нууц үгийг хэт олон удаа буруу оруулсан тохиолдолд таны Android TV төхөөрөмжийг түгжиж эсвэл үүний бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Дэлгэцийн түгжээг тайлахад буруу бичиж оруулсан нууц үгний тоог хянаж, инфотэйнмент системийг түгжих эсвэл хэт олон удаа нууц үгийг буруу бичиж оруулсан тохиолдолд инфотэйнмент системийн бүх өгөгдлийг устгана."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах, ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал утсыг түгжиж эсвэл утасны бүх өгөгдлийг арилгана"</string>
@@ -841,7 +843,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Дэлгэц түгжих"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Дэлгэц хэзээ яаж түгжихийг удирдах"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Бүх өгөгдлийг арилгах"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Үйлдвэрийн дата утгыг өгсөнөөр таблетын дата шууд арилгагдана."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Үйлдвэрийн өгөгдлийн төлөвт шилжсэнээр таблетын өгөгдлийг шууд арилгана уу."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Таны Android TV төхөөрөмжийн өгөгдлийг танд анхааруулалгүйгээр үйлдвэрээс гарсан төлөвт шилжүүлэн устгана."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Үйлдвэрийн өгөгдлийн төлөвт үйлдлийг гүйцэтгэснээр инфотэйнмент системийн өгөгдлийг сануулгагүйгээр устгана."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Сануулахгүйгээр утасны бүх өгөгдлийг арилгаж, үйлдвэрийн өгөгдлийн тохиргоонд шинэчилнэ"</string>

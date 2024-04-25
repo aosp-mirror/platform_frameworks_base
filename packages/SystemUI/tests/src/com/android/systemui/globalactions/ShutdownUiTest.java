@@ -40,7 +40,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class ShutdownUiTest extends SysuiTestCase {

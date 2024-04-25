@@ -37,3 +37,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "big_picture_style_discard_empty_icon_bitmap_drawables"
+    namespace: "systemui"
+    description: "BigPictureStyle: Ignore Icon BitmapDrawables without Bitmaps"
+    bug: "335878768"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

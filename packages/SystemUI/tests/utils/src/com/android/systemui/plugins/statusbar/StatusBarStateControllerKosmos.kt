@@ -31,7 +31,7 @@ var Kosmos.statusBarStateController: SysuiStatusBarStateController by
     Kosmos.Fixture {
         StatusBarStateControllerImpl(
             uiEventLogger,
-            interactionJankMonitor,
+            { interactionJankMonitor },
             mock(),
             { shadeInteractor },
             { deviceUnlockedInteractor },

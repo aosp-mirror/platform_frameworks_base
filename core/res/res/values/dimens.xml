@@ -1043,4 +1043,10 @@
     <dimen name="handwriting_bounds_offset_top">40dp</dimen>
     <dimen name="handwriting_bounds_offset_right">10dp</dimen>
     <dimen name="handwriting_bounds_offset_bottom">40dp</dimen>
+
+    <!-- The threshold for full back swipe progress. -->
+    <dimen name="navigation_edge_action_progress_threshold">412dp</dimen>
+    <!-- The non-linear progress interval when the screen is wider than the
+        navigation_edge_action_progress_threshold. -->
+    <item name="back_progress_non_linear_factor" format="float" type="dimen">0.2</item>
 </resources>

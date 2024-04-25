@@ -16,3 +16,11 @@ flag {
      description: "Feature flag for YUV image compress to Ultra HDR."
      bug: "308978825"
 }
+
+flag {
+    name: "icon_load_drawable_return_null_when_uri_decode_fails"
+    is_exported: true
+    namespace: "core_graphics"
+    description: "Return null when decode from URI fails in Icon.loadDrawable()"
+    bug: "335878768"
+}

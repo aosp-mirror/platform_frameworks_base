@@ -94,6 +94,7 @@ import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRe
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.AvalancheController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
 
 import org.junit.Assert;
@@ -140,6 +141,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    @Mock private AvalancheController mAvalancheController;
 
     @Before
     public void setUp() throws Exception {
@@ -153,7 +155,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mNotificationSectionsManager,
                 mBypassController,
                 mStatusBarKeyguardViewManager,
-                mLargeScreenShadeInterpolator
+                mLargeScreenShadeInterpolator,
+                mAvalancheController
         ));
 
         // Register the debug flags we use

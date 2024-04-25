@@ -28,8 +28,8 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.FontSizeUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.qs.DataUsageGraph;
+import com.android.systemui.res.R;
 
 import java.text.DecimalFormat;
 

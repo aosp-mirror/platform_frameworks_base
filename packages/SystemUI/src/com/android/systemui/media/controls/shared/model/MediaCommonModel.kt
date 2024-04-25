@@ -20,7 +20,7 @@ package com.android.systemui.media.controls.shared.model
 sealed class MediaCommonModel {
     data class MediaControl(
         val mediaLoadedModel: MediaDataLoadingModel.Loaded,
-        val canBeRemoved: Boolean = false
+        val canBeRemoved: Boolean = false,
     ) : MediaCommonModel()
 
     data class MediaRecommendations(val recsLoadingModel: SmartspaceMediaLoadingModel) :

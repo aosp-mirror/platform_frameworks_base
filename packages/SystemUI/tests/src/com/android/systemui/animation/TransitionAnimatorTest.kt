@@ -64,14 +64,7 @@ class TransitionAnimatorTest : SysuiTestCase() {
 
     @get:Rule(order = 0) val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     @get:Rule(order = 1) val activityRule = ActivityScenarioRule(EmptyTestActivity::class.java)
-    @get:Rule(order = 2)
-    val motionRule =
-        ViewMotionTestRule<EmptyTestActivity>(
-            pathManager,
-            { activityRule.scenario },
-            context = context,
-            bitmapDiffer = null,
-        )
+    @get:Rule(order = 2) val motionRule = ViewMotionTestRule(pathManager, { activityRule.scenario })
 
     @Test
     fun backgroundAnimation_whenLaunching() {

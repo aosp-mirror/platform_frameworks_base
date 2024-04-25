@@ -30,7 +30,6 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.IntoSet;
 
-
 /** Dagger Module for code in the power package. */
 @Module(
         includes = {

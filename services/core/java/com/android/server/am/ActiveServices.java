@@ -3724,6 +3724,33 @@ public final class ActiveServices {
         return fgsType;
     }
 
+    /**
+     * @return the constant time limit defined for the given foreground service type.
+     */
+    private long getTimeLimitForFgsType(int foregroundServiceType) {
+        return switch (foregroundServiceType) {
+            case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING ->
+                    mAm.mConstants.mMediaProcessingFgsTimeoutDuration;
+            case ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC ->
+                    mAm.mConstants.mDataSyncFgsTimeoutDuration;
+            // Add logic for time limits introduced in the future for other fgs types above.
+            default -> Long.MAX_VALUE;
+        };
+    }
+
+    /**
+     * @return the next stop time for the given type, based on how long it has already ran for.
+     * The total runtime is automatically reset 24hrs after the first fgs start of this type
+     * or if the app has recently been in the TOP state when the app calls startForeground().
+     */
+    private long getNextFgsStopTime(int fgsType, TimeLimitedFgsInfo fgsInfo) {
+        final long timeLimit = getTimeLimitForFgsType(fgsType);
+        if (timeLimit == Long.MAX_VALUE) {
+            return Long.MAX_VALUE;
+        }
+        return fgsInfo.getLastFgsStartTime() + Math.max(0, timeLimit - fgsInfo.getTotalRuntime());
+    }
+
     private void maybeUpdateFgsTrackingLocked(ServiceRecord sr, int previousFgsType) {
         final int previouslyTimeLimitedType = getTimeLimitedFgsType(previousFgsType);
         if (previouslyTimeLimitedType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE
@@ -3755,7 +3782,7 @@ public final class ActiveServices {
         }
 
         traceInstant("FGS start: ", sr);
-        final long nowRealtime = SystemClock.elapsedRealtime();
+        final long nowUptime = SystemClock.uptimeMillis();
 
         // Fetch/create/update the fgs info for the time-limited type.
         SparseArray<TimeLimitedFgsInfo> fgsInfo = mTimeLimitedFgsInfo.get(sr.appInfo.uid);
@@ -3766,10 +3793,10 @@ public final class ActiveServices {
         final int timeLimitedFgsType = getTimeLimitedFgsType(sr.foregroundServiceType);
         TimeLimitedFgsInfo fgsTypeInfo = fgsInfo.get(timeLimitedFgsType);
         if (fgsTypeInfo == null) {
-            fgsTypeInfo = sr.createTimeLimitedFgsInfo(nowRealtime);
+            fgsTypeInfo = sr.createTimeLimitedFgsInfo(nowUptime);
             fgsInfo.put(timeLimitedFgsType, fgsTypeInfo);
         }
-        fgsTypeInfo.setLastFgsStartTime(nowRealtime);
+        fgsTypeInfo.setLastFgsStartTime(nowUptime);
 
         // We'll cancel the previous ANR timer and start a fresh one below.
         mFGSAnrTimer.cancel(sr);
@@ -3777,7 +3804,7 @@ public final class ActiveServices {
 
         final Message msg = mAm.mHandler.obtainMessage(
                 ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
-        final long timeoutCallbackTime = sr.getNextFgsStopTime(timeLimitedFgsType, fgsTypeInfo);
+        final long timeoutCallbackTime = getNextFgsStopTime(timeLimitedFgsType, fgsTypeInfo);
         if (timeoutCallbackTime == Long.MAX_VALUE) {
             // This should never happen since we only get to this point if the service record's
             // foregroundServiceType attribute contains a type that can be timed-out.
@@ -3833,6 +3860,20 @@ public final class ActiveServices {
                 mFGSAnrTimer.discard(sr);
                 return;
             }
+
+            final long lastTopTime = sr.app.mState.getLastTopTime();
+            final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
+            final long nowUptime = SystemClock.uptimeMillis();
+            if (constantTimeLimit > (nowUptime - lastTopTime)) {
+                // The app was in the TOP state after the FGS was started so its time allowance
+                // should be counted from that time since this is considered a user interaction
+                mFGSAnrTimer.discard(sr);
+                final Message msg = mAm.mHandler.obtainMessage(
+                                        ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
+                mAm.mHandler.sendMessageAtTime(msg, lastTopTime + constantTimeLimit);
+                return;
+            }
+
             Slog.e(TAG_SERVICE, "FGS (" + ServiceInfo.foregroundServiceTypeToLabel(fgsType)
                     + ") timed out: " + sr);
             mFGSAnrTimer.accept(sr);
@@ -3843,14 +3884,13 @@ public final class ActiveServices {
                 final TimeLimitedFgsInfo fgsTypeInfo = fgsInfo.get(fgsType);
                 if (fgsTypeInfo != null) {
                     // Update total runtime for the time-limited fgs type and mark it as timed out.
-                    final long nowRealtime = SystemClock.elapsedRealtime();
                     fgsTypeInfo.updateTotalRuntime();
-                    fgsTypeInfo.setTimeLimitExceededAt(nowRealtime);
+                    fgsTypeInfo.setTimeLimitExceededAt(nowUptime);
 
                     logFGSStateChangeLocked(sr,
                             FOREGROUND_SERVICE_STATE_CHANGED__STATE__TIMED_OUT,
-                            nowRealtime > fgsTypeInfo.getLastFgsStartTime()
-                                    ? (int) (nowRealtime - fgsTypeInfo.getLastFgsStartTime()) : 0,
+                            nowUptime > fgsTypeInfo.getLastFgsStartTime()
+                                    ? (int) (nowUptime - fgsTypeInfo.getLastFgsStartTime()) : 0,
                             FGS_STOP_REASON_UNKNOWN,
                             FGS_TYPE_POLICY_CHECK_UNKNOWN,
                             FOREGROUND_SERVICE_STATE_CHANGED__FGS_START_API__FGSSTARTAPI_NA,

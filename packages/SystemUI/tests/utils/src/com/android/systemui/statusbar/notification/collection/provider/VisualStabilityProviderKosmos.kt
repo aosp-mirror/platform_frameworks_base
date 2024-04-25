@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.fingerprint;
 
-/**
- * Interface for interacting with the side fingerprint sensor (side-fps) overlay.
- * @hide
- */
-oneway interface ISidefpsController {
+package com.android.systemui.statusbar.notification.collection.provider
 
-    // Shows the overlay for the given sensor with a reason from BiometricOverlayConstants.
-    void show(int sensorId, int reason);
+import com.android.systemui.kosmos.Kosmos
 
-    // Hides the overlay.
-    void hide(int sensorId);
-}
+val Kosmos.visualStabilityProvider by Kosmos.Fixture { VisualStabilityProvider() }

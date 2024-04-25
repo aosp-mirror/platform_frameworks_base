@@ -356,6 +356,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Pantaila-argazkiak atera."</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pantaila-argazkiak atera ditzake."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Aurrebista, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"desgaitu edo aldatu egoera-barra"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Egoera-barra desgaitzeko edo sistema-ikonoak gehitzeko edo kentzeko baimena ematen dio aplikazioari."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"bihurtu egoera-barra"</string>
@@ -2048,7 +2050,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Mapak eta nabigazioa"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Produktibitatea"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Erabilerraztasuna"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Gailuaren memoria"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Gailuko biltegia"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB bidezko arazketa"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ordu"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"minutu"</string>

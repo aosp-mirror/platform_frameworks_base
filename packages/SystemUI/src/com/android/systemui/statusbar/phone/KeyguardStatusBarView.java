@@ -52,13 +52,13 @@ import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherCo
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-
 import kotlinx.coroutines.flow.FlowKt;
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.flow.StateFlow;
 import kotlinx.coroutines.flow.StateFlowKt;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * The header group on Keyguard.

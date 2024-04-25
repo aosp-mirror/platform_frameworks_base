@@ -19,7 +19,6 @@ package com.android.systemui.plugins.statusbar;
 import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
-
 /**
  * Sends updates to {@link StateListener}s about changes to the status bar state and dozing state
  */

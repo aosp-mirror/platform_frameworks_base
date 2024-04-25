@@ -30,6 +30,8 @@ import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATIO
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -49,8 +51,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -207,6 +207,8 @@ import com.android.wm.shell.taskview.TaskView;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.Transitions;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -224,8 +226,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

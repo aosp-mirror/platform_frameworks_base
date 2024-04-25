@@ -24,6 +24,8 @@ import static com.android.systemui.statusbar.phone.ScrimState.SHADE_LOCKED;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,8 +42,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
 
 import android.animation.Animator;
 import android.app.AlarmManager;
@@ -89,6 +89,8 @@ import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
 
 import com.google.common.truth.Expect;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -104,8 +106,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
-import kotlinx.coroutines.test.TestScope;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)

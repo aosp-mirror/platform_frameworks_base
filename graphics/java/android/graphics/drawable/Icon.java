@@ -494,15 +494,22 @@ public final class Icon implements Parcelable {
             case TYPE_URI:
                 InputStream is = getUriInputStream(context);
                 if (is != null) {
-                    return new BitmapDrawable(context.getResources(),
-                            fixMaxBitmapSize(BitmapFactory.decodeStream(is)));
+                    final Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    if (bitmap == null) {
+                        Log.w(TAG, "Unable to decode image from URI: " + getUriString());
+                    }
+                    return new BitmapDrawable(context.getResources(), fixMaxBitmapSize(bitmap));
                 }
                 break;
             case TYPE_URI_ADAPTIVE_BITMAP:
                 is = getUriInputStream(context);
                 if (is != null) {
+                    final Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    if (bitmap == null) {
+                        Log.w(TAG, "Unable to decode image from URI: " + getUriString());
+                    }
                     return new AdaptiveIconDrawable(null, new BitmapDrawable(context.getResources(),
-                            fixMaxBitmapSize(BitmapFactory.decodeStream(is))));
+                            fixMaxBitmapSize(bitmap)));
                 }
                 break;
         }

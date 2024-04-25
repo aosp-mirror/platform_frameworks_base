@@ -183,6 +183,7 @@ public class ViewFrameRateTest {
         mActivityRule.runOnUiThread(() -> {
             frameLayout.setFrameContentVelocity(1f);
             mMovingView.offsetTopAndBottom(100);
+            frameLayout.invalidate();
             runAfterDraw(() -> assertEquals(60f, mViewRoot.getLastPreferredFrameRate(), 0f));
         });
         waitForAfterDraw();

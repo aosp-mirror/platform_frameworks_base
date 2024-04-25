@@ -38,7 +38,7 @@ import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.user.data.repository.UserRepository
-import com.android.systemui.util.kotlin.Sextuple
+import com.android.systemui.util.kotlin.Septuple
 import com.android.systemui.util.kotlin.combine
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -145,15 +145,16 @@ constructor(
 
     private val initialBouncerMessage: Flow<BouncerMessageModel> =
         combine(
+                primaryBouncerInteractor.lastShownSecurityMode, // required to update defaultMessage
                 biometricSettingsRepository.authenticationFlags,
                 trustRepository.isCurrentUserTrustManaged,
                 isAnyBiometricsEnabledAndEnrolled,
                 deviceEntryFingerprintAuthInteractor.isLockedOut,
                 faceAuthRepository.isLockedOut,
                 isFingerprintAuthCurrentlyAllowedOnBouncer,
-                ::Sextuple
+                ::Septuple
             )
-            .map { (flags, _, biometricsEnrolledAndEnabled, fpLockedOut, faceLockedOut, _) ->
+            .map { (_, flags, _, biometricsEnrolledAndEnabled, fpLockedOut, faceLockedOut, _) ->
                 val isTrustUsuallyManaged = trustRepository.isCurrentUserTrustUsuallyManaged.value
                 val trustOrBiometricsAvailable =
                     (isTrustUsuallyManaged || biometricsEnrolledAndEnabled)

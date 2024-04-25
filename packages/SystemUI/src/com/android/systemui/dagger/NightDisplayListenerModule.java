@@ -23,10 +23,10 @@ import android.os.UserHandle;
 
 import com.android.systemui.dagger.qualifiers.Background;
 
-import javax.inject.Inject;
-
 import dagger.Module;
 import dagger.Provides;
+
+import javax.inject.Inject;
 
 /**
  * Module for providing a {@link NightDisplayListener}.

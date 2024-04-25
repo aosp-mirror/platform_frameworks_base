@@ -458,6 +458,8 @@
     <string name="work_mode_off_title" msgid="5794818421357835873">"Riattivare le app di lavoro?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Riattiva"</string>
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Chiudi widget su schermata di blocco"</string>
+    <!-- no translation found for accessibility_action_label_edit_widgets (3821868581348322346) -->
+    <skip />
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Widget su schermata di blocco"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Cambio utente"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu a discesa"</string>
@@ -748,7 +750,7 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifiche"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Scorciatoie da tastiera"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Cambia layout della tastiera"</string>
-    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"oppure"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"o"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Cancella la query di ricerca"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Scorciatoie da tastiera"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Cerca scorciatoie"</string>

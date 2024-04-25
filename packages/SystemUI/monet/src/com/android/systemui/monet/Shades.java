@@ -21,7 +21,6 @@ import androidx.annotation.ColorInt;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 
-
 /**
  * Generate sets of colors that are shades of the same color
  */

@@ -31,9 +31,11 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestHelper
 import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
+import com.android.systemui.media.controls.domain.pipeline.interactor.mediaRecommendationsInteractor
 import com.android.systemui.media.controls.domain.pipeline.mediaDataFilter
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
+import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 import com.android.systemui.statusbar.notificationLockscreenUserManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -119,7 +121,35 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
             assertThat(recsCard.key).isEqualTo(KEY_MEDIA_SMARTSPACE)
         }
 
-    private fun loadMediaControl(key: String, instanceId: InstanceId) {
+    @Test
+    fun recommendationClicked_switchToPlayer() =
+        testScope.runTest {
+            val sortedMedia by collectLastValue(underTest.mediaItems)
+            kosmos.visualStabilityProvider.isReorderingAllowed = false
+            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
+            val instanceId = InstanceId.fakeInstanceId(123)
+
+            loadMediaRecommendations()
+            kosmos.mediaRecommendationsInteractor.switchToMediaControl(PACKAGE_NAME)
+
+            var recsCard = sortedMedia?.get(0) as MediaCommonViewModel.MediaRecommendations
+            assertThat(sortedMedia).hasSize(1)
+            assertThat(recsCard.key).isEqualTo(KEY_MEDIA_SMARTSPACE)
+
+            loadMediaControl(KEY, instanceId, false)
+
+            recsCard = sortedMedia?.get(0) as MediaCommonViewModel.MediaRecommendations
+            assertThat(sortedMedia).hasSize(1)
+            assertThat(recsCard.key).isEqualTo(KEY_MEDIA_SMARTSPACE)
+
+            loadMediaControl(KEY, instanceId, true)
+
+            val mediaControl = sortedMedia?.get(0) as MediaCommonViewModel.MediaControl
+            assertThat(sortedMedia).hasSize(2)
+            assertThat(mediaControl.instanceId).isEqualTo(instanceId)
+        }
+
+    private fun loadMediaControl(key: String, instanceId: InstanceId, isPlaying: Boolean = true) {
         whenever(notificationLockscreenUserManager.isCurrentProfile(USER_ID)).thenReturn(true)
         whenever(notificationLockscreenUserManager.isProfileAvailable(USER_ID)).thenReturn(true)
         val mediaData =
@@ -127,7 +157,8 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
                 userId = USER_ID,
                 packageName = PACKAGE_NAME,
                 notificationKey = key,
-                instanceId = instanceId
+                instanceId = instanceId,
+                isPlaying = isPlaying,
             )
 
         mediaDataFilter.onMediaDataLoaded(key, key, mediaData)

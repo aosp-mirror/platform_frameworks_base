@@ -13,23 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.wm.shell.back
+package android.window
 
 import android.util.MathUtils
-import android.window.BackEvent
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class TouchTrackerTest {
-    private fun linearTouchTracker(): TouchTracker = TouchTracker().apply {
+class BackTouchTrackerTest {
+    private fun linearTouchTracker(): BackTouchTracker = BackTouchTracker().apply {
         setProgressThresholds(MAX_DISTANCE, MAX_DISTANCE, NON_LINEAR_FACTOR)
     }
 
-    private fun nonLinearTouchTracker(): TouchTracker = TouchTracker().apply {
+    private fun nonLinearTouchTracker(): BackTouchTracker = BackTouchTracker().apply {
         setProgressThresholds(LINEAR_DISTANCE, MAX_DISTANCE, NON_LINEAR_FACTOR)
     }
 
-    private fun TouchTracker.assertProgress(expected: Float) {
+    private fun BackTouchTracker.assertProgress(expected: Float) {
         val actualProgress = createProgressEvent().progress
         assertEquals(expected, actualProgress, /* delta = */ 0f)
     }

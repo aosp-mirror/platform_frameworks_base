@@ -71,7 +71,6 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
@@ -93,6 +92,9 @@ import dagger.Lazy;
 
 import kotlin.Unit;
 
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.Job;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,9 +107,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.Job;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -136,7 +135,6 @@ public class AuthController implements
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
-    private final Provider<SideFpsController> mSidefpsControllerFactory;
     private final CoroutineScope mApplicationCoroutineScope;
     private Job mBiometricContextListenerJob = null;
 
@@ -163,7 +161,6 @@ public class AuthController implements
     @Nullable private UdfpsController mUdfpsController;
     @Nullable private UdfpsOverlayParams mUdfpsOverlayParams;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
-    @Nullable private SideFpsController mSideFpsController;
     @NonNull private Lazy<UdfpsLogger> mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
@@ -320,14 +317,7 @@ public class AuthController implements
                     this, mUdfpsLogger.get()));
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
         }
-
         mSidefpsProps = !sidefpsProps.isEmpty() ? sidefpsProps : null;
-        if (mSidefpsProps != null) {
-            if (!SideFpsControllerRefactor.isEnabled()) {
-                mSideFpsController = mSidefpsControllerFactory.get();
-            }
-        }
-
         mFingerprintManager.registerBiometricStateListener(new BiometricStateListener() {
             @Override
             public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
@@ -738,7 +728,6 @@ public class AuthController implements
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
             Provider<UdfpsController> udfpsControllerFactory,
-            Provider<SideFpsController> sidefpsControllerFactory,
             @NonNull DisplayManager displayManager,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
             @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
@@ -766,7 +755,6 @@ public class AuthController implements
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
         mUdfpsControllerFactory = udfpsControllerFactory;
-        mSidefpsControllerFactory = sidefpsControllerFactory;
         mUdfpsLogger = udfpsLogger;
         mDisplayManager = displayManager;
         mWindowManager = windowManager;

@@ -682,6 +682,17 @@ private class SwipeTransition(
                                         }
                                     if (isBouncing) {
                                         bouncingScene = targetScene
+
+                                        // Immediately stop this transition if we are bouncing on a
+                                        // scene that does not bounce.
+                                        val overscrollSpec = currentOverscrollSpec
+                                        if (
+                                            overscrollSpec != null &&
+                                                overscrollSpec.transformationSpec.transformations
+                                                    .isEmpty()
+                                        ) {
+                                            snapToScene(targetScene)
+                                        }
                                     }
                                 }
                             }

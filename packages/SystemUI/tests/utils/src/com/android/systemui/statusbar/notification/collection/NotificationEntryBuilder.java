@@ -33,9 +33,9 @@ import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
 import com.android.systemui.util.time.FakeSystemClock;
 
-import java.util.ArrayList;
-
 import kotlin.Unit;
+
+import java.util.ArrayList;
 
 /**
  * Combined builder for constructing a NotificationEntry and its associated StatusBarNotification

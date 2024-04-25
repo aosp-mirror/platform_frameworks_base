@@ -25,12 +25,12 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.CustomTile;
 
+import dagger.Lazy;
+
 import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /**
  * A factory that creates Quick Settings tiles based on a tileSpec

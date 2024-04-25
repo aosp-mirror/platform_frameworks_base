@@ -89,13 +89,13 @@ import com.android.wm.shell.shared.ShellTransitions;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.transition.Transitions;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.CoroutineScope;
 
 public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";

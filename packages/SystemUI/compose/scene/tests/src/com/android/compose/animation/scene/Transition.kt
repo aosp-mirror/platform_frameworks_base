@@ -18,12 +18,17 @@ package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.test.TestScope
 
 /** A utility to easily create a [TransitionState.Transition] in tests. */
 fun transition(
     from: SceneKey,
     to: SceneKey,
     progress: () -> Float = { 0f },
+    interruptionProgress: () -> Float = { 100f },
     isInitiatedByUserInput: Boolean = false,
     isUserInputOngoing: Boolean = false,
     isUpOrLeft: Boolean = false,
@@ -54,6 +59,23 @@ fun transition(
                     )
 
             return onFinish(this)
+        }
+
+        override fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {
+            return interruptionProgress()
+        }
+    }
+}
+
+/**
+ * Return a onFinish lambda that can be used with [transition] so that the transition never
+ * finishes. This allows to keep the transition in the current transitions list.
+ */
+fun TestScope.neverFinish(): (TransitionState.Transition) -> Job {
+    return {
+        backgroundScope.launch {
+            // Try to acquire a locked mutex so that this code never completes.
+            Mutex(locked = true).withLock {}
         }
     }
 }

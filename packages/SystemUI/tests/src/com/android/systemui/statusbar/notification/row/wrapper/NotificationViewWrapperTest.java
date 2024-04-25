@@ -21,8 +21,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;

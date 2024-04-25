@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે તમારી સાચવેલી પાસકીનો ઉપયોગ કરો"</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે તમારા સાચવેલા પાસવર્ડનો ઉપયોગ કરો"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે તમારા એકાઉન્ટનો ઉપયોગ કરો"</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> વડે <xliff:g id="APP_NAME">%1$s</xliff:g>માં સાઇન ઇન કરવા માટે તમારા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સાઇન ઇન વિકલ્પો અનલૉક કરો"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે કોઈ સાચવેલી પાસકી પસંદ કરો"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે કોઈ સાચવેલો પાસવર્ડ પસંદ કરો"</string>

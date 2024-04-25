@@ -357,6 +357,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"praviti snimke ekrana"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Može napraviti snimak ekrana."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Pregled, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"onemogućavanje ili mijenjanje statusne trake"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Dozvoljava aplikaciji onemogućavanje statusne trake ili dodavanje i uklanjanje sistemskih ikona."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"funkcioniranje u vidu statusne trake"</string>
@@ -829,7 +831,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavljanje pravila za lozinke"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolira dužinu i znakove koji su dozvoljeni u lozinkama za zaključavanje ekrana i PIN-ovima."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Praćenje pokušaja otključavanja ekrana"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Prati broj pogrešno unijetih lozinki prilikom otključavanja ekrana i zaključava tablet ili briše sve podatke s njega ukoliko se previše puta unese pogrešna lozinka."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Prati broj pogrešno unesenih lozinki prilikom otključavanja ekrana i zaključava tablet ili briše sve podatke s njega ukoliko se previše puta unese pogrešna lozinka."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Praćenje broja unosa netačnih lozinki pri otključavanju ekrana i zaključavanje Android TV uređaja ili brisanje svih podataka Android TV uređaja u slučaju prevelikog broja unosa netačnih lozinki."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati koliko puta je lozinka neispravno unijeta prilikom otključavanja ekrana i zaključava informativno-zabavni sistem ili briše sve podatke informativno-zabavnog sistema ako se lozinka neispravno unese previše puta."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Prati broj pogrešno unesenih lozinki prilikom otključavanja ekrana i zaključava telefon ili briše sve podatke s telefona ukoliko se previše puta unese pogrešna lozinka."</string>

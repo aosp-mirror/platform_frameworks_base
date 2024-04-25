@@ -54,9 +54,7 @@ import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWi
 import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -350,11 +348,7 @@ public interface StatusBarIconController {
         private final MobileContextProvider mMobileContextProvider;
         private final LocationBasedWifiViewModel mWifiViewModel;
         private final MobileIconsViewModel mMobileIconsViewModel;
-        /**
-         * Stores the list of bindable icons that have been added, keyed on slot name. This ensures
-         * we don't accidentally add the same bindable icon twice.
-         */
-        private final Map<String, BindableIconHolder> mBindableIcons = new HashMap<>();
+
         protected final Context mContext;
         protected int mIconSize;
         // Whether or not these icons show up in dumpsys
@@ -466,12 +460,8 @@ public interface StatusBarIconController {
          * ViewBinder to control its visual state.
          */
         protected StatusIconDisplayable addBindableIcon(BindableIconHolder holder, int index) {
-            mBindableIcons.put(holder.getSlot(), holder);
             ModernStatusBarView view = holder.getInitializer().createAndBind(mContext);
             mGroup.addView(view, index, onCreateLayoutParams());
-            if (mIsInDemoMode) {
-                mDemoStatusIcons.addBindableIcon(holder);
-            }
             return view;
         }
 
@@ -582,9 +572,6 @@ public interface StatusBarIconController {
             if (mDemoStatusIcons == null) {
                 mDemoStatusIcons = createDemoStatusIcons();
                 mDemoStatusIcons.addModernWifiView(mWifiViewModel);
-                for (BindableIconHolder holder : mBindableIcons.values()) {
-                    mDemoStatusIcons.addBindableIcon(holder);
-                }
             }
             mDemoStatusIcons.onDemoModeStarted();
         }

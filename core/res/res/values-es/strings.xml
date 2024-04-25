@@ -357,6 +357,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Hacer captura"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede hacer capturas de la pantalla."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Vista previa, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"inhabilitar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite que la aplicación inhabilite la barra de estado o añada y elimine iconos del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparecer en la barra de estado"</string>
@@ -1512,7 +1514,7 @@
     <string name="deny" msgid="6632259981847676572">"Denegar"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permiso solicitado"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permiso solicitado\npara la cuenta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Permiso solicitado por <xliff:g id="APP">%1$s</xliff:g>\npara acceder a la cuenta<xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Permiso solicitado por <xliff:g id="APP">%1$s</xliff:g>\npara acceder a la cuenta <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Estás usando esta aplicación fuera del perfil de trabajo"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Estás usando esta aplicación en tu perfil de trabajo"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Método de introducción de texto"</string>

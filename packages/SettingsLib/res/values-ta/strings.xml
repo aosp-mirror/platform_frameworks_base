@@ -94,24 +94,41 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"இணைக்கப்பட்டது (மொபைல் இல்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"இணைக்கப்பட்டது (மீடியா இல்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"இணைக்கப்பட்டது (மொபைல் அல்லது மீடியா இல்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"செயலில் உள்ளது, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"செயலில் உள்ளது, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
+    <!-- no translation found for bluetooth_active_battery_level (2685517576209066008) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered (4961338936672922617) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered_left (5521405563527657515) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7165552824664523336) -->
+    <skip />
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
-    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"இடதுபுறம்: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"வலதுபுறம்: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_battery_level_untethered (1616774716076301755) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left (5725764679536058365) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right (8377995536997790142) -->
+    <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"செயலில் உள்ளது"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"சேமிக்கப்பட்டது"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"இடது பக்கம் மட்டும் செயலில் உள்ளது"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"வலது பக்கம் மட்டும் செயலில் உள்ளது"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"வலது மற்றும் இடது பக்கம் செயலில் உள்ளது"</string>
-    <string name="bluetooth_active_media_only_battery_level" msgid="1164678961213251365">"செயலிலுள்ளது (மீடியா மட்டும்), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
-    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="1345174295097854560">"செயலிலுள்ளது (மீடியா மட்டும்), இடது: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, வலது: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
-    <string name="bluetooth_battery_level_lea_support" msgid="8580950145907305436">"இணைக்கப்பட்டுள்ளது (ஆடியோ பகிர்வை ஆதரிக்கிறது), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
-    <string name="bluetooth_battery_level_untethered_lea_support" msgid="8534816721698743015">"இணைக்கப்பட்டுள்ளது (ஆடியோ பகிர்வை ஆதரிக்கிறது), இடது: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, வலது: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
-    <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="6605320955858788855">"இணைக்கப்பட்டுள்ளது (ஆடியோ பகிர்வை ஆதரிக்கிறது), இடது: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="5717356160322149355">"இணைக்கப்பட்டுள்ளது (ஆடியோ பகிர்வை ஆதரிக்கிறது), வலது: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_media_only_battery_level (7772517511061834073) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (7444753133664620926) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_lea_support (5968584103507988820) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_lea_support (803110681688633362) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_left_lea_support (7707464334346454950) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level_untethered_right_lea_support (8941549024377771038) -->
+    <skip />
+    <!-- no translation found for bluetooth_no_battery_level_lea_support (5721725041048434075) -->
+    <skip />
     <string name="bluetooth_active_media_only_no_battery_level" msgid="71106861912593126">"செயலிலுள்ளது (மீடியா மட்டும்)"</string>
     <string name="bluetooth_saved_device_lea_support" msgid="7231323139968285768">"ஆடியோ பகிர்வை ஆதரிக்கிறது"</string>
     <string name="bluetooth_hearing_aid_media_only_left_active" msgid="1632152540901488645">"செயலிலுள்ளது (மீடியா மட்டும்), இடதுபுறம் மட்டும்"</string>
@@ -487,14 +504,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழுவதும் சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - சார்ஜிங் மேம்படுத்தப்பட்டது"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ சார்ஜாகிறது"</string>
-    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
-    <skip />
-    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
-    <skip />
-    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
-    <skip />
-    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
-    <skip />
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g>க்கு முழுமையாகச் சார்ஜாகிவிடும்"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>க்கு முழுமையாகச் சார்ஜாகிவிடும்"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"<xliff:g id="TIME">%1$s</xliff:g>க்கு முழுமையாகச் சார்ஜாகிவிடும்"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g>க்கு முழுமையாகச் சார்ஜாகிவிடும்"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"சார்ஜ் ஆகிறது"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"வேகமாக சார்ஜாகிறது"</string>
@@ -506,10 +519,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"சார்ஜாகிவிட்டது"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"முழுவதும் சார்ஜாகிவிட்டது"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"சார்ஜிங் இடைநிறுத்தப்பட்டுள்ளது"</string>
-    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
-    <skip />
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"சார்ஜாகிறது"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"விரைவு சார்ஜிங்"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"நிர்வாகி கட்டுப்படுத்துகிறார்"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"வரையறுக்கப்பட்ட அமைப்பால் கட்டுப்படுத்தப்படுகிறது"</string>
     <string name="disabled" msgid="8017887509554714950">"முடக்கப்பட்டது"</string>
@@ -696,8 +707,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"சிக்னல் ஒரு கோட்டில் உள்ளது."</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"சிக்னல் இரண்டு கோட்டில் உள்ளது."</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"சிக்னல் மூன்று கோட்டில் உள்ளது."</string>
-    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
-    <skip />
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"நான்கு மொபைல் சிக்னல் கோடுகள்."</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"சிக்னல் முழுமையாக உள்ளது."</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"டேட்டா சிக்னல் இல்லை."</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"தரவு சிக்னல் ஒரு கோட்டில் உள்ளது."</string>

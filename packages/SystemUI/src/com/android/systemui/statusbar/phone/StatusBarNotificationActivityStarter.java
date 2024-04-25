@@ -90,7 +90,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-
 /**
  * Status bar implementation of {@link NotificationActivityStarter}.
  */

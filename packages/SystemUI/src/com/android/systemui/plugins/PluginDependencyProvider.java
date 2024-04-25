@@ -19,10 +19,10 @@ import android.util.ArrayMap;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.PluginDependency.DependencyProvider;
 
+import dagger.Lazy;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import dagger.Lazy;
 
 /**
  */

@@ -12629,6 +12629,15 @@ public final class Settings {
          * @hide
          */
         public static final String V_TO_U_RESTORE_DENYLIST = "v_to_u_restore_denylist";
+
+        /**
+         * Integer property that determines which charging optimization mode is applied.
+         * [0-10] inclusive representing different modes, where 0 is the default indicating
+         * no optimization mode is applied.
+         *
+         * @hide
+         */
+        public static final String CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode";
     }
 
     /**

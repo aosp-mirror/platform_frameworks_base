@@ -23,6 +23,9 @@ import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -36,9 +39,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import android.annotation.IdRes;
 import android.content.ContentResolver;
@@ -202,6 +202,9 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -212,9 +215,6 @@ import org.mockito.stubbing.Answer;
 
 import java.util.List;
 import java.util.Optional;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.test.TestScope;
 
 public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
@@ -444,7 +444,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(
                 mUiEventLogger,
-                mKosmos.getInteractionJankMonitor(),
+                () -> mKosmos.getInteractionJankMonitor(),
                 mJavaAdapter,
                 () -> mShadeInteractor,
                 () -> mKosmos.getDeviceUnlockedInteractor(),
@@ -598,7 +598,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         mock(HeadsUpManager.class),
                         new StatusBarStateControllerImpl(
                                 new UiEventLoggerFake(),
-                                mKosmos.getInteractionJankMonitor(),
+                                () -> mKosmos.getInteractionJankMonitor(),
                                 mJavaAdapter,
                                 () -> mShadeInteractor,
                                 () -> mKosmos.getDeviceUnlockedInteractor(),
@@ -802,7 +802,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,
-                mKosmos.getInteractionJankMonitor(),
+                () -> mKosmos.getInteractionJankMonitor(),
                 mShadeLog,
                 mDumpManager,
                 mDeviceEntryFaceAuthInteractor,

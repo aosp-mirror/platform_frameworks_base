@@ -253,8 +253,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         @Override
         public void onStatusBarTrackpadEvent(MotionEvent event) {
-            verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () ->
-                    mShadeViewControllerLazy.get().handleExternalTouch(event));
+            verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () -> {
+                if (SceneContainerFlag.isEnabled()) {
+                    int action = event.getActionMasked();
+                    if (action == ACTION_DOWN) {
+                        mSceneInteractor.get().onRemoteUserInteractionStarted(
+                                "trackpad swipe");
+                    } else if (action == ACTION_UP) {
+                        mSceneInteractor.get().changeScene(
+                                Scenes.Shade, "short trackpad swipe");
+                    }
+                    mStatusBarWinController.getWindowRootView().dispatchTouchEvent(event);
+                } else {
+                    mShadeViewControllerLazy.get().handleExternalTouch(event);
+                }
+            });
         }
 
         @Override
@@ -264,9 +277,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         @Override
-        public void setOverrideHomeButtonLongPress(long duration, float slopMultiplier) {
+        public void setOverrideHomeButtonLongPress(long duration, float slopMultiplier,
+                boolean haptic) {
             verifyCallerAndClearCallingIdentityPostMain("setOverrideHomeButtonLongPress",
-                    () -> notifySetOverrideHomeButtonLongPress(duration, slopMultiplier));
+                    () -> notifySetOverrideHomeButtonLongPress(duration, slopMultiplier, haptic));
         }
 
         @Override
@@ -956,9 +970,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
-    private void notifySetOverrideHomeButtonLongPress(long duration, float slopMultiplier) {
+    private void notifySetOverrideHomeButtonLongPress(long duration, float slopMultiplier,
+            boolean haptic) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).setOverrideHomeButtonLongPress(duration, slopMultiplier);
+            mConnectionCallbacks.get(i)
+                    .setOverrideHomeButtonLongPress(duration, slopMultiplier, haptic);
         }
     }
 
@@ -1119,8 +1135,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void startAssistant(Bundle bundle) {}
         default void setAssistantOverridesRequested(int[] invocationTypes) {}
         default void animateNavBarLongPress(boolean isTouchDown, boolean shrink, long durationMs) {}
-        /** Set override of home button long press duration and touch slop multiplier. */
-        default void setOverrideHomeButtonLongPress(long override, float slopMultiplier) {}
+        /** Set override of home button long press duration, touch slop multiplier, and haptic. */
+        default void setOverrideHomeButtonLongPress(
+                long override, float slopMultiplier, boolean haptic) {}
     }
 
     /**

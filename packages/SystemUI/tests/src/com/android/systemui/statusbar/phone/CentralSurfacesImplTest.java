@@ -27,6 +27,8 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.flowOf;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -43,8 +45,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static java.util.Collections.emptySet;
-
-import static kotlinx.coroutines.flow.FlowKt.flowOf;
 
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
@@ -195,6 +195,8 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -207,8 +209,6 @@ import java.io.PrintWriter;
 import java.util.Optional;
 
 import javax.inject.Provider;
-
-import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

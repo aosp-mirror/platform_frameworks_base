@@ -60,6 +60,7 @@ public final class TextFlags {
             Flags.FLAG_USE_BOUNDS_FOR_WIDTH,
             Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE,
             Flags.FLAG_ICU_BIDI_MIGRATION,
+            Flags.FLAG_FIX_MISALIGNED_CONTEXT_MENU,
     };
 
     /**
@@ -73,6 +74,7 @@ public final class TextFlags {
             Flags.useBoundsForWidth(),
             Flags.fixLineHeightForLocale(),
             Flags.icuBidiMigration(),
+            Flags.fixMisalignedContextMenu(),
     };
 
     /**

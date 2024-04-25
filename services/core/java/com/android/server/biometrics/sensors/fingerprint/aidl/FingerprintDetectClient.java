@@ -16,8 +16,6 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
-import static com.android.systemui.shared.Flags.sidefpsControllerRefactor;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -77,12 +75,7 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
         setRequestId(requestId);
         mAuthenticationStateListeners = authenticationStateListeners;
         mIsStrongBiometric = isStrongBiometric;
-        if (sidefpsControllerRefactor()) {
-            mSensorOverlays = new SensorOverlays(udfpsOverlayController);
-        } else {
-            mSensorOverlays = new SensorOverlays(
-                    udfpsOverlayController, null /* sideFpsController */);
-        }
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController);
         mOptions = options;
     }
 
@@ -96,12 +89,10 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
     protected void stopHalOperation() {
         resetIgnoreDisplayTouches();
         mSensorOverlays.hide(getSensorId());
-        if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStopped(
-                    new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
-                            BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
-            );
-        }
+        mAuthenticationStateListeners.onAuthenticationStopped(
+                new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                        BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
         unsubscribeBiometricContext();
 
         if (mCancellationSignal != null) {
@@ -119,25 +110,19 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
         resetIgnoreDisplayTouches();
         mSensorOverlays.show(getSensorId(), BiometricRequestConstants.REASON_AUTH_KEYGUARD,
                 this);
-
-        if (sidefpsControllerRefactor()) {
-            mAuthenticationStateListeners.onAuthenticationStarted(
-                new AuthenticationStartedInfo.Builder(BiometricSourceType.FINGERPRINT,
-                        BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
-            );
-        }
-
+        mAuthenticationStateListeners.onAuthenticationStarted(
+            new AuthenticationStartedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                    BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+        );
         try {
             doDetectInteraction();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting finger detect", e);
             mSensorOverlays.hide(getSensorId());
-            if (sidefpsControllerRefactor()) {
-                mAuthenticationStateListeners.onAuthenticationStopped(
-                        new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
-                                BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
-                );
-            }
+            mAuthenticationStateListeners.onAuthenticationStopped(
+                    new AuthenticationStoppedInfo.Builder(BiometricSourceType.FINGERPRINT,
+                            BiometricRequestConstants.REASON_AUTH_KEYGUARD).build()
+            );
             mCallback.onClientFinished(this, false /* success */);
         }
     }
@@ -154,14 +139,12 @@ public class FingerprintDetectClient extends AcquisitionClient<AidlSession>
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to start detect interaction", e);
                     mSensorOverlays.hide(getSensorId());
-                    if (sidefpsControllerRefactor()) {
-                        mAuthenticationStateListeners.onAuthenticationStopped(
-                                new AuthenticationStoppedInfo.Builder(
-                                        BiometricSourceType.FINGERPRINT,
-                                        BiometricRequestConstants.REASON_AUTH_KEYGUARD
-                                ).build()
-                        );
-                    }
+                    mAuthenticationStateListeners.onAuthenticationStopped(
+                            new AuthenticationStoppedInfo.Builder(
+                                    BiometricSourceType.FINGERPRINT,
+                                    BiometricRequestConstants.REASON_AUTH_KEYGUARD
+                            ).build()
+                    );
                     mCallback.onClientFinished(this, false /* success */);
                 }
             }, ctx -> {

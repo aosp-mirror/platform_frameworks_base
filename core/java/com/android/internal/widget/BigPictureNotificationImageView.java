@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -29,6 +30,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+import android.widget.flags.Flags;
 
 import com.android.internal.R;
 
@@ -117,6 +119,22 @@ public class BigPictureNotificationImageView extends ImageView implements
         // old code path
         final Drawable drawable = loadImage(icon);
         return () -> setImageDrawable(drawable);
+    }
+
+    @Override
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        if (drawable instanceof BitmapDrawable bitmapDrawable) {
+            if (bitmapDrawable.getBitmap() == null) {
+                if (Flags.bigPictureStyleDiscardEmptyIconBitmapDrawables()) {
+                    Log.e(TAG, "discarding BitmapDrawable with null Bitmap (invalid image file?)");
+                    drawable = null;
+                } else {
+                    Log.e(TAG, "setting BitmapDrawable with null Bitmap (invalid image file?)");
+                }
+            }
+        }
+
+        super.setImageDrawable(drawable);
     }
 
     private Drawable loadImage(Uri uri) {

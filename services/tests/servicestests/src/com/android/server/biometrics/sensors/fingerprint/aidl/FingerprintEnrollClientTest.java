@@ -20,8 +20,6 @@ import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPR
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_TOO_FAST;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_TIMEOUT;
 
-import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -33,7 +31,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,7 +49,6 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -71,6 +67,7 @@ import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
 import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
+import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -126,8 +123,6 @@ public class FingerprintEnrollClientTest {
     private BiometricUtils<Fingerprint> mBiometricUtils;
     @Mock
     private IUdfpsOverlayController mUdfpsOverlayController;
-    @Mock
-    private ISidefpsController mSideFpsController;
     @Mock
     private AuthenticationStateListeners mAuthenticationStateListeners;
     @Mock
@@ -287,12 +282,12 @@ public class FingerprintEnrollClientTest {
 
     @Test
     public void showHideOverlay_cancel() throws RemoteException {
-        showHideOverlay(c -> c.cancel());
+        showHideOverlay(AcquisitionClient::cancel);
     }
 
     @Test
     public void showHideOverlay_stop() throws RemoteException {
-        showHideOverlay(c -> c.stopHalOperation());
+        showHideOverlay(FingerprintEnrollClient::stopHalOperation);
     }
 
     @Test
@@ -303,45 +298,7 @@ public class FingerprintEnrollClientTest {
 
     @Test
     public void showHideOverlay_result() throws RemoteException {
-        showHideOverlay(c -> c.onEnrollResult(new Fingerprint("", 1, 1), 0));
-    }
-
-    private void showHideOverlay(Consumer<FingerprintEnrollClient> block)
-            throws RemoteException {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
-        final FingerprintEnrollClient client = createClient();
-
-        client.start(mCallback);
-
-        verify(mUdfpsOverlayController).showUdfpsOverlay(eq(REQUEST_ID), anyInt(), anyInt(), any());
-        verify(mSideFpsController).show(anyInt(), anyInt());
-
-        block.accept(client);
-
-        verify(mUdfpsOverlayController).hideUdfpsOverlay(anyInt());
-        verify(mSideFpsController).hide(anyInt());
-        verify(mHal, times(2)).setIgnoreDisplayTouches(false);
-    }
-
-    @Test
-    public void showHideOverlay_cancel_sidefpsControllerRemovalRefactor() throws RemoteException {
-        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.cancel());
-    }
-
-    @Test
-    public void showHideOverlay_stop_sidefpsControllerRemovalRefactor() throws RemoteException {
-        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.stopHalOperation());
-    }
-
-    @Test
-    public void showHideOverlay_error_sidefpsControllerRemovalRefactor() throws RemoteException {
-        showHideOverlay_sidefpsControllerRemovalRefactor(c -> c.onError(0, 0));
-        verify(mCallback).onClientFinished(any(), eq(false));
-    }
-
-    @Test
-    public void showHideOverlay_result_sidefpsControllerRemovalRefactor() throws RemoteException {
-        showHideOverlay_sidefpsControllerRemovalRefactor(
+        showHideOverlay(
                 c -> c.onEnrollResult(new Fingerprint("", 1, 1), 0));
     }
 
@@ -355,9 +312,8 @@ public class FingerprintEnrollClientTest {
                 eq(BiometricsProtoEnums.ENROLLMENT_SOURCE_SUW));
     }
 
-    private void showHideOverlay_sidefpsControllerRemovalRefactor(
+    private void showHideOverlay(
             Consumer<FingerprintEnrollClient> block) throws RemoteException {
-        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         final FingerprintEnrollClient client = createClient();
 
         client.start(mCallback);
@@ -414,7 +370,6 @@ public class FingerprintEnrollClientTest {
     @Test
     public void testAuthenticationStateListeners_onError()
             throws RemoteException {
-        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         final FingerprintEnrollClient client = createClient();
         client.start(mCallback);
         client.onError(FINGERPRINT_ERROR_TIMEOUT, 0);
@@ -449,7 +404,7 @@ public class FingerprintEnrollClientTest {
         mClientMonitorCallbackConverter, 0 /* userId */,
         HAT, "owner", mBiometricUtils, 8 /* sensorId */,
         mBiometricLogger, mBiometricContext, mSensorProps, mUdfpsOverlayController,
-        mSideFpsController, mAuthenticationStateListeners, 6 /* maxTemplatesPerUser */,
+                mAuthenticationStateListeners, 6 /* maxTemplatesPerUser */,
         FingerprintManager.ENROLL_ENROLL, (new FingerprintEnrollOptions.Builder())
                 .setEnrollReason(ENROLL_SOURCE).build()
         );

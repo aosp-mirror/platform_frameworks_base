@@ -61,6 +61,13 @@ flag {
 }
 
 flag {
+    name: "new_multiuser_settings_ux"
+    namespace: "multiuser"
+    description: "Update multiuser settings UI"
+    bug: "298008926"
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
     is_exported: true
     namespace: "profile_experiences"

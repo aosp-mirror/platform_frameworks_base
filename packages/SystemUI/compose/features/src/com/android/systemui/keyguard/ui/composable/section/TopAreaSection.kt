@@ -149,6 +149,7 @@ constructor(
             }
             with(clockSection) {
                 LargeClock(
+                    burnInParams = burnIn.parameters,
                     modifier =
                         Modifier.fillMaxSize().thenIf(shouldOffSetClockToOneHalf) {
                             // If we do not have a custom position animation, we want
@@ -179,7 +180,12 @@ constructor(
 
         Column(modifier = modifier) {
             val currentClock = currentClockState.value ?: return@Column
-            with(weatherClockSection) { Time(clock = currentClock, modifier = Modifier) }
+            with(weatherClockSection) {
+                Time(
+                    clock = currentClock,
+                    burnInParams = burnIn.parameters,
+                )
+            }
             val density = LocalDensity.current
             val context = LocalContext.current
 
@@ -193,7 +199,12 @@ constructor(
                         )
                 )
             }
-            with(weatherClockSection) { LargeClockSectionBelowSmartspace(clock = currentClock) }
+            with(weatherClockSection) {
+                LargeClockSectionBelowSmartspace(
+                    burnInParams = burnIn.parameters,
+                    clock = currentClock,
+                )
+            }
         }
     }
 

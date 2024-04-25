@@ -212,8 +212,7 @@ public class StatusBarIconControllerImpl implements Tunable,
         StatusBarIconHolder existingHolder = mStatusBarIconList.getIconHolder(icon.getSlot(), 0);
         // Expected to be null
         if (existingHolder == null) {
-            BindableIconHolder bindableIcon =
-                    new BindableIconHolder(icon.getInitializer(), icon.getSlot());
+            BindableIconHolder bindableIcon = new BindableIconHolder(icon.getInitializer());
             setIcon(icon.getSlot(), bindableIcon);
         } else {
             Log.e(TAG, "addBindableIcon called, but icon has already been added. Ignoring");

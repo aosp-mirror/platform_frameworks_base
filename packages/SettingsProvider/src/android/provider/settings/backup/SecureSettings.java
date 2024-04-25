@@ -273,6 +273,7 @@ public class SecureSettings {
         Settings.Secure.AUDIO_DEVICE_INVENTORY,
         Settings.Secure.SCREEN_RESOLUTION_MODE,
         Settings.Secure.ACCESSIBILITY_FLOATING_MENU_TARGETS,
-        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL
+        Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
+        Settings.Secure.CHARGE_OPTIMIZATION_MODE
     };
 }

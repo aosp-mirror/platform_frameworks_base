@@ -33,7 +33,6 @@ import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
-import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.utils.os.FakeHandler
@@ -66,9 +65,7 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
     @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
 
     lateinit var bouncerInteractor: PrimaryBouncerInteractor
-    private val mainHandler by lazy {
-        FakeHandler(Looper.getMainLooper())
-    }
+    private val mainHandler by lazy { FakeHandler(Looper.getMainLooper()) }
     val repository = FakeKeyguardBouncerRepository()
 
     lateinit var underTest: KeyguardBouncerViewModel
@@ -105,46 +102,6 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
         // Run the tasks that are pending at this point of virtual time.
         runCurrent()
         assertThat(message?.message).isEqualTo("abc")
-        job.cancel()
-    }
-
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    @Test
-    fun shouldUpdateSideFps_show() = runTest {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        var count = 0
-        val job = underTest.shouldUpdateSideFps.onEach { count++ }.launchIn(this)
-        repository.setPrimaryShow(true)
-        // Run the tasks that are pending at this point of virtual time.
-        runCurrent()
-        assertThat(count).isEqualTo(1)
-        job.cancel()
-    }
-
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    @Test
-    fun shouldUpdateSideFps_hide() = runTest {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        repository.setPrimaryShow(true)
-        var count = 0
-        val job = underTest.shouldUpdateSideFps.onEach { count++ }.launchIn(this)
-        repository.setPrimaryShow(false)
-        // Run the tasks that are pending at this point of virtual time.
-        runCurrent()
-        assertThat(count).isEqualTo(1)
-        job.cancel()
-    }
-
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    @Test
-    fun sideFpsShowing() = runTest {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        var sideFpsIsShowing = false
-        val job = underTest.sideFpsShowing.onEach { sideFpsIsShowing = it }.launchIn(this)
-        repository.setSideFpsShowing(true)
-        // Run the tasks that are pending at this point of virtual time.
-        runCurrent()
-        assertThat(sideFpsIsShowing).isEqualTo(true)
         job.cancel()
     }
 

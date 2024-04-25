@@ -27,7 +27,6 @@ import android.Manifest;
 import android.app.ActivityManagerInternal;
 import android.app.Notification;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 

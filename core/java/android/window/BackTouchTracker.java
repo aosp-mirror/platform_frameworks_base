@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.back;
+package android.window;
 
 import android.annotation.FloatRange;
 import android.os.SystemProperties;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationTarget;
-import android.window.BackEvent;
-import android.window.BackMotionEvent;
 
 import java.io.PrintWriter;
 
 /**
  * Helper class to record the touch location for gesture and generate back events.
+ * @hide
  */
-class TouchTracker {
+public class BackTouchTracker {
     private static final String PREDICTIVE_BACK_LINEAR_DISTANCE_PROP =
             "persist.wm.debug.predictive_back_linear_distance";
     private static final int LINEAR_DISTANCE = SystemProperties
@@ -53,9 +52,13 @@ class TouchTracker {
     private float mLatestVelocityY;
     private float mStartThresholdX;
     private int mSwipeEdge;
+    private boolean mShouldUpdateStartLocation = false;
     private TouchTrackerState mState = TouchTrackerState.INITIAL;
 
-    void update(float touchX, float touchY, float velocityX, float velocityY) {
+    /**
+     * Updates the tracker with a new motion event.
+     */
+    public void update(float touchX, float touchY, float velocityX, float velocityY) {
         /**
          * If back was previously cancelled but the user has started swiping in the forward
          * direction again, restart back.
@@ -74,34 +77,52 @@ class TouchTracker {
         mLatestVelocityY = velocityY;
     }
 
-    void setTriggerBack(boolean triggerBack) {
+    /** Sets whether the back gesture is past the trigger threshold. */
+    public void setTriggerBack(boolean triggerBack) {
         if (mTriggerBack != triggerBack && !triggerBack) {
             mStartThresholdX = mLatestTouchX;
         }
         mTriggerBack = triggerBack;
     }
 
-    boolean getTriggerBack() {
+    /** Gets whether the back gesture is past the trigger threshold. */
+    public boolean getTriggerBack() {
         return mTriggerBack;
     }
 
-    void setState(TouchTrackerState state) {
+
+    /** Returns if the start location should be updated. */
+    public boolean shouldUpdateStartLocation() {
+        return mShouldUpdateStartLocation;
+    }
+
+    /** Sets if the start location should be updated. */
+    public void setShouldUpdateStartLocation(boolean shouldUpdate) {
+        mShouldUpdateStartLocation = shouldUpdate;
+    }
+
+    /** Sets the state of the touch tracker. */
+    public void setState(TouchTrackerState state) {
         mState = state;
     }
 
-    boolean isInInitialState() {
+    /** Returns if the tracker is in initial state. */
+    public boolean isInInitialState() {
         return mState == TouchTrackerState.INITIAL;
     }
 
-    boolean isActive() {
+    /** Returns if a back gesture is active. */
+    public boolean isActive() {
         return mState == TouchTrackerState.ACTIVE;
     }
 
-    boolean isFinished() {
+    /** Returns if a back gesture has been finished. */
+    public boolean isFinished() {
         return mState == TouchTrackerState.FINISHED;
     }
 
-    void setGestureStartLocation(float touchX, float touchY, int swipeEdge) {
+    /** Sets the start location of the back gesture. */
+    public void setGestureStartLocation(float touchX, float touchY, int swipeEdge) {
         mInitTouchX = touchX;
         mInitTouchY = touchY;
         mLatestTouchX = touchX;
@@ -110,25 +131,27 @@ class TouchTracker {
         mStartThresholdX = mInitTouchX;
     }
 
-    /** Update the start location used to compute the progress
-     * to the latest touch location.
-     */
-    void updateStartLocation() {
+    /** Update the start location used to compute the progress to the latest touch location. */
+    public void updateStartLocation() {
         mInitTouchX = mLatestTouchX;
         mInitTouchY = mLatestTouchY;
         mStartThresholdX = mInitTouchX;
+        mShouldUpdateStartLocation = false;
     }
 
-    void reset() {
+    /** Resets the tracker. */
+    public void reset() {
         mInitTouchX = 0;
         mInitTouchY = 0;
         mStartThresholdX = 0;
         mTriggerBack = false;
         mState = TouchTrackerState.INITIAL;
         mSwipeEdge = BackEvent.EDGE_LEFT;
+        mShouldUpdateStartLocation = false;
     }
 
-    BackMotionEvent createStartEvent(RemoteAnimationTarget target) {
+    /** Creates a start {@link BackMotionEvent}. */
+    public BackMotionEvent createStartEvent(RemoteAnimationTarget target) {
         return new BackMotionEvent(
                 /* touchX = */ mInitTouchX,
                 /* touchY = */ mInitTouchY,
@@ -140,7 +163,8 @@ class TouchTracker {
                 /* departingAnimationTarget = */ target);
     }
 
-    BackMotionEvent createProgressEvent() {
+    /** Creates a progress {@link BackMotionEvent}. */
+    public BackMotionEvent createProgressEvent() {
         float progress = getProgress(mLatestTouchX);
         return createProgressEvent(progress);
     }
@@ -152,7 +176,7 @@ class TouchTracker {
      * @return progress value
      */
     @FloatRange(from = 0.0, to = 1.0)
-    float getProgress(float touchX) {
+    public float getProgress(float touchX) {
         // If back is committed, progress is the distance between the last and first touch
         // point, divided by the max drag distance. Otherwise, it's the distance between
         // the last touch point and the starting threshold, divided by max drag distance.
@@ -200,11 +224,20 @@ class TouchTracker {
      * Maximum distance in pixels.
      * Progress is considered to be completed (1f) when this limit is exceeded.
      */
-    float getMaxDistance() {
+    public float getMaxDistance() {
         return mMaxDistance;
     }
 
-    BackMotionEvent createProgressEvent(float progress) {
+    public float getLinearDistance() {
+        return mLinearDistance;
+    }
+
+    public float getNonLinearFactor() {
+        return mNonLinearFactor;
+    }
+
+    /** Creates a progress {@link BackMotionEvent} for the given progress. */
+    public BackMotionEvent createProgressEvent(float progress) {
         return new BackMotionEvent(
                 /* touchX = */ mLatestTouchX,
                 /* touchY = */ mLatestTouchY,
@@ -216,6 +249,7 @@ class TouchTracker {
                 /* departingAnimationTarget = */ null);
     }
 
+    /** Sets the thresholds for computing progress. */
     public void setProgressThresholds(float linearDistance, float maxDistance,
             float nonLinearFactor) {
         if (LINEAR_DISTANCE >= 0) {
@@ -227,13 +261,14 @@ class TouchTracker {
         mNonLinearFactor = nonLinearFactor;
     }
 
-    void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "TouchTracker state:");
+    /** Dumps debugging info. */
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "BackTouchTracker state:");
         pw.println(prefix + "  mState=" + mState);
         pw.println(prefix + "  mTriggerBack=" + mTriggerBack);
     }
 
-    enum TouchTrackerState {
+    public enum TouchTrackerState {
         INITIAL, ACTIVE, FINISHED
     }
 

@@ -37,8 +37,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
-import java.util.Set;
-
 /**
  * The guts of a conversation notification that doesn't use valid shortcuts that is revealed when
  * performing a long press.

@@ -83,13 +83,13 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
 import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Controls when to show the LockIcon affordance (lock/unlocked icon or circle) on lock screen.

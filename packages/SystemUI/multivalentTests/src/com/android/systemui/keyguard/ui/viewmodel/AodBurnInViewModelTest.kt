@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.burnInInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -59,6 +60,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val keyguardClockRepository = kosmos.fakeKeyguardClockRepository
     private lateinit var underTest: AodBurnInViewModel
 
     private var burnInParameters = BurnInParameters()
@@ -67,6 +69,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
 
         MockitoAnnotations.initMocks(this)
         whenever(burnInInteractor.burnIn(anyInt(), anyInt())).thenReturn(burnInFlow)
@@ -297,5 +300,81 @@ class AodBurnInViewModelTest : SysuiTestCase() {
             assertThat(movement?.translationY).isEqualTo(0)
             assertThat(movement?.scale).isEqualTo(0.5f)
             assertThat(movement?.scaleClockOnly).isEqualTo(false)
+        }
+
+    @Test
+    fun translationAndScale_composeFlagOn_weatherLargeClock() =
+        testBurnInViewModelWhenComposeFlagOn(
+            isSmallClock = false,
+            isWeatherClock = true,
+            expectedScaleOnly = false
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOn_weatherSmallClock() =
+        testBurnInViewModelWhenComposeFlagOn(
+            isSmallClock = true,
+            isWeatherClock = true,
+            expectedScaleOnly = true
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOn_nonWeatherLargeClock() =
+        testBurnInViewModelWhenComposeFlagOn(
+            isSmallClock = false,
+            isWeatherClock = false,
+            expectedScaleOnly = true
+        )
+
+    @Test
+    fun translationAndScale_composeFlagOn_nonWeatherSmallClock() =
+        testBurnInViewModelWhenComposeFlagOn(
+            isSmallClock = true,
+            isWeatherClock = false,
+            expectedScaleOnly = true
+        )
+
+    private fun testBurnInViewModelWhenComposeFlagOn(
+        isSmallClock: Boolean,
+        isWeatherClock: Boolean,
+        expectedScaleOnly: Boolean
+    ) =
+        testScope.runTest {
+            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
+            mSetFlagsRule.enableFlags(AConfigFlags.FLAG_COMPOSE_LOCKSCREEN)
+            if (isSmallClock) {
+                keyguardClockRepository.setClockSize(ClockSize.SMALL)
+                // we need the following step to update stateFlow value
+                kosmos.testScope.collectLastValue(kosmos.keyguardClockViewModel.clockSize)
+            }
+
+            whenever(clockController.config.useAlternateSmartspaceAODTransition)
+                .thenReturn(if (isWeatherClock) true else false)
+
+            val movement by collectLastValue(underTest.movement(burnInParameters))
+
+            // Set to dozing (on AOD)
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                ),
+                validateStep = false,
+            )
+
+            // Trigger a change to the burn-in model
+            burnInFlow.value =
+                BurnInModel(
+                    translationX = 20,
+                    translationY = 30,
+                    scale = 0.5f,
+                )
+
+            assertThat(movement?.translationX).isEqualTo(20)
+            assertThat(movement?.translationY).isEqualTo(30)
+            assertThat(movement?.scale).isEqualTo(0.5f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(expectedScaleOnly)
         }
 }

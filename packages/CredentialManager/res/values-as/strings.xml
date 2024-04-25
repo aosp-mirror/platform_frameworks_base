@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"আপুনি <xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ কৰি থোৱা পাছকী ব্যৱহাৰ কৰক"</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"আপুনি <xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ কৰি থোৱা পাছৱৰ্ড ব্যৱহাৰ কৰক"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে থকা আপোনাৰ একাউণ্ট ব্যৱহাৰ কৰক"</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> ব্যৱহাৰ কৰি <xliff:g id="APP_NAME">%1$s</xliff:g>ত ছাইন ইন কৰিবলৈ আপোনাৰ স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছাইন ইনৰ বিকল্পসমূহ আনলক কৰক"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা পাছকী বাছনি কৰক"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবে ছেভ হৈ থকা এটা পাছৱৰ্ড বাছনি কৰক"</string>

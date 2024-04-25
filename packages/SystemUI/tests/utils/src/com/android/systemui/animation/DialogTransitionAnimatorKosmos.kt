@@ -16,7 +16,10 @@
 
 package com.android.systemui.animation
 
+import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 
-val Kosmos.dialogTransitionAnimator by Fixture { fakeDialogTransitionAnimator() }
+val Kosmos.dialogTransitionAnimator by Fixture {
+    fakeDialogTransitionAnimator(interactionJankMonitor = interactionJankMonitor)
+}

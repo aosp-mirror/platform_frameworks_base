@@ -18,7 +18,7 @@ package com.android.systemui.bouncer.data.repository
 
 import android.os.Build
 import android.util.Log
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
+import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.bouncer.shared.model.BouncerDismissActionModel
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
@@ -89,7 +89,9 @@ interface KeyguardBouncerRepository {
     val resourceUpdateRequests: StateFlow<Boolean>
     val alternateBouncerVisible: StateFlow<Boolean>
     val alternateBouncerUIAvailable: StateFlow<Boolean>
-    val sideFpsShowing: StateFlow<Boolean>
+
+    /** Last shown security mode of the primary bouncer (ie: pin/pattern/password/SIM) */
+    val lastShownSecurityMode: StateFlow<KeyguardSecurityModel.SecurityMode>
 
     /** Action that should be run right after the bouncer is dismissed. */
     var bouncerDismissActionModel: BouncerDismissActionModel?
@@ -126,8 +128,7 @@ interface KeyguardBouncerRepository {
 
     fun setAlternateBouncerUIAvailable(isAvailable: Boolean)
 
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    fun setSideFpsShowing(isShowing: Boolean)
+    fun setLastShownSecurityMode(securityMode: KeyguardSecurityModel.SecurityMode)
 }
 
 @SysUISingleton
@@ -186,6 +187,11 @@ constructor(
 
     private val _showMessage = MutableStateFlow<BouncerShowMessageModel?>(null)
     override val showMessage = _showMessage.asStateFlow()
+    private val _lastShownSecurityMode =
+        MutableStateFlow(KeyguardSecurityModel.SecurityMode.Invalid)
+    override val lastShownSecurityMode: StateFlow<KeyguardSecurityModel.SecurityMode> =
+        _lastShownSecurityMode.asStateFlow()
+
     private val _resourceUpdateRequests = MutableStateFlow(false)
     override val resourceUpdateRequests = _resourceUpdateRequests.asStateFlow()
 
@@ -196,8 +202,6 @@ constructor(
     private val _alternateBouncerUIAvailable = MutableStateFlow(false)
     override val alternateBouncerUIAvailable: StateFlow<Boolean> =
         _alternateBouncerUIAvailable.asStateFlow()
-    private val _sideFpsShowing = MutableStateFlow(false)
-    override val sideFpsShowing: StateFlow<Boolean> = _sideFpsShowing.asStateFlow()
 
     init {
         setUpLogging()
@@ -269,10 +273,8 @@ constructor(
         _isBackButtonEnabled.value = isBackButtonEnabled
     }
 
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    override fun setSideFpsShowing(isShowing: Boolean) {
-        SideFpsControllerRefactor.assertInLegacyMode()
-        _sideFpsShowing.value = isShowing
+    override fun setLastShownSecurityMode(securityMode: KeyguardSecurityModel.SecurityMode) {
+        _lastShownSecurityMode.value = securityMode
     }
 
     /** Sets up logs for state flows. */
@@ -321,8 +323,9 @@ constructor(
         alternateBouncerUIAvailable
             .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
             .launchIn(applicationScope)
-        sideFpsShowing
-            .logDiffsForTable(buffer, "", "isSideFpsShowing", false)
+        lastShownSecurityMode
+            .map { it.name }
+            .logDiffsForTable(buffer, "", "lastShownSecurityMode", null)
             .launchIn(applicationScope)
     }
 
