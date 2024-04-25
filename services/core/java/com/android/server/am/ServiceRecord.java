@@ -30,9 +30,9 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UptimeMillisLong;
 import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.Notification;
@@ -677,29 +677,29 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      * Data container class to help track certain fgs info for time-restricted types.
      */
     static class TimeLimitedFgsInfo {
-        @ElapsedRealtimeLong
+        @UptimeMillisLong
         private long mFirstFgsStartTime;
-        @ElapsedRealtimeLong
+        @UptimeMillisLong
         private long mLastFgsStartTime;
-        @ElapsedRealtimeLong
+        @UptimeMillisLong
         private long mTimeLimitExceededAt = Long.MIN_VALUE;
         private long mTotalRuntime = 0;
 
-        TimeLimitedFgsInfo(@ElapsedRealtimeLong long startTime) {
+        TimeLimitedFgsInfo(@UptimeMillisLong long startTime) {
             mFirstFgsStartTime = startTime;
             mLastFgsStartTime = startTime;
         }
 
-        @ElapsedRealtimeLong
+        @UptimeMillisLong
         public long getFirstFgsStartTime() {
             return mFirstFgsStartTime;
         }
 
-        public void setLastFgsStartTime(@ElapsedRealtimeLong long startTime) {
+        public void setLastFgsStartTime(@UptimeMillisLong long startTime) {
             mLastFgsStartTime = startTime;
         }
 
-        @ElapsedRealtimeLong
+        @UptimeMillisLong
         public long getLastFgsStartTime() {
             return mLastFgsStartTime;
         }
@@ -712,11 +712,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             return mTotalRuntime;
         }
 
-        public void setTimeLimitExceededAt(@ElapsedRealtimeLong long timeLimitExceededAt) {
+        public void setTimeLimitExceededAt(@UptimeMillisLong long timeLimitExceededAt) {
             mTimeLimitExceededAt = timeLimitExceededAt;
         }
 
-        @ElapsedRealtimeLong
+        @UptimeMillisLong
         public long getTimeLimitExceededAt() {
             return mTimeLimitExceededAt;
         }
@@ -1858,8 +1858,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     /**
      * Called when a time-limited FGS starts.
      */
-    public TimeLimitedFgsInfo createTimeLimitedFgsInfo(@ElapsedRealtimeLong long nowRealtime) {
-        return new TimeLimitedFgsInfo(nowRealtime);
+    public TimeLimitedFgsInfo createTimeLimitedFgsInfo(@UptimeMillisLong long nowUptime) {
+        return new TimeLimitedFgsInfo(nowUptime);
     }
 
     /**
@@ -1870,27 +1870,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 && isForeground
                 && ams.mServices.getTimeLimitedFgsType(foregroundServiceType)
                         != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
-    }
-
-    /**
-     * @return the next stop time for the given type, based on how long it has already ran for.
-     * The total runtime is automatically reset 24hrs after the first fgs start of this type
-     * or if the app has recently been in the TOP state when the app calls startForeground().
-     */
-    long getNextFgsStopTime(int fgsType, TimeLimitedFgsInfo fgsInfo) {
-        final long timeLimit;
-        switch (ams.mServices.getTimeLimitedFgsType(fgsType)) {
-            case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING:
-                timeLimit = ams.mConstants.mMediaProcessingFgsTimeoutDuration;
-                break;
-            case ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC:
-                timeLimit = ams.mConstants.mDataSyncFgsTimeoutDuration;
-                break;
-            // Add logic for time limits introduced in the future for other fgs types above.
-            default:
-                return Long.MAX_VALUE;
-        }
-        return fgsInfo.mLastFgsStartTime + Math.max(0, timeLimit - fgsInfo.mTotalRuntime);
     }
 
     private boolean isAppAlive() {
