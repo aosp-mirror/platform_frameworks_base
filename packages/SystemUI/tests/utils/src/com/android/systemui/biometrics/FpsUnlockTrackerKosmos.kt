@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package android.view
+package com.android.systemui.biometrics
 
-import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
-var Kosmos.layoutInflater: LayoutInflater by
-    Kosmos.Fixture { LayoutInflater.from(applicationContext) }
+val Kosmos.fpsUnlockTracker by Kosmos.Fixture { mock<FpsUnlockTracker>() }
