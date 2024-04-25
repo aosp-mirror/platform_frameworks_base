@@ -136,10 +136,9 @@ public class UserWakeupStore {
      * Remove wakeup scheduled for the user with given userId if present.
      */
     public void removeUserWakeup(int userId) {
-        synchronized (mUserWakeupLock) {
-            mUserStarts.delete(userId);
+        if (deleteWakeupFromUserStarts(userId)) {
+            updateUserListFile();
         }
-        updateUserListFile();
     }
 
     /**
@@ -186,7 +185,7 @@ public class UserWakeupStore {
      * Return scheduled start time for user or -1 if user does not have alarm set.
      */
     @VisibleForTesting
-    long getWakeupTimeForUserForTest(int userId) {
+    long getWakeupTimeForUser(int userId) {
         synchronized (mUserWakeupLock) {
             return mUserStarts.get(userId, -1);
         }
@@ -197,8 +196,11 @@ public class UserWakeupStore {
      */
     public void onUserStarting(int userId) {
         synchronized (mUserWakeupLock) {
-            mStartingUsers.put(userId, getWakeupTimeForUserForTest(userId));
-            mUserStarts.delete(userId);
+            final long wakeup = getWakeupTimeForUser(userId);
+            if (wakeup >= 0) {
+                mStartingUsers.put(userId, wakeup);
+                mUserStarts.delete(userId);
+            }
         }
     }
 
@@ -206,21 +208,48 @@ public class UserWakeupStore {
      * Remove userId from starting user list once start is complete.
      */
     public void onUserStarted(int userId) {
-        synchronized (mUserWakeupLock) {
-            mStartingUsers.delete(userId);
+        if (deleteWakeupFromStartingUsers(userId)) {
+            updateUserListFile();
         }
-        updateUserListFile();
     }
 
     /**
      * Remove userId from the store when the user is removed.
      */
     public void onUserRemoved(int userId) {
-        synchronized (mUserWakeupLock) {
-            mUserStarts.delete(userId);
-            mStartingUsers.delete(userId);
+        if (deleteWakeupFromUserStarts(userId) || deleteWakeupFromStartingUsers(userId)) {
+            updateUserListFile();
         }
-        updateUserListFile();
+    }
+
+    /**
+     * Remove wakeup for a given userId from mUserStarts.
+     * @return true if an entry is found and the list of wakeups changes.
+     */
+    private boolean deleteWakeupFromUserStarts(int userId) {
+        int index;
+        synchronized (mUserWakeupLock) {
+            index = mUserStarts.indexOfKey(userId);
+            if (index >= 0) {
+                mUserStarts.removeAt(index);
+            }
+        }
+        return index >= 0;
+    }
+
+    /**
+     * Remove wakeup for a given userId from mStartingUsers.
+     * @return true if an entry is found and the list of wakeups changes.
+     */
+    private boolean deleteWakeupFromStartingUsers(int userId) {
+        int index;
+        synchronized (mUserWakeupLock) {
+            index = mStartingUsers.indexOfKey(userId);
+            if (index >= 0) {
+                mStartingUsers.removeAt(index);
+            }
+        }
+        return index >= 0;
     }
 
     /**
