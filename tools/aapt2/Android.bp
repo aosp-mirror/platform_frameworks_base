@@ -248,7 +248,7 @@ cc_genrule {
     cmd: "mkdir -p $(genDir)/integration-tests/CompileTest/ && " +
         "cp $(locations integration-tests/CompileTest/**/*) $(genDir)/integration-tests/CompileTest/ && " +
         "mkdir -p $(genDir)/integration-tests/CommandTests/ && " +
-        "cp $(locations integration-tests/CommandTests/**/*) $(genDir)/integration-tests/CompileTest/ && " +
+        "cp $(locations integration-tests/CommandTests/**/*) $(genDir)/integration-tests/CommandTests/ && " +
         "mkdir -p $(genDir)/integration-tests/ConvertTest/ && " +
         "cp $(locations integration-tests/ConvertTest/**/*) $(genDir)/integration-tests/ConvertTest/ && " +
         "mkdir -p $(genDir)/integration-tests/DumpTest/ && " +
