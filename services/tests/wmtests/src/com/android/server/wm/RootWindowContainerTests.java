@@ -832,7 +832,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         // Assume the task is at the topmost position
         assertFalse(rootTask.isTopRootTaskInDisplayArea());
-        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity();
+        doReturn(taskDisplayArea.getHomeActivity()).when(taskDisplayArea).topRunningActivity(
+                anyBoolean());
 
         // Use the task as target to resume.
         mRootWindowContainer.resumeFocusedTasksTopActivities();
