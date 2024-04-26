@@ -27,9 +27,8 @@ rule com.android.nfc.NfcDispatcherProto* com.android.nfc.x.@0
 rule android.os.PersistableBundleProto* com.android.nfc.x.@0
 
 # Used by framework-nfc for reading trunk stable flags
-rule android.nfc.FakeFeatureFlagsImpl* com.android.nfc.x.@0
-rule android.nfc.FeatureFlags* com.android.nfc.x.@0
-rule android.nfc.Flags* com.android.nfc.x.@0
+rule android.nfc.*Flags* com.android.nfc.x.@0
+rule android.nfc.Flags com.android.nfc.x.@0
 rule android.permission.flags.** com.android.nfc.x.@0
 
 # Used by framework-nfc for misc utilities
