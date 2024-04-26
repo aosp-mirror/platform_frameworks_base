@@ -573,12 +573,16 @@ final class InstallPackageHelper {
                     (scanFlags & SCAN_DONT_KILL_APP) != 0 /* retainImplicitGrantOnReplace */);
             mPm.addAllPackageProperties(pkg);
 
-            if (oldPkgSetting == null || oldPkgSetting.getPkg() == null) {
-                mPm.mDomainVerificationManager.addPackage(pkgSetting,
-                        request.getPreVerifiedDomains());
-            } else {
-                mPm.mDomainVerificationManager.migrateState(oldPkgSetting, pkgSetting,
-                        request.getPreVerifiedDomains());
+            // Only verify app links for non-archival installations, otherwise there won't be any
+            // declared app links.
+            if (!request.isArchived()) {
+                if (oldPkgSetting == null || oldPkgSetting.getPkg() == null) {
+                    mPm.mDomainVerificationManager.addPackage(pkgSetting,
+                            request.getPreVerifiedDomains());
+                } else {
+                    mPm.mDomainVerificationManager.migrateState(oldPkgSetting, pkgSetting,
+                            request.getPreVerifiedDomains());
+                }
             }
 
             int collectionSize = ArrayUtils.size(pkg.getInstrumentations());
