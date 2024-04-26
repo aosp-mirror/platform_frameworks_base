@@ -157,7 +157,7 @@ constructor(
 
         // Set up links back into the pipeline for listeners that need to send events upstream.
         mediaTimeoutListener.timeoutCallback = { key: String, timedOut: Boolean ->
-            setInactive(key, timedOut)
+            mediaDataProcessor.setInactive(key, timedOut)
         }
         mediaTimeoutListener.stateCallback = { key: String, state: PlaybackState ->
             mediaDataProcessor.updateState(key, state)

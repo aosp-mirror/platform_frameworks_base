@@ -41,21 +41,21 @@ import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.sample
+import java.util.concurrent.Executor
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /** Models UI state and handles user input for a media control. */
 class MediaControlViewModel(
     @Application private val applicationContext: Context,
-    @Application private val applicationScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Background private val backgroundExecutor: Executor,
     private val interactor: MediaControlInteractor,
     private val logger: MediaUiEventLogger,
 ) {
@@ -72,9 +72,15 @@ class MediaControlViewModel(
                 .distinctUntilChanged()
         )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val player: Flow<MediaPlayerViewModel?> =
-        combine(playTurbulenceNoise, interactor.mediaControl) { playTurbulenceNoise, mediaControl ->
-                mediaControl?.let { toViewModel(it, playTurbulenceNoise) }
+        interactor.onAnyMediaConfigurationChange
+            .flatMapLatest {
+                combine(playTurbulenceNoise, interactor.mediaControl) {
+                    playTurbulenceNoise,
+                    mediaControl ->
+                    mediaControl?.let { toViewModel(it, playTurbulenceNoise) }
+                }
             }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
@@ -161,12 +167,10 @@ class MediaControlViewModel(
                 if (model.isResume && model.resumeProgress != null) {
                     seekBarViewModel.updateStaticProgress(model.resumeProgress)
                 } else {
-                    applicationScope.launch {
-                        withContext(backgroundDispatcher) {
-                            seekBarViewModel.updateController(
-                                model.token?.let { MediaController(applicationContext, it) }
-                            )
-                        }
+                    backgroundExecutor.execute {
+                        seekBarViewModel.updateController(
+                            model.token?.let { MediaController(applicationContext, it) }
+                        )
                     }
                 }
             }

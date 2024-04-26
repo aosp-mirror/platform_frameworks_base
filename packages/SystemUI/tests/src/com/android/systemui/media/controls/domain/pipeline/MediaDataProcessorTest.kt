@@ -54,6 +54,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.data.repository.MediaDataRepository
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
+import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.resume.MediaResumeListener
 import com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser
@@ -68,6 +69,7 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.SbnBuilder
+import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
@@ -125,6 +127,7 @@ private fun <T> anyObject(): T {
 @RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner::class)
 class MediaDataProcessorTest : SysuiTestCase() {
+    val kosmos = testKosmos()
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     @Mock lateinit var mediaControllerFactory: MediaControllerFactory
@@ -168,7 +171,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
     @Mock private lateinit var ugm: IUriGrantsManager
     @Mock private lateinit var imageSource: ImageDecoder.Source
     private lateinit var mediaDataRepository: MediaDataRepository
-    private lateinit var mediaFilterRepository: MediaFilterRepository
     private lateinit var testScope: TestScope
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var testableLooper: TestableLooper
@@ -183,6 +185,7 @@ class MediaDataProcessorTest : SysuiTestCase() {
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
             1
         )
+    private val mediaFilterRepository: MediaFilterRepository = kosmos.mediaFilterRepository
 
     private lateinit var staticMockSession: MockitoSession
 
@@ -210,7 +213,6 @@ class MediaDataProcessorTest : SysuiTestCase() {
         )
         testDispatcher = UnconfinedTestDispatcher()
         testScope = TestScope(testDispatcher)
-        mediaFilterRepository = MediaFilterRepository(clock)
         mediaDataRepository = MediaDataRepository(mediaFlags, dumpManager)
         mediaDataProcessor =
             MediaDataProcessor(
