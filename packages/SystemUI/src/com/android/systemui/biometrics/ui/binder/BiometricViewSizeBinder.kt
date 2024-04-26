@@ -20,6 +20,7 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.graphics.Outline
+import android.graphics.Rect
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.util.TypedValue
@@ -36,7 +37,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Guideline
 import androidx.core.animation.addListener
-import androidx.core.view.doOnAttach
 import androidx.core.view.doOnLayout
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
@@ -106,6 +106,52 @@ object BiometricViewSizeBinder {
                     )
                     .toInt()
 
+            var currentSize: PromptSize? = null
+            var currentPosition: PromptPosition = PromptPosition.Bottom
+            panelView.outlineProvider =
+                object : ViewOutlineProvider() {
+                    override fun getOutline(view: View, outline: Outline) {
+                        when (currentPosition) {
+                            PromptPosition.Right -> {
+                                outline.setRoundRect(
+                                    0,
+                                    0,
+                                    view.width + cornerRadiusPx,
+                                    view.height,
+                                    cornerRadiusPx.toFloat()
+                                )
+                            }
+                            PromptPosition.Left -> {
+                                outline.setRoundRect(
+                                    -cornerRadiusPx,
+                                    0,
+                                    view.width,
+                                    view.height,
+                                    cornerRadiusPx.toFloat()
+                                )
+                            }
+                            PromptPosition.Top -> {
+                                outline.setRoundRect(
+                                    0,
+                                    -cornerRadiusPx,
+                                    view.width,
+                                    view.height,
+                                    cornerRadiusPx.toFloat()
+                                )
+                            }
+                            PromptPosition.Bottom -> {
+                                outline.setRoundRect(
+                                    0,
+                                    0,
+                                    view.width,
+                                    view.height + cornerRadiusPx,
+                                    cornerRadiusPx.toFloat()
+                                )
+                            }
+                        }
+                    }
+                }
+
             // ConstraintSets for animating between prompt sizes
             val mediumConstraintSet = ConstraintSet()
             mediumConstraintSet.clone(view as ConstraintLayout)
@@ -115,7 +161,9 @@ object BiometricViewSizeBinder {
 
             val largeConstraintSet = ConstraintSet()
             largeConstraintSet.clone(mediumConstraintSet)
-            largeConstraintSet.constrainMaxWidth(R.id.panel, view.width)
+            largeConstraintSet.constrainMaxWidth(R.id.panel, 0)
+            largeConstraintSet.setGuidelineBegin(R.id.leftGuideline, 0)
+            largeConstraintSet.setGuidelineEnd(R.id.rightGuideline, 0)
 
             // TODO: Investigate better way to handle 180 rotations
             val flipConstraintSet = ConstraintSet()
@@ -138,65 +186,134 @@ object BiometricViewSizeBinder {
                     }
                 }
 
-                fun roundCorners(size: PromptSize, position: PromptPosition) {
-                    var left = 0
-                    var top = 0
-                    var right = 0
-                    var bottom = 0
-                    when (size) {
-                        PromptSize.SMALL,
-                        PromptSize.MEDIUM ->
-                            when (position) {
-                                PromptPosition.Right -> {
-                                    left = 0
-                                    top = 0
-                                    right = view.width + cornerRadiusPx
-                                    bottom = view.height
+                view.repeatWhenAttached {
+                    lifecycleScope.launch {
+                        viewModel.iconPosition.collect { position ->
+                            if (position != Rect()) {
+                                val iconParams =
+                                    iconHolderView.layoutParams as ConstraintLayout.LayoutParams
+
+                                if (position.left != 0) {
+                                    iconParams.endToEnd = ConstraintSet.UNSET
+                                    iconParams.leftMargin = position.left
+                                    mediumConstraintSet.clear(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.END
+                                    )
+                                    mediumConstraintSet.connect(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.START,
+                                        ConstraintSet.PARENT_ID,
+                                        ConstraintSet.START
+                                    )
+                                    mediumConstraintSet.setMargin(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.START,
+                                        position.left
+                                    )
+                                    smallConstraintSet.clear(R.id.biometric_icon, ConstraintSet.END)
+                                    smallConstraintSet.connect(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.START,
+                                        ConstraintSet.PARENT_ID,
+                                        ConstraintSet.START
+                                    )
+                                    smallConstraintSet.setMargin(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.START,
+                                        position.left
+                                    )
                                 }
-                                PromptPosition.Left -> {
-                                    left = -cornerRadiusPx
-                                    top = 0
-                                    right = view.width
-                                    bottom = view.height
+                                if (position.top != 0) {
+                                    iconParams.bottomToBottom = ConstraintSet.UNSET
+                                    iconParams.topMargin = position.top
+                                    mediumConstraintSet.clear(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.BOTTOM
+                                    )
+                                    mediumConstraintSet.setMargin(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.TOP,
+                                        position.top
+                                    )
+                                    smallConstraintSet.clear(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.BOTTOM
+                                    )
+                                    smallConstraintSet.setMargin(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.TOP,
+                                        position.top
+                                    )
                                 }
-                                PromptPosition.Top -> {
-                                    left = 0
-                                    top = -cornerRadiusPx
-                                    right = panelView.width
-                                    bottom = view.height
+                                if (position.right != 0) {
+                                    iconParams.startToStart = ConstraintSet.UNSET
+                                    iconParams.rightMargin = position.right
+                                    mediumConstraintSet.clear(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.START
+                                    )
+                                    mediumConstraintSet.connect(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.END,
+                                        ConstraintSet.PARENT_ID,
+                                        ConstraintSet.END
+                                    )
+                                    mediumConstraintSet.setMargin(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.END,
+                                        position.right
+                                    )
+                                    smallConstraintSet.clear(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.START
+                                    )
+                                    smallConstraintSet.connect(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.END,
+                                        ConstraintSet.PARENT_ID,
+                                        ConstraintSet.END
+                                    )
+                                    smallConstraintSet.setMargin(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.END,
+                                        position.right
+                                    )
                                 }
-                                PromptPosition.Bottom -> {
-                                    left = 0
-                                    top = 0
-                                    right = panelView.width
-                                    bottom = view.height + cornerRadiusPx
+                                if (position.bottom != 0) {
+                                    iconParams.topToTop = ConstraintSet.UNSET
+                                    iconParams.bottomMargin = position.bottom
+                                    mediumConstraintSet.clear(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.TOP
+                                    )
+                                    mediumConstraintSet.setMargin(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.BOTTOM,
+                                        position.bottom
+                                    )
+                                    smallConstraintSet.clear(R.id.biometric_icon, ConstraintSet.TOP)
+                                    smallConstraintSet.setMargin(
+                                        R.id.biometric_icon,
+                                        ConstraintSet.BOTTOM,
+                                        position.bottom
+                                    )
                                 }
+                                iconHolderView.layoutParams = iconParams
                             }
-                        PromptSize.LARGE -> {
-                            left = 0
-                            top = 0
-                            right = view.width
-                            bottom = view.height
                         }
                     }
-
-                    // Round the panel outline
-                    panelView.outlineProvider =
-                        object : ViewOutlineProvider() {
-                            override fun getOutline(view: View, outline: Outline) {
-                                outline.setRoundRect(
-                                    left,
-                                    top,
-                                    right,
-                                    bottom,
-                                    cornerRadiusPx.toFloat()
-                                )
-                            }
+                    lifecycleScope.launch {
+                        viewModel.iconSize.collect { iconSize ->
+                            iconHolderView.layoutParams.width = iconSize.first
+                            iconHolderView.layoutParams.height = iconSize.second
+                            mediumConstraintSet.constrainWidth(R.id.biometric_icon, iconSize.first)
+                            mediumConstraintSet.constrainHeight(
+                                R.id.biometric_icon,
+                                iconSize.second
+                            )
                         }
-                }
-
-                view.repeatWhenAttached {
-                    var currentSize: PromptSize? = null
+                    }
 
                     lifecycleScope.launch {
                         viewModel.guidelineBounds.collect { bounds ->
@@ -249,87 +366,77 @@ object BiometricViewSizeBinder {
                     lifecycleScope.launch {
                         combine(viewModel.position, viewModel.size, ::Pair).collect {
                             (position, size) ->
-                            view.doOnAttach {
-                                setVisibilities(size)
+                            setVisibilities(size)
 
-                                if (position.isLeft) {
-                                    if (size.isSmall) {
-                                        flipConstraintSet.clone(smallConstraintSet)
-                                    } else {
-                                        flipConstraintSet.clone(mediumConstraintSet)
-                                    }
-
-                                    // Move all content to other panel
-                                    flipConstraintSet.connect(
-                                        R.id.scrollView,
-                                        ConstraintSet.START,
-                                        R.id.midGuideline,
-                                        ConstraintSet.START
-                                    )
-                                    flipConstraintSet.connect(
-                                        R.id.scrollView,
-                                        ConstraintSet.END,
-                                        R.id.rightGuideline,
-                                        ConstraintSet.END
-                                    )
+                            if (position.isLeft) {
+                                if (size.isSmall) {
+                                    flipConstraintSet.clone(smallConstraintSet)
+                                } else {
+                                    flipConstraintSet.clone(mediumConstraintSet)
                                 }
 
-                                roundCorners(size, position)
-
-                                when {
-                                    size.isSmall -> {
-                                        if (position.isLeft) {
-                                            flipConstraintSet.applyTo(view)
-                                        } else {
-                                            smallConstraintSet.applyTo(view)
-                                        }
-                                    }
-                                    size.isMedium && currentSize.isSmall -> {
-                                        val autoTransition = AutoTransition()
-                                        autoTransition.setDuration(
-                                            ANIMATE_SMALL_TO_MEDIUM_DURATION_MS.toLong()
-                                        )
-
-                                        TransitionManager.beginDelayedTransition(
-                                            view,
-                                            autoTransition
-                                        )
-
-                                        if (position.isLeft) {
-                                            flipConstraintSet.applyTo(view)
-                                        } else {
-                                            mediumConstraintSet.applyTo(view)
-                                        }
-                                    }
-                                    size.isMedium -> {
-                                        if (position.isLeft) {
-                                            flipConstraintSet.applyTo(view)
-                                        } else {
-                                            mediumConstraintSet.applyTo(view)
-                                        }
-                                    }
-                                    size.isLarge -> {
-                                        val autoTransition = AutoTransition()
-                                        autoTransition.setDuration(
-                                            ANIMATE_MEDIUM_TO_LARGE_DURATION_MS.toLong()
-                                        )
-
-                                        TransitionManager.beginDelayedTransition(
-                                            view,
-                                            autoTransition
-                                        )
-                                        largeConstraintSet.applyTo(view)
-                                    }
-                                }
-
-                                currentSize = size
-                                view.visibility = View.VISIBLE
-                                viewModel.setIsIconViewLoaded(false)
-                                notifyAccessibilityChanged()
-
-                                view.invalidate()
-                                view.requestLayout()
+                                // Move all content to other panel
+                                flipConstraintSet.connect(
+                                    R.id.scrollView,
+                                    ConstraintSet.START,
+                                    R.id.midGuideline,
+                                    ConstraintSet.START
+                                )
+                                flipConstraintSet.connect(
+                                    R.id.scrollView,
+                                    ConstraintSet.END,
+                                    R.id.rightGuideline,
+                                    ConstraintSet.END
+                                )
                             }
+
+                            when {
+                                size.isSmall -> {
+                                    if (position.isLeft) {
+                                        flipConstraintSet.applyTo(view)
+                                    } else {
+                                        smallConstraintSet.applyTo(view)
+                                    }
+                                }
+                                size.isMedium && currentSize.isSmall -> {
+                                    val autoTransition = AutoTransition()
+                                    autoTransition.setDuration(
+                                        ANIMATE_SMALL_TO_MEDIUM_DURATION_MS.toLong()
+                                    )
+
+                                    TransitionManager.beginDelayedTransition(view, autoTransition)
+
+                                    if (position.isLeft) {
+                                        flipConstraintSet.applyTo(view)
+                                    } else {
+                                        mediumConstraintSet.applyTo(view)
+                                    }
+                                }
+                                size.isMedium -> {
+                                    if (position.isLeft) {
+                                        flipConstraintSet.applyTo(view)
+                                    } else {
+                                        mediumConstraintSet.applyTo(view)
+                                    }
+                                }
+                                size.isLarge && currentSize.isMedium -> {
+                                    val autoTransition = AutoTransition()
+                                    autoTransition.setDuration(
+                                        ANIMATE_MEDIUM_TO_LARGE_DURATION_MS.toLong()
+                                    )
+
+                                    TransitionManager.beginDelayedTransition(view, autoTransition)
+                                    largeConstraintSet.applyTo(view)
+                                }
+                            }
+
+                            currentSize = size
+                            currentPosition = position
+                            notifyAccessibilityChanged()
+
+                            panelView.invalidateOutline()
+                            view.invalidate()
+                            view.requestLayout()
                         }
                     }
                 }
