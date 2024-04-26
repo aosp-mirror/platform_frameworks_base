@@ -473,6 +473,20 @@ public final class AttributionSource implements Parcelable {
     }
 
     /**
+     * @return The next package's device Id from its context.
+     * This device ID is used for permissions checking during attribution source validation.
+     *
+     * @hide
+     */
+    public int getNextDeviceId() {
+        if (mAttributionSourceState.next != null
+                && mAttributionSourceState.next.length > 0) {
+            return mAttributionSourceState.next[0].deviceId;
+        }
+        return Context.DEVICE_ID_DEFAULT;
+    }
+
+    /**
      * Checks whether this attribution source can be trusted. That is whether
      * the app it refers to created it and provided to the attribution chain.
      *
