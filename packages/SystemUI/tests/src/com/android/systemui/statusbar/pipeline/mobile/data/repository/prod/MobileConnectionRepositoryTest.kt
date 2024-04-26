@@ -35,6 +35,7 @@ import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
 import android.telephony.SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
+import android.telephony.TelephonyCallback.CarrierRoamingNtnModeListener
 import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.DisplayInfoListener
 import android.telephony.TelephonyCallback.ServiceStateListener
@@ -983,26 +984,19 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
-    fun isNonTerrestrial_updatesFromServiceState() =
+    fun isNonTerrestrial_updatesFromCallback0() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isNonTerrestrial)
-
-            // Lambda makes it a little clearer what we are testing IMO
-            val serviceStateCreator = { ntn: Boolean ->
-                mock<ServiceState>().also {
-                    whenever(it.isUsingNonTerrestrialNetwork).thenReturn(ntn)
-                }
-            }
 
             // Starts out false
             assertThat(latest).isFalse()
 
-            getTelephonyCallbackForType<ServiceStateListener>()
-                .onServiceStateChanged(serviceStateCreator(true))
+            val callback = getTelephonyCallbackForType<CarrierRoamingNtnModeListener>()
+
+            callback.onCarrierRoamingNtnModeChanged(true)
             assertThat(latest).isTrue()
 
-            getTelephonyCallbackForType<ServiceStateListener>()
-                .onServiceStateChanged(serviceStateCreator(false))
+            callback.onCarrierRoamingNtnModeChanged(false)
             assertThat(latest).isFalse()
         }
 
