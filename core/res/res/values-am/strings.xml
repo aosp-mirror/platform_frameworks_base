@@ -1864,7 +1864,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3ኛ ሥራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g>ን አባዛ"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ከመንቀል በፊት ፒን ጠይቅ"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ከመንቀል በፊት የማስከፈቻ ስርዓተ-ጥለት ጠይቅ"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ከመንቀል በፊት የማስከፈቻ ሥርዓተ-ጥለት ጠይቅ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ከመንቀል በፊት የይለፍ ቃል ጠይቅ"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"በእርስዎ አስተዳዳሪ ተጭኗል"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"በእርስዎ አስተዳዳሪ ተዘምኗል"</string>

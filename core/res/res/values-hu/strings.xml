@@ -1696,7 +1696,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"BE"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"KI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Teljes körű vezérlést biztosít eszköze felett a(z) <xliff:g id="SERVICE">%1$s</xliff:g> szolgáltatás számára?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"A teljes vezérlés indokolt olyan alkalmazásoknál, amelyek kisegítő lehetőségeket nyújtanak, a legtöbb alkalmazásnál azonban nem."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"A teljes körű vezérlés indokolt olyan alkalmazásoknál, amelyek kisegítő lehetőségeket nyújtanak, a legtöbb alkalmazásnál azonban nem."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Képernyő megtekintése és kezelése"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Elolvashatja a képernyő tartalmát, és tartalmakat jeleníthet meg más alkalmazások felett."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Műveletek megtekintése és elvégzése"</string>
@@ -1864,7 +1864,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. munkahelyi <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> klónozása"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"PIN-kód kérése a kitűzés feloldásához"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Feloldási minta kérése a rögzítés feloldásához"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Feloldási minta kérése a kitűzés feloldásához"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Jelszó kérése a rögzítés feloldásához"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"A rendszergazda által telepítve"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"A rendszergazda által frissítve"</string>

@@ -683,7 +683,7 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Bewege das Smartphone näher heran"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Bewege das Smartphone nach oben"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Bewege das Smartphone nach unten"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smart­phone nach links"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gesicht nicht erkannt. Smartphone auf Augenhöhe halten."</string>
@@ -1722,7 +1722,7 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Wähle eine Funktion aus, die verwendet wird, wenn du auf die Schaltfläche \"Bedienungshilfen\" tippst:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Wähle die Funktion aus, die mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Wähle eine Funktion aus, die mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Wenn du zwischen den Funktionen wechseln möchtest, halte die Schaltfläche \"Bedienungshilfen\" gedrückt."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Wenn du zwischen den Funktionen wechseln möchtest, halte die Schaltfläche „Bedienungshilfen“ gedrückt."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Wenn du zwischen den Funktionen wechseln möchtest, wische mit zwei Fingern nach oben und halte."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Wenn du zwischen den Funktionen wechseln möchtest, wische mit drei Fingern nach oben und halte."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Vergrößerung"</string>

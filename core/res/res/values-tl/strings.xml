@@ -686,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Iusog pakaliwa ang telepono mo"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Iusog pakanan ang telepono mo"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Tumingin nang mas direkta sa iyong device."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Hindi makita ang mukha mo. Hawakan ang telepono kapantay ng mata."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Hindi makita ang mukha mo. Ipantay ang telepono sa mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Masyadong magalaw. Hawakang mabuti ang telepono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Paki-enroll muli ang iyong mukha."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Hindi makilala ang mukha. Subukan ulit."</string>
@@ -1195,7 +1195,7 @@
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"I-edit"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"Ibahagi"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"Ibahagi gamit ang %1$s"</string>
-    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"Ibahagi"</string>
+    <string name="whichSendApplicationLabel" msgid="7467813004769188515">"I-share"</string>
     <string name="whichSendToApplication" msgid="77101541959464018">"Ipadala gamit ang"</string>
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Ipadala gamit ang %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"Ipadala"</string>

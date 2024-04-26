@@ -1393,7 +1393,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"DIJELI"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODBIJ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Odabir načina unosa"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Zadrži na zaslonu dok je fizička tipkovnica aktivna"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Zadržava se na zaslonu dok je fizička tipkovnica aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaži virtualnu tipkovnicu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfigurirajte uređaj <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Konfigurirajte fizičke tipkovnice"</string>
