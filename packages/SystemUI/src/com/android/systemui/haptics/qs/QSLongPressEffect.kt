@@ -189,7 +189,6 @@ constructor(
                 durations?.get(1) ?: LongPressHapticBuilder.INVALID_DURATION,
                 effectDuration
             )
-        _postedActionType.value = ActionType.INITIALIZE_ANIMATOR
         setState(State.IDLE)
         return true
     }
@@ -209,6 +208,5 @@ constructor(
         START_ANIMATOR,
         REVERSE_ANIMATOR,
         CANCEL_ANIMATOR,
-        INITIALIZE_ANIMATOR,
     }
 }
