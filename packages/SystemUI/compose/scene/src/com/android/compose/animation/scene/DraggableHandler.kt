@@ -658,12 +658,28 @@ private class SwipeTransition(
         targetOffset: Float,
         targetScene: SceneKey,
     ): OffsetAnimation {
+        // Skip the animation if we have already reached the target scene and the overscroll does
+        // not animate anything.
+        val hasReachedTargetScene =
+            (targetScene == toScene && progress >= 1f) ||
+                (targetScene == fromScene && progress <= 0f)
+        val skipAnimation =
+            hasReachedTargetScene &&
+                currentOverscrollSpec?.transformationSpec?.transformations?.isEmpty() == true
+
         return startOffsetAnimation {
             val animatable = Animatable(dragOffset, OffsetVisibilityThreshold)
             val isTargetGreater = targetOffset > animatable.value
             val job =
                 coroutineScope
                     .launch {
+                        // TODO(b/327249191): Refactor the code so that we don't even launch a
+                        // coroutine if we don't need to animate.
+                        if (skipAnimation) {
+                            snapToScene(targetScene)
+                            return@launch
+                        }
+
                         try {
                             val swipeSpec =
                                 transformationSpec.swipeSpec
