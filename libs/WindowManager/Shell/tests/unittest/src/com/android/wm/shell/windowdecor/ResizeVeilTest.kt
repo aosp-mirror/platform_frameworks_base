@@ -15,8 +15,8 @@
  */
 package com.android.wm.shell.windowdecor
 
+import android.graphics.Bitmap
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
@@ -60,7 +60,7 @@ class ResizeVeilTest : ShellTestCase() {
     @Mock
     private lateinit var mockDisplayController: DisplayController
     @Mock
-    private lateinit var mockAppIcon: Drawable
+    private lateinit var mockAppIcon: Bitmap
     @Mock
     private lateinit var mockDisplay: Display
     @Mock

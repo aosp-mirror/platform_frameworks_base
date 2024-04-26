@@ -107,8 +107,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private MaximizeMenu mMaximizeMenu;
 
     private ResizeVeil mResizeVeil;
-
-    private Drawable mAppIconDrawable;
     private Bitmap mAppIconBitmap;
     private CharSequence mAppName;
 
@@ -444,12 +442,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
         PackageManager pm = mContext.getApplicationContext().getPackageManager();
         final IconProvider provider = new IconProvider(mContext);
-        mAppIconDrawable = provider.getIcon(activityInfo);
+        final Drawable appIconDrawable = provider.getIcon(activityInfo);
         final Resources resources = mContext.getResources();
         final BaseIconFactory factory = new BaseIconFactory(mContext,
                 resources.getDisplayMetrics().densityDpi,
                 resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
-        mAppIconBitmap = factory.createScaledBitmap(mAppIconDrawable, MODE_DEFAULT);
+        mAppIconBitmap = factory.createScaledBitmap(appIconDrawable, MODE_DEFAULT);
         final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
         mAppName = pm.getApplicationLabel(applicationInfo);
     }
@@ -467,7 +465,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * until a resize event calls showResizeVeil below.
      */
     void createResizeVeil() {
-        mResizeVeil = new ResizeVeil(mContext, mDisplayController, mAppIconDrawable, mTaskInfo,
+        mResizeVeil = new ResizeVeil(mContext, mDisplayController, mAppIconBitmap, mTaskInfo,
                 mTaskSurface, mSurfaceControlTransactionSupplier);
     }
 
