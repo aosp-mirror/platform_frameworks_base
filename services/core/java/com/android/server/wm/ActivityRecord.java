@@ -8689,6 +8689,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // calculate the override, skip the override.
             return;
         }
+        // Make sure the orientation related fields will be updated by the override insets, because
+        // fixed rotation has assigned the fields from display's configuration.
+        if (hasFixedRotationTransform()) {
+            inOutConfig.windowConfiguration.setAppBounds(null);
+            inOutConfig.screenWidthDp = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.screenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+            inOutConfig.smallestScreenWidthDp = Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+            inOutConfig.orientation = ORIENTATION_UNDEFINED;
+        }
 
         // Override starts here.
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
@@ -8725,8 +8734,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // For the case of PIP transition and multi-window environment, the
             // smallestScreenWidthDp is handled already. Override only if the app is in
             // fullscreen.
-            DisplayInfo info = new DisplayInfo();
-            mDisplayContent.getDisplay().getDisplayInfo(info);
+            final DisplayInfo info = new DisplayInfo(mDisplayContent.getDisplayInfo());
             mDisplayContent.computeSizeRanges(info, rotated, dw, dh,
                     mDisplayContent.getDisplayMetrics().density,
                     inOutConfig, true /* overrideConfig */);
