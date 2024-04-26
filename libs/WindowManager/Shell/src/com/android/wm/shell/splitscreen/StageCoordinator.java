@@ -1762,10 +1762,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void finishEnterSplitScreen(SurfaceControl.Transaction finishT) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "finishEnterSplitScreen");
         mSplitLayout.update(finishT, true /* resetImePosition */);
-        mMainStage.getSplitDecorManager().inflate(mContext, mMainStage.mRootLeash,
-                getMainStageBounds());
-        mSideStage.getSplitDecorManager().inflate(mContext, mSideStage.mRootLeash,
-                getSideStageBounds());
+        mMainStage.getSplitDecorManager().inflate(mContext, mMainStage.mRootLeash);
+        mSideStage.getSplitDecorManager().inflate(mContext, mSideStage.mRootLeash);
         setDividerVisibility(true, finishT);
         // Ensure divider surface are re-parented back into the hierarchy at the end of the
         // transition. See Transition#buildFinishTransaction for more detail.
