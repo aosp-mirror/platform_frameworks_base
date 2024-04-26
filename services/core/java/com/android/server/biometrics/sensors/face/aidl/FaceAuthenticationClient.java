@@ -17,6 +17,9 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import static android.adaptiveauth.Flags.reportBiometricAuthAttempts;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_NOT_DETECTED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_SENSOR_DIRTY;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_UNKNOWN;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_VENDOR;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_VENDOR_BASE;
 import static android.hardware.face.FaceManager.getAuthHelpMessage;
@@ -43,7 +46,6 @@ import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceAuthenticationFrame;
-import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -90,8 +92,8 @@ public class FaceAuthenticationClient
     private final SensorPrivacyManager mSensorPrivacyManager;
     @NonNull
     private final AuthenticationStateListeners mAuthenticationStateListeners;
-    @FaceManager.FaceAcquired
-    private int mLastAcquire = FaceManager.FACE_ACQUIRED_UNKNOWN;
+    @BiometricFaceConstants.FaceAcquired
+    private int mLastAcquire = FACE_ACQUIRED_UNKNOWN;
 
     public FaceAuthenticationClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
@@ -232,9 +234,9 @@ public class FaceAuthenticationClient
     public boolean wasUserDetected() {
         // Do not provide haptic feedback if the user was not detected, and an error (usually
         // ERROR_TIMEOUT) is received.
-        return mLastAcquire != FaceManager.FACE_ACQUIRED_NOT_DETECTED
-                && mLastAcquire != FaceManager.FACE_ACQUIRED_SENSOR_DIRTY
-                && mLastAcquire != FaceManager.FACE_ACQUIRED_UNKNOWN;
+        return mLastAcquire != FACE_ACQUIRED_NOT_DETECTED
+                && mLastAcquire != FACE_ACQUIRED_SENSOR_DIRTY
+                && mLastAcquire != FACE_ACQUIRED_UNKNOWN;
     }
 
     @Override

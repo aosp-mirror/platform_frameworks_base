@@ -30,6 +30,8 @@ import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_N
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_TIMED;
 import static android.hardware.biometrics.BiometricConstants.LockoutMode;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricSourceType.FACE;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
@@ -1238,9 +1240,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean cameraPrivacyEnabled = mSensorPrivacyManager.isSensorPrivacyEnabled(
                 SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE, SensorPrivacyManager.Sensors.CAMERA);
 
-        final boolean isHwUnavailable = msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE;
+        final boolean isHwUnavailable = msgId == FACE_ERROR_HW_UNAVAILABLE;
 
-        if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
+        if (msgId == FACE_ERROR_LOCKOUT_PERMANENT) {
             if (getFaceAuthInteractor() != null && getFaceAuthInteractor().isFaceAuthStrong()) {
                 updateFingerprintListeningState(BIOMETRIC_ACTION_STOP);
             }
