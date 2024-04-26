@@ -102,6 +102,15 @@ constructor(
         )
     }
 
+    fun logOnCarrierRoamingNtnModeChanged(active: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { bool1 = active },
+            { "onCarrierRoamingNtnModeChanged: $bool1" }
+        )
+    }
+
     fun logOnDisplayInfoChanged(displayInfo: TelephonyDisplayInfo, subId: Int) {
         buffer.log(
             TAG,
