@@ -1628,6 +1628,8 @@
   <java-symbol type="string" name="miniresolver_switch" />
   <java-symbol type="string" name="miniresolver_call_information" />
   <java-symbol type="string" name="miniresolver_sms_information" />
+  <java-symbol type="string" name="miniresolver_private_space_phone_information" />
+  <java-symbol type="string" name="miniresolver_private_space_messages_information" />
   <java-symbol type="id" name="miniresolver_info_section" />
   <java-symbol type="id" name="miniresolver_info_section_text" />
   <java-symbol type="id" name="button_open" />
