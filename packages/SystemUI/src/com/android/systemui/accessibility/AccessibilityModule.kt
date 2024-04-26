@@ -22,6 +22,8 @@ import com.android.systemui.accessibility.data.repository.ColorCorrectionReposit
 import com.android.systemui.accessibility.data.repository.ColorCorrectionRepositoryImpl
 import com.android.systemui.accessibility.data.repository.ColorInversionRepository
 import com.android.systemui.accessibility.data.repository.ColorInversionRepositoryImpl
+import com.android.systemui.accessibility.data.repository.OneHandedModeRepository
+import com.android.systemui.accessibility.data.repository.OneHandedModeRepositoryImpl
 import com.android.systemui.accessibility.qs.QSAccessibilityModule
 import dagger.Binds
 import dagger.Module
@@ -33,6 +35,8 @@ interface AccessibilityModule {
 
     @Binds
     fun colorInversionRepository(impl: ColorInversionRepositoryImpl): ColorInversionRepository
+
+    @Binds fun oneHandedModeRepository(impl: OneHandedModeRepositoryImpl): OneHandedModeRepository
 
     @Binds
     fun accessibilityQsShortcutsRepository(
