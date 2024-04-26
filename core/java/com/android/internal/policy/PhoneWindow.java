@@ -37,6 +37,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,7 +47,9 @@ import android.app.KeyguardManager;
 import android.app.SearchManager;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Overridable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -179,6 +182,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     private static final long ENFORCE_EDGE_TO_EDGE = 309578419;
+
+    /**
+     * Override the layout in display cutout mode behavior. This will only apply if the edge to edge
+     * is not enforced.
+     */
+    @ChangeId
+    @Disabled
+    @Overridable
+    private static final long OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE = 332679525L;
 
     private static final int CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
             (1 << FEATURE_CUSTOM_TITLE) |
@@ -2474,6 +2486,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mEdgeToEdgeEnforced) {
             getAttributes().privateFlags |= PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
             mDecorFitsSystemWindows = false;
+        }
+        if (CompatChanges.isChangeEnabled(OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)
+                && !a.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement,
+                false /* defValue */)) {
+            getAttributes().privateFlags |= PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
         }
 
         mIsFloating = a.getBoolean(R.styleable.Window_windowIsFloating, false);
