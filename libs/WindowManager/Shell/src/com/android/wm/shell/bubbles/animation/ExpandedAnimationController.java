@@ -468,9 +468,9 @@ public class ExpandedAnimationController
         final int index = mLayout.indexOfChild(bubbleView);
         final PointF p = mPositioner.getExpandedBubbleXY(index, mBubbleStackView.getState());
         animationForChildAtIndex(index)
-                .position(p.x, p.y)
+                .position(p.x, p.y, /* translationZ= */ 0f)
                 .withPositionStartVelocities(velX, velY)
-                .start(() -> bubbleView.setTranslationZ(0f) /* after */);
+                .start();
 
         mMagnetizedBubbleDraggingOut = null;
 
@@ -509,6 +509,7 @@ public class ExpandedAnimationController
         return Sets.newHashSet(
                 DynamicAnimation.TRANSLATION_X,
                 DynamicAnimation.TRANSLATION_Y,
+                DynamicAnimation.TRANSLATION_Z,
                 DynamicAnimation.SCALE_X,
                 DynamicAnimation.SCALE_Y,
                 DynamicAnimation.ALPHA);
