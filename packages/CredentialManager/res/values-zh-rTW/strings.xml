@@ -40,7 +40,7 @@
     <string name="choose_provider_title" msgid="8870795677024868108">"選擇要將<xliff:g id="CREATETYPES">%1$s</xliff:g>存在哪裡"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"選取密碼管理工具並儲存資訊，下次就能更快登入"</string>
     <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"要建立用於登入「<xliff:g id="APP_NAME">%1$s</xliff:g>」的密碼金鑰嗎？"</string>
-    <string name="choose_create_option_password_title" msgid="4481366993598649224">"要儲存用於登入「<xliff:g id="APP_NAME">%1$s</xliff:g>」的密碼嗎？"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"要儲存登入「<xliff:g id="APP_NAME">%1$s</xliff:g>」的密碼嗎？"</string>
     <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"要儲存「<xliff:g id="APP_NAME">%1$s</xliff:g>」的登入資訊嗎？"</string>
     <string name="passkey" msgid="632353688396759522">"密碼金鑰"</string>
     <string name="password" msgid="6738570945182936667">"密碼"</string>

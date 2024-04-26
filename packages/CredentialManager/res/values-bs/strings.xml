@@ -48,7 +48,7 @@
     <string name="passwords" msgid="5419394230391253816">"lozinke"</string>
     <string name="sign_ins" msgid="4710739369149469208">"prijave"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informacije o prijavi"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvaj <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> na"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Sačuvaj vrstu akreditiva \"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>\" na"</string>
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Kreirati pristupni ključ na drugom uređaju?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Sačuvati lozinku na drugom uređaju?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Sačuvati akreditive za prijavu na drugom uređaju?"</string>
