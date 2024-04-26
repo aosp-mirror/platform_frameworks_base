@@ -656,6 +656,10 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Хиймэл дагуул, холболт муу байна"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Хиймэл дагуул, холболт сайн байна"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Хиймэл дагуул, холболт боломжтой"</string>
+    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
+    <skip />
+    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Ажлын профайл"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Зарим хүнд хөгжилтэй байж болох ч бүх хүнд тийм биш"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Системийн UI Tохируулагч нь Android хэрэглэгчийн интерфэйсийг тааруулах, өөрчлөх нэмэлт аргыг зааж өгөх болно. Эдгээр туршилтын тохиргоо нь цаашид өөрчлөгдөх, эвдрэх, алга болох магадлалтай. Үйлдлийг болгоомжтой хийнэ үү."</string>

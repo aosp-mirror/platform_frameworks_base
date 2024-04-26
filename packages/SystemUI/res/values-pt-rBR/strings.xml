@@ -656,6 +656,10 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satélite, conexão ruim"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satélite, conexão boa"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satélite, conexão disponível"</string>
+    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
+    <skip />
+    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabalho"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversão para alguns, mas não para todos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"O sintonizador System UI fornece maneiras adicionais de ajustar e personalizar a interface do usuário do Android. Esses recursos experimentais podem mudar, falhar ou desaparecer nas versões futuras. Prossiga com cuidado."</string>

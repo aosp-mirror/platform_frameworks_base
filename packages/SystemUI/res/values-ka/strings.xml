@@ -656,6 +656,10 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"სუსტი სატელიტური კავშირი"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"კარგი სატელიტური კავშირი"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ხელმისაწვდომია სატელიტური კავშირი"</string>
+    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
+    <skip />
+    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"სამსახურის პროფილი"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ზოგისთვის გასართობია, მაგრამ არა ყველასთვის"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"სისტემის UI ტუნერი გაძლევთ დამატებით გზებს Android-ის სამომხმარებლო ინტერფეისის პარამეტრების დაყენებისთვის. ეს ექსპერიმენტული მახასიათებლები შეიძლება შეიცვალოს, შეწყდეს ან გაქრეს მომავალ ვერსიებში. სიფრთხილით გააგრძელეთ."</string>

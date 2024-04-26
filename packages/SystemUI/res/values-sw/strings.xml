@@ -371,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Vifaa vya kusikilizia"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Unganisha kifaa kipya"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Bofya ili uunganishe kifaa kipya"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"Imeshindwa kusasisha mipangilio iliyowekwa mapema"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Ungependa kuwacha kuzuia maikrofoni ya kifaa?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Ungependa kuacha kuzuia kamera ya kifaa?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Ungependa kuwacha kuzuia kamera na maikrofoni ya kifaa?"</string>
@@ -656,6 +655,10 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Setilaiti, muunganisho hafifu"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Setilaiti, muunganisho thabiti"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Setilaiti, muunganisho unapatikana"</string>
+    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
+    <skip />
+    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Wasifu wa kazini"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Kinafurahisha kwa baadhi ya watu lakini si wote"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Kirekebishi cha kiolesura cha mfumo kinakupa njia zaidi za kugeuza na kubadilisha kiolesura cha Android ili kikufae. Vipengele hivi vya majaribio vinaweza kubadilika, kuharibika au kupotea katika matoleo ya siku zijazo. Endelea kwa uangalifu."</string>

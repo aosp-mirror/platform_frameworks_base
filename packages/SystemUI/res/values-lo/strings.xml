@@ -656,6 +656,10 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"ດາວທຽມ, ການເຊື່ອມຕໍ່ບໍ່ດີ"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ດາວທຽມ, ການເຊື່ອມຕໍ່ດີ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ດາວທຽມ, ການເຊື່ອມຕໍ່ທີ່ພ້ອມນຳໃຊ້"</string>
+    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
+    <skip />
+    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ມ່ວນຊື່ນສຳລັບບາງຄົນ ແຕ່ບໍ່ແມ່ນສຳລັບທຸກຄົນ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner ໃຫ້ທ່ານມີວິທີພິເສດຕື່ມອີກໃນການປັບປ່ຽນ ແລະຕົບແຕ່ງສ່ວນຕໍ່ປະສານຜູ້ໃຊ້ຂອງ Android. ຄຸນສົມບັດທົດລອງໃຊ້ເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການວາງຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງດຳເນີນຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>

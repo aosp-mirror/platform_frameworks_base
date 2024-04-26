@@ -656,6 +656,10 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"स्याटलाइट, खराब कनेक्सन"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"स्याटलाइट, राम्रो कनेक्सन"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"स्याटलाइट, कनेक्सन उपलब्ध छ"</string>
+    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
+    <skip />
+    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"कार्य प्रोफाइल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"केहीका लागि रमाइलो हुन्छ तर सबैका लागि होइन"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम UI ट्युनरले तपाईँलाई Android प्रयोगकर्ता इन्टरफेस आफू अनुकूल गर्न र ट्विक गर्न थप तरिकाहरू प्रदान गर्छ। यी प्रयोगात्मक सुविधाहरू भावी विमोचनमा परिवर्तन हुन, बिग्रिन वा हराउन सक्ने छन्। सावधानीपूर्वक अगाडि बढ्नुहोस्।"</string>
