@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"အထောက်အထားမန်နေဂျာ"</string>
     <string name="string_cancel" msgid="6369133483981306063">"မလုပ်တော့"</string>
     <string name="string_continue" msgid="1346732695941131882">"ရှေ့ဆက်ရန်"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"အခြားနည်း သိမ်းရန်"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"အခြားနည်းသုံးရန်"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ပိုမိုလေ့လာရန်"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"စကားဝှက်ကို ပြရန်"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"စကားဝှက်ကို ဖျောက်ရန်"</string>
