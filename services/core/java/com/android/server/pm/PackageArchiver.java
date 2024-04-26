@@ -284,7 +284,7 @@ public class PackageArchiver {
         }
 
         String currentLauncherPackageName = getCurrentLauncherPackageName(getParentUserId(userId));
-        if ((currentLauncherPackageName == null || !callerPackageName.equals(
+        if ((currentLauncherPackageName == null || !TextUtils.equals(callerPackageName,
                 currentLauncherPackageName)) && callingUid != Process.SHELL_UID) {
             // TODO(b/311619990): Remove dependency on SHELL_UID for testing
             Slog.e(TAG, TextUtils.formatSimple(
@@ -830,7 +830,7 @@ public class PackageArchiver {
                 mPm.mInstallerService.getAllSessions(userId).getList();
         for (int idx = 0; idx < activeSessions.size(); idx++) {
             PackageInstaller.SessionInfo activeSession = activeSessions.get(idx);
-            if (activeSession.appPackageName.equals(packageName)
+            if (TextUtils.equals(activeSession.appPackageName, packageName)
                     && activeSession.userId == userId && activeSession.active
                     && activeSession.isUnarchival()) {
                 return activeSession;

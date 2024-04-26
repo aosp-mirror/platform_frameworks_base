@@ -966,7 +966,14 @@ public final class BroadcastHelper {
         if (packageRemovedInfo.mIsAppIdRemoved) {
             // If a system app's updates are uninstalled the UID is not actually removed. Some
             // services need to know the package name affected.
-            if (isReplace) {
+            //
+            // When setting Intent.EXTRA_REPLACING is true for isReplace or isArchived above,
+            // the system triggers AppOpsService#resetAllModes in
+            // ActivityManagerService#broadcastIntentLockedTraced when the action is
+            // ACTION_UID_REMOVED. Add Intent.EXTRA_PACKAGE_NAME for isReplace or isArchived too.
+            // Because AppOpsService#resetAllModes needs the packageName to define which uid to be
+            // reset. If there is no package name, it resets the all appOps for all uids.
+            if (isReplace || isArchived) {
                 extras.putString(Intent.EXTRA_PACKAGE_NAME, removedPackage);
             }
 
