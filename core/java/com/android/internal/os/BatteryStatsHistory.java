@@ -133,6 +133,13 @@ public class BatteryStatsHistory {
     // For state2, trace all bit changes.
     static final int STATE2_TRACE_MASK = ~0;
 
+    /**
+     * Number of overflow bytes that can be written into the history buffer if the history
+     * directory is locked. This is done to prevent a long lock contention and a potential
+     * kill by a watchdog.
+     */
+    private static final int EXTRA_BUFFER_SIZE_WHEN_DIR_LOCKED = 100_000;
+
     private final Parcel mHistoryBuffer;
     private final File mSystemDir;
     private final HistoryStepDetailsCalculator mStepDetailsCalculator;
@@ -258,6 +265,10 @@ public class BatteryStatsHistory {
 
         void lock() {
             mLock.lock();
+        }
+
+        boolean tryLock() {
+            return mLock.tryLock();
         }
 
         void unlock() {
@@ -469,14 +480,12 @@ public class BatteryStatsHistory {
                 return;
             }
 
-            if (isLocked()) {
+            if (!tryLock()) {
                 mCleanupNeeded = true;
                 return;
             }
 
             mCleanupNeeded = false;
-
-            lock();
             try {
                 // if free disk space is less than 100MB, delete oldest history file.
                 if (!hasFreeDiskSpace(mDirectory)) {
@@ -1772,29 +1781,12 @@ public class BatteryStatsHistory {
             }
             mHistoryLastWritten.setTo(mHistoryLastLastWritten);
         }
-        final int dataSize = mHistoryBuffer.dataSize();
 
-        if (dataSize >= mMaxHistoryBufferSize) {
-            if (mMaxHistoryBufferSize == 0) {
-                Slog.wtf(TAG, "mMaxHistoryBufferSize should not be zero when writing history");
-                mMaxHistoryBufferSize = 1024;
-            }
-
-            // Make a copy of mHistoryCur.
-            HistoryItem copy = new HistoryItem();
-            copy.setTo(cur);
-
-            startNextFile(elapsedRealtimeMs);
-
-            // startRecordingHistory will reset mHistoryCur.
-            startRecordingHistory(elapsedRealtimeMs, uptimeMs, false);
-
-            // Add the copy into history buffer.
-            writeHistoryItem(elapsedRealtimeMs, uptimeMs, copy, HistoryItem.CMD_UPDATE);
+        if (maybeFlushBufferAndWriteHistoryItem(cur, elapsedRealtimeMs, uptimeMs)) {
             return;
         }
 
-        if (dataSize == 0) {
+        if (mHistoryBuffer.dataSize() == 0) {
             // The history is currently empty; we need it to start with a time stamp.
             HistoryItem copy = new HistoryItem();
             copy.setTo(cur);
@@ -1809,6 +1801,52 @@ public class BatteryStatsHistory {
             writeHistoryItem(elapsedRealtimeMs, uptimeMs, copy, HistoryItem.CMD_RESET);
         }
         writeHistoryItem(elapsedRealtimeMs, uptimeMs, cur, HistoryItem.CMD_UPDATE);
+    }
+
+    @GuardedBy("this")
+    private boolean maybeFlushBufferAndWriteHistoryItem(HistoryItem cur, long elapsedRealtimeMs,
+            long uptimeMs) {
+        int dataSize = mHistoryBuffer.dataSize();
+        if (dataSize < mMaxHistoryBufferSize) {
+            return false;
+        }
+
+        if (mMaxHistoryBufferSize == 0) {
+            Slog.wtf(TAG, "mMaxHistoryBufferSize should not be zero when writing history");
+            mMaxHistoryBufferSize = 1024;
+        }
+
+        boolean successfullyLocked = mHistoryDir.tryLock();
+        if (!successfullyLocked) {      // Already locked by another thread
+            // If the buffer size is below the allowed overflow limit, just keep going
+            if (dataSize < mMaxHistoryBufferSize + EXTRA_BUFFER_SIZE_WHEN_DIR_LOCKED) {
+                return false;
+            }
+
+            // Report the long contention as a WTF and flush the buffer anyway, potentially
+            // triggering a watchdog kill, which is still better than spinning forever.
+            Slog.wtf(TAG, "History buffer overflow exceeds " + EXTRA_BUFFER_SIZE_WHEN_DIR_LOCKED
+                    + " bytes");
+        }
+
+        // Make a copy of mHistoryCur before starting a new file
+        HistoryItem copy = new HistoryItem();
+        copy.setTo(cur);
+
+        try {
+            startNextFile(elapsedRealtimeMs);
+        } finally {
+            if (successfullyLocked) {
+                mHistoryDir.unlock();
+            }
+        }
+
+        // startRecordingHistory will reset mHistoryCur.
+        startRecordingHistory(elapsedRealtimeMs, uptimeMs, false);
+
+        // Add the copy into history buffer.
+        writeHistoryItem(elapsedRealtimeMs, uptimeMs, copy, HistoryItem.CMD_UPDATE);
+        return true;
     }
 
     @GuardedBy("this")
