@@ -712,7 +712,7 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifiche"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Scorciatoie da tastiera"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Cambia layout della tastiera"</string>
-    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"oppure"</string>
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"o"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Cancella la query di ricerca"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Scorciatoie"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Cerca scorciatoie"</string>
@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Spostati avanti tra le app recenti"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Spostati indietro tra le app recenti"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Apri elenco di app"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Mostra barra delle app"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Apri impostazioni"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Apri l\'assistente"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Blocca lo schermo"</string>

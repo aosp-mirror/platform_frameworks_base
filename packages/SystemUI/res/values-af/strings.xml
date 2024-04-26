@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Beweeg vorentoe deur onlangse apps"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Beweeg terug deur onlangse apps"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Maak appslys oop"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Wys taakbalk"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Maak instellings oop"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Maak Assistent oop"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Sluit skerm"</string>

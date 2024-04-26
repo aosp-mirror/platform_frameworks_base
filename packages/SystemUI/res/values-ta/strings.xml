@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"சமீபத்திய ஆப்ஸுக்கு முன்னோக்கிச் செல்லுதல்"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"சமீபத்திய ஆப்ஸுக்குப் பின்னோக்கிச் செல்லுதல்"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ஆப்ஸ் பட்டியலைத் திறத்தல்"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"செயல் பட்டியைக் காட்டுதல்"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"அமைப்புகளைத் திறத்தல்"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistantடைத் திறத்தல்"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"பூட்டுத் திரை"</string>

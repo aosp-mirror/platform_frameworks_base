@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Parcurge aplicațiile recente înainte"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Parcurge aplicațiile recente înapoi"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Deschide lista de aplicații"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Afișează bara de activități"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Deschide setările"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Deschide Asistentul"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Ecranul de blocare"</string>

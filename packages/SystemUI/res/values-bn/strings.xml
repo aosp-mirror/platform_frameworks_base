@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"সাম্প্রতিক অ্যাপের মাধ্যমে পরবর্তী জায়গায় যান"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"সাম্প্রতিক অ্যাপের মাধ্যমে আগের জায়গায় ফিরুন"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"অ্যাপের তালিকা খুলুন"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"টাস্কবার দেখুন"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"সেটিংস খুলুন"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant খুলুন"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"লক স্ক্রিন"</string>

@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"ఇటీవల ఉపయోగించిన యాప్‌ల తదుపరి పేజీకి వెళ్లండి"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"ఇటీవల ఉపయోగించిన యాప్‌ల మునుపటి పేజీకి వెళ్లండి"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"యాప్‌ల లిస్ట్‌ను తెరవండి"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"టాస్క్‌బార్‌ను చూపండి"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"సెట్టింగ్‌లను తెరవండి"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"అసిస్టెంట్‌ను తెరవండి"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"లాక్ స్క్రీన్"</string>

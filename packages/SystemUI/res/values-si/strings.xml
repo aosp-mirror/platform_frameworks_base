@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"මෑත යෙදුම් හරහා ඉදිරියට කාලක්‍රම කරන්න"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"මෑත යෙදුම් හරහා ආපස්සට කාලක්‍රම කරන්න"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"යෙදුම් ලැයිස්තුව විවෘත කරන්න"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"කාර්ය තීරුව පෙන්වන්න"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"සැකසීම් විවෘත කරන්න"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"සහායක විවෘත කරන්න"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"තිරය අගුළු දමන්න"</string>

@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन के अगले पेज पर जाने के लिए"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन के पिछले पेज पर जाने के लिए"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ऐप्लिकेशन की सूची खोलने के लिए"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"टास्कबार दिखाने के लिए"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"सेटिंग खोलने के लिए"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Google Assistant खोलने के लिए"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"स्क्रीन लॉक करने के लिए"</string>
