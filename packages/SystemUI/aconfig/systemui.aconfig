@@ -525,6 +525,13 @@ flag {
 }
 
 flag {
+   name: "smartspace_lockscreen_viewmodel"
+   namespace: "systemui"
+   description: "Indicate Smartspace lockscreen viewmodel"
+   bug: "331451011"
+}
+
+flag {
    name: "pin_input_field_styled_focus_state"
    namespace: "systemui"
    description: "Enables styled focus states on pin input field if keyboard is connected"
