@@ -23,7 +23,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Assert
@@ -33,12 +32,14 @@ class ShadeTestUtil constructor(val delegate: ShadeTestUtilDelegate) {
 
     /** Sets shade expansion to a value between 0-1. */
     fun setShadeExpansion(shadeExpansion: Float) {
-        setShadeAndQsExpansion(shadeExpansion, 0f)
+        delegate.assertFlagValid()
+        delegate.setShadeExpansion(shadeExpansion)
     }
 
     /** Sets QS expansion to a value between 0-1. */
     fun setQsExpansion(qsExpansion: Float) {
-        setShadeAndQsExpansion(0f, qsExpansion)
+        delegate.assertFlagValid()
+        delegate.setQsExpansion(qsExpansion)
     }
 
     /** Sets both shade and QS expansion. One value must be zero or values must add up to 1f. */
@@ -48,13 +49,19 @@ class ShadeTestUtil constructor(val delegate: ShadeTestUtilDelegate) {
             shadeExpansion == 0f || qsExpansion == 0f || shadeExpansion + qsExpansion == 1f,
         )
         delegate.assertFlagValid()
-        delegate.setShadeAndQsExpansionInternal(shadeExpansion, qsExpansion)
+        delegate.setShadeAndQsExpansion(shadeExpansion, qsExpansion)
     }
 
     /** Sets the shade expansion on the lockscreen to the given amount from 0-1. */
     fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
         delegate.assertFlagValid()
         delegate.setLockscreenShadeExpansion(lockscreenShadeExpansion)
+    }
+
+    /** Sets whether the user is moving the shade with touch input. */
+    fun setLockscreenShadeTracking(lockscreenShadeTracking: Boolean) {
+        delegate.assertFlagValid()
+        delegate.setLockscreenShadeTracking(lockscreenShadeTracking)
     }
 }
 
@@ -64,16 +71,25 @@ interface ShadeTestUtilDelegate {
     fun assertFlagValid()
 
     /** Sets both shade and QS expansion. One value must be zero or values must add up to 1f. */
-    fun setShadeAndQsExpansionInternal(shadeExpansion: Float, qsExpansion: Float)
+    fun setShadeAndQsExpansion(shadeExpansion: Float, qsExpansion: Float)
 
     /** Sets the shade expansion on the lockscreen to the given amount from 0-1. */
     fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float)
+
+    /** Sets whether the user is moving the shade with touch input. */
+    fun setLockscreenShadeTracking(lockscreenShadeTracking: Boolean)
+
+    /** Sets shade expansion to a value between 0-1. */
+    fun setShadeExpansion(shadeExpansion: Float)
+
+    /** Sets QS expansion to a value between 0-1. */
+    fun setQsExpansion(qsExpansion: Float)
 }
 
 /** Sets up shade state for tests when the scene container flag is disabled. */
 class ShadeTestUtilLegacyImpl(val testScope: TestScope, val shadeRepository: FakeShadeRepository) :
     ShadeTestUtilDelegate {
-    override fun setShadeAndQsExpansionInternal(shadeExpansion: Float, qsExpansion: Float) {
+    override fun setShadeAndQsExpansion(shadeExpansion: Float, qsExpansion: Float) {
         shadeRepository.setLegacyShadeExpansion(shadeExpansion)
         shadeRepository.setQsExpansion(qsExpansion)
         testScope.runCurrent()
@@ -83,22 +99,54 @@ class ShadeTestUtilLegacyImpl(val testScope: TestScope, val shadeRepository: Fak
         shadeRepository.setLockscreenShadeExpansion(lockscreenShadeExpansion)
     }
 
+    override fun setLockscreenShadeTracking(lockscreenShadeTracking: Boolean) {
+        shadeRepository.setLegacyLockscreenShadeTracking(lockscreenShadeTracking)
+    }
+
     override fun assertFlagValid() {
         Assert.assertFalse(SceneContainerFlag.isEnabled)
+    }
+
+    /** Sets shade expansion to a value between 0-1. */
+    override fun setShadeExpansion(shadeExpansion: Float) {
+        shadeRepository.setLegacyShadeExpansion(shadeExpansion)
+        testScope.runCurrent()
+    }
+
+    /** Sets QS expansion to a value between 0-1. */
+    override fun setQsExpansion(qsExpansion: Float) {
+        shadeRepository.setQsExpansion(qsExpansion)
+        testScope.runCurrent()
     }
 }
 
 /** Sets up shade state for tests when the scene container flag is enabled. */
 class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: SceneInteractor) :
     ShadeTestUtilDelegate {
-    override fun setShadeAndQsExpansionInternal(shadeExpansion: Float, qsExpansion: Float) {
+    val isUserInputOngoing = MutableStateFlow(true)
+
+    override fun setShadeAndQsExpansion(shadeExpansion: Float, qsExpansion: Float) {
         if (shadeExpansion == 0f) {
             setTransitionProgress(Scenes.Lockscreen, Scenes.QuickSettings, qsExpansion)
         } else if (qsExpansion == 0f) {
             setTransitionProgress(Scenes.Lockscreen, Scenes.Shade, shadeExpansion)
+        } else if (shadeExpansion == 1f) {
+            setIdleScene(Scenes.Shade)
+        } else if (qsExpansion == 1f) {
+            setIdleScene(Scenes.QuickSettings)
         } else {
             setTransitionProgress(Scenes.Shade, Scenes.QuickSettings, qsExpansion)
         }
+    }
+
+    /** Sets shade expansion to a value between 0-1. */
+    override fun setShadeExpansion(shadeExpansion: Float) {
+        setShadeAndQsExpansion(shadeExpansion, 0f)
+    }
+
+    /** Sets QS expansion to a value between 0-1. */
+    override fun setQsExpansion(qsExpansion: Float) {
+        setShadeAndQsExpansion(0f, qsExpansion)
     }
 
     override fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
@@ -109,6 +157,10 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
         } else {
             setTransitionProgress(Scenes.Lockscreen, Scenes.Shade, lockscreenShadeExpansion)
         }
+    }
+
+    override fun setLockscreenShadeTracking(lockscreenShadeTracking: Boolean) {
+        isUserInputOngoing.value = lockscreenShadeTracking
     }
 
     private fun setIdleScene(scene: SceneKey) {
@@ -127,8 +179,8 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
                     fromScene = from,
                     toScene = to,
                     progress = MutableStateFlow(progress),
-                    isInitiatedByUserInput = false,
-                    isUserInputOngoing = flowOf(false),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = isUserInputOngoing,
                 )
             )
         sceneInteractor.setTransitionState(transitionState)
