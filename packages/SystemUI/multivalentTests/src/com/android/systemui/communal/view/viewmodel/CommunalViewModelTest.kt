@@ -20,9 +20,9 @@ import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.widget.RemoteViews
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
@@ -41,6 +41,7 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel.Companion.PO
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -50,8 +51,9 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.settings.fakeUserTracker
-import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.ShadeTestUtil
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.smartspace.data.repository.fakeSmartspaceRepository
 import com.android.systemui.testKosmos
@@ -70,11 +72,13 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class CommunalViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var user: UserInfo
     @Mock private lateinit var providerInfo: AppWidgetProviderInfo
@@ -88,8 +92,13 @@ class CommunalViewModelTest : SysuiTestCase() {
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
     private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var userRepository: FakeUserRepository
+    private lateinit var shadeTestUtil: ShadeTestUtil
 
     private lateinit var underTest: CommunalViewModel
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setUp() {
@@ -101,6 +110,7 @@ class CommunalViewModelTest : SysuiTestCase() {
         smartspaceRepository = kosmos.fakeSmartspaceRepository
         mediaRepository = kosmos.fakeCommunalMediaRepository
         userRepository = kosmos.fakeUserRepository
+        shadeTestUtil = kosmos.shadeTestUtil
 
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
         mSetFlagsRule.enableFlags(FLAG_COMMUNAL_HUB)
@@ -274,7 +284,7 @@ class CommunalViewModelTest : SysuiTestCase() {
         testScope.runTest {
             // On keyguard without any shade expansion.
             kosmos.fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-            kosmos.fakeShadeRepository.setLockscreenShadeExpansion(0f)
+            shadeTestUtil.setLockscreenShadeExpansion(0f)
             runCurrent()
             assertThat(underTest.canChangeScene()).isTrue()
         }
@@ -284,7 +294,7 @@ class CommunalViewModelTest : SysuiTestCase() {
         testScope.runTest {
             // On keyguard with shade fully expanded.
             kosmos.fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-            kosmos.fakeShadeRepository.setLockscreenShadeExpansion(1f)
+            shadeTestUtil.setLockscreenShadeExpansion(1f)
             runCurrent()
             assertThat(underTest.canChangeScene()).isFalse()
         }
@@ -297,5 +307,11 @@ class CommunalViewModelTest : SysuiTestCase() {
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
     }
 }
