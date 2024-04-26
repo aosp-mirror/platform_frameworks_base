@@ -122,8 +122,6 @@ public class ProxyManagerTest {
 
     @Before
     public void setup() throws RemoteException {
-        mSetFlagsRule.initAllFlagsToReleaseConfigDefault();
-
         MockitoAnnotations.initMocks(this);
         final Resources resources = InstrumentationRegistry.getContext().getResources();
 
