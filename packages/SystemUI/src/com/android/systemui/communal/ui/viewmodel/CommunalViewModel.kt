@@ -16,11 +16,15 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.content.res.Resources
+import android.view.View
+import android.view.accessibility.AccessibilityNodeInfo
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -31,6 +35,7 @@ import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
+import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
 import javax.inject.Named
@@ -56,6 +61,7 @@ class CommunalViewModel
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
+    @Main private val resources: Resources,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
@@ -107,6 +113,25 @@ constructor(
                 transitionedToGlanceableHub && isIdleOnCommunal && !isAnyFullyExpanded
             }
             .distinctUntilChanged()
+
+    override val widgetAccessibilityDelegate =
+        object : View.AccessibilityDelegate() {
+            override fun onInitializeAccessibilityNodeInfo(
+                host: View,
+                info: AccessibilityNodeInfo
+            ) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                // Hint user to long press in order to enter edit mode
+                info.addAction(
+                    AccessibilityNodeInfo.AccessibilityAction(
+                        AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
+                        resources
+                            .getString(R.string.accessibility_action_label_edit_widgets)
+                            .lowercase()
+                    )
+                )
+            }
+        }
 
     private val _isEnableWidgetDialogShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isEnableWidgetDialogShowing: Flow<Boolean> = _isEnableWidgetDialogShowing.asStateFlow()

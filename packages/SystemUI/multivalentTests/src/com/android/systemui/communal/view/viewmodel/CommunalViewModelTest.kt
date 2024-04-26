@@ -140,6 +140,7 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
         underTest =
             CommunalViewModel(
                 testScope,
+                context.resources,
                 kosmos.keyguardTransitionInteractor,
                 kosmos.communalInteractor,
                 kosmos.communalTutorialInteractor,

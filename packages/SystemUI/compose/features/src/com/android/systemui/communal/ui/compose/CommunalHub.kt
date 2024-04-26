@@ -105,6 +105,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -841,19 +842,31 @@ private fun WidgetContent(
     widgetConfigurator: WidgetConfigurator?,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val isFocusable by viewModel.isFocusable.collectAsState(initial = false)
-
+    val accessibilityLabel =
+        remember(model, context) {
+            model.providerInfo.loadLabel(context.packageManager).toString().trim()
+        }
+    val clickActionLabel = stringResource(R.string.accessibility_action_label_select_widget)
     Box(
         modifier =
-            modifier.thenIf(!viewModel.isEditMode && model.inQuietMode) {
-                Modifier.pointerInput(Unit) {
-                    // consume tap to prevent the child view from triggering interactions with the
-                    // app widget
-                    observeTaps(shouldConsume = true) { _ ->
-                        viewModel.onOpenEnableWorkProfileDialog()
+            modifier
+                .thenIf(!viewModel.isEditMode && model.inQuietMode) {
+                    Modifier.pointerInput(Unit) {
+                        // consume tap to prevent the child view from triggering interactions with
+                        // the app widget
+                        observeTaps(shouldConsume = true) { _ ->
+                            viewModel.onOpenEnableWorkProfileDialog()
+                        }
                     }
                 }
-            }
+                .thenIf(viewModel.isEditMode) {
+                    Modifier.semantics {
+                        contentDescription = accessibilityLabel
+                        onClick(label = clickActionLabel, action = null)
+                    }
+                }
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
@@ -865,6 +878,7 @@ private fun WidgetContent(
                         // Remove the extra padding applied to AppWidgetHostView to allow widgets to
                         // occupy the entire box.
                         setPadding(0)
+                        accessibilityDelegate = viewModel.widgetAccessibilityDelegate
                     }
             },
             update = {
