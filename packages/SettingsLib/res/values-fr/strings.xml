@@ -710,7 +710,7 @@
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activer les animations système pour la prévisualisation du Retour"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ce paramètre active les animations système pour la prévisualisation du geste de retour. Pour cela, enableOnBackInvokedCallback doit être défini sur \"True\" dans le fichier manifeste de chaque appli."</string>
     <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
-    <string name="not_specified" msgid="5423502443185110328">"Non personnalisé"</string>
+    <string name="not_specified" msgid="5423502443185110328">"Non défini"</string>
     <string name="neuter" msgid="2075249330106127310">"Neutre"</string>
     <string name="feminine" msgid="1529155595310784757">"Féminin"</string>
     <string name="masculine" msgid="4653978041013996303">"Masculin"</string>
