@@ -16,14 +16,13 @@
 
 package com.android.systemui.shade
 
-import android.content.Context
+import android.graphics.Rect
 import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.MotionEvent
 import android.view.View
-import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -132,6 +131,11 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
 
         overrideResource(R.dimen.communal_right_edge_swipe_region_width, RIGHT_SWIPE_REGION_WIDTH)
+        overrideResource(R.dimen.communal_top_edge_swipe_region_height, TOP_SWIPE_REGION_WIDTH)
+        overrideResource(
+            R.dimen.communal_bottom_edge_swipe_region_height,
+            BOTTOM_SWIPE_REGION_WIDTH
+        )
 
         // Make communal available so that communalInteractor.desiredScene accurately reflects
         // scene changes instead of just returning Blank.
@@ -421,6 +425,24 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun gestureExclusionZone_setAfterInit() =
+        with(kosmos) {
+            testScope.runTest {
+                goToScene(CommunalScenes.Communal)
+
+                assertThat(containerView.systemGestureExclusionRects)
+                    .containsExactly(
+                        Rect(
+                            /* left */ 0,
+                            /* top */ TOP_SWIPE_REGION_WIDTH,
+                            /* right */ CONTAINER_WIDTH,
+                            /* bottom */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
+                        )
+                    )
+            }
+        }
+
     private fun initAndAttachContainerView() {
         containerView = View(context)
 
@@ -430,18 +452,9 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         underTest.initView(containerView)
 
         // Attach the view so that flows start collecting.
-        ViewUtils.attachView(parentView)
+        ViewUtils.attachView(parentView, CONTAINER_WIDTH, CONTAINER_HEIGHT)
         // Attaching is async so processAllMessages is required for view.repeatWhenAttached to run.
         testableLooper.processAllMessages()
-
-        // Give the view a fixed size to simplify testing for edge swipes.
-        val lp =
-            parentView.layoutParams.apply {
-                width = CONTAINER_WIDTH
-                height = CONTAINER_HEIGHT
-            }
-        val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        wm.updateViewLayout(parentView, lp)
     }
 
     private fun goToScene(scene: SceneKey) {
@@ -453,6 +466,8 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         private const val CONTAINER_WIDTH = 100
         private const val CONTAINER_HEIGHT = 100
         private const val RIGHT_SWIPE_REGION_WIDTH = 20
+        private const val TOP_SWIPE_REGION_WIDTH = 12
+        private const val BOTTOM_SWIPE_REGION_WIDTH = 14
 
         /**
          * A touch down event right in the middle of the screen, to avoid being in any of the swipe
