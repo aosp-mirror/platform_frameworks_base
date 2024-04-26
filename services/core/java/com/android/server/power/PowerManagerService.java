@@ -231,7 +231,7 @@ public final class PowerManagerService extends SystemService
 
     // Default timeout in milliseconds.  This is only used until the settings
     // provider populates the actual default value (R.integer.def_screen_off_timeout).
-    private static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
+    static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
     private static final int DEFAULT_SLEEP_TIMEOUT = -1;
 
     // Screen brightness boost timeout.
@@ -1417,8 +1417,9 @@ public final class PowerManagerService extends SystemService
             updateSettingsLocked();
             if (mFeatureFlags.isEarlyScreenTimeoutDetectorEnabled()) {
                 mScreenTimeoutOverridePolicy = new ScreenTimeoutOverridePolicy(mContext,
-                        mMinimumScreenOffTimeoutConfig, () -> {
+                        mMinimumScreenOffTimeoutConfig, (releaseReason) -> {
                     Message msg = mHandler.obtainMessage(MSG_RELEASE_ALL_OVERRIDE_WAKE_LOCKS);
+                    msg.arg1 = releaseReason;
                     mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
                 });
             }
@@ -1827,6 +1828,12 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private void removeWakeLockNoUpdateLocked(WakeLock wakeLock, int index) {
+        removeWakeLockNoUpdateLocked(wakeLock, index,
+                ScreenTimeoutOverridePolicy.RELEASE_REASON_UNKNOWN);
+    }
+
+    @GuardedBy("mLock")
+    private void removeWakeLockNoUpdateLocked(WakeLock wakeLock, int index, int releaseReason) {
         mWakeLocks.remove(index);
         UidState state = wakeLock.mUidState;
         state.mNumWakeLocks--;
@@ -1835,7 +1842,7 @@ public final class PowerManagerService extends SystemService
             mUidState.remove(state.mUid);
         }
 
-        notifyWakeLockReleasedLocked(wakeLock);
+        notifyWakeLockReleasedLocked(wakeLock, releaseReason);
         applyWakeLockFlagsOnReleaseLocked(wakeLock);
         mDirty |= DIRTY_WAKE_LOCKS;
     }
@@ -2001,12 +2008,17 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private void notifyWakeLockReleasedLocked(WakeLock wakeLock) {
+        notifyWakeLockReleasedLocked(wakeLock, ScreenTimeoutOverridePolicy.RELEASE_REASON_UNKNOWN);
+    }
+
+    @GuardedBy("mLock")
+    private void notifyWakeLockReleasedLocked(WakeLock wakeLock, int releaseReason) {
         if (mSystemReady && wakeLock.mNotifiedAcquired) {
             wakeLock.mNotifiedAcquired = false;
             wakeLock.mAcquireTime = 0;
             mNotifier.onWakeLockReleased(wakeLock.mFlags, wakeLock.mTag,
                     wakeLock.mPackageName, wakeLock.mOwnerUid, wakeLock.mOwnerPid,
-                    wakeLock.mWorkSource, wakeLock.mHistoryTag, wakeLock.mCallback);
+                    wakeLock.mWorkSource, wakeLock.mHistoryTag, wakeLock.mCallback, releaseReason);
             notifyWakeLockLongFinishedLocked(wakeLock);
         }
     }
@@ -5345,7 +5357,7 @@ public final class PowerManagerService extends SystemService
                     handleAttentiveTimeout();
                     break;
                 case MSG_RELEASE_ALL_OVERRIDE_WAKE_LOCKS:
-                    releaseAllOverrideWakeLocks();
+                    releaseAllOverrideWakeLocks(msg.arg1);
                     break;
             }
 
@@ -7269,7 +7281,7 @@ public final class PowerManagerService extends SystemService
         return false;
     }
 
-    private void releaseAllOverrideWakeLocks() {
+    private void releaseAllOverrideWakeLocks(int releaseReason) {
         synchronized (mLock) {
             final int size = mWakeLocks.size();
             boolean change = false;
@@ -7277,7 +7289,7 @@ public final class PowerManagerService extends SystemService
                 final WakeLock wakeLock = mWakeLocks.get(i);
                 if ((wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK)
                         == PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK) {
-                    removeWakeLockNoUpdateLocked(wakeLock, i);
+                    removeWakeLockNoUpdateLocked(wakeLock, i, releaseReason);
                     change = true;
                 }
             }
