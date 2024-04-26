@@ -32,6 +32,7 @@ import android.view.WindowManager
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.res.R
@@ -56,6 +57,7 @@ constructor(
     private val logger: UiEventLogger,
     private val viewModel: ScreenshotViewModel,
     private val windowManager: WindowManager,
+    private val thumbnailObserver: ThumbnailObserver,
     @Assisted private val context: Context,
     @Assisted private val displayId: Int
 ) : ScreenshotViewProxy {
@@ -99,6 +101,10 @@ constructor(
             info.touchableRegion.set(touchableRegion)
         }
         screenshotPreview = view.screenshotPreview
+        thumbnailObserver.setViews(
+            view.screenshotPreview,
+            view.requireViewById(R.id.screenshot_preview_border)
+        )
     }
 
     override fun reset() {
@@ -111,8 +117,12 @@ constructor(
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
         val entrance = animationController.getEntranceAnimation(screenRect, showFlash)
-        // reset the timeout when animation finishes
-        entrance.doOnEnd { callbacks?.onUserInteraction() }
+        entrance.doOnStart { thumbnailObserver.onEntranceStarted() }
+        entrance.doOnEnd {
+            // reset the timeout when animation finishes
+            callbacks?.onUserInteraction()
+            thumbnailObserver.onEntranceComplete()
+        }
         return entrance
     }
 

@@ -35,4 +35,10 @@ public interface ReferenceScreenshotModule {
     @Binds
     ScreenshotActionsProvider.Factory bindScreenshotActionsProviderFactory(
             DefaultScreenshotActionsProvider.Factory defaultScreenshotActionsProviderFactory);
+
+    /** */
+    @Provides
+    static ThumbnailObserver providesThumbnailObserver() {
+        return new ThumbnailObserver();
+    };
 }
