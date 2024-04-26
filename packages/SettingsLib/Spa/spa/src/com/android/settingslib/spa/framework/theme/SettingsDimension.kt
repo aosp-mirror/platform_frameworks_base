@@ -22,12 +22,14 @@ import androidx.compose.ui.unit.dp
 object SettingsDimension {
     val paddingTiny = 2.dp
     val paddingSmall = 4.dp
+    val paddingLarge = 16.dp
+    val paddingExtraLarge = 24.dp
 
     val itemIconSize = 24.dp
     val itemIconContainerSize = 72.dp
-    val itemPaddingStart = 24.dp
-    val itemPaddingEnd = 16.dp
-    val itemPaddingVertical = 16.dp
+    val itemPaddingStart = paddingExtraLarge
+    val itemPaddingEnd = paddingLarge
+    val itemPaddingVertical = paddingLarge
     val itemPadding = PaddingValues(
         start = itemPaddingStart,
         top = itemPaddingVertical,
@@ -70,6 +72,6 @@ object SettingsDimension {
     /** The sizes info of illustration widget. */
     val illustrationMaxWidth = 412.dp
     val illustrationMaxHeight = 300.dp
-    val illustrationPadding = 16.dp
+    val illustrationPadding = paddingLarge
     val illustrationCornerRadius = 28.dp
 }
