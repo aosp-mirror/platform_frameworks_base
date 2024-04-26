@@ -1007,4 +1007,23 @@ class DraggableHandlerTest {
         dragController.onDragStopped(velocity = 0f)
         assertTransition(isUserInputOngoing = false)
     }
+
+    @Test
+    fun emptyOverscrollImmediatelyAbortsSettleAnimationWhenOverProgress() = runGestureTest {
+        // Overscrolling on scene B does nothing.
+        layoutState.transitions = transitions { overscroll(SceneB, Orientation.Vertical) {} }
+
+        // Swipe up to scene B at progress = 200%.
+        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        val dragController = onDragStarted(startedPosition = middle, overSlop = up(2f))
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 2f)
+
+        // Release the finger.
+        dragController.onDragStopped(velocity = -velocityThreshold)
+
+        // Exhaust all coroutines *without advancing the clock*. Given that we are at progress >=
+        // 100% and that the overscroll on scene B is doing nothing, we are already idle.
+        runCurrent()
+        assertIdle(SceneB)
+    }
 }
