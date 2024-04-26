@@ -167,7 +167,7 @@
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"ସୁରକ୍ଷିତ ନେଟ୍‌ୱର୍କ"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"କଢ଼ାଯାଇଥିବା ଆପ୍‌ଗୁଡ଼ିକ"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"ଆପ୍‌ ଏବଂ ଉପଯୋଗକର୍ତ୍ତା ବାହାର କରାଗଲା"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"ଆପ୍ସ ଏବଂ ୟୁଜରଙ୍କୁ କାଢ଼ି ଦିଆଯାଇଛି"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"ସିଷ୍ଟମ୍ ଅପ୍‌ଡେଟ୍"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB ଟିଥରିଂ"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"ପୋର୍ଟବଲ୍‌ ହଟସ୍ପଟ୍‌"</string>
@@ -176,7 +176,7 @@
     <string name="tether_settings_title_all" msgid="8910259483383010470">"ଟିଥରିଙ୍ଗ ଓ ପୋର୍ଟବଲ୍ ହଟ୍‌ସ୍ପଟ୍‌"</string>
     <string name="managed_user_title" msgid="449081789742645723">"ସମସ୍ତ କାର୍ଯ୍ୟ ଆପ୍‌"</string>
     <string name="unknown" msgid="3544487229740637809">"ଅଜଣା"</string>
-    <string name="running_process_item_user_label" msgid="3988506293099805796">"ଉପଯୋଗକର୍ତ୍ତା: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="running_process_item_user_label" msgid="3988506293099805796">"ୟୁଜର: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"କିଛି ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ ମାନ ସେଟ୍‌ ହୋଇଛି"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"କୌଣସି ଡିଫଲ୍ଟ ସେଟ୍‍ ହୋଇନାହିଁ"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ଟେକ୍ସଟ୍-ଟୁ-ସ୍ପିଚ୍ ସେଟିଂସ"</string>
@@ -479,14 +479,10 @@
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - ପୂର୍ଣ୍ଣ ହେବାକୁ ଆଉ <xliff:g id="TIME">%2$s</xliff:g> ବାକି ଅଛି"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - ଚାର୍ଜିଂକୁ ଅପ୍ଟିମାଇଜ କରାଯାଇଛି"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ ଚାର୍ଜିଂ"</string>
-    <!-- no translation found for power_fast_charging_duration_v2 (3797735998640359490) -->
-    <skip />
-    <!-- no translation found for power_charging_duration_v2 (2938998284074003248) -->
-    <skip />
-    <!-- no translation found for power_remaining_charging_duration_only_v2 (5358176435722950193) -->
-    <skip />
-    <!-- no translation found for power_remaining_fast_charging_duration_only_v2 (6270950195810579563) -->
-    <skip />
+    <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATUS">%2$s</xliff:g> - <xliff:g id="TIME">%3$s</xliff:g> ସୁଦ୍ଧା ସମ୍ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବ"</string>
+    <string name="power_charging_duration_v2" msgid="2938998284074003248">"<xliff:g id="LEVEL">%1$s</xliff:g> • <xliff:g id="TIME">%2$s</xliff:g> ସୁଦ୍ଧା ସମ୍ପୂର୍ଣ୍ଣ ଭାବେ ଚାର୍ଜ ହୋଇଯିବ"</string>
+    <string name="power_remaining_charging_duration_only_v2" msgid="5358176435722950193">"<xliff:g id="TIME">%1$s</xliff:g> ସୁଦ୍ଧା ସମ୍ପୂର୍ଣ୍ଣ ଭାବେ ଚାର୍ଜ ହୋଇଯିବ"</string>
+    <string name="power_remaining_fast_charging_duration_only_v2" msgid="6270950195810579563">"<xliff:g id="TIME">%1$s</xliff:g> ସୁଦ୍ଧା ସମ୍ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"ଅଜ୍ଞାତ"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ଶୀଘ୍ର ଚାର୍ଜ ହେଉଛି"</string>
@@ -498,10 +494,8 @@
     <string name="battery_info_status_full" msgid="1339002294876531312">"ଚାର୍ଜ ହୋଇଯାଇଛି"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ଚାର୍ଜ ହୋଇଛି"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"ଚାର୍ଜିଂ ହୋଲ୍ଡରେ ଅଛି"</string>
-    <!-- no translation found for battery_info_status_charging_v2 (6118522107222245505) -->
-    <skip />
-    <!-- no translation found for battery_info_status_charging_fast_v2 (1825439848151256589) -->
-    <skip />
+    <string name="battery_info_status_charging_v2" msgid="6118522107222245505">"ଚାର୍ଜ ହେଉଛି"</string>
+    <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"ଫାଷ୍ଟ ଚାର୍ଜିଂ"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"ଆଡ୍‌ମିନ୍‌ ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ପ୍ରତିବନ୍ଧିତ ସେଟିଂ ଦ୍ୱାରା ନିୟନ୍ତ୍ରଣ କରାଯାଇଛି"</string>
     <string name="disabled" msgid="8017887509554714950">"ଅକ୍ଷମ ହୋଇଛି"</string>
@@ -628,7 +622,7 @@
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g>କୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ନୂଆ ୟୁଜର ତିଆରି କରାଯାଉଛି…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"ନୂଆ ଅତିଥି ତିଆରି କରାଯାଉଛି…"</string>
-    <string name="add_user_failed" msgid="4809887794313944872">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବାକୁ ବିଫଳ ହେଲା"</string>
+    <string name="add_user_failed" msgid="4809887794313944872">"ନୂଆ ୟୁଜର ତିଆରି କରିବା ବିଫଳ ହୋଇଛି"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"ଜଣେ ନୂଆ ଅତିଥି ତିଆରି କରିବାରେ ବିଫଳ ହୋଇଛି"</string>
     <string name="user_nickname" msgid="262624187455825083">"ଡାକନାମ"</string>
     <string name="edit_user_info_message" msgid="5199468585059260053">"ଏହି ଡିଭାଇସ ବ୍ୟବହାର କରୁଥିବା ଯେ କୌଣସି ବ୍ୟକ୍ତିଙ୍କୁ ଆପଣଙ୍କ ନାମ ଏବଂ ଛବି ଦେଖାଯିବ।"</string>
@@ -690,8 +684,7 @@
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"ଫୋନର ଗୋଟିଏ ବାର ଅଛି।"</string>
     <string name="accessibility_phone_two_bars" msgid="2531458337458953263">"ଫୋନର ଦୁଇଟି ବାର୍‌ ଅଛି।"</string>
     <string name="accessibility_phone_three_bars" msgid="1523967995996696619">"ଫୋନ୍‍ରେ ତିନୋଟି ବାର୍‍ ଅଛି।"</string>
-    <!-- no translation found for accessibility_phone_four_bars (4477202400261338403) -->
-    <skip />
+    <string name="accessibility_phone_four_bars" msgid="4477202400261338403">"ଫୋନର ଚାରୋଟି ବାର।"</string>
     <string name="accessibility_phone_signal_full" msgid="4302338883816077134">"ଫୋନ୍ ସିଗ୍ନାଲ୍ ପୂର୍ଣ୍ଣ ଅଛି।"</string>
     <string name="accessibility_no_data" msgid="4563181886936931008">"କୌଣସି ଡାଟା ନାହିଁ।"</string>
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"ଡାଟାର ଗୋଟିଏ ବାର ଅଛି।"</string>
