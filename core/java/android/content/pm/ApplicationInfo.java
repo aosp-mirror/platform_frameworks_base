@@ -2700,7 +2700,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
-    @Override protected ApplicationInfo getApplicationInfo() {
+    @Override public ApplicationInfo getApplicationInfo() {
         return this;
     }
 
