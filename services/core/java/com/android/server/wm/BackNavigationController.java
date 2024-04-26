@@ -269,6 +269,8 @@ class BackNavigationController {
                                     customAppTransition.mBackgroundColor);
                         }
                     }
+                    infoBuilder.setLetterboxColor(currentActivity.mLetterboxUiController
+                            .getLetterboxBackgroundColor().toArgb());
                     removedWindowContainer = currentActivity;
                     prevTask = prevActivities.get(0).getTask();
                     backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
