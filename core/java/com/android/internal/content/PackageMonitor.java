@@ -48,8 +48,6 @@ import java.util.concurrent.Executor;
 public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     static final String TAG = "PackageMonitor";
 
-    final IntentFilter mPackageFilt;
-
     Context mRegisteredContext;
     Handler mRegisteredHandler;
     String[] mDisappearingPackages;
@@ -66,17 +64,32 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
 
     private Executor mExecutor;
 
+    final boolean mSupportsPackageRestartQuery;
+
     @UnsupportedAppUsage
     public PackageMonitor() {
+        this(true);
+    }
+
+    /**
+     * The constructor of PackageMonitor whose parameters clearly indicate whether support
+     * querying package restart event.
+     */
+    public PackageMonitor(boolean supportsPackageRestartQuery) {
+        mSupportsPackageRestartQuery = supportsPackageRestartQuery;
+    }
+
+    private IntentFilter getPackageFilter() {
         final boolean isCore = UserHandle.isCore(android.os.Process.myUid());
 
-        mPackageFilt = new IntentFilter();
+        IntentFilter filter = new IntentFilter();
         // Settings app sends the broadcast
-        mPackageFilt.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
-        mPackageFilt.addDataScheme("package");
+        filter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
+        filter.addDataScheme("package");
         if (isCore) {
-            mPackageFilt.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+            filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         }
+        return filter;
     }
 
     @UnsupportedAppUsage
@@ -91,7 +104,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 (thread == null) ? BackgroundThread.getHandler() : new Handler(thread));
     }
 
-
     /**
      * Register for notifications of package changes such as install, removal and other events.
      */
@@ -101,10 +113,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         }
         mRegisteredContext = context;
         mRegisteredHandler = Objects.requireNonNull(handler);
-        if (user != null) {
-            context.registerReceiverAsUser(this, user, mPackageFilt, null, mRegisteredHandler);
-        } else {
-            context.registerReceiver(this, mPackageFilt, null, mRegisteredHandler);
+        if (mSupportsPackageRestartQuery) {
+            final IntentFilter filter = getPackageFilter();
+            if (user != null) {
+                context.registerReceiverAsUser(this, user, filter, null, mRegisteredHandler);
+            } else {
+                context.registerReceiver(this, filter, null, mRegisteredHandler);
+            }
         }
         if (mPackageMonitorCallback == null) {
             PackageManager pm = mRegisteredContext.getPackageManager();
@@ -126,7 +141,9 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         if (mRegisteredContext == null) {
             throw new IllegalStateException("Not registered");
         }
-        mRegisteredContext.unregisterReceiver(this);
+        if (mSupportsPackageRestartQuery) {
+            mRegisteredContext.unregisterReceiver(this);
+        }
 
         PackageManager pm = mRegisteredContext.getPackageManager();
         if (pm != null && mPackageMonitorCallback != null) {
@@ -378,7 +395,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
      * @param intent the intent that contains package related event information
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    public void doHandlePackageEvent(Intent intent) {
+    public final void doHandlePackageEvent(Intent intent) {
         mChangeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                 UserHandle.USER_NULL);
         if (mChangeUserId == UserHandle.USER_NULL) {
