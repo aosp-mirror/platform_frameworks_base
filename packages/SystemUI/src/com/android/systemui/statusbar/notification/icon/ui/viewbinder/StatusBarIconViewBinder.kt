@@ -35,12 +35,13 @@ object StatusBarIconViewBinder {
     //  view-model (which, at the time of this writing, does not yet exist).
 
     suspend fun bindColor(view: StatusBarIconView, color: Flow<Int>) {
-        // Don't change the icon color if an app icon experiment is enabled.
-        if (!android.app.Flags.notificationsUseAppIcon()) {
-            color.collectTracingEach("SBIV#bindColor") { color ->
+        color.collectTracingEach("SBIV#bindColor") { color ->
+            // Don't change the icon color if an app icon experiment is enabled.
+            if (!android.app.Flags.notificationsUseAppIcon()) {
                 view.staticDrawableColor = color
-                view.setDecorColor(color)
             }
+            // Continue changing the overflow dot color
+            view.setDecorColor(color)
         }
     }
 
@@ -57,15 +58,16 @@ object StatusBarIconViewBinder {
         iconColors: Flow<NotificationIconColors>,
         contrastColorUtil: ContrastColorUtil,
     ) {
-        // Don't change the icon color if an app icon experiment is enabled.
-        if (!android.app.Flags.notificationsUseAppIcon()) {
-            iconColors.collectTracingEach("SBIV#bindIconColors") { colors ->
+        iconColors.collectTracingEach("SBIV#bindIconColors") { colors ->
+            // Don't change the icon color if an app icon experiment is enabled.
+            if (!android.app.Flags.notificationsUseAppIcon()) {
                 val isPreL = java.lang.Boolean.TRUE == view.getTag(R.id.icon_is_pre_L)
                 val isColorized = !isPreL || NotificationUtils.isGrayscale(view, contrastColorUtil)
                 view.staticDrawableColor =
                     if (isColorized) colors.staticDrawableColor(view.viewBounds) else NO_COLOR
-                view.setDecorColor(colors.tint)
             }
+            // Continue changing the overflow dot color
+            view.setDecorColor(colors.tint)
         }
     }
 }
