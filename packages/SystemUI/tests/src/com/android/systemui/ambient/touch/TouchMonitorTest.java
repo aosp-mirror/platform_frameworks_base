@@ -24,26 +24,35 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.display.DisplayManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
-import android.util.Pair;
+import android.testing.TestableLooper;
 import android.view.GestureDetector;
 import android.view.IWindowManager;
 import android.view.InputEvent;
 import android.view.MotionEvent;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 
-import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.dagger.InputSessionComponent;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.display.DisplayHelper;
@@ -67,31 +76,58 @@ import java.util.stream.Stream;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TouchMonitorTest extends SysuiTestCase {
+    private KosmosJavaAdapter mKosmos;
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mKosmos = new KosmosJavaAdapter(this);
+    }
+
+    private static class SimpleLifecycleOwner implements LifecycleOwner {
+        LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
+        @NonNull
+        @Override
+        public Lifecycle getLifecycle() {
+            return mLifecycle;
+        }
+
+        public void setState(Lifecycle.State state) {
+            mLifecycle.setCurrentState(state);
+        }
     }
 
     private static class Environment {
         private final InputSessionComponent.Factory mInputFactory;
         private final InputSession mInputSession;
-        private final Lifecycle mLifecycle;
-        private final LifecycleOwner mLifecycleOwner;
+        private final SimpleLifecycleOwner mLifecycleOwner;
+
+        private final LifecycleRegistry mLifecycleRegistry;
         private final TouchMonitor mMonitor;
-        private final DefaultLifecycleObserver mLifecycleObserver;
         private final InputChannelCompat.InputEventListener mEventListener;
         private final GestureDetector.OnGestureListener mGestureListener;
         private final DisplayHelper mDisplayHelper;
+        private final DisplayManager mDisplayManager;
+        private final WindowManager mWindowManager;
+        private final WindowMetrics mWindowMetrics;
         private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
         private final FakeExecutor mBackgroundExecutor = new FakeExecutor(new FakeSystemClock());
+
         private final Rect mDisplayBounds = Mockito.mock(Rect.class);
         private final IWindowManager mIWindowManager;
 
-        Environment(Set<TouchHandler> handlers) {
-            mLifecycle = Mockito.mock(Lifecycle.class);
-            mLifecycleOwner = Mockito.mock(LifecycleOwner.class);
+        private final KosmosJavaAdapter mKosmos;
+
+
+        Environment(Set<TouchHandler> handlers, KosmosJavaAdapter kosmos) {
+            mLifecycleOwner = new SimpleLifecycleOwner();
+            mLifecycleRegistry = spy(new LifecycleRegistry(mLifecycleOwner));
+
             mIWindowManager = Mockito.mock(IWindowManager.class);
+            mDisplayManager = Mockito.mock(DisplayManager.class);
+            mWindowManager = Mockito.mock(WindowManager.class);
+            mKosmos = kosmos;
 
             mInputFactory = Mockito.mock(InputSessionComponent.Factory.class);
             final InputSessionComponent inputComponent = Mockito.mock(InputSessionComponent.class);
@@ -104,18 +140,16 @@ public class TouchMonitorTest extends SysuiTestCase {
             mDisplayHelper = Mockito.mock(DisplayHelper.class);
             when(mDisplayHelper.getMaxBounds(anyInt(), anyInt()))
                     .thenReturn(mDisplayBounds);
-            mMonitor = new TouchMonitor(mExecutor, mBackgroundExecutor,
-                    mLifecycle, mInputFactory, mDisplayHelper, handlers, mIWindowManager, 0);
+
+            mWindowMetrics = Mockito.mock(WindowMetrics.class);
+            when(mWindowMetrics.getBounds()).thenReturn(mDisplayBounds);
+            when(mWindowManager.getMaximumWindowMetrics()).thenReturn(mWindowMetrics);
+            mMonitor = new TouchMonitor(mExecutor, mBackgroundExecutor, mLifecycleRegistry,
+                    mInputFactory, mDisplayHelper, mKosmos.getConfigurationInteractor(),
+                    handlers, mIWindowManager,  0);
             mMonitor.init();
 
-            final ArgumentCaptor<LifecycleObserver> lifecycleObserverCaptor =
-                    ArgumentCaptor.forClass(LifecycleObserver.class);
-            verify(mLifecycle).addObserver(lifecycleObserverCaptor.capture());
-            assertThat(lifecycleObserverCaptor.getValue() instanceof DefaultLifecycleObserver)
-                    .isTrue();
-            mLifecycleObserver = (DefaultLifecycleObserver) lifecycleObserverCaptor.getValue();
-
-            updateLifecycle(observer -> observer.first.onResume(observer.second));
+            updateLifecycle(Lifecycle.State.RESUMED);
 
             // Capture creation request.
             final ArgumentCaptor<InputChannelCompat.InputEventListener> inputEventListenerCaptor =
@@ -145,8 +179,8 @@ public class TouchMonitorTest extends SysuiTestCase {
             listenerConsumer.accept(mGestureListener);
         }
 
-        void updateLifecycle(Consumer<Pair<DefaultLifecycleObserver, LifecycleOwner>> consumer) {
-            consumer.accept(Pair.create(mLifecycleObserver, mLifecycleOwner));
+        void updateLifecycle(Lifecycle.State state) {
+            mLifecycleRegistry.setCurrentState(state);
         }
 
         void verifyInputSessionDispose() {
@@ -156,10 +190,33 @@ public class TouchMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_AMBIENT_TOUCH_MONITOR_LISTEN_TO_DISPLAY_CHANGES)
+    public void testConfigurationListenerUpdatesBounds() {
+        final TouchHandler touchHandler = createTouchHandler();
+        final Environment environment = new Environment(Stream.of(touchHandler)
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
+        ArgumentCaptor<DisplayManager.DisplayListener> listenerCaptor =
+                ArgumentCaptor.forClass(DisplayManager.DisplayListener.class);
+        final Rect testRect = new Rect(0, 0, 2, 2);
+        final Configuration configuration = new Configuration();
+        configuration.windowConfiguration.setMaxBounds(testRect);
+
+        mKosmos.getConfigurationRepository().onConfigurationChange(configuration);
+        final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
+        when(initialEvent.getX()).thenReturn(0.0f);
+        when(initialEvent.getY()).thenReturn(0.0f);
+        environment.publishInputEvent(initialEvent);
+
+        // Verify display bounds passed into TouchHandler#getTouchInitiationRegion
+        verify(touchHandler).getTouchInitiationRegion(eq(testRect), any(), any());
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_AMBIENT_TOUCH_MONITOR_LISTEN_TO_DISPLAY_CHANGES)
     public void testReportedDisplayBounds() {
         final TouchHandler touchHandler = createTouchHandler();
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
         when(initialEvent.getX()).thenReturn(0.0f);
@@ -190,7 +247,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         }).when(touchHandler).getTouchInitiationRegion(any(), any(), any());
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         // Ensure touch outside specified region is not delivered.
         final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
@@ -219,7 +276,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         }).when(touchHandler).getTouchInitiationRegion(any(), any(), any());
 
         final Environment environment = new Environment(Stream.of(touchHandler, unzonedTouchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         // Ensure touch outside specified region is delivered to unzoned touch handler.
         final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
@@ -261,7 +318,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         when(touchHandler.isEnabled()).thenReturn(false);
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
         final MotionEvent initialEvent = Mockito.mock(MotionEvent.class);
         when(initialEvent.getX()).thenReturn(5.0f);
         when(initialEvent.getY()).thenReturn(5.0f);
@@ -277,7 +334,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -297,7 +354,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -321,7 +378,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -340,7 +397,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -365,7 +422,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         when(touchHandler2.isEnabled()).thenReturn(true);
 
         final Environment environment = new Environment(Stream.of(touchHandler, touchHandler2)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -389,7 +446,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -435,7 +492,7 @@ public class TouchMonitorTest extends SysuiTestCase {
                 Mockito.mock(TouchHandler.TouchSession.Callback.class);
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -453,11 +510,9 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
-        environment.updateLifecycle(observerOwnerPair -> {
-            observerOwnerPair.first.onPause(observerOwnerPair.second);
-        });
+        environment.updateLifecycle(Lifecycle.State.STARTED);
 
         environment.verifyInputSessionDispose();
     }
@@ -467,7 +522,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -486,9 +541,7 @@ public class TouchMonitorTest extends SysuiTestCase {
 
         verify(touchHandler).onSessionStart(touchSessionArgumentCaptor.capture());
 
-        environment.updateLifecycle(observerOwnerPair -> {
-            observerOwnerPair.first.onPause(observerOwnerPair.second);
-        });
+        environment.updateLifecycle(Lifecycle.State.STARTED);
 
         verify(environment.mInputSession, never()).dispose();
 
@@ -505,7 +558,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler = createTouchHandler();
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -524,9 +577,7 @@ public class TouchMonitorTest extends SysuiTestCase {
 
         verify(touchHandler).onSessionStart(touchSessionArgumentCaptor.capture());
 
-        environment.updateLifecycle(observerOwnerPair -> {
-            observerOwnerPair.first.onDestroy(observerOwnerPair.second);
-        });
+        environment.updateLifecycle(Lifecycle.State.DESTROYED);
 
         // Check to make sure the input session is now disposed.
         environment.verifyInputSessionDispose();
@@ -538,7 +589,7 @@ public class TouchMonitorTest extends SysuiTestCase {
         final TouchHandler touchHandler1 = createTouchHandler();
         final TouchHandler touchHandler2 = createTouchHandler();
         final Environment environment = new Environment(Stream.of(touchHandler1, touchHandler2)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -574,7 +625,7 @@ public class TouchMonitorTest extends SysuiTestCase {
                 Mockito.mock(TouchHandler.TouchSession.Callback.class);
 
         final Environment environment = new Environment(Stream.of(touchHandler)
-                .collect(Collectors.toCollection(HashSet::new)));
+                .collect(Collectors.toCollection(HashSet::new)), mKosmos);
 
         final InputEvent initialEvent = Mockito.mock(InputEvent.class);
         environment.publishInputEvent(initialEvent);
@@ -584,9 +635,7 @@ public class TouchMonitorTest extends SysuiTestCase {
 
         environment.executeAll();
 
-        environment.updateLifecycle(observerOwnerPair -> {
-            observerOwnerPair.first.onDestroy(observerOwnerPair.second);
-        });
+        environment.updateLifecycle(Lifecycle.State.DESTROYED);
 
         environment.executeAll();
 
