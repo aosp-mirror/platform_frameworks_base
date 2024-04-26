@@ -27,7 +27,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -100,8 +99,6 @@ public class TaskSnapshotWindow {
             return null;
         }
 
-        final Point taskSize = snapshot.getTaskSize();
-        final Rect taskBounds = new Rect(0, 0, taskSize.x, taskSize.y);
         final int orientation = snapshot.getOrientation();
         final int displayId = runningTaskInfo.displayId;
 
@@ -150,7 +147,7 @@ public class TaskSnapshotWindow {
         }
 
         SnapshotDrawerUtils.drawSnapshotOnSurface(info, layoutParams, surfaceControl, snapshot,
-                taskBounds, tmpFrames.frame, topWindowInsetsState, true /* releaseAfterDraw */);
+                info.taskBounds, topWindowInsetsState, true /* releaseAfterDraw */);
         snapshotSurface.mHasDrawn = true;
         snapshotSurface.reportDrawn();
 
