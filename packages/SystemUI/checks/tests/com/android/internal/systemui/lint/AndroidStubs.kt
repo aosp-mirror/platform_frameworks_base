@@ -22,7 +22,7 @@ import java.io.File
 internal val libraryNames =
     arrayOf(
         "framework.jar",
-        "androidx.annotation_annotation-nodeps.jar",
+        "androidx.annotation_annotation.jar",
         "kotlinx-coroutines-core.jar",
     )
 
