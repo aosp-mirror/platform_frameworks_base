@@ -19,6 +19,7 @@ package android.view;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
@@ -435,6 +436,80 @@ public class ViewFrameRateTest {
         waitForAfterDraw();
     }
 
+    /**
+     * A common behavior is for two different views to be invalidated in succession, but
+     * intermittently. We want to treat this as an intermittent invalidation.
+     *
+     * This test will only succeed on non-cuttlefish devices, so it is commented out
+     * for potential manual testing.
+     */
+//    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
+    public void intermittentDoubleInvalidate() throws Throwable {
+        View parent = (View) mMovingView.getParent();
+        mActivityRule.runOnUiThread(() -> {
+            parent.setWillNotDraw(false);
+            // Make sure the View is large
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = parent.getWidth();
+            layoutParams.height = parent.getHeight();
+            mMovingView.setLayoutParams(layoutParams);
+        });
+        waitForFrameRateCategoryToSettle();
+        for (int i = 0; i < 5; i++) {
+            int expectedCategory;
+            if (i < 4) {
+                // not intermittent yet.
+                // It takes 2 frames of intermittency before Views vote as intermittent.
+                // It takes 4 more frames for the category to drop to the next category.
+                expectedCategory =
+                        toolkitFrameRateDefaultNormalReadOnly() ? FRAME_RATE_CATEGORY_NORMAL
+                                : FRAME_RATE_CATEGORY_HIGH;
+            } else {
+                // intermittent
+                expectedCategory = FRAME_RATE_CATEGORY_NORMAL;
+            }
+            mActivityRule.runOnUiThread(() -> {
+                mMovingView.invalidate();
+                runAfterDraw(() -> assertEquals(expectedCategory,
+                        mViewRoot.getLastPreferredFrameRateCategory()));
+            });
+            waitForAfterDraw();
+            mActivityRule.runOnUiThread(() -> {
+                parent.invalidate();
+                runAfterDraw(() -> assertEquals(expectedCategory,
+                        mViewRoot.getLastPreferredFrameRateCategory()));
+            });
+            waitForAfterDraw();
+            Thread.sleep(90);
+        }
+    }
+
+    // When a view has two motions that offset each other, the overall motion
+    // should be canceled and be considered unmoved.
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+    })
+    public void sameFrameMotion() throws Throwable {
+        mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
+        waitForFrameRateCategoryToSettle();
+
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.offsetLeftAndRight(10);
+            mMovingView.offsetLeftAndRight(-10);
+            mMovingView.offsetTopAndBottom(100);
+            mMovingView.offsetTopAndBottom(-100);
+            mMovingView.invalidate();
+            runAfterDraw(() -> {
+                assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
+                assertEquals(FRAME_RATE_CATEGORY_NO_PREFERENCE,
+                        mViewRoot.getLastPreferredFrameRateCategory());
+            });
+        });
+        waitForAfterDraw();
+    }
     private void runAfterDraw(@NonNull Runnable runnable) {
         Handler handler = new Handler(Looper.getMainLooper());
         mAfterDrawLatch = new CountDownLatch(1);

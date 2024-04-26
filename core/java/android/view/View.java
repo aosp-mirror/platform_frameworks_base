@@ -4745,6 +4745,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mLeft;
     /**
+     * The mLeft from the previous frame. Used for detecting movement for purposes of variable
+     * refresh rate.
+     */
+    private int mLastFrameLeft;
+    /**
      * The distance in pixels from the left edge of this view's parent
      * to the right edge of this view.
      * {@hide}
@@ -4760,6 +4765,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(category = "layout")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mTop;
+    /**
+     * The mTop from the previous frame. Used for detecting movement for purposes of variable
+     * refresh rate.
+     */
+    private int mLastFrameTop;
     /**
      * The distance in pixels from the top edge of this view's parent
      * to the bottom edge of this view.
@@ -19535,7 +19545,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setTop(int top) {
         if (top != mTop) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
@@ -20427,7 +20436,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void offsetTopAndBottom(int offset) {
         if (offset != 0) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (isHardwareAccelerated()) {
@@ -20479,7 +20487,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (isHardwareAccelerated()) {
@@ -25523,7 +25530,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (mLeft != left || mRight != right || mTop != top || mBottom != bottom) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             changed = true;
 
             // Remember our drawn bit
@@ -33976,8 +33982,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // The most common case is when nothing is set, so this special case is called
             // often.
             if (mAttachInfo.mViewVelocityApi
-                    && (mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)
+                    && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                    || mLastFrameTop != mTop)
                     && viewRootImpl.shouldCheckFrameRate(false)
                     && parent instanceof View
                     && ((View) parent).mFrameContentVelocity <= 0) {
@@ -33990,14 +33997,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
                 mLastFrameRateCategory = frameRateCategory;
             }
+            mLastFrameLeft = mLeft;
+            mLastFrameTop = mTop;
             return;
         }
         if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)) {
             float velocityFrameRate = 0f;
             if (mAttachInfo.mViewVelocityApi) {
                 if (velocity < 0f
-                        && (mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)
+                        && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                        || mLastFrameTop != mTop)
                         && mParent instanceof View
                         && ((View) mParent).mFrameContentVelocity <= 0
                 ) {
@@ -34062,6 +34072,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
             mLastFrameRateCategory = frameRateCategory;
         }
+        mLastFrameLeft = mLeft;
+        mLastFrameTop = mTop;
     }
 
     private float convertVelocityToFrameRate(float velocityPps) {
