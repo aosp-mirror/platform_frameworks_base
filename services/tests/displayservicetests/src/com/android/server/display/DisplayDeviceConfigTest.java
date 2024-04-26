@@ -21,7 +21,6 @@ import static com.android.internal.display.BrightnessSynchronizer.brightnessIntT
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.config.SensorData.TEMPERATURE_TYPE_SKIN;
-import static com.android.server.display.config.SensorData.SupportedMode;
 import static com.android.server.display.utils.DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat;
 import static com.android.server.display.utils.DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat;
 
@@ -58,6 +57,7 @@ import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.HysteresisLevels;
 import com.android.server.display.config.IdleScreenRefreshRateTimeoutLuxThresholdPoint;
 import com.android.server.display.config.RefreshRateData;
+import com.android.server.display.config.SupportedModeData;
 import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.feature.flags.Flags;
@@ -613,7 +613,7 @@ public final class DisplayDeviceConfigTest {
         assertEquals(mDisplayDeviceConfig.getProximitySensor().minRefreshRate, 60, SMALL_DELTA);
         assertEquals(mDisplayDeviceConfig.getProximitySensor().maxRefreshRate, 90, SMALL_DELTA);
         assertThat(mDisplayDeviceConfig.getProximitySensor().supportedModes).hasSize(2);
-        SupportedMode mode = mDisplayDeviceConfig.getProximitySensor().supportedModes.get(0);
+        SupportedModeData mode = mDisplayDeviceConfig.getProximitySensor().supportedModes.get(0);
         assertEquals(mode.refreshRate, 60, SMALL_DELTA);
         assertEquals(mode.vsyncRate, 65, SMALL_DELTA);
         mode = mDisplayDeviceConfig.getProximitySensor().supportedModes.get(1);
@@ -933,6 +933,21 @@ public final class DisplayDeviceConfigTest {
         assertEquals(0.2f, mDisplayDeviceConfig.getNitsFromBacklight(0.0f), ZERO_DELTA);
     }
 
+    @Test
+    public void testLowPowerSupportedModesFromConfigFile() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        RefreshRateData refreshRateData = mDisplayDeviceConfig.getRefreshRateData();
+        assertNotNull(refreshRateData);
+        assertThat(refreshRateData.lowPowerSupportedModes).hasSize(2);
+        SupportedModeData supportedModeData = refreshRateData.lowPowerSupportedModes.get(0);
+        assertThat(supportedModeData.refreshRate).isEqualTo(60);
+        assertThat(supportedModeData.vsyncRate).isEqualTo(60);
+        supportedModeData = refreshRateData.lowPowerSupportedModes.get(1);
+        assertThat(supportedModeData.refreshRate).isEqualTo(60);
+        assertThat(supportedModeData.vsyncRate).isEqualTo(120);
+    }
+
     private String getValidLuxThrottling() {
         return "<luxThrottling>\n"
                 + "    <brightnessLimitMap>\n"
@@ -1087,6 +1102,19 @@ public final class DisplayDeviceConfigTest {
                 +   "<type></type>\n"
                 +   "<name></name>\n"
                 + "</proxSensor>\n";
+    }
+
+    private String getLowPowerConfig() {
+        return "<lowPowerSupportedModes>\n"
+                + "    <point>\n"
+                + "        <first>60</first>\n"
+                + "        <second>60</second>\n"
+                + "    </point>\n"
+                + "    <point>\n"
+                + "        <first>60</first>\n"
+                + "        <second>120</second>\n"
+                + "    </point>\n"
+                + "</lowPowerSupportedModes>\n";
     }
 
     private String getHdrBrightnessConfig() {
@@ -1620,6 +1648,7 @@ public final class DisplayDeviceConfigTest {
                 +               "</displayBrightnessPoint>\n"
                 +           "</blockingZoneThreshold>\n"
                 +       "</higherBlockingZoneConfigs>\n"
+                + getLowPowerConfig()
                 +   "</refreshRate>\n"
                 +   "<screenOffBrightnessSensorValueToLux>\n"
                 +       "<item>-1</item>\n"

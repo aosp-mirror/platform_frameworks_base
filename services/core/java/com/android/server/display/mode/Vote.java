@@ -18,6 +18,9 @@ package com.android.server.display.mode;
 
 import android.annotation.NonNull;
 
+import com.android.server.display.config.SupportedModeData;
+
+import java.util.ArrayList;
 import java.util.List;
 
 interface Vote {
@@ -102,9 +105,15 @@ interface Vote {
     // For internal application to limit display modes to specific ids
     int PRIORITY_SYSTEM_REQUESTED_MODES = 14;
 
-    // LOW_POWER_MODE force the render frame rate to [0, 60HZ] if
+    // PRIORITY_LOW_POWER_MODE_MODES limits display modes to specific refreshRate-vsync pairs if
     // Settings.Global.LOW_POWER_MODE is on.
-    int PRIORITY_LOW_POWER_MODE = 15;
+    // Lower priority that PRIORITY_LOW_POWER_MODE_RENDER_RATE and if discarded (due to other
+    // higher priority votes), render rate limit can still apply
+    int PRIORITY_LOW_POWER_MODE_MODES = 14;
+
+    // PRIORITY_LOW_POWER_MODE_RENDER_RATE force the render frame rate to [0, 60HZ] if
+    // Settings.Global.LOW_POWER_MODE is on.
+    int PRIORITY_LOW_POWER_MODE_RENDER_RATE = 15;
 
     // PRIORITY_FLICKER_REFRESH_RATE_SWITCH votes for disabling refresh rate switching. If the
     // higher priority voters' result is a range, it will fix the rate to a single choice.
@@ -177,22 +186,26 @@ interface Vote {
         return new BaseModeRefreshRateVote(baseModeRefreshRate);
     }
 
-    static Vote forSupportedRefreshRates(
-            List<SupportedRefreshRatesVote.RefreshRates> refreshRates) {
-        return new SupportedRefreshRatesVote(refreshRates);
+    static Vote forSupportedRefreshRates(List<SupportedModeData> supportedModes) {
+        if (supportedModes.isEmpty()) {
+            return null;
+        }
+        List<SupportedRefreshRatesVote.RefreshRates> rates = new ArrayList<>();
+        for (SupportedModeData data : supportedModes) {
+            rates.add(new SupportedRefreshRatesVote.RefreshRates(data.refreshRate, data.vsyncRate));
+        }
+        return new SupportedRefreshRatesVote(rates);
     }
 
     static Vote forSupportedModes(List<Integer> modeIds) {
         return new SupportedModesVote(modeIds);
     }
 
-
-
     static Vote forSupportedRefreshRatesAndDisableSwitching(
             List<SupportedRefreshRatesVote.RefreshRates> supportedRefreshRates) {
         return new CombinedVote(
                 List.of(forDisableRefreshRateSwitching(),
-                        forSupportedRefreshRates(supportedRefreshRates)));
+                        new SupportedRefreshRatesVote(supportedRefreshRates)));
     }
 
     static String priorityToString(int priority) {
@@ -213,8 +226,10 @@ interface Vote {
                 return "PRIORITY_HIGH_BRIGHTNESS_MODE";
             case PRIORITY_PROXIMITY:
                 return "PRIORITY_PROXIMITY";
-            case PRIORITY_LOW_POWER_MODE:
-                return "PRIORITY_LOW_POWER_MODE";
+            case PRIORITY_LOW_POWER_MODE_MODES:
+                return "PRIORITY_LOW_POWER_MODE_MODES";
+            case PRIORITY_LOW_POWER_MODE_RENDER_RATE:
+                return "PRIORITY_LOW_POWER_MODE_RENDER_RATE";
             case PRIORITY_SKIN_TEMPERATURE:
                 return "PRIORITY_SKIN_TEMPERATURE";
             case PRIORITY_UDFPS:
@@ -227,6 +242,8 @@ interface Vote {
                 return "PRIORITY_LIMIT_MODE";
             case PRIORITY_SYNCHRONIZED_REFRESH_RATE:
                 return "PRIORITY_SYNCHRONIZED_REFRESH_RATE";
+            case PRIORITY_USER_SETTING_PEAK_REFRESH_RATE:
+                return "PRIORITY_USER_SETTING_PEAK_REFRESH_RATE";
             case PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE:
                 return "PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE";
             case PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE:
