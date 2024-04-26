@@ -830,7 +830,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Beheer die lengte en die karakters wat in skermslotwagwoorde en -PIN\'e toegelaat word."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor pogings om skerm te ontsluit"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word. Sluit die tablet of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Monitor die aantal keer wat \'n verkeerde wagwoord ingevoer word wanneer die skerm ontsluit word. Sluit die tablet of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitor die aantal verkeerde wagwoorde wat ingetik word wanneer die skerm ontsluit word, en sluit jou Android TV-toestel of vee al jou Android TV-toestel se data uit as te veel verkeerde wagwoorde ingetik word."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die inligtingvermaakstelsel of vee al die inligtingvermaakstelsel se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Monitor die aantal keer wat \'n verkeerde wagwoorde ingevoer is wanneer die skerm ontsluit word. Sluit die foon of vee al die data uit as die wagwoord te veel keer verkeerd ingevoer word."</string>
@@ -843,7 +843,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Om die skerm te sluit"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Beheer hoe en wanneer die skerm sluit."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Om alle data uit te vee"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vee die tablet se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vee die tablet se data uit sonder waarskuwing, deur \'n fabriekterugstelling uit te voer."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Vee jou Android TV-toestel se data sonder waarskuwing uit deur \'n fabrieksterugstelling uit te voer."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Vee die inligtingvermaakstelsel se data sonder waarskuwing uit deur \'n fabriekterugstelling te doen."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Vee die foon se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>

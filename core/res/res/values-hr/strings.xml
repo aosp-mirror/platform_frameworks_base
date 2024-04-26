@@ -831,7 +831,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Upravlja duljinom i znakovima koji su dopušteni u zaporkama i PIN-ovima zaključavanja zaslona."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Nadzor pokušaja otključavanja zaslona"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Nadziri broj netočnih zaporki unesenih pri otključavanju zaslona i zaključaj tabletno računalo ili izbriši sve podatke na njemu ako je uneseno previše netočnih zaporki."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Nadzire se broj netočnih zaporki unesenih pri otključavanju zaslona, a tablet se zaključava ili se s njega brišu svi podaci ako je uneseno previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava Android TV uređaj ili s njega briše sve podatke ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava sustav za informiranje i zabavu ili briše sve njegove podatke ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Nadzire broj netočno unesenih zaporki pri otključavanju zaslona i zaključava telefon ili briše sve podatke na telefonu ako je uneseno previše netočnih zaporki."</string>
@@ -844,7 +844,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Zaključavanje zaslona"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Upravlja se načinom i vremenom zaključavanja zaslona."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Brisanje svih podataka"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vraćanjem u tvorničko stanje izbriši podatke tabletnog računala bez upozorenja."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Vraćanjem na tvorničke postavke brišu se podaci tableta bez upozorenja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Podatke Android TV uređaja izbrišite bez upozorenja vraćanjem uređaja na tvorničke postavke."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Briše podatke sustava za informiranje i zabavu bez upozorenja vraćanjem na tvorničko stanje."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Vraćanjem na tvorničke postavke brišu se podaci s telefona bez upozorenja."</string>
@@ -1537,7 +1537,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Promijenite mrežu ili postavke VPN-a"</string>
     <string name="upload_file" msgid="8651942222301634271">"Odaberite datoteku"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Nema odabranih datoteka"</string>
-    <string name="reset" msgid="3865826612628171429">"Ponovo postavi"</string>
+    <string name="reset" msgid="3865826612628171429">"Poništi"</string>
     <string name="submit" msgid="862795280643405865">"Pošalji"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Pokrenuta je aplikacija za vožnju"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Dodirnite za zatvaranje aplikacije za vožnju."</string>

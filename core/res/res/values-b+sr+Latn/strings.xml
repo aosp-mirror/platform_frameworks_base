@@ -1899,8 +1899,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Traži PIN pre otkačinjanja"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Traži šablon za otključavanje pre otkačinjanja"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Traži lozinku pre otkačinjanja"</string>
-    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"Instalirao je administrator.\nIdite u podešavanja da biste videli odobrene dozvole"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ažurirao je administrator"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Izbrisao je administrator"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Potvrdi"</string>
