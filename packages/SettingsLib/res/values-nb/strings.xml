@@ -98,9 +98,9 @@
     <skip />
     <!-- no translation found for bluetooth_active_battery_level_untethered (4961338936672922617) -->
     <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (5521405563527657515) -->
+    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
     <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7165552824664523336) -->
+    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
     <skip />
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Batteri: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -112,9 +112,12 @@
     <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiv"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Lagret"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktiv, bare venstre"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktiv, bare høyre"</string>
-    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktiv, venstre og høyre"</string>
+    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
+    <skip />
     <!-- no translation found for bluetooth_active_media_only_battery_level (7772517511061834073) -->
     <skip />
     <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (7444753133664620926) -->
