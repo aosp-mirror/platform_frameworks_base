@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.domain.interactor
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -29,12 +28,13 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 
 @SysUISingleton
@@ -49,8 +49,6 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
-    private val lockPatternUtils: LockPatternUtils,
-    private val selectedUserInteractor: SelectedUserInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.AOD,
@@ -65,9 +63,17 @@ constructor(
         listenForAodToAwake()
         listenForAodToOccluded()
         listenForAodToPrimaryBouncer()
-        listenForAodToGone()
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
+
+    private val canDismissLockscreen: Flow<Boolean> =
+        combine(
+            keyguardInteractor.isKeyguardShowing,
+            keyguardInteractor.isKeyguardDismissible,
+            keyguardInteractor.biometricUnlockState,
+        ) { isKeyguardShowing, isKeyguardDismissible, biometricUnlockState ->
+            (isWakeAndUnlock(biometricUnlockState) || (!isKeyguardShowing && isKeyguardDismissible))
+        }
 
     /**
      * Listen for the signal that we're waking up and figure what state we need to transition to.
@@ -79,12 +85,13 @@ constructor(
         scope.launch("$TAG#listenForAodToAwake") {
             powerInteractor.detailedWakefulness
                 .filterRelevantKeyguardStateAnd { wakefulness -> wakefulness.isAwake() }
+                .debounce(50L)
                 .sample(
                     startedKeyguardTransitionStep,
                     keyguardInteractor.biometricUnlockState,
                     keyguardInteractor.primaryBouncerShowing,
                     keyguardInteractor.isKeyguardOccluded,
-                    selectedUserInteractor.selectedUser,
+                    canDismissLockscreen,
                 )
                 .collect {
                     (
@@ -93,10 +100,9 @@ constructor(
                         biometricUnlockState,
                         primaryBouncerShowing,
                         isKeyguardOccludedLegacy,
-                        currentUser,
+                        canDismissLockscreen,
                     ) ->
                     if (!maybeHandleInsecurePowerGesture()) {
-                        val securityNone = lockPatternUtils.isLockScreenDisabled(currentUser)
                         val shouldTransitionToLockscreen =
                             if (KeyguardWmStateRefactor.isEnabled) {
                                 // Check with the superclass to see if an occlusion transition is
@@ -105,13 +111,11 @@ constructor(
                                 // completes.
                                 !maybeStartTransitionToOccludedOrInsecureCamera() &&
                                     !isWakeAndUnlock(biometricUnlockState) &&
-                                    !primaryBouncerShowing &&
-                                    !securityNone
+                                    !primaryBouncerShowing
                             } else {
                                 !isKeyguardOccludedLegacy &&
                                     !isWakeAndUnlock(biometricUnlockState) &&
-                                    !primaryBouncerShowing &&
-                                    !securityNone
+                                    !primaryBouncerShowing
                             }
 
                         // With the refactor enabled, maybeStartTransitionToOccludedOrInsecureCamera
@@ -119,7 +123,11 @@ constructor(
                         val shouldTransitionToOccluded =
                             !KeyguardWmStateRefactor.isEnabled && isKeyguardOccludedLegacy
 
-                        if (shouldTransitionToLockscreen) {
+                        if (canDismissLockscreen) {
+                            startTransitionTo(
+                                toState = KeyguardState.GONE,
+                            )
+                        } else if (shouldTransitionToLockscreen) {
                             val modeOnCanceled =
                                 if (startedStep.from == KeyguardState.LOCKSCREEN) {
                                     TransitionModeOnCanceled.REVERSE
@@ -178,35 +186,6 @@ constructor(
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { primaryBouncerShowing -> primaryBouncerShowing }
                 .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
-        }
-    }
-
-    private fun listenForAodToGone() {
-        if (KeyguardWmStateRefactor.isEnabled) {
-            // Handled via #dismissAod.
-            return
-        }
-
-        scope.launch("$TAG#listenForAodToGone") {
-            powerInteractor.isAwake
-                .debounce(50L)
-                .filterRelevantKeyguardState()
-                .sample(
-                    keyguardInteractor.biometricUnlockState,
-                    keyguardInteractor.isKeyguardShowing,
-                    keyguardInteractor.isKeyguardDismissible,
-                )
-                .collect { (isAwake, biometricUnlockState, isKeyguardShowing, isKeyguardDismissible)
-                    ->
-                    KeyguardWmStateRefactor.assertInLegacyMode()
-                    if (
-                        isAwake &&
-                            (isWakeAndUnlock(biometricUnlockState) ||
-                                (!isKeyguardShowing && isKeyguardDismissible))
-                    ) {
-                        startTransitionTo(KeyguardState.GONE)
-                    }
-                }
         }
     }
 
