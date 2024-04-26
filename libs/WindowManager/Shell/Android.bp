@@ -210,6 +210,7 @@ android_library {
         "androidx.recyclerview_recyclerview",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
+        "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "//frameworks/libs/systemui:iconloader_base",
         "com_android_wm_shell_flags_lib",
         "com.android.window.flags.window-aconfig-java",
