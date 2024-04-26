@@ -1008,6 +1008,25 @@ public class PackageManagerSettingsTests {
     }
 
     @Test
+    public void testWriteReadPendingRestore() {
+        Settings settings = makeSettings();
+        PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
+        packageSetting.setAppId(Process.FIRST_APPLICATION_UID);
+        packageSetting.setPkg(PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed()
+                .setUid(packageSetting.getAppId())
+                .hideAsFinal());
+
+        packageSetting.setPendingRestore(true);
+        settings.mPackages.put(PACKAGE_NAME_1, packageSetting);
+
+        settings.writeLPr(computer, /*sync=*/true);
+        settings.mPackages.clear();
+
+        assertThat(settings.readLPw(computer, createFakeUsers()), is(true));
+        assertThat(settings.getPackageLPr(PACKAGE_NAME_1).isPendingRestore(), is(true));
+    }
+
+    @Test
     public void testWriteReadArchiveState() {
         Settings settings = makeSettings();
         PackageSetting packageSetting = createPackageSetting(PACKAGE_NAME_1);
