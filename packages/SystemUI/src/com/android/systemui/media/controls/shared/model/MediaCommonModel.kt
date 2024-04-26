@@ -21,6 +21,7 @@ sealed class MediaCommonModel {
     data class MediaControl(
         val mediaLoadedModel: MediaDataLoadingModel.Loaded,
         val canBeRemoved: Boolean = false,
+        val isMediaFromRec: Boolean = false,
     ) : MediaCommonModel()
 
     data class MediaRecommendations(val recsLoadingModel: SmartspaceMediaLoadingModel) :

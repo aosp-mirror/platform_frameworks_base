@@ -32,6 +32,7 @@ sealed class MediaCommonViewModel {
         override val onAdded: (MediaCommonViewModel) -> Unit,
         override val onRemoved: (Boolean) -> Unit,
         override val onUpdated: (MediaCommonViewModel) -> Unit,
+        val isMediaFromRec: Boolean = false,
     ) : MediaCommonViewModel()
 
     data class MediaRecommendations(

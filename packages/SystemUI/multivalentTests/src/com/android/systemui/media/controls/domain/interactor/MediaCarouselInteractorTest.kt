@@ -55,6 +55,14 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
     private val mediaFilterRepository: MediaFilterRepository = kosmos.mediaFilterRepository
     private val mediaRecommendationsInteractor: MediaRecommendationsInteractor =
         kosmos.mediaRecommendationsInteractor
+    val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
+    private val mediaRecommendation =
+        SmartspaceMediaData(
+            targetId = KEY_MEDIA_SMARTSPACE,
+            isActive = true,
+            packageName = PACKAGE_NAME,
+            recommendations = MediaTestHelper.getValidRecommendationList(icon),
+        )
 
     private val underTest: MediaCarouselInteractor = kosmos.mediaCarouselInteractor
 
@@ -122,26 +130,19 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
                 collectLastValue(underTest.hasActiveMediaOrRecommendation)
             val hasAnyMediaOrRecommendation by
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
-            val sortedMedia by collectLastValue(underTest.sortedMedia)
+            val currentMedia by collectLastValue(underTest.currentMedia)
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
-            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
-            val userMediaRecommendation =
-                SmartspaceMediaData(
-                    targetId = KEY_MEDIA_SMARTSPACE,
-                    isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
-                )
             val userMedia = MediaData(active = false)
             val recsLoadingModel = SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE, true)
             val mediaLoadingModel = MediaDataLoadingModel.Loaded(userMedia.instanceId)
 
-            mediaFilterRepository.setRecommendation(userMediaRecommendation)
+            mediaFilterRepository.setRecommendation(mediaRecommendation)
             mediaFilterRepository.setRecommendationsLoadingState(recsLoadingModel)
 
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasAnyMediaOrRecommendation).isTrue()
-            assertThat(sortedMedia)
+            assertThat(currentMedia)
                 .containsExactly(MediaCommonModel.MediaRecommendations(recsLoadingModel))
 
             mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
@@ -149,7 +150,7 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
 
             assertThat(hasActiveMediaOrRecommendation).isTrue()
             assertThat(hasAnyMediaOrRecommendation).isTrue()
-            assertThat(sortedMedia)
+            assertThat(currentMedia)
                 .containsExactly(
                     MediaCommonModel.MediaRecommendations(recsLoadingModel),
                     MediaCommonModel.MediaControl(mediaLoadingModel, true)
@@ -165,14 +166,6 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             val hasAnyMediaOrRecommendation by
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
-
-            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
-            val mediaRecommendation =
-                SmartspaceMediaData(
-                    targetId = KEY_MEDIA_SMARTSPACE,
-                    isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
-                )
 
             mediaFilterRepository.setRecommendation(mediaRecommendation)
 
@@ -193,14 +186,6 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
             val hasAnyMediaOrRecommendation by
                 collectLastValue(underTest.hasAnyMediaOrRecommendation)
             kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
-
-            val icon = Icon.createWithResource(context, R.drawable.ic_media_play)
-            val mediaRecommendation =
-                SmartspaceMediaData(
-                    targetId = KEY_MEDIA_SMARTSPACE,
-                    isActive = true,
-                    recommendations = MediaTestHelper.getValidRecommendationList(icon),
-                )
 
             mediaFilterRepository.setRecommendation(mediaRecommendation)
 
@@ -234,26 +219,42 @@ class MediaCarouselInteractorTest : SysuiTestCase() {
     @Test
     fun loadMediaFromRec() =
         testScope.runTest {
-            val isMediaFromRec by collectLastValue(underTest.isMediaFromRec)
+            val currentMedia by collectLastValue(underTest.currentMedia)
             val instanceId = InstanceId.fakeInstanceId(123)
-            val data = MediaData(active = true, instanceId = instanceId, packageName = PACKAGE_NAME)
+            val data =
+                MediaData(
+                    active = true,
+                    instanceId = instanceId,
+                    packageName = PACKAGE_NAME,
+                    notificationKey = KEY
+                )
+            val smartspaceLoadingModel = SmartspaceMediaLoadingModel.Loaded(KEY_MEDIA_SMARTSPACE)
+            val mediaLoadingModel = MediaDataLoadingModel.Loaded(instanceId)
 
-            assertThat(isMediaFromRec).isFalse()
-
+            mediaFilterRepository.setRecommendation(mediaRecommendation)
+            mediaFilterRepository.setRecommendationsLoadingState(smartspaceLoadingModel)
             mediaRecommendationsInteractor.switchToMediaControl(PACKAGE_NAME)
             mediaFilterRepository.addSelectedUserMediaEntry(data)
-            mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
+            mediaFilterRepository.addMediaDataLoadingState(mediaLoadingModel)
 
-            assertThat(isMediaFromRec).isFalse()
+            assertThat(currentMedia)
+                .containsExactly(MediaCommonModel.MediaRecommendations(smartspaceLoadingModel))
+                .inOrder()
 
             mediaFilterRepository.addSelectedUserMediaEntry(data.copy(isPlaying = true))
             mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
 
-            assertThat(isMediaFromRec).isTrue()
+            assertThat(currentMedia)
+                .containsExactly(
+                    MediaCommonModel.MediaControl(mediaLoadingModel, isMediaFromRec = true),
+                    MediaCommonModel.MediaRecommendations(smartspaceLoadingModel)
+                )
+                .inOrder()
         }
 
     companion object {
         private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
         private const val PACKAGE_NAME = "com.android.example"
+        private const val KEY = "key"
     }
 }

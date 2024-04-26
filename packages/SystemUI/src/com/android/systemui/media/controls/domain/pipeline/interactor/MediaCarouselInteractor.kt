@@ -63,7 +63,7 @@ constructor(
     private val mediaDeviceManager: MediaDeviceManager,
     private val mediaDataCombineLatest: MediaDataCombineLatest,
     private val mediaDataFilter: MediaDataFilterImpl,
-    mediaFilterRepository: MediaFilterRepository,
+    private val mediaFilterRepository: MediaFilterRepository,
     private val mediaFlags: MediaFlags,
 ) : MediaDataManager, CoreStartable {
 
@@ -123,18 +123,8 @@ constructor(
                 initialValue = false,
             )
 
-    /** The most recent sorted set for user media instances */
-    val sortedMedia: StateFlow<List<MediaCommonModel>> =
-        mediaFilterRepository.sortedMedia
-            .mapLatest { it.values.toList() }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = emptyList(),
-            )
-
-    /** Whether the current change in media was done by clicking on a recommendation */
-    val isMediaFromRec: StateFlow<Boolean> = mediaFilterRepository.isMediaFromRec
+    /** The current list for user media instances */
+    val currentMedia: StateFlow<List<MediaCommonModel>> = mediaFilterRepository.currentMedia
 
     override fun start() {
         if (!mediaFlags.isMediaControlsRefactorEnabled()) {
@@ -250,6 +240,10 @@ constructor(
     override fun hasAnyMedia() = hasAnyMedia.value
 
     override fun isRecommendationActive() = mediaDataRepository.smartspaceMediaData.value.isActive
+
+    fun reorderMedia() {
+        mediaFilterRepository.setOrderedMedia()
+    }
 
     /** Add a listener for internal events. */
     private fun addInternalListener(listener: MediaDataManager.Listener) =
