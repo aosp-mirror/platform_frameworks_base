@@ -112,6 +112,7 @@ interface QSAccessibilityModule {
         const val COLOR_INVERSION_TILE_SPEC = "inversion"
         const val FONT_SCALING_TILE_SPEC = "font_scaling"
         const val REDUCE_BRIGHTNESS_TILE_SPEC = "reduce_brightness"
+        const val ONE_HANDED_TILE_SPEC = "onehanded"
 
         @Provides
         @IntoMap
@@ -241,5 +242,19 @@ interface QSAccessibilityModule {
                     mapper,
                 )
             else StubQSTileViewModel
+
+        @Provides
+        @IntoMap
+        @StringKey(ONE_HANDED_TILE_SPEC)
+        fun provideOneHandedTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(ONE_HANDED_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = com.android.internal.R.drawable.ic_qs_one_handed_mode,
+                        labelRes = R.string.quick_settings_onehanded_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
     }
 }

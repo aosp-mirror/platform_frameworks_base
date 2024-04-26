@@ -95,6 +95,9 @@ interface ConnectivityModule {
         const val AIRPLANE_MODE_TILE_SPEC = "airplane"
         const val DATA_SAVER_TILE_SPEC = "saver"
         const val INTERNET_TILE_SPEC = "internet"
+        const val HOTSPOT_TILE_SPEC = "hotspot"
+        const val CAST_TILE_SPEC = "cast"
+        const val BLUETOOTH_TILE_SPEC = "bt"
 
         /** Inject InternetTile or InternetTileNewImpl into tileMap in QSModule */
         @Provides
@@ -203,6 +206,48 @@ interface ConnectivityModule {
                 userActionInteractor,
                 stateInteractor,
                 mapper,
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(HOTSPOT_TILE_SPEC)
+        fun provideHotspotTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(HOTSPOT_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_hotspot,
+                        labelRes = R.string.quick_settings_hotspot_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(CAST_TILE_SPEC)
+        fun provideCastTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(CAST_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_cast,
+                        labelRes = R.string.quick_settings_cast_title,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(BLUETOOTH_TILE_SPEC)
+        fun provideBluetoothTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(BLUETOOTH_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_bluetooth_icon_off,
+                        labelRes = R.string.quick_settings_bluetooth_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
             )
     }
 }

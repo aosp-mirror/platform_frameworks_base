@@ -16,10 +16,16 @@
 
 package com.android.systemui.qrcodescanner.dagger
 
+import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.QRCodeScannerTile
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
+import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
+import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
 
@@ -31,4 +37,22 @@ interface QRCodeScannerModule {
     @IntoMap
     @StringKey(QRCodeScannerTile.TILE_SPEC)
     fun bindQRCodeScannerTile(qrCodeScannerTile: QRCodeScannerTile): QSTileImpl<*>
+
+    companion object {
+        const val QR_CODE_SCANNER_TILE_SPEC = "qr_code_scanner"
+
+        @Provides
+        @IntoMap
+        @StringKey(QR_CODE_SCANNER_TILE_SPEC)
+        fun provideQRCodeScannerTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(QR_CODE_SCANNER_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_qr_code_scanner,
+                        labelRes = R.string.qr_code_scanner_title,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+    }
 }
