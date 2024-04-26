@@ -101,6 +101,8 @@ object Shade {
     object Dimensions {
         val ScrimCornerSize = 32.dp
         val HorizontalPadding = 16.dp
+        const val ScrimOverscrollLimit = 100f
+        const val ScrimVisibilityThreshold = 5f
     }
 
     object Shapes {
@@ -198,7 +200,11 @@ private fun SceneScope.SingleShade(
 ) {
     val maxNotifScrimTop = remember { mutableStateOf(0f) }
     val tileSquishiness by
-        animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
+        animateSceneFloatAsState(
+            value = 1f,
+            key = QuickSettings.SharedValues.TilesSquishiness,
+            canOverflow = false
+        )
     val isClickable by viewModel.isClickable.collectAsState()
 
     // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this scene
@@ -234,10 +240,7 @@ private fun SceneScope.SingleShade(
                             Box(Modifier.element(QuickSettings.Elements.QuickQuickSettings)) {
                                 QuickSettings(
                                     viewModel.qsSceneAdapter,
-                                    {
-                                        (viewModel.qsSceneAdapter.qqsHeight * tileSquishiness)
-                                            .roundToInt()
-                                    },
+                                    { viewModel.qsSceneAdapter.qqsHeight },
                                     isSplitShade = false,
                                     squishiness = tileSquishiness,
                                 )
