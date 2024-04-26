@@ -338,8 +338,6 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
-    private ScreenOffAnimationController mScreenOffAnimationController;
-    @Mock
     Transitions mTransitions;
     @Mock
     private Optional<OneHandedController> mOneHandedOptional;
@@ -491,7 +489,6 @@ public class BubblesTest extends SysuiTestCase {
                 mColorExtractor,
                 mDumpManager,
                 mKeyguardStateController,
-                mScreenOffAnimationController,
                 mAuthController,
                 () -> mShadeInteractor,
                 mShadeWindowLogger,

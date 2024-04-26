@@ -262,7 +262,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mColorExtractor,
                 mDumpManager,
                 mKeyguardStateController,
-                mScreenOffAnimationController,
                 mAuthController,
                 () -> mShadeInteractor,
                 mShadeWindowLogger,

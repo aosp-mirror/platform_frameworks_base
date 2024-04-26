@@ -155,7 +155,6 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mColorExtractor,
                 mDumpManager,
                 mKeyguardStateController,
-                mKosmos.getScreenOffAnimationController(),
                 mAuthController,
                 mKosmos::getShadeInteractor,
                 mShadeWindowLogger,
