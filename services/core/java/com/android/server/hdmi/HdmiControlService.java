@@ -40,6 +40,7 @@ import static com.android.server.power.ShutdownThread.SHUTDOWN_ACTION_PROPERTY;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -4388,8 +4389,7 @@ public class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
-        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                HdmiControlService.PERMISSION);
+        sendBroadcastAsUser(intent);
     }
 
     @ServiceThreadOnly
@@ -4398,8 +4398,17 @@ public class HdmiControlService extends SystemService {
         Intent intent = new Intent(HdmiControlManager.ACTION_OSD_MESSAGE);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_ID, messageId);
         intent.putExtra(HdmiControlManager.EXTRA_MESSAGE_EXTRA_PARAM1, extra);
-        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                HdmiControlService.PERMISSION);
+        sendBroadcastAsUser(intent);
+    }
+
+    // This method is used such that we can override it inside unit tests to avoid a
+    // SecurityException.
+    @ServiceThreadOnly
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)
+    protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+        assertRunOnServiceThread();
+        getContext().sendBroadcastAsUser(intent, UserHandle.ALL, HdmiControlService.PERMISSION);
     }
 
     @VisibleForTesting

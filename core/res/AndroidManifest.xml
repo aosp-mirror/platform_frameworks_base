@@ -299,6 +299,9 @@
 
     <protected-broadcast android:name="android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED" />
 
+    <protected-broadcast android:name="android.hardware.hdmi.action.OSD_MESSAGE" />
+    <protected-broadcast android:name="android.hardware.hdmi.action.ON_ACTIVE_SOURCE_RECOVERED_DISMISS_UI" />
+
     <protected-broadcast android:name="android.hardware.usb.action.USB_STATE" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_PORT_CHANGED" />
     <protected-broadcast android:name="android.hardware.usb.action.USB_PORT_COMPLIANCE_CHANGED" />

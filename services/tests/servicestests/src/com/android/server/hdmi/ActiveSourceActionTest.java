@@ -24,8 +24,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.spy;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -70,6 +72,11 @@ public class ActiveSourceActionTest {
 
             @Override
             protected void writeStringSystemProperty(String key, String value) {
+                // do nothing
+            }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
                 // do nothing
             }
         };
