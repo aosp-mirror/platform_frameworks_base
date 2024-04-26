@@ -325,4 +325,11 @@
         android:keyboardLayout="@raw/keyboard_layout_thai_kedmanee"
         android:keyboardLocale="th-Thai"
         android:keyboardLayoutType="extended" />
+
+    <keyboard-layout
+        android:name="keyboard_layout_thai_pattachote"
+        android:label="@string/keyboard_layout_thai_pattachote"
+        android:keyboardLayout="@raw/keyboard_layout_thai_pattachote"
+        android:keyboardLocale="th-Thai"
+        android:keyboardLayoutType="extended" />
 </keyboard-layouts>
