@@ -8233,7 +8233,7 @@
         </activity>
         <activity android:name="com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity"
                   android:exported="false"
-                  android:theme="@style/Theme.DeviceDefault.Resolver"
+                  android:theme="@style/AccessibilityButtonChooserDialog"
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true"
                   android:documentLaunchMode="never"
