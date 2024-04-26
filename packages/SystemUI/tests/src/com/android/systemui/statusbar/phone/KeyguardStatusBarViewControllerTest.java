@@ -76,6 +76,8 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository;
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -114,9 +116,9 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarIconController mStatusBarIconController;
     @Mock
-    private StatusBarIconController.TintedIconManager.Factory mIconManagerFactory;
+    private TintedIconManager.Factory mIconManagerFactory;
     @Mock
-    private StatusBarIconController.TintedIconManager mIconManager;
+    private TintedIconManager mIconManager;
     @Mock
     private BatteryMeterViewController mBatteryMeterViewController;
     @Mock

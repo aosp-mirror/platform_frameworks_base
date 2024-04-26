@@ -82,9 +82,9 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.viewmodel.ShadeSceneViewModel
-import com.android.systemui.statusbar.phone.StatusBarIconController
-import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
 import com.android.systemui.statusbar.phone.StatusBarLocation
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.util.animation.MeasurementInput
 import javax.inject.Inject
 import javax.inject.Named

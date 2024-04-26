@@ -11,12 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.phone.ui;
 
-import static com.android.systemui.statusbar.phone.StatusBarIconList.Slot;
+import static com.android.systemui.statusbar.phone.ui.StatusBarIconList.Slot;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -38,6 +38,7 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.statusbar.phone.StatusBarIconHolder;
 import com.android.systemui.statusbar.phone.StatusBarIconHolder.BindableIconHolder;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
@@ -459,9 +460,9 @@ public class StatusBarIconControllerImpl implements Tunable,
         for (IconManager manager : mIconGroups) {
             if (manager.shouldLog()) {
                 ViewGroup group = manager.mGroup;
-                int N = group.getChildCount();
-                pw.println("  icon views: " + N);
-                for (int i = 0; i < N; i++) {
+                int n = group.getChildCount();
+                pw.println("  icon views: " + n);
+                for (int i = 0; i < n; i++) {
                     StatusIconDisplayable ic = (StatusIconDisplayable) group.getChildAt(i);
                     pw.println("    [" + i + "] icon=" + ic);
                 }

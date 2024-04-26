@@ -64,6 +64,8 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.fragment.StatusBarIconBlocklistKt;
 import com.android.systemui.statusbar.phone.fragment.StatusBarSystemEventDefaultAnimator;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -107,7 +109,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final BatteryController mBatteryController;
     private final UserInfoController mUserInfoController;
     private final StatusBarIconController mStatusBarIconController;
-    private final StatusBarIconController.TintedIconManager.Factory mTintedIconManagerFactory;
+    private final TintedIconManager.Factory mTintedIconManagerFactory;
     private final BatteryMeterViewController mBatteryMeterViewController;
     private final ShadeViewStateProvider mShadeViewStateProvider;
     private final KeyguardStateController mKeyguardStateController;
@@ -248,7 +250,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final int mNotificationsHeaderCollideDistance;
 
     private boolean mBatteryListening;
-    private StatusBarIconController.TintedIconManager mTintedIconManager;
+    private TintedIconManager mTintedIconManager;
 
     private float mKeyguardStatusBarAnimateAlpha = 1f;
     /**
@@ -281,7 +283,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             BatteryController batteryController,
             UserInfoController userInfoController,
             StatusBarIconController statusBarIconController,
-            StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory,
+            TintedIconManager.Factory tintedIconManagerFactory,
             BatteryMeterViewController batteryMeterViewController,
             ShadeViewStateProvider shadeViewStateProvider,
             KeyguardStateController keyguardStateController,
