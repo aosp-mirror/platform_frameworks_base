@@ -91,7 +91,7 @@ public final class HintManagerService extends SystemService {
     @GuardedBy("mLock")
     private final ArrayMap<Integer, ArrayMap<IBinder, ArraySet<AppHintSession>>> mActiveSessions;
 
-    /** Lock to protect mActiveSessions. */
+    /** Lock to protect mActiveSessions and the UidObserver. */
     private final Object mLock = new Object();
 
     @GuardedBy("mNonIsolatedTidsLock")
@@ -318,11 +318,10 @@ public final class HintManagerService extends SystemService {
 
     @VisibleForTesting
     final class MyUidObserver extends UidObserver {
-        private final Object mCacheLock = new Object();
-        @GuardedBy("mCacheLock")
+        @GuardedBy("mLock")
         private final SparseIntArray mProcStatesCache = new SparseIntArray();
         public boolean isUidForeground(int uid) {
-            synchronized (mCacheLock) {
+            synchronized (mLock) {
                 return mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
                         <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
             }
@@ -331,10 +330,8 @@ public final class HintManagerService extends SystemService {
         @Override
         public void onUidGone(int uid, boolean disabled) {
             FgThread.getHandler().post(() -> {
-                synchronized (mCacheLock) {
-                    mProcStatesCache.delete(uid);
-                }
                 synchronized (mLock) {
+                    mProcStatesCache.delete(uid);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(uid);
                     if (tokenMap == null) {
                         return;
@@ -357,7 +354,7 @@ public final class HintManagerService extends SystemService {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             FgThread.getHandler().post(() -> {
-                synchronized (mCacheLock) {
+                synchronized (mLock) {
                     if (powerhintThreadCleanup()) {
                         final boolean before = isUidForeground(uid);
                         mProcStatesCache.put(uid, procState);
@@ -370,9 +367,7 @@ public final class HintManagerService extends SystemService {
                     } else {
                         mProcStatesCache.put(uid, procState);
                     }
-                }
-                boolean shouldAllowUpdate = isUidForeground(uid);
-                synchronized (mLock) {
+                    boolean shouldAllowUpdate = isUidForeground(uid);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(uid);
                     if (tokenMap == null) {
                         return;
@@ -691,10 +686,10 @@ public final class HintManagerService extends SystemService {
                     }
                 }
 
-                AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
-                        halSessionPtr, durationNanos);
                 logPerformanceHintSessionAtom(callingUid, halSessionPtr, durationNanos, tids);
                 synchronized (mLock) {
+                    AppHintSession hs = new AppHintSession(callingUid, callingTgid, tids, token,
+                            halSessionPtr, durationNanos);
                     ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap =
                             mActiveSessions.get(callingUid);
                     if (tokenMap == null) {
