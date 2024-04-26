@@ -106,3 +106,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "migrate_full_oomadj_updates"
+    namespace: "backstage_power"
+    description: "Migrate full updates to partial updates where possible"
+    bug: "324915545"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

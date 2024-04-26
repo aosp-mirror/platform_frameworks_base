@@ -3541,13 +3541,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mAppProfiler.setAllowLowerMemLevelLocked(false);
                 doLowMem = false;
             }
+            if (doOomAdj) {
+                if (Flags.migrateFullOomadjUpdates()) {
+                    app.forEachConnectionHost((host) -> enqueueOomAdjTargetLocked(host));
+                }
+            }
+
             EventLogTags.writeAmProcDied(app.userId, pid, app.processName, setAdj, setProcState);
             if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
                 "Dying app: " + app + ", pid: " + pid + ", thread: " + thread.asBinder());
             handleAppDiedLocked(app, pid, false, true, fromBinderDied);
 
             if (doOomAdj) {
-                updateOomAdjLocked(OOM_ADJ_REASON_PROCESS_END);
+                if (Flags.migrateFullOomadjUpdates()) {
+                    updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_PROCESS_END);
+                } else {
+                    updateOomAdjLocked(OOM_ADJ_REASON_PROCESS_END);
+                }
             }
             if (doLowMem) {
                 mAppProfiler.doLowMemReportIfNeededLocked(app);
@@ -17723,11 +17733,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy({"this", "mProcLock"})
-    final void setAppIdTempAllowlistStateLSP(int uid, boolean onAllowlist) {
-        mOomAdjuster.setAppIdTempAllowlistStateLSP(uid, onAllowlist);
-    }
-
-    @GuardedBy({"this", "mProcLock"})
     final void setUidTempAllowlistStateLSP(int uid, boolean onAllowlist) {
         mOomAdjuster.setUidTempAllowlistStateLSP(uid, onAllowlist);
     }
@@ -18689,7 +18694,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     } else {
                         mFgsStartTempAllowList.removeUid(changingUid);
                     }
-                    setAppIdTempAllowlistStateLSP(changingUid, adding);
+                    setUidTempAllowlistStateLSP(changingUid, adding);
                 }
             }
         }
