@@ -478,6 +478,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     @Nullable
     final CameraStateMonitor mCameraStateMonitor;
+    @Nullable
+    final ActivityRefresher mActivityRefresher;
 
     DisplayFrames mDisplayFrames;
     final DisplayUpdater mDisplayUpdater;
@@ -1258,13 +1260,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mWmService.mLetterboxConfiguration.isCameraCompatTreatmentEnabledAtBuildTime();
         if (shouldCreateDisplayRotationCompatPolicy) {
             mCameraStateMonitor = new CameraStateMonitor(this, mWmService.mH);
+            mActivityRefresher = new ActivityRefresher(mWmService, mWmService.mH);
             mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
-                    this, mWmService.mH, mCameraStateMonitor);
+                    this, mCameraStateMonitor, mActivityRefresher);
 
             mCameraStateMonitor.startListeningToCameraState();
         } else {
             // These are to satisfy the `final` check.
             mCameraStateMonitor = null;
+            mActivityRefresher = null;
             mDisplayRotationCompatPolicy = null;
         }
 
