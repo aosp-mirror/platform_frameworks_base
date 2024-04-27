@@ -139,6 +139,8 @@ constructor(
         }
         reattachHostView()
         onMediaHostVisibilityChanged(mediaHost.visible)
+
+        singlePaneContainer?.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
 
     /** Called whenever the media hosts visibility changes */
