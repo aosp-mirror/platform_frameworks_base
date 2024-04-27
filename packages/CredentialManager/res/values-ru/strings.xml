@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"Менеджер учетных данных"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Отмена"</string>
     <string name="string_continue" msgid="1346732695941131882">"Продолжить"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"Сохранить"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Другой способ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Подробнее"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Показать пароль"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Скрыть пароль"</string>

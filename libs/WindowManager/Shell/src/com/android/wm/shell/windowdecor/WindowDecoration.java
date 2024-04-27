@@ -33,6 +33,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Trace;
 import android.view.Display;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -311,7 +312,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 boundingRects = null;
             } else {
                 // The customizable region can at most be equal to the caption bar.
-                if (params.mAllowCaptionInputFallthrough) {
+                if (params.hasInputFeatureSpy()) {
                     outResult.mCustomizableCaptionRegion.set(mCaptionInsetsRect);
                 }
                 boundingRects = new Rect[numOfElements];
@@ -324,7 +325,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                             calculateBoundingRect(element, elementWidthPx, mCaptionInsetsRect);
                     // Subtract the regions used by the caption elements, the rest is
                     // customizable.
-                    if (params.mAllowCaptionInputFallthrough) {
+                    if (params.hasInputFeatureSpy()) {
                         outResult.mCustomizableCaptionRegion.op(boundingRects[i],
                                 Region.Op.DIFFERENCE);
                     }
@@ -378,6 +379,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             startT.unsetColor(mTaskSurface);
         }
 
+        Trace.beginSection("CaptionViewHostLayout");
         if (mCaptionWindowManager == null) {
             // Put caption under a container surface because ViewRootImpl sets the destination frame
             // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
@@ -394,11 +396,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
-        if (params.mAllowCaptionInputFallthrough) {
-            lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_SPY;
-        } else {
-            lp.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_SPY;
-        }
+        lp.inputFeatures = params.mInputFeatures;
         if (mViewHost == null) {
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
                     mCaptionWindowManager);
@@ -412,6 +410,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             }
             mViewHost.relayout(lp);
         }
+        Trace.endSection(); // CaptionViewHostLayout
     }
 
     private Rect calculateBoundingRect(@NonNull OccludingCaptionElement element,
@@ -605,7 +604,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionHeightId;
         int mCaptionWidthId;
         final List<OccludingCaptionElement> mOccludingCaptionElements = new ArrayList<>();
-        boolean mAllowCaptionInputFallthrough;
+        int mInputFeatures;
 
         int mShadowRadiusId;
         int mCornerRadius;
@@ -620,7 +619,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionHeightId = Resources.ID_NULL;
             mCaptionWidthId = Resources.ID_NULL;
             mOccludingCaptionElements.clear();
-            mAllowCaptionInputFallthrough = false;
+            mInputFeatures = 0;
 
             mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
@@ -628,6 +627,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mApplyStartTransactionOnDraw = false;
             mSetTaskPositionAndCrop = false;
             mWindowDecorConfig = null;
+        }
+
+        boolean hasInputFeatureSpy() {
+            return (mInputFeatures & WindowManager.LayoutParams.INPUT_FEATURE_SPY) != 0;
         }
 
         /**

@@ -2430,12 +2430,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int FRAME_RATE_CATEGORY_REASON_VELOCITY = 0x0600_0000;
 
     /**
-     * This indicates that the frame rate category was chosen because it is idle.
-     * @hide
-     */
-    public static final int FRAME_RATE_CATEGORY_REASON_IDLE = 0x0700_0000;
-
-    /**
      * This indicates that the frame rate category was chosen because it is currently boosting.
      * @hide
      */

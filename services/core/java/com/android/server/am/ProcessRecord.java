@@ -71,6 +71,7 @@ import com.android.server.wm.WindowProcessListener;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Full information about a particular process that
@@ -1691,5 +1692,23 @@ class ProcessRecord implements WindowProcessListener {
                 && !mOptRecord.isFreezeExempt()
                 && !mOptRecord.shouldNotFreeze()
                 && mState.getCurAdj() >= ProcessList.FREEZER_CUTOFF_ADJ;
+    }
+
+    public void forEachConnectionHost(Consumer<ProcessRecord> consumer) {
+        for (int i = mServices.numberOfConnections() - 1; i >= 0; i--) {
+            final ConnectionRecord cr = mServices.getConnectionAt(i);
+            final ProcessRecord service = cr.binding.service.app;
+            consumer.accept(service);
+        }
+        for (int i = mServices.numberOfSdkSandboxConnections() - 1; i >= 0; i--) {
+            final ConnectionRecord cr = mServices.getSdkSandboxConnectionAt(i);
+            final ProcessRecord service = cr.binding.service.app;
+            consumer.accept(service);
+        }
+        for (int i = mProviders.numberOfProviderConnections() - 1; i >= 0; i--) {
+            ContentProviderConnection cpc = mProviders.getProviderConnectionAt(i);
+            ProcessRecord provider = cpc.provider.proc;
+            consumer.accept(provider);
+        }
     }
 }

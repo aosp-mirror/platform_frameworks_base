@@ -197,7 +197,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         rectAfterEnd.top += 20
         rectAfterEnd.bottom += 20
 
-        verify(mockDesktopWindowDecoration, never()).createResizeVeil()
+        verify(mockDesktopWindowDecoration, never()).showResizeVeil(any())
         verify(mockDesktopWindowDecoration, never()).hideResizeVeil()
         verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->

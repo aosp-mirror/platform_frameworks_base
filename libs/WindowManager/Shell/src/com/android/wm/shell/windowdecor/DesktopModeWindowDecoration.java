@@ -44,6 +44,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.Log;
 import android.util.Size;
 import android.view.Choreographer;
@@ -51,6 +52,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.window.WindowContainerTransaction;
 
@@ -158,7 +160,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
+        Trace.beginSection("DesktopModeWindowDecoration#loadAppInfo");
         loadAppInfo();
+        Trace.endSection();
     }
 
     void setCaptionListeners(
@@ -204,6 +208,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
             boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
+        Trace.beginSection("DesktopModeWindowDecoration#relayout");
         if (isHandleMenuActive()) {
             mHandleMenu.relayout(startT);
         }
@@ -215,16 +220,22 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-inner");
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
+        Trace.endSection();
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-applyWCT");
         mTaskOrganizer.applyTransaction(wct);
+        Trace.endSection();
 
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
             // Nothing is set up in this case including the decoration surface.
+            Trace.endSection(); // DesktopModeWindowDecoration#relayout
             return;
         }
+
         if (oldRootView != mResult.mRootView) {
             if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_focused_window_decor) {
                 mWindowDecorViewHolder = new DesktopModeFocusedWindowDecorationViewHolder(
@@ -252,7 +263,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 throw new IllegalArgumentException("Unexpected layout resource id");
             }
         }
+        Trace.beginSection("DesktopModeWindowDecoration#relayout-binding");
         mWindowDecorViewHolder.bindData(mTaskInfo);
+        Trace.endSection();
 
         if (!mTaskInfo.isFocused) {
             closeHandleMenu();
@@ -268,11 +281,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 updateExclusionRegion();
             }
             closeDragResizeListener();
+            Trace.endSection(); // DesktopModeWindowDecoration#relayout
             return;
         }
 
         if (oldDecorationSurface != mDecorationContainerSurface || mDragResizeListener == null) {
             closeDragResizeListener();
+            Trace.beginSection("DesktopModeWindowDecoration#relayout-DragResizeInputListener");
             mDragResizeListener = new DragResizeInputListener(
                     mContext,
                     mHandler,
@@ -283,6 +298,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mSurfaceControlBuilderSupplier,
                     mSurfaceControlTransactionSupplier,
                     mDisplayController);
+            Trace.endSection();
         }
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
@@ -307,6 +323,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mMaximizeMenu.positionMenu(calculateMaximizeMenuPosition(), startT);
             }
         }
+        Trace.endSection(); // DesktopModeWindowDecoration#relayout
     }
 
     @VisibleForTesting
@@ -324,11 +341,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
 
         if (captionLayoutId == R.layout.desktop_mode_app_controls_window_decor) {
-            // If the app is requesting to customize the caption bar, allow input to fall through
-            // to the windows below so that the app can respond to input events on their custom
-            // content.
-            relayoutParams.mAllowCaptionInputFallthrough =
-                    TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo);
+            if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
+                // If the app is requesting to customize the caption bar, allow input to fall
+                // through to the windows below so that the app can respond to input events on
+                // their custom content.
+                relayoutParams.mInputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_SPY;
+            }
             // Report occluding elements as bounding rects to the insets system so that apps can
             // draw in the empty space in the center:
             //   First, the "app chip" section of the caption bar (+ some extra margins).
@@ -343,6 +361,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             controlsElement.mWidthResId = R.dimen.desktop_mode_customizable_caption_margin_end;
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
+        } else if (captionLayoutId == R.layout.desktop_mode_focused_window_decor) {
+            // The focused decor (fullscreen/split) does not need to handle input because input in
+            // the App Handle is handled by the InputMonitor in DesktopModeWindowDecorViewModel.
+            relayoutParams.mInputFeatures
+                    |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
         }
         if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ taskInfo.isFocused)) {
             relayoutParams.mShadowRadiusId = taskInfo.isFocused
@@ -464,7 +487,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Create the resize veil for this task. Note the veil's visibility is View.GONE by default
      * until a resize event calls showResizeVeil below.
      */
-    void createResizeVeil() {
+    private void createResizeVeilIfNeeded() {
+        if (mResizeVeil != null) return;
         mResizeVeil = new ResizeVeil(mContext, mDisplayController, mAppIconBitmap, mTaskInfo,
                 mTaskSurface, mSurfaceControlTransactionSupplier);
     }
@@ -473,6 +497,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Show the resize veil.
      */
     public void showResizeVeil(Rect taskBounds) {
+        createResizeVeilIfNeeded();
         mResizeVeil.showVeil(mTaskSurface, taskBounds);
     }
 
@@ -480,6 +505,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Show the resize veil.
      */
     public void showResizeVeil(SurfaceControl.Transaction tx, Rect taskBounds) {
+        createResizeVeilIfNeeded();
         mResizeVeil.showVeil(tx, mTaskSurface, taskBounds, false /* fadeIn */);
     }
 

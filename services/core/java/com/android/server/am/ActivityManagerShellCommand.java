@@ -1397,12 +1397,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 "runClearStartInfo()");
         String opt;
         int userId = UserHandle.USER_CURRENT;
-        String packageName = null;
         while ((opt = getNextOption()) != null) {
             if (opt.equals("--user")) {
                 userId = UserHandle.parseUserArg(getNextArgRequired());
             } else {
-                packageName = opt;
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
             }
         }
         if (userId == UserHandle.USER_CURRENT) {
@@ -1413,7 +1413,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             userId = user.id;
         }
         mInternal.mProcessList.getAppStartInfoTracker()
-                .clearHistoryProcessStartInfo(packageName, userId);
+                .clearHistoryProcessStartInfo(getNextArg(), userId);
         return 0;
     }
 
@@ -1445,12 +1445,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 "runClearExitInfo()");
         String opt;
         int userId = UserHandle.USER_CURRENT;
-        String packageName = null;
         while ((opt = getNextOption()) != null) {
             if (opt.equals("--user")) {
                 userId = UserHandle.parseUserArg(getNextArgRequired());
             } else {
-                packageName = opt;
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
             }
         }
         if (userId == UserHandle.USER_CURRENT) {
@@ -1460,7 +1460,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             userId = user.id;
         }
-        mInternal.mProcessList.mAppExitInfoTracker.clearHistoryProcessExitInfo(packageName, userId);
+        mInternal.mProcessList.mAppExitInfoTracker.clearHistoryProcessExitInfo(getNextArg(),
+                userId);
         return 0;
     }
 
@@ -4381,13 +4382,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      above <HEAP-LIMIT> then a heap dump is collected for the user to report.");
             pw.println("  clear-watch-heap");
             pw.println("      Clear the previously set-watch-heap.");
-            pw.println("  clear-start-info [--user <USER_ID> | all | current] [package]");
-            pw.println("      Clear the process start-info for given package");
+            pw.println("  clear-start-info [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      Clear process start-info for the given package.");
+            pw.println("      Clear start-info for all packages if no package is provided.");
             pw.println("  start-info-detailed-monitoring [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      Enable application start info detailed monitoring for the given package.");
             pw.println("      Disable if no package is supplied.");
-            pw.println("  clear-exit-info [--user <USER_ID> | all | current] [package]");
-            pw.println("      Clear the process exit-info for given package");
+            pw.println("  clear-exit-info [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      Clear process exit-info for the given package.");
+            pw.println("      Clear exit-info for all packages if no package is provided.");
             pw.println("  bug-report [--progress | --telephony]");
             pw.println("      Request bug report generation; will launch a notification");
             pw.println("        when done to select where it should be delivered. Options are:");

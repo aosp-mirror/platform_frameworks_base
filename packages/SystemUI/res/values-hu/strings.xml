@@ -371,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Hallókészülékek"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Új eszköz párosítása"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kattintson új eszköz párosításához"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"Nem sikerült frissíteni a beállításkészletet"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Feloldja az eszköz mikrofonjának letiltását?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Feloldja az eszköz kamerájának letiltását?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Feloldja az eszköz kamerájának és mikrofonjának letiltását?"</string>
@@ -656,6 +655,10 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Műhold, gyenge kapcsolat"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Műhold, jó kapcsolat"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Műhold, van rendelkezésre álló kapcsolat"</string>
+    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
+    <skip />
+    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Munkaprofil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Egyeseknek tetszik, másoknak nem"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"A Kezelőfelület-hangoló az Android felhasználói felületének szerkesztéséhez és testreszabásához nyújt további megoldásokat. Ezek a kísérleti funkciók változhatnak vagy megsérülhetnek a későbbi kiadásokban, illetve eltűnhetnek azokból. Körültekintően járjon el."</string>

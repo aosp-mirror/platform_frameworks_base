@@ -29,6 +29,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.os.Trace;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
@@ -135,6 +136,7 @@ public class ResizeVeil {
             // Display may not be available yet, skip this until then.
             return;
         }
+        Trace.beginSection("ResizeVeil#setupResizeVeil");
         mVeilSurface = mSurfaceControlBuilderFactory
                 .create("Resize veil of Task=" + mTaskInfo.taskId)
                 .setContainerLayer()
@@ -179,6 +181,7 @@ public class ResizeVeil {
 
         mViewHost = mSurfaceControlViewHostFactory.create(mContext, mDisplay, wwm, "ResizeVeil");
         mViewHost.setView(root, lp);
+        Trace.endSection();
     }
 
     private boolean obtainDisplayOrRegisterListener() {
