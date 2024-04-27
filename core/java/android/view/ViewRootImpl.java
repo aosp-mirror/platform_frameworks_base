@@ -37,7 +37,6 @@ import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_BOOST;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_CONFLICTED;
-import static android.view.View.FRAME_RATE_CATEGORY_REASON_IDLE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INVALID;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_LARGE;
@@ -1088,16 +1087,10 @@ public final class ViewRootImpl implements ViewParent,
     // The last preferred frame rate of the view that is mainly used to
     // track the difference between the current preferred frame rate and the previous value.
     private float mLastPreferredFrameRate = 0;
-    // Used to check if there were any view invalidations in
-    // the previous time frame (FRAME_RATE_IDLENESS_REEVALUATE_TIME).
-    private boolean mHasInvalidation = false;
     // Used to check if it is in the frame rate boosting period.
     private boolean mIsFrameRateBoosting = false;
     // Used to check if it is in touch boosting period.
     private boolean mIsTouchBoosting = false;
-    // Used to check if there is a message in the message queue
-    // for idleness handling.
-    private boolean mHasIdledMessage = false;
     private boolean mDrawnThisFrame = false;
     // Used to check if there is a conflict between different frame rate voting.
     // Take 24 and 30 as an example, 24 is not a divisor of 30.
@@ -1108,10 +1101,6 @@ public final class ViewRootImpl implements ViewParent,
             FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
     // time for touch boost period.
     private static final int FRAME_RATE_TOUCH_BOOST_TIME = 3000;
-    // time for checking idle status periodically.
-    private static final int FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS = 500;
-    // time for revaluating the idle status before lowering the frame rate.
-    private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 1000;
     // time for evaluating the interval between current time and
     // the time when frame rate was set previously.
     private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
@@ -4263,7 +4252,6 @@ public final class ViewRootImpl implements ViewParent,
                 mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
                         FRAME_RATE_SETTING_REEVALUATE_TIME);
             }
-            checkIdleness();
             mFrameRateCategoryHighCount = mFrameRateCategoryHighCount > 0
                     ? mFrameRateCategoryHighCount - 1 : mFrameRateCategoryHighCount;
             mFrameRateCategoryNormalCount = mFrameRateCategoryNormalCount > 0
@@ -6445,8 +6433,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_REFRESH_POINTER_ICON";
                 case MSG_TOUCH_BOOST_TIMEOUT:
                     return "MSG_TOUCH_BOOST_TIMEOUT";
-                case MSG_CHECK_INVALIDATION_IDLE:
-                    return "MSG_CHECK_INVALIDATION_IDLE";
                 case MSG_FRAME_RATE_SETTING:
                     return "MSG_FRAME_RATE_SETTING";
             }
@@ -6714,27 +6700,6 @@ public final class ViewRootImpl implements ViewParent,
                     mIsFrameRateBoosting = false;
                     mIsTouchBoosting = false;
                     break;
-                case MSG_CHECK_INVALIDATION_IDLE:
-                    if (!mHasInvalidation && !mIsFrameRateBoosting && !mIsTouchBoosting) {
-                        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                        mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_IDLE;
-                        mFrameRateCategoryView = null;
-                        setPreferredFrameRateCategory(mPreferredFrameRateCategory);
-                        mHasIdledMessage = false;
-                    } else {
-                        /**
-                         * If there is no invalidation within a certain period,
-                         * we consider the display is idled.
-                         * We then set the frame rate catetogry to NO_PREFERENCE.
-                         * Note that SurfaceFlinger also has a mechanism to lower the refresh rate
-                         * if there is no updates of the buffer.
-                         */
-                        mHasInvalidation = false;
-                        mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
-                                FRAME_RATE_IDLENESS_REEVALUATE_TIME);
-                        mHasIdledMessage = true;
-                    }
-                    break;
                 case MSG_REFRESH_POINTER_ICON:
                     if (mPointerIconEvent == null) {
                         break;
@@ -6744,7 +6709,6 @@ public final class ViewRootImpl implements ViewParent,
                 case MSG_FRAME_RATE_SETTING:
                     mPreferredFrameRate = 0;
                     mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-                    setPreferredFrameRate(mPreferredFrameRate);
                     break;
             }
         }
@@ -12649,7 +12613,6 @@ public final class ViewRootImpl implements ViewParent,
             case FRAME_RATE_CATEGORY_REASON_REQUESTED -> str = "requested";
             case FRAME_RATE_CATEGORY_REASON_INVALID -> str = "invalid frame rate";
             case FRAME_RATE_CATEGORY_REASON_VELOCITY -> str = "velocity";
-            case FRAME_RATE_CATEGORY_REASON_IDLE -> str = "idle";
             case FRAME_RATE_CATEGORY_REASON_UNKNOWN -> str = "unknown";
             case FRAME_RATE_CATEGORY_REASON_BOOST -> str = "boost";
             case FRAME_RATE_CATEGORY_REASON_TOUCH -> str = "touch";
@@ -12718,7 +12681,6 @@ public final class ViewRootImpl implements ViewParent,
             mFrameRateCategoryChangeReason = reason;
             // mFrameRateCategoryView = view == null ? "-" : view.getClass().getSimpleName();
         }
-        mHasInvalidation = true;
         mDrawnThisFrame = true;
     }
 
@@ -12792,7 +12754,6 @@ public final class ViewRootImpl implements ViewParent,
                 mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
                 mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_VELOCITY;
                 mFrameRateCategoryView = null;
-                mHasInvalidation = true;
                 mDrawnThisFrame = true;
                 return;
             }
@@ -12824,7 +12785,6 @@ public final class ViewRootImpl implements ViewParent,
 
         mPreferredFrameRate = nextFrameRate;
         mFrameRateCompatibility = nextFrameRateCompatibility;
-        mHasInvalidation = true;
         mDrawnThisFrame = true;
     }
 
@@ -12944,19 +12904,8 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
-    private void checkIdleness() {
-        if (!mHasIdledMessage) {
-            // Check where the display is idled periodically.
-            // If so, set the frame rate category to NO_PREFERENCE
-            mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
-                    FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS);
-            mHasIdledMessage = true;
-        }
-    }
-
     private void removeVrrMessages() {
         mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
-        mHandler.removeMessages(MSG_CHECK_INVALIDATION_IDLE);
         mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
     }
 
