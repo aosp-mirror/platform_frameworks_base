@@ -200,7 +200,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
         mRelayoutParams.mSetTaskPositionAndCrop = setTaskCropAndPosition;
-        mRelayoutParams.mAllowCaptionInputFallthrough = false;
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
