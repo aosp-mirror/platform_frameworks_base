@@ -114,6 +114,18 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             return RESULT_DONE;
         }
 
+        // TODO(b/336998072) - Find a better solution to this that makes use of the logic from
+        //  TaskLaunchParamsModifier. Put logic in common utils, return RESULT_CONTINUE, inherit
+        //  from parent class, etc.
+        if (outParams.mPreferredTaskDisplayArea == null && task.getRootTask() != null) {
+            appendLog("display-from-task=" + task.getRootTask().getDisplayId());
+            outParams.mPreferredTaskDisplayArea = task.getRootTask().getDisplayArea();
+        }
+
+        if (phase == PHASE_DISPLAY_AREA) {
+            return RESULT_DONE;
+        }
+
         if (!currentParams.mBounds.isEmpty()) {
             appendLog("currentParams has bounds set, not overriding");
             return RESULT_SKIP;

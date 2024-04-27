@@ -382,6 +382,10 @@ public final class CompanionDeviceManager {
     @GuardedBy("mListeners")
     private final ArrayList<OnAssociationsChangedListenerProxy> mListeners = new ArrayList<>();
 
+    @GuardedBy("mTransportsChangedListeners")
+    private final ArrayList<OnTransportsChangedListenerProxy> mTransportsChangedListeners =
+            new ArrayList<>();
+
     @GuardedBy("mTransports")
     private final SparseArray<Transport> mTransports = new SparseArray<>();
 
@@ -998,12 +1002,15 @@ public final class CompanionDeviceManager {
             return;
         }
 
-        final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
-                executor, listener);
-        try {
-            mService.addOnTransportsChangedListener(proxy);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        synchronized (mTransportsChangedListeners) {
+            final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
+                    executor, listener);
+            try {
+                mService.addOnTransportsChangedListener(proxy);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mTransportsChangedListeners.add(proxy);
         }
     }
 
@@ -1022,12 +1029,20 @@ public final class CompanionDeviceManager {
             return;
         }
 
-        final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
-                null, listener);
-        try {
-            mService.removeOnTransportsChangedListener(proxy);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        synchronized (mTransportsChangedListeners) {
+            final Iterator<OnTransportsChangedListenerProxy> iterator =
+                    mTransportsChangedListeners.iterator();
+            while (iterator.hasNext()) {
+                final OnTransportsChangedListenerProxy proxy = iterator.next();
+                if (proxy.mListener == listener) {
+                    try {
+                        mService.removeOnTransportsChangedListener(proxy);
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                    iterator.remove();
+                }
+            }
         }
     }
 
@@ -1884,7 +1899,7 @@ public final class CompanionDeviceManager {
             mLocalOut = new ParcelFileDescriptor.AutoCloseOutputStream(localFd);
 
             try {
-                mService.attachSystemDataTransport(mContext.getPackageName(),
+                mService.attachSystemDataTransport(mContext.getOpPackageName(),
                         mContext.getUserId(), mAssociationId, remoteFd);
             } catch (RemoteException e) {
                 throw new IOException("Failed to configure transport", e);
@@ -1921,9 +1936,9 @@ public final class CompanionDeviceManager {
             mStopped = true;
 
             try {
-                mService.detachSystemDataTransport(mContext.getPackageName(),
+                mService.detachSystemDataTransport(mContext.getOpPackageName(),
                         mContext.getUserId(), mAssociationId);
-            } catch (RemoteException e) {
+            } catch (RemoteException | IllegalArgumentException e) {
                 Log.w(TAG, "Failed to detach transport", e);
             }
 

@@ -19,6 +19,8 @@ package android.graphics.drawable;
 import static android.content.Context.CONTEXT_INCLUDE_CODE;
 import static android.content.Context.CONTEXT_RESTRICTED;
 
+import static com.android.graphics.flags.Flags.iconLoadDrawableReturnNullWhenUriDecodeFails;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -497,6 +499,9 @@ public final class Icon implements Parcelable {
                     final Bitmap bitmap = BitmapFactory.decodeStream(is);
                     if (bitmap == null) {
                         Log.w(TAG, "Unable to decode image from URI: " + getUriString());
+                        if (iconLoadDrawableReturnNullWhenUriDecodeFails()) {
+                            return null;
+                        }
                     }
                     return new BitmapDrawable(context.getResources(), fixMaxBitmapSize(bitmap));
                 }
@@ -507,6 +512,9 @@ public final class Icon implements Parcelable {
                     final Bitmap bitmap = BitmapFactory.decodeStream(is);
                     if (bitmap == null) {
                         Log.w(TAG, "Unable to decode image from URI: " + getUriString());
+                        if (iconLoadDrawableReturnNullWhenUriDecodeFails()) {
+                            return null;
+                        }
                     }
                     return new AdaptiveIconDrawable(null, new BitmapDrawable(context.getResources(),
                             fixMaxBitmapSize(bitmap)));

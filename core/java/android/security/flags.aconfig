@@ -43,6 +43,13 @@ flag {
 }
 
 flag {
+    name: "unlocked_storage_api"
+    namespace: "hardware_backed_security"
+    description: "Feature flag for unlocked-only storage API"
+    bug: "325129836"
+}
+
+flag {
     name: "deprecate_fsv_sig"
     namespace: "hardware_backed_security"
     description: "Feature flag for deprecating .fsv_sig"

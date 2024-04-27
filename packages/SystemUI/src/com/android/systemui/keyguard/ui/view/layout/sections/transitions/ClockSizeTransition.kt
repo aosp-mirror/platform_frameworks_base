@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.graphics.Rect
 import android.transition.Transition
+import android.transition.TransitionListenerAdapter
 import android.transition.TransitionSet
 import android.transition.TransitionValues
 import android.util.Log
@@ -169,6 +170,18 @@ class ClockSizeTransition(
                     return@OnPreDrawListener true
                 }
 
+                this@VisibilityBoundsTransition.addListener(
+                    object : TransitionListenerAdapter() {
+                        override fun onTransitionStart(t: Transition) {
+                            toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
+                        }
+
+                        override fun onTransitionEnd(t: Transition) {
+                            toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
+                        }
+                    }
+                )
+
                 val listener =
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationStart(anim: Animator) {
@@ -178,26 +191,11 @@ class ClockSizeTransition(
                         override fun onAnimationEnd(anim: Animator) {
                             assignAnimValues("end", 1f, toVis)
                             if (sendToBack) toView.translationZ = 0f
-                            toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
-                        }
-
-                        override fun onAnimationPause(anim: Animator) {
-                            toView.viewTreeObserver.removeOnPreDrawListener(predrawCallback)
-                        }
-
-                        override fun onAnimationResume(anim: Animator) {
-                            toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
                         }
                     }
 
-                anim.duration = duration
-                anim.startDelay = startDelay
-                anim.interpolator = interpolator
                 anim.addListener(listener)
-                anim.addPauseListener(listener)
-
                 assignAnimValues("init", 0f, fromVis)
-                toView.viewTreeObserver.addOnPreDrawListener(predrawCallback)
             }
         }
 

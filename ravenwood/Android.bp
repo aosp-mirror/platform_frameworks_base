@@ -163,6 +163,8 @@ sh_test_host {
     test_suites: ["general-tests"],
     data: [
         ":framework-minus-apex.ravenwood.stats",
+        ":framework-minus-apex.ravenwood.apis",
         ":services.core.ravenwood.stats",
+        ":services.core.ravenwood.apis",
     ],
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.systemui.statusbar.phone.ui;
 
-import static com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY;
+import static com.android.systemui.statusbar.phone.ui.StatusBarIconController.TAG_PRIMARY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.statusbar.phone.StatusBarIconHolder;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

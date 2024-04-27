@@ -51,6 +51,8 @@ private fun ClassNodes.isAidlClass(className: String): Boolean {
 }
 
 /**
+ * Effectively apply @RavenwoodKeepWholeClass to all classes with these names
+ *
  * @return if a given class "seems like" an feature flags class.
  */
 private fun ClassNodes.isFeatureFlagsClass(className: String): Boolean {
@@ -59,6 +61,7 @@ private fun ClassNodes.isFeatureFlagsClass(className: String): Boolean {
     return className.endsWith("/Flags")
             || className.endsWith("/FeatureFlags")
             || className.endsWith("/FeatureFlagsImpl")
+            || className.endsWith("/CustomFeatureFlags")
             || className.endsWith("/FakeFeatureFlagsImpl");
 }
 

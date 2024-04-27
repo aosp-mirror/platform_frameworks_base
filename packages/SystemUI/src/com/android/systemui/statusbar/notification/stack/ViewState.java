@@ -657,7 +657,7 @@ public class ViewState implements Dumpable {
         }
         ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TRANSLATION_Y);
         AnimationFilter filter = properties.getAnimationFilter();
-        if (!filter.shouldAnimateY(child)) {
+        if (!filter.animateY) {
             // just a local update was performed
             if (previousAnimator != null) {
                 // we need to increase all animation keyframes of the previous animator by the

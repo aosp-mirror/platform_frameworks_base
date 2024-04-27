@@ -36,6 +36,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.domain.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
@@ -44,6 +45,7 @@ import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.controls.ui.view.MediaScrollView
+import com.android.systemui.media.controls.ui.viewmodel.mediaCarouselViewModel
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.plugins.ActivityStarter
@@ -100,6 +102,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     val kosmos = testKosmos()
 
     @Mock lateinit var mediaControlPanelFactory: Provider<MediaControlPanel>
+    @Mock lateinit var mediaViewControllerFactory: Provider<MediaViewController>
     @Mock lateinit var panel: MediaControlPanel
     @Mock lateinit var visualStabilityProvider: VisualStabilityProvider
     @Mock lateinit var mediaHostStatesManager: MediaHostStatesManager
@@ -148,6 +151,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 mediaHostStatesManager,
                 activityStarter,
                 clock,
+                kosmos.testDispatcher,
                 executor,
                 bgExecutor,
                 testDispatcher,
@@ -162,6 +166,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 kosmos.keyguardTransitionInteractor,
                 globalSettings,
                 secureSettings,
+                kosmos.mediaCarouselViewModel,
+                mediaViewControllerFactory,
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))

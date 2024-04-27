@@ -27,6 +27,7 @@ import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.data.repository.MediaFilterRepository
+import com.android.systemui.media.controls.data.repository.mediaFilterRepository
 import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_RESUME
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaData
@@ -38,6 +39,7 @@ import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
@@ -77,6 +79,7 @@ private val SMARTSPACE_INSTANCE_ID = InstanceId.fakeInstanceId(456)!!
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class MediaDataFilterImplTest : SysuiTestCase() {
+    val kosmos = testKosmos()
 
     @Mock private lateinit var listener: MediaDataProcessor.Listener
     @Mock private lateinit var userTracker: UserTracker
@@ -91,12 +94,12 @@ class MediaDataFilterImplTest : SysuiTestCase() {
     @Mock private lateinit var cardAction: SmartspaceAction
 
     private lateinit var mediaDataFilter: MediaDataFilterImpl
-    private lateinit var repository: MediaFilterRepository
     private lateinit var testScope: TestScope
     private lateinit var dataMain: MediaData
     private lateinit var dataGuest: MediaData
     private lateinit var dataPrivateProfile: MediaData
     private val clock = FakeSystemClock()
+    private val repository: MediaFilterRepository = kosmos.mediaFilterRepository
 
     @Before
     fun setup() {
@@ -104,7 +107,6 @@ class MediaDataFilterImplTest : SysuiTestCase() {
         MediaPlayerData.clear()
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         testScope = TestScope()
-        repository = MediaFilterRepository(FakeSystemClock())
         mediaDataFilter =
             MediaDataFilterImpl(
                 context,

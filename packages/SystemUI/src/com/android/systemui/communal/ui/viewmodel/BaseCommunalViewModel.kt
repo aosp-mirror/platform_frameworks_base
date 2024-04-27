@@ -88,14 +88,14 @@ abstract class BaseCommunalViewModel(
     /** Whether in edit mode for the communal hub. */
     open val isEditMode = false
 
-    /** Whether the popup message triggered by dismissing the CTA tile is showing. */
-    open val isPopupOnDismissCtaShowing: Flow<Boolean> = flowOf(false)
+    /** Whether the type of popup currently showing */
+    open val currentPopup: Flow<PopupType?> = flowOf(null)
 
     /** Whether the communal hub is empty with no widget available. */
     open val isEmptyState: Flow<Boolean> = flowOf(false)
 
-    /** Hide the popup message triggered by dismissing the CTA tile. */
-    open fun onHidePopupAfterDismissCta() {}
+    /** Called as the UI request to dismiss the any displaying popup */
+    open fun onHidePopup() {}
 
     /** Called as the UI requests deleting a widget. */
     open fun onDeleteWidget(id: Int) {}
@@ -126,6 +126,9 @@ abstract class BaseCommunalViewModel(
 
     /** Called as the user cancels dragging a widget to reorder. */
     open fun onReorderWidgetCancel() {}
+
+    /** Called as the user request to show the customize widget button. */
+    open fun onShowCustomizeWidgetButton() {}
 
     /** Set the key of the currently selected item */
     fun setSelectedKey(key: String?) {

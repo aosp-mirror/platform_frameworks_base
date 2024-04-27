@@ -19,6 +19,7 @@ package com.android.systemui.ambient.touch;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import static com.android.systemui.shared.Flags.bouncerAreaExclusion;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -37,7 +38,9 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.android.systemui.Flags;
 import com.android.systemui.ambient.touch.dagger.InputSessionComponent;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -69,6 +72,9 @@ public class TouchMonitor {
     public String TAG = "DreamOverlayTouchMonitor";
     private final Executor mMainExecutor;
     private final Executor mBackgroundExecutor;
+
+    private final ConfigurationInteractor mConfigurationInteractor;
+
     private final Lifecycle mLifecycle;
     private Rect mExclusionRect = null;
 
@@ -81,6 +87,8 @@ public class TouchMonitor {
                     mExclusionRect = systemGestureExclusion.getBounds();
                 }
             };
+
+    private Consumer<Rect> mMaxBoundsConsumer = rect -> mMaxBounds = rect;
 
 
     /**
@@ -262,6 +270,7 @@ public class TouchMonitor {
      */
     private void startMonitoring() {
         stopMonitoring(true);
+
         if (bouncerAreaExclusion()) {
             mBackgroundExecutor.execute(() -> {
                 try {
@@ -340,8 +349,13 @@ public class TouchMonitor {
                             if (!handler.isEnabled()) {
                                 continue;
                             }
-                            final Rect maxBounds = mDisplayHelper.getMaxBounds(ev.getDisplayId(),
-                                    TYPE_APPLICATION_OVERLAY);
+
+                            final Rect maxBounds =
+                                    Flags.ambientTouchMonitorListenToDisplayChanges()
+                                            ? mMaxBounds
+                                            : mDisplayHelper.getMaxBounds(ev.getDisplayId(),
+                                                    TYPE_APPLICATION_OVERLAY);
+
                             final Region initiationRegion = Region.obtain();
                             Rect exclusionRect = null;
                             if (bouncerAreaExclusion()) {
@@ -478,6 +492,8 @@ public class TouchMonitor {
     private final int mDisplayId;
     private final IWindowManager mWindowManagerService;
 
+    private Rect mMaxBounds;
+
 
     /**
      * Designated constructor for {@link TouchMonitor}
@@ -500,6 +516,7 @@ public class TouchMonitor {
             Lifecycle lifecycle,
             InputSessionComponent.Factory inputSessionFactory,
             DisplayHelper displayHelper,
+            ConfigurationInteractor configurationInteractor,
             Set<TouchHandler> handlers,
             IWindowManager windowManagerService,
             @DisplayId int displayId) {
@@ -511,6 +528,7 @@ public class TouchMonitor {
         mLifecycle = lifecycle;
         mDisplayHelper = displayHelper;
         mWindowManagerService = windowManagerService;
+        mConfigurationInteractor = configurationInteractor;
     }
 
     /**
@@ -518,6 +536,9 @@ public class TouchMonitor {
      */
     public void init() {
         mLifecycle.addObserver(mLifecycleObserver);
+        if (Flags.ambientTouchMonitorListenToDisplayChanges()) {
+            collectFlow(mLifecycle, mConfigurationInteractor.getMaxBounds(), mMaxBoundsConsumer);
+        }
     }
 
     private void isolate(Set<TouchSessionImpl> sessions) {

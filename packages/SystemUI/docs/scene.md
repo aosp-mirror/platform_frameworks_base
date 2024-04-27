@@ -65,23 +65,25 @@ framework, please make sure `SceneContainerFlag.isEnabled` in the
 [`SceneContainerFlags.kt`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/src/com/android/systemui/scene/shared/flag/SceneContainerFlags.kt)
 file evalutes to `true`.
 
-1.  Set the **`migrate_keyguard_status_bar_view`** classic flag to `true` by
-    running: `console $ adb shell statusbar cmd migrate_keyguard_status_bar_view
-    true`
-2.  Set a collection of **aconfig flags** to `true` by running the following
+1.  Set a collection of **aconfig flags** to `true` by running the following
     commands:
     ```console
-    $ adb shell device_config put systemui com.android.systemui.scene_container true
-    $ adb shell device_config put systemui com.android.systemui.compose_lockscreen true
-    $ adb shell device_config put systemui com.android.systemui.keyguard_bottom_area_refactor true
-    $ adb shell device_config put systemui com.android.systemui.media_in_scene_container true
-    $ adb shell device_config put systemui com.android.systemui.migrate_clocks_to_blueprint true
+    $ adb shell device_config override systemui com.android.systemui.scene_container true
+    $ adb shell device_config override systemui com.android.systemui.compose_lockscreen true
+    $ adb shell device_config override systemui com.android.systemui.keyguard_bottom_area_refactor true
+    $ adb shell device_config override systemui com.android.systemui.keyguard_wm_state_refactor true
+    $ adb shell device_config override systemui com.android.systemui.media_in_scene_container true
+    $ adb shell device_config override systemui com.android.systemui.migrate_clocks_to_blueprint true
+    $ adb shell device_config override systemui com.android.systemui.notification_heads_up_refactor true
+    $ adb shell device_config override systemui com.android.systemui.predictive_back_sysui true
+    $ adb shell device_config override systemui com.android.systemui.device_entry_udfps_refactor true
+    $ adb shell device_config override systemui com.android.systemui.refactor_keyguard_dismiss_intent true
     ```
-3.  **Restart** System UI by issuing the following command:
+2.  **Restart** System UI by issuing the following command:
     ```console
     $ adb shell am crash com.android.systemui
     ```
-4.  **Verify** that the scene framework was turned on. There are two ways to do
+3.  **Verify** that the scene framework was turned on. There are two ways to do
     this:
 
     *(a)* look for the sash/ribbon UI at the bottom-right corner of the display:

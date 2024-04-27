@@ -17,12 +17,10 @@
 package com.android.systemui.biometrics.ui.binder
 
 import android.animation.Animator
-import android.app.ActivityTaskManager
 import android.graphics.Rect
 import android.hardware.biometrics.SensorLocationInternal
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManagerGlobal
-import android.os.Handler
 import android.testing.TestableLooper
 import android.view.Display
 import android.view.DisplayInfo
@@ -32,67 +30,31 @@ import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowMetrics
+import android.view.layoutInflater
+import android.view.windowManager
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
-import com.android.keyguard.KeyguardSecurityModel
-import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
-import com.android.systemui.biometrics.FpsUnlockTracker
-import com.android.systemui.biometrics.data.repository.FakeBiometricStatusRepository
-import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
+import com.android.systemui.biometrics.data.repository.biometricStatusRepository
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
-import com.android.systemui.biometrics.ui.viewmodel.SideFpsOverlayViewModel
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
-import com.android.systemui.bouncer.ui.BouncerView
-import com.android.systemui.classifier.FalsingCollector
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryFingerprintAuthInteractor
-import com.android.systemui.display.data.repository.FakeDisplayRepository
-import com.android.systemui.keyguard.DismissCallbackRegistry
-import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
-import com.android.systemui.keyguard.domain.interactor.DeviceEntrySideFpsOverlayInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
-import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
-import com.android.systemui.log.SideFpsLogger
-import com.android.systemui.log.logcatLogBuffer
-import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
+import com.android.systemui.display.data.repository.displayRepository
+import com.android.systemui.display.data.repository.displayStateRepository
+import com.android.systemui.keyguard.ui.viewmodel.sideFpsProgressBarViewModel
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.statusbar.phone.dozeServiceHost
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.testKosmos
-import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
-import com.android.systemui.user.domain.interactor.SelectedUserInteractor
-import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
-import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -120,41 +82,13 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
     @JvmField @Rule var mockitoRule: MockitoRule = MockitoJUnit.rule()
-    @Mock private lateinit var activityTaskManager: ActivityTaskManager
     @Mock private lateinit var displayManager: DisplayManager
-    @Mock private lateinit var faceAuthInteractor: DeviceEntryFaceAuthInteractor
     @Mock
     private lateinit var fingerprintInteractiveToAuthProvider: FingerprintInteractiveToAuthProvider
-    @Mock private lateinit var fpsUnlockTracker: FpsUnlockTracker
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var layoutInflater: LayoutInflater
-    @Mock private lateinit var screenSizeFoldProvider: ScreenSizeFoldProvider
-    @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var sideFpsView: View
-    @Mock private lateinit var windowManager: WindowManager
 
     private val contextDisplayInfo = DisplayInfo()
-
-    private val bouncerRepository = FakeKeyguardBouncerRepository()
-    private val biometricSettingsRepository = FakeBiometricSettingsRepository()
-    private val biometricStatusRepository = FakeBiometricStatusRepository()
-    private val deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
-    private val displayRepository = FakeDisplayRepository()
-    private val displayStateRepository = FakeDisplayStateRepository()
-    private val fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
-
-    private lateinit var underTest: SideFpsOverlayViewBinder
-
-    private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
-    private lateinit var biometricStatusInteractor: BiometricStatusInteractor
-    private lateinit var deviceEntrySideFpsOverlayInteractor: DeviceEntrySideFpsOverlayInteractor
-    private lateinit var displayStateInteractor: DisplayStateInteractorImpl
-    private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
-    private lateinit var sfpsSensorInteractor: SideFpsSensorInteractor
-
-    private lateinit var sideFpsProgressBarViewModel: SideFpsProgressBarViewModel
-
-    private lateinit var viewModel: SideFpsOverlayViewModel
 
     private var displayWidth: Int = 0
     private var displayHeight: Int = 0
@@ -163,9 +97,6 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
 
     private lateinit var deviceConfig: DeviceConfig
     private lateinit var sensorLocation: SensorLocationInternal
-
-    private val testScope = TestScope(StandardTestDispatcher())
-    private val fakeExecutor = FakeExecutor(FakeSystemClock())
 
     enum class DeviceConfig {
         X_ALIGNED,
@@ -184,122 +115,13 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
                 Display(mock(DisplayManagerGlobal::class.java), 1, contextDisplayInfo, resources)
             )
 
-        alternateBouncerInteractor =
-            AlternateBouncerInteractor(
-                mock(StatusBarStateController::class.java),
-                mock(KeyguardStateController::class.java),
-                bouncerRepository,
-                fingerprintPropertyRepository,
-                biometricSettingsRepository,
-                FakeSystemClock(),
-                keyguardUpdateMonitor,
-                { mock(DeviceEntryFingerprintAuthInteractor::class.java) },
-                { mock(KeyguardInteractor::class.java) },
-                { mock(KeyguardTransitionInteractor::class.java) },
-                testScope.backgroundScope,
-            )
-
-        biometricStatusInteractor =
-            BiometricStatusInteractorImpl(
-                activityTaskManager,
-                biometricStatusRepository,
-                fingerprintPropertyRepository
-            )
-
-        displayStateInteractor =
-            DisplayStateInteractorImpl(
-                testScope.backgroundScope,
-                mContext,
-                fakeExecutor,
-                displayStateRepository,
-                displayRepository,
-            )
-        displayStateInteractor.setScreenSizeFoldProvider(screenSizeFoldProvider)
-
-        primaryBouncerInteractor =
-            PrimaryBouncerInteractor(
-                bouncerRepository,
-                mock(BouncerView::class.java),
-                mock(Handler::class.java),
-                mock(KeyguardStateController::class.java),
-                mock(KeyguardSecurityModel::class.java),
-                mock(PrimaryBouncerCallbackInteractor::class.java),
-                mock(FalsingCollector::class.java),
-                mock(DismissCallbackRegistry::class.java),
-                mContext,
-                keyguardUpdateMonitor,
-                FakeTrustRepository(),
-                testScope.backgroundScope,
-                selectedUserInteractor,
-                faceAuthInteractor
-            )
-
-        deviceEntrySideFpsOverlayInteractor =
-            DeviceEntrySideFpsOverlayInteractor(
-                testScope.backgroundScope,
-                mContext,
-                deviceEntryFingerprintAuthRepository,
-                kosmos.sceneInteractor,
-                primaryBouncerInteractor,
-                alternateBouncerInteractor,
-                keyguardUpdateMonitor
-            )
+        kosmos.layoutInflater = layoutInflater
 
         whenever(fingerprintInteractiveToAuthProvider.enabledForCurrentUser)
             .thenReturn(MutableStateFlow(false))
 
-        sfpsSensorInteractor =
-            SideFpsSensorInteractor(
-                mContext,
-                fingerprintPropertyRepository,
-                windowManager,
-                displayStateInteractor,
-                Optional.of(fingerprintInteractiveToAuthProvider),
-                kosmos.biometricSettingsRepository,
-                kosmos.keyguardTransitionInteractor,
-                SideFpsLogger(logcatLogBuffer("SfpsLogger"))
-            )
-
-        sideFpsProgressBarViewModel =
-            SideFpsProgressBarViewModel(
-                mContext,
-                biometricStatusInteractor,
-                kosmos.deviceEntryFingerprintAuthInteractor,
-                sfpsSensorInteractor,
-                kosmos.dozeServiceHost,
-                kosmos.keyguardInteractor,
-                displayStateInteractor,
-                UnconfinedTestDispatcher(),
-                testScope.backgroundScope,
-                kosmos.powerInteractor,
-            )
-
-        viewModel =
-            SideFpsOverlayViewModel(
-                mContext,
-                biometricStatusInteractor,
-                deviceEntrySideFpsOverlayInteractor,
-                displayStateInteractor,
-                sfpsSensorInteractor,
-                sideFpsProgressBarViewModel
-            )
-
-        underTest =
-            SideFpsOverlayViewBinder(
-                testScope.backgroundScope,
-                mContext,
-                { biometricStatusInteractor },
-                { displayStateInteractor },
-                { deviceEntrySideFpsOverlayInteractor },
-                { fpsUnlockTracker },
-                { layoutInflater },
-                { sideFpsProgressBarViewModel },
-                { sfpsSensorInteractor },
-                { windowManager }
-            )
-
         context.addMockSystemService(DisplayManager::class.java, displayManager)
-        context.addMockSystemService(WindowManager::class.java, windowManager)
+        context.addMockSystemService(WindowManager::class.java, kosmos.windowManager)
 
         `when`(layoutInflater.inflate(R.layout.sidefps_view, null, false)).thenReturn(sideFpsView)
         `when`(sideFpsView.requireViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
@@ -320,16 +142,16 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
 
     @Test
     fun verifyIndicatorNotAdded_whenInRearDisplayMode() {
-        testScope.runTest {
+        kosmos.testScope.runTest {
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
                 isInRearDisplayMode = true
             )
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.NotRunning
             )
-            sideFpsProgressBarViewModel.setVisible(false)
+            kosmos.sideFpsProgressBarViewModel.setVisible(false)
             updatePrimaryBouncer(
                 isShowing = true,
                 isAnimatingAway = false,
@@ -338,22 +160,22 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             )
             runCurrent()
 
-            verify(windowManager, never()).addView(any(), any())
+            verify(kosmos.windowManager, never()).addView(any(), any())
         }
     }
 
     @Test
     fun verifyIndicatorShowAndHide_onPrimaryBouncerShowAndHide() {
-        testScope.runTest {
+        kosmos.testScope.runTest {
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
                 isInRearDisplayMode = false
             )
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.NotRunning
             )
-            sideFpsProgressBarViewModel.setVisible(false)
+            kosmos.sideFpsProgressBarViewModel.setVisible(false)
             // Show primary bouncer
             updatePrimaryBouncer(
                 isShowing = true,
@@ -363,7 +185,7 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             )
             runCurrent()
 
-            verify(windowManager).addView(any(), any())
+            verify(kosmos.windowManager).addView(any(), any())
 
             // Hide primary bouncer
             updatePrimaryBouncer(
@@ -374,45 +196,45 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             )
             runCurrent()
 
-            verify(windowManager).removeView(any())
+            verify(kosmos.windowManager).removeView(any())
         }
     }
 
     @Test
     fun verifyIndicatorShowAndHide_onAlternateBouncerShowAndHide() {
-        testScope.runTest {
+        kosmos.testScope.runTest {
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
                 isInRearDisplayMode = false
             )
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.NotRunning
             )
-            sideFpsProgressBarViewModel.setVisible(false)
+            kosmos.sideFpsProgressBarViewModel.setVisible(false)
             // Show alternate bouncer
-            bouncerRepository.setAlternateVisible(true)
+            kosmos.keyguardBouncerRepository.setAlternateVisible(true)
             runCurrent()
 
-            verify(windowManager).addView(any(), any())
+            verify(kosmos.windowManager).addView(any(), any())
 
             // Hide alternate bouncer
-            bouncerRepository.setAlternateVisible(false)
+            kosmos.keyguardBouncerRepository.setAlternateVisible(false)
             runCurrent()
 
-            verify(windowManager).removeView(any())
+            verify(kosmos.windowManager).removeView(any())
         }
     }
 
     @Test
     fun verifyIndicatorShownAndHidden_onSystemServerAuthenticationStartedAndStopped() {
-        testScope.runTest {
+        kosmos.testScope.runTest {
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
                 isInRearDisplayMode = false
             )
-            sideFpsProgressBarViewModel.setVisible(false)
+            kosmos.sideFpsProgressBarViewModel.setVisible(false)
             updatePrimaryBouncer(
                 isShowing = false,
                 isAnimatingAway = false,
@@ -420,20 +242,20 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
                 isUnlockingWithFpAllowed = true
             )
             // System server authentication started
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.BiometricPromptAuthentication
             )
             runCurrent()
 
-            verify(windowManager).addView(any(), any())
+            verify(kosmos.windowManager).addView(any(), any())
 
             // System server authentication stopped
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.NotRunning
             )
             runCurrent()
 
-            verify(windowManager).removeView(any())
+            verify(kosmos.windowManager).removeView(any())
         }
     }
 
@@ -441,17 +263,17 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
     // On progress bar hidden - show indicator
     @Test
     fun verifyIndicatorProgressBarInteraction() {
-        testScope.runTest {
+        kosmos.testScope.runTest {
             // Pre-auth conditions
             setupTestConfiguration(
                 DeviceConfig.X_ALIGNED,
                 rotation = DisplayRotation.ROTATION_0,
                 isInRearDisplayMode = false
             )
-            biometricStatusRepository.setFingerprintAuthenticationReason(
+            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
                 AuthenticationReason.NotRunning
             )
-            sideFpsProgressBarViewModel.setVisible(false)
+            kosmos.sideFpsProgressBarViewModel.setVisible(false)
 
             // Show primary bouncer
             updatePrimaryBouncer(
@@ -462,26 +284,26 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             )
             runCurrent()
 
-            val inOrder = inOrder(windowManager)
+            val inOrder = inOrder(kosmos.windowManager)
 
             // Verify indicator shown
-            inOrder.verify(windowManager).addView(any(), any())
+            inOrder.verify(kosmos.windowManager).addView(any(), any())
 
             // Set progress bar visible
-            sideFpsProgressBarViewModel.setVisible(true)
+            kosmos.sideFpsProgressBarViewModel.setVisible(true)
 
             runCurrent()
 
             // Verify indicator hidden
-            inOrder.verify(windowManager).removeView(any())
+            inOrder.verify(kosmos.windowManager).removeView(any())
 
             // Set progress bar invisible
-            sideFpsProgressBarViewModel.setVisible(false)
+            kosmos.sideFpsProgressBarViewModel.setVisible(false)
 
             runCurrent()
 
             // Verify indicator shown
-            inOrder.verify(windowManager).addView(any(), any())
+            inOrder.verify(kosmos.windowManager).addView(any(), any())
         }
     }
 
@@ -491,14 +313,16 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
         fpsDetectionRunning: Boolean,
         isUnlockingWithFpAllowed: Boolean,
     ) {
-        bouncerRepository.setPrimaryShow(isShowing)
-        bouncerRepository.setPrimaryStartingToHide(false)
+        kosmos.keyguardBouncerRepository.setPrimaryShow(isShowing)
+        kosmos.keyguardBouncerRepository.setPrimaryStartingToHide(false)
         val primaryStartDisappearAnimation = if (isAnimatingAway) Runnable {} else null
-        bouncerRepository.setPrimaryStartDisappearAnimation(primaryStartDisappearAnimation)
+        kosmos.keyguardBouncerRepository.setPrimaryStartDisappearAnimation(
+            primaryStartDisappearAnimation
+        )
 
-        whenever(keyguardUpdateMonitor.isFingerprintDetectionRunning)
+        whenever(kosmos.keyguardUpdateMonitor.isFingerprintDetectionRunning)
             .thenReturn(fpsDetectionRunning)
-        whenever(keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)
+        whenever(kosmos.keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)
             .thenReturn(isUnlockingWithFpAllowed)
         mContext.orCreateTestableResources.addOverride(
             R.bool.config_show_sidefps_hint_on_bouncer,
@@ -530,7 +354,7 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
             }
         }
 
-        whenever(windowManager.maximumWindowMetrics)
+        whenever(kosmos.windowManager.maximumWindowMetrics)
             .thenReturn(
                 WindowMetrics(
                     Rect(0, 0, displayWidth, displayHeight),
@@ -540,17 +364,17 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
 
         contextDisplayInfo.uniqueId = DISPLAY_ID
 
-        fingerprintPropertyRepository.setProperties(
+        kosmos.fingerprintPropertyRepository.setProperties(
             sensorId = 1,
             strength = SensorStrength.STRONG,
             sensorType = FingerprintSensorType.POWER_BUTTON,
             sensorLocations = mapOf(DISPLAY_ID to sensorLocation)
         )
 
-        displayStateRepository.setIsInRearDisplayMode(isInRearDisplayMode)
-        displayStateRepository.setCurrentRotation(rotation)
-        displayRepository.emitDisplayChangeEvent(0)
-        underTest.start()
+        kosmos.displayStateRepository.setIsInRearDisplayMode(isInRearDisplayMode)
+        kosmos.displayStateRepository.setCurrentRotation(rotation)
+        kosmos.displayRepository.emitDisplayChangeEvent(0)
+        kosmos.sideFpsOverlayViewBinder.start()
         runCurrent()
     }
 

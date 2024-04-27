@@ -87,7 +87,9 @@ object BiometricViewBinder {
          *
          * TODO(b/288175072): May be able to remove this once constraint layout is implemented
          */
-        view.visibility = View.INVISIBLE
+        if (!constraintBp()) {
+            view.visibility = View.INVISIBLE
+        }
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
         val textColorError =
@@ -102,6 +104,12 @@ object BiometricViewBinder {
         val descriptionView = view.requireViewById<TextView>(R.id.description)
         val customizedViewContainer =
             view.requireViewById<LinearLayout>(R.id.customized_view_container)
+        val udfpsGuidanceView =
+            if (constraintBp()) {
+                view.requireViewById<View>(R.id.panel)
+            } else {
+                backgroundView
+            }
 
         // set selected to enable marquee unless a screen reader is enabled
         logoView.isSelected =
@@ -226,8 +234,8 @@ object BiometricViewBinder {
             }
 
             lifecycleScope.launch {
-                viewModel.showBpWithoutIconForCredential.collect {
-                    if (!it) {
+                viewModel.showBpWithoutIconForCredential.collect { showWithoutIcon ->
+                    if (!showWithoutIcon) {
                         PromptIconViewBinder.bind(
                             iconView,
                             iconOverlayView,
@@ -428,7 +436,7 @@ object BiometricViewBinder {
                 }
 
                 // Talkback directional guidance
-                backgroundView.setOnHoverListener { _, event ->
+                udfpsGuidanceView.setOnHoverListener { _, event ->
                     launch {
                         viewModel.onAnnounceAccessibilityHint(
                             event,

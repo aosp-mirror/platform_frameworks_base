@@ -140,6 +140,7 @@
     <color name="biometric_dialog_gray">#ff757575</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary40</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
+    <color name="biometric_dialog_face_checkmark">#34A853</color> <!-- green 500 -->
 
     <!-- SFPS colors -->
     <color name="sfps_chevron_fill">@color/material_dynamic_primary90</color>

@@ -132,6 +132,7 @@ import com.android.systemui.communal.ui.compose.extensions.observeTaps
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.PopupType
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -148,8 +149,7 @@ fun CommunalHub(
     onEditDone: (() -> Unit)? = null,
 ) {
     val communalContent by viewModel.communalContent.collectAsState(initial = emptyList())
-    val isPopupOnDismissCtaShowing by
-        viewModel.isPopupOnDismissCtaShowing.collectAsState(initial = false)
+    val currentPopup by viewModel.currentPopup.collectAsState(initial = null)
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
@@ -161,7 +161,6 @@ fun CommunalHub(
     val removeButtonEnabled by remember {
         derivedStateOf { selectedKey.value != null || reorderingWidgets }
     }
-    var isButtonToEditWidgetsShowing by remember { mutableStateOf(false) }
     val isEmptyState by viewModel.isEmptyState.collectAsState(initial = false)
 
     val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
@@ -214,7 +213,7 @@ fun CommunalHub(
                                         communalContent[index] is
                                             CommunalContentModel.CtaTileInViewMode
                                 ) {
-                                    isButtonToEditWidgetsShowing = true
+                                    viewModel.onShowCustomizeWidgetButton()
                                 }
                                 val key =
                                     index?.let { keyAtIndexIfEditable(communalContent, index) }
@@ -290,18 +289,22 @@ fun CommunalHub(
             )
         }
 
-        if (isPopupOnDismissCtaShowing) {
-            PopupOnDismissCtaTile(viewModel::onHidePopupAfterDismissCta)
-        }
-
-        if (isButtonToEditWidgetsShowing) {
-            ButtonToEditWidgets(
-                onClick = {
-                    isButtonToEditWidgetsShowing = false
-                    viewModel.onOpenWidgetEditor(selectedKey.value)
-                },
-                onHide = { isButtonToEditWidgetsShowing = false },
-            )
+        if (currentPopup != null) {
+            when (currentPopup) {
+                PopupType.CtaTile -> {
+                    PopupOnDismissCtaTile(viewModel::onHidePopup)
+                }
+                PopupType.CustomizeWidgetButton -> {
+                    ButtonToEditWidgets(
+                        onClick = {
+                            viewModel.onHidePopup()
+                            viewModel.onOpenWidgetEditor(selectedKey.value)
+                        },
+                        onHide = { viewModel.onHidePopup()}
+                    )
+                }
+                null -> {}
+            }
         }
 
         if (viewModel is CommunalViewModel && dialogFactory != null) {
@@ -679,11 +682,11 @@ private fun ButtonToEditWidgets(
 }
 
 @Composable
-private fun PopupOnDismissCtaTile(onHidePopupAfterDismissCta: () -> Unit) {
+private fun PopupOnDismissCtaTile(onHidePopup: () -> Unit) {
     Popup(
         alignment = Alignment.TopCenter,
         offset = IntOffset(0, 40),
-        onDismissRequest = onHidePopupAfterDismissCta
+        onDismissRequest = onHidePopup
     ) {
         val colors = LocalAndroidColorScheme.current
         Row(

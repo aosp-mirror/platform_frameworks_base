@@ -24,11 +24,11 @@ import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
@@ -64,7 +64,7 @@ public class ResizeVeil {
     private final SurfaceControlBuilderFactory mSurfaceControlBuilderFactory;
     private final WindowDecoration.SurfaceControlViewHostFactory mSurfaceControlViewHostFactory;
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
-    private final Drawable mAppIcon;
+    private final Bitmap mAppIcon;
     private ImageView mIconView;
     private int mIconSize;
     private SurfaceControl mParentSurface;
@@ -97,7 +97,7 @@ public class ResizeVeil {
 
     public ResizeVeil(Context context,
             @NonNull DisplayController displayController,
-            Drawable appIcon, RunningTaskInfo taskInfo,
+            Bitmap appIcon, RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier) {
         this(context,
@@ -112,7 +112,7 @@ public class ResizeVeil {
 
     public ResizeVeil(Context context,
             @NonNull DisplayController displayController,
-            Drawable appIcon, RunningTaskInfo taskInfo,
+            Bitmap appIcon, RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             SurfaceControlBuilderFactory surfaceControlBuilderFactory,
@@ -162,7 +162,7 @@ public class ResizeVeil {
         final View root = LayoutInflater.from(mContext)
                 .inflate(R.layout.desktop_mode_resize_veil, null /* root */);
         mIconView = root.findViewById(R.id.veil_application_icon);
-        mIconView.setImageDrawable(mAppIcon);
+        mIconView.setImageBitmap(mAppIcon);
 
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(

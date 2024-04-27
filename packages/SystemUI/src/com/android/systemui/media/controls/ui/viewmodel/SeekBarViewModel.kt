@@ -33,19 +33,12 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.util.concurrency.RepeatableExecutor
 import javax.inject.Inject
 import kotlin.math.abs
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private const val POSITION_UPDATE_INTERVAL_MILLIS = 100L
 private const val MIN_FLING_VELOCITY_SCALE_FACTOR = 10
@@ -88,11 +81,8 @@ private fun PlaybackState.computePosition(duration: Long): Long {
 class SeekBarViewModel
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
-    @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val bgExecutor: RepeatableExecutor,
     private val falsingManager: FalsingManager,
-    private val mediaFlags: MediaFlags,
 ) {
     private var _data =
         Progress(
@@ -118,19 +108,9 @@ constructor(
     private var controller: MediaController? = null
         set(value) {
             if (field?.sessionToken != value?.sessionToken) {
-                if (!mediaFlags.isMediaControlsRefactorEnabled()) {
-                    field?.unregisterCallback(callback)
-                    value?.registerCallback(callback)
-                    field = value
-                } else {
-                    applicationScope.launch {
-                        withContext(mainDispatcher) {
-                            field?.unregisterCallback(callback)
-                            value?.registerCallback(callback)
-                            field = value
-                        }
-                    }
-                }
+                field?.unregisterCallback(callback)
+                value?.registerCallback(callback)
+                field = value
             }
         }
     private var playbackState: PlaybackState? = null

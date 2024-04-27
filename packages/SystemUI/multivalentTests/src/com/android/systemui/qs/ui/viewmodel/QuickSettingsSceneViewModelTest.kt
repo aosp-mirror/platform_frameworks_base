@@ -29,6 +29,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
@@ -38,6 +39,8 @@ import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
+import com.android.systemui.scene.domain.interactor.sceneContainerStartable
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
@@ -58,6 +61,7 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -71,6 +75,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     private val footerActionsController = mock<FooterActionsController>()
 
     private val sceneInteractor = kosmos.sceneInteractor
+    private val sceneBackInteractor = kosmos.sceneBackInteractor
+    private val sceneContainerStartable = kosmos.sceneContainerStartable
 
     private lateinit var underTest: QuickSettingsSceneViewModel
 
@@ -79,6 +85,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     fun setUp() {
         kosmos.fakeFeatureFlagsClassic.set(Flags.NEW_NETWORK_SLICE_UI, false)
 
+        sceneContainerStartable.start()
         underTest =
             QuickSettingsSceneViewModel(
                 applicationScope = testScope.backgroundScope,
@@ -89,7 +96,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 notifications = kosmos.notificationsPlaceholderViewModel,
                 footerActionsViewModelFactory = footerActionsViewModelFactory,
                 footerActionsController = footerActionsController,
-                sceneInteractor = sceneInteractor,
+                sceneBackInteractor = sceneBackInteractor,
             )
     }
 
@@ -127,11 +134,12 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
             val destinations by collectLastValue(underTest.destinationScenes)
 
             val currentScene by collectLastValue(sceneInteractor.currentScene)
-            val previousScene by collectLastValue(sceneInteractor.previousScene())
+            val backScene by collectLastValue(sceneBackInteractor.backScene)
             sceneInteractor.changeScene(Scenes.Lockscreen, "reason")
             sceneInteractor.changeScene(Scenes.QuickSettings, "reason")
             assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
-            assertThat(previousScene).isEqualTo(Scenes.Lockscreen)
+            assertThat(backScene).isEqualTo(Scenes.Lockscreen)
+
             assertThat(destinations)
                 .isEqualTo(
                     mapOf(

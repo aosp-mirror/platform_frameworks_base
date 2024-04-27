@@ -122,11 +122,9 @@ constructor(
         val overlayViewModel =
             SideFpsOverlayViewModel(
                 applicationContext,
-                biometricStatusInteractor.get(),
                 deviceEntrySideFpsOverlayInteractor.get(),
                 displayStateInteractor.get(),
                 sfpsSensorInteractor.get(),
-                sideFpsProgressBarViewModel.get()
             )
         bind(overlayView!!, overlayViewModel, fpsUnlockTracker.get(), windowManager.get())
         overlayView!!.visibility = View.INVISIBLE

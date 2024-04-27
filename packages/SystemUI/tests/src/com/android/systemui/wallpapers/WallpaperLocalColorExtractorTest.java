@@ -59,8 +59,8 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
-    private static final int LOW_BMP_WIDTH = 128;
-    private static final int LOW_BMP_HEIGHT = 128;
+    private static final int LOW_BMP_WIDTH = 112;
+    private static final int LOW_BMP_HEIGHT = 112;
     private static final int HIGH_BMP_WIDTH = 3000;
     private static final int HIGH_BMP_HEIGHT = 4000;
     private static final int VERY_LOW_BMP_WIDTH = 1;
@@ -189,7 +189,7 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
 
     /**
      * Test that for bitmaps of random dimensions, the mini bitmap is always created
-     * with either a width <= SMALL_SIDE or a height <= SMALL_SIDE
+     * with an area <= MINI_BITMAP_MAX_AREA
      */
     @Test
     public void testMiniBitmapCreation() {
@@ -203,14 +203,14 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
             spyColorExtractor.onBitmapChanged(bitmap);
 
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
-            assertThat(Math.min(mMiniBitmapWidth, mMiniBitmapHeight))
-                    .isAtMost(WallpaperLocalColorExtractor.SMALL_SIDE);
+            assertThat(mMiniBitmapWidth * mMiniBitmapHeight)
+                    .isAtMost(WallpaperLocalColorExtractor.MINI_BITMAP_MAX_AREA);
         }
     }
 
     /**
-     * Test that for bitmaps with both width and height <= SMALL_SIDE,
-     * the mini bitmap is always created with both width and height <= SMALL_SIDE
+     * Test that for bitmaps with both width and height <= LOW_BMP_WIDTH,
+     * the mini bitmap is always created with an area <= MINI_BITMAP_MAX_AREA
      */
     @Test
     public void testSmallMiniBitmapCreation() {
@@ -224,8 +224,8 @@ public class WallpaperLocalColorExtractorTest extends SysuiTestCase {
             spyColorExtractor.onBitmapChanged(bitmap);
 
             assertThat(mMiniBitmapUpdatedCount).isEqualTo(1);
-            assertThat(Math.max(mMiniBitmapWidth, mMiniBitmapHeight))
-                    .isAtMost(WallpaperLocalColorExtractor.SMALL_SIDE);
+            assertThat(mMiniBitmapWidth * mMiniBitmapHeight)
+                    .isAtMost(WallpaperLocalColorExtractor.MINI_BITMAP_MAX_AREA);
         }
     }
 

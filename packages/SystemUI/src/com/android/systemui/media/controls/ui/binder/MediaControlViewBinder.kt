@@ -100,7 +100,7 @@ object MediaControlViewBinder {
         }
     }
 
-    private suspend fun bindMediaCard(
+    suspend fun bindMediaCard(
         viewHolder: MediaViewHolder,
         viewController: MediaViewController,
         viewModel: MediaPlayerViewModel,
@@ -333,7 +333,7 @@ object MediaControlViewBinder {
                 }
             }
         }
-        updateSeekBarVisibility(viewController.expandedLayout, isSeekBarEnabled = false)
+        updateSeekBarVisibility(viewController.expandedLayout, viewController.isSeekBarEnabled)
     }
 
     private fun bindButtonCommon(
@@ -472,6 +472,7 @@ object MediaControlViewBinder {
                             if (viewModel.shouldAddGradient) 333 else 80
                         )
                     }
+                        ?: albumView.setImageDrawable(artwork)
                 }
                 viewController.isArtworkBound = viewModel.shouldAddGradient
                 viewController.prevArtwork = artwork

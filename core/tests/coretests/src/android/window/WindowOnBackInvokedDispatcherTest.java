@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -403,7 +404,9 @@ public class WindowOnBackInvokedDispatcherTest {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
         OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
 
-        mDispatcher.onMotionEvent(mMotionEvent);
+        // Send motion event in View's main thread.
+        final Handler main = Handler.getMain();
+        main.runWithScissors(() -> mDispatcher.onMotionEvent(mMotionEvent), 100);
         assertFalse(mDispatcher.mTouchTracker.isActive());
 
         callbackInfo.getCallback().onBackStarted(mBackEvent);
@@ -411,8 +414,9 @@ public class WindowOnBackInvokedDispatcherTest {
         assertTrue(mDispatcher.isDispatching());
         assertTrue(mDispatcher.mTouchTracker.isActive());
 
-        mDispatcher.onMotionEvent(mMotionEvent);
+        main.runWithScissors(() -> mDispatcher.onMotionEvent(mMotionEvent), 100);
         waitForIdle();
-        verify(mCallback1).onBackProgressed(any());
+        // onBackPressed is called from animator, so it can happen more than once.
+        verify(mCallback1, atLeast(1)).onBackProgressed(any());
     }
 }

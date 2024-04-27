@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams;
 
+import static android.service.dreams.Flags.dreamWakeRedirect;
+
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_MANAGER;
 import static com.android.systemui.dreams.dagger.DreamModule.HOME_CONTROL_PANEL_DREAM_COMPONENT;
@@ -148,6 +150,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private TouchMonitor mTouchMonitor;
 
     private final CommunalInteractor mCommunalInteractor;
+
+    private boolean mCommunalAvailable;
+
+    final Consumer<Boolean> mIsCommunalAvailableCallback =
+            isAvailable -> {
+                mCommunalAvailable = isAvailable;
+                updateRedirectWakeup();
+            };
 
     private final SystemDialogsCloser mSystemDialogsCloser;
 
@@ -287,6 +297,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mExecutor.execute(() -> setLifecycleStateLocked(Lifecycle.State.CREATED));
 
+        collectFlow(getLifecycle(), mCommunalInteractor.isCommunalAvailable(),
+                mIsCommunalAvailableCallback);
         collectFlow(getLifecycle(), communalInteractor.isCommunalVisible(),
                 mCommunalVisibleConsumer);
         collectFlow(getLifecycle(), keyguardInteractor.primaryBouncerShowing,
@@ -359,7 +371,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             return;
         }
 
-        setLifecycleStateLocked(Lifecycle.State.RESUMED);
+        // Set lifecycle to resumed only if there's nothing covering the dream, ex. shade, bouncer,
+        // or hub. These updates can come in before onStartDream runs.
+        updateLifecycleStateLocked();
         mStateController.setOverlayActive(true);
         final ComponentName dreamComponent = getDreamComponent();
         mStateController.setLowLightActive(
@@ -372,11 +386,26 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mDreamOverlayCallbackController.onStartDream();
         mStarted = true;
+
+        updateRedirectWakeup();
+    }
+
+    private void updateRedirectWakeup() {
+        if (!mStarted || !dreamWakeRedirect()) {
+            return;
+        }
+
+        redirectWake(mCommunalAvailable);
     }
 
     @Override
     public void onEndDream() {
         resetCurrentDreamOverlayLocked();
+    }
+
+    @Override
+    public void onWakeRequested() {
+        mCommunalInteractor.changeScene(CommunalScenes.Communal, null);
     }
 
     private Lifecycle.State getLifecycleStateLocked() {

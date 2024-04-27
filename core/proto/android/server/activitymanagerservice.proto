@@ -1059,6 +1059,7 @@ message AppsStartInfoProto {
 
             optional int32 uid = 1;
             repeated .android.app.ApplicationStartInfoProto app_start_info = 2;
+            optional bool monitoring_enabled = 3;
         }
         repeated User users = 2;
     }

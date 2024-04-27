@@ -139,6 +139,13 @@ flag {
 }
 
 flag {
+    name: "adpf_measure_during_input_event_boost"
+    namespace: "game"
+    description: "Guards use of a boost when view measures during input events"
+    bug: "256549451"
+}
+
+flag {
     name: "battery_service_support_current_adb_command"
     namespace: "backstage_power"
     description: "Whether or not BatteryService supports adb commands for Current values."

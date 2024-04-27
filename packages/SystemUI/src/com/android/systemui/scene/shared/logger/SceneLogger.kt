@@ -20,6 +20,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.SceneFrameworkLog
+import java.util.Stack
 import javax.inject.Inject
 
 class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: LogBuffer) {
@@ -102,7 +103,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             tag = TAG,
             level = LogLevel.INFO,
             messageInitializer = { str1 = reason },
-            messagePrinter = { "remote user interaction started, reason: $str3" },
+            messagePrinter = { "remote user interaction started, reason: $str1" },
         )
     }
 
@@ -112,6 +113,15 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
             level = LogLevel.INFO,
             messageInitializer = {},
             messagePrinter = { "user interaction finished" },
+        )
+    }
+
+    fun logSceneBackStack(backStack: Stack<SceneKey>) {
+        logBuffer.log(
+            tag = TAG,
+            level = LogLevel.INFO,
+            messageInitializer = { str1 = backStack.joinToString(", ") { it.debugName } },
+            messagePrinter = { "back stack: $str1" },
         )
     }
 

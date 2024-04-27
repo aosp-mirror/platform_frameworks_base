@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2017 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
-
-import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_ICON;
+package com.android.systemui.statusbar.phone.ui;
 
 import static junit.framework.Assert.assertTrue;
 
@@ -40,8 +40,8 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
-import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
-import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
+import com.android.systemui.statusbar.phone.StatusBarIconHolder;
+import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
@@ -60,9 +60,9 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class StatusBarIconControllerTest extends LeakCheckedTest {
 
-    private MobileContextProvider mMobileContextProvider = mock(MobileContextProvider.class);
-    private MobileUiAdapter mMobileUiAdapter = mock(MobileUiAdapter.class);
-    private MobileIconsViewModel mMobileIconsViewModel = mock(MobileIconsViewModel.class);
+    private final MobileContextProvider mMobileContextProvider = mock(MobileContextProvider.class);
+    private final MobileUiAdapter mMobileUiAdapter = mock(MobileUiAdapter.class);
+    private final MobileIconsViewModel mMobileIconsViewModel = mock(MobileIconsViewModel.class);
 
     @Before
     public void setup() {
@@ -123,20 +123,11 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
     }
 
     private <T extends IconManager & TestableIconManager> void testCallOnAdd_forManager(T manager) {
-        StatusBarIconHolder holder = holderForType(TYPE_ICON);
+        StatusBarIconHolder holder = StatusBarIconHolder.fromIcon(mock(StatusBarIcon.class));
         manager.onIconAdded(0, "test_slot", false, holder);
         assertTrue("Expected StatusBarIconView",
                 (manager.getViewAt(0) instanceof StatusBarIconView));
 
-    }
-
-    private StatusBarIconHolder holderForType(int type) {
-        switch (type) {
-
-            case TYPE_ICON:
-            default:
-                return StatusBarIconHolder.fromIcon(mock(StatusBarIcon.class));
-        }
     }
 
     private static class TestDarkIconManager extends DarkIconManager

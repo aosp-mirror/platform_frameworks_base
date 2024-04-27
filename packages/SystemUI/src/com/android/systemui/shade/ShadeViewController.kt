@@ -177,8 +177,7 @@ interface ShadeFoldAnimator {
 @Deprecated("This interface should not be used in scene container.")
 interface ShadeViewStateProvider {
     /** Returns the expanded height of the panel view. */
-    @Deprecated("deprecated by migrate_keyguard_status_bar_view flag")
-    val panelViewExpandedHeight: Float
+    @Deprecated("deprecated by SceneContainerFlag.isEnabled") val panelViewExpandedHeight: Float
 
     /**
      * Returns true if heads up should be visible.
@@ -189,6 +188,5 @@ interface ShadeViewStateProvider {
     @Deprecated("deprecated in Flexiglass.") fun shouldHeadsUpBeVisible(): Boolean
 
     /** Return the fraction of the shade that's expanded, when in lockscreen. */
-    @Deprecated("deprecated by migrate_keyguard_status_bar_view flag")
-    val lockscreenShadeDragProgress: Float
+    @Deprecated("deprecated by SceneContainerFlag.isEnabled") val lockscreenShadeDragProgress: Float
 }

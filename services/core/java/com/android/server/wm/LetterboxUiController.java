@@ -1316,7 +1316,7 @@ final class LetterboxUiController {
         return shouldShowLetterboxUi;
     }
 
-    private Color getLetterboxBackgroundColor() {
+    Color getLetterboxBackgroundColor() {
         final WindowState w = mActivityRecord.findMainWindow();
         if (w == null || w.isLetterboxedForDisplayCutout()) {
             return Color.valueOf(Color.BLACK);

@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+
     <application
         android:allowBackup="false"
         android:label="@string/app_label"

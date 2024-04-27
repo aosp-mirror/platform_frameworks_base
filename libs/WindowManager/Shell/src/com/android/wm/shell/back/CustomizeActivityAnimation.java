@@ -271,7 +271,8 @@ public class CustomizeActivityAnimation extends ShellBackAnimation {
 
     /** Load customize animation before animation start. */
     @Override
-    public boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo) {
+    public boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo,
+            int letterboxColor) {
         if (animationInfo == null) {
             return false;
         }

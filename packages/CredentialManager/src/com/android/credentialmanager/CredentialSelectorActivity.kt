@@ -125,6 +125,7 @@ class CredentialSelectorActivity : ComponentActivity() {
             return Triple(true, false, null)
         }
         val shouldShowCancellationUi = cancelUiRequest.shouldShowCancellationExplanation()
+        viewModel?.onDeveloperCancellationReceivedForBiometricPrompt()
         Log.d(
             Constants.LOG_TAG, "Received UI cancellation intent. Should show cancellation" +
             " ui = $shouldShowCancellationUi")

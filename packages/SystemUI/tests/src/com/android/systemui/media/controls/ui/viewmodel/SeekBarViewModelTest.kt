@@ -29,12 +29,7 @@ import androidx.arch.core.executor.TaskExecutor
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.Classifier
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.media.controls.util.MediaFlags
-import com.android.systemui.media.controls.util.mediaFlags
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.concurrency.FakeRepeatableExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -61,7 +56,6 @@ import org.mockito.junit.MockitoJUnit
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class SeekBarViewModelTest : SysuiTestCase() {
-    val kosmos = testKosmos()
 
     private lateinit var viewModel: SeekBarViewModel
     private lateinit var fakeExecutor: FakeExecutor
@@ -81,7 +75,6 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Mock private lateinit var mockTransport: MediaController.TransportControls
     @Mock private lateinit var falsingManager: FalsingManager
     @Mock private lateinit var mockBar: SeekBar
-    @Mock private lateinit var mediaFlags: MediaFlags
     private val token1 = MediaSession.Token(1, null)
     private val token2 = MediaSession.Token(2, null)
 
@@ -90,18 +83,10 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        viewModel =
-            SeekBarViewModel(
-                kosmos.applicationCoroutineScope,
-                kosmos.testDispatcher,
-                FakeRepeatableExecutor(fakeExecutor),
-                falsingManager,
-                mediaFlags,
-            )
+        viewModel = SeekBarViewModel(FakeRepeatableExecutor(fakeExecutor), falsingManager)
         viewModel.logSeek = {}
         whenever(mockController.sessionToken).thenReturn(token1)
         whenever(mockBar.context).thenReturn(context)
-        whenever(mediaFlags.isMediaControlsRefactorEnabled()).thenReturn(false)
 
         // LiveData to run synchronously
         ArchTaskExecutor.getInstance().setDelegate(taskExecutor)

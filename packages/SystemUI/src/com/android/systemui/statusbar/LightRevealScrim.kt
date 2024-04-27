@@ -190,12 +190,12 @@ data class LinearSideLightRevealEffect(private val isVertical: Boolean) : LightR
     private companion object {
         // From which percentage we should start the gradient reveal width
         // E.g. if 0 - starts with 0px width, 0.6f - starts with 60% width
-        private const val GRADIENT_START_BOUNDS_PERCENTAGE: Float = 1f
+        private const val GRADIENT_START_BOUNDS_PERCENTAGE: Float = 0.95f
 
         // When to start changing alpha color of the gradient scrim
         // E.g. if 0.6f - starts fading the gradient away at 60% and becomes completely
         // transparent at 100%
-        private const val REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE: Float = 1f
+        private const val REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE: Float = 0.95f
 
         // When to finish displaying start color fill that reveals the content
         // E.g. if 0.6f - the content won't be visible at 0% and it will gradually

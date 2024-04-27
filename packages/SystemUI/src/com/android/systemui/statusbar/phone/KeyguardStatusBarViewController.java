@@ -46,11 +46,10 @@ import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -65,6 +64,8 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.fragment.StatusBarIconBlocklistKt;
 import com.android.systemui.statusbar.phone.fragment.StatusBarSystemEventDefaultAnimator;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -108,7 +109,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final BatteryController mBatteryController;
     private final UserInfoController mUserInfoController;
     private final StatusBarIconController mStatusBarIconController;
-    private final StatusBarIconController.TintedIconManager.Factory mTintedIconManagerFactory;
+    private final TintedIconManager.Factory mTintedIconManagerFactory;
     private final BatteryMeterViewController mBatteryMeterViewController;
     private final ShadeViewStateProvider mShadeViewStateProvider;
     private final KeyguardStateController mKeyguardStateController;
@@ -118,7 +119,6 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final BiometricUnlockController mBiometricUnlockController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final StatusBarContentInsetsProvider mInsetsProvider;
-    private final FeatureFlags mFeatureFlags;
     private final UserManager mUserManager;
     private final StatusBarUserChipViewModel mStatusBarUserChipViewModel;
     private final SecureSettings mSecureSettings;
@@ -250,7 +250,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final int mNotificationsHeaderCollideDistance;
 
     private boolean mBatteryListening;
-    private StatusBarIconController.TintedIconManager mTintedIconManager;
+    private TintedIconManager mTintedIconManager;
 
     private float mKeyguardStatusBarAnimateAlpha = 1f;
     /**
@@ -283,7 +283,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             BatteryController batteryController,
             UserInfoController userInfoController,
             StatusBarIconController statusBarIconController,
-            StatusBarIconController.TintedIconManager.Factory tintedIconManagerFactory,
+            TintedIconManager.Factory tintedIconManagerFactory,
             BatteryMeterViewController batteryMeterViewController,
             ShadeViewStateProvider shadeViewStateProvider,
             KeyguardStateController keyguardStateController,
@@ -293,7 +293,6 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             BiometricUnlockController biometricUnlockController,
             SysuiStatusBarStateController statusBarStateController,
             StatusBarContentInsetsProvider statusBarContentInsetsProvider,
-            FeatureFlags featureFlags,
             UserManager userManager,
             StatusBarUserChipViewModel userChipViewModel,
             SecureSettings secureSettings,
@@ -321,7 +320,6 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mBiometricUnlockController = biometricUnlockController;
         mStatusBarStateController = statusBarStateController;
         mInsetsProvider = statusBarContentInsetsProvider;
-        mFeatureFlags = featureFlags;
         mUserManager = userManager;
         mStatusBarUserChipViewModel = userChipViewModel;
         mSecureSettings = secureSettings;
@@ -707,7 +705,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     }
 
     private boolean isMigrationEnabled() {
-        return mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW);
+        return SceneContainerFlag.isEnabled();
     }
 
     private final ContentObserver mVolumeSettingObserver = new ContentObserver(null) {

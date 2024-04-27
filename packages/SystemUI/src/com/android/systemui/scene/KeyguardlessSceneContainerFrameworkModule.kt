@@ -47,6 +47,12 @@ object KeyguardlessSceneContainerFrameworkModule {
                     Scenes.Shade,
                 ),
             initialSceneKey = Scenes.Gone,
+            navigationDistances =
+                mapOf(
+                    Scenes.Gone to 0,
+                    Scenes.Shade to 1,
+                    Scenes.QuickSettings to 2,
+                ),
         )
     }
 }

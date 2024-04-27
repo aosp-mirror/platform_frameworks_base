@@ -17,6 +17,9 @@ package com.android.systemui.dreams
 
 import android.content.ComponentName
 import android.content.Intent
+import android.os.RemoteException
+import android.platform.test.annotations.EnableFlags
+import android.service.dreams.Flags
 import android.service.dreams.IDreamOverlay
 import android.service.dreams.IDreamOverlayCallback
 import android.service.dreams.IDreamOverlayClient
@@ -44,7 +47,9 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.fakeCommunalRepository
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutEngine
@@ -57,12 +62,14 @@ import com.android.systemui.testKosmos
 import com.android.systemui.touch.TouchInsetManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -70,6 +77,9 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.isNull
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -86,6 +96,8 @@ class DreamOverlayServiceTest : SysuiTestCase() {
     @Mock lateinit var mLifecycleOwner: DreamOverlayLifecycleOwner
 
     private lateinit var lifecycleRegistry: FakeLifecycleRegistry
+
+    lateinit var mCommunalInteractor: CommunalInteractor
 
     private lateinit var mWindowParams: WindowManager.LayoutParams
 
@@ -162,6 +174,9 @@ class DreamOverlayServiceTest : SysuiTestCase() {
         whenever(mComplicationComponent.getComplicationHostViewController())
             .thenReturn(mComplicationHostViewController)
         whenever(mLifecycleOwner.registry).thenReturn(lifecycleRegistry)
+
+        mCommunalInteractor = Mockito.spy(kosmos.communalInteractor)
+
         whenever(mComplicationComponentFactory.create(any(), any(), any(), any()))
             .thenReturn(mComplicationComponent)
         whenever(mComplicationComponent.getVisibilityController())
@@ -192,7 +207,7 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 mStateController,
                 mKeyguardUpdateMonitor,
                 mScrimManager,
-                kosmos.communalInteractor,
+                mCommunalInteractor,
                 mSystemDialogsCloser,
                 mUiEventLogger,
                 mTouchInsetManager,
@@ -605,6 +620,57 @@ class DreamOverlayServiceTest : SysuiTestCase() {
             .isTrue()
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    @kotlin.Throws(RemoteException::class)
+    fun testTransitionToGlanceableHub() =
+        testScope.runTest {
+            // Inform the overlay service of dream starting. Do not show dream complications.
+            client.startDream(
+                mWindowParams,
+                mDreamOverlayCallback,
+                DREAM_COMPONENT,
+                false /*shouldShowComplication*/
+            )
+            mMainExecutor.runAllReady()
+
+            verify(mDreamOverlayCallback).onRedirectWake(false)
+            clearInvocations(mDreamOverlayCallback)
+            kosmos.setCommunalAvailable(true)
+            mMainExecutor.runAllReady()
+            runCurrent()
+            verify(mDreamOverlayCallback).onRedirectWake(true)
+            client.onWakeRequested()
+            verify(mCommunalInteractor).changeScene(eq(CommunalScenes.Communal), isNull())
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    @Throws(RemoteException::class)
+    fun testRedirectExit() =
+        testScope.runTest {
+            // Inform the overlay service of dream starting. Do not show dream complications.
+            client.startDream(
+                mWindowParams,
+                mDreamOverlayCallback,
+                DREAM_COMPONENT,
+                false /*shouldShowComplication*/
+            )
+            // Set communal available, verify that overlay callback is informed.
+            kosmos.setCommunalAvailable(true)
+            mMainExecutor.runAllReady()
+            runCurrent()
+            verify(mDreamOverlayCallback).onRedirectWake(true)
+
+            clearInvocations(mDreamOverlayCallback)
+
+            // Set communal unavailable, verify that overlay callback is informed.
+            kosmos.setCommunalAvailable(false)
+            mMainExecutor.runAllReady()
+            runCurrent()
+            verify(mDreamOverlayCallback).onRedirectWake(false)
+        }
+
     // Tests that the bouncer closes when DreamOverlayService is told that the dream is coming to
     // the front.
     @Test
@@ -687,6 +753,31 @@ class DreamOverlayServiceTest : SysuiTestCase() {
                 Lifecycle.State.STARTED,
                 Lifecycle.State.RESUMED
             )
+    }
+
+    // Verifies that the touch handling lifecycle is STARTED even if the dream starts while not
+    // focused.
+    @Test
+    fun testLifecycle_dreamNotFocusedOnStart_isStarted() {
+        val transitionState: MutableStateFlow<ObservableTransitionState> =
+            MutableStateFlow(ObservableTransitionState.Idle(CommunalScenes.Blank))
+        communalRepository.setTransitionState(transitionState)
+
+        // Communal becomes visible.
+        transitionState.value = ObservableTransitionState.Idle(CommunalScenes.Communal)
+        testScope.runCurrent()
+        mMainExecutor.runAllReady()
+
+        // Start dreaming.
+        val client = client
+        client.startDream(
+            mWindowParams,
+            mDreamOverlayCallback,
+            DREAM_COMPONENT,
+            false /*shouldShowComplication*/
+        )
+        mMainExecutor.runAllReady()
+        assertThat(lifecycleRegistry.currentState).isEqualTo(Lifecycle.State.STARTED)
     }
 
     @Test

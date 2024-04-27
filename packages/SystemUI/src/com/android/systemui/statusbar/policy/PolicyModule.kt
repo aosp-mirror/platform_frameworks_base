@@ -88,6 +88,7 @@ interface PolicyModule {
         const val WORK_MODE_TILE_SPEC = "work"
         const val CAMERA_TOGGLE_TILE_SPEC = "cameratoggle"
         const val MIC_TOGGLE_TILE_SPEC = "mictoggle"
+        const val DND_TILE_SPEC = "dnd"
 
         /** Inject flashlight config */
         @Provides
@@ -136,10 +137,7 @@ interface PolicyModule {
                 instanceId = uiEventLogger.getNewInstanceId(),
                 policy =
                     QSTilePolicy.Restricted(
-                        listOf(
-                            DISALLOW_SHARE_LOCATION,
-                            DISALLOW_CONFIG_LOCATION
-                        )
+                        listOf(DISALLOW_SHARE_LOCATION, DISALLOW_CONFIG_LOCATION)
                     )
             )
 
@@ -320,6 +318,21 @@ interface PolicyModule {
                 userActionInteractor.create(MICROPHONE),
                 stateInteractor.create(MICROPHONE),
                 mapper.create(SensorPrivacyTileResources.MicrophonePrivacyTileResources),
+            )
+
+        /** Inject microphone toggle config */
+        @Provides
+        @IntoMap
+        @StringKey(DND_TILE_SPEC)
+        fun provideDndTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(DND_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_dnd_icon_off,
+                        labelRes = R.string.quick_settings_dnd_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
             )
     }
 

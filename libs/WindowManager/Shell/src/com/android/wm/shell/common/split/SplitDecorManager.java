@@ -18,6 +18,7 @@ package com.android.wm.shell.common.split;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -109,7 +110,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     }
 
     /** Inflates split decor surface on the root surface. */
-    public void inflate(Context context, SurfaceControl rootLeash, Rect rootBounds) {
+    public void inflate(Context context, SurfaceControl rootLeash) {
         if (mIconLeash != null && mViewHost != null) {
             return;
         }
@@ -128,13 +129,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 0 /* width */, 0 /* height */, TYPE_APPLICATION_OVERLAY,
                 FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT);
-        lp.width = rootBounds.width();
-        lp.height = rootBounds.height();
+        lp.width = mIconSize;
+        lp.height = mIconSize;
         lp.token = new Binder();
         lp.setTitle(TAG);
         lp.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
-        // TODO(b/189839391): Set INPUT_FEATURE_NO_INPUT_CHANNEL after WM supports
-        //  TRUSTED_OVERLAY for windowless window without input channel.
+        lp.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
         mViewHost.setView(rootLayout, lp);
     }
 

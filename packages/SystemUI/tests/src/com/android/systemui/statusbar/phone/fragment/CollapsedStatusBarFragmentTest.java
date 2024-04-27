@@ -61,10 +61,11 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.Notificati
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.phone.ui.DarkIconManager;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -117,9 +118,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Mock
     private PanelExpansionInteractor mPanelExpansionInteractor;
     @Mock
-    private StatusBarIconController.DarkIconManager.Factory mIconManagerFactory;
+    private DarkIconManager.Factory mIconManagerFactory;
     @Mock
-    private StatusBarIconController.DarkIconManager mIconManager;
+    private DarkIconManager mIconManager;
     private FakeCollapsedStatusBarViewModel mCollapsedStatusBarViewModel;
     private FakeCollapsedStatusBarViewBinder mCollapsedStatusBarViewBinder;
     @Mock

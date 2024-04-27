@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -82,7 +83,11 @@ public final class AppStartInfoTracker {
     private static final int FOREACH_ACTION_REMOVE_ITEM = 1;
     private static final int FOREACH_ACTION_STOP_ITERATION = 2;
 
+    private static final String MONITORING_MODE_EMPTY_TEXT = "No records";
+
     @VisibleForTesting static final int APP_START_INFO_HISTORY_LIST_SIZE = 16;
+
+    private static final int APP_START_INFO_MONITORING_MODE_LIST_SIZE = 100;
 
     @VisibleForTesting static final String APP_START_STORE_DIR = "procstartstore";
 
@@ -424,6 +429,40 @@ public final class AppStartInfoTracker {
         }
         addTimestampToStart(app, timeNs,
                 ApplicationStartInfo.START_TIMESTAMP_APPLICATION_ONCREATE);
+    }
+
+    /**
+     * Helper functions for monitoring shell command.
+     * > adb shell am start-info-detailed-monitoring [package-name]
+     */
+    void configureDetailedMonitoring(PrintWriter pw, String packageName, int userId) {
+        synchronized (mLock) {
+            if (!mEnabled) {
+                return;
+            }
+
+            forEachPackageLocked((name, records) -> {
+                for (int i = 0; i < records.size(); i++) {
+                    records.valueAt(i).disableAppMonitoringMode();
+                }
+                return AppStartInfoTracker.FOREACH_ACTION_NONE;
+            });
+
+            if (TextUtils.isEmpty(packageName)) {
+                pw.println("ActivityManager AppStartInfo detailed monitoring disabled");
+            } else {
+                SparseArray<AppStartInfoContainer> array = mData.getMap().get(packageName);
+                if (array != null) {
+                    for (int i = 0; i < array.size(); i++) {
+                        array.valueAt(i).enableAppMonitoringModeForUser(userId);
+                    }
+                    pw.println("ActivityManager AppStartInfo detailed monitoring enabled for "
+                            + packageName);
+                } else {
+                    pw.println("Package " + packageName + " not found");
+                }
+            }
+        }
     }
 
     /** Report a bind application timestamp to add to {@link ApplicationStartInfo}. */
@@ -1011,13 +1050,44 @@ public final class AppStartInfoTracker {
 
     /** A container class of (@link android.app.ApplicationStartInfo) */
     final class AppStartInfoContainer {
-        private List<ApplicationStartInfo> mInfos; // Always kept sorted by first timestamp.
+        private ArrayList<ApplicationStartInfo> mInfos; // Always kept sorted by first timestamp.
         private int mMaxCapacity;
         private int mUid;
+        private boolean mMonitoringModeEnabled = false;
 
         AppStartInfoContainer(final int maxCapacity) {
             mInfos = new ArrayList<ApplicationStartInfo>();
             mMaxCapacity = maxCapacity;
+        }
+
+        int getMaxCapacity() {
+            return mMonitoringModeEnabled ? APP_START_INFO_MONITORING_MODE_LIST_SIZE : mMaxCapacity;
+        }
+
+        @GuardedBy("mLock")
+        void enableAppMonitoringModeForUser(int userId) {
+            if (UserHandle.getUserId(mUid) == userId) {
+                mMonitoringModeEnabled = true;
+            }
+        }
+
+        @GuardedBy("mLock")
+        void disableAppMonitoringMode() {
+            mMonitoringModeEnabled = false;
+
+            // Capacity is reduced by turning off monitoring mode. Check if array size is within
+            // new lower limits and trim extraneous records if it is not.
+            if (mInfos.size() <= getMaxCapacity()) {
+                return;
+            }
+
+            // Sort records so we can remove the least recent ones.
+            Collections.sort(mInfos, (a, b) ->
+                    Long.compare(getStartTimestamp(b), getStartTimestamp(a)));
+
+            // Remove records and trim list object back to size.
+            mInfos.subList(0, mInfos.size() - getMaxCapacity()).clear();
+            mInfos.trimToSize();
         }
 
         @GuardedBy("mLock")
@@ -1029,7 +1099,7 @@ public final class AppStartInfoTracker {
         @GuardedBy("mLock")
         void addStartInfoLocked(ApplicationStartInfo info) {
             int size = mInfos.size();
-            if (size >= mMaxCapacity) {
+            if (size >= getMaxCapacity()) {
                 // Remove oldest record if size is over max capacity.
                 int oldestIndex = -1;
                 long oldestTimeStamp = Long.MAX_VALUE;
@@ -1061,10 +1131,57 @@ public final class AppStartInfoTracker {
 
         @GuardedBy("mLock")
         void dumpLocked(PrintWriter pw, String prefix, SimpleDateFormat sdf) {
+            if (mMonitoringModeEnabled) {
+                // For monitoring mode, calculate the average start time for each start state to
+                // add to output.
+                List<Long> coldStartTimes = new ArrayList<>();
+                List<Long> warmStartTimes = new ArrayList<>();
+                List<Long> hotStartTimes = new ArrayList<>();
+
+                for (int i = 0; i < mInfos.size(); i++) {
+                    ApplicationStartInfo startInfo = mInfos.get(i);
+                    Map<Integer, Long> timestamps = startInfo.getStartupTimestamps();
+
+                    // Confirm required timestamps exist.
+                    if (timestamps.containsKey(ApplicationStartInfo.START_TIMESTAMP_LAUNCH)
+                            && timestamps.containsKey(
+                            ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME)) {
+                        // Add timestamp to correct collection.
+                        long time = timestamps.get(ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME)
+                                - timestamps.get(ApplicationStartInfo.START_TIMESTAMP_LAUNCH);
+                        switch (startInfo.getStartType()) {
+                            case ApplicationStartInfo.START_TYPE_COLD:
+                                coldStartTimes.add(time);
+                                break;
+                            case ApplicationStartInfo.START_TYPE_WARM:
+                                warmStartTimes.add(time);
+                                break;
+                            case ApplicationStartInfo.START_TYPE_HOT:
+                                hotStartTimes.add(time);
+                                break;
+                        }
+                    }
+                }
+
+                pw.println(prefix + "  Average Start Time in ns for Cold Starts: "
+                        + (coldStartTimes.isEmpty()  ? MONITORING_MODE_EMPTY_TEXT
+                                : calculateAverage(coldStartTimes)));
+                pw.println(prefix + "  Average Start Time in ns for Warm Starts: "
+                        + (warmStartTimes.isEmpty() ? MONITORING_MODE_EMPTY_TEXT
+                                : calculateAverage(warmStartTimes)));
+                pw.println(prefix + "  Average Start Time in ns for Hot Starts: "
+                        + (hotStartTimes.isEmpty() ? MONITORING_MODE_EMPTY_TEXT
+                                : calculateAverage(hotStartTimes)));
+            }
+
             int size = mInfos.size();
             for (int i = 0; i < size; i++) {
                 mInfos.get(i).dump(pw, prefix + "  ", "#" + i, sdf);
             }
+        }
+
+        private long calculateAverage(List<Long> vals) {
+            return (long) vals.stream().mapToDouble(a -> a).average().orElse(0.0);
         }
 
         @GuardedBy("mLock")
@@ -1076,6 +1193,7 @@ public final class AppStartInfoTracker {
                 mInfos.get(i)
                         .writeToProto(proto, AppsStartInfoProto.Package.User.APP_START_INFO);
             }
+            proto.write(AppsStartInfoProto.Package.User.MONITORING_ENABLED, mMonitoringModeEnabled);
             proto.end(token);
         }
 
@@ -1093,6 +1211,10 @@ public final class AppStartInfoTracker {
                         ApplicationStartInfo info = new ApplicationStartInfo();
                         info.readFromProto(proto, AppsStartInfoProto.Package.User.APP_START_INFO);
                         mInfos.add(info);
+                        break;
+                    case (int) AppsStartInfoProto.Package.User.MONITORING_ENABLED:
+                        mMonitoringModeEnabled = proto.readBoolean(
+                            AppsStartInfoProto.Package.User.MONITORING_ENABLED);
                         break;
                 }
             }

@@ -56,6 +56,7 @@ public class CompanionTransportManager {
     @GuardedBy("mTransports")
     private final SparseArray<Transport> mTransports = new SparseArray<>();
     @NonNull
+    @GuardedBy("mTransportsListeners")
     private final RemoteCallbackList<IOnTransportsChangedListener> mTransportsListeners =
             new RemoteCallbackList<>();
     /** Message type -> IOnMessageReceivedListener */
@@ -84,34 +85,28 @@ public class CompanionTransportManager {
      */
     public void addListener(IOnTransportsChangedListener listener) {
         Slog.i(TAG, "Registering OnTransportsChangedListener");
-        mTransportsListeners.register(listener);
-        List<AssociationInfo> associations = new ArrayList<>();
-        synchronized (mTransports) {
-            for (int i = 0; i < mTransports.size(); i++) {
-                AssociationInfo association = mAssociationStore.getAssociationById(
-                        mTransports.keyAt(i));
-                if (association != null) {
-                    associations.add(association);
+        synchronized (mTransportsListeners) {
+            mTransportsListeners.register(listener);
+            mTransportsListeners.broadcast(listener1 -> {
+                // callback to the current listener with all the associations of the transports
+                // immediately
+                if (listener1 == listener) {
+                    try {
+                        listener.onTransportsChanged(getAssociationsWithTransport());
+                    } catch (RemoteException ignored) {
+                    }
                 }
-            }
+            });
         }
-        mTransportsListeners.broadcast(listener1 -> {
-            // callback to the current listener with all the associations of the transports
-            // immediately
-            if (listener1 == listener) {
-                try {
-                    listener.onTransportsChanged(associations);
-                } catch (RemoteException ignored) {
-                }
-            }
-        });
     }
 
     /**
      * Remove the listener for receiving callbacks when any of the transports is changed
      */
     public void removeListener(IOnTransportsChangedListener listener) {
-        mTransportsListeners.unregister(listener);
+        synchronized (mTransportsListeners) {
+            mTransportsListeners.unregister(listener);
+        }
     }
 
     /**
@@ -179,7 +174,7 @@ public class CompanionTransportManager {
         Slog.i(TAG, "Transport detached.");
     }
 
-    private void notifyOnTransportsChanged() {
+    private List<AssociationInfo> getAssociationsWithTransport() {
         List<AssociationInfo> associations = new ArrayList<>();
         synchronized (mTransports) {
             for (int i = 0; i < mTransports.size(); i++) {
@@ -190,12 +185,18 @@ public class CompanionTransportManager {
                 }
             }
         }
-        mTransportsListeners.broadcast(listener -> {
-            try {
-                listener.onTransportsChanged(associations);
-            } catch (RemoteException ignored) {
-            }
-        });
+        return associations;
+    }
+
+    private void notifyOnTransportsChanged() {
+        synchronized (mTransportsListeners) {
+            mTransportsListeners.broadcast(listener -> {
+                try {
+                    listener.onTransportsChanged(getAssociationsWithTransport());
+                } catch (RemoteException ignored) {
+                }
+            });
+        }
     }
 
     private void initializeTransport(int associationId,

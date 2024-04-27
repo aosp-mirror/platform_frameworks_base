@@ -22,5 +22,10 @@ enum class BiometricPromptState {
     /** The biometric prompt is active but data hasn't been returned yet. */
     PENDING,
     /** The biometric prompt has closed and returned data we then send to the provider activity. */
-    COMPLETE
+    COMPLETE,
+    /**
+     * The biometric prompt has been canceled by a developer signal. If this is true, certain
+     * conditions can be triggered, such as no longer propagating ERROR_CANCELED.
+     */
+    CANCELED,
 }

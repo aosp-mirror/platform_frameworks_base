@@ -31,7 +31,6 @@ public class AnimationFilter {
     boolean animateAlpha;
     boolean animateX;
     public boolean animateY;
-    ArraySet<View> animateYViews = new ArraySet<>();
     boolean animateZ;
     boolean animateHeight;
     boolean animateTopInset;
@@ -87,13 +86,8 @@ public class AnimationFilter {
         return this;
     }
 
-    public AnimationFilter animateY(View view) {
-        animateYViews.add(view);
-        return this;
-    }
-
     public boolean shouldAnimateY(View view) {
-        return animateY || animateYViews.contains(view);
+        return animateY;
     }
 
     /**
@@ -118,7 +112,6 @@ public class AnimationFilter {
         animateAlpha |= filter.animateAlpha;
         animateX |= filter.animateX;
         animateY |= filter.animateY;
-        animateYViews.addAll(filter.animateYViews);
         animateZ |= filter.animateZ;
         animateHeight |= filter.animateHeight;
         animateTopInset |= filter.animateTopInset;
@@ -131,7 +124,6 @@ public class AnimationFilter {
         animateAlpha = false;
         animateX = false;
         animateY = false;
-        animateYViews.clear();
         animateZ = false;
         animateHeight = false;
         animateTopInset = false;

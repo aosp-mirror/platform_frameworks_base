@@ -1005,7 +1005,6 @@ public final class MediaRouter2 {
      *     RoutingController#wasTransferInitiatedBySelf()}.
      * @hide
      */
-    @FlaggedApi(FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES)
     public void transfer(
             @NonNull RoutingController controller,
             @NonNull MediaRoute2Info route,

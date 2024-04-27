@@ -59,8 +59,8 @@ import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
-import com.android.systemui.flags.FakeFeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.DisableSceneContainer;
+import com.android.systemui.flags.EnableSceneContainer;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -76,6 +76,8 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.data.repository.FakeKeyguardStatusBarRepository;
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -101,7 +103,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
-    private final FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     @Mock
     private CarrierTextController mCarrierTextController;
     @Mock
@@ -115,9 +116,9 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarIconController mStatusBarIconController;
     @Mock
-    private StatusBarIconController.TintedIconManager.Factory mIconManagerFactory;
+    private TintedIconManager.Factory mIconManagerFactory;
     @Mock
-    private StatusBarIconController.TintedIconManager mIconManager;
+    private TintedIconManager mIconManager;
     @Mock
     private BatteryMeterViewController mBatteryMeterViewController;
     @Mock
@@ -160,7 +161,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
         mShadeViewStateProvider = new TestShadeViewStateProvider();
 
         MockitoAnnotations.initMocks(this);
@@ -217,7 +217,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mBiometricUnlockController,
                 mStatusBarStateController,
                 mStatusBarContentInsetsProvider,
-                mFeatureFlags,
                 mUserManager,
                 mStatusBarUserChipViewModel,
                 mSecureSettings,
@@ -334,8 +333,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void onViewReAttached_flagOff_iconManagerNotReRegistered() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
         mController.onViewAttached();
         mController.onViewDetached();
         reset(mStatusBarIconController);
@@ -346,8 +345,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void onViewReAttached_flagOn_iconManagerReRegistered() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
         mController.onViewAttached();
         mController.onViewDetached();
         reset(mStatusBarIconController);
@@ -383,9 +382,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void setBatteryListening_true_flagOn_callbackNotAdded() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
-
         mController.setBatteryListening(true);
 
         verify(mBatteryController, never()).addCallback(any());
@@ -563,8 +561,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_dozingTrue_flagOff_viewHidden() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
         mController.init();
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -576,8 +574,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableSceneContainer
     public void updateViewState_dozingFalse_flagOff_viewShown() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, false);
         mController.init();
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -589,8 +587,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void updateViewState_flagOn_doesNothing() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
         mController.init();
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -605,8 +603,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void updateViewStateWithAlphaAndVis_flagOn_doesNothing() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
         mController.init();
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -621,8 +619,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void setAlpha_flagOn_doesNothing() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
         mController.init();
         mController.onViewAttached();
         updateStateToKeyguard();
@@ -635,8 +633,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableSceneContainer
     public void setDozing_flagOn_doesNothing() {
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW, true);
         mController.init();
         mController.onViewAttached();
         updateStateToKeyguard();

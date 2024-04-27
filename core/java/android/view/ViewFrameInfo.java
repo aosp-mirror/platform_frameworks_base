@@ -34,6 +34,8 @@ public class ViewFrameInfo {
 
     private int mInputEventId;
 
+    private int mViewsMeasuredCounts;
+
     /**
      * Populate the missing fields using the data from ViewFrameInfo
      * @param frameInfo : the structure FrameInfo object to populate
@@ -51,6 +53,7 @@ public class ViewFrameInfo {
         drawStart = 0;
         mInputEventId = IInputConstants.INVALID_INPUT_EVENT_ID;
         flags = 0;
+        mViewsMeasuredCounts = 0;
     }
 
     /**
@@ -58,6 +61,13 @@ public class ViewFrameInfo {
      */
     public void markDrawStart() {
         drawStart = System.nanoTime();
+    }
+
+    /**
+     * Record the number of view being measured for the current frame.
+     */
+    public int getAndIncreaseViewMeasuredCount() {
+        return ++mViewsMeasuredCounts;
     }
 
     /**

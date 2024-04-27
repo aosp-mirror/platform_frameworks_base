@@ -30,6 +30,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
@@ -678,21 +679,32 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      */
     static class TimeLimitedFgsInfo {
         @UptimeMillisLong
-        private long mFirstFgsStartTime;
+        private long mFirstFgsStartUptime;
+        // The first fgs start time is maintained here separately in realtime-base
+        // for the 24-hour window reset logic.
+        @ElapsedRealtimeLong
+        private long mFirstFgsStartRealtime;
         @UptimeMillisLong
         private long mLastFgsStartTime;
         @UptimeMillisLong
         private long mTimeLimitExceededAt = Long.MIN_VALUE;
+        @UptimeMillisLong
         private long mTotalRuntime = 0;
 
         TimeLimitedFgsInfo(@UptimeMillisLong long startTime) {
-            mFirstFgsStartTime = startTime;
+            mFirstFgsStartUptime = startTime;
+            mFirstFgsStartRealtime = SystemClock.elapsedRealtime();
             mLastFgsStartTime = startTime;
         }
 
         @UptimeMillisLong
-        public long getFirstFgsStartTime() {
-            return mFirstFgsStartTime;
+        public long getFirstFgsStartUptime() {
+            return mFirstFgsStartUptime;
+        }
+
+        @ElapsedRealtimeLong
+        public long getFirstFgsStartRealtime() {
+            return mFirstFgsStartRealtime;
         }
 
         public void setLastFgsStartTime(@UptimeMillisLong long startTime) {
@@ -705,9 +717,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
 
         public void updateTotalRuntime() {
-            mTotalRuntime += SystemClock.elapsedRealtime() - mLastFgsStartTime;
+            mTotalRuntime += SystemClock.uptimeMillis() - mLastFgsStartTime;
         }
 
+        @UptimeMillisLong
         public long getTotalRuntime() {
             return mTotalRuntime;
         }
@@ -722,7 +735,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
 
         public void reset() {
-            mFirstFgsStartTime = 0;
+            mFirstFgsStartUptime = 0;
+            mFirstFgsStartRealtime = 0;
             mLastFgsStartTime = 0;
             mTotalRuntime = 0;
             mTimeLimitExceededAt = Long.MIN_VALUE;

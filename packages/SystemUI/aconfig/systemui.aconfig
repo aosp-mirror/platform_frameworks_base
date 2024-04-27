@@ -525,6 +525,13 @@ flag {
 }
 
 flag {
+   name: "smartspace_lockscreen_viewmodel"
+   namespace: "systemui"
+   description: "Indicate Smartspace lockscreen viewmodel"
+   bug: "331451011"
+}
+
+flag {
    name: "pin_input_field_styled_focus_state"
    namespace: "systemui"
    description: "Enables styled focus states on pin input field if keyboard is connected"
@@ -827,4 +834,14 @@ flag {
     namespace: "systemui"
     description: "Enforce BaseUserRestriction for DISALLOW_CONFIG_BRIGHTNESS."
     bug: "329205638"
+}
+
+flag {
+  name: "ambient_touch_monitor_listen_to_display_changes"
+  namespace: "systemui"
+  description: "listen to display changes and cache window metrics"
+  bug: "330906135"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

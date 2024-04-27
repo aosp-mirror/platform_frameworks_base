@@ -281,6 +281,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runClearWatchHeap(pw);
                 case "clear-start-info":
                     return runClearStartInfo(pw);
+                case "start-info-detailed-monitoring":
+                    return runStartInfoDetailedMonitoring(pw);
                 case "clear-exit-info":
                     return runClearExitInfo(pw);
                 case "bug-report":
@@ -1412,6 +1414,29 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
         mInternal.mProcessList.getAppStartInfoTracker()
                 .clearHistoryProcessStartInfo(packageName, userId);
+        return 0;
+    }
+
+    int runStartInfoDetailedMonitoring(PrintWriter pw) throws RemoteException {
+        String opt;
+        int userId = UserHandle.USER_CURRENT;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        if (userId == UserHandle.USER_CURRENT) {
+            UserInfo user = mInterface.getCurrentUser();
+            if (user == null) {
+                return -1;
+            }
+            userId = user.id;
+        }
+        mInternal.mProcessList.getAppStartInfoTracker()
+                .configureDetailedMonitoring(pw, getNextArg(), userId);
         return 0;
     }
 
@@ -4358,6 +4383,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Clear the previously set-watch-heap.");
             pw.println("  clear-start-info [--user <USER_ID> | all | current] [package]");
             pw.println("      Clear the process start-info for given package");
+            pw.println("  start-info-detailed-monitoring [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      Enable application start info detailed monitoring for the given package.");
+            pw.println("      Disable if no package is supplied.");
             pw.println("  clear-exit-info [--user <USER_ID> | all | current] [package]");
             pw.println("      Clear the process exit-info for given package");
             pw.println("  bug-report [--progress | --telephony]");

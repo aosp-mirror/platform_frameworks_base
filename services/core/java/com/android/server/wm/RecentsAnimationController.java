@@ -60,6 +60,7 @@ import android.view.SurfaceSession;
 import android.view.WindowInsets.Type;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
+import android.window.WindowAnimationState;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
@@ -370,6 +371,12 @@ public class RecentsAnimationController implements DeathRecipient {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public void handOffAnimation(
+                RemoteAnimationTarget[] targets, WindowAnimationState[] states) {
+            // unused legacy implementation
         }
     };
 
