@@ -303,10 +303,18 @@ constructor(
         // battery settings same as in QS icons
         batteryMeterViewController.ignoreTunerUpdates()
 
+        val fgColor =
+            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary)
+        val bgColor =
+            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimaryInverse)
+
         iconManager = tintedIconManagerFactory.create(iconContainer, StatusBarLocation.QS)
-        iconManager.setTint(
-            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary),
-            Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimaryInverse),
+        iconManager.setTint(fgColor, bgColor)
+
+        batteryIcon.updateColors(
+            fgColor /* foreground */,
+            bgColor /* background */,
+            fgColor /* single tone (current default) */
         )
 
         carrierIconSlots =

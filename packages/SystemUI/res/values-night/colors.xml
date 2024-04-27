@@ -77,6 +77,7 @@
     <color name="biometric_dialog_gray">#ffcccccc</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary70</color>
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
+    <color name="biometric_dialog_face_checkmark">#5bb974</color> <!-- green 400 -->
 
     <color name="GM2_green_500">#FF41Af6A</color>
     <color name="GM2_blue_500">#5195EA</color>

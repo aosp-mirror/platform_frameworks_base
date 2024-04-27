@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"તાજેતરની ઍપ પર આગળ જાઓ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"તાજેતરની ઍપ પર પાછળ જાઓ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"ઍપની સૂચિ ખોલો"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"ટાસ્કબાર બતાવો"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"સેટિંગ ખોલો"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ખોલો"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"લૉક સ્ક્રીન"</string>

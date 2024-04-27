@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"Credential Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Cancelar"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuar"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"Guardar outra forma"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Guardar de outra forma"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Saber mais"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Mostrar palavra-passe"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Ocultar palavra-passe"</string>

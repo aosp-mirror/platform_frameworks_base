@@ -828,7 +828,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"पासवर्ड नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"स्क्रीन लॉक पासवर्ड आणि पिन मध्ये अनुमती दिलेले लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"स्क्रीन अनलॉक प्रयत्नांवर लक्ष ठेवा"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅबलेट लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास टॅबलेटचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"टाइप केलेल्या चुकीच्या पासवर्डच्या संख्येचे निरीक्षण करा. स्क्रीन अनलॉक करताना, टॅबलेट लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास, टॅबलेटचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्ड संख्येचे परीक्षण करते आणि Android TV डिव्हाइस लॉक करते किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास Android TV डिव्हाइसचा सर्व डेटा मिटवते."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"टाइप केलेल्या चुकीच्या पासवर्डच्या संख्येचे निरीक्षण करा. स्क्रीन अनलॉक करताना, इंफोटेनमेंट सिस्टीम लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास, इंफोटेनमेंट सिस्टीमचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"स्क्रीन अनलॉक करताना टाइप केलेल्या अयोग्य पासवर्डच्या संख्येवर लक्ष ठेवा. बरेच पासवर्ड टाइप केले असल्यास फोन लॉक करा किंवा फोनचा सर्व डेटा मिटवा."</string>
@@ -841,7 +841,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"स्क्रीन लॉक करा"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"स्क्रीन कशी आणि केव्हा लॉक होते ते नियंत्रित करा."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"सर्व डेटा मिटवा"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय टॅब्लेटचा डेटा मिटवा."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय टॅबलेटचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"चेतावणी न देता फॅक्टरी डेटा रीसेट करून Android TV डिव्हाइसचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"फॅक्टरी डेटा रीसेट करून कोणत्याही चेतावणीशिवाय इंफोटेनमेंट सिस्टीमचा डेटा मिटवा."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय फोनचा डेटा मिटवा."</string>

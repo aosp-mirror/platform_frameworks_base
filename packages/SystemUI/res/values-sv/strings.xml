@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Bläddra framåt bland de senaste apparna"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Bläddra bakåt bland de senaste apparna"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Öppna applistan"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Se aktivitetsfält"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Öppna inställningarna"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Öppna assistenten"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lås skärmen"</string>

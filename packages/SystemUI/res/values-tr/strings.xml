@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Son uygulamalarda ileriye doğru git"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Son uygulamalarda geriye doğru git"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Uygulama listesini aç"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Görev çubuğunu göster"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ayarları aç"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Asistan\'ı aç"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Kilit ekranı"</string>

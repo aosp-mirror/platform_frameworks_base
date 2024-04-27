@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Kruženje unaprijed kroz nedavne aplikacije"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Kruženje unatrag kroz nedavne aplikacije"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvaranje popisa aplikacija"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Pokaži traku sa zadacima"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvaranje postavki"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvaranje asistenta"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključavanje zaslona"</string>

@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"မကြာသေးမီက အက်ပ်များကို အဝိုင်းပုံရှေ့သို့လှည့်ရန်"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"မကြာသေးမီက အက်ပ်များကို အဝိုင်းပုံနောက်ပြန်လှည့်ရန်"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"အက်ပ်ပြသမှု ဖွင့်ရန်"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Taskbar ပြပါ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"ဆက်တင်များ ဖွင့်ရန်"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Assistant ဖွင့်ရန်"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"လော့ခ်မျက်နှာပြင်"</string>

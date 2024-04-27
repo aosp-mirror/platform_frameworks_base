@@ -735,7 +735,6 @@
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"រុករកទៅមុខ ដើម្បីមើលកម្មវិធីថ្មីៗ"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"រុករកថយក្រោយ ដើម្បីមើលកម្មវិធីថ្មីៗ"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"បើកបញ្ជីកម្មវិធី"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"បង្ហាញរបារកិច្ចការ"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"បើកការកំណត់"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"បើក​ជំនួយការ"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ចាក់​សោ​អេក្រង់"</string>

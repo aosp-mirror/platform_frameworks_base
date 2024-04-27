@@ -829,7 +829,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Establecimiento de reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Controla la longitud y los caracteres permitidos en los PIN y en las contraseñas de bloqueo de pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisar los intentos de desbloqueo de pantalla"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el tablet o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea la tablet o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Comprueba cuántas veces se han introducido contraseñas incorrectas para desbloquear la pantalla y, si te parece que han sido demasiadas, bloquea tu dispositivo Android TV o borra todos sus datos."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el sistema de infoentretenimiento o borra todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el teléfono o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
@@ -842,7 +842,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloquear la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Controla cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Borrar todos los datos"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Borrar los datos del tablet sin avisar restableciendo el estado de fábrica"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Borra los datos de la tablet sin avisar restableciendo el estado de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Restablece los datos de fábrica de tu dispositivo Android TV, eliminando sin previo aviso los datos que tuviera."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Borra los datos del sistema de infoentretenimiento sin avisar restableciendo el estado de fábrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
@@ -1510,7 +1510,7 @@
     <string name="deny" msgid="6632259981847676572">"Denegar"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Permiso solicitado"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Permiso solicitado\npara la cuenta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Permiso solicitado por <xliff:g id="APP">%1$s</xliff:g>\npara acceder a la cuenta<xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
+    <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"Permiso solicitado por <xliff:g id="APP">%1$s</xliff:g>\npara acceder a la cuenta <xliff:g id="ACCOUNT">%2$s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"Estás usando esta aplicación fuera del perfil de trabajo"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Estás usando esta aplicación en tu perfil de trabajo"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Método de introducción de texto"</string>
