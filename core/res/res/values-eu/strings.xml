@@ -2003,7 +2003,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Mapak eta nabigazioa"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Produktibitatea"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Erabilerraztasuna"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Gailuaren memoria"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Gailuko biltegia"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB bidezko arazketa"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"ordu"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"minutu"</string>
