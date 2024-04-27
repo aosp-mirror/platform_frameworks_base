@@ -59,3 +59,14 @@ flag {
     bug: "333752000"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "add_schandle_to_vri_surface"
+    namespace: "window_surfaces"
+    description: "Add surface control handle to VRI Surface"
+    bug: "320706287"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
