@@ -3856,7 +3856,7 @@ public final class ActiveServices {
     void onFgsTimeout(ServiceRecord sr) {
         synchronized (mAm) {
             final int fgsType = getTimeLimitedFgsType(sr.foregroundServiceType);
-            if (fgsType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
+            if (fgsType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE || sr.app == null) {
                 mFGSAnrTimer.discard(sr);
                 return;
             }
