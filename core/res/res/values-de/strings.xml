@@ -803,7 +803,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Zulässige Länge und Zeichen für Passwörter für die Displaysperre festlegen"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Versuche zum Entsperren des Displays überwachen"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten auf dem Tablet löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten auf dem Tablet löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Es wird überwacht, wie oft beim Versuch, den Bildschirm zu entsperren, ein falsches Passwort eingegeben wird. Wenn es zu viele Fehlversuche gibt, wird das Android TV-Gerät gesperrt oder alle Daten darauf werden gelöscht."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays erfassen und Infotainmentsystem sperren oder alle Daten des Infotainmentsystems löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Bildschirms überwachen und Telefon sperren oder alle Daten auf dem Telefon löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
@@ -1722,7 +1722,7 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Wähle eine Funktion aus, die verwendet wird, wenn du auf die Schaltfläche \"Bedienungshilfen\" tippst:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Wähle die Funktion aus, die mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit zwei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Wähle eine Funktion aus, die mit der Touch-Geste für die Bedienungshilfen verwendet werden soll (mit drei Fingern vom unteren Bildschirmrand nach oben wischen):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Wenn du zwischen den Funktionen wechseln möchtest, halte die Schaltfläche \"Bedienungshilfen\" gedrückt."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Wenn du zwischen den Funktionen wechseln möchtest, halte die Schaltfläche „Bedienungshilfen“ gedrückt."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Wenn du zwischen den Funktionen wechseln möchtest, wische mit zwei Fingern nach oben und halte."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Wenn du zwischen den Funktionen wechseln möchtest, wische mit drei Fingern nach oben und halte."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Vergrößerung"</string>

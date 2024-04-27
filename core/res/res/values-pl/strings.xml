@@ -805,7 +805,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolowanie długości haseł blokady ekranu i kodów PIN oraz dozwolonych w nich znaków."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitorowanie prób odblokowania ekranu"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Przy odblokowywaniu ekranu monitoruj, ile razy wpisano nieprawidłowe hasło i blokuj tablet lub usuń z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło i blokuje tablet lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Monitorowanie liczby nieudanych prób odblokowania ekranu za pomocą hasła oraz blokowanie urządzenia z Androidem TV lub kasowanie z niego wszystkich danych w razie wpisania błędnego hasła zbyt wiele razy."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Monitorowanie przypadków nieprawidłowego wpisania hasła podczas odblokowywania ekranu i blokowanie systemu multimedialno-rozrywkowego lub usuwanie z niego wszystkich danych przy zbyt dużej liczbie błędnych prób."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy."</string>
@@ -1238,7 +1238,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Zawsze pokazuj"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje obecnie ustawionego rozmiaru wyświetlacza i może działać niestabilnie."</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje obecnie ustawionego rozmiaru wyświetlanych elementów i może działać niestabilnie."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Zawsze pokazuj"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została skompilowana pod niezgodną wersję systemu Android i może zachowywać się niezgodnie z oczekiwaniami. Sprawdź, czy jest dostępna zaktualizowana wersja aplikacji."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Zawsze pokazuj"</string>
