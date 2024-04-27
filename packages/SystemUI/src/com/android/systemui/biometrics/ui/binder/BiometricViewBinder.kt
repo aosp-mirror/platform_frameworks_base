@@ -112,10 +112,6 @@ object BiometricViewBinder {
             }
 
         // set selected to enable marquee unless a screen reader is enabled
-        logoView.isSelected =
-            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
-        logoDescriptionView.isSelected =
-            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         titleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
@@ -419,19 +415,6 @@ object BiometricViewBinder {
                         indicatorMessageView.isSelected =
                             !accessibilityManager.isEnabled ||
                                 !accessibilityManager.isTouchExplorationEnabled
-
-                        /**
-                         * Note: Talkback 14.0 has new rate-limitation design to reduce frequency of
-                         * TYPE_WINDOW_CONTENT_CHANGED events to once every 30 seconds. (context:
-                         * b/281765653#comment18) Using {@link View#announceForAccessibility}
-                         * instead as workaround since sending events exceeding this frequency is
-                         * required.
-                         */
-                        indicatorMessageView?.text?.let {
-                            if (it.isNotBlank()) {
-                                view.announceForAccessibility(it)
-                            }
-                        }
                     }
                 }
 
