@@ -25,7 +25,6 @@ import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 
 import java.util.Objects;
 
@@ -44,8 +43,6 @@ import java.util.Objects;
     private final int mInternalDeviceType;
     @NonNull
     private final String mDeviceAddress;
-    /** Unique device id from internal device type and address. */
-    private final Pair<Integer, String> mDeviceId;
     private boolean mSAEnabled;
     private boolean mHasHeadTracker = false;
     private boolean mHeadTrackerEnabled;
@@ -71,11 +68,6 @@ import java.util.Objects;
         }
         mDeviceAddress = isBluetoothDevice(mInternalDeviceType) ? Objects.requireNonNull(
                 address) : "";
-        mDeviceId = new Pair<>(mInternalDeviceType, mDeviceAddress);
-    }
-
-    public Pair<Integer, String> getDeviceId() {
-        return mDeviceId;
     }
 
     @AudioDeviceInfo.AudioDeviceType
@@ -146,8 +138,7 @@ import java.util.Objects;
 
     @Override
     public String toString() {
-        return "type: " + mDeviceType
-                + " internal type: 0x" + Integer.toHexString(mInternalDeviceType)
+        return "type: " + mDeviceType + "internal type: " + mInternalDeviceType
                 + " addr: " + mDeviceAddress + " enabled: " + mSAEnabled
                 + " HT: " + mHasHeadTracker + " HTenabled: " + mHeadTrackerEnabled;
     }
