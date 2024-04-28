@@ -816,7 +816,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Lukita ruudun"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Hallinnoida, milloin ja miten näyttö lukittuu."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Pyyhkiä kaikki tiedot"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Tyhjentää tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Tyhjentää Android TV ‑laitteen tiedot ilman varoitusta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Poistaa infotainment-järjestelmän datan ilman varoitusta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Tyhjentää puhelimen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
