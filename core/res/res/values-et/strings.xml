@@ -816,7 +816,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Ekraani lukustamine"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Määrake, kuidas ja millal ekraan lukustub."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Kõikide andmete kustutamine"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Kustutage tahvelarvuti andmed hoiatamata, lähtestades arvuti tehaseandmetele."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Kustutab tahvelarvuti andmed hoiatamata, lähtestades arvuti tehaseandmetele."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Kustutatakse teie Android TV seadme andmed ilma hoiatamata, lähtestades seadme tehase andmetele."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Teabe ja meelelahutuse süsteemi andmete hoiatamata kustutamine tehase andmetele lähtestamise abil."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Kustutab telefoniandmed hoiatuseta, lähtestades telefoni tehaseseadetele."</string>
