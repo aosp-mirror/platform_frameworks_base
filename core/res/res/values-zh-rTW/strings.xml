@@ -803,7 +803,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住平板電腦或全部清除平板電腦中的資料。"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"監控螢幕解鎖時密碼輸入錯誤的次數；如果錯誤次數過多，會鎖住平板電腦或清除平板電腦的所有資料。"</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"監控螢幕解鎖密碼輸入錯誤的次數。如果輸入錯誤的次數超過上限，系統會將 Android TV 裝置鎖定，或清除 Android TV 裝置的所有資料。"</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"監控密碼輸入錯誤的次數。解鎖螢幕時，如果密碼輸入錯誤次數過多，系統就會鎖住資訊娛樂系統或清除資訊娛樂系統的所有資料。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"監控螢幕解鎖時密碼輸入錯誤的次數；如果密碼輸入錯誤的次數過多，則會鎖住手機或清除手機的所有資料。"</string>
