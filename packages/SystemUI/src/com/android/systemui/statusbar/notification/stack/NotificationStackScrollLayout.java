@@ -2399,12 +2399,13 @@ public class NotificationStackScrollLayout
     private void updateContentHeight() {
         final float scrimTopPadding = mAmbientState.isOnKeyguard() ? 0 : mMinimumPaddings;
         final int shelfIntrinsicHeight = mShelf != null ? mShelf.getIntrinsicHeight() : 0;
+        final int footerIntrinsicHeight = mFooterView != null ? mFooterView.getIntrinsicHeight() : 0;
         final float height =
                 (int) scrimTopPadding + (int) mNotificationStackSizeCalculator.computeHeight(
                         /* notificationStackScrollLayout= */ this, mMaxDisplayedNotifications,
                         shelfIntrinsicHeight);
         mIntrinsicContentHeight = height;
-        mScrollViewFields.sendStackHeight(height);
+        mScrollViewFields.sendStackHeight(height + footerIntrinsicHeight);
 
         // The topPadding can be bigger than the regular padding when qs is expanded, in that
         // state the maxPanelHeight and the contentHeight should be bigger
