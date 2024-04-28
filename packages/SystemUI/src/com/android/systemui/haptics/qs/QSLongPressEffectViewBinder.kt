@@ -57,6 +57,7 @@ object QSLongPressEffectViewBinder {
                                     qsLongPressEffect.clearActionType()
                                 }
                                 QSLongPressEffect.ActionType.LONG_PRESS -> {
+                                    tile.prepareForLaunch()
                                     tile.performLongClick()
                                     qsLongPressEffect.clearActionType()
                                 }

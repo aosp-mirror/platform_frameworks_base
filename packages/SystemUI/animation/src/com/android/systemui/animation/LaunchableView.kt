@@ -16,6 +16,7 @@
 
 package com.android.systemui.animation
 
+import android.graphics.Rect
 import android.view.View
 
 /** A view that can expand/launch into an app or a dialog. */
@@ -41,6 +42,9 @@ interface LaunchableView {
 
     /** Perform an action when the activity launch animation ends */
     fun onActivityLaunchAnimationEnd() {}
+
+    /** Provide an optional correction applied to the visible area during a launch animation */
+    fun getPaddingForLaunchAnimation(): Rect = Rect()
 }
 
 /** A delegate that can be used by views to make the implementation of [LaunchableView] easier. */

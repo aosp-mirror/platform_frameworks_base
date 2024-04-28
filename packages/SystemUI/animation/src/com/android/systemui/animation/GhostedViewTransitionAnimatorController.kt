@@ -191,14 +191,20 @@ constructor(
         // so we have to take the optical insets into account.
         ghostedView.getLocationOnScreen(ghostedViewLocation)
         val insets = backgroundInsets
-        state.top = ghostedViewLocation[1] + insets.top
+        val boundCorrections: Rect =
+            if (ghostedView is LaunchableView) {
+                ghostedView.getPaddingForLaunchAnimation()
+            } else {
+                Rect()
+            }
+        state.top = ghostedViewLocation[1] + insets.top + boundCorrections.top
         state.bottom =
             ghostedViewLocation[1] + (ghostedView.height * ghostedView.scaleY).roundToInt() -
-                insets.bottom
-        state.left = ghostedViewLocation[0] + insets.left
+                insets.bottom + boundCorrections.bottom
+        state.left = ghostedViewLocation[0] + insets.left + boundCorrections.left
         state.right =
             ghostedViewLocation[0] + (ghostedView.width * ghostedView.scaleX).roundToInt() -
-                insets.right
+                insets.right + boundCorrections.right
     }
 
     override fun onTransitionAnimationStart(isExpandingFullyAbove: Boolean) {
