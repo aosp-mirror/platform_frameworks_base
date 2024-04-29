@@ -35,6 +35,7 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
@@ -78,6 +79,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     private val sceneBackInteractor = kosmos.sceneBackInteractor
     private val sceneContainerStartable = kosmos.sceneContainerStartable
 
+    private val mediaDataManager = mock<MediaDataManager>()
+
     private lateinit var underTest: QuickSettingsSceneViewModel
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -97,6 +100,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 footerActionsViewModelFactory = footerActionsViewModelFactory,
                 footerActionsController = footerActionsController,
                 sceneBackInteractor = sceneBackInteractor,
+                mediaDataManager = mediaDataManager,
             )
     }
 
@@ -229,5 +233,23 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
         underTest.getFooterActionsViewModel(mock())
 
         verify(footerActionsController, times(1)).init()
+    }
+
+    @Test
+    fun hasMedia_mediaVisible() {
+        testScope.runTest {
+            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(true)
+
+            assertThat(underTest.isMediaVisible()).isTrue()
+        }
+    }
+
+    @Test
+    fun doesNotHaveMedia_mediaNotVisible() {
+        testScope.runTest {
+            whenever(mediaDataManager.hasAnyMediaOrRecommendation()).thenReturn(false)
+
+            assertThat(underTest.isMediaVisible()).isFalse()
+        }
     }
 }
