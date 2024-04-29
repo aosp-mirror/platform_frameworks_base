@@ -1396,7 +1396,14 @@ public class PackageWatchdog {
             int innerDepth = parser.getDepth();
             try {
                 if (Flags.recoverabilityDetection()) {
-                    observerMitigationCount = parser.getAttributeInt(null, ATTR_MITIGATION_COUNT);
+                    try {
+                        observerMitigationCount =
+                                parser.getAttributeInt(null, ATTR_MITIGATION_COUNT);
+                    } catch (XmlPullParserException e) {
+                        Slog.i(
+                            TAG,
+                            "ObserverInternal mitigation count was not present.");
+                    }
                 }
                 while (XmlUtils.nextElementWithin(parser, innerDepth)) {
                     if (TAG_PACKAGE.equals(parser.getName())) {
