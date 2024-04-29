@@ -20,12 +20,17 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.content.res.TypedArray;
 import android.os.Looper;
 import android.platform.test.annotations.EnableFlags;
 import android.service.dreams.DreamService;
@@ -41,6 +46,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -81,6 +87,18 @@ public class DreamServiceTest {
 
         assertThat(metadata.settingsActivity).isNull();
         assertThat(metadata.dreamCategory).isEqualTo(DreamService.DREAM_CATEGORY_DEFAULT);
+    }
+
+    @Test
+    public void testMetadataParsing_exceptionReading() {
+        final PackageManager packageManager = Mockito.mock(PackageManager.class);
+        final ServiceInfo serviceInfo = Mockito.mock(ServiceInfo.class);
+        final TypedArray rawMetadata = Mockito.mock(TypedArray.class);
+        when(packageManager.extractPackageItemInfoAttributes(eq(serviceInfo), any(), any(), any()))
+                .thenReturn(rawMetadata);
+        when(rawMetadata.getString(anyInt())).thenThrow(new RuntimeException("failure"));
+
+        assertThat(DreamService.getDreamMetadata(packageManager, serviceInfo)).isNull();
     }
 
     private DreamService.DreamMetadata getDreamMetadata(String dreamClassName)

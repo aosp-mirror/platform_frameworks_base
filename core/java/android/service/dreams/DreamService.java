@@ -1383,16 +1383,22 @@ public class DreamService extends Service implements Window.Callback {
                 DreamService.DREAM_META_DATA, DREAM_META_DATA_ROOT_TAG,
                 com.android.internal.R.styleable.Dream)) {
             if (rawMetadata == null) return null;
-            return new DreamMetadata(
-                    convertToComponentName(
-                    rawMetadata.getString(
-                            com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
-                    rawMetadata.getDrawable(
-                            com.android.internal.R.styleable.Dream_previewImage),
-                    rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
-                            DEFAULT_SHOW_COMPLICATIONS),
-                    rawMetadata.getInt(R.styleable.Dream_dreamCategory, DREAM_CATEGORY_DEFAULT)
-                    );
+            try {
+                return new DreamMetadata(
+                        convertToComponentName(
+                                rawMetadata.getString(
+                                        com.android.internal.R.styleable.Dream_settingsActivity),
+                                serviceInfo),
+                        rawMetadata.getDrawable(
+                                com.android.internal.R.styleable.Dream_previewImage),
+                        rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
+                                DEFAULT_SHOW_COMPLICATIONS),
+                        rawMetadata.getInt(R.styleable.Dream_dreamCategory, DREAM_CATEGORY_DEFAULT)
+                );
+            } catch (Exception exception) {
+                Log.e(TAG, "Failed to create read metadata", exception);
+                return null;
+            }
         }
     }
 
