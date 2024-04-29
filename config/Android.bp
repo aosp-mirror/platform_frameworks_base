@@ -29,6 +29,13 @@ license {
     ],
 }
 
+prebuilt_etc {
+    name: "preloaded-classes",
+    src: "preloaded-classes",
+    filename: "preloaded-classes",
+    installable: false,
+}
+
 filegroup {
     name: "preloaded-classes-denylist",
     srcs: ["preloaded-classes-denylist"],
