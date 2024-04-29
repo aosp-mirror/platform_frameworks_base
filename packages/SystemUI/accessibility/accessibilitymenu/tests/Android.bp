@@ -34,6 +34,7 @@ android_test {
         "compatibility-device-util-axt",
         "platform-test-annotations",
         "truth",
+        "uiautomator-helpers",
     ],
     srcs: [
         "src/**/*.java",
