@@ -136,8 +136,14 @@ public class AnrTimerTest {
             this(helper.mHandler, MSG_TIMEOUT, caller());
         }
 
-        void start(TestArg arg, long millis) {
-            start(arg, arg.pid, arg.uid, millis);
+        @Override
+        public int getPid(TestArg arg) {
+            return arg.pid;
+        }
+
+        @Override
+        public int getUid(TestArg arg) {
+            return arg.uid;
         }
 
         // Return the name of method that called the constructor, assuming that this function is

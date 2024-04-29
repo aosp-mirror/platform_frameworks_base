@@ -47,7 +47,7 @@ import java.util.Objects;
  * mode, the timer just sends a delayed message.  In modern mode, the timer is implemented in
  * native code; on expiration, the message is sent without delay.
  *
- * <p>There are four external operations on a timer:
+ * <p>There are five external operations on a timer:
  * <ul>
  *
  * <li>{@link #start} starts a timer.  The timer is started with an object that the message
@@ -74,9 +74,13 @@ import java.util.Objects;
  * exit. (So, instances in system server generally need not be explicitly closed since they are
  * created during process start and will last until process exit.)
  *
+ * <p>AnrTimer parameterized by the type <code>V</code>.  The public methods on AnrTimer require
+ * an instance of <code>V</code>; the instance of <code>V</code> is a key that identifies a
+ * specific timer.
+ *
  * @hide
  */
-public class AnrTimer<V> implements AutoCloseable {
+public abstract class AnrTimer<V> implements AutoCloseable {
 
     /**
      * The log tag.
@@ -99,6 +103,20 @@ public class AnrTimer<V> implements AutoCloseable {
      * The trace tag is the same usd by ActivityManager.
      */
     private static final long TRACE_TAG = Trace.TRACE_TAG_ACTIVITY_MANAGER;
+
+    /**
+     * Fetch the Linux pid from the object. The returned value may be zero to indicate that there
+     * is no valid pid available.
+     * @return a valid pid or zero.
+     */
+    public abstract int getPid(V obj);
+
+    /**
+     * Fetch the Linux uid from the object. The returned value may be zero to indicate that there
+     * is no valid uid available.
+     * @return a valid uid or zero.
+     */
+    public abstract int getUid(V obj);
 
     /**
      * Return true if the feature is enabled.  By default, the value is take from the Flags class
@@ -564,13 +582,11 @@ public class AnrTimer<V> implements AutoCloseable {
      * allows a client to deliver an immediate timeout via the AnrTimer.
      *
      * @param arg The key by which the timer is known.  This is never examined or modified.
-     * @param pid The Linux process ID of the target being timed.
-     * @param uid The Linux user ID of the target being timed.
      * @param timeoutMs The timer timeout, in milliseconds.
      */
-    public void start(@NonNull V arg, int pid, int uid, long timeoutMs) {
+    public void start(@NonNull V arg, long timeoutMs) {
         if (timeoutMs < 0) timeoutMs = 0;
-        mFeature.start(arg, pid, uid, timeoutMs);
+        mFeature.start(arg, getPid(arg), getUid(arg), timeoutMs);
     }
 
     /**
