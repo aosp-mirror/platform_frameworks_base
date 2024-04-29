@@ -226,6 +226,13 @@ flag {
 }
 
 flag {
+    name: "dual_shade"
+    namespace: "systemui"
+    description: "Enables the BC25 Dual Shade (go/bc25-dual-shade-design)."
+    bug: "337259436"
+}
+
+flag {
     name: "keyguard_bottom_area_refactor"
     namespace: "systemui"
     description: "Bottom area of keyguard refactor move into KeyguardRootView. Includes "

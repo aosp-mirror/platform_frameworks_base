@@ -98,10 +98,8 @@
     <skip />
     <!-- no translation found for bluetooth_active_battery_level_untethered (4961338936672922617) -->
     <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"သုံးနေသည်။ ဘယ်ဘက်- ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>။"</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"သုံးနေသည်။ ညာဘက်- ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>။"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <!-- no translation found for bluetooth_battery_level_untethered (1616774716076301755) -->
@@ -112,12 +110,9 @@
     <skip />
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ဖွင့်ထားသည်"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"သိမ်းထားသည်များ"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"သုံးနေသည် (ဘယ်ဘက်သီးသန့်)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"သုံးနေသည် (ညာဘက်သီးသန့်)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"သုံးနေသည် (ဘယ်နှင့်ညာ)"</string>
     <!-- no translation found for bluetooth_active_media_only_battery_level (7772517511061834073) -->
     <skip />
     <!-- no translation found for bluetooth_active_media_only_battery_level_untethered (7444753133664620926) -->

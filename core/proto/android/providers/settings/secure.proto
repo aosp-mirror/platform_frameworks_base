@@ -102,7 +102,7 @@ message SecureSettingsProto {
         optional SettingProto qs_targets = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_pinch_to_zoom_anywhere_enabled = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_single_finger_panning_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto accessibility_floating_menu_targets = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility_gesture_targets = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto display_daltonizer_saturation_level = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }

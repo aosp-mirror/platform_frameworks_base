@@ -326,7 +326,7 @@ public class SecureSettingsValidators {
                 Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(
-                Secure.ACCESSIBILITY_FLOATING_MENU_TARGETS,
+                Secure.ACCESSIBILITY_GESTURE_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_QS_TARGETS,

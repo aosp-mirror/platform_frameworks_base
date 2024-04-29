@@ -154,16 +154,31 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>:‏ <xliff:g id="DIALING_NUMBER">{1}</xliff:g> אחרי <xliff:g id="TIME_DELAY">{2}</xliff:g> שניות"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ללא העברה"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ללא העברה"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"אבטחת הרשת הסלולרית"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"בדיקת ההגדרות"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"בוצעה גישה למזהה המכשיר"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"‏רשת בחיבור <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> רשמה את המזהה הייחודי של המכשיר שלך (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> פעמים בתקופה שבין <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ל-<xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"חיבור מוצפן אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"התחברת עכשיו לרשת סלולרית מאובטחת יותר."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"חיבור לא מוצפן אל <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"התחברת עכשיו לרשת סלולרית לא מוצפנת. השיחות, ההודעות והנתונים שלך חשופים ליירוט."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"הגדרות אבטחה סלולרית"</string>
+    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
+    <skip />
+    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
+    <skip />
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"מידע נוסף"</string>
+    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
+    <skip />
     <string name="fcComplete" msgid="1080909484660507044">"קוד תכונה הושלם."</string>
     <string name="fcError" msgid="5325116502080221346">"בעיה בחיבור או קוד תכונה לא תקין."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"אישור"</string>
@@ -357,8 +372,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"צילום המסך"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ניתן לצלם צילום מסך של התצוגה."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"תצוגה מקדימה, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"סגירה"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"השבתה או שינוי של שורת הסטטוס"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"מאפשרת לאפליקציה להשבית את שורת הסטטוס או להוסיף ולהסיר סמלי מערכת."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"להיות שורת הסטטוס"</string>
@@ -1656,9 +1670,9 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"מערכת"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"‏אודיו Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"צג אלחוטי"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"‏העברה (cast)"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"‏הפעלת Cast"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"התחברות למכשיר"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"העברת מסך אל מכשיר"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"‏הפעלת Cast של התוכן במסך אל מכשיר"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"המערכת מחפשת מכשירים…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"הגדרות"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ניתוק"</string>
@@ -1899,8 +1913,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"יש לבקש קוד אימות לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"צריך לבקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"יש לבקש סיסמה לפני ביטול הצמדה"</string>
-    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"החבילה הותקנה על ידי האדמין.\nצריך לעבור להגדרות כדי לראות את ההרשאות שניתנו"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"נמחקה על ידי מנהל המערכת"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"אישור"</string>
@@ -2218,6 +2231,10 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"לעבור לאפליקציה לעבודה?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"בארגון שלך מאפשרים לבצע שיחות רק מאפליקציות לעבודה"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"בארגון שלך מאפשרים לשלוח הודעות רק מאפליקציות לעבודה"</string>
+    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
+    <skip />
+    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"בדפדפן האישי"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"בדפדפן של העבודה"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"שיחה"</string>

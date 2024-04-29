@@ -1340,35 +1340,39 @@ public class TransitionAnimation {
         final int pixelStride = plane.getPixelStride();
         final int rowStride = plane.getRowStride();
         final int sampling = 10;
-        final int[] borderLumas = new int[(width + height) * 2 / sampling];
+        final int[] histogram = new int[256];
 
         // Grab the top and bottom borders.
         int i = 0;
         for (int x = 0, size = width - sampling; x < size; x += sampling) {
-            borderLumas[i++] = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
-            borderLumas[i++] = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
+            final int topLm = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
+            final int bottomLm = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
+            histogram[topLm]++;
+            histogram[bottomLm]++;
         }
 
         // Grab the left and right borders.
         for (int y = 0, size = height - sampling; y < size; y += sampling) {
-            borderLumas[i++] = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
-            borderLumas[i++] = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
+            final int leftLm = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
+            final int rightLm = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
+            histogram[leftLm]++;
+            histogram[rightLm]++;
         }
 
         ir.close();
 
-        // Get "mode" by histogram.
-        final int[] histogram = new int[256];
-        int maxCount = 0;
-        int mostLuma = 0;
-        for (int luma : borderLumas) {
-            final int count = ++histogram[luma];
-            if (count > maxCount) {
-                maxCount = count;
-                mostLuma = luma;
+        // Find the median from histogram.
+        final int halfNum = (width + height) / sampling;
+        int sum = 0;
+        int medianLuminance = 0;
+        for (i = 0; i < histogram.length; i++) {
+            sum += histogram[i];
+            if (sum >= halfNum) {
+                medianLuminance = i;
+                break;
             }
         }
-        return mostLuma / 255f;
+        return medianLuminance / 255f;
     }
 
     /** Returns the luminance of the pixel in 0~255. */

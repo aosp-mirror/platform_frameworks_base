@@ -436,6 +436,33 @@ public class ViewFrameRateTest {
         waitForAfterDraw();
     }
 
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+    })
+    public void willNotDrawUsesCategory() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setWillNotDraw(true);
+            mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_LOW);
+        });
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.invalidate();
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_LOW,
+                    mViewRoot.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_NORMAL);
+            mMovingView.setAlpha(0.9f);
+            runAfterDraw(() -> {
+                assertEquals(FRAME_RATE_CATEGORY_NORMAL,
+                        mViewRoot.getLastPreferredFrameRateCategory());
+            });
+        });
+        waitForAfterDraw();
+    }
+
     /**
      * A common behavior is for two different views to be invalidated in succession, but
      * intermittently. We want to treat this as an intermittent invalidation.

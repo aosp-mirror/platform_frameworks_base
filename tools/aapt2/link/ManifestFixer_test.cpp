@@ -677,6 +677,83 @@ TEST_F(ManifestFixerTest, DontReplaceVersionNameOrCode) {
   EXPECT_THAT(attr->value, StrEq("0x00000002"));
 }
 
+TEST_F(ManifestFixerTest, MarkNonUpdatableSystem) {
+  ManifestFixerOptions options;
+  options.non_updatable_system = true;
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Attribute* attr = manifest_el->FindAttribute("", "updatableSystem");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("false"));
+}
+
+TEST_F(ManifestFixerTest, MarkNonUpdatableSystemOverwritingValue) {
+  ManifestFixerOptions options;
+  options.non_updatable_system = true;
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android"
+                updatableSystem="true" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Attribute* attr = manifest_el->FindAttribute("", "updatableSystem");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("false"));
+}
+
+TEST_F(ManifestFixerTest, DontMarkNonUpdatableSystemWhenExplicitVersion) {
+  ManifestFixerOptions options;
+  options.non_updatable_system = true;
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android"
+                android:versionCode="0x00000001" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Attribute* attr = manifest_el->FindAttribute("", "updatableSystem");
+  ASSERT_THAT(attr, IsNull());
+}
+
+TEST_F(ManifestFixerTest, DontMarkNonUpdatableSystemWhenAddedVersion) {
+  ManifestFixerOptions options;
+  options.non_updatable_system = true;
+  options.version_code_default = std::string("0x10000000");
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android" />)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Attribute* attr = manifest_el->FindAttribute("", "updatableSystem");
+  ASSERT_THAT(attr, IsNull());
+
+  attr = manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("0x10000000"));
+}
+
 TEST_F(ManifestFixerTest, EnsureManifestAttributesAreTyped) {
   EXPECT_THAT(Verify("<manifest package=\"android\" coreApp=\"hello\" />"), IsNull());
   EXPECT_THAT(Verify("<manifest package=\"android\" coreApp=\"1dp\" />"), IsNull());

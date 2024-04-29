@@ -153,16 +153,31 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> ಸೆಕೆಂಡುಗಳ ನಂತರ <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"ಸೆಲ್ಯುಲಾರ್ ನೆಟ್‌ವರ್ಕ್ ಭದ್ರತೆ"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"ಸಾಧನ ಗುರುತಿಸುವಿಕೆಯನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> ಕನೆಕ್ಷನ್‌ಲ್ಲಿರುವ ನೆಟ್‌ವರ್ಕ್ ನಿಮ್ಮ ಸಾಧನದ ಅನನ್ಯ ಗುರುತಿಸುವಿಕೆಯನ್ನು (IMSI) <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ಮತ್ತು <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> ರ ನಡುವಿನ ಅವಧಿಯಲ್ಲಿ <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ಬಾರಿ ದಾಖಲಿಸಿದೆ."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ಗೆ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಕನೆಕ್ಷನ್"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ನೀವು ಈಗ ಹೆಚ್ಚು ಸುರಕ್ಷಿತ ಸೆಲ್ಯುಲಾರ್ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದ್ದೀರಿ."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ಗೆ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡದ ಕನೆಕ್ಷನ್"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"ನೀವು ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡದ ಸೆಲ್ಯುಲಾರ್ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಕನೆಕ್ಟ್ ಆಗಿದ್ದೀರಿ. ನಿಮ್ಮ ಕರೆಗಳು, ಸಂದೇಶಗಳು ಮತ್ತು ಡೇಟಾಗೆ ಹೆಚ್ಚು ಬಾರಿ ಅಡಚಣೆಯಾಗುತ್ತದೆ."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ಸೆಲ್ಯುಲಾರ್ ಭದ್ರತಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
+    <skip />
+    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
+    <skip />
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
+    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
+    <skip />
     <string name="fcComplete" msgid="1080909484660507044">"ವೈಶಿಷ್ಟ್ಯದ ಕೋಡ್ ಪೂರ್ಣಗೊಂಡಿದೆ."</string>
     <string name="fcError" msgid="5325116502080221346">"ಸಂಪರ್ಕದ ಸಮಸ್ಯೆ ಅಥವಾ ಅಮಾನ್ಯ ವೈಶಿಷ್ಟ್ಯದ ಕೋಡ್."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ಸರಿ"</string>
@@ -356,8 +371,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ಪ್ರದರ್ಶನದ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಲ್ಲದು."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"ಪೂರ್ವವೀಕ್ಷಣೆ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಇಲ್ಲವೇ ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಥವಾ ಸೇರಿಸಲು ಮತ್ತು ಸಿಸ್ಟಂ ಐಕಾನ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯಾಗಿರಲು"</string>
@@ -2216,6 +2230,10 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗೆ ಬದಲಿಸಬೇಕೇ?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳಿಂದ ಮಾತ್ರ ಕರೆಗಳನ್ನು ಮಾಡಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳಿಂದ ಮಾತ್ರ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
+    <skip />
+    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ವೈಯಕ್ತಿಕ ಬ್ರೌಸರ್ ಬಳಸಿ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ಉದ್ಯೋಗ ಬ್ರೌಸರ್ ಬಳಸಿ"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"ಕರೆ ಮಾಡಿ"</string>
@@ -2395,8 +2413,7 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ಕೆಲಸ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ಪರೀಕ್ಷೆ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ಸಮುದಾಯ"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
-    <skip />
+    <string name="redacted_notification_message" msgid="1520587845842228816">"ಸೂಕ್ಷ್ಮ ನೋಟಿಫಿಕೇಶನ್ ಕಂಟೆಂಟ್ ಅನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ಭದ್ರತೆಗಾಗಿ ಸ್ಕ್ರೀನ್‌‌ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯಲ್ಲಿ ಆ್ಯಪ್ ಕಂಟೆಂಟ್‌ ಅನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ಸ್ಯಾಟಲೈಟ್‌ಗೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
