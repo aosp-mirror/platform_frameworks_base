@@ -23,7 +23,7 @@
     android:gravity="center_vertical"
     android:theme="@style/Theme.DeviceDefault.Notification"
     android:importantForAccessibility="no">
-    <com.android.internal.widget.CachingIconView
+    <com.android.internal.widget.NotificationRowIconView
         android:id="@+id/icon"
         android:layout_width="@dimen/notification_icon_circle_size"
         android:layout_height="@dimen/notification_icon_circle_size"
