@@ -190,15 +190,31 @@ void SystemProperties_set(JNIEnv *env, jobject clazz, jstring keyJ,
             return;
         }
     }
+    // Calling SystemProperties.set() with a null value is equivalent to an
+    // empty string, but this is not true for the underlying libc function.
+    const char* value_c_str = value ? value->c_str() : "";
+    // Explicitly clear errno so we can recognize __system_property_set()
+    // failures from failed system calls (as opposed to "init rejected your
+    // request" failures).
+    errno = 0;
     bool success;
 #if defined(__BIONIC__)
-    success = !__system_property_set(key.c_str(), value ? value->c_str() : "");
+    success = !__system_property_set(key.c_str(), value_c_str);
 #else
-    success = android::base::SetProperty(key.c_str(), value ? value->c_str() : "");
+    success = android::base::SetProperty(key.c_str(), value_c_str);
 #endif
     if (!success) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                          "failed to set system property (check logcat for reason)");
+        if (errno != 0) {
+            jniThrowExceptionFmt(env, "java/lang/RuntimeException",
+                                 "failed to set system property \"%s\" to \"%s\": %m",
+                                 key.c_str(), value_c_str);
+        } else {
+            // Must have made init unhappy, which will have logged something,
+            // but there's no API to ask for more detail.
+            jniThrowExceptionFmt(env, "java/lang/RuntimeException",
+                                 "failed to set system property \"%s\" to \"%s\" (check logcat for reason)",
+                                 key.c_str(), value_c_str);
+        }
     }
 }
 
