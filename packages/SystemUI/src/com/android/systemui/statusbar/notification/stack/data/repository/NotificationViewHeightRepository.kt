@@ -27,13 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SysUISingleton
 class NotificationViewHeightRepository @Inject constructor() {
 
-    /**
-     * The height in px of the contents of notification stack. Depending on the number of
-     * notifications, this can exceed the space available on screen to show notifications, at which
-     * point the notification stack should become scrollable.
-     */
-    val stackHeight = MutableStateFlow(0f)
-
     /** The height in px of the current heads up notification. */
     val headsUpHeight = MutableStateFlow(0f)
 

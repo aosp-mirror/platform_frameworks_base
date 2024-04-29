@@ -87,10 +87,12 @@ import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.Shade
 import com.android.systemui.shade.ui.composable.ShadeHeader
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.phone.ui.TintedIconManager
+import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
@@ -105,6 +107,7 @@ class QuickSettingsScene
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val shadeSession: SaveableSession,
+    private val notificationStackScrollView: Lazy<NotificationScrollView>,
     private val viewModel: QuickSettingsSceneViewModel,
     private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
@@ -127,6 +130,7 @@ constructor(
         modifier: Modifier,
     ) {
         QuickSettingsScene(
+            notificationStackScrollView = notificationStackScrollView.get(),
             viewModel = viewModel,
             notificationsPlaceholderViewModel = notificationsPlaceholderViewModel,
             createTintedIconManager = tintedIconManagerFactory::create,
@@ -142,6 +146,7 @@ constructor(
 
 @Composable
 private fun SceneScope.QuickSettingsScene(
+    notificationStackScrollView: NotificationScrollView,
     viewModel: QuickSettingsSceneViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
@@ -349,6 +354,7 @@ private fun SceneScope.QuickSettingsScene(
             )
         }
         NotificationScrollingStack(
+            stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
             shadeSession = shadeSession,
             maxScrimTop = { screenHeight },

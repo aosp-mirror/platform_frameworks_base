@@ -87,13 +87,6 @@ constructor(
     val shadeScrimRounding: Flow<ShadeScrimRounding> =
         interactor.shadeScrimRounding.dumpWhileCollecting("shadeScrimRounding")
 
-    /**
-     * The height in px of the contents of notification stack. Depending on the number of
-     * notifications, this can exceed the space available on screen to show notifications, at which
-     * point the notification stack should become scrollable.
-     */
-    val stackHeight: StateFlow<Float> = interactor.stackHeight.dumpValue("stackHeight")
-
     /** The height in px of the contents of the HUN. */
     val headsUpHeight: StateFlow<Float> = interactor.headsUpHeight.dumpValue("headsUpHeight")
 

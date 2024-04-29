@@ -40,6 +40,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -75,6 +77,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_CORNER_RADIUS
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
@@ -158,6 +161,7 @@ fun SceneScope.ConstrainedNotificationStack(
 @Composable
 fun SceneScope.NotificationScrollingStack(
     shadeSession: SaveableSession,
+    stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     maxScrimTop: () -> Float,
     shouldPunchHoleBehindScrim: Boolean,
@@ -179,7 +183,12 @@ fun SceneScope.NotificationScrollingStack(
         with(density) { WindowInsets.systemBars.asPaddingValues().calculateBottomPadding().toPx() }
     val screenHeight = LocalRawScreenHeight.current
 
-    val stackHeight = viewModel.stackHeight.collectAsState()
+    /**
+     * The height in px of the contents of notification stack. Depending on the number of
+     * notifications, this can exceed the space available on screen to show notifications, at which
+     * point the notification stack should become scrollable.
+     */
+    val stackHeight = remember { mutableIntStateOf(0) }
 
     val scrimRounding = viewModel.shadeScrimRounding.collectAsState(ShadeScrimRounding())
 
@@ -212,7 +221,7 @@ fun SceneScope.NotificationScrollingStack(
     // if contentHeight drops below minimum visible scrim height while scrim is
     // expanded, reset scrim offset.
     LaunchedEffect(stackHeight, scrimOffset) {
-        snapshotFlow { stackHeight.value < minVisibleScrimHeight() && scrimOffset.value < 0f }
+        snapshotFlow { stackHeight.intValue < minVisibleScrimHeight() && scrimOffset.value < 0f }
             .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.snapTo(0f) }
     }
 
@@ -324,7 +333,7 @@ fun SceneScope.NotificationScrollingStack(
                                     },
                                     minScrimOffset = minScrimOffset,
                                     maxScrimOffset = 0f,
-                                    contentHeight = { stackHeight.value },
+                                    contentHeight = { stackHeight.intValue.toFloat() },
                                     minVisibleScrimHeight = minVisibleScrimHeight,
                                     isCurrentGestureOverscroll = {
                                         isCurrentGestureOverscroll.value
@@ -334,7 +343,11 @@ fun SceneScope.NotificationScrollingStack(
                         )
                         .verticalScroll(scrollState)
                         .fillMaxWidth()
-                        .height { (stackHeight.value + navBarHeight).roundToInt() },
+                        .notificationStackHeight(
+                            view = stackScrollView,
+                            padding = navBarHeight.toInt()
+                        )
+                        .onSizeChanged { size -> stackHeight.intValue = size.height },
             )
         }
         HeadsUpNotificationSpace(viewModel = viewModel)
