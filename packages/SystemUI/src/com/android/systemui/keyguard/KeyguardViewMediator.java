@@ -21,6 +21,7 @@ import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.provider.Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT;
 import static android.provider.Settings.System.LOCKSCREEN_SOUNDS_ENABLED;
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static android.service.dreams.Flags.dismissDreamOnKeyguardDismiss;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
@@ -3092,13 +3093,22 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         createInteractionJankMonitorConf(
                                 CUJ_LOCKSCREEN_UNLOCK_ANIMATION, "DismissPanel"));
 
+                // Filter out any closing apps, such as the dream.
+                RemoteAnimationTarget[] openingApps = apps;
+                if (dismissDreamOnKeyguardDismiss()) {
+                    openingApps = Arrays.stream(apps)
+                            .filter(a -> a.mode == RemoteAnimationTarget.MODE_OPENING)
+                            .toArray(RemoteAnimationTarget[]::new);
+                }
+
                 // Pass the surface and metadata to the unlock animation controller.
                 RemoteAnimationTarget[] openingWallpapers = Arrays.stream(wallpapers).filter(
                         w -> w.mode == RemoteAnimationTarget.MODE_OPENING).toArray(
                         RemoteAnimationTarget[]::new);
+
                 mKeyguardUnlockAnimationControllerLazy.get()
                         .notifyStartSurfaceBehindRemoteAnimation(
-                                apps, openingWallpapers, startTime,
+                                openingApps, openingWallpapers, startTime,
                                 mSurfaceBehindRemoteAnimationRequested);
             } else {
                 mInteractionJankMonitor.begin(

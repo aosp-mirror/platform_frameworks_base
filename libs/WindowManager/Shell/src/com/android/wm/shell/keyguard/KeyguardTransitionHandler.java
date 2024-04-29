@@ -20,6 +20,7 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.service.dreams.Flags.dismissDreamOnKeyguardDismiss;
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
@@ -44,10 +45,13 @@ import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.TaskStackListenerCallback;
+import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.sysui.KeyguardChangeListener;
@@ -62,7 +66,8 @@ import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
  * <p>This takes the highest priority.
  */
 public class KeyguardTransitionHandler
-        implements Transitions.TransitionHandler, KeyguardChangeListener {
+        implements Transitions.TransitionHandler, KeyguardChangeListener,
+        TaskStackListenerCallback {
     private static final String TAG = "KeyguardTransition";
 
     private final Transitions mTransitions;
@@ -71,6 +76,7 @@ public class KeyguardTransitionHandler
     private final ShellExecutor mMainExecutor;
 
     private final ArrayMap<IBinder, StartedTransition> mStartedTransitions = new ArrayMap<>();
+    private final TaskStackListenerImpl mTaskStackListener;
 
     /**
      * Local IRemoteTransition implementations registered by the keyguard service.
@@ -87,6 +93,8 @@ public class KeyguardTransitionHandler
 
     // Last value reported by {@link KeyguardChangeListener}.
     private boolean mKeyguardShowing = true;
+    @Nullable
+    private WindowContainerToken mDreamToken;
 
     private final class StartedTransition {
         final TransitionInfo mInfo;
@@ -105,18 +113,23 @@ public class KeyguardTransitionHandler
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
             @NonNull Transitions transitions,
+            @NonNull TaskStackListenerImpl taskStackListener,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor mainExecutor) {
         mTransitions = transitions;
         mShellController = shellController;
         mMainHandler = mainHandler;
         mMainExecutor = mainExecutor;
+        mTaskStackListener = taskStackListener;
         shellInit.addInitCallback(this::onInit, this);
     }
 
     private void onInit() {
         mTransitions.addHandler(this);
         mShellController.addKeyguardChangeListener(this);
+        if (dismissDreamOnKeyguardDismiss()) {
+            mTaskStackListener.addListener(this);
+        }
     }
 
     /**
@@ -139,6 +152,11 @@ public class KeyguardTransitionHandler
 
     public boolean isKeyguardShowing() {
         return mKeyguardShowing;
+    }
+
+    @Override
+    public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
+        mDreamToken = taskInfo.getActivityType() == ACTIVITY_TYPE_DREAM ? taskInfo.token : null;
     }
 
     @Override
@@ -271,6 +289,13 @@ public class KeyguardTransitionHandler
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
+        if (dismissDreamOnKeyguardDismiss()
+                && (request.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0
+                && mDreamToken != null) {
+            // Dismiss the dream in the same transaction, so that it isn't visible once the device
+            // is unlocked.
+            return new WindowContainerTransaction().removeTask(mDreamToken);
+        }
         return null;
     }
 
