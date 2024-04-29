@@ -1652,9 +1652,9 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"מערכת"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"‏אודיו Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"צג אלחוטי"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"‏העברה (cast)"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"‏הפעלת Cast"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"התחברות למכשיר"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"העברת מסך אל מכשיר"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"‏הפעלת Cast של התוכן במסך אל מכשיר"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"המערכת מחפשת מכשירים…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"הגדרות"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ניתוק"</string>

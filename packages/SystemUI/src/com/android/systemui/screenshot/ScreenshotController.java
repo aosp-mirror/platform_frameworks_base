@@ -19,7 +19,7 @@ package com.android.systemui.screenshot;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
-import static com.android.systemui.Flags.screenshotShelfUi;
+import static com.android.systemui.Flags.screenshotShelfUi2;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
@@ -403,7 +403,7 @@ public class ScreenshotController {
             return;
         }
 
-        if (screenshotShelfUi()) {
+        if (screenshotShelfUi2()) {
             final UUID requestId = UUID.randomUUID();
             final String screenshotId = String.format("Screenshot_%s", requestId);
             mActionsProvider = mActionsProviderFactory.create(
@@ -454,7 +454,7 @@ public class ScreenshotController {
         // ignore system bar insets for the purpose of window layout
         mWindow.getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> WindowInsets.CONSUMED);
-        if (!screenshotShelfUi()) {
+        if (!screenshotShelfUi2()) {
             mScreenshotHandler.cancelTimeout(); // restarted after animation
         }
     }
@@ -503,7 +503,7 @@ public class ScreenshotController {
     }
 
     boolean isPendingSharedTransition() {
-        if (screenshotShelfUi()) {
+        if (screenshotShelfUi2()) {
             return mActionExecutor.isPendingSharedTransition();
         } else {
             return mViewProxy.isPendingSharedTransition();
@@ -624,7 +624,7 @@ public class ScreenshotController {
                 (response) -> {
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION,
                             0, response.getPackageName());
-                    if (screenshotShelfUi() && mActionsProvider != null) {
+                    if (screenshotShelfUi2() && mActionsProvider != null) {
                         mActionsProvider.onScrollChipReady(
                                 () -> onScrollButtonClicked(owner, response));
                     } else {

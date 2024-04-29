@@ -155,6 +155,12 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
 
         val previewAnimator = AnimatorSet()
         previewAnimator.play(previewXAndScaleAnimator).with(previewYAnimator)
+        previewAnimator.doOnEnd {
+            screenshotPreview.scaleX = 1f
+            screenshotPreview.scaleY = 1f
+            screenshotPreview.x = endPos.x - screenshotPreview.width / 2f
+            screenshotPreview.y = endPos.y - screenshotPreview.height / 2f
+        }
 
         previewAnimator.doOnStart { screenshotPreview.visibility = View.VISIBLE }
         return previewAnimator
