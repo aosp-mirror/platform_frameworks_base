@@ -153,16 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> ຫຼັງຈາກ <xliff:g id="TIME_DELAY">{2}</xliff:g> ວິນາທີ"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ບໍ່ຖືກສົ່ງຕໍ່"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ບໍ່ຖືກສົ່ງຕໍ່"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"ຄວາມປອດໄພຂອງເຄືອຂ່າຍມືຖື"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ກວດສອບການຕັ້ງຄ່າ"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"ເຂົ້າເຖິງຕົວລະບຸອຸປະກອນແລ້ວ"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"ເຄືອຂ່າຍຢູ່ການເຊື່ອມຕໍ່ <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> ທີ່ບັນທຶກຕົວລະບຸທີ່ບໍ່ຊ້ຳກັນ (IMSI) ໃນອຸປະກອນຂອງທ່ານ <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ເທື່ອໃນໄລຍະເວລາລະຫວ່າງ <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ຫາ <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"ການເຊື່ອມຕໍ່ທີ່ໄດ້ຖືກເຂົ້າລະຫັດໄວ້ກັບ <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ຕອນນີ້ທ່ານເຊື່ອມຕໍ່ກັບເຄືອຂ່າຍມືຖືທີ່ປອດໄພຍິ່ງຂຶ້ນແລ້ວ."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"ການເຊື່ອມຕໍ່ທີ່ບໍ່ໄດ້ຖືກເຂົ້າລະຫັດໄວ້ກັບ <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"ທ່ານເຊື່ອມຕໍ່ກັບເຄືອຂ່າຍມືຖືທີ່ບໍ່ໄດ້ຖືກເຂົ້າລະຫັດໄວ້. ການໂທ, ຂໍ້ຄວາມ ແລະ ຂໍ້ມູນຂອງທ່ານແມ່ນມີໂອກາດສ່ຽງທີ່ຈະຖືກສະກັດກັ້ນ."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ການຕັ້ງຄ່າຄວາມປອດໄພຂອງເຄືອຂ່າຍມືຖື"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"ຄວາມປອດໄພເຄືອຂ່າຍມືຖື"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"ການເຂົ້າລະຫັດ, ການແຈ້ງເຕືອນສຳລັບເຄືອຂ່າຍທີ່ບໍ່ໄດ້ຖືກເຂົ້າລະຫັດ"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ເຂົ້າເຖິງ ID ອຸປະກອນແລ້ວ"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"ເມື່ອເວລາ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, ເຄືອຂ່າຍໃກ້ຄຽງໄດ້ບັນທຶກ ID ທີ່ບໍ່ຊ້ຳກັນຂອງອຸປະກອນຂອງທ່ານ (IMSI ຫຼື IMEI) ໃນລະຫວ່າງທີ່ໃຊ້ຊິມ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> ຂອງທ່ານ"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"ເມື່ອເວລາ <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, ເຄືອຂ່າຍໃກ້ຄຽງໄດ້ບັນທຶກ ID ທີ່ບໍ່ຊ້ຳກັນຂອງອຸປະກອນຂອງທ່ານ (IMSI ຫຼື IMEI) ໃນລະຫວ່າງທີ່ໃຊ້ຊິມ <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> ຂອງທ່ານ.\n\nເຊິ່ງໝາຍຄວາມວ່າສະຖານທີ່, ການເຄື່ອນໄຫວ ຫຼື ຂໍ້ມູນລະບຸຕົວຕົນຂອງທ່ານໄດ້ຖືກບັນທຶກໄວ້ແລ້ວ. ນີ້ແມ່ນແນວທາງປະຕິບັດທົ່ວໄປ ແຕ່ອາດເປັນບັນຫາສຳລັບຜູ້ທີ່ກັງວົນກ່ຽວກັບຄວາມເປັນສ່ວນຕົວ."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"ເຊື່ອມຕໍ່ກັບເຄືອຂ່າຍ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ທີ່ໄດ້ຖືກເຂົ້າລະຫັດແລ້ວ"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"ການເຊື່ອມຕໍ່ຊິມ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ປອດໄພຍິ່ງຂຶ້ນແລ້ວ"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"ເຊື່ອມຕໍ່ກັບເຄືອຂ່າຍທີ່ບໍ່ໄດ້ຖືກເຂົ້າລະຫັດແລ້ວ"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"ຕອນນີ້ການໂທ, ຂໍ້ຄວາມ ແລະ ຂໍ້ມູນກຳລັງຢູ່ໃນຄວາມສ່ຽງໃນລະຫວ່າງທີ່ໃຊ້ຊິມ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ຂອງທ່ານ"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"ຕອນນີ້ການໂທ, ຂໍ້ຄວາມ ແລະ ຂໍ້ມູນກຳລັງຢູ່ໃນຄວາມສ່ຽງໃນລະຫວ່າງທີ່ໃຊ້ຊິມ <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ຂອງທ່ານ.\n\nເມື່ອການເຊື່ອມຕໍ່ຂອງທ່ານໄດ້ຖືກເຂົ້າລະຫັດອີກຄັ້ງ, ທ່ານຈະໄດ້ຮັບການແຈ້ງເຕືອນອີກຄັ້ງ."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"ການຕັ້ງຄ່າຄວາມປອດໄພເຄືອຂ່າຍມືຖື"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ລະຫັດຄຸນສົມບັດສຳເລັດແລ້ວ."</string>
     <string name="fcError" msgid="5325116502080221346">"ເກີດບັນຫາການເຊື່ອມຕໍ່ ຫຼືລະຫັດການເຮັດວຽກບໍ່ຖືກຕ້ອງ."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ຕົກລົງ"</string>
@@ -356,8 +359,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ຖ່າຍຮູບໜ້າຈໍ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"ຕົວຢ່າງ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"ປິດໄວ້"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ປິດການນນຳໃຊ້ ຫຼື ແກ້ໄຂແຖບສະຖານະ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງແຖບສະຖານະ ຫຼືເພີ່ມ ແລະລຶບໄອຄອນລະບົບອອກໄດ້."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ເປັນ​ແຖບ​ສະ​ຖາ​ນະ"</string>
@@ -1898,8 +1900,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"​ຖາມ​ຫາ​ຮູບ​ແບບ​ປົດ​ລັອກ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
-    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"ຕິດຕັ້ງໂດຍຜູ້ເບິ່ງແຍງຂອງທ່ານ.\nເຂົ້າໄປການຕັ້ງຄ່າເພື່ອເບິ່ງສິດທີ່ໄດ້ຮັບອະນຸຍາດ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ຖືກອັບໂຫລດໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ຖືກລຶບອອກໂດຍຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ຕົກລົງ"</string>
@@ -2217,6 +2218,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ສະຫຼັບໄປເປັນແອັບບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"ອົງການຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"ອົງການຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານສົ່ງຂໍ້ຄວາມໄດ້ຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"ທ່ານສາມາດໂທໄດ້ຈາກແອັບໂທລະສັບສ່ວນຕົວຂອງທ່ານເທົ່ານັ້ນ. ລະບົບຈະເພີ່ມການໂທດ້ວຍແອັບໂທລະສັບສ່ວນຕົວໃສ່ໃນປະຫວັດການໂທສ່ວນຕົວຂອງທ່ານ."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"ທ່ານສາມາດສົ່ງຂໍ້ຄວາມ SMS ໄດ້ຈາກແອັບ Messages ສ່ວນຕົວຂອງທ່ານເທົ່ານັ້ນ."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບສ່ວນຕົວ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບບ່ອນເຮັດວຽກ"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"ໂທ"</string>
@@ -2396,8 +2399,7 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ວຽກ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ທົດສອບ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ສ່ວນກາງ"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
-    <skip />
+    <string name="redacted_notification_message" msgid="1520587845842228816">"ເນື້ອຫາການແຈ້ງເຕືອນທີ່ລະອຽດອ່ອນເຊື່ອງຢູ່"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ເນື້ອຫາແອັບຖືກເຊື່ອງໄວ້ຈາກການແບ່ງປັນໜ້າຈໍເພື່ອຄວາມປອດໄພ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ເຊື່ອມຕໍ່ກັບດາວທຽມໂດຍອັດຕະໂນມັດ"</string>

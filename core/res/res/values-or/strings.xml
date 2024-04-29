@@ -153,16 +153,31 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> ସେକେଣ୍ଡ ପରେ"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ଫରୱାର୍ଡ କରାଯାଇନାହିଁ"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ଫର୍‌ୱର୍ଡ କରାଗଲା ନାହିଁ"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"ସେଲୁଲାର ନେଟୱାର୍କ ସୁରକ୍ଷା"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ସେଟିଂସର ସମୀକ୍ଷା କରନ୍ତୁ"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"ଡିଭାଇସ ଚିହ୍ନଟକାରୀକୁ ଆକ୍ସେସ କରାଯାଇଛି"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> କନେକ୍ସନରେ ଥିବା ଏକ ନେଟୱାର୍କ <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ଏବଂ <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> ମଧ୍ୟରେ ଥିବା ଅବଧିରେ <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ଥର ଆପଣଙ୍କ ଡିଭାଇସର ସ୍ୱତନ୍ତ୍ର ଚିହ୍ନଟକାରୀ (IMSI)କୁ ରେକର୍ଡ କରିଛି।"</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ସହ ଏନକ୍ରିପ୍ଟ କରାଯାଇଥିବା କନେକ୍ସନ"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ଆପଣ ବର୍ତ୍ତମାନ ଅଧିକ ସୁରକ୍ଷିତ ଏକ ସେଲୁଲାର ନେଟୱାର୍କ ସହ କନେକ୍ଟ ଅଛନ୍ତି।"</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ସହ ଅଣ-ଏନକ୍ରିପ୍ଟ କରାଯାଇଥିବା କନେକ୍ସନ"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"ଆପଣ ଏକ ଅଣ-ଏନକ୍ରିପ୍ଟ କରାଯାଇଥିବା ସେଲୁଲାର ନେଟୱାର୍କ ସହ କନେକ୍ଟ ଅଛନ୍ତି। ଆପଣଙ୍କ କଲ, ମେସେଜ ଏବଂ ଡାଟା ଇଣ୍ଟରସେପସନ ପାଇଁ ଅସୁରକ୍ଷିତ ଅଟେ।"</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ସେଲୁଲାର ସୁରକ୍ଷା ସେଟିଂସ"</string>
+    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
+    <skip />
+    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
+    <skip />
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
+    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
+    <skip />
     <string name="fcComplete" msgid="1080909484660507044">"ଫିଚର୍ କୋଡ୍ ସମ୍ପୂର୍ଣ୍ଣ।"</string>
     <string name="fcError" msgid="5325116502080221346">"ସଂଯୋଗରେ ସମସ୍ୟା କିମ୍ୱା ଅମାନ୍ୟ ଫିଚର୍ କୋଡ୍।"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ଠିକ ଅଛି"</string>
@@ -356,8 +371,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ସ୍କ୍ରିନସଟ୍ ନିଅନ୍ତୁ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ଡିସପ୍ଲେର ଏକ ସ୍କ୍ରିନସଟ୍ ନିଆଯାଇପାରେ।"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"ପ୍ରିଭ୍ୟୁ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ଷ୍ଟାଟସ୍‌ ବାର୍‌କୁ ଅକ୍ଷମ କିମ୍ୱା ସଂଶୋଧନ କରନ୍ତୁ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ଆପ୍‍କୁ, ସ୍ଥିତି ବାର୍‍ ଅକ୍ଷମ କରିବାକୁ କିମ୍ବା ସିଷ୍ଟମ୍‍ ଆଇକନ୍‍ ଯୋଡ଼ିବା କିମ୍ବା ବାହାର କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ଷ୍ଟାଟସ୍‍ ବାର୍‍ ରହିବାକୁ ଦିଅନ୍ତୁ"</string>
@@ -1898,8 +1912,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ PIN ପଚାରନ୍ତୁ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ ଲକ୍‌ ଖୋଲିବା ପାଟର୍ନ ପଚାରନ୍ତୁ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ ପାସ୍‌ୱର୍ଡ ପଚାରନ୍ତୁ"</string>
-    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"ଆପଣଙ୍କ ଆଡମିନଙ୍କ ଦ୍ୱାରା ଇନଷ୍ଟଲ କରାଯାଇଛି।\nଅନୁମୋଦିତ ଅମୁମତିଗୁଡ଼ିକ ଭ୍ୟୁ କରିବା ପାଇଁ ସେଟିଂସକୁ ଯାଆନ୍ତୁ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ଠିକ ଅଛି"</string>
@@ -2217,6 +2230,10 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ୱାର୍କ ଆପକୁ ସୁଇଚ କରିବେ?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"ଆପଣଙ୍କ ସଂସ୍ଥା ଆପଣଙ୍କୁ କେବଳ ୱାର୍କ ଆପ୍ସରୁ କଲ କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"ଆପଣଙ୍କ ସଂସ୍ଥା ଆପଣଙ୍କୁ କେବଳ ୱାର୍କ ଆପ୍ସରୁ ମେସେଜ ପଠାଇବା ପାଇଁ ଅନୁମତି ଦିଏ"</string>
+    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
+    <skip />
+    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ବ୍ୟକ୍ତିଗତ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ୱାର୍କ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"କଲ କରନ୍ତୁ"</string>
