@@ -825,7 +825,7 @@
     <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволува сопственикот да ја ажурира апликацијата што претходно ја инсталирал без дејство од корисникот"</string>
     <string name="permlab_writeVerificationStateE2eeContactKeys" msgid="3990742344778360457">"ажурирање на состојбите за потврда на контактните клучеви за обострано шифрирање што се во сопственост на други апликации"</string>
     <string name="permdesc_writeVerificationStateE2eeContactKeys" msgid="8453156829747427041">"Дозволува апликацијата да ги ажурира состојбите за потврда на контактните клучеви за обострано шифрирање што се во сопственост на други апликации"</string>
-    <string name="policylab_limitPassword" msgid="4851829918814422199">"Постави правила за лозинката"</string>
+    <string name="policylab_limitPassword" msgid="4851829918814422199">"Поставување правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Следење на обидите за отклучување на екранот"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Го следи бројот на неточни лозинки што се внесени за отклучување на екранот и го заклучува таблетот или ги брише сите податоци од него ако се внесат голем број неточни лозинки."</string>
@@ -836,31 +836,31 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Го следи бројот на погрешно внесени лозинки при отклучување на екранот и го заклучува уредот Android TV или ги брише сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го системот за информации и забава или избриши ги сите податоци од овој профил доколку се внесени премногу погрешни лозинки."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Набљудувај го бројот на погрешно внесени лозинки при отклучување на екранот и заклучи го телефонот или избриши ги сите податоци од овој корисник доколку се внесени премногу погрешни лозинки."</string>
-    <string name="policylab_resetPassword" msgid="214556238645096520">"Промени го заклучувањето на екранот"</string>
-    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Промени го заклучувањето на екранот."</string>
-    <string name="policylab_forceLock" msgid="7360335502968476434">"Заклучи го екранот"</string>
-    <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролирај како и кога се заклучува екранот."</string>
+    <string name="policylab_resetPassword" msgid="214556238645096520">"Менување на заклучувањето на екранот"</string>
+    <string name="policydesc_resetPassword" msgid="4626419138439341851">"Го менува заклучувањето на екранот."</string>
+    <string name="policylab_forceLock" msgid="7360335502968476434">"Заклучување на екранот"</string>
+    <string name="policydesc_forceLock" msgid="1008844760853899693">"Контролира како и кога се заклучува екранот."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Бришење на сите податоци"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Избриши ги податоците во таблетот без предупредување со ресетирање на фабрички податоци."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Ги брише податоците од таблетот без предупредување вршејќи ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Ги брише податоците на вашиот уред Android TV без предупредување, така што ќе изврши ресетирање на фабричките податоци."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Избриши ги податоците во системот за информации и забава без предупредување со ресетирање на фабрички податоци."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Ги брише податоците од телефонот без предупредување вршејќи ресетирање на фабрички податоци."</string>
-    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Избриши ги податоците на профилот"</string>
-    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Избриши ги податоците на корисникот"</string>
+    <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Бришење на податоците на профилот"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Бришење на податоците на корисникот"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Избриши ги податоците на овој корисник на таблетот без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Ги брише податоците на овој корисник на уредов Android TV без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Избриши ги податоците на профилов во системот за информации и забава без предупредување."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Избриши ги податоците на овој корисник на телефонот без предупредување."</string>
-    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Постави го глобалниот прокси на уредот"</string>
+    <string name="policylab_setGlobalProxy" msgid="215332221188670221">"Поставување глобален прокси на уредот"</string>
     <string name="policydesc_setGlobalProxy" msgid="7149665222705519604">"Поставете го глобалниот прокси на уредот да се користи додека политиката е овозможена. Само сопственикот на уредот може да го поставува глобалниот прокси."</string>
     <string name="policylab_expirePassword" msgid="6015404400532459169">"Рок на лозинка за закл. екран"</string>
     <string name="policydesc_expirePassword" msgid="9136524319325960675">"Измени колку често мора да се менува лозинката, PIN-бројот или шемата за заклучување екран."</string>
     <string name="policylab_encryptedStorage" msgid="9012936958126670110">"Постави шифрирање на меморија"</string>
     <string name="policydesc_encryptedStorage" msgid="1102516950740375617">"Барај зачуваните податоци за апликација да се шифрирани."</string>
-    <string name="policylab_disableCamera" msgid="5749486347810162018">"Оневозможи фотоапарати"</string>
+    <string name="policylab_disableCamera" msgid="5749486347810162018">"Оневозможување на камерите"</string>
     <string name="policydesc_disableCamera" msgid="3204405908799676104">"Спречи употреба на сите камери на уредот."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Онев. функции од заклуч. екран"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Спречи користење на некои функции од заклучување на екранот."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="5071855750149949741">"Оневозможување функции за заклучување на екранот"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Го спречува користењето на некои функции за заклучување на екранот."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Дома"</item>
     <item msgid="7740243458912727194">"Мобилен"</item>
