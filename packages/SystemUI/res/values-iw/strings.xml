@@ -302,7 +302,7 @@
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"‏אין רשתות Wi-Fi זמינות"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"בתהליך הפעלה…"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"‏הפעלת Cast למסך"</string>
-    <string name="quick_settings_casting" msgid="1435880708719268055">"‏מתבצעת העברה (cast)"</string>
+    <string name="quick_settings_casting" msgid="1435880708719268055">"‏מופעל Cast"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"מכשיר ללא שם"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"אין מכשירים זמינים"</string>
     <string name="quick_settings_cast_no_network" msgid="3863016850468559522">"‏אין חיבור ל-Wi-Fi או לאתרנט"</string>
@@ -371,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"מכשירי שמיעה"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"התאמה של מכשיר חדש"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"צריך ללחוץ כדי להתאים מכשיר חדש"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"לא ניתן לעדכן את ההגדרה הקבועה מראש"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"לבטל את חסימת המיקרופון של המכשיר?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"לבטל את חסימת המצלמה של המכשיר?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"לבטל את חסימת המצלמה והמיקרופון של המכשיר?"</string>
@@ -476,25 +475,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"להסיר את המשתמש?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"הסרה"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"‏לאפליקציית <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל המידע הגלוי במסך שלך ולכל תוכן שמופעל במכשיר שלך בזמן הקלטה או העברה (cast). המידע הזה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
-    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"‏להתחיל להקליט או להעביר (cast)?"</string>
-    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast) – כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להפעיל Cast דרך <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"‏לאפליקציית <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל המידע הגלוי במסך שלך ולכל תוכן שמופעל במכשיר שלך בזמן הקלטה או הפעלת Cast. המידע הזה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"‏להתחיל הקלטה או הפעלת Cast?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או הפעלת Cast – כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"כל המסך"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"אפליקציה אחת"</string>
     <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"שיתוף או הקלטה של אפליקציה"</string>
-    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"‏בזמן שיתוף, הקלטה או העברה (cast) תהיה ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
-    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"‏בזמן שיתוף, הקלטה או העברה (cast) של אפליקציה, תהיה ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"‏להתחיל להקליט או להפעיל Cast דרך <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"‏בזמן שיתוף, הקלטה או הפעלת Cast תהיה ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"‏בזמן שיתוף, הקלטה או הפעלת Cast של אפליקציה, תהיה ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"התחלה"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> השביתה את האפשרות הזו"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"‏להפעיל Cast?"</string>
-    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"‏בזמן העברה (cast), תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"‏בזמן הפעלת Cast, תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"‏בזמן Cast מאפליקציה, תהיה ל-Android גישה לכל מה שמופיע באפליקציה ולכל מדיה שפועלת בה. כדאי להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"‏הפעלת Cast"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"להתחיל את השיתוף?"</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"‏בזמן שיתוף, הקלטה או העברה (cast) תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
-    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"‏בזמן שיתוף, הקלטה או העברה (cast) של אפליקציה, תהיה ל-Android גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"‏בזמן שיתוף, הקלטה או הפעלת Cast תהיה ל-Android גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"‏בזמן שיתוף, הקלטה או הפעלת Cast של אפליקציה, תהיה ל-Android גישה לכל מה שגלוי באפליקציה או מופעל מהאפליקציה. מומלץ להיזהר עם סיסמאות, פרטי תשלום, הודעות, תמונות, אודיו וסרטונים."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"התחלה"</string>
     <string name="media_projection_task_switcher_text" msgid="590885489897412359">"השיתוף מושהה כשמחליפים אפליקציות"</string>
     <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"שיתוף של האפליקציה הזו במקום"</string>
@@ -656,10 +655,8 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"לוויין, חיבור באיכות ירודה"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"לוויין, חיבור באיכות טובה"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"לוויין, יש חיבור זמין"</string>
-    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
-    <skip />
-    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="7942466244369263272">"יש חיבור ללוויין"</string>
+    <string name="satellite_not_connected_carrier_text" msgid="3471375076594005077">"אין חיבור ללוויין"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"פרופיל עבודה"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"מהנה בשביל חלק מהאנשים, אבל לא בשביל כולם"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏התכונה System UI Tuner מספקת לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, לא לעבוד כראוי או להיעלם בגרסאות עתידיות. יש להמשיך בזהירות."</string>
@@ -1088,8 +1085,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"משהו השתבש. יש לנסות שוב."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"בטעינה"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"טאבלט"</string>
-    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"‏העברה (cast) של מדיה"</string>
-    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"‏מתבצעת העברה (cast) של <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"‏הפעלת Cast של מדיה"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"‏מופעל Cast של <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"לא פעיל, יש לבדוק את האפליקציה"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"לא נמצא"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"הפקד לא זמין"</string>
@@ -1108,7 +1105,7 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(מנותק)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"לא ניתן להחליף. צריך להקיש כדי לנסות שוב."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"חיבור מכשיר"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‏כדי להעביר (cast) את הסשן הזה, צריך לפתוח את האפליקציה."</string>
+    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"‏כדי להפעיל Cast של הסשן הזה, צריך לפתוח את האפליקציה."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"אפליקציה לא ידועה"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"‏עצירת ההעברה (casting)"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"מכשירים זמינים לפלט אודיו."</string>

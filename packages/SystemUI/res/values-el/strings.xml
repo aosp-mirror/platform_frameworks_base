@@ -371,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Συσκευές ακοής"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Σύζευξη νέας συσκευής"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Κάντε κλικ για σύζευξη νέας συσκευής"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"Δεν ήταν δυνατή η ενημέρωση της προεπιλογής"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Κατάργηση αποκλεισμού μικροφώνου συσκευής;"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Κατάργηση αποκλεισμού κάμερας συσκευής;"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Κατάργηση αποκλεισμού κάμερας και μικροφώνου συσκευής;"</string>
@@ -656,10 +655,8 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Δορυφορική, κακή σύνδεση"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Δορυφορική, καλή σύνδεση"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Δορυφορική, διαθέσιμη σύνδεση"</string>
-    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
-    <skip />
-    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="7942466244369263272">"Συνδέθηκε σε δορυφόρο"</string>
+    <string name="satellite_not_connected_carrier_text" msgid="3471375076594005077">"Δεν συνδέθηκε σε δορυφόρο"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Προφίλ εργασίας"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Διασκέδαση για ορισμένους, αλλά όχι για όλους"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Το System UI Tuner σάς προσφέρει επιπλέον τρόπους για να τροποποιήσετε και να προσαρμόσετε τη διεπαφή χρήστη Android. Αυτές οι πειραματικές λειτουργίες ενδέχεται να τροποποιηθούν, να παρουσιάσουν σφάλματα ή να καταργηθούν σε μελλοντικές εκδόσεις. Συνεχίστε με προσοχή."</string>

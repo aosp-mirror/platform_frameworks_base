@@ -371,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Сонсголын төхөөрөмжүүд"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Шинэ төхөөрөмж хослуулах"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Шинэ төхөөрөмж хослуулахын тулд товшино уу"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"Урьдчилсан тохируулгыг шинэчилж чадсангүй"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Төхөөрөмжийн микрофоныг блокоос гаргах уу?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Төхөөрөмжийн камерыг блокоос гаргах уу?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Төхөөрөмжийн камер болон микрофоныг блокоос гаргах уу?"</string>
@@ -656,10 +655,8 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Хиймэл дагуул, холболт муу байна"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Хиймэл дагуул, холболт сайн байна"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Хиймэл дагуул, холболт боломжтой"</string>
-    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
-    <skip />
-    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="7942466244369263272">"Хиймэл дагуулд холбогдсон"</string>
+    <string name="satellite_not_connected_carrier_text" msgid="3471375076594005077">"Хиймэл дагуулд холбогдоогүй"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Ажлын профайл"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Зарим хүнд хөгжилтэй байж болох ч бүх хүнд тийм биш"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Системийн UI Tохируулагч нь Android хэрэглэгчийн интерфэйсийг тааруулах, өөрчлөх нэмэлт аргыг зааж өгөх болно. Эдгээр туршилтын тохиргоо нь цаашид өөрчлөгдөх, эвдрэх, алга болох магадлалтай. Үйлдлийг болгоомжтой хийнэ үү."</string>

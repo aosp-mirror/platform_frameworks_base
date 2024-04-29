@@ -371,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"செவித்துணைக் கருவிகள்"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"புதிய சாதனத்தை இணை"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"புதிய சாதனத்தை இணைக்க கிளிக் செய்யலாம்"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"முன்னமைவைப் புதுப்பிக்க முடியவில்லை"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"சாதனத்தின் மைக்ரோஃபோனுக்கான தடுப்பை நீக்கவா?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"சாதனத்தின் கேமராவுக்கான தடுப்பை நீக்கவா?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"சாதனத்தின் கேமராவுக்கும் மைக்ரோஃபோனுக்குமான தடுப்பை நீக்கவா?"</string>
@@ -656,10 +655,8 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"சாட்டிலைட், மோசமான இணைப்பு"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"சாட்டிலைட், நிலையான இணைப்பு"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"சாட்டிலைட், இணைப்பு கிடைக்கிறது"</string>
-    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
-    <skip />
-    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="7942466244369263272">"சாட்டிலைட்டுடன் இணைக்கப்பட்டுள்ளது"</string>
+    <string name="satellite_not_connected_carrier_text" msgid="3471375076594005077">"சாட்டிலைட்டுடன் இணைக்கப்படவில்லை"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"பணிக் கணக்கு"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"சில வேடிக்கையாக இருந்தாலும் கவனம் தேவை"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner, Android பயனர் இடைமுகத்தை மாற்றவும் தனிப்பயனாக்கவும் கூடுதல் வழிகளை வழங்குகிறது. இந்தப் பரிசோதனைக்குரிய அம்சங்கள் எதிர்கால வெளியீடுகளில் மாற்றப்படலாம், இடைநிறுத்தப்படலாம் அல்லது தோன்றாமல் போகலாம். கவனத்துடன் தொடரவும்."</string>

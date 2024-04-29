@@ -371,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Слухови апарати"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Сдвояване на ново устройство"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Кликнете за сдвояване на ново устройство"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"Предварително зададените настройки не бяха актуализирани"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Да се отблокира ли микрофонът на устройството?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Да се отблокира ли камерата на устройството?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Да се отблокират ли камерата и микрофонът на устройството?"</string>
@@ -458,8 +457,7 @@
     <string name="work_mode_off_title" msgid="5794818421357835873">"Отмяна на паузата за служ. прил.?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Отмяна на паузата"</string>
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Затваряне на приспособленията на заключения екран"</string>
-    <!-- no translation found for accessibility_action_label_edit_widgets (3821868581348322346) -->
-    <skip />
+    <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Персонализиране на приспособленията"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Приспособления на заключения екран"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Превключване между потребителите"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"падащо меню"</string>
@@ -656,10 +654,8 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Сателит, лоша връзка"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Сателит, добра връзка"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Сателит, налице е връзка"</string>
-    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
-    <skip />
-    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="7942466244369263272">"Установена е връзка със сателит"</string>
+    <string name="satellite_not_connected_carrier_text" msgid="3471375076594005077">"Не е установена връзка със сателит"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Потребителски профил в Work"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Забавно – но не за всички"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Тунерът на системния потребителски интерфейс ви предоставя допълнителни възможности за прецизиране и персонализиране на практическата работа с Android. Тези експериментални функции може да се променят, повредят или да изчезнат в бъдещите версии. Действайте внимателно."</string>
