@@ -4389,12 +4389,6 @@ public class Notification implements Parcelable
          */
         @NonNull
         public Builder setWhen(long when) {
-            if (updateRankingTime()) {
-                // don't show a timestamp that's decades old
-                if (mN.extras.getBoolean(EXTRA_SHOW_WHEN, true) && when == 0) {
-                    return this;
-                }
-            }
             mN.when = when;
             return this;
         }
