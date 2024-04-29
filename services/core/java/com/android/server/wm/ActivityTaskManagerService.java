@@ -1374,13 +1374,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final boolean debug = ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
+            final int userId = UserHandle.getCallingUserId();
             ActivityInfo aInfo = null;
             try {
                 List<ResolveInfo> resolves =
                         AppGlobals.getPackageManager().queryIntentActivities(
                                 intent, r.resolvedType,
                                 PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS,
-                                UserHandle.getCallingUserId()).getList();
+                                userId).getList();
 
                 // Look for the original activity in the list...
                 final int N = resolves != null ? resolves.size() : 0;
@@ -1465,6 +1466,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         .setRealCallingPid(-1)
                         .setRealCallingUid(r.launchedFromUid)
                         .setActivityOptions(options)
+                        .setUserId(userId)
                         .execute();
                 r.finishing = wasFinishing;
                 return res == ActivityManager.START_SUCCESS;
