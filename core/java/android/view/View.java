@@ -33984,7 +33984,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     && ((View) parent).mFrameContentVelocity <= 0) {
                 viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
             }
-            if (!willNotDraw() && viewRootImpl.shouldCheckFrameRateCategory()) {
+            if (viewRootImpl.shouldCheckFrameRateCategory()) {
                 int frameRateCategory = calculateFrameRateCategory();
                 int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
                 int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
@@ -34026,7 +34026,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
-        if (!willNotDraw() && viewRootImpl.shouldCheckFrameRateCategory()) {
+        if (viewRootImpl.shouldCheckFrameRateCategory()) {
             if (sToolkitMetricsForFrameRateDecisionFlagValue) {
                 int width = mRight - mLeft;
                 int height = mBottom - mTop;
@@ -34034,7 +34034,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 viewRootImpl.recordViewPercentage(sizePercentage);
             }
 
-            int frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+            int frameRateCategory;
             if (Float.isNaN(frameRate)) {
                 frameRateCategory = calculateFrameRateCategory();
             } else if (frameRate < 0) {
@@ -34059,6 +34059,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                                 | FRAME_RATE_CATEGORY_REASON_INVALID;
                     }
                 }
+            } else {
+                // Category doesn't control it. It is directly controlled by frame rate
+                frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
+                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
             }
 
             int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
