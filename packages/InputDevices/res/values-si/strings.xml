@@ -51,4 +51,6 @@
     <string name="keyboard_layout_mongolian" msgid="7678483495823936626">"මොන්ගෝලියානු"</string>
     <string name="keyboard_layout_georgian" msgid="4596185456863747454">"ජෝර්ජියානු"</string>
     <string name="keyboard_layout_thai_kedmanee" msgid="6637147314580760938">"තායි (කෙඩ්මනී)"</string>
+    <!-- no translation found for keyboard_layout_thai_pattachote (2547992342794252205) -->
+    <skip />
 </resources>
