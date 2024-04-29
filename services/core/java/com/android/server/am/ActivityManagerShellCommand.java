@@ -117,6 +117,7 @@ import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.TeeWriter;
 import android.util.proto.ProtoOutputStream;
+import android.view.Choreographer;
 import android.view.Display;
 import android.window.SplashScreen;
 
@@ -241,6 +242,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 case "start":
                 case "start-activity":
                     return runStartActivity(pw);
+                case "start-in-vsync":
+                    final ProgressWaiter waiter = new ProgressWaiter(0);
+                    final int[] startResult = new int[1];
+                    startResult[0] = -1;
+                    mInternal.mUiHandler.runWithScissors(
+                            () -> Choreographer.getInstance().postFrameCallback(frameTimeNanos -> {
+                                try {
+                                    startResult[0] = runStartActivity(pw);
+                                    waiter.onFinished(0, null /* extras */);
+                                } catch (Exception ex) {
+                                    getErrPrintWriter().println(
+                                            "Error: unable to start activity, " + ex);
+                                }
+                            }),
+                            USER_OPERATION_TIMEOUT_MS / 2);
+                    waiter.waitForFinish(USER_OPERATION_TIMEOUT_MS);
+                    return startResult[0];
                 case "startservice":
                 case "start-service":
                     return runStartService(pw, false);
@@ -4262,6 +4280,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --activityType <ACTIVITY_TYPE>: The activity type to launch the activity as.");
             pw.println("      --display <DISPLAY_ID>: The display to launch the activity into.");
             pw.println("      --splashscreen-icon: Show the splash screen icon on launch.");
+            pw.println("  start-in-vsync");
+            pw.println("      Start an Activity with vsync aligned. See `start-activity` for the");
+            pw.println("      possible options.");
             pw.println("  start-service [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
