@@ -341,7 +341,7 @@ public class CpuPowerStatsCollectorTest {
                 }}, 0, 1234);
 
         mMockClock.uptime = 1000;
-        collector.forceSchedule();
+        collector.schedule();
         waitForIdle();
 
         mUidResolver.noteIsolatedUidRemoved(ISOLATED_UID, UID_2);
@@ -354,7 +354,7 @@ public class CpuPowerStatsCollectorTest {
                 }}, 1234, 3421);
 
         mMockClock.uptime = 2000;
-        collector.forceSchedule();
+        collector.schedule();
         waitForIdle();
 
         assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_2), 0))
