@@ -43,19 +43,14 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.util.ArraySet;
 import android.widget.Toast;
 
 import com.android.internal.R;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.UiThread;
-
-import java.util.Set;
 
 /**
  * Controls camera compatibility treatment that handles orientation mismatch between camera
@@ -69,7 +64,7 @@ import java.util.Set;
  * R.bool.config_isWindowManagerCameraCompatTreatmentEnabled} is {@code true}.
  */
  // TODO(b/261444714): Consider moving Camera-specific logic outside of the WM Core path
-final class DisplayRotationCompatPolicy {
+final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraCompatStateListener {
 
     // Delay for updating display rotation after Camera connection is closed. Needed to avoid
     // rotation flickering when an app is flipping between front and rear cameras or when size
@@ -91,54 +86,26 @@ final class DisplayRotationCompatPolicy {
 
     private final DisplayContent mDisplayContent;
     private final WindowManagerService mWmService;
-    private final CameraManager mCameraManager;
+    private final CameraStateMonitor mCameraStateMonitor;
     private final Handler mHandler;
-
-    // Bi-directional map between package names and active camera IDs since we need to 1) get a
-    // camera id by a package name when determining rotation; 2) get a package name by a camera id
-    // when camera connection is closed and we need to clean up our records.
-    @GuardedBy("this")
-    private final CameraIdPackageNameBiMapping mCameraIdPackageBiMap =
-            new CameraIdPackageNameBiMapping();
-    @GuardedBy("this")
-    private final Set<String> mScheduledToBeRemovedCameraIdSet = new ArraySet<>();
-    @GuardedBy("this")
-    private final Set<String> mScheduledOrientationUpdateCameraIdSet = new ArraySet<>();
-
-    private final CameraManager.AvailabilityCallback mAvailabilityCallback =
-            new  CameraManager.AvailabilityCallback() {
-                @Override
-                public void onCameraOpened(@NonNull String cameraId, @NonNull String packageId) {
-                    notifyCameraOpened(cameraId, packageId);
-                }
-
-                @Override
-                public void onCameraClosed(@NonNull String cameraId) {
-                    notifyCameraClosed(cameraId);
-                }
-            };
 
     @ScreenOrientation
     private int mLastReportedOrientation = SCREEN_ORIENTATION_UNSET;
 
-    DisplayRotationCompatPolicy(@NonNull DisplayContent displayContent) {
-        this(displayContent, displayContent.mWmService.mH);
-    }
-
-    @VisibleForTesting
-    DisplayRotationCompatPolicy(@NonNull DisplayContent displayContent, Handler handler) {
+    DisplayRotationCompatPolicy(@NonNull DisplayContent displayContent, Handler handler,
+            @NonNull CameraStateMonitor cameraStateMonitor) {
         // This constructor is called from DisplayContent constructor. Don't use any fields in
         // DisplayContent here since they aren't guaranteed to be set.
         mHandler = handler;
         mDisplayContent = displayContent;
         mWmService = displayContent.mWmService;
-        mCameraManager = mWmService.mContext.getSystemService(CameraManager.class);
-        mCameraManager.registerAvailabilityCallback(
-                mWmService.mContext.getMainExecutor(), mAvailabilityCallback);
+        mCameraStateMonitor = cameraStateMonitor;
+        mCameraStateMonitor.addCameraStateListener(this);
     }
 
+    /** Releases camera state listener. */
     void dispose() {
-        mCameraManager.unregisterAvailabilityCallback(mAvailabilityCallback);
+        mCameraStateMonitor.removeCameraStateListener(this);
     }
 
     /**
@@ -169,7 +136,7 @@ final class DisplayRotationCompatPolicy {
         if (!isTreatmentEnabledForDisplay()) {
             return SCREEN_ORIENTATION_UNSPECIFIED;
         }
-        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+        final ActivityRecord topActivity = mDisplayContent.topRunningActivity(
                 /* considerKeyguardState= */ true);
         if (!isTreatmentEnabledForActivity(topActivity)) {
             return SCREEN_ORIENTATION_UNSPECIFIED;
@@ -188,7 +155,7 @@ final class DisplayRotationCompatPolicy {
         // rotated in the orientation oposite to the natural one even if it's portrait.
         // TODO(b/261475895): Consider allowing more rotations for "sensor" and "user" versions
         // of the portrait and landscape orientation requests.
-        int orientation = (isPortraitActivity && isNaturalDisplayOrientationPortrait)
+        final int orientation = (isPortraitActivity && isNaturalDisplayOrientationPortrait)
                 || (!isPortraitActivity && !isNaturalDisplayOrientationPortrait)
                         ? SCREEN_ORIENTATION_PORTRAIT
                         : SCREEN_ORIENTATION_LANDSCAPE;
@@ -249,12 +216,10 @@ final class DisplayRotationCompatPolicy {
      * reason with the {@link Toast}.
      */
     void onScreenRotationAnimationFinished() {
-        if (!isTreatmentEnabledForDisplay() || mCameraIdPackageBiMap.isEmpty()) {
-            return;
-        }
-        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
-                    /* considerKeyguardState= */ true);
-        if (!isTreatmentEnabledForActivity(topActivity)) {
+        final ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                /* considerKeyguardState= */ true);
+        if (!isTreatmentEnabledForDisplay()
+                || !isTreatmentEnabledForActivity(topActivity)) {
             return;
         }
         showToast(R.string.display_rotation_camera_compat_toast_after_rotation);
@@ -272,8 +237,8 @@ final class DisplayRotationCompatPolicy {
                             + (topActivity == null ? "null" : topActivity.shortComponentName)
                     + " isTreatmentEnabledForActivity="
                             + isTreatmentEnabledForActivity(topActivity)
-                    + " CameraIdPackageNameBiMap="
-                            + mCameraIdPackageBiMap.getSummaryForDisplayRotationHistoryRecord();
+                            + "mCameraStateMonitor="
+                            + mCameraStateMonitor.getSummary();
         }
         return "DisplayRotationCompatPolicy{"
                 + " isTreatmentEnabledForDisplay=" + isTreatmentEnabledForDisplay()
@@ -373,67 +338,41 @@ final class DisplayRotationCompatPolicy {
         // Checking windowing mode on activity level because we don't want to
         // apply treatment in case of activity embedding.
         return (!mustBeFullscreen || !activity.inMultiWindowMode())
-                && mCameraIdPackageBiMap.containsPackageName(activity.packageName)
+                && mCameraStateMonitor.isCameraRunningForActivity(activity)
                 && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
     }
 
-    private synchronized void notifyCameraOpened(
-            @NonNull String cameraId, @NonNull String packageName) {
-        // If an activity is restarting or camera is flipping, the camera connection can be
-        // quickly closed and reopened.
-        mScheduledToBeRemovedCameraIdSet.remove(cameraId);
-        ProtoLog.v(WM_DEBUG_ORIENTATION,
-                "Display id=%d is notified that Camera %s is open for package %s",
-                mDisplayContent.mDisplayId, cameraId, packageName);
-        // Some apps can’t handle configuration changes coming at the same time with Camera setup
-        // so delaying orientation update to accomadate for that.
-        mScheduledOrientationUpdateCameraIdSet.add(cameraId);
-        mHandler.postDelayed(
-                () ->  delayedUpdateOrientationWithWmLock(cameraId, packageName),
-                CAMERA_OPENED_ROTATION_UPDATE_DELAY_MS);
-    }
-
-    private void delayedUpdateOrientationWithWmLock(
-            @NonNull String cameraId, @NonNull String packageName) {
-        synchronized (this) {
-            if (!mScheduledOrientationUpdateCameraIdSet.remove(cameraId)) {
-                // Orientation update has happened already or was cancelled because
-                // camera was closed.
-                return;
-            }
-            mCameraIdPackageBiMap.put(packageName, cameraId);
+    @Override
+    public boolean onCameraOpened(@NonNull ActivityRecord cameraActivity,
+            @NonNull String cameraId) {
+        // Checking whether an activity in fullscreen rather than the task as this camera
+        // compat treatment doesn't cover activity embedding.
+        if (cameraActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+            cameraActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
+            mDisplayContent.updateOrientation();
+            return true;
         }
-        synchronized (mWmService.mGlobalLock) {
-            ActivityRecord topActivity = mDisplayContent.topRunningActivity(
-                        /* considerKeyguardState= */ true);
-            if (topActivity == null || topActivity.getTask() == null) {
-                return;
-            }
-            // Checking whether an activity in fullscreen rather than the task as this camera
-            // compat treatment doesn't cover activity embedding.
-            if (topActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
-                mDisplayContent.updateOrientation();
-                return;
-            }
-            // Checking that the whole app is in multi-window mode as we shouldn't show toast
-            // for the activity embedding case.
-            if (topActivity.getTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
-                    && isTreatmentEnabledForActivity(topActivity, /* mustBeFullscreen */ false)) {
-                final PackageManager packageManager = mWmService.mContext.getPackageManager();
-                try {
-                    showToast(
-                            R.string.display_rotation_camera_compat_toast_in_multi_window,
-                            (String) packageManager.getApplicationLabel(
-                                    packageManager.getApplicationInfo(packageName, /* flags */ 0)));
-                } catch (PackageManager.NameNotFoundException e) {
-                    ProtoLog.e(WM_DEBUG_ORIENTATION,
-                            "DisplayRotationCompatPolicy: Multi-window toast not shown as "
-                                    + "package '%s' cannot be found.",
-                            packageName);
-                }
+        // Checking that the whole app is in multi-window mode as we shouldn't show toast
+        // for the activity embedding case.
+        if (cameraActivity.getTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
+                && isTreatmentEnabledForActivity(
+                cameraActivity, /* mustBeFullscreen */ false)) {
+            final PackageManager packageManager = mWmService.mContext.getPackageManager();
+            try {
+                showToast(
+                        R.string.display_rotation_camera_compat_toast_in_multi_window,
+                        (String) packageManager.getApplicationLabel(
+                                packageManager.getApplicationInfo(cameraActivity.packageName,
+                                        /* flags */ 0)));
+                return true;
+            } catch (PackageManager.NameNotFoundException e) {
+                ProtoLog.e(WM_DEBUG_ORIENTATION,
+                        "DisplayRotationCompatPolicy: Multi-window toast not shown as "
+                                + "package '%s' cannot be found.",
+                        cameraActivity.packageName);
             }
         }
+        return false;
     }
 
     @VisibleForTesting
@@ -451,66 +390,42 @@ final class DisplayRotationCompatPolicy {
                         Toast.LENGTH_LONG).show());
     }
 
-    private synchronized void notifyCameraClosed(@NonNull String cameraId) {
-        ProtoLog.v(WM_DEBUG_ORIENTATION,
-                "Display id=%d is notified that Camera %s is closed, scheduling rotation update.",
-                mDisplayContent.mDisplayId, cameraId);
-        mScheduledToBeRemovedCameraIdSet.add(cameraId);
-        // No need to update orientation for this camera if it's already closed.
-        mScheduledOrientationUpdateCameraIdSet.remove(cameraId);
-        scheduleRemoveCameraId(cameraId);
-    }
-
-    // Delay is needed to avoid rotation flickering when an app is flipping between front and
-    // rear cameras, when size compat mode is restarted or activity is being refreshed.
-    private void scheduleRemoveCameraId(@NonNull String cameraId) {
-        mHandler.postDelayed(
-                () -> removeCameraId(cameraId),
-                CAMERA_CLOSED_ROTATION_UPDATE_DELAY_MS);
-    }
-
-    private void removeCameraId(String cameraId) {
+    @Override
+    public boolean onCameraClosed(@NonNull ActivityRecord cameraActivity,
+            @NonNull String cameraId) {
         synchronized (this) {
-            if (!mScheduledToBeRemovedCameraIdSet.remove(cameraId)) {
-                // Already reconnected to this camera, no need to clean up.
-                return;
-            }
+            // TODO(b/336474959): Once refresh is implemented in `CameraCompatFreeformPolicy`,
+            // consider checking this in CameraStateMonitor before notifying the listeners (this).
             if (isActivityForCameraIdRefreshing(cameraId)) {
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Display id=%d is notified that Camera %s is closed but activity is"
+                        "Display id=%d is notified that camera is closed but activity is"
                                 + " still refreshing. Rescheduling an update.",
-                        mDisplayContent.mDisplayId, cameraId);
-                mScheduledToBeRemovedCameraIdSet.add(cameraId);
-                scheduleRemoveCameraId(cameraId);
-                return;
+                        mDisplayContent.mDisplayId);
+                return false;
             }
-            mCameraIdPackageBiMap.removeCameraId(cameraId);
         }
         ProtoLog.v(WM_DEBUG_ORIENTATION,
-                "Display id=%d is notified that Camera %s is closed, updating rotation.",
-                mDisplayContent.mDisplayId, cameraId);
-        synchronized (mWmService.mGlobalLock) {
-            ActivityRecord topActivity = mDisplayContent.topRunningActivity(
-                    /* considerKeyguardState= */ true);
-            if (topActivity == null
-                    // Checking whether an activity in fullscreen rather than the task as this
-                    // camera compat treatment doesn't cover activity embedding.
-                    || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
-                return;
-            }
-            topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
-            mDisplayContent.updateOrientation();
+                "Display id=%d is notified that Camera is closed, updating rotation.",
+                mDisplayContent.mDisplayId);
+        final ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                /* considerKeyguardState= */ true);
+        if (topActivity == null
+                // Checking whether an activity in fullscreen rather than the task as this
+                // camera compat treatment doesn't cover activity embedding.
+                || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+            return true;
         }
+        topActivity.mLetterboxUiController.recomputeConfigurationForCameraCompatIfNeeded();
+        mDisplayContent.updateOrientation();
+        return true;
     }
 
+    // TODO(b/336474959): Do we need cameraId here?
     private boolean isActivityForCameraIdRefreshing(String cameraId) {
-        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+        final ActivityRecord topActivity = mDisplayContent.topRunningActivity(
                 /* considerKeyguardState= */ true);
-        if (!isTreatmentEnabledForActivity(topActivity)) {
-            return false;
-        }
-        String activeCameraId = mCameraIdPackageBiMap.getCameraId(topActivity.packageName);
-        if (activeCameraId == null || activeCameraId != cameraId) {
+        if (!isTreatmentEnabledForActivity(topActivity)
+                || !mCameraStateMonitor.isCameraWithIdRunningForActivity(topActivity, cameraId)) {
             return false;
         }
         return topActivity.mLetterboxUiController.isRefreshAfterRotationRequested();
