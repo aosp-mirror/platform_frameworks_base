@@ -154,6 +154,11 @@ public class DisplayManagerFlags {
             Flags::useFusionProxSensor
     );
 
+    private final FlagState mPeakRefreshRatePhysicalLimit = new FlagState(
+            Flags.FLAG_ENABLE_PEAK_REFRESH_RATE_PHYSICAL_LIMIT,
+            Flags::enablePeakRefreshRatePhysicalLimit
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -312,6 +317,10 @@ public class DisplayManagerFlags {
         return mUseFusionProxSensor.getName();
     }
 
+    public boolean isPeakRefreshRatePhysicalLimitEnabled() {
+        return mPeakRefreshRatePhysicalLimit.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -343,6 +352,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mRefactorDisplayPowerController);
         pw.println(" " + mResolutionBackupRestore);
         pw.println(" " + mUseFusionProxSensor);
+        pw.println(" " + mPeakRefreshRatePhysicalLimit);
     }
 
     private static class FlagState {
