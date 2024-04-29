@@ -33,6 +33,19 @@ per-file res/xml/public-final.xml = file:/tools/aapt2/OWNERS
 # Multiuser
 per-file res/xml/config_user_types.xml = file:/MULTIUSER_OWNERS
 
+# Notifications
+per-file res/*/*notification* = file:/packages/SystemUI/src/com/android/systemui/statusbar/notification/OWNERS
+# TODO(b/337816136): Move notification values to separate files
+per-file res/values*/attrs.xml = jeffdq@google.com
+per-file res/values*/colors.xml = jeffdq@google.com
+per-file res/values*/dimens.xml = jeffdq@google.com
+per-file res/values*/config.xml = jeffdq@google.com
+per-file res/values/ids.xml = jeffdq@google.com
+per-file res/values/strings.xml = jeffdq@google.com
+per-file res/values/symbols.xml = jeffdq@google.com
+per-file res/values/themes_device_defaults.xml = jeffdq@google.com
+per-file res/values/styles_material.xml = jeffdq@google.com
+
 # Battery Saver
 per-file res/values/config_battery_saver.xml = file:/services/core/java/com/android/server/power/batterysaver/OWNERS
 
