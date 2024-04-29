@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.compose
+package com.android.systemui.qs.panels.shared.model
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
+import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.common.shared.model.Text
 import com.android.systemui.qs.pipeline.shared.TileSpec
 
-interface GridLayout {
-    @Composable
-    fun TileGrid(
-        tiles: List<TileViewModel>,
-        modifier: Modifier,
-    )
-
-    @Composable
-    fun EditTileGrid(
-        tiles: List<EditTileViewModel>,
-        modifier: Modifier,
-        onAddTile: (TileSpec, Int) -> Unit,
-        onRemoveTile: (TileSpec) -> Unit,
-    )
+data class EditTileData(
+    val tileSpec: TileSpec,
+    val icon: Icon,
+    val label: Text,
+    val appName: Text?,
+) {
+    init {
+        check(
+            (tileSpec is TileSpec.PlatformTileSpec && appName == null) ||
+                (tileSpec is TileSpec.CustomTileSpec && appName != null)
+        ) {
+            "tileSpec: $tileSpec - appName: $appName. " +
+                "appName must be non-null for custom tiles and only for custom tiles."
+        }
+    }
 }

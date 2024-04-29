@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.qs.panels.data.repository
 
-import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
+import android.content.res.Resources
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 @SysUISingleton
-class QuickSettingsContainerViewModel
+class StockTilesRepository
 @Inject
 constructor(
-    val brightnessSliderViewModel: BrightnessSliderViewModel,
-    val tileGridViewModel: TileGridViewModel,
-    val editModeViewModel: EditModeViewModel,
-)
+    @Main private val resources: Resources,
+) {
+    /**
+     * List of stock platform tiles. All of the specs will be of type [TileSpec.PlatformTileSpec].
+     */
+    val stockTiles =
+        resources
+            .getString(R.string.quick_settings_tiles_stock)
+            .split(",")
+            .map(TileSpec::create)
+            .filterNot { it is TileSpec.Invalid }
+}

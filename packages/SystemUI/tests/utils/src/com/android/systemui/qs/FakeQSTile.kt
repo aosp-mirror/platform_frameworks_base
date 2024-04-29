@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.pipeline.domain.interactor
+package com.android.systemui.qs
 
 import com.android.internal.logging.InstanceId
 import com.android.systemui.animation.Expandable

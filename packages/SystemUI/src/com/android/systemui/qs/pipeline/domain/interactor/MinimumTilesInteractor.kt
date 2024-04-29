@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.qs.pipeline.domain.interactor
 
-import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
+import com.android.systemui.qs.pipeline.data.repository.MinimumTilesRepository
 import javax.inject.Inject
 
-@SysUISingleton
-class QuickSettingsContainerViewModel
+class MinimumTilesInteractor
 @Inject
 constructor(
-    val brightnessSliderViewModel: BrightnessSliderViewModel,
-    val tileGridViewModel: TileGridViewModel,
-    val editModeViewModel: EditModeViewModel,
-)
+    private val minimumTilesRepository: MinimumTilesRepository,
+) {
+    val minNumberOfTiles: Int
+        get() = minimumTilesRepository.minNumberOfTiles
+}

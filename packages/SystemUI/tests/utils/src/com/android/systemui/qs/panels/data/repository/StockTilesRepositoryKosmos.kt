@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.qs.panels.data.repository
 
-import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
-import javax.inject.Inject
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
 
-@SysUISingleton
-class QuickSettingsContainerViewModel
-@Inject
-constructor(
-    val brightnessSliderViewModel: BrightnessSliderViewModel,
-    val tileGridViewModel: TileGridViewModel,
-    val editModeViewModel: EditModeViewModel,
-)
+var Kosmos.stockTilesRepository by
+    Kosmos.Fixture {
+        testCase.context.orCreateTestableResources
+        StockTilesRepository(testCase.context.resources)
+    }
