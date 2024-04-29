@@ -232,10 +232,16 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             String sessionId,
             String routeId,
             @RoutingSessionInfo.TransferReason int transferReason) {
+        String selectedDeviceRouteId = mDeviceRouteController.getSelectedRoute().getId();
         if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
-            // The currently selected route is the default route.
-            Log.w(TAG, "Ignoring transfer to " + MediaRoute2Info.ROUTE_ID_DEFAULT);
-            return;
+            if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
+                // Transfer to the default route (which is the selected route). We replace the id to
+                // be the selected route id so that the transfer reason gets updated.
+                routeId = selectedDeviceRouteId;
+            } else {
+                Log.w(TAG, "Ignoring transfer to " + MediaRoute2Info.ROUTE_ID_DEFAULT);
+                return;
+            }
         }
 
         if (Flags.enableBuiltInSpeakerRouteSuitabilityStatuses()) {
@@ -250,11 +256,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             }
         }
 
-        MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
+        String finalRouteId = routeId; // Make a final copy to use it in the lambda.
         boolean isAvailableDeviceRoute =
                 mDeviceRouteController.getAvailableRoutes().stream()
-                        .anyMatch(it -> it.getId().equals(routeId));
-        boolean isSelectedDeviceRoute = TextUtils.equals(routeId, selectedDeviceRoute.getId());
+                        .anyMatch(it -> it.getId().equals(finalRouteId));
+        boolean isSelectedDeviceRoute = TextUtils.equals(routeId, selectedDeviceRouteId);
 
         if (isSelectedDeviceRoute || isAvailableDeviceRoute) {
             // The requested route is managed by the device route controller. Note that the selected
