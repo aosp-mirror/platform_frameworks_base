@@ -17,10 +17,14 @@ database tool. On your development machine, run the tool from the
 <code>platform-tools/</code> folder of your SDK. On the emulator, run the tool
 with adb shell, for example, <code>adb shell sqlite3</code>.
 
-<p>The version of SQLite depends on the version of Android. See the following table:
+<p>The version of SQLite depends on the version of Android. In the past,
+  SQLite upgrades have been delivered as part of a new API level, but more
+  recently SQLite may be upgraded within an API level.  See the following
+  table:
 <table style="width:auto;">
   <tr><th>Android API</th><th>SQLite Version</th></tr>
-  <tr><td>LATEST</td><td>3.42.0</td></tr>
+  <tr><td>API 35</td><td>3.44.3</td></tr>
+  <tr><td>API 34</td><td>3.42.0</td></tr>
   <tr><td>API 34</td><td>3.39</td></tr>
   <tr><td>API 33</td><td>3.32</td></tr>
   <tr><td>API 32</td><td>3.32</td></tr>
