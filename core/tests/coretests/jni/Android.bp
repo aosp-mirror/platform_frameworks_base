@@ -67,3 +67,27 @@ cc_test_library {
     ],
     gtest: false,
 }
+
+cc_test_library {
+    name: "libviewRootImplTest_jni",
+    srcs: [
+        "ViewRootImplTestJni.cpp",
+    ],
+    shared_libs: [
+        "libandroid",
+        "libandroid_runtime_lazy",
+        "libbase",
+        "libbinder",
+        "liblog",
+        "libnativehelper",
+        "libpowermanager",
+        "libutils",
+    ],
+    header_libs: ["jni_headers"],
+    stl: "libc++_static",
+    cflags: [
+        "-Werror",
+        "-Wall",
+    ],
+    gtest: false,
+}

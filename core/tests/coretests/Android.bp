@@ -116,6 +116,7 @@ android_test {
     ],
     jni_libs: [
         "libpowermanagertest_jni",
+        "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
     ],
 
