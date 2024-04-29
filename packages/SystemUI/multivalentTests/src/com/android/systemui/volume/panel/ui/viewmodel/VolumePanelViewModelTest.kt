@@ -55,6 +55,7 @@ class VolumePanelViewModelTest : SysuiTestCase() {
         underTest =
             VolumePanelViewModel(
                 testableResources.resources,
+                kosmos.testScope.backgroundScope,
                 KosmosVolumePanelComponentFactory(kosmos),
                 kosmos.fakeConfigurationController,
             )

@@ -45,7 +45,6 @@ import kotlinx.coroutines.CoroutineScope
     modules =
         [
             // Volume Panel infra modules
-            CoroutineModule::class,
             DefaultMultibindsModule::class,
             DomainModule::class,
             UiModule::class,
@@ -61,6 +60,12 @@ import kotlinx.coroutines.CoroutineScope
 )
 interface VolumePanelComponent {
 
+    /**
+     * Provides a coroutine scope to use inside [VolumePanelScope].
+     * [com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel] manages the lifecycle
+     * of this scope. It's cancelled when the View Model is destroyed. This helps to free occupied
+     * resources when volume panel is not shown.
+     */
     fun coroutineScope(): CoroutineScope
 
     fun componentsInteractor(): ComponentsInteractor
@@ -74,6 +79,9 @@ interface VolumePanelComponent {
     @Subcomponent.Factory
     interface Factory : VolumePanelComponentFactory {
 
-        override fun create(@BindsInstance viewModel: VolumePanelViewModel): VolumePanelComponent
+        override fun create(
+            @BindsInstance viewModel: VolumePanelViewModel,
+            @BindsInstance scope: CoroutineScope,
+        ): VolumePanelComponent
     }
 }

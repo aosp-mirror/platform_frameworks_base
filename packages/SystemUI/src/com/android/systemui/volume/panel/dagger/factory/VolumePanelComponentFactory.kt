@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.dagger.factory
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent
 import com.android.systemui.volume.panel.ui.viewmodel.VolumePanelViewModel
 import dagger.BindsInstance
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Common interface for all [dagger.Subcomponent.Factory] providing [VolumePanelComponent].
@@ -26,5 +27,8 @@ import dagger.BindsInstance
  */
 interface VolumePanelComponentFactory {
 
-    fun create(@BindsInstance viewModel: VolumePanelViewModel): VolumePanelComponent
+    fun create(
+        @BindsInstance viewModel: VolumePanelViewModel,
+        @BindsInstance scope: CoroutineScope,
+    ): VolumePanelComponent
 }
