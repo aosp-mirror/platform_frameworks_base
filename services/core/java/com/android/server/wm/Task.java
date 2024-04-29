@@ -6916,7 +6916,7 @@ class Task extends TaskFragment {
             mIsBoosted = isBoosted;
             // The client transaction will be applied together with the next assignLayer.
             if (clientTransaction != null) {
-                mDecorSurfaceContainer.mPendingClientTransactions.add(clientTransaction);
+                mPendingClientTransactions.add(clientTransaction);
             }
         }
 

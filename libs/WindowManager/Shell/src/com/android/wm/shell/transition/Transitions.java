@@ -61,6 +61,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ITransitionPlayer;
 import android.window.RemoteTransition;
+import android.window.TaskFragmentOrganizer;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionMetrics;
@@ -182,6 +183,13 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     /** Transition to resize PiP task. */
     public static final int TRANSIT_RESIZE_PIP = TRANSIT_FIRST_CUSTOM + 16;
+
+    /**
+     * The task fragment drag resize transition used by activity embedding.
+     */
+    public static final int TRANSIT_TASK_FRAGMENT_DRAG_RESIZE =
+            // TRANSIT_FIRST_CUSTOM + 17
+            TaskFragmentOrganizer.TASK_FRAGMENT_TRANSIT_DRAG_RESIZE;
 
     private final ShellTaskOrganizer mOrganizer;
     private final Context mContext;
