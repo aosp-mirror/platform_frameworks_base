@@ -33,7 +33,6 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -636,8 +635,7 @@ public final class KeyboardShortcuts {
             TextView categoryTitle = (TextView) inflater.inflate(
                     R.layout.keyboard_shortcuts_category_title, keyboardShortcutsLayout, false);
             categoryTitle.setText(group.getLabel());
-            categoryTitle.setTextColor(group.isSystemGroup() ? Utils.getColorAccent(mContext) :
-                    ColorStateList.valueOf(mContext.getColor(R.color.ksh_application_group_color)));
+            categoryTitle.setTextColor(Utils.getColorAccent(mContext));
             keyboardShortcutsLayout.addView(categoryTitle);
 
             LinearLayout shortcutContainer = (LinearLayout) inflater.inflate(
