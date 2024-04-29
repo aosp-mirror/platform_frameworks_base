@@ -21,6 +21,8 @@ import static android.graphics.Color.WHITE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
+import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
+
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -43,6 +45,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowRelayoutResult;
 import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.SnapshotDrawerUtils;
@@ -139,9 +142,16 @@ public class TaskSnapshotWindow {
         }
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
-            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
-                    tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
-                    tmpControls, new Bundle());
+            if (windowSessionRelayoutInfo()) {
+                final WindowRelayoutResult outRelayoutResult = new WindowRelayoutResult(tmpFrames,
+                        tmpMergedConfiguration, surfaceControl, tmpInsetsState, tmpControls);
+                session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
+                        outRelayoutResult);
+            } else {
+                session.relayoutLegacy(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
+                        tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
+                        tmpControls, new Bundle());
+            }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
