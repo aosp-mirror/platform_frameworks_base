@@ -47,8 +47,11 @@ internal fun CoroutineScope.animateToScene(
     }
 
     return when (transitionState) {
-        is TransitionState.Idle -> animate(layoutState, target, transitionKey)
+        is TransitionState.Idle ->
+            animate(layoutState, target, transitionKey, isInitiatedByUserInput = false)
         is TransitionState.Transition -> {
+            val isInitiatedByUserInput = transitionState.isInitiatedByUserInput
+
             // A transition is currently running: first check whether `transition.toScene` or
             // `transition.fromScene` is the same as our target scene, in which case the transition
             // can be accelerated or reversed to end up in the target state.
@@ -69,7 +72,13 @@ internal fun CoroutineScope.animateToScene(
                     // The transition is in progress: start the canned animation at the same
                     // progress as it was in.
                     // TODO(b/290184746): Also take the current velocity into account.
-                    animate(layoutState, target, transitionKey, startProgress = progress)
+                    animate(
+                        layoutState,
+                        target,
+                        transitionKey,
+                        isInitiatedByUserInput,
+                        startProgress = progress,
+                    )
                 }
             } else if (transitionState.fromScene == target) {
                 // There is a transition from [target] to another scene: simply animate the same
@@ -88,14 +97,47 @@ internal fun CoroutineScope.animateToScene(
                         layoutState,
                         target,
                         transitionKey,
+                        isInitiatedByUserInput,
                         startProgress = progress,
                         reversed = true,
                     )
                 }
             } else {
                 // Generic interruption; the current transition is neither from or to [target].
-                // TODO(b/290930950): Better handle interruptions here.
-                animate(layoutState, target, transitionKey)
+                val interruptionResult =
+                    layoutState.transitions.interruptionHandler.onInterruption(
+                        transitionState,
+                        target,
+                    )
+                        ?: DefaultInterruptionHandler.onInterruption(transitionState, target)
+
+                val animateFrom = interruptionResult.animateFrom
+                if (
+                    animateFrom != transitionState.toScene &&
+                        animateFrom != transitionState.fromScene
+                ) {
+                    error(
+                        "InterruptionResult.animateFrom must be either the fromScene " +
+                            "(${transitionState.fromScene.debugName}) or the toScene " +
+                            "(${transitionState.toScene.debugName}) of the interrupted transition."
+                    )
+                }
+
+                // If we were A => B and that we are now animating A => C, add a transition B => A
+                // to the list of transitions so that B "disappears back to A".
+                val chain = interruptionResult.chain
+                if (chain && animateFrom != transitionState.currentScene) {
+                    animateToScene(layoutState, animateFrom, transitionKey = null)
+                }
+
+                animate(
+                    layoutState,
+                    target,
+                    transitionKey,
+                    isInitiatedByUserInput,
+                    fromScene = animateFrom,
+                    chain = chain,
+                )
             }
         }
     }
@@ -103,32 +145,30 @@ internal fun CoroutineScope.animateToScene(
 
 private fun CoroutineScope.animate(
     layoutState: BaseSceneTransitionLayoutState,
-    target: SceneKey,
+    targetScene: SceneKey,
     transitionKey: TransitionKey?,
+    isInitiatedByUserInput: Boolean,
     startProgress: Float = 0f,
     reversed: Boolean = false,
+    fromScene: SceneKey = layoutState.transitionState.currentScene,
+    chain: Boolean = true,
 ): TransitionState.Transition {
-    val fromScene = layoutState.transitionState.currentScene
-    val isUserInput =
-        (layoutState.transitionState as? TransitionState.Transition)?.isInitiatedByUserInput
-            ?: false
-
     val targetProgress = if (reversed) 0f else 1f
     val transition =
         if (reversed) {
             OneOffTransition(
-                fromScene = target,
+                fromScene = targetScene,
                 toScene = fromScene,
-                currentScene = target,
-                isInitiatedByUserInput = isUserInput,
+                currentScene = targetScene,
+                isInitiatedByUserInput = isInitiatedByUserInput,
                 isUserInputOngoing = false,
             )
         } else {
             OneOffTransition(
                 fromScene = fromScene,
-                toScene = target,
-                currentScene = target,
-                isInitiatedByUserInput = isUserInput,
+                toScene = targetScene,
+                currentScene = targetScene,
+                isInitiatedByUserInput = isInitiatedByUserInput,
                 isUserInputOngoing = false,
             )
         }
@@ -136,7 +176,7 @@ private fun CoroutineScope.animate(
     // Change the current layout state to start this new transition. This will compute the
     // TransformationSpec associated to this transition, which we need to initialize the Animatable
     // that will actually animate it.
-    layoutState.startTransition(transition, transitionKey)
+    layoutState.startTransition(transition, transitionKey, chain)
 
     // The transition now contains the transformation spec that we should use to instantiate the
     // Animatable.
@@ -156,7 +196,7 @@ private fun CoroutineScope.animate(
                     // Settle the state to Idle(target). Note that this will do nothing if this
                     // transition was replaced/interrupted by another one, and this also runs if
                     // this coroutine is cancelled, i.e. if [this] coroutine scope is cancelled.
-                    layoutState.finishTransition(transition, target)
+                    layoutState.finishTransition(transition, targetScene)
                 }
             }
 
