@@ -22,7 +22,10 @@ import static android.media.AudioManager.ADJUST_RAISE;
 import static android.media.AudioManager.ADJUST_UNMUTE;
 
 import android.content.Context;
+import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceVolumeManager;
 import android.media.AudioManager;
+import android.media.VolumeInfo;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
@@ -60,6 +63,8 @@ class AudioManagerShellCommand extends ShellCommand {
                 return resetSoundDoseTimeout();
             case "set-volume":
                 return setVolume();
+            case "set-device-volume":
+                return setDeviceVolume();
             case "adj-mute":
                 return adjMute();
             case "adj-unmute":
@@ -97,6 +102,8 @@ class AudioManagerShellCommand extends ShellCommand {
         pw.println("    Resets the sound dose timeout used for momentary exposure");
         pw.println("  set-volume STREAM_TYPE VOLUME_INDEX");
         pw.println("    Sets the volume for STREAM_TYPE to VOLUME_INDEX");
+        pw.println("  set-device-volume STREAM_TYPE VOLUME_INDEX NATIVE_DEVICE_TYPE");
+        pw.println("    Sets for NATIVE_DEVICE_TYPE the STREAM_TYPE volume to VOLUME_INDEX");
         pw.println("  adj-mute STREAM_TYPE");
         pw.println("    mutes the STREAM_TYPE");
         pw.println("  adj-unmute STREAM_TYPE");
@@ -254,6 +261,23 @@ class AudioManagerShellCommand extends ShellCommand {
         getOutPrintWriter().println("calling AudioManager.setStreamVolume("
                 + stream + ", " + index + ", 0)");
         am.setStreamVolume(stream, index, 0);
+        return 0;
+    }
+
+    private int setDeviceVolume() {
+        final Context context = mService.mContext;
+        final AudioDeviceVolumeManager advm = (AudioDeviceVolumeManager) context.getSystemService(
+                Context.AUDIO_DEVICE_VOLUME_SERVICE);
+        final int stream = readIntArg();
+        final int index = readIntArg();
+        final int device = readIntArg();
+
+        final VolumeInfo volume = new VolumeInfo.Builder(stream).setVolumeIndex(index).build();
+        final AudioDeviceAttributes ada = new AudioDeviceAttributes(
+                /*native type*/ device, /*address*/ "foo");
+        getOutPrintWriter().println(
+                "calling AudioDeviceVolumeManager.setDeviceVolume(" + volume + ", " + ada + ")");
+        advm.setDeviceVolume(volume, ada);
         return 0;
     }
 
