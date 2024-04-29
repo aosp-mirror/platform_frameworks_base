@@ -665,6 +665,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void addUserEngagedSession(MediaSessionRecordImpl mediaSessionRecord) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
         synchronized (mLock) {
             int uid = mediaSessionRecord.getUid();
             mUserEngagedSessionsForFgs.putIfAbsent(uid, new HashSet<>());
@@ -673,6 +676,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void removeUserEngagedSession(MediaSessionRecordImpl mediaSessionRecord) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
         synchronized (mLock) {
             int uid = mediaSessionRecord.getUid();
             Set<MediaSessionRecordImpl> mUidUserEngagedSessionsForFgs =
