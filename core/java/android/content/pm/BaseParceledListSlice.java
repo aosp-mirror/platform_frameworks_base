@@ -45,11 +45,18 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
     private static final String TAG = "ParceledListSlice";
     private static final boolean DEBUG = false;
 
-    /*
-     * TODO get this number from somewhere else. For now set it to a quarter of
-     * the 1MB limit.
-     */
     private static final int MAX_IPC_SIZE = IBinder.getSuggestedMaxIpcSizeBytes();
+
+    /**
+     * As of 2024 and for some time, max size has been 64KB. If a single
+     * element is too large, this class will write too big of Parcels,
+     * so log. 64KB/4 is 16KB is still pretty big for a single element
+     * (which could result in a ~64KB + 16KB = 80KB transaction). We may
+     * want to reduce the warning size just in case. Though, 64KB is
+     * already quite large for binder transactions, another strategy may
+     * be needed.
+     */
+    private static final int WARN_ELM_SIZE = MAX_IPC_SIZE / 4;
 
     private List<T> mList;
 
@@ -206,12 +213,23 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
 
                         try {
                             reply.writeNoException();
+
+                            // note: this logic ensures if there are enough elements in the list,
+                            // we will always write over the max IPC size. This is dangerous
+                            // when there are large elements.
                             while (i < N && reply.dataSize() < MAX_IPC_SIZE) {
                                 reply.writeInt(1);
+
+                                int preWriteSize = reply.dataSize();
 
                                 final T parcelable = mList.get(i);
                                 verifySameType(listElementClass, parcelable.getClass());
                                 writeElement(parcelable, reply, callFlags);
+
+                                int elmSize = reply.dataSize() - preWriteSize;
+                                if (elmSize >= WARN_ELM_SIZE) {
+                                    Log.w(TAG, "Element #" + i + " is " + elmSize + " bytes.");
+                                }
 
                                 if (DEBUG) Log.d(TAG, "Wrote extra #" + i + ": " + mList.get(i));
                                 i++;
@@ -222,6 +240,9 @@ abstract class BaseParceledListSlice<T> implements Parcelable {
                             } else {
                                 if (DEBUG) Log.d(TAG, "Transfer done, clearing mList reference");
                                 mList = null;
+                            }
+                            if (reply.dataSize() >= MAX_IPC_SIZE + WARN_ELM_SIZE) {
+                                Log.w(TAG, "Overly large reply size: " + reply.dataSize());
                             }
                         } catch (RuntimeException e) {
                             if (DEBUG) Log.d(TAG, "Transfer failed, clearing mList reference");
