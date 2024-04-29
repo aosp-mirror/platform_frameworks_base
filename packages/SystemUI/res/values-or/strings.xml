@@ -371,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"ହିଅରିଂ ଡିଭାଇସଗୁଡ଼ିକ"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"ନୂଆ ଡିଭାଇସ ପେୟାର କର"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"ନୂଆ ଡିଭାଇସ ପେୟାର କରିବାକୁ କ୍ଲିକ କରନ୍ତୁ"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"ପ୍ରିସେଟକୁ ଅପଡେଟ କରାଯାଇପାରିଲା ନାହିଁ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"ଡିଭାଇସର ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"ଡିଭାଇସର କେମେରାକୁ ଅନବ୍ଲକ କରିବେ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"ଡିଭାଇସର କ୍ୟାମେରା ଏବଂ ମାଇକ୍ରୋଫୋନକୁ ଅନବ୍ଲକ୍ କରିବେ?"</string>
@@ -656,10 +655,8 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"ସାଟେଲାଇଟ, ଦୁର୍ବଳ କନେକ୍ସନ"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ସାଟେଲାଇଟ, ଭଲ କନେକ୍ସନ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ସାଟେଲାଇଟ, କନେକ୍ସନ ଉପଲବ୍ଧ"</string>
-    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
-    <skip />
-    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="7942466244369263272">"ସେଟେଲାଇଟ ସହ କନେକ୍ଟ ହୋଇଛନ୍ତି"</string>
+    <string name="satellite_not_connected_carrier_text" msgid="3471375076594005077">"ସେଟେଲାଇଟ ସହ କନେକ୍ଟ ହୋଇନାହାଁନ୍ତି"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"କେତେକଙ୍କ ପାଇଁ ମଜାଦାର, କିନ୍ତୁ ସମସ୍ତଙ୍କ ପାଇଁ ନୁହେଁ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Android ୟୁଜର୍‍ ଇଣ୍ଟରଫେସ୍‍ ବଦଳାଇବାକୁ ତଥା ନିଜ ପସନ୍ଦ ଅନୁଯାୟୀ କରିବାକୁ ସିଷ୍ଟମ୍‍ UI ଟ୍ୟୁନର୍‍ ଆପଣଙ୍କୁ ଅତିରିକ୍ତ ଉପାୟ ପ୍ରଦାନ କରେ। ଏହି ପରୀକ୍ଷାମୂଳକ ସୁବିଧାମାନ ବଦଳିପାରେ, ଭାଙ୍ଗିପାରେ କିମ୍ବା ଭବିଷ୍ୟତର ରିଲିଜ୍‌ଗୁଡ଼ିକରେ ନଦେଖାଯାଇପାରେ। ସତର୍କତାର ସହ ଆଗକୁ ବଢ଼ନ୍ତୁ।"</string>
