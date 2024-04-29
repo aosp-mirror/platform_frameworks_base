@@ -290,7 +290,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਸੀਮਾ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਚਿਤਾਵਨੀ"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ਰਾਤ ਦੀ ਰੋਸ਼ਨੀ"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"ਨਾਈਟ ਲਾਈਟ"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"ਸੂਰਜ ਛਿਪਣ \'ਤੇ ਚਾਲੂ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"ਸੂਰਜ ਚੜ੍ਹਨ ਤੱਕ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਚਾਲੂ"</string>
@@ -499,9 +499,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ਐਪ ਨੂੰ ਪਿੰਨ ਕੀਤਾ ਗਿਆ"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"ਐਪ ਨੂੰ ਅਨਪਿੰਨ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"ਕਾਲ ਕਰੋ"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"ਕਾਲ"</string>
     <string name="stream_system" msgid="7663148785370565134">"ਸਿਸਟਮ"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"ਘੰਟੀ ਵਜਾਓ"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"ਘੰਟੀ"</string>
     <string name="stream_music" msgid="2188224742361847580">"ਮੀਡੀਆ"</string>
     <string name="stream_alarm" msgid="16058075093011694">"ਅਲਾਰਮ"</string>
     <string name="stream_notification" msgid="7930294049046243939">"ਸੂਚਨਾ"</string>

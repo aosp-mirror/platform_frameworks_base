@@ -665,10 +665,10 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"কিবা ভুল হ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফেচ আনলক"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফে’চ আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ফেচ আনলক ব্যৱহাৰ কৰোঁতে সমস্যা হৈছে"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপোনাৰ মুখাৱয়বৰ মডেলটো মচিবলৈ টিপক, তাৰ পাছত পুনৰ আপোনাৰ মুখাৱয়ব যোগ দিয়ক"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"ফেচ আনলক সুবিধাটো ছেট আপ কৰক"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"ফে’চ আনলক ছেট আপ কৰক"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপোনাৰ ফ’নটোলৈ চাই সেইটো আনলক কৰক"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"ফেচ আনলক সুবিধাটো ব্যৱহাৰ কৰিবলৈ ছেটিং &gt; গোপনীয়তাত "<b>"কেমেৰাৰ এক্সেছ"</b>" অন কৰক"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক কৰাৰ অধিক উপায় ছেট আপ কৰক"</string>
@@ -1041,7 +1041,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"আনলক ক্ষেত্ৰ বিস্তাৰ কৰক।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"শ্লাইডৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"আৰ্হিৰদ্বাৰা আনলক।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ফেচ আনলক।"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ফে’চ আনলক।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"পিনৰদ্বাৰা আনলক।"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"ছিম পিন আনলক।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"ছিম পিইউকে আনলক।"</string>
@@ -1699,7 +1699,7 @@
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"আপোনাক সাধ্য সুবিধাৰ প্ৰয়োজনসমূহৰ জৰিয়তে সহায় কৰা এপ্‌সমূহৰ বাবে সম্পূর্ণ নিয়ন্ত্ৰণৰ সুবিধাটো সঠিক যদিও অধিকাংশ এপৰ বাবে এয়া সঠিক নহয়।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"চাওক আৰু স্ক্ৰীন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ই স্ক্ৰীনত থকা আটাইখিনি সমল পঢ়িব পাৰে আৰু অন্য এপ্‌সমূহৰ ওপৰত সমল প্ৰদর্শন কৰিব পাৰে।"</string>
-    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"কার্যসমূহ চাওক আৰু কৰক"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"কার্যসমূহ চোৱা আৰু কৰা"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ই আপুনি কোনো এপ্ বা হার্ডৱেৰ ছেন্সৰৰ সৈতে কৰা ভাব-বিনিময় আৰু আপোনাৰ হৈ অন্য কোনো লোকে এপৰ সৈতে কৰা ভাব-বিনিময় ট্ৰেক কৰিব পাৰে।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"অনুমতি দিয়ক"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"অস্বীকাৰ কৰক"</string>

@@ -970,7 +970,7 @@
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Туура!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Дагы аракет кылыңыз"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Дагы аракет кылыңыз"</string>
-    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Элементтердин жана дайындардын кулпусун ачуу"</string>
+    <string name="lockscreen_storage_locked" msgid="634993789186443380">"Функциялар менен колдонмолордун кулпусун ачуу"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Жүзүнөн таанып ачуу аракеттеринин чегинен аштыңыз"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM карта жок"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Планшетте SIM карта жок."</string>

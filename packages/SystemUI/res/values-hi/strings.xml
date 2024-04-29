@@ -418,7 +418,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"मैनेज करें"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"नई सूचनाएं"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"बिना आवाज़ किए मिलने वाली सूचनाएं"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"साइलेंट मोड में मिली सूचनाएं"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाएं"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
@@ -576,7 +576,7 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;स्थिति:&lt;/b&gt; रैंकिंग में नीचे किया गया"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"यह कई तरीकों से दिखती है, जैसे कि लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर और बातचीत वाली सूचनाओं में सबसे ऊपर"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"यह कई तरीकों से दिखती है, जैसे कि बातचीत वाली सूचनाओं में सबसे ऊपर, बबल के तौर पर, और लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"यह कई तरीकों से दिखती है, जैसे कि लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर और बातचीत वाली सूचनाओं में सबसे ऊपर. साथ ही, इसकी वजह से, \'परेशान न करें\' सुविधा में भी रुकावट आती है"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"यह लॉक स्क्रीन पर, बातचीत वाली सूचनाओं में सबसे ऊपर और प्रोफ़ाइल फ़ोटो के साथ दिखती है. साथ ही, यह \'परेशान न करें\' मोड को बायपास कर सकती है."</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"यह कई तरीकों से दिखती है, जैसे कि बातचीत वाली सूचनाओं में सबसे ऊपर, बबल के तौर पर, और लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो के तौर पर. साथ ही, यह \'परेशान न करें\' मोड को बायपास कर सकती है"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> पर बातचीत की सुविधाएं काम नहीं करतीं"</string>
@@ -646,7 +646,7 @@
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"कोई शॉर्टकट नहीं मिला"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"सिस्टम"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"इनपुट"</string>
-    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"खुले हुए ऐप्लिकेशन"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"ऐप्लिकेशन खोलने के लिए"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"मौजूदा ऐप्लिकेशन"</string>
     <string name="group_system_access_notification_shade" msgid="7116898151485382275">"नोटिफ़िकेशन शेड को ऐक्सेस करें"</string>
     <string name="group_system_full_screenshot" msgid="7389040853798023211">"पूरा स्क्रीनशॉट लें"</string>
@@ -660,7 +660,7 @@
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"टास्कबार छिपाएं और (फिर से) दिखाएं"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"सिस्टम की सेटिंग ऐक्सेस करें"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Google Assistant को ऐक्सेस करें"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"लॉक स्क्रीन"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"स्क्रीन लॉक करने के लिए"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"तेज़ी से मेमो बनाने के लिए Notes ऐप्लिकेशन का इस्तेमाल करें"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"सिस्टम मल्टीटास्किंग"</string>
     <string name="system_multitasking_rhs" msgid="6593269428880305699">"मौजूदा ऐप्लिकेशन को स्प्लिट स्क्रीन की मदद से दाईं ओर ले जाएं"</string>
@@ -719,7 +719,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"दायां कुंजी कोड"</string>
     <string name="left_icon" msgid="5036278531966897006">"बायां आइकॉन"</string>
     <string name="right_icon" msgid="1103955040645237425">"दायां आइकॉन"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"टाइल जोड़ने के लिए दबाएं और खींचें"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"टाइल जोड़ने के लिए दबाकर खींचे और छोड़ें"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"टाइल का क्रम फिर से बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"हटाने के लिए यहां खींचें और छोड़ें"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"आपके पास कम से कम <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> टाइलें होनी चाहिए"</string>
@@ -881,7 +881,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"सबसे ऊपर दाईं ओर ले जाएं"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"सबसे नीचे बाईं ओर ले जाएं"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"सबसे नीचे दाईं ओर ले जाएं"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"एज पर ले जाएं और छिपाएं"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"किनारे ले जाएं और छिपाएं"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"एज से निकालें और दिखाएं"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"हटाएं"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"टॉगल करें"</string>
@@ -1001,7 +1001,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर को क्लिपबोर्ड पर कॉपी किया गया."</string>
     <string name="basic_status" msgid="2315371112182658176">"ऐसी बातचीत जिसमें इंटरैक्शन डेटा मौजूद नहीं है"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत विजेट"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"बातचीत वाला विजेट"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"किसी बातचीत को होम स्क्रीन पर जोड़ने के लिए, उस बातचीत पर टैप करें"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"हाल ही में हुई बातचीत यहां दिखेंगी"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"अहम बातचीत"</string>
@@ -1071,7 +1071,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# ऐप्लिकेशन चालू है}one{# ऐप्लिकेशन चालू है}other{# ऐप्लिकेशन चालू हैं}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"नई जानकारी"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ये ऐप्लिकेशन चालू हैं"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ये ऐप्लिकेशन चालू हैं और आपके इस्तेमाल न करने पर भी चल रहे हैं. इससे, ये बेहतर तरीके से फ़ंक्शन करते हैं. हालांकि, इससे बैटरी लाइफ़ पर भी असर पड़ सकता है."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ये ऐप्लिकेशन चालू हैं और आपके इस्तेमाल न करने पर भी चल रहे हैं. इससे ये बेहतर तरीके से काम कर पाते हैं. हालांकि, बैटरी लाइफ़ पर इसका असर पड़ सकता है."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"बंद करें"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"बंद है"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"हो गया"</string>
