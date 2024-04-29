@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.tracing.perfetto.DataSourceParams.PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT;
+
 import android.annotation.NonNull;
 import android.internal.perfetto.protos.ShellTransitionOuterClass.ShellTransition;
 import android.internal.perfetto.protos.TracePacketOuterClass.TracePacket;
@@ -39,7 +41,8 @@ class PerfettoTransitionTracer implements TransitionTracer {
 
     PerfettoTransitionTracer() {
         Producer.init(InitArguments.DEFAULTS);
-        mDataSource.register(DataSourceParams.DEFAULTS);
+        mDataSource.register(
+                new DataSourceParams(PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_STALL_AND_ABORT));
     }
 
     /**
