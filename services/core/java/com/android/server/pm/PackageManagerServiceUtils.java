@@ -1659,11 +1659,23 @@ public class PackageManagerServiceUtils {
      * Extract the app.metadata file from apk.
      */
     public static boolean extractAppMetadataFromApk(AndroidPackage pkg,
-            String appMetadataFilePath) {
+            String appMetadataFilePath, boolean isSystem) {
         if (appMetadataFilePath == null) {
             return false;
         }
         File appMetadataFile = new File(appMetadataFilePath);
+        if (appMetadataFile.exists()) {
+            return true;
+        }
+        if (isSystem) {
+            try {
+                makeDirRecursive(new File(appMetadataFilePath).getParentFile(), 0700);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to create app metadata dir for package "
+                        + pkg.getPackageName() + ": " + e.getMessage());
+                return false;
+            }
+        }
         Map<String, Property> properties = pkg.getProperties();
         if (!properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL_PATH)) {
             return false;
@@ -1677,7 +1689,8 @@ public class PackageManagerServiceUtils {
         for (int i = 0; i < splits.size(); i++) {
             try (ZipFile zipFile = new ZipFile(splits.get(i).getPath())) {
                 ZipEntry zipEntry = zipFile.getEntry(fileInApkPath);
-                if (zipEntry != null && zipEntry.getSize() <= getAppMetadataSizeLimit()) {
+                if (zipEntry != null
+                        && (isSystem || zipEntry.getSize() <= getAppMetadataSizeLimit())) {
                     try (InputStream in = zipFile.getInputStream(zipEntry)) {
                         try (FileOutputStream out = new FileOutputStream(appMetadataFile)) {
                             FileUtils.copy(in, out);
