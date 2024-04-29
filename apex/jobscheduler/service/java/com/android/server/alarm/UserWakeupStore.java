@@ -98,12 +98,7 @@ public class UserWakeupStore {
      */
     @GuardedBy("mUserWakeupLock")
     private final SparseLongArray mUserStarts = new SparseLongArray();
-    /**
-     * A list of users that are in a phase after they have been started but before alarms were
-     * initialized.
-     */
-    @GuardedBy("mUserWakeupLock")
-    private final SparseLongArray mStartingUsers = new SparseLongArray();
+
     private Executor mBackgroundExecutor;
     private static final File USER_WAKEUP_DIR = new File(Environment.getDataSystemDirectory(),
             ROOT_DIR_NAME);
@@ -124,9 +119,6 @@ public class UserWakeupStore {
      */
     public void addUserWakeup(int userId, long alarmTime) {
         synchronized (mUserWakeupLock) {
-            // This should not be needed, but if an app in the user is scheduling an alarm clock, we
-            // consider the user start complete. There is a dedicated removal when user is started.
-            mStartingUsers.delete(userId);
             mUserStarts.put(userId, alarmTime - BUFFER_TIME_MS + getUserWakeupOffset());
         }
         updateUserListFile();
@@ -192,23 +184,10 @@ public class UserWakeupStore {
     }
 
     /**
-     * Move user from wakeup list to starting user list.
+     * Remove scheduled user wakeup from the list when it is started.
      */
     public void onUserStarting(int userId) {
-        synchronized (mUserWakeupLock) {
-            final long wakeup = getWakeupTimeForUser(userId);
-            if (wakeup >= 0) {
-                mStartingUsers.put(userId, wakeup);
-                mUserStarts.delete(userId);
-            }
-        }
-    }
-
-    /**
-     * Remove userId from starting user list once start is complete.
-     */
-    public void onUserStarted(int userId) {
-        if (deleteWakeupFromStartingUsers(userId)) {
+        if (deleteWakeupFromUserStarts(userId)) {
             updateUserListFile();
         }
     }
@@ -217,7 +196,7 @@ public class UserWakeupStore {
      * Remove userId from the store when the user is removed.
      */
     public void onUserRemoved(int userId) {
-        if (deleteWakeupFromUserStarts(userId) || deleteWakeupFromStartingUsers(userId)) {
+        if (deleteWakeupFromUserStarts(userId)) {
             updateUserListFile();
         }
     }
@@ -232,21 +211,6 @@ public class UserWakeupStore {
             index = mUserStarts.indexOfKey(userId);
             if (index >= 0) {
                 mUserStarts.removeAt(index);
-            }
-        }
-        return index >= 0;
-    }
-
-    /**
-     * Remove wakeup for a given userId from mStartingUsers.
-     * @return true if an entry is found and the list of wakeups changes.
-     */
-    private boolean deleteWakeupFromStartingUsers(int userId) {
-        int index;
-        synchronized (mUserWakeupLock) {
-            index = mStartingUsers.indexOfKey(userId);
-            if (index >= 0) {
-                mStartingUsers.removeAt(index);
             }
         }
         return index >= 0;
@@ -299,9 +263,6 @@ public class UserWakeupStore {
                 for (int i = 0; i < mUserStarts.size(); i++) {
                     listOfUsers.add(new Pair<>(mUserStarts.keyAt(i), mUserStarts.valueAt(i)));
                 }
-                for (int i = 0; i < mStartingUsers.size(); i++) {
-                    listOfUsers.add(new Pair<>(mStartingUsers.keyAt(i), mStartingUsers.valueAt(i)));
-                }
             }
             Collections.sort(listOfUsers, Comparator.comparingLong(pair -> pair.second));
             for (int i = 0; i < listOfUsers.size(); i++) {
@@ -329,7 +290,6 @@ public class UserWakeupStore {
         }
         synchronized (mUserWakeupLock) {
             mUserStarts.clear();
-            mStartingUsers.clear();
         }
         try (FileInputStream fis = userWakeupFile.openRead()) {
             final TypedXmlPullParser parser = Xml.resolvePullParser(fis);
@@ -394,14 +354,6 @@ public class UserWakeupStore {
                 pw.print(mUserStarts.keyAt(i));
                 pw.print(", userStartTime: ");
                 TimeUtils.formatDuration(mUserStarts.valueAt(i), nowELAPSED, pw);
-                pw.println();
-            }
-            pw.println(mStartingUsers.size() + " starting users: ");
-            for (int i = 0; i < mStartingUsers.size(); i++) {
-                pw.print("UserId: ");
-                pw.print(mStartingUsers.keyAt(i));
-                pw.print(", userStartTime: ");
-                TimeUtils.formatDuration(mStartingUsers.valueAt(i), nowELAPSED, pw);
                 pw.println();
             }
             pw.decreaseIndent();
