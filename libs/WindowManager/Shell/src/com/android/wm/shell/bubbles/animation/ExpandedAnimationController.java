@@ -356,7 +356,6 @@ public class ExpandedAnimationController
             MagnetizedObject.MagnetListener listener) {
         mLayout.cancelAnimationsOnView(bubble);
 
-        bubble.setTranslationZ(Short.MAX_VALUE);
         mMagnetizedBubbleDraggingOut = new MagnetizedObject<View>(
                 mLayout.getContext(), bubble,
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y) {
@@ -460,6 +459,7 @@ public class ExpandedAnimationController
     /**
      * Snaps a bubble back to its position within the bubble row, and animates the rest of the
      * bubbles to accommodate it if it was previously dragged out past the threshold.
+     * Only happens while the stack is expanded.
      */
     public void snapBubbleBack(View bubbleView, float velX, float velY) {
         if (mLayout == null) {
@@ -467,8 +467,12 @@ public class ExpandedAnimationController
         }
         final int index = mLayout.indexOfChild(bubbleView);
         final PointF p = mPositioner.getExpandedBubbleXY(index, mBubbleStackView.getState());
+        // overflow is not draggable so it's never the overflow
+        final float zTranslation = mPositioner.getZTranslation(index,
+                false /* isOverflow */,
+                true /* isExpanded */);
         animationForChildAtIndex(index)
-                .position(p.x, p.y, /* translationZ= */ 0f)
+                .position(p.x, p.y, zTranslation)
                 .withPositionStartVelocities(velX, velY)
                 .start();
 

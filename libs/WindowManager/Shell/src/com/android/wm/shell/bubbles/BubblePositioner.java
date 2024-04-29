@@ -76,6 +76,7 @@ public class BubblePositioner {
     private int mBubblePaddingTop;
     private int mBubbleOffscreenAmount;
     private int mStackOffset;
+    private int mBubbleElevation;
 
     private int mExpandedViewMinHeight;
     private int mExpandedViewLargeScreenWidth;
@@ -147,6 +148,7 @@ public class BubblePositioner {
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreenAmount = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
         if (mShowingInBubbleBar) {
             mExpandedViewLargeScreenWidth = Math.min(
@@ -659,6 +661,29 @@ public class BubblePositioner {
                     mMinimumFlyoutWidthLargeScreen);
         }
         return mScreenRect.width() * FLYOUT_MAX_WIDTH_PERCENT;
+    }
+
+    /**
+     * Returns the z translation a specific bubble should use. When expanded we keep a slight
+     * translation to ensure proper ordering when animating to / from collapsed state. When
+     * collapsed, only the top two bubbles appear so only their shadows show.
+     */
+    public float getZTranslation(int index, boolean isOverflow, boolean isExpanded) {
+        if (isOverflow) {
+            return 0f; // overflow is lowest
+        }
+        return isExpanded
+                // When expanded use minimal amount to keep order
+                ? getMaxBubbles() - index
+                // When collapsed, only the top two bubbles have elevation
+                : index < NUM_VISIBLE_WHEN_RESTING
+                        ? (getMaxBubbles() * mBubbleElevation) - index
+                        : 0;
+    }
+
+    /** The elevation to use for bubble UI elements. */
+    public int getBubbleElevation() {
+        return mBubbleElevation;
     }
 
     /**
