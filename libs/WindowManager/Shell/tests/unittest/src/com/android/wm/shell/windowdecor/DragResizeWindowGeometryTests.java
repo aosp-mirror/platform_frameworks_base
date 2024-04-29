@@ -27,10 +27,7 @@ import static com.google.common.truth.Truth.assertThat;
 import android.annotation.NonNull;
 import android.graphics.Point;
 import android.graphics.Region;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.Size;
 
@@ -74,7 +71,7 @@ public class DragResizeWindowGeometryTests {
             TASK_SIZE.getHeight() + EDGE_RESIZE_THICKNESS / 2);
 
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     /**
      * Check that both groups of objects satisfy equals/hashcode within each group, and that each
@@ -147,8 +144,8 @@ public class DragResizeWindowGeometryTests {
      * capture all eligible input regardless of source (touch or cursor).
      */
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testRegionUnion_edgeDragResizeEnabled_containsLargeCorners() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE);
         Region region = new Region();
         GEOMETRY.union(region);
         // Make sure we're choosing a point outside of any debug region buffer.
@@ -164,8 +161,8 @@ public class DragResizeWindowGeometryTests {
      * size.
      */
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testRegionUnion_edgeDragResizeDisabled_containsFineCorners() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE);
         Region region = new Region();
         GEOMETRY.union(region);
         final int cornerRadius = DragResizeWindowGeometry.DEBUG
@@ -176,16 +173,16 @@ public class DragResizeWindowGeometryTests {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testCalculateControlType_edgeDragResizeEnabled_edges() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE);
         // The input source (touch or cursor) shouldn't impact the edge resize size.
         validateCtrlTypeForEdges(/* isTouch= */ false);
         validateCtrlTypeForEdges(/* isTouch= */ true);
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testCalculateControlType_edgeDragResizeDisabled_edges() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE);
         // Edge resizing is not supported when the flag is disabled.
         validateCtrlTypeForEdges(/* isTouch= */ false);
         validateCtrlTypeForEdges(/* isTouch= */ false);
@@ -203,8 +200,8 @@ public class DragResizeWindowGeometryTests {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testCalculateControlType_edgeDragResizeEnabled_corners() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE);
         final TestPoints fineTestPoints = new TestPoints(TASK_SIZE, FINE_CORNER_SIZE / 2);
         final TestPoints largeCornerTestPoints = new TestPoints(TASK_SIZE, LARGE_CORNER_SIZE / 2);
 
@@ -226,8 +223,8 @@ public class DragResizeWindowGeometryTests {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testCalculateControlType_edgeDragResizeDisabled_corners() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE);
         final TestPoints fineTestPoints = new TestPoints(TASK_SIZE, FINE_CORNER_SIZE / 2);
         final TestPoints largeCornerTestPoints = new TestPoints(TASK_SIZE, LARGE_CORNER_SIZE / 2);
 
