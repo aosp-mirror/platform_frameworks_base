@@ -1814,6 +1814,11 @@ public final class SystemServiceRegistry {
                         return null;
                     }
                     break;
+                case Context.APPWIDGET_SERVICE:
+                    if (!hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_APP_WIDGETS)) {
+                        return null;
+                    }
+                    break;
             }
             Slog.wtf(TAG, "Manager wrapper not available: " + name);
             return null;
