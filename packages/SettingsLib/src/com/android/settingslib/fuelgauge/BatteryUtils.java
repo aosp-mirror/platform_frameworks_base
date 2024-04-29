@@ -27,6 +27,7 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.util.List;
@@ -97,9 +98,18 @@ public final class BatteryUtils {
     /** Used to override the system property to enable or reset for charging string V2. */
     @VisibleForTesting
     public static void setChargingStringV2Enabled(Boolean enabled) {
-        SystemProperties.set(
-                BatteryUtils.PROPERTY_CHARGING_STRING_V2_KEY,
-                enabled == null ? "" : String.valueOf(enabled));
+        setChargingStringV2Enabled(enabled, true /* updateProperty */);
+    }
+
+    /** Used to override the system property to enable or reset for charging string V2. */
+    @VisibleForTesting
+    public static void setChargingStringV2Enabled(
+            @Nullable Boolean enabled, boolean updateProperty) {
+        if (updateProperty) {
+            SystemProperties.set(
+                    BatteryUtils.PROPERTY_CHARGING_STRING_V2_KEY,
+                    enabled == null ? "" : String.valueOf(enabled));
+        }
         BatteryUtils.sChargingStringV2Enabled = enabled;
     }
 }
