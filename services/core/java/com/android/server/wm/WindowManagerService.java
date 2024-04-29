@@ -20,7 +20,6 @@ import static android.Manifest.permission.ACCESS_SURFACE_FLINGER;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
-import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.MODIFY_TOUCH_MODE_STATE;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
@@ -295,7 +294,6 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
-import android.view.TaskTransitionSpec;
 import android.view.View;
 import android.view.View.FocusDirection;
 import android.view.ViewDebug;
@@ -761,11 +759,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * not as critical.
      */
     final Handler mAnimationHandler = new Handler(AnimationThread.getHandler().getLooper());
-
-    /**
-     * Used during task transitions to allow SysUI and launcher to customize task transitions.
-     */
-    TaskTransitionSpec mTaskTransitionSpec;
 
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
@@ -9863,24 +9856,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void setTaskSnapshotEnabled(boolean enabled) {
         mTaskSnapshotController.setSnapshotEnabled(enabled);
-    }
-
-    @Override
-    public void setTaskTransitionSpec(TaskTransitionSpec spec) {
-        if (!checkCallingPermission(MANAGE_ACTIVITY_TASKS, "setTaskTransitionSpec()")) {
-            throw new SecurityException("Requires MANAGE_ACTIVITY_TASKS permission");
-        }
-
-        mTaskTransitionSpec = spec;
-    }
-
-    @Override
-    public void clearTaskTransitionSpec() {
-        if (!checkCallingPermission(MANAGE_ACTIVITY_TASKS, "clearTaskTransitionSpec()")) {
-            throw new SecurityException("Requires MANAGE_ACTIVITY_TASKS permission");
-        }
-
-        mTaskTransitionSpec = null;
     }
 
     @Override

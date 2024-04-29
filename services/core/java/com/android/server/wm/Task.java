@@ -48,7 +48,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -171,12 +170,10 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
@@ -2940,33 +2937,6 @@ class Task extends TaskFragment {
             out.set(getBounds());
         }
         return;
-    }
-
-    /**
-     * Account for specified insets to crop the animation bounds by to avoid the animation
-     * occurring over "out of bounds" regions
-     *
-     * For example this is used to make sure the tasks are cropped to be fully above the expanded
-     * taskbar when animating.
-     *
-     * TEMPORARY FIELD (b/202383002)
-     * TODO: Remove once we use surfaceflinger rounded corners on tasks rather than taskbar overlays
-     *       or when shell transitions are fully enabled
-     *
-     * @param animationBounds The animation bounds to adjust to account for the custom spec insets.
-     */
-    void adjustAnimationBoundsForTransition(Rect animationBounds) {
-        TaskTransitionSpec spec = mWmService.mTaskTransitionSpec;
-        if (spec != null) {
-            final InsetsState state =
-                    getDisplayContent().getInsetsStateController().getRawInsetsState();
-            for (int i = state.sourceSize() - 1; i >= 0; i--) {
-                final InsetsSource source = state.sourceAt(i);
-                if (source.hasFlags(FLAG_INSETS_ROUNDED_CORNER)) {
-                    animationBounds.inset(source.calculateVisibleInsets(animationBounds));
-                }
-            }
-        }
     }
 
     void setDragResizing(boolean dragResizing) {

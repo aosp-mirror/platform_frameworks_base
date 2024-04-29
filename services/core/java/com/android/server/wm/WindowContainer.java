@@ -44,7 +44,6 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.isActivityTransitOld;
 import static com.android.server.wm.AppTransition.isTaskFragmentTransitOld;
-import static com.android.server.wm.AppTransition.isTaskTransitOld;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
@@ -72,7 +71,6 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
@@ -103,7 +101,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
-import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
@@ -3148,9 +3145,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Separate position and size for use in animators.
         final Rect screenBounds = getAnimationBounds(appRootTaskClipMode);
         mTmpRect.set(screenBounds);
-        if (this.asTask() != null && isTaskTransitOld(transit)) {
-            this.asTask().adjustAnimationBoundsForTransition(mTmpRect);
-        }
         getAnimationPosition(mTmpPoint);
         mTmpRect.offsetTo(0, 0);
 
@@ -3285,10 +3279,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
             AnimationRunnerBuilder animationRunnerBuilder = new AnimationRunnerBuilder();
 
-            if (isTaskTransitOld(transit) && getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
-                animationRunnerBuilder.setTaskBackgroundColor(getTaskAnimationBackgroundColor());
-            }
-
             // Check if the animation requests to show background color for Activity and embedded
             // TaskFragment.
             final ActivityRecord activityRecord = asActivityRecord();
@@ -3340,18 +3330,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
-    }
-
-    private @ColorInt int getTaskAnimationBackgroundColor() {
-        Context uiContext = mDisplayContent.getDisplayPolicy().getSystemUiContext();
-        TaskTransitionSpec customSpec = mWmService.mTaskTransitionSpec;
-        @ColorInt int defaultFallbackColor = uiContext.getColor(R.color.overview_background);
-
-        if (customSpec != null && customSpec.backgroundColor != 0) {
-            return customSpec.backgroundColor;
-        }
-
-        return defaultFallbackColor;
     }
 
     final SurfaceAnimationRunner getSurfaceAnimationRunner() {
