@@ -49,6 +49,16 @@ flag {
 }
 
 flag {
+    name: "do_not_reset_key_event_state"
+    namespace: "accessibility"
+    description: "Don't reset the event stream state when receiving an event without policy flag FLAG_PASS_TO_USER. Just pass it through the pipeline."
+    bug: "331900630"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_a11y_checker_logging"
     namespace: "accessibility"
     description: "Whether to identify and log app a11y issues."
