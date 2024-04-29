@@ -489,6 +489,16 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
       }
     }
 
+    if (options_.non_updatable_system) {
+      if (el->FindAttribute(xml::kSchemaAndroid, "versionCode") == nullptr) {
+        el->RemoveAttribute("", "updatableSystem");
+        el->attributes.push_back(xml::Attribute{"", "updatableSystem", "false"});
+      } else {
+        diag->Note(android::DiagMessage(el->line_number)
+                   << "Ignoring --non-updatable-system because the manifest has a versionCode");
+      }
+    }
+
     return true;
   });
 

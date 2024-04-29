@@ -91,6 +91,11 @@ struct ManifestFixerOptions {
 
   // Whether to suppress `android:compileSdkVersion*` and `platformBuildVersion*` attributes.
   bool no_compile_sdk_metadata = false;
+
+  // Whether to mark the app as a non-updatable system app. This adds `updatableSystem="false"` to
+  // the <manifest> tag. Not used if a version code is set either explicitly in the manifest or
+  // through version_code_default.
+  bool non_updatable_system = false;
 };
 
 // Verifies that the manifest is correctly formed and inserts defaults where specified with
