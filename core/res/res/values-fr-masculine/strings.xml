@@ -20,7 +20,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Vous êtes désormais connecté à un réseau mobile plus sécurisé."</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Vous êtes connecté à un réseau mobile non chiffré. Vos appels, messages et données sont susceptibles d\'être interceptés."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"lire les flux auxquels vous êtes abonné"</string>
 </resources>

@@ -154,16 +154,31 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : <xliff:g id="DIALING_NUMBER">{1}</xliff:g> au bout de <xliff:g id="TIME_DELAY">{2}</xliff:g> secondes"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : non transféré"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Sécurité du réseau cellulaire"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Vérifiez les paramètres"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"Accès à l\'identifiant de l\'appareil"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Un réseau doté de la connexion <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> a enregistré l\'identifiant unique (IMSI) de votre appareil <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> fois entre les périodes suivantes : <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> et <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Connexion chiffrée à <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Vous êtes maintenant connecté à un réseau cellulaire plus sécuritaire."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Connexion non chiffrée à <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Vous êtes connecté à un réseau cellulaire non chiffré. Vos appels, vos données et vos messages risquent d\'être interceptés."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Paramètres de sécurité du réseau cellulaire"</string>
+    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
+    <skip />
+    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
+    <skip />
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"En savoir plus"</string>
+    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
+    <skip />
     <string name="fcComplete" msgid="1080909484660507044">"Code de service terminé"</string>
     <string name="fcError" msgid="5325116502080221346">"Problème de connexion ou code de service non valide"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -357,8 +372,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Prendre une capture d\'écran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Peut prendre une capture de l\'écran."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Aperçu, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"Ignorer"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"désactiver ou modifier la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"servir de barre d\'état"</string>
@@ -1899,8 +1913,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Demander le NIP avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
-    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"Installé par votre administrateur.\nAccédez aux paramètres pour consulter les autorisations accordées"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mise à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
@@ -2218,6 +2231,10 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Passer à l\'application professionnelle?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Votre organisation vous autorise à passer des appels uniquement à partir d\'applications professionnelles"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Votre organisation vous autorise à envoyer des messages uniquement à partir d\'applications professionnelles"</string>
+    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
+    <skip />
+    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utiliser le navigateur du profil personnel"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utiliser le navigateur du profil professionnel"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Appeler"</string>
@@ -2397,8 +2414,7 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Professionnel 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Commun"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
-    <skip />
+    <string name="redacted_notification_message" msgid="1520587845842228816">"Le contenu confidentiel des notifications est masqué"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Le contenu de l\'application est masqué du Partage d\'écran par mesure de sécurité"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Connecté au satellite automatiquement"</string>

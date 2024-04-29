@@ -153,16 +153,31 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> បន្ទាប់​ពី <xliff:g id="TIME_DELAY">{2}</xliff:g> វិនាទី"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"សុវត្ថិភាពបណ្ដាញចល័ត"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"ពិនិត្យមើល​ការកំណត់"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"បានចូលប្រើ​លេខកូដ​សម្គាល់​ឧបករណ៍​"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"បណ្តាញនៅលើការតភ្ជាប់ <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> បានកត់ត្រាលេខកូដសម្គាល់ខុសពីគេ (IMSI) ​របស់ឧបករណ៍អ្នក <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> ដងក្នុងរយៈពេលចន្លោះពី <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> ដល់ <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>។"</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"បានអ៊ីនគ្រីបការតភ្ជាប់ទៅ <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"ឥឡូវនេះ អ្នកបានភ្ជាប់ទៅបណ្ដាញ​ចល័តដែលមានសុវត្ថិភាពជាងមុន។"</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"ការតភ្ជាប់ដែលមិនមានការអ៊ីនគ្រីបទៅ <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"អ្នកបានភ្ជាប់ទៅបបណ្ដាញ​ចល័តដែលមិនមានការអ៊ីនគ្រីប។ ការហៅទូរសព្ទ សារ និងទិន្នន័យរបស់អ្នកងាយរងគ្រោះពីការស្កាត់យក។"</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"ការកំណត់សុវត្ថិភាពបណ្ដាញចល័ត"</string>
+    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
+    <skip />
+    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
+    <skip />
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ស្វែងយល់បន្ថែម"</string>
+    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
+    <skip />
     <string name="fcComplete" msgid="1080909484660507044">"កូដ​លក្ខណៈ​ពេញលេញ។"</string>
     <string name="fcError" msgid="5325116502080221346">"បញ្ហា​ការ​តភ្ជាប់​ ឬ​កូដ​លក្ខណៈ​​​មិន​ត្រឹមត្រូវ​។"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"យល់​ព្រម​"</string>
@@ -356,8 +371,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ថត​អេក្រង់"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"អាច​ថត​អេក្រង់​នៃ​ផ្ទាំង​អេក្រង់​បាន។"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"មើល​សាកល្បង <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"ច្រានចោល"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"បិទ ឬ​កែ​របារ​ស្ថានភាព"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ឲ្យ​កម្មវិធី​បិទ​របារ​ស្ថានភាព ឬ​បន្ថែម និង​លុប​រូប​តំណាង​ប្រព័ន្ធ។"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ធ្វើជារបារស្ថានភាព"</string>
@@ -1898,8 +1912,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"សួរ​រក​កូដ PIN មុន​ពេលដកខ្ទាស់"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេលដោះខ្ទាស់"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
-    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"បានដំឡើងដោយអ្នកគ្រប់គ្រងរបស់អ្នក។\nចូលទៅកាន់ការកំណត់ ដើម្បីមើលការ​អនុញ្ញាតដែលផ្ដល់ឱ្យ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
@@ -2217,6 +2230,10 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ប្ដូរទៅកម្មវិធីការងារឬ?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"ស្ថាប័ន​របស់អ្នក​អនុញ្ញាត​ឱ្យអ្នកធ្វើការហៅទូរសព្ទ​ពីកម្មវិធីការងារ​តែប៉ុណ្ណោះ"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"ស្ថាប័ន​របស់អ្នក​អនុញ្ញាត​ឱ្យអ្នក​ផ្ញើសារ​ពី​កម្មវិធី​ការងារតែប៉ុណ្ណោះ"</string>
+    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
+    <skip />
+    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​ផ្ទាល់ខ្លួន"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​សម្រាប់​ការងារ"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"ហៅទូរសព្ទ"</string>
@@ -2396,8 +2413,7 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ការងារទី 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ការធ្វើ​តេស្ត"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ទូទៅ"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
-    <skip />
+    <string name="redacted_notification_message" msgid="1520587845842228816">"បានលាក់ខ្លឹមសារជូនដំណឹងដែលមានលក្ខណៈរសើប"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"បានលាក់ខ្លឹមសារកម្មវិធីពីការបង្ហាញ​អេក្រង់ដើម្បីសុវត្ថិភាព"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ភ្ជាប់ដោយស្វ័យប្រវត្តិទៅផ្កាយរណប"</string>

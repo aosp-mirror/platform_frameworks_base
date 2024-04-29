@@ -153,16 +153,31 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंदांनंतर <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"मोबाइल नेटवर्कची सुरक्षा"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"सेटिंग्जचे पुनरावलोकन करा"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"डिव्हाइस आयडेंटिफायर अ‍ॅक्सेस केला आहे"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> कनेक्शनवरील नेटवर्कने <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> आणि <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> या कालावधीदरम्यान तुमच्या डिव्हाइसचा युनिक आयडेंटिफायर (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> वेळा रेकॉर्ड केला."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> वर कनेक्शन एन्क्रिप्ट केले आहे"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"तुम्ही आता आणखी सुरक्षित मोबाइल नेटवर्कशी कनेक्ट केले आहे."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> वर कनेक्शन एन्क्रिप्ट केलेले नाही"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"तुम्ही एन्क्रिप्ट न केलेल्या मोबाइल नेटवर्कशी कनेक्ट केले आहे. तुमचे कॉल, मेसेज आणि डेटा यामध्ये व्यत्यय येण्याचा धोका आहे."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"मोबाइल सुरक्षा सेटिंग्ज"</string>
+    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
+    <skip />
+    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
+    <skip />
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"अधिक जाणून घ्या"</string>
+    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
+    <skip />
     <string name="fcComplete" msgid="1080909484660507044">"वैशिष्ट्य कोड पूर्ण."</string>
     <string name="fcError" msgid="5325116502080221346">"कनेक्शन समस्या किंवा अवैध फीचर कोड."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ठीक"</string>
@@ -356,8 +371,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रीनशॉट घ्या"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिस्प्लेचा स्क्रीनशॉट घेऊ शकतो."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"पूर्वावलोकन, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"डिसमिस करा"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्टेटस बार अक्षम करा किंवा सुधारित करा"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"स्टेटस बार होऊ द्या"</string>
@@ -1898,8 +1912,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"अनपिन करण्‍यापूर्वी पिन विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
-    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"तुमच्या ॲडमिनने इंस्टॉल केले आहे.\nदिलेल्या परवानग्या पाहण्यासाठी सेटिंग्जवर जा"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"आपल्या प्रशासकाने हटवले"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ओके"</string>
@@ -2217,6 +2230,10 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"work app वर स्विच करायचे आहे का?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"तुमची संस्था तुम्हाला फक्त work app वरून कॉल करण्याची अनुमती देते"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"तुमची संस्था तुम्हाला फक्त work app वरून मेसेज पाठवण्याची अनुमती देते"</string>
+    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
+    <skip />
+    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"वैयक्तिक ब्राउझर वापरा"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउझर वापरा"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"कॉल करा"</string>
@@ -2396,8 +2413,7 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ऑफिस ३"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"चाचणी"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"सामुदायिक"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
-    <skip />
+    <string name="redacted_notification_message" msgid="1520587845842228816">"संवेदनशील नोटिफिकेशनचा आशय लपवलेला आहे"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"स्क्रीन शेअर करताना सुरक्षेसाठी अ‍ॅपमधील आशय लपवला आहे"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"उपग्रहाशी आपोआप कनेक्ट केलेले आहे"</string>
