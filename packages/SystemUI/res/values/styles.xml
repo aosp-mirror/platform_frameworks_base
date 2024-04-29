@@ -175,27 +175,28 @@
     </style>
 
     <style name="TextAppearance.AuthCredential.OldTitle">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">24sp</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.OldSubtitle">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.OldDescription">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.LogoDescription" parent="TextAppearance.Material3.LabelLarge" >
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:ellipsize">marquee</item>
         <item name="android:gravity">@integer/biometric_dialog_text_gravity</item>
         <item name="android:marqueeRepeatLimit">1</item>
@@ -204,30 +205,36 @@
     </style>
 
     <style name="TextAppearance.AuthCredential.Title" parent="TextAppearance.Material3.HeadlineSmall" >
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Subtitle" parent="TextAppearance.Material3.BodyMedium" >
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Description" parent="TextAppearance.Material3.BodyMedium" >
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.VerticalListContentViewDescription" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.ContentViewWithButtonDescription" parent="TextAppearance.AuthCredential.Description" />
 
     <style name="TextAppearance.AuthCredential.ContentViewListItem" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:paddingTop">@dimen/biometric_prompt_content_list_item_padding_top</item>
         <item name="android:breakStrategy">high_quality</item>
     </style>
 
     <style name="TextAppearance.AuthCredential.Indicator" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:marqueeRepeatLimit">marquee_forever</item>
         <item name="android:singleLine">true</item>
@@ -250,22 +257,25 @@
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Title">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:layout_marginTop">24dp</item>
         <item name="android:textSize">36dp</item>
         <item name="android:focusable">true</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Subtitle">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Description">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:layout_marginTop">20dp</item>
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Error">
@@ -282,7 +292,7 @@
         <item name="android:gravity">start</item>
     </style>
 
-    <style name="TextAppearance.AuthCredential.PasswordEntry" parent="@android:style/TextAppearance.DeviceDefault">
+    <style name="TextAppearance.AuthNonBioCredential.PasswordEntry" parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:gravity">center</item>
         <item name="android:paddingTop">28dp</item>
         <item name="android:singleLine">true</item>
@@ -291,7 +301,7 @@
         <item name="android:background">@drawable/edit_text_filled</item>
     </style>
 
-    <style name="AuthCredentialHeaderStyle">
+    <style name="AuthNonBioCredentialHeaderStyle">
         <item name="android:paddingStart">48dp</item>
         <item name="android:paddingEnd">48dp</item>
         <item name="android:paddingTop">48dp</item>
@@ -299,12 +309,12 @@
         <item name="android:layout_gravity">top</item>
     </style>
 
-    <style name="AuthCredentialIconStyle">
+    <style name="AuthNonBioCredentialIconStyle">
         <item name="android:layout_width">@dimen/biometric_auth_icon_size</item>
         <item name="android:layout_height">@dimen/biometric_auth_icon_size</item>
     </style>
 
-    <style name="AuthCredentialPatternContainerStyle">
+    <style name="AuthNonBioCredentialPatternContainerStyle">
         <item name="android:gravity">center</item>
         <item name="android:maxHeight">@dimen/biometric_auth_pattern_view_max_size</item>
         <item name="android:maxWidth">@dimen/biometric_auth_pattern_view_max_size</item>
@@ -314,7 +324,7 @@
         <item name="android:paddingVertical">20dp</item>
     </style>
 
-    <style name="AuthCredentialPinPasswordContainerStyle">
+    <style name="AuthNonBioCredentialPinPasswordContainerStyle">
         <item name="android:gravity">center</item>
         <item name="android:maxHeight">48dp</item>
         <item name="android:maxWidth">600dp</item>
@@ -322,7 +332,7 @@
         <item name="android:minWidth">200dp</item>
     </style>
 
-    <style name="AuthCredentialEmergencyButtonStyle">
+    <style name="AuthNonBioCredentialEmergencyButtonStyle">
         <item name="android:background">@drawable/auth_credential_emergency_button_background</item>
         <item name="android:textColor">@android:color/system_accent3_900</item>
         <item name="android:outlineProvider">none</item>
@@ -331,6 +341,14 @@
         <item name="android:paddingLeft">30dp</item>
         <item name="android:paddingRight">30dp</item>
         <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="AuthCredentialPanelStyle">
+        <item name="android:background">?androidprv:attr/materialColorSurfaceBright</item>
+        <item name="android:clickable">true</item>
+        <item name="android:clipToOutline">true</item>
+        <item name="android:importantForAccessibility">no</item>
+        <item name="android:visibility">visible</item>
     </style>
 
     <style name="AuthCredentialContentViewStyle">
@@ -345,6 +363,7 @@
     </style>
 
     <style name="AuthCredentialContentViewMoreOptionsButtonStyle" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:background">@color/transparent</item>
         <item name="android:gravity">start</item>
         <item name="enforceTextAppearance">false</item>
@@ -436,17 +455,17 @@
         <item name="android:textColor">?attr/wallpaperTextColor</item>
     </style>
 
-    <style name="AuthCredentialStyle">
+    <style name="AuthNonBioCredentialStyle">
         <item name="*android:regularColor">?android:attr/colorForeground</item>
         <item name="*android:successColor">?android:attr/colorForeground</item>
         <item name="*android:errorColor">?android:attr/colorError</item>
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
-        <item name="headerStyle">@style/AuthCredentialHeaderStyle</item>
-        <item name="headerIconStyle">@style/AuthCredentialIconStyle</item>
+        <item name="headerStyle">@style/AuthNonBioCredentialHeaderStyle</item>
+        <item name="headerIconStyle">@style/AuthNonBioCredentialIconStyle</item>
         <item name="titleTextAppearance">@style/TextAppearance.AuthNonBioCredential.Title</item>
         <item name="subTitleTextAppearance">@style/TextAppearance.AuthNonBioCredential.Subtitle</item>
         <item name="descriptionTextAppearance">@style/TextAppearance.AuthNonBioCredential.Description</item>
-        <item name="passwordTextAppearance">@style/TextAppearance.AuthCredential.PasswordEntry</item>
+        <item name="passwordTextAppearance">@style/TextAppearance.AuthNonBioCredential.PasswordEntry</item>
         <item name="errorTextAppearance">@style/TextAppearance.AuthNonBioCredential.Error</item>
         <item name="errorTextAppearanceLand">@style/TextAppearance.AuthNonBioCredential.ErrorLand</item>
     </style>
@@ -458,12 +477,12 @@
         <item name="*android:dotColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="LockPatternContainerStyle" parent="@style/AuthCredentialStyle">
-        <item name="containerStyle">@style/AuthCredentialPatternContainerStyle</item>
+    <style name="LockPatternContainerStyle" parent="@style/AuthNonBioCredentialStyle">
+        <item name="containerStyle">@style/AuthNonBioCredentialPatternContainerStyle</item>
     </style>
 
-    <style name="LockPinPasswordContainerStyle" parent="@style/AuthCredentialStyle">
-        <item name="containerStyle">@style/AuthCredentialPinPasswordContainerStyle</item>
+    <style name="LockPinPasswordContainerStyle" parent="@style/AuthNonBioCredentialStyle">
+        <item name="containerStyle">@style/AuthNonBioCredentialPinPasswordContainerStyle</item>
     </style>
 
     <style name="Theme.SystemUI.QuickSettings" parent="@*android:style/Theme.DeviceDefault">

@@ -29,6 +29,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
@@ -386,6 +388,12 @@ public class AuthContainerView extends LinearLayout
         });
 
         mPanelView = mLayout.findViewById(R.id.panel);
+        if (!constraintBp()) {
+            final TypedArray ta = mContext.obtainStyledAttributes(new int[]{
+                    android.R.attr.colorBackgroundFloating});
+            mPanelView.setBackgroundColor(ta.getColor(0, Color.WHITE));
+            ta.recycle();
+        }
         mPanelController = new AuthPanelController(mContext, mPanelView);
         mBackgroundExecutor = bgExecutor;
         mInteractionJankMonitor = jankMonitor;
