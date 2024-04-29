@@ -378,7 +378,7 @@ public class RankingHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags({android.app.Flags.FLAG_SORT_SECTION_BY_TIME, Flags.FLAG_UPDATE_RANKING_TIME})
+    @EnableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME)
     public void testSort_oldWhenChildren_unspecifiedSummary() {
         NotificationRecord child1 = new NotificationRecord(mContext,
                 new StatusBarNotification(
@@ -430,7 +430,7 @@ public class RankingHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags({android.app.Flags.FLAG_SORT_SECTION_BY_TIME, Flags.FLAG_UPDATE_RANKING_TIME})
+    @EnableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME)
     public void testSort_oldChildren_unspecifiedSummary() {
         NotificationRecord child1 = new NotificationRecord(mContext,
                 new StatusBarNotification(
@@ -480,7 +480,7 @@ public class RankingHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags({android.app.Flags.FLAG_SORT_SECTION_BY_TIME, Flags.FLAG_UPDATE_RANKING_TIME})
+    @EnableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME)
     public void testSort_oldChildren_oldSummary() {
         NotificationRecord child1 = new NotificationRecord(mContext,
                 new StatusBarNotification(
