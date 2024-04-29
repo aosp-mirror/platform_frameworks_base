@@ -167,8 +167,18 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
 
+        // reset drawing status to test if previous task is translucent activity
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
+        // simulate translucent
+        recordA.setOccludesParent(false);
+        backNavigationInfo = startBackNavigation();
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
+
         // reset drawing status to test keyguard occludes
         topActivity.setOccludesParent(true);
+        recordA.setOccludesParent(true);
         backNavigationInfo.onBackNavigationFinished(false);
         mBackNavigationController.clearBackAnimations();
         makeWindowVisibleAndDrawn(topActivity.findMainWindow());

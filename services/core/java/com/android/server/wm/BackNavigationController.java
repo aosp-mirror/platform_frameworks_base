@@ -308,7 +308,9 @@ class BackNavigationController {
                     // another task.
                     final Task prevParent = prevTask.getParent().asTask();
                     final Task currParent = currentTask.getParent().asTask();
-                    if (prevTask.inMultiWindowMode() && prevParent != currParent) {
+                    if ((prevTask.inMultiWindowMode() && prevParent != currParent)
+                            // Do not animate to translucent task, it could be trampoline.
+                            || hasTranslucentActivity(currentActivity, prevActivities)) {
                         backType = BackNavigationInfo.TYPE_CALLBACK;
                     } else {
                         removedWindowContainer = prevTask;
@@ -523,7 +525,7 @@ class BackNavigationController {
         }
         for (int i = prevActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord test = prevActivities.get(i);
-            if (!test.occludesParent() || test.showWallpaper()) {
+            if (!test.occludesParent() || test.hasWallpaper()) {
                 return true;
             }
         }
