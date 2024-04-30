@@ -3984,6 +3984,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         // packageName -> list of components to send broadcasts now
         final ArrayMap<String, ArrayList<String>> sendNowBroadcasts = new ArrayMap<>(targetSize);
+        final List<PackageMetrics.ComponentStateMetrics> componentStateMetricsList =
+                new ArrayList<PackageMetrics.ComponentStateMetrics>();
         synchronized (mLock) {
             Computer computer = snapshotComputer();
             boolean scheduleBroadcastMessage = false;
@@ -3997,11 +3999,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // update enabled settings
                 final ComponentEnabledSetting setting = settings.get(i);
                 final String packageName = setting.getPackageName();
-                if (!setEnabledSettingInternalLocked(computer, pkgSettings.get(packageName),
-                        setting, userId, callingPackage)) {
+                final PackageSetting packageSetting = pkgSettings.get(packageName);
+                final PackageMetrics.ComponentStateMetrics componentStateMetrics =
+                        new PackageMetrics.ComponentStateMetrics(setting,
+                                UserHandle.getUid(userId, packageSetting.getAppId()),
+                                packageSetting.getEnabled(userId));
+                if (!setEnabledSettingInternalLocked(computer, packageSetting, setting, userId,
+                        callingPackage)) {
                     continue;
                 }
                 anyChanged = true;
+                componentStateMetricsList.add(componentStateMetrics);
 
                 if ((setting.getEnabledFlags() & PackageManager.SYNCHRONOUS) != 0) {
                     isSynchronous = true;
@@ -4028,6 +4036,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // nothing changed, return immediately
                 return;
             }
+
+            // Log the metrics when the component state is changed.
+            PackageMetrics.reportComponentStateChanged(computer, componentStateMetricsList, userId);
 
             if (isSynchronous) {
                 flushPackageRestrictionsAsUserInternalLocked(userId);
