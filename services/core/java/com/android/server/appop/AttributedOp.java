@@ -24,6 +24,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -134,7 +135,7 @@ final class AttributedOp {
         AppOpsManager.OpEventProxyInfo proxyInfo = null;
         if (proxyUid != Process.INVALID_UID) {
             proxyInfo = mAppOpsService.mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
-                    proxyAttributionTag);
+                            proxyAttributionTag, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
         }
 
         AppOpsManager.NoteOpEvent existingEvent = mAccessEvents.get(key);
@@ -855,7 +856,7 @@ final class AttributedOp {
             AppOpsManager.OpEventProxyInfo proxyInfo = null;
             if (proxyUid != Process.INVALID_UID) {
                 proxyInfo = mOpEventProxyInfoPool.acquire(proxyUid, proxyPackageName,
-                        proxyAttributionTag);
+                        proxyAttributionTag, VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
             }
 
             if (recycled != null) {
@@ -881,10 +882,11 @@ final class AttributedOp {
 
         AppOpsManager.OpEventProxyInfo acquire(@IntRange(from = 0) int uid,
                 @Nullable String packageName,
-                @Nullable String attributionTag) {
+                @Nullable String attributionTag,
+                @Nullable String deviceId) {
             AppOpsManager.OpEventProxyInfo recycled = acquire();
             if (recycled != null) {
-                recycled.reinit(uid, packageName, attributionTag);
+                recycled.reinit(uid, packageName, attributionTag, deviceId);
                 return recycled;
             }
 

@@ -3459,6 +3459,8 @@ public class AppOpsManager {
         private @Nullable String mPackageName;
         /** Attribution tag of the proxy that noted the op */
         private @Nullable String mAttributionTag;
+        /** Persistent device Id of the proxy that noted the op */
+        private @Nullable String mDeviceId;
 
         /**
          * Reinit existing object with new state.
@@ -3466,14 +3468,16 @@ public class AppOpsManager {
          * @param uid UID of the proxy app that noted the op
          * @param packageName Package of the proxy that noted the op
          * @param attributionTag attribution tag of the proxy that noted the op
+         * @param deviceId Persistent device Id of the proxy that noted the op
          *
          * @hide
          */
         public void reinit(@IntRange(from = 0) int uid, @Nullable String packageName,
-                @Nullable String attributionTag) {
+                @Nullable String attributionTag, @Nullable String deviceId) {
             mUid = Preconditions.checkArgumentNonnegative(uid);
             mPackageName = packageName;
             mAttributionTag = attributionTag;
+            mDeviceId = deviceId;
         }
 
 
@@ -3507,16 +3511,33 @@ public class AppOpsManager {
                 @IntRange(from = 0) int uid,
                 @Nullable String packageName,
                 @Nullable String attributionTag) {
+            this(uid, packageName, attributionTag,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
+        }
+
+        /**
+         * Creates a new OpEventProxyInfo.
+         *
+         * @param uid UID of the proxy app that noted the op
+         * @param packageName Package of the proxy that noted the op
+         * @param attributionTag Attribution tag of the proxy that noted the op
+         * @param deviceId Persistent device Id of the proxy that noted the op
+         *
+         * @hide
+         */
+        public OpEventProxyInfo(
+                @IntRange(from = 0) int uid,
+                @Nullable String packageName,
+                @Nullable String attributionTag,
+                @Nullable String deviceId) {
             this.mUid = uid;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mUid,
                     "from", 0);
             this.mPackageName = packageName;
             this.mAttributionTag = attributionTag;
-
-            // onConstructed(); // You can define this method to get a callback
+            this.mDeviceId = deviceId;
         }
-
         /**
          * Copy constructor
          *
@@ -3527,6 +3548,7 @@ public class AppOpsManager {
             mUid = orig.mUid;
             mPackageName = orig.mPackageName;
             mAttributionTag = orig.mAttributionTag;
+            mDeviceId = orig.mDeviceId;
         }
 
         /**
@@ -3553,6 +3575,9 @@ public class AppOpsManager {
             return mAttributionTag;
         }
 
+        @FlaggedApi(Flags.FLAG_DEVICE_ID_IN_OP_PROXY_INFO_ENABLED)
+        public @Nullable String getDeviceId() { return mDeviceId; }
+
         @Override
         @DataClass.Generated.Member
         public void writeToParcel(@NonNull Parcel dest, int flags) {
@@ -3562,10 +3587,12 @@ public class AppOpsManager {
             byte flg = 0;
             if (mPackageName != null) flg |= 0x2;
             if (mAttributionTag != null) flg |= 0x4;
+            if (mDeviceId != null) flg |= 0x8;
             dest.writeByte(flg);
             dest.writeInt(mUid);
             if (mPackageName != null) dest.writeString(mPackageName);
             if (mAttributionTag != null) dest.writeString(mAttributionTag);
+            if (mDeviceId != null) dest.writeString(mDeviceId);
         }
 
         @Override
@@ -3583,14 +3610,14 @@ public class AppOpsManager {
             int uid = in.readInt();
             String packageName = (flg & 0x2) == 0 ? null : in.readString();
             String attributionTag = (flg & 0x4) == 0 ? null : in.readString();
-
+            String deviceId = (flg & 0x8) == 0 ? null : in.readString();
             this.mUid = uid;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mUid,
                     "from", 0);
             this.mPackageName = packageName;
             this.mAttributionTag = attributionTag;
-
+            this.mDeviceId = deviceId;
             // onConstructed(); // You can define this method to get a callback
         }
 

@@ -872,6 +872,7 @@ package android.app {
   public static final class AppOpsManager.OpEventProxyInfo implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public String getAttributionTag();
+    method @FlaggedApi("android.permission.flags.device_id_in_op_proxy_info_enabled") @Nullable public String getDeviceId();
     method @Nullable public String getPackageName();
     method @IntRange(from=0) public int getUid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);

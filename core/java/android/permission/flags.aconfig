@@ -180,3 +180,11 @@ flag {
     description: "Use runtime permission state to determine appop state"
     bug: "266164193"
 }
+
+flag {
+    name: "device_id_in_op_proxy_info_enabled"
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Enable getDeviceId API in OpEventProxyInfo"
+    bug: "337340961"
+}
