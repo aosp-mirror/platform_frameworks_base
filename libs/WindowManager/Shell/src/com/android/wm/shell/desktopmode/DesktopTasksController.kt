@@ -1504,7 +1504,7 @@ class DesktopTasksController(
 
         @JvmField
         val DESKTOP_MODE_INITIAL_BOUNDS_SCALE = SystemProperties
-                .getInt("persist.wm.debug.freeform_initial_bounds_scale", 75) / 100f
+                .getInt("persist.wm.debug.desktop_mode_initial_bounds_scale", 75) / 100f
 
         /**
          * Check if desktop density override is enabled
