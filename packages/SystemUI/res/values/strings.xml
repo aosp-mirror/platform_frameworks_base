@@ -1719,9 +1719,7 @@
     <string name="accessibility_status_bar_satellite_available">Satellite, connection available</string>
 
     <!-- Text displayed indicating that the user is connected to a satellite signal. -->
-    <string name="satellite_connected_carrier_text">Connected to satellite</string>
-    <!-- Text displayed indicating that the user is not connected to a satellite signal. -->
-    <string name="satellite_not_connected_carrier_text">Not connected to satellite</string>
+    <string name="satellite_connected_carrier_text">Satellite SOS</string>
 
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>

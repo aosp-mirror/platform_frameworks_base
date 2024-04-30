@@ -587,7 +587,7 @@ class DeviceBasedSatelliteViewModelTest : SysuiTestCase() {
             advanceTimeBy(10.seconds)
 
             assertThat(latest)
-                .isEqualTo(context.getString(R.string.satellite_not_connected_carrier_text))
+                .isEqualTo(context.getString(R.string.satellite_connected_carrier_text))
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
