@@ -23,13 +23,14 @@ package {
     default_visibility: [
         "//visibility:override",
         "//frameworks/base/packages/SystemUI:__subpackages__",
-        "//platform_testing:__subpackages__"
+        "//platform_testing:__subpackages__",
     ],
 }
 
 aconfig_declarations {
     name: "com_android_systemui_flags",
     package: "com.android.systemui",
+    container: "system",
     srcs: [
         "*.aconfig",
     ],
