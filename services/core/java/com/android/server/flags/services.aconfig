@@ -17,3 +17,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "backstage_power"
+    name: "pkg_targeted_battery_changed_not_sticky"
+    description: "Avoid sending the package targeted BATTERY_CHANGED broadcast as sticky"
+    bug: "336832816"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
