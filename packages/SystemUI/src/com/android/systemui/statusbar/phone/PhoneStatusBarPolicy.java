@@ -549,12 +549,23 @@ public class PhoneStatusBarPolicy
             try {
                 final int userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
                 final int iconResId = mUserManager.getUserStatusBarIconResId(userId);
-                // TODO(b/170249807, b/230779281): Handle non-managed-profile String
-                String accessibilityString = getManagedProfileAccessibilityString();
                 mMainExecutor.execute(() -> {
                     final boolean showIcon;
                     if (iconResId != Resources.ID_NULL && (!mKeyguardStateController.isShowing()
                             || mKeyguardStateController.isOccluded())) {
+                        String accessibilityString = "";
+                        if (android.os.Flags.allowPrivateProfile()
+                                && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
+                            try {
+                                accessibilityString =
+                                        mUserManager.getProfileAccessibilityString(userId);
+                            } catch (Resources.NotFoundException nfe) {
+                                Log.e(TAG, "Accessibility string not found for userId:"
+                                        + userId);
+                            }
+                        } else {
+                            accessibilityString = getManagedProfileAccessibilityString();
+                        }
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 iconResId,

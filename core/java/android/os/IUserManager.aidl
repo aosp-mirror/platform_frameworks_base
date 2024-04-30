@@ -133,6 +133,7 @@ interface IUserManager {
     int getUserStatusBarIconResId(int userId);
     boolean hasBadge(int userId);
     int getProfileLabelResId(int userId);
+    int getProfileAccessibilityLabelResId(int userId);
     boolean isUserUnlocked(int userId);
     boolean isUserRunning(int userId);
     boolean isUserForeground(int userId);
