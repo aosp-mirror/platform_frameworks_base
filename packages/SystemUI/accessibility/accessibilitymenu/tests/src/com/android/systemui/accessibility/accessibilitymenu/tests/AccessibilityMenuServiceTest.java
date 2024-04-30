@@ -30,6 +30,8 @@ import static com.android.systemui.accessibility.accessibilitymenu.Accessibility
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.INTENT_TOGGLE_MENU;
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.PACKAGE_NAME;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
 import android.app.KeyguardManager;
@@ -43,6 +45,8 @@ import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.os.PowerManager;
+import android.os.RemoteException;
+import android.platform.uiautomator_helpers.WaitUtils;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
@@ -51,6 +55,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.Configurator;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.compatibility.common.util.TestUtils;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut.ShortcutId;
@@ -60,7 +66,6 @@ import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -76,11 +81,13 @@ public class AccessibilityMenuServiceTest {
     private static final int TIMEOUT_SERVICE_STATUS_CHANGE_S = 5;
     private static final int TIMEOUT_UI_CHANGE_S = 5;
     private static final int NO_GLOBAL_ACTION = -1;
-    private static final Intent INTENT_OPEN_MENU = new Intent(INTENT_TOGGLE_MENU)
-            .setPackage(PACKAGE_NAME);
+    private static final Intent INTENT_OPEN_MENU =
+            new Intent(INTENT_TOGGLE_MENU).setPackage(PACKAGE_NAME);
+    private static final String SERVICE_NAME = PACKAGE_NAME + "/.AccessibilityMenuService";
 
     private static Instrumentation sInstrumentation;
     private static UiAutomation sUiAutomation;
+    private static UiDevice sUiDevice;
     private static final AtomicInteger sLastGlobalAction = new AtomicInteger(NO_GLOBAL_ACTION);
     private static final AtomicBoolean sOpenBlocked = new AtomicBoolean(false);
 
@@ -91,12 +98,14 @@ public class AccessibilityMenuServiceTest {
 
     @BeforeClass
     public static void classSetup() throws Throwable {
-        final String serviceName = PACKAGE_NAME + "/.AccessibilityMenuService";
+        Configurator.getInstance()
+                .setUiAutomationFlags(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES);
         sInstrumentation = InstrumentationRegistry.getInstrumentation();
         sUiAutomation = sInstrumentation.getUiAutomation(
                 UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES);
         sUiAutomation.adoptShellPermissionIdentity(
                 UiAutomation.ALL_PERMISSIONS.toArray(new String[0]));
+        sUiDevice = UiDevice.getInstance(sInstrumentation);
 
         final Context context = sInstrumentation.getTargetContext();
         sAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -117,13 +126,13 @@ public class AccessibilityMenuServiceTest {
 
         // Enable a11yMenu service.
         Settings.Secure.putString(context.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, serviceName);
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, SERVICE_NAME);
 
         TestUtils.waitUntil("Failed to enable service",
                 TIMEOUT_SERVICE_STATUS_CHANGE_S,
                 () -> sAccessibilityManager.getEnabledAccessibilityServiceList(
                         AccessibilityServiceInfo.FEEDBACK_ALL_MASK).stream().filter(
-                                info -> info.getId().contains(serviceName)).count() == 1);
+                                info -> info.getId().contains(SERVICE_NAME)).count() == 1);
         context.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -159,8 +168,11 @@ public class AccessibilityMenuServiceTest {
     public void tearDown() throws Throwable {
         closeMenu();
         sLastGlobalAction.set(NO_GLOBAL_ACTION);
+        // Leave the device in clean state when the test finished
+        unlockSignal();
         // dismisses screenshot popup if present.
-        sUiAutomation.executeShellCommand("input keyevent KEYCODE_BACK");
+        sUiDevice.pressBack();
+        sUiDevice.pressHome();
     }
 
     private static boolean isMenuVisible() {
@@ -168,38 +180,25 @@ public class AccessibilityMenuServiceTest {
         return root != null && root.getPackageName().toString().equals(PACKAGE_NAME);
     }
 
-    private static void wakeUpScreen() throws Throwable {
-        sUiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP");
-        TestUtils.waitUntil("Screen did not wake up.",
-                TIMEOUT_UI_CHANGE_S,
-                () -> sPowerManager.isInteractive());
+    private static void wakeUpScreen() throws RemoteException {
+        sUiDevice.wakeUp();
+        WaitUtils.waitForValueToSettle("Screen On", AccessibilityMenuServiceTest::isScreenOn);
+        assertWithMessage("Screen is on").that(isScreenOn()).isTrue();
     }
 
     private static void closeScreen() throws Throwable {
-        Display display = sDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         sUiAutomation.performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
-        TestUtils.waitUntil("Screen did not close.",
-                TIMEOUT_UI_CHANGE_S,
-                () -> !sPowerManager.isInteractive()
-                        && display.getState() == Display.STATE_OFF
-        );
+        WaitUtils.waitForValueToSettle("Screen Off", AccessibilityMenuServiceTest::isScreenOff);
+        assertWithMessage("Screen is off").that(isScreenOff()).isTrue();
     }
 
     private static void openMenu() throws Throwable {
         unlockSignal();
-        sInstrumentation.getContext().sendBroadcast(INTENT_OPEN_MENU);
-
-        TestUtils.waitUntil("Timed out before menu could appear.",
-                TIMEOUT_UI_CHANGE_S,
-                () -> {
-                    if (isMenuVisible()) {
-                        return true;
-                    } else {
-                        unlockSignal();
-                        sInstrumentation.getContext().sendBroadcast(INTENT_OPEN_MENU);
-                        return false;
-                    }
-                });
+        if (!isMenuVisible()) {
+            sInstrumentation.getTargetContext().sendBroadcast(INTENT_OPEN_MENU);
+            sUiDevice.waitForIdle();
+            WaitUtils.ensureThat("Accessibility Menu is visible", () -> isMenuVisible());
+        }
     }
 
     private static void closeMenu() throws Throwable {
@@ -342,7 +341,9 @@ public class AccessibilityMenuServiceTest {
 
         sUiAutomation.executeAndWaitForEvent(
                 () -> assistantButton.performAction(CLICK_ID),
-                (event) -> expectedPackage.contains(event.getPackageName()),
+                (event) ->
+                        event.getPackageName() != null
+                                && expectedPackage.contains(event.getPackageName()),
                 TIMEOUT_UI_CHANGE_S * 1000
         );
     }
@@ -358,7 +359,9 @@ public class AccessibilityMenuServiceTest {
 
         sUiAutomation.executeAndWaitForEvent(
                 () -> settingsButton.performAction(CLICK_ID),
-                (event) -> expectedPackage.contains(event.getPackageName()),
+                (event) ->
+                        event.getPackageName() != null
+                                && expectedPackage.contains(event.getPackageName()),
                 TIMEOUT_UI_CHANGE_S * 1000
         );
     }
@@ -454,24 +457,40 @@ public class AccessibilityMenuServiceTest {
     }
 
     @Test
-    @Ignore("Test failure in pre/postsubmit cannot be replicated on local devices. "
-            + "Coverage is low-impact.")
     public void testOnScreenLock_cannotOpenMenu() throws Throwable {
         closeScreen();
         wakeUpScreen();
+        sInstrumentation.getContext().sendBroadcast(INTENT_OPEN_MENU);
+        sUiDevice.waitForIdle();
 
         TestUtils.waitUntil("Did not receive signal that menu cannot open",
                 TIMEOUT_UI_CHANGE_S,
-                () -> {
-                    sInstrumentation.getContext().sendBroadcast(INTENT_OPEN_MENU);
-                    return sOpenBlocked.get();
-                });
+                sOpenBlocked::get);
     }
 
-    private static void unlockSignal() {
-        // MENU unlocks screen,
-        // BACK closes any menu that may appear if the screen wasn't locked.
-        sUiAutomation.executeShellCommand("input keyevent KEYCODE_MENU");
-        sUiAutomation.executeShellCommand("input keyevent KEYCODE_BACK");
+    private static void unlockSignal() throws RemoteException {
+        if (!sKeyguardManager.isKeyguardLocked()) {
+            return;
+        }
+        // go/adb-cheats#unlock-screen
+        wakeUpScreen();
+        if (sKeyguardManager.isKeyguardLocked()) {
+            sUiDevice.pressMenu();
+        }
+        WaitUtils.ensureThat(
+                "Device unlocked & isInteractive",
+                () -> isScreenOn() && !sKeyguardManager.isKeyguardLocked());
+    }
+
+    private static boolean isScreenOn() {
+        int display = Display.DEFAULT_DISPLAY;
+        return sPowerManager.isInteractive(display)
+                && sDisplayManager.getDisplay(display).getState() == Display.STATE_ON;
+    }
+
+    private static boolean isScreenOff() {
+        int display = Display.DEFAULT_DISPLAY;
+        return !sPowerManager.isInteractive(display)
+                && sDisplayManager.getDisplay(display).getState() == Display.STATE_OFF;
     }
 }
