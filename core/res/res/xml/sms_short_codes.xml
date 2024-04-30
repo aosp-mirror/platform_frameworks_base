@@ -69,6 +69,9 @@
     <!-- Brazil: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="br" pattern="\\d{1,5}" free="6000[012]\\d|876|5500|9963|4141|8000|2652" />
 
+    <!-- Botswana: 1-5 digits (standard system default, not country specific) -->
+    <shortcode country="bw" pattern="\\d{1,5}" free="16641" />
+
     <!-- Belarus: 4 digits -->
     <shortcode country="by" pattern="\\d{4}" premium="3336|4161|444[4689]|501[34]|7781" />
 
@@ -108,7 +111,7 @@
     <shortcode country="dk" pattern="\\d{4,5}" premium="1\\d{3}" free="116\\d{3}|4665" />
 
     <!-- Dominican Republic: 1-6 digits (standard system default, not country specific) -->
-    <shortcode country="do" pattern="\\d{1,6}" free="912892" />
+    <shortcode country="do" pattern="\\d{1,6}" free="912892|912" />
 
     <!-- Ecuador: 1-6 digits (standard system default, not country specific) -->
     <shortcode country="ec" pattern="\\d{1,6}" free="466453|18512" />
@@ -141,7 +144,7 @@
     <shortcode country="ge" pattern="\\d{1,5}" premium="801[234]|888[239]" free="95201|95202|95203" />
 
     <!-- Ghana: 4 digits, known premium codes listed -->
-    <shortcode country="gh" pattern="\\d{4}" free="5041|3777" />
+    <shortcode country="gh" pattern="\\d{4}" free="5041|3777|2333" />
 
     <!-- Greece: 5 digits (54xxx, 19yxx, x=0-9, y=0-5): http://www.cmtelecom.com/premium-sms/greece -->
     <shortcode country="gr" pattern="\\d{5}" premium="54\\d{3}|19[0-5]\\d{2}" free="116\\d{3}|12115" />
@@ -195,7 +198,7 @@
     <shortcode country="kz" pattern="\\d{4}" premium="335[02]|4161|444[469]|77[2359]0|8444|919[3-5]|968[2-5]" />
 
     <!-- Kuwait: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="kw" pattern="\\d{1,5}" free="1378|50420|94006|55991|50976" />
+    <shortcode country="kw" pattern="\\d{1,5}" free="1378|50420|94006|55991|50976|7112" />
 
     <!-- Lithuania: 3-5 digits, known premium codes listed, plus EU -->
     <shortcode country="lt" pattern="\\d{3,5}" premium="13[89]1|1394|16[34]5" free="116\\d{3}|1399|1324" />
@@ -223,7 +226,7 @@
     <shortcode country="mz" pattern="\\d{1,5}" free="1714" />
 
     <!-- Mexico: 4-7 digits (not confirmed), known premium codes listed -->
-    <shortcode country="mx" pattern="\\d{4,7}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963|91101|45453|550346|3030303" />
+    <shortcode country="mx" pattern="\\d{4,7}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963|91101|45453|550346|3030303|81811" />
 
     <!-- Malaysia: 5 digits: http://www.skmm.gov.my/attachment/Consumer_Regulation/Mobile_Content_Services_FAQs.pdf -->
     <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099|28288|66668|66966" />
@@ -253,7 +256,7 @@
     <shortcode country="ph" pattern="\\d{1,5}" free="2147|5495|5496" />
 
     <!-- Pakistan -->
-    <shortcode country="pk" pattern="\\d{1,6}" free="2057|9092|909203" />
+    <shortcode country="pk" pattern="\\d{1,6}" free="2057|9092|909203|909201" />
 
     <!-- Palestine: 5 digits, known premium codes listed -->
     <shortcode country="ps" pattern="\\d{1,5}" free="37477|6681" />
@@ -339,8 +342,8 @@
     <!-- Venezuela: 1-6 digits (standard system default, not country specific) -->
     <shortcode country="ve" pattern="\\d{1,6}" free="538352" />
 
-    <!-- Vietnam: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="vn" pattern="\\d{1,5}" free="5001|9055|8079" />
+    <!-- Vietnam: 1-6 digits (standard system default, not country specific) -->
+    <shortcode country="vn" pattern="\\d{1,6}" free="5001|9055|8079|90002|118989" />
 
     <!-- Mayotte (French Territory): 1-5 digits (not confirmed) -->
     <shortcode country="yt" pattern="\\d{1,5}" free="38600,36300,36303,959" />
