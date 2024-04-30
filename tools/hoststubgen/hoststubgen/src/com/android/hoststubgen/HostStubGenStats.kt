@@ -15,7 +15,8 @@
  */
 package com.android.hoststubgen
 
-import com.android.hoststubgen.asm.toHumanReadableClassName
+import com.android.hoststubgen.asm.getOuterClassNameFromFullClassName
+import com.android.hoststubgen.asm.getPackageNameFromFullClassName
 import com.android.hoststubgen.filters.FilterPolicyWithReason
 import org.objectweb.asm.Opcodes
 import java.io.PrintWriter
@@ -55,8 +56,8 @@ open class HostStubGenStats {
         // Ignore methods where policy isn't relevant
         if (policy.isIgnoredForStats) return
 
-        val packageName = resolvePackageName(fullClassName)
-        val className = resolveOuterClassName(fullClassName)
+        val packageName = getPackageNameFromFullClassName(fullClassName)
+        val className = getOuterClassNameFromFullClassName(fullClassName)
 
         // Ignore methods for certain generated code
         if (className.endsWith("Proto")
@@ -86,44 +87,6 @@ open class HostStubGenStats {
                             classStats.supported, classStats.total)
                 }
             }
-        }
-    }
-
-    fun dumpApis(pw: PrintWriter) {
-        pw.printf("PackageName,ClassName,MethodName,MethodDesc\n")
-        apis.sortedWith(compareBy({ it.fullClassName }, { it.methodName }, { it.methodDesc }))
-            .forEach { api ->
-            pw.printf(
-                "%s,%s,%s,%s\n",
-                csvEscape(resolvePackageName(api.fullClassName)),
-                csvEscape(resolveClassName(api.fullClassName)),
-                csvEscape(api.methodName),
-                csvEscape(api.methodDesc),
-                )
-        }
-    }
-
-    private fun resolvePackageName(fullClassName: String): String {
-        val start = fullClassName.lastIndexOf('/')
-        return fullClassName.substring(0, start).toHumanReadableClassName()
-    }
-
-    private fun resolveOuterClassName(fullClassName: String): String {
-        val start = fullClassName.lastIndexOf('/')
-        val end = fullClassName.indexOf('$')
-        if (end == -1) {
-            return fullClassName.substring(start + 1)
-        } else {
-            return fullClassName.substring(start + 1, end)
-        }
-    }
-
-    private fun resolveClassName(fullClassName: String): String {
-        val pos = fullClassName.lastIndexOf('/')
-        if (pos == -1) {
-            return fullClassName
-        } else {
-            return fullClassName.substring(pos + 1)
         }
     }
 }
