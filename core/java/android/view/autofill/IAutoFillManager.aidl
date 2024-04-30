@@ -49,6 +49,7 @@ oneway interface IAutoFillManager {
     void updateSession(int sessionId, in AutofillId id, in Rect bounds,
         in AutofillValue value, int action, int flags, int userId);
     void setAutofillFailure(int sessionId, in List<AutofillId> ids, int userId);
+    void setViewAutofilled(int sessionId, in AutofillId id, int userId);
     void finishSession(int sessionId, int userId, int commitReason);
     void cancelSession(int sessionId, int userId);
     void setAuthenticationResult(in Bundle data, int sessionId, int authenticationId, int userId);

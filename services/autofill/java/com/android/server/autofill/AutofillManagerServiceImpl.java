@@ -466,6 +466,7 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     void setAutofillFailureLocked(int sessionId, int uid, @NonNull List<AutofillId> ids) {
         if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
             return;
         }
         final Session session = mSessions.get(sessionId);
@@ -477,8 +478,23 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
+    void setViewAutofilled(int sessionId, int uid, @NonNull AutofillId id) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "setViewAutofilled(): no session for " + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setViewAutofilled(id);
+    }
+
+    @GuardedBy("mLock")
     void finishSessionLocked(int sessionId, int uid, @AutofillCommitReason int commitReason) {
         if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
             return;
         }
 

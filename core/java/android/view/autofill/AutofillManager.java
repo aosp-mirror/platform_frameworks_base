@@ -1978,6 +1978,13 @@ public final class AutofillManager {
 
                     if (Objects.equals(mLastAutofilledData.get(id), value)) {
                         view.setAutofilled(true, hideHighlight);
+                        try {
+                            mService.setViewAutofilled(mSessionId, id, mContext.getUserId());
+                        } catch (RemoteException e) {
+                            // The failure could be a consequence of something going wrong on the
+                            // server side. Do nothing here since it's just logging, but it's
+                            // possible follow-up actions may fail.
+                        }
                     } else {
                         view.setAutofilled(false, false);
                         mLastAutofilledData.remove(id);
@@ -2978,6 +2985,13 @@ public final class AutofillManager {
                 mLastAutofilledData.put(view.getAutofillId(), targetValue);
             }
             view.setAutofilled(true, hideHighlight);
+            try {
+                mService.setViewAutofilled(mSessionId, view.getAutofillId(), mContext.getUserId());
+            } catch (RemoteException e) {
+                // The failure could be a consequence of something going wrong on the server side.
+                // Do nothing here since it's just logging, but it's possible follow-up actions may
+                // fail.
+            }
         }
     }
 
