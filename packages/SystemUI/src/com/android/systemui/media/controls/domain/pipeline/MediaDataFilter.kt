@@ -206,11 +206,11 @@ constructor(
         listeners.forEach { it.onSmartspaceMediaDataLoaded(key, data, shouldPrioritizeMutable) }
     }
 
-    override fun onMediaDataRemoved(key: String) {
+    override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
         allEntries.remove(key)
         userEntries.remove(key)?.let {
             // Only notify listeners if something actually changed
-            listeners.forEach { it.onMediaDataRemoved(key) }
+            listeners.forEach { it.onMediaDataRemoved(key, userInitiated) }
         }
     }
 
@@ -246,7 +246,7 @@ constructor(
                 // Only remove media when the profile is unavailable.
                 if (DEBUG) Log.d(TAG, "Removing $key after profile change")
                 userEntries.remove(key, data)
-                listeners.forEach { listener -> listener.onMediaDataRemoved(key) }
+                listeners.forEach { listener -> listener.onMediaDataRemoved(key, false) }
             }
         }
     }
@@ -261,7 +261,7 @@ constructor(
         userEntries.clear()
         keyCopy.forEach {
             if (DEBUG) Log.d(TAG, "Removing $it after user change")
-            listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it) }
+            listenersCopy.forEach { listener -> listener.onMediaDataRemoved(it, false) }
         }
 
         allEntries.forEach { (key, data) ->

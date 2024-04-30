@@ -165,10 +165,10 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
 
     @Test
     fun noMediaSession_removedEventNotFiltered() {
-        filter.onMediaDataRemoved(KEY)
+        filter.onMediaDataRemoved(KEY, false)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
-        verify(mediaListener).onMediaDataRemoved(eq(KEY))
+        verify(mediaListener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -193,11 +193,11 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
         whenever(mediaSessionManager.getActiveSessions(any())).thenReturn(controllers)
         sessionListener.onActiveSessionsChanged(controllers)
         // WHEN a removed event is received
-        filter.onMediaDataRemoved(KEY)
+        filter.onMediaDataRemoved(KEY, false)
         bgExecutor.runAllReady()
         fgExecutor.runAllReady()
         // THEN the event is not filtered
-        verify(mediaListener).onMediaDataRemoved(eq(KEY))
+        verify(mediaListener).onMediaDataRemoved(eq(KEY), eq(false))
     }
 
     @Test
@@ -294,7 +294,7 @@ public class MediaSessionBasedFilterTest : SysuiTestCase() {
                 anyBoolean()
             )
         // AND there should be a removed event for key2
-        verify(mediaListener).onMediaDataRemoved(eq(key2))
+        verify(mediaListener).onMediaDataRemoved(eq(key2), eq(false))
     }
 
     @Test

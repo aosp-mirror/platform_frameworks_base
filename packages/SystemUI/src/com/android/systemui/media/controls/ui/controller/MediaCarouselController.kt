@@ -170,6 +170,7 @@ constructor(
     @VisibleForTesting var pageIndicator: PageIndicator
     private val visualStabilityCallback: OnReorderingAllowedListener
     private var needsReordering: Boolean = false
+    private var isUserInitiatedRemovalQueued: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
     var shouldScrollToKey: Boolean = false
     private var isRtl: Boolean = false
@@ -310,12 +311,15 @@ constructor(
                 reorderAllPlayers(previousVisiblePlayerKey = null)
             }
 
-            keysNeedRemoval.forEach { removePlayer(it) }
+            keysNeedRemoval.forEach {
+                removePlayer(it, userInitiated = isUserInitiatedRemovalQueued)
+            }
             if (keysNeedRemoval.size > 0) {
                 // Carousel visibility may need to be updated after late removals
                 updateHostVisibility()
             }
             keysNeedRemoval.clear()
+            isUserInitiatedRemovalQueued = false
 
             // Update user visibility so that no extra impression will be logged when
             // activeMediaIndex resets to 0
@@ -399,18 +403,18 @@ constructor(
 
                     val canRemove = data.isPlaying?.let { !it } ?: data.isClearable && !data.active
                     if (canRemove && !Utils.useMediaResumption(context)) {
-                        // This view isn't playing, let's remove this! This happens e.g. when
-                        // dismissing/timing out a view. We still have the data around because
-                        // resumption could be on, but we should save the resources and release
-                        // this.
+                        // This media control is both paused and timed out, and the resumption
+                        // setting is off - let's remove it
                         if (isReorderingAllowed) {
-                            onMediaDataRemoved(key)
+                            onMediaDataRemoved(key, userInitiated = MediaPlayerData.isSwipedAway)
                         } else {
+                            isUserInitiatedRemovalQueued = MediaPlayerData.isSwipedAway
                             keysNeedRemoval.add(key)
                         }
                     } else {
                         keysNeedRemoval.remove(key)
                     }
+                    MediaPlayerData.isSwipedAway = false
                 }
 
                 override fun onSmartspaceMediaDataLoaded(
@@ -490,11 +494,12 @@ constructor(
                             addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
                         }
                     }
+                    MediaPlayerData.isSwipedAway = false
                 }
 
-                override fun onMediaDataRemoved(key: String) {
-                    debugLogger.logMediaRemoved(key)
-                    removePlayer(key)
+                override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
+                    debugLogger.logMediaRemoved(key, userInitiated)
+                    removePlayer(key, userInitiated = userInitiated)
                 }
 
                 override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
@@ -802,7 +807,8 @@ constructor(
     fun removePlayer(
         key: String,
         dismissMediaData: Boolean = true,
-        dismissRecommendation: Boolean = true
+        dismissRecommendation: Boolean = true,
+        userInitiated: Boolean = false,
     ): MediaControlPanel? {
         if (key == MediaPlayerData.smartspaceMediaKey()) {
             MediaPlayerData.smartspaceMediaData?.let {
@@ -821,7 +827,7 @@ constructor(
 
             if (dismissMediaData) {
                 // Inform the media manager of a potentially late dismissal
-                mediaManager.dismissMediaData(key, delay = 0L)
+                mediaManager.dismissMediaData(key, delay = 0L, userInitiated = userInitiated)
             }
             if (dismissRecommendation) {
                 // Inform the media manager of a potentially late dismissal
@@ -1213,7 +1219,8 @@ constructor(
         }
     }
 
-    private fun onSwipeToDismiss() {
+    @VisibleForTesting
+    fun onSwipeToDismiss() {
         MediaPlayerData.players().forEachIndexed { index, it ->
             if (it.mIsImpressed) {
                 logSmartspaceCardReported(
@@ -1228,6 +1235,7 @@ constructor(
                 it.mIsImpressed = false
             }
         }
+        MediaPlayerData.isSwipedAway = true
         logger.logSwipeDismiss()
         mediaManager.onSwipeToDismiss()
     }
@@ -1253,6 +1261,7 @@ constructor(
                 "state: ${desiredHostState?.expansion}, " +
                     "only active ${desiredHostState?.showsOnlyActiveMedia}"
             )
+            println("isSwipedAway: ${MediaPlayerData.isSwipedAway}")
         }
     }
 }
@@ -1291,7 +1300,7 @@ internal object MediaPlayerData {
         val data: MediaData,
         val key: String,
         val updateTime: Long = 0,
-        val isSsReactivated: Boolean = false
+        val isSsReactivated: Boolean = false,
     )
 
     private val comparator =
@@ -1315,6 +1324,9 @@ internal object MediaPlayerData {
 
     // A map that tracks order of visible media players before they get reordered.
     private val visibleMediaPlayers = LinkedHashMap<String, MediaSortKey>()
+
+    // Whether the user swiped away the carousel since its last update
+    internal var isSwipedAway: Boolean = false
 
     fun addMediaPlayer(
         key: String,
