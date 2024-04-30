@@ -303,8 +303,7 @@ class BackNavigationController {
                     removedWindowContainer = currentTask;
                     backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
                     final ActivityRecord ar = prevTask.getTopNonFinishingActivity();
-                    mShowWallpaper =
-                            ar != null && ar.forAllWindows(WindowState::hasWallpaper, true);
+                    mShowWallpaper = ar != null && ar.hasWallpaper();
                 } else {
                     // If it reaches the top activity, we will check the below task from parent.
                     // If it's null or multi-window and has different parent task, fallback the type
