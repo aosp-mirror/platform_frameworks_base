@@ -1071,6 +1071,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testAllowsTopmostFullscreenOrientation() {
         final DisplayContent dc = createNewDisplay();
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, dc.getOrientation());
         dc.getDisplayRotation().setFixedToUserRotation(
                 IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
 
