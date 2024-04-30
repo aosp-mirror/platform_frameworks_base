@@ -33,6 +33,7 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.os.PowerManager
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -46,6 +47,7 @@ import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -312,6 +314,51 @@ class FromAodTransitionInteractorTest : SysuiTestCase() {
             advanceTimeBy(100) // account for debouncing
 
             // We should head back to GONE since we started there.
+            assertThat(transitionRepository)
+                .startedTransition(from = KeyguardState.AOD, to = KeyguardState.GONE)
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
+    fun testTransitionToGone_onWakeUp_ifPowerButtonGestureDetectedInAod_fromGone() =
+        testScope.runTest {
+            powerInteractor.setAwakeForTest()
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.GONE,
+                testScope,
+            )
+            runCurrent()
+
+            // Make sure we're GONE.
+            assertEquals(KeyguardState.GONE, kosmos.keyguardTransitionInteractor.getFinishedState())
+
+            // Start going to AOD on first button push
+            powerInteractor.onStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN)
+            transitionRepository.sendTransitionSteps(
+                listOf(
+                    TransitionStep(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.AOD,
+                        transitionState = TransitionState.STARTED,
+                        value = 0f
+                    ),
+                    TransitionStep(
+                        from = KeyguardState.GONE,
+                        to = KeyguardState.AOD,
+                        transitionState = TransitionState.RUNNING,
+                        value = 0.1f
+                    ),
+                ),
+                testScope = testScope,
+            )
+
+            // Detect a power gesture and then wake up.
+            reset(transitionRepository)
+            powerInteractor.onCameraLaunchGestureDetected()
+            powerInteractor.setAwakeForTest()
+            advanceTimeBy(100) // account for debouncing
+
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.AOD, to = KeyguardState.GONE)
         }
