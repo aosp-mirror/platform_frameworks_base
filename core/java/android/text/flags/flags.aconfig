@@ -202,3 +202,10 @@ flag {
   description: "Deprecate the Paint#elegantTextHeight API and stick it to true"
   bug: "349519475"
 }
+
+flag {
+  name: "vertical_text_layout"
+  namespace: "text"
+  description: "Make Paint class work for vertical layout text."
+  bug: "355296926"
+}
