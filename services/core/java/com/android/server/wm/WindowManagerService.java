@@ -528,6 +528,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args,
+                boolean asProto) {
+            if (asProto) {
+                return;
+            }
+            mAtmService.dumpActivity(fd, pw, /* name= */ "all", /* args= */ new String[]{},
+                    /* opti= */ 0,
+                    /* dumpAll= */ true,
+                    /* dumpVisibleRootTasksOnly= */ true,
+                    /* dumpFocusedRootTaskOnly= */ false, INVALID_DISPLAY, UserHandle.USER_ALL,
+                    /* timeout= */ 1000
+            );
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
             doDump(fd, pw, args, asProto);
         }
