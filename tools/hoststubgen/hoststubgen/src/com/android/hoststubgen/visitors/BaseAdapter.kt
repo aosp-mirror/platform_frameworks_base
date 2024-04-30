@@ -20,8 +20,8 @@ import com.android.hoststubgen.HostStubGenStats
 import com.android.hoststubgen.LogLevel
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.UnifiedVisitor
-import com.android.hoststubgen.asm.getPackageNameFromClassName
-import com.android.hoststubgen.asm.resolveClassName
+import com.android.hoststubgen.asm.getPackageNameFromFullClassName
+import com.android.hoststubgen.asm.resolveClassNameWithDefaultPackage
 import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.FilterPolicyWithReason
@@ -89,7 +89,7 @@ abstract class BaseAdapter (
     ) {
         super.visit(version, access, name, signature, superName, interfaces)
         currentClassName = name
-        currentPackageName = getPackageNameFromClassName(name)
+        currentPackageName = getPackageNameFromFullClassName(name)
         classPolicy = filter.getPolicyForClass(currentClassName)
 
         log.d("[%s] visit: %s (package: %s)", this.javaClass.simpleName, name, currentPackageName)
@@ -98,7 +98,8 @@ abstract class BaseAdapter (
         log.indent()
 
         filter.getNativeSubstitutionClass(currentClassName)?.let { className ->
-            val fullClassName = resolveClassName(className, currentPackageName).toJvmClassName()
+            val fullClassName = resolveClassNameWithDefaultPackage(className, currentPackageName)
+                .toJvmClassName()
             log.d("  NativeSubstitutionClass: $fullClassName")
             if (classes.findClass(fullClassName) == null) {
                 log.w("Native substitution class $fullClassName not found. Class must be " +

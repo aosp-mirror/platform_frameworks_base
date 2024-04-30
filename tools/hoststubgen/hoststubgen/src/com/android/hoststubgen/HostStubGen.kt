@@ -16,6 +16,7 @@
 package com.android.hoststubgen
 
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.dumper.ApiDumper
 import com.android.hoststubgen.filters.AnnotationBasedFilter
 import com.android.hoststubgen.filters.ClassWidePolicyPropagatingFilter
 import com.android.hoststubgen.filters.ConstantFilter
@@ -89,7 +90,11 @@ class HostStubGen(val options: HostStubGenOptions) {
             log.i("Dump file created at $it")
         }
         options.apiListFile.ifSet {
-            PrintWriter(it).use { pw -> stats.dumpApis(pw) }
+            PrintWriter(it).use { pw ->
+                // TODO, when dumping a jar that's not framework-minus-apex.jar, we need to feed
+                // framework-minus-apex.jar so that we can dump inherited methods from it.
+                ApiDumper(pw, allClasses, null, filter).dump()
+            }
             log.i("API list file created at $it")
         }
     }
