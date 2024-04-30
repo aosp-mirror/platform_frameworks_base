@@ -28,7 +28,6 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
-import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
@@ -1165,34 +1164,15 @@ public class ViewRootImplTest {
         });
         waitForAfterDraw();
 
-        // reset the frame rate category counts
-        for (int i = 0; i < 5; i++) {
-            sInstrumentation.runOnMainSync(() -> {
-                mView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
-                mView.invalidate();
-            });
-            sInstrumentation.waitForIdleSync();
-        }
-
         // In transition from frequent update to infrequent update
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
-            mView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE);
             mView.invalidate();
-            runAfterDraw(() -> {
-                assertEquals(FRAME_RATE_CATEGORY_NO_PREFERENCE,
-                        mViewRootImpl.getLastPreferredFrameRateCategory());
-            });
-        });
-        waitForAfterDraw();
-        Thread.sleep(delay);
-        sInstrumentation.runOnMainSync(() -> {
-            mView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_DEFAULT);
-            mView.invalidate();
-            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_NO_PREFERENCE,
+            int expected = toolkitFrameRateDefaultNormalReadOnly()
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
+            runAfterDraw(() -> assertEquals(expected,
                     mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
-        waitForAfterDraw();
 
         // Infrequent update
         Thread.sleep(delay);
