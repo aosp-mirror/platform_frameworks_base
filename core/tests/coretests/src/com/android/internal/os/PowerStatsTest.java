@@ -168,6 +168,20 @@ public class PowerStatsTest {
         assertThat(end).isEqualTo("END");
     }
 
+    @Test
+    public void parceling_corruptParcel() {
+        PowerStats stats = new PowerStats(mDescriptor);
+        Parcel parcel = Parcel.obtain();
+        stats.writeToParcel(parcel);
+
+        Parcel newParcel = marshallAndUnmarshall(parcel);
+        newParcel.writeInt(-42);        // Negative section length
+        newParcel.setDataPosition(0);
+
+        PowerStats newStats = PowerStats.readFromParcel(newParcel, mRegistry);
+        assertThat(newStats).isNull();
+    }
+
     private static Parcel marshallAndUnmarshall(Parcel parcel) {
         byte[] bytes = parcel.marshall();
         parcel.recycle();
