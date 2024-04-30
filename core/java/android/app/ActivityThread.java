@@ -353,6 +353,9 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private static final String DEFAULT_FULL_BACKUP_AGENT = "android.app.backup.FullBackupAgent";
 
+    private static final long BINDER_CALLBACK_THROTTLE = 10_100L;
+    private long mBinderCallbackLast = -1;
+
     /**
      * Denotes the sequence number of the process state change for which the main thread needs
      * to block until the network rules are updated for it.
@@ -7525,6 +7528,12 @@ public final class ActivityThread extends ClientTransactionHandler
         Binder.setTransactionCallback(new IBinderCallback() {
             @Override
             public void onTransactionError(int pid, int code, int flags, int err) {
+                final long now = SystemClock.uptimeMillis();
+                if (now < mBinderCallbackLast + BINDER_CALLBACK_THROTTLE) {
+                    Slog.d(TAG, "Too many transaction errors, throttling freezer binder callback.");
+                    return;
+                }
+                mBinderCallbackLast = now;
                 try {
                     mgr.frozenBinderTransactionDetected(pid, code, flags, err);
                 } catch (RemoteException ex) {
