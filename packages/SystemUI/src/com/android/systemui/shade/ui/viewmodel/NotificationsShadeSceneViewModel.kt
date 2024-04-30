@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.ui.viewmodel
+package com.android.systemui.shade.ui.viewmodel
 
-import com.android.compose.animation.scene.Edge
+import com.android.compose.animation.scene.Back
+import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,37 +30,27 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+/** Models UI state and handles user input for the Notifications Shade scene. */
 @SysUISingleton
-class GoneSceneViewModel
+class NotificationsShadeSceneViewModel
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    shadeInteractor: ShadeInteractor,
+    overlayShadeViewModel: OverlayShadeViewModel,
 ) {
     val destinationScenes: StateFlow<Map<UserAction, UserActionResult>> =
-        shadeInteractor.shadeMode
-            .map { shadeMode -> destinationScenes(shadeMode = shadeMode) }
+        overlayShadeViewModel.backgroundScene
+            .map(::destinationScenes)
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = destinationScenes(shadeMode = shadeInteractor.shadeMode.value)
+                initialValue = destinationScenes(overlayShadeViewModel.backgroundScene.value),
             )
 
-    private fun destinationScenes(shadeMode: ShadeMode): Map<UserAction, UserActionResult> {
-        return buildMap {
-            if (shadeMode is ShadeMode.Single) {
-                this[
-                    Swipe(
-                        pointerCount = 2,
-                        fromSource = Edge.Top,
-                        direction = SwipeDirection.Down,
-                    )] = UserActionResult(Scenes.QuickSettings)
-            }
-
-            this[Swipe(direction = SwipeDirection.Down)] =
-                UserActionResult(
-                    if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade
-                )
-        }
+    private fun destinationScenes(backgroundScene: SceneKey): Map<UserAction, UserActionResult> {
+        return mapOf(
+            Swipe.Up to backgroundScene,
+            Back to backgroundScene,
+        )
     }
 }

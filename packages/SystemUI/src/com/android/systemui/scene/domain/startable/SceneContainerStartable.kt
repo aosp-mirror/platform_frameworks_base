@@ -537,6 +537,7 @@ constructor(
                                     Scenes.Lockscreen -> true
                                     Scenes.Bouncer -> false
                                     Scenes.Shade -> false
+                                    Scenes.NotificationsShade -> false
                                     else -> null
                                 }
                             }

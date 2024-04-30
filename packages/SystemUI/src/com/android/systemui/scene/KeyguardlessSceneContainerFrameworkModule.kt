@@ -21,6 +21,7 @@ import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInte
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shared.flag.DualShade
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -33,6 +34,7 @@ import dagger.multibindings.IntoMap
         [
             EmptySceneModule::class,
             GoneSceneModule::class,
+            NotificationsShadeSceneModule::class,
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
         ],
@@ -59,18 +61,22 @@ interface KeyguardlessSceneContainerFrameworkModule {
                 // Note that this list is in z-order. The first one is the bottom-most and the
                 // last one is top-most.
                 sceneKeys =
-                    listOf(
+                    listOfNotNull(
                         Scenes.Gone,
                         Scenes.QuickSettings,
-                        Scenes.Shade,
+                        Scenes.NotificationsShade.takeIf { DualShade.isEnabled },
+                        Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Gone,
                 navigationDistances =
                     mapOf(
-                        Scenes.Gone to 0,
-                        Scenes.Shade to 1,
-                        Scenes.QuickSettings to 2,
-                    ),
+                            Scenes.Gone to 0,
+                            Scenes.NotificationsShade to 1.takeIf { DualShade.isEnabled },
+                            Scenes.Shade to 1.takeUnless { DualShade.isEnabled },
+                            Scenes.QuickSettings to 2,
+                        )
+                        .filterValues { it != null }
+                        .mapValues { checkNotNull(it.value) }
             )
         }
     }
