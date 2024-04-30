@@ -240,3 +240,11 @@ flag {
     bug: "297603927"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "component_state_changed_metrics"
+    namespace: "package_manager_service"
+    description: "Feature flag to log the metrics when the component state is changed."
+    bug: "316916801"
+    is_fixed_read_only: true
+}
