@@ -110,9 +110,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
-    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 50;
+    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 200;
     private static final long RAPID_ACTIVITY_LAUNCH_MS = 500;
-    private static final long RESET_RAPID_ACTIVITY_LAUNCH_MS = 5 * RAPID_ACTIVITY_LAUNCH_MS;
+    private static final long RESET_RAPID_ACTIVITY_LAUNCH_MS = 3 * RAPID_ACTIVITY_LAUNCH_MS;
 
     public static final int STOPPED_STATE_NOT_STOPPED = 0;
     public static final int STOPPED_STATE_FIRST_LAUNCH = 1;
