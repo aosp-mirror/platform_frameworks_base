@@ -1031,6 +1031,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @VisibleForTesting(visibility = PACKAGE)
     public void setPredictiveBackImeHideAnimInProgress(boolean isInProgress) {
         mIsPredictiveBackImeHideAnimInProgress = isInProgress;
+        if (isInProgress) {
+            // The InsetsAnimationControlRunner has layoutInsetsDuringAnimation set to SHOWN during
+            // predictive back. Let's set it to HIDDEN once the predictive back animation enters the
+            // post-commit phase.
+            // That prevents flickers in case the animation is cancelled by an incoming show request
+            // during the hide animation.
+            for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
+                final InsetsAnimationControlRunner runner = mRunningAnimations.get(i).runner;
+                if ((runner.getTypes() & ime()) != 0) {
+                    runner.updateLayoutInsetsDuringAnimation(LAYOUT_INSETS_DURING_ANIMATION_HIDDEN);
+                    break;
+                }
+            }
+        }
     }
 
     boolean isPredictiveBackImeHideAnimInProgress() {
