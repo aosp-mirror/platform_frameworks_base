@@ -154,15 +154,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
                 surfaceControlViewHostFactory);
-
         mHandler = handler;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
-
-        Trace.beginSection("DesktopModeWindowDecoration#loadAppInfo");
-        loadAppInfo();
-        Trace.endSection();
     }
 
     void setCaptionListeners(
@@ -245,6 +240,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 );
             } else if (mRelayoutParams.mLayoutResId
                     == R.layout.desktop_mode_app_controls_window_decor) {
+                loadAppInfoIfNeeded();
                 mWindowDecorViewHolder = new DesktopModeAppControlsWindowDecorationViewHolder(
                         mResult.mRootView,
                         mOnCaptionTouchListener,
@@ -457,22 +453,31 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mDragResizeListener != null && mDragResizeListener.isHandlingDragResize();
     }
 
-    private void loadAppInfo() {
-        final ActivityInfo activityInfo = mTaskInfo.topActivityInfo;
-        if (activityInfo == null) {
-            Log.e(TAG, "Top activity info not found in task");
-            return;
+    private void loadAppInfoIfNeeded() {
+        // TODO(b/337370277): move this to another thread.
+        try {
+            Trace.beginSection("DesktopModeWindowDecoration#loadAppInfoIfNeeded");
+            if (mAppIconBitmap != null && mAppName != null) {
+                return;
+            }
+            final ActivityInfo activityInfo = mTaskInfo.topActivityInfo;
+            if (activityInfo == null) {
+                Log.e(TAG, "Top activity info not found in task");
+                return;
+            }
+            PackageManager pm = mContext.getApplicationContext().getPackageManager();
+            final IconProvider provider = new IconProvider(mContext);
+            final Drawable appIconDrawable = provider.getIcon(activityInfo);
+            final Resources resources = mContext.getResources();
+            final BaseIconFactory factory = new BaseIconFactory(mContext,
+                    resources.getDisplayMetrics().densityDpi,
+                    resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
+            mAppIconBitmap = factory.createScaledBitmap(appIconDrawable, MODE_DEFAULT);
+            final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
+            mAppName = pm.getApplicationLabel(applicationInfo);
+        } finally {
+            Trace.endSection();
         }
-        PackageManager pm = mContext.getApplicationContext().getPackageManager();
-        final IconProvider provider = new IconProvider(mContext);
-        final Drawable appIconDrawable = provider.getIcon(activityInfo);
-        final Resources resources = mContext.getResources();
-        final BaseIconFactory factory = new BaseIconFactory(mContext,
-                resources.getDisplayMetrics().densityDpi,
-                resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
-        mAppIconBitmap = factory.createScaledBitmap(appIconDrawable, MODE_DEFAULT);
-        final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
-        mAppName = pm.getApplicationLabel(applicationInfo);
     }
 
     private void closeDragResizeListener() {
@@ -489,6 +494,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     private void createResizeVeilIfNeeded() {
         if (mResizeVeil != null) return;
+        loadAppInfoIfNeeded();
         mResizeVeil = new ResizeVeil(mContext, mDisplayController, mAppIconBitmap, mTaskInfo,
                 mTaskSurface, mSurfaceControlTransactionSupplier);
     }
@@ -625,6 +631,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Create and display handle menu window.
      */
     void createHandleMenu() {
+        loadAppInfoIfNeeded();
         mHandleMenu = new HandleMenu.Builder(this)
                 .setAppIcon(mAppIconBitmap)
                 .setAppName(mAppName)
@@ -649,10 +656,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     @Override
-    void releaseViews() {
+    void releaseViews(WindowContainerTransaction wct) {
         closeHandleMenu();
         closeMaximizeMenu();
-        super.releaseViews();
+        super.releaseViews(wct);
     }
 
     /**
