@@ -32,6 +32,7 @@ import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
@@ -205,6 +206,14 @@ constructor(
     fun canChangeScene(): Boolean {
         return !shadeInteractor.isAnyFullyExpanded.value
     }
+
+    /**
+     * Whether touches should be disabled in communal.
+     *
+     * This is needed because the notification shade does not block touches in blank areas and these
+     * fall through to the glanceable hub, which we don't want.
+     */
+    val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
 
     companion object {
         const val POPUP_AUTO_HIDE_TIMEOUT_MS = 12000L

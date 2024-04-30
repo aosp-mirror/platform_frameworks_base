@@ -27,6 +27,7 @@ import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
+import com.android.systemui.communal.ui.compose.extensions.allowGestures
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.res.R
@@ -79,6 +80,7 @@ fun CommunalContainer(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val currentSceneKey: SceneKey by viewModel.currentScene.collectAsState(CommunalScenes.Blank)
+    val touchesAllowed by viewModel.touchesAllowed.collectAsState(initial = false)
     val state: MutableSceneTransitionLayoutState = remember {
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
@@ -128,6 +130,10 @@ fun CommunalContainer(
             CommunalScene(viewModel, colors, dialogFactory, modifier = modifier)
         }
     }
+
+    // Touches on the notification shade in blank areas fall through to the glanceable hub. When the
+    // shade is showing, we block all touches in order to prevent this unwanted behavior.
+    Box(modifier = Modifier.fillMaxSize().allowGestures(touchesAllowed))
 }
 
 /** Scene containing the glanceable hub UI. */
