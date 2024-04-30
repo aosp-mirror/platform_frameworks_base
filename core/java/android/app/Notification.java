@@ -3256,8 +3256,9 @@ public class Notification implements Parcelable
                 boolean mustClearCookie = false;
                 if (!parcel.hasClassCookie(Notification.class)) {
                     // This is the "root" notification, and not an "inner" notification (including
-                    // publicVersion or anything else that might be embedded in extras).
-                    parcel.setClassCookie(Notification.class, this);
+                    // publicVersion or anything else that might be embedded in extras). So we want
+                    // to use its token for every inner notification (might be null).
+                    parcel.setClassCookie(Notification.class, mAllowlistToken);
                     mustClearCookie = true;
                 }
                 try {
@@ -3266,7 +3267,7 @@ public class Notification implements Parcelable
                     writeToParcelImpl(parcel, flags);
                 } finally {
                     if (mustClearCookie) {
-                        parcel.removeClassCookie(Notification.class, this);
+                        parcel.removeClassCookie(Notification.class, mAllowlistToken);
                     }
                 }
             } else {
@@ -3290,14 +3291,9 @@ public class Notification implements Parcelable
         parcel.writeInt(1);
 
         if (Flags.secureAllowlistToken()) {
-            Notification rootNotification = (Notification) parcel.getClassCookie(
-                    Notification.class);
-            if (rootNotification != null && rootNotification != this) {
-                // Always use the same token as the root notification
-                parcel.writeStrongBinder(rootNotification.mAllowlistToken);
-            } else {
-                parcel.writeStrongBinder(mAllowlistToken);
-            }
+            // Always use the same token as the root notification (might be null).
+            IBinder rootNotificationToken = (IBinder) parcel.getClassCookie(Notification.class);
+            parcel.writeStrongBinder(rootNotificationToken);
         } else {
             parcel.writeStrongBinder(mAllowlistToken);
         }
