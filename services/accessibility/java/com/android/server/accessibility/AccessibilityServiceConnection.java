@@ -30,10 +30,10 @@ import android.accessibilityservice.BrailleDisplayController;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IBrailleDisplayController;
 import android.accessibilityservice.TouchInteractionController;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
+import android.annotation.RequiresNoPermission;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
@@ -79,7 +79,6 @@ import java.util.Set;
  * passed to the service it represents as soon it is bound. It also serves as the
  * connection for the service.
  */
-@SuppressWarnings("MissingPermissionAnnotation")
 class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnection {
     private static final String LOG_TAG = "AccessibilityServiceConnection";
 
@@ -110,6 +109,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             mUserId = userId;
         }
 
+        @RequiresNoPermission
         @Override
         public void sessionCreated(IAccessibilityInputMethodSession session, int id) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "ASC.sessionCreated");
@@ -196,6 +196,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         return mSecurityPolicy.canRetrieveWindowContentLocked(this) && mRetrieveInteractiveWindows;
     }
 
+    @RequiresNoPermission
     @Override
     public void disableSelf() {
         if (svcConnTracingEnabled()) {
@@ -253,6 +254,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
+    @RequiresNoPermission
     @Override
     public AccessibilityServiceInfo getServiceInfo() {
         return mAccessibilityServiceInfo;
@@ -330,6 +332,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         return false;
     }
 
+    @RequiresNoPermission
     @Override
     public boolean setSoftKeyboardShowMode(int showMode) {
         if (svcConnTracingEnabled()) {
@@ -351,6 +354,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
+    @RequiresNoPermission
     @Override
     public int getSoftKeyboardShowMode() {
         if (svcConnTracingEnabled()) {
@@ -365,6 +369,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
+    @RequiresNoPermission
     @Override
     public boolean switchToInputMethod(String imeId) {
         if (svcConnTracingEnabled()) {
@@ -386,6 +391,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         return result;
     }
 
+    @RequiresNoPermission
     @Override
     @AccessibilityService.SoftKeyboardController.EnableImeResult
     public int setInputMethodEnabled(String imeId, boolean enabled) throws SecurityException {
@@ -421,6 +427,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         return ENABLE_IME_FAIL_UNKNOWN;
     }
 
+    @RequiresNoPermission
     @Override
     public boolean isAccessibilityButtonAvailable() {
         if (svcConnTracingEnabled()) {
@@ -535,6 +542,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
         synchronized (mLock) {
@@ -569,6 +577,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
+    @RequiresNoPermission
     @Override
     public void setFocusAppearance(int strokeWidth, int color) {
         AccessibilityUserState userState = mUserStateWeakReference.get();
@@ -683,16 +692,15 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
      *                         {@link android.bluetooth.BluetoothDevice#getAddress()}.
      */
     @Override
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    @EnforcePermission(Manifest.permission.BLUETOOTH_CONNECT)
     public void connectBluetoothBrailleDisplay(
             @NonNull String bluetoothAddress, @NonNull IBrailleDisplayController controller) {
+        connectBluetoothBrailleDisplay_enforcePermission();
         if (!android.view.accessibility.Flags.brailleDisplayHid()) {
             throw new IllegalStateException("Flag BRAILLE_DISPLAY_HID not enabled");
         }
         Objects.requireNonNull(bluetoothAddress);
         Objects.requireNonNull(controller);
-        mContext.enforceCallingPermission(Manifest.permission.BLUETOOTH_CONNECT,
-                "Missing BLUETOOTH_CONNECT permission");
         if (!BluetoothAdapter.checkBluetoothAddress(bluetoothAddress)) {
             throw new IllegalArgumentException(
                     bluetoothAddress + " is not a valid Bluetooth address");
@@ -728,7 +736,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
      *
      * <p>The caller package must already have USB permission for this {@link UsbDevice}.
      */
-    @SuppressLint("MissingPermission") // system_server has the required MANAGE_USB permission
+    @RequiresNoPermission
     @Override
     @NonNull
     public void connectUsbBrailleDisplay(@NonNull UsbDevice usbDevice,
@@ -783,11 +791,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     @Override
-    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    @EnforcePermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void setTestBrailleDisplayData(List<Bundle> brailleDisplays) {
+        setTestBrailleDisplayData_enforcePermission();
         // Enforce that this TestApi is only called by trusted (test) callers.
-        mContext.enforceCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY,
-                "Missing MANAGE_ACCESSIBILITY permission");
         mTestBrailleDisplays = brailleDisplays;
     }
 
