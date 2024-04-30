@@ -2764,21 +2764,9 @@ public final class DisplayManagerService extends SystemService {
                 display.setHasContentLocked(hasContent);
                 shouldScheduleTraversal = true;
             }
-            if (requestedModeId == 0 && requestedRefreshRate != 0) {
-                // Scan supported modes returned by display.getInfo() to find a mode with the same
-                // size as the default display mode but with the specified refresh rate instead.
-                Display.Mode mode = display.getDisplayInfoLocked().findDefaultModeByRefreshRate(
-                        requestedRefreshRate);
-                if (mode != null) {
-                    requestedModeId = mode.getModeId();
-                } else {
-                    Slog.e(TAG, "Couldn't find a mode for the requestedRefreshRate: "
-                            + requestedRefreshRate + " on Display: " + displayId);
-                }
-            }
 
-            mDisplayModeDirector.getAppRequestObserver().setAppRequest(
-                    displayId, requestedModeId, requestedMinRefreshRate, requestedMaxRefreshRate);
+            mDisplayModeDirector.getAppRequestObserver().setAppRequest(displayId, requestedModeId,
+                    requestedRefreshRate, requestedMinRefreshRate, requestedMaxRefreshRate);
 
             // TODO(b/202378408) set minimal post-processing only if it's supported once we have a
             // separate API for disabling on-device processing.
