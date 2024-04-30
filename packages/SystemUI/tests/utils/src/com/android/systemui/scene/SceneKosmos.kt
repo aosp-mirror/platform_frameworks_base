@@ -32,7 +32,7 @@ val Kosmos.fakeScenes by Fixture {
 val Kosmos.scenes by Fixture { fakeScenes }
 
 val Kosmos.initialSceneKey by Fixture { Scenes.Lockscreen }
-val Kosmos.sceneContainerConfig by Fixture {
+var Kosmos.sceneContainerConfig by Fixture {
     val navigationDistances =
         mapOf(
             Scenes.Gone to 0,
