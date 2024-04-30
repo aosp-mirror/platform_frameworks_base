@@ -97,7 +97,7 @@ import java.util.Map;
 public final class KeyboardShortcutListSearch {
     private static final String TAG = KeyboardShortcutListSearch.class.getSimpleName();
     private static final Object sLock = new Object();
-    @VisibleForTesting static KeyboardShortcutListSearch sInstance;
+    @VisibleForTesting public static KeyboardShortcutListSearch sInstance;
 
     private static int SHORTCUT_SYSTEM_INDEX = 0;
     private static int SHORTCUT_INPUT_INDEX = 1;
@@ -136,7 +136,7 @@ public final class KeyboardShortcutListSearch {
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    @VisibleForTesting Context mContext;
+    @VisibleForTesting public Context mContext;
     private final IPackageManager mPackageManager;
 
     @VisibleForTesting BottomSheetDialog mKeyboardShortcutsBottomSheetDialog;
@@ -414,7 +414,7 @@ public final class KeyboardShortcutListSearch {
     private boolean mImeShortcutsReceived;
 
     @VisibleForTesting
-    void showKeyboardShortcuts(int deviceId) {
+    public void showKeyboardShortcuts(int deviceId) {
         retrieveKeyCharacterMap(deviceId);
         mAppShortcutsReceived = false;
         mImeShortcutsReceived = false;
@@ -502,7 +502,8 @@ public final class KeyboardShortcutListSearch {
         return keyboardShortcutMultiMappingGroups;
     }
 
-    private void dismissKeyboardShortcuts() {
+    @VisibleForTesting
+    public void dismissKeyboardShortcuts() {
         if (mKeyboardShortcutsBottomSheetDialog != null) {
             mKeyboardShortcutsBottomSheetDialog.dismiss();
             mKeyboardShortcutsBottomSheetDialog = null;
