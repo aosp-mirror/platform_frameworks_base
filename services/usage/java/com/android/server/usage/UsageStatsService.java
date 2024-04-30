@@ -1237,7 +1237,7 @@ public class UsageStatsService extends SystemService implements
                     break;
                 case Event.SHORTCUT_INVOCATION:
                 case Event.CHOOSER_ACTION:
-                case Event.STANDBY_BUCKET_CHANGED:
+                // case Event.STANDBY_BUCKET_CHANGED:
                 case Event.FOREGROUND_SERVICE_START:
                 case Event.FOREGROUND_SERVICE_STOP:
                     logAppUsageEventReportedAtomLocked(event.mEventType, uid, event.mPackage);
