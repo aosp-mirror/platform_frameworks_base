@@ -43,14 +43,16 @@ interface IBatteryStats {
     void noteStartVideo(int uid);
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteStopVideo(int uid);
+    // The audio battery stats interface is oneway to prevent inversion. These calls
+    // are ordered with respect to each other, but not with any other calls.
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void noteStartAudio(int uid);
+    oneway void noteStartAudio(int uid);
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void noteStopAudio(int uid);
+    oneway void noteStopAudio(int uid);
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteResetVideo();
     @EnforcePermission("UPDATE_DEVICE_STATS")
-    void noteResetAudio();
+    oneway void noteResetAudio();
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteFlashlightOn(int uid);
     @EnforcePermission("UPDATE_DEVICE_STATS")
