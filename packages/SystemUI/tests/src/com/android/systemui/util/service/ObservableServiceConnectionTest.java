@@ -16,8 +16,6 @@
 
 package com.android.systemui.util.service;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -118,6 +116,7 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
         connection.addCallback(mCallback);
         mExecutor.runAllReady();
         connection.bind();
+        mExecutor.runAllReady();
 
         when(mTransformer.convert(eq(mBinder))).thenReturn(mResult);
 
@@ -143,8 +142,8 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
         when(mContext.bindServiceAsUser(eq(mIntent), eq(connection), anyInt(),
                 eq(UserHandle.of(MAIN_USER_ID)))).thenReturn(true);
         connection.bind();
+        mExecutor.runAllReady();
         connection.onServiceDisconnected(mComponentName);
-
         mExecutor.runAllReady();
 
         // Ensure proper disconnect reason reported back
@@ -157,6 +156,7 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
         clearInvocations(mContext);
         // Ensure unbind after disconnect has no effect on the connection
         connection.unbind();
+        mExecutor.runAllReady();
         verify(mContext, never()).unbindService(eq(connection));
     }
 
@@ -197,7 +197,8 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
 
         // Verify that the exception was caught and that bind returns false, and we properly
         // unbind.
-        assertThat(connection.bind()).isFalse();
+        connection.bind();
+        mExecutor.runAllReady();
         verify(mContext).unbindService(connection);
     }
 
@@ -212,13 +213,15 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
                 .thenThrow(new SecurityException());
 
         // Verify that bind returns false and we properly unbind.
-        assertThat(connection.bind()).isFalse();
+        connection.bind();
+        mExecutor.runAllReady();
         verify(mContext).unbindService(connection);
 
         clearInvocations(mContext);
 
         // Ensure unbind after the failed bind has no effect.
         connection.unbind();
+        mExecutor.runAllReady();
         verify(mContext, never()).unbindService(eq(connection));
     }
 }
