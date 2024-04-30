@@ -1268,7 +1268,7 @@ public class DisplayDeviceConfig {
         return mAmbientLightSensor;
     }
 
-    SensorData getScreenOffBrightnessSensor() {
+    public SensorData getScreenOffBrightnessSensor() {
         return mScreenOffBrightnessSensor;
     }
 

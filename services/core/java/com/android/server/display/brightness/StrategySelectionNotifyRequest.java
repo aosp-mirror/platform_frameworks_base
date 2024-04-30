@@ -45,18 +45,22 @@ public final class StrategySelectionNotifyRequest {
 
     // True if light sensor is to be used to automatically determine doze screen brightness.
     private final boolean mAllowAutoBrightnessWhileDozingConfig;
+    // True if the auto brightness is enabled in the settings
+    private final boolean mIsAutoBrightnessEnabled;
 
     public StrategySelectionNotifyRequest(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest, int targetDisplayState,
             DisplayBrightnessStrategy displayBrightnessStrategy,
             float lastUserSetScreenBrightness,
-            boolean userSetBrightnessChanged, boolean allowAutoBrightnessWhileDozingConfig) {
+            boolean userSetBrightnessChanged, boolean allowAutoBrightnessWhileDozingConfig,
+            boolean isAutoBrightnessEnabled) {
         mDisplayPowerRequest = displayPowerRequest;
         mTargetDisplayState = targetDisplayState;
         mSelectedDisplayBrightnessStrategy = displayBrightnessStrategy;
         mLastUserSetScreenBrightness = lastUserSetScreenBrightness;
         mUserSetBrightnessChanged = userSetBrightnessChanged;
         mAllowAutoBrightnessWhileDozingConfig = allowAutoBrightnessWhileDozingConfig;
+        mIsAutoBrightnessEnabled = isAutoBrightnessEnabled;
     }
 
     public DisplayBrightnessStrategy getSelectedDisplayBrightnessStrategy() {
@@ -76,14 +80,15 @@ public final class StrategySelectionNotifyRequest {
                 && mUserSetBrightnessChanged == other.isUserSetBrightnessChanged()
                 && mLastUserSetScreenBrightness == other.getLastUserSetScreenBrightness()
                 && mAllowAutoBrightnessWhileDozingConfig
-                == other.isAllowAutoBrightnessWhileDozingConfig();
+                == other.isAllowAutoBrightnessWhileDozingConfig()
+                && mIsAutoBrightnessEnabled == other.isAutoBrightnessEnabled();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mSelectedDisplayBrightnessStrategy, mDisplayPowerRequest,
                 mTargetDisplayState, mUserSetBrightnessChanged, mLastUserSetScreenBrightness,
-                mAllowAutoBrightnessWhileDozingConfig);
+                mAllowAutoBrightnessWhileDozingConfig, mIsAutoBrightnessEnabled);
     }
 
     public float getLastUserSetScreenBrightness() {
@@ -106,6 +111,10 @@ public final class StrategySelectionNotifyRequest {
         return mAllowAutoBrightnessWhileDozingConfig;
     }
 
+    public boolean isAutoBrightnessEnabled() {
+        return mIsAutoBrightnessEnabled;
+    }
+
     /**
      * A utility to stringify a StrategySelectionNotifyRequest
      */
@@ -116,6 +125,7 @@ public final class StrategySelectionNotifyRequest {
                 + " mSelectedDisplayBrightnessStrategy=" + mSelectedDisplayBrightnessStrategy
                 + " mLastUserSetScreenBrightness=" + mLastUserSetScreenBrightness
                 + " mUserSetBrightnessChanged=" + mUserSetBrightnessChanged
-                + " mAllowAutoBrightnessWhileDozingConfig=" + mAllowAutoBrightnessWhileDozingConfig;
+                + " mAllowAutoBrightnessWhileDozingConfig=" + mAllowAutoBrightnessWhileDozingConfig
+                + " mIsAutoBrightnessEnabled=" + mIsAutoBrightnessEnabled;
     }
 }
