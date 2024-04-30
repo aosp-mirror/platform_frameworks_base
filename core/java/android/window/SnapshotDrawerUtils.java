@@ -52,11 +52,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.GraphicBuffer;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.hardware.HardwareBuffer;
 import android.os.IBinder;
 import android.util.Log;
@@ -98,11 +96,6 @@ public class SnapshotDrawerUtils {
             | FLAG_SECURE
             | FLAG_DIM_BEHIND;
 
-    private static final RectF sTmpSnapshotSize = new RectF();
-    private static final RectF sTmpDstFrame = new RectF();
-
-    private static final Matrix sSnapshotMatrix = new Matrix();
-    private static final float[] sTmpFloat9 = new float[9];
     private static final Paint sBackgroundPaint = new Paint();
 
     /**
@@ -116,24 +109,27 @@ public class SnapshotDrawerUtils {
         private final CharSequence mTitle;
 
         private SystemBarBackgroundPainter mSystemBarBackgroundPainter;
-        private final Rect mTaskBounds;
         private final Rect mFrame = new Rect();
         private final Rect mSystemBarInsets = new Rect();
+        private final int mSnapshotW;
+        private final int mSnapshotH;
         private boolean mSizeMismatch;
 
         public SnapshotSurface(SurfaceControl rootSurface, TaskSnapshot snapshot,
-                CharSequence title,
-                Rect taskBounds) {
+                CharSequence title) {
             mRootSurface = rootSurface;
             mSnapshot = snapshot;
             mTitle = title;
-            mTaskBounds = taskBounds;
+            final HardwareBuffer hwBuffer = snapshot.getHardwareBuffer();
+            mSnapshotW = hwBuffer.getWidth();
+            mSnapshotH = hwBuffer.getHeight();
         }
 
         /**
          * Initiate system bar painter to draw the system bar background.
          */
-        void initiateSystemBarPainter(int windowFlags, int windowPrivateFlags,
+        @VisibleForTesting
+        public void initiateSystemBarPainter(int windowFlags, int windowPrivateFlags,
                 int appearance, ActivityManager.TaskDescription taskDescription,
                 @WindowInsets.Type.InsetsType int requestedVisibleTypes) {
             mSystemBarBackgroundPainter = new SystemBarBackgroundPainter(windowFlags,
@@ -143,14 +139,13 @@ public class SnapshotDrawerUtils {
         }
 
         /**
-         * Set frame size.
+         * Set frame size that the snapshot should fill. It is the bounds of a task or activity.
          */
-        void setFrames(Rect frame, Rect systemBarInsets) {
+        @VisibleForTesting
+        public void setFrames(Rect frame, Rect systemBarInsets) {
             mFrame.set(frame);
             mSystemBarInsets.set(systemBarInsets);
-            final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
-            mSizeMismatch = (mFrame.width() != snapshot.getWidth()
-                    || mFrame.height() != snapshot.getHeight());
+            mSizeMismatch = (mFrame.width() != mSnapshotW || mFrame.height() != mSnapshotH);
             mSystemBarBackgroundPainter.setInsets(systemBarInsets);
         }
 
@@ -186,7 +181,7 @@ public class SnapshotDrawerUtils {
 
             // We consider nearly matched dimensions as there can be rounding errors and the user
             // won't notice very minute differences from scaling one dimension more than the other
-            boolean aspectRatioMismatch = !isAspectRatioMatch(mFrame, mSnapshot);
+            boolean aspectRatioMismatch = !isAspectRatioMatch(mFrame, mSnapshotW, mSnapshotH);
 
             // Keep a reference to it such that it doesn't get destroyed when finalized.
             SurfaceControl childSurfaceControl = new SurfaceControl.Builder(session)
@@ -198,12 +193,14 @@ public class SnapshotDrawerUtils {
                     .build();
 
             final Rect frame;
+            final Rect letterboxInsets = mSnapshot.getLetterboxInsets();
+            float offsetX = letterboxInsets.left;
+            float offsetY = letterboxInsets.top;
             // We can just show the surface here as it will still be hidden as the parent is
             // still hidden.
             mTransaction.show(childSurfaceControl);
             if (aspectRatioMismatch) {
                 Rect crop = null;
-                final Rect letterboxInsets = mSnapshot.getLetterboxInsets();
                 if (letterboxInsets.left != 0 || letterboxInsets.top != 0
                         || letterboxInsets.right != 0 || letterboxInsets.bottom != 0) {
                     // Clip off letterbox.
@@ -214,23 +211,27 @@ public class SnapshotDrawerUtils {
                 // if letterbox doesn't match window frame, try crop by content insets
                 if (aspectRatioMismatch) {
                     // Clip off ugly navigation bar.
-                    crop = calculateSnapshotCrop(mSnapshot.getContentInsets());
+                    final Rect contentInsets = mSnapshot.getContentInsets();
+                    crop = calculateSnapshotCrop(contentInsets);
+                    offsetX = contentInsets.left;
+                    offsetY = contentInsets.top;
                 }
                 frame = calculateSnapshotFrame(crop);
-                mTransaction.setWindowCrop(childSurfaceControl, crop);
-                mTransaction.setPosition(childSurfaceControl, frame.left, frame.top);
-                sTmpSnapshotSize.set(crop);
-                sTmpDstFrame.set(frame);
+                mTransaction.setCrop(childSurfaceControl, crop);
             } else {
                 frame = null;
-                sTmpSnapshotSize.set(0, 0, buffer.getWidth(), buffer.getHeight());
-                sTmpDstFrame.set(mFrame);
-                sTmpDstFrame.offsetTo(0, 0);
             }
 
-            // Scale the mismatch dimensions to fill the task bounds
-            sSnapshotMatrix.setRectToRect(sTmpSnapshotSize, sTmpDstFrame, Matrix.ScaleToFit.FILL);
-            mTransaction.setMatrix(childSurfaceControl, sSnapshotMatrix, sTmpFloat9);
+            // Align the snapshot with content area.
+            if (offsetX != 0f || offsetY != 0f) {
+                mTransaction.setPosition(childSurfaceControl,
+                        -offsetX * mFrame.width() / mSnapshot.getTaskSize().x,
+                        -offsetY * mFrame.height() / mSnapshot.getTaskSize().y);
+            }
+            // Scale the mismatch dimensions to fill the target frame.
+            final float scaleX = (float) mFrame.width() / mSnapshotW;
+            final float scaleY = (float) mFrame.height() / mSnapshotH;
+            mTransaction.setScale(childSurfaceControl, scaleX, scaleY);
             mTransaction.setColorSpace(childSurfaceControl, mSnapshot.getColorSpace());
             mTransaction.setBuffer(childSurfaceControl, mSnapshot.getHardwareBuffer());
 
@@ -261,17 +262,17 @@ public class SnapshotDrawerUtils {
          * @param insets Content insets or Letterbox insets
          * @return crop rect in snapshot coordinate space.
          */
-        Rect calculateSnapshotCrop(@NonNull Rect insets) {
+        @VisibleForTesting
+        public Rect calculateSnapshotCrop(@NonNull Rect insets) {
             final Rect rect = new Rect();
-            final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
-            rect.set(0, 0, snapshot.getWidth(), snapshot.getHeight());
+            rect.set(0, 0, mSnapshotW, mSnapshotH);
 
-            final float scaleX = (float) snapshot.getWidth() / mSnapshot.getTaskSize().x;
-            final float scaleY = (float) snapshot.getHeight() / mSnapshot.getTaskSize().y;
+            final float scaleX = (float) mSnapshotW / mSnapshot.getTaskSize().x;
+            final float scaleY = (float) mSnapshotH / mSnapshot.getTaskSize().y;
 
             // Let's remove all system decorations except the status bar, but only if the task is at
             // the very top of the screen.
-            final boolean isTop = mTaskBounds.top == 0 && mFrame.top == 0;
+            final boolean isTop = mFrame.top == 0;
             rect.inset((int) (insets.left * scaleX),
                     isTop ? 0 : (int) (insets.top * scaleY),
                     (int) (insets.right * scaleX),
@@ -284,10 +285,10 @@ public class SnapshotDrawerUtils {
          *
          * @param crop rect that is in snapshot coordinate space.
          */
-        Rect calculateSnapshotFrame(Rect crop) {
-            final HardwareBuffer snapshot = mSnapshot.getHardwareBuffer();
-            final float scaleX = (float) snapshot.getWidth() / mSnapshot.getTaskSize().x;
-            final float scaleY = (float) snapshot.getHeight() / mSnapshot.getTaskSize().y;
+        @VisibleForTesting
+        public Rect calculateSnapshotFrame(Rect crop) {
+            final float scaleX = (float) mSnapshotW / mSnapshot.getTaskSize().x;
+            final float scaleY = (float) mSnapshotH / mSnapshot.getTaskSize().y;
 
             // Rescale the frame from snapshot to window coordinate space
             final Rect frame = new Rect(0, 0,
@@ -303,7 +304,8 @@ public class SnapshotDrawerUtils {
         /**
          * Draw status bar and navigation bar background.
          */
-        void drawBackgroundAndBars(Canvas c, Rect frame) {
+        @VisibleForTesting
+        public void drawBackgroundAndBars(Canvas c, Rect frame) {
             final int statusBarHeight = mSystemBarBackgroundPainter.getStatusBarColorViewHeight();
             final boolean fillHorizontally = c.getWidth() > frame.right;
             final boolean fillVertically = c.getHeight() > frame.bottom;
@@ -320,33 +322,27 @@ public class SnapshotDrawerUtils {
 
         /**
          * Ask system bar background painter to draw status bar background.
-         *
          */
-        void drawStatusBarBackground(Canvas c, @Nullable Rect alreadyDrawnFrame) {
+        @VisibleForTesting
+        public void drawStatusBarBackground(Canvas c, @Nullable Rect alreadyDrawnFrame) {
             mSystemBarBackgroundPainter.drawStatusBarBackground(c, alreadyDrawnFrame,
                     mSystemBarBackgroundPainter.getStatusBarColorViewHeight());
         }
 
         /**
          * Ask system bar background painter to draw navigation bar background.
-         *
          */
-        void drawNavigationBarBackground(Canvas c) {
+        @VisibleForTesting
+        public void drawNavigationBarBackground(Canvas c) {
             mSystemBarBackgroundPainter.drawNavigationBarBackground(c);
         }
     }
 
-    /**
-     * @return true if the aspect ratio match between a frame and a snapshot buffer.
-     */
-    public static boolean isAspectRatioMatch(Rect frame, TaskSnapshot snapshot) {
+    private static boolean isAspectRatioMatch(Rect frame, int w, int h) {
         if (frame.isEmpty()) {
             return false;
         }
-        final HardwareBuffer buffer = snapshot.getHardwareBuffer();
-        return Math.abs(
-                ((float) buffer.getWidth() / buffer.getHeight())
-                        - ((float) frame.width() / frame.height())) <= 0.01f;
+        return Math.abs(((float) w / h) - ((float) frame.width() / frame.height())) <= 0.01f;
     }
 
     private static boolean isAspectRatioMatch(Rect frame1, Rect frame2) {
@@ -378,14 +374,14 @@ public class SnapshotDrawerUtils {
      */
     public static void drawSnapshotOnSurface(StartingWindowInfo info, WindowManager.LayoutParams lp,
             SurfaceControl rootSurface, TaskSnapshot snapshot,
-            Rect configBounds, Rect windowBounds, InsetsState topWindowInsetsState,
+            Rect windowBounds, InsetsState topWindowInsetsState,
             boolean releaseAfterDraw) {
         if (windowBounds.isEmpty()) {
             Log.e(TAG, "Unable to draw snapshot on an empty windowBounds");
             return;
         }
         final SnapshotSurface drawSurface = new SnapshotSurface(
-                rootSurface, snapshot, lp.getTitle(), configBounds);
+                rootSurface, snapshot, lp.getTitle());
 
         final WindowManager.LayoutParams attrs = info.topOpaqueWindowLayoutParams;
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;

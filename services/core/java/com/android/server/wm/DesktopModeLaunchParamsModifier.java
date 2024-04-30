@@ -48,8 +48,15 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     /**
      * Flag to indicate whether to restrict desktop mode to supported devices.
      */
+    @VisibleForTesting
+    static final String ENFORCE_DEVICE_RESTRICTIONS_KEY =
+            "persist.wm.debug.desktop_mode_enforce_device_restrictions";
+
+    /**
+     * Flag to indicate whether to restrict desktop mode to supported devices.
+     */
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
+            ENFORCE_DEVICE_RESTRICTIONS_KEY, true);
 
     private StringBuilder mLogBuilder;
 
@@ -178,24 +185,24 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
      * Return {@code true} if desktop mode should be restricted to supported devices.
      */
     @VisibleForTesting
-    public boolean enforceDeviceRestrictions() {
+    static boolean enforceDeviceRestrictions() {
         return ENFORCE_DEVICE_RESTRICTIONS;
     }
 
     /**
      * Return {@code true} if the current device supports desktop mode.
      */
+    // TODO(b/337819319): use a companion object instead.
     @VisibleForTesting
-    public boolean isDesktopModeSupported(@NonNull Context context) {
+    static boolean isDesktopModeSupported(@NonNull Context context) {
         return context.getResources().getBoolean(R.bool.config_isDesktopModeSupported);
     }
 
     /**
      * Return {@code true} if desktop mode can be entered on the current device.
      */
-    boolean canEnterDesktopMode(@NonNull Context context) {
+    static boolean canEnterDesktopMode(@NonNull Context context) {
         return isDesktopModeEnabled()
                 && (!enforceDeviceRestrictions() || isDesktopModeSupported(context));
     }
-
 }

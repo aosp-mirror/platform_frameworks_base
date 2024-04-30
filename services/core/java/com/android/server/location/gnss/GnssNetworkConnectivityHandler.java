@@ -203,7 +203,7 @@ class GnssNetworkConnectivityHandler {
 
         SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
         if (subManager != null) {
-            if (Flags.subscriptionsListenerThread()) {
+            if (Flags.subscriptionsChangedListenerThread()) {
                 subManager.addOnSubscriptionsChangedListener(FgThread.getExecutor(),
                         mOnSubscriptionsChangeListener);
             } else {

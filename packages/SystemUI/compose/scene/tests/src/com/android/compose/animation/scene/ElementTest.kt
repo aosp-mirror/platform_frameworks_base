@@ -46,7 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.layout.intermediateLayout
+import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertPositionInRootIsEqualTo
@@ -91,7 +91,9 @@ class ElementTest {
             modifier
                 .offset(offset)
                 .element(key)
-                .intermediateLayout { measurable, constraints ->
+                .approachLayout(
+                    isMeasurementApproachInProgress = { layoutState.isTransitioning() }
+                ) { measurable, constraints ->
                     onLayout()
                     val placement = measurable.measure(constraints)
                     layout(placement.width, placement.height) {
@@ -525,7 +527,7 @@ class ElementTest {
                     // page should be composed.
                     HorizontalPager(
                         pagerState,
-                        outOfBoundsPageCount = 0,
+                        beyondViewportPageCount = 0,
                     ) { page ->
                         when (page) {
                             0 -> Box(Modifier.element(TestElements.Foo).fillMaxSize())

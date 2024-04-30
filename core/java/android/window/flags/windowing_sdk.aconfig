@@ -110,3 +110,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "window_session_relayout_info"
+    description: "Pass an out RelayoutInfo instead of Bundle to fix the Parcel recycle bug"
+    bug: "335601427"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

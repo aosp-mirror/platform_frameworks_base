@@ -35,6 +35,7 @@ import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowRelayoutResult;
 import android.window.ClientWindowFrames;
 import android.window.InputTransferToken;
 import android.window.OnBackInvokedCallbackInfo;
@@ -84,6 +85,16 @@ interface IWindowSession {
     void remove(IBinder clientToken);
 
     /**
+     * @deprecated
+     */
+    int relayoutLegacy(IWindow window, in WindowManager.LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewVisibility,
+            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
+            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
+            out InsetsState insetsState, out InsetsSourceControl.Array activeControls,
+            out Bundle bundle);
+
+    /**
      * Change the parameters of a window.  You supply the
      * new parameters, it returns the new frame of the window on screen (the
      * position should be ignored) and surface of the window.  The surface
@@ -98,22 +109,12 @@ interface IWindowSession {
      * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
      * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
      * @param lastSyncSeqId The last SyncSeqId that the client applied.
-     * @param outFrames The window frames used by the client side for layout.
-     * @param outMergedConfiguration New config container that holds global, override and merged
-     *                               config for window, if it is now becoming visible and the merged
-     *                               config has changed since it was last displayed.
-     * @param outSurfaceControl Object in which is placed the new display surface.
-     * @param insetsState The current insets state in the system.
-     * @param activeControls Objects which allow controlling {@link InsetsSource}s.
-     * @param bundle A Bundle to contain the latest SyncSeqId and any extra relayout optional infos.
+     * @param outRelayoutResult Data object contains the info to be returned from server side.
      * @return int Result flags, defined in {@link WindowManagerGlobal}.
      */
-    int relayout(IWindow window, in WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
-            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl.Array activeControls,
-            out Bundle bundle);
+    int relayout(IWindow window, in WindowManager.LayoutParams attrs, int requestedWidth,
+            int requestedHeight, int viewVisibility, int flags, int seq, int lastSyncSeqId,
+            out @nullable WindowRelayoutResult outRelayoutResult);
 
     /**
      * Similar to {@link #relayout} but this is an oneway method which doesn't return anything.

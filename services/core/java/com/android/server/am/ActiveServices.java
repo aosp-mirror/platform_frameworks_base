@@ -3864,12 +3864,10 @@ public final class ActiveServices {
             final long lastTopTime = sr.app.mState.getLastTopTime();
             final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
             final long nowUptime = SystemClock.uptimeMillis();
-            if (lastTopTime != Long.MIN_VALUE && constantTimeLimit > (nowUptime - lastTopTime)) {
-                // Discard any other messages for this service
-                mFGSAnrTimer.discard(sr);
-                mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
+            if (constantTimeLimit > (nowUptime - lastTopTime)) {
                 // The app was in the TOP state after the FGS was started so its time allowance
                 // should be counted from that time since this is considered a user interaction
+                mFGSAnrTimer.discard(sr);
                 final Message msg = mAm.mHandler.obtainMessage(
                                         ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
                 mAm.mHandler.sendMessageAtTime(msg, lastTopTime + constantTimeLimit);

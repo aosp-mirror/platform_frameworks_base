@@ -408,6 +408,7 @@
   <java-symbol type="bool" name="config_supportsSplitScreenMultiWindow" />
   <java-symbol type="bool" name="config_supportsMultiDisplay" />
   <java-symbol type="bool" name="config_leftRightSplitInPortrait" />
+  <java-symbol type="bool" name="config_flexibleSplitRatios" />
   <java-symbol type="integer" name="config_supportsNonResizableMultiWindow" />
   <java-symbol type="integer" name="config_respectsActivityMinWidthHeightMultiWindow" />
   <java-symbol type="dimen" name="config_minPercentageMultiWindowSupportHeight" />
@@ -1110,6 +1111,10 @@
   <java-symbol type="string" name="profile_label_work_3" />
   <java-symbol type="string" name="profile_label_test" />
   <java-symbol type="string" name="profile_label_communal" />
+  <java-symbol type="string" name="accessibility_label_managed_profile" />
+  <java-symbol type="string" name="accessibility_label_private_profile" />
+  <java-symbol type="string" name="accessibility_label_clone_profile" />
+  <java-symbol type="string" name="accessibility_label_communal_profile" />
   <java-symbol type="string" name="mediasize_unknown_portrait" />
   <java-symbol type="string" name="mediasize_unknown_landscape" />
   <java-symbol type="string" name="mediasize_iso_a0" />

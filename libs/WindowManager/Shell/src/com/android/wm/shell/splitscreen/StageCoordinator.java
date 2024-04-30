@@ -3351,6 +3351,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 true /* reparentLeafTaskIfRelaunch */);
     }
 
+    /** Call this when the animation from split screen to desktop is started. */
+    public void onSplitToDesktop() {
+        setSplitsVisible(false);
+    }
+
     /** Call this when the recents animation finishes by doing pair-to-pair switch. */
     public void onRecentsPairToPairAnimationFinish(WindowContainerTransaction finishWct) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onRecentsPairToPairAnimationFinish");

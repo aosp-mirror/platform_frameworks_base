@@ -162,6 +162,10 @@ constructor(
         loggingReason: String,
         transitionKey: TransitionKey? = null,
     ) {
+        if (!repository.allSceneKeys().contains(toScene)) {
+            return
+        }
+
         check(
             toScene != Scenes.Gone || deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked
         ) {

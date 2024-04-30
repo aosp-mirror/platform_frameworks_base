@@ -80,10 +80,13 @@ flag {
 }
 
 flag {
-    name: "subscriptions_listener_thread"
+    name: "subscriptions_changed_listener_thread"
     namespace: "location"
-    description: "Flag for running onSubscriptionsChangeListener on FgThread"
+    description: "Flag for running onSubscriptionsChangedListener on FgThread"
     bug: "332451908"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

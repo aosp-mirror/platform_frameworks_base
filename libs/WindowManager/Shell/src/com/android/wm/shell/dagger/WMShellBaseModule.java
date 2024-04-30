@@ -702,10 +702,12 @@ public abstract class WMShellBaseModule {
             ShellInit shellInit,
             ShellController shellController,
             Transitions transitions,
+            TaskStackListenerImpl taskStackListener,
             @ShellMainThread Handler mainHandler,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new KeyguardTransitionHandler(
-                    shellInit, shellController, transitions, mainHandler, mainExecutor);
+                shellInit, shellController, transitions, taskStackListener, mainHandler,
+                mainExecutor);
     }
 
     @WMSingleton

@@ -3691,6 +3691,9 @@ class Task extends TaskFragment {
                 info.requestedVisibleTypes = topMainWin.getRequestedVisibleTypes();
             }
         }
+        final Rect rotatedBounds = activity.getFixedRotationTransformDisplayBounds();
+        info.taskBounds.set(rotatedBounds != null ? rotatedBounds
+                : info.taskInfo.configuration.windowConfiguration.getBounds());
         // If the developer has persist a different configuration, we need to override it to the
         // starting window because persisted configuration does not effect to Task.
         info.taskInfo.configuration.setTo(activity.getConfiguration());

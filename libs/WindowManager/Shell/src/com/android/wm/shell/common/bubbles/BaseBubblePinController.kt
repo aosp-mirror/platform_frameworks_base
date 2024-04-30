@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.common.bubbles
 
+import android.graphics.Point
 import android.graphics.RectF
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -35,7 +36,7 @@ import com.android.wm.shell.common.bubbles.BubbleBarLocation.RIGHT
  *
  * Shows a drop target when releasing a view would update the [BubbleBarLocation].
  */
-abstract class BaseBubblePinController {
+abstract class BaseBubblePinController(private val screenSizeProvider: () -> Point) {
 
     private var onLeft = false
     private var dismissZone: RectF? = null
@@ -50,8 +51,8 @@ abstract class BaseBubblePinController {
      */
     fun onDragStart(initialLocationOnLeft: Boolean) {
         onLeft = initialLocationOnLeft
+        screenCenterX = screenSizeProvider.invoke().x / 2
         dismissZone = getExclusionRect()
-        screenCenterX = getScreenCenterX()
     }
 
     /** View has moved to [x] and [y] screen coordinates */
@@ -91,11 +92,10 @@ abstract class BaseBubblePinController {
         this.listener = listener
     }
 
-    /** Get screen center coordinate on the x axis. */
-    protected abstract fun getScreenCenterX(): Int
-
-    /** Optional exclusion rect where drag interactions are not processed */
-    protected abstract fun getExclusionRect(): RectF?
+    /** Get width for exclusion rect where dismiss takes over drag */
+    protected abstract fun getExclusionRectWidth(): Float
+    /** Get height for exclusion rect where dismiss takes over drag */
+    protected abstract fun getExclusionRectHeight(): Float
 
     /** Create the drop target view and attach it to the parent */
     protected abstract fun createDropTargetView(): View
@@ -112,6 +112,14 @@ abstract class BaseBubblePinController {
     private fun onLocationChange(location: BubbleBarLocation) {
         showDropTarget(location)
         listener?.onChange(location)
+    }
+
+    private fun getExclusionRect(): RectF {
+        val rect = RectF(0f, 0f, getExclusionRectWidth(), getExclusionRectHeight())
+        // Center it around the bottom center of the screen
+        val screenBottom = screenSizeProvider.invoke().y
+        rect.offsetTo(screenCenterX - rect.width() / 2, screenBottom - rect.height())
+        return rect
     }
 
     private fun showDropTarget(location: BubbleBarLocation) {

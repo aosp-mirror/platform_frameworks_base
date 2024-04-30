@@ -217,18 +217,18 @@ internal class ElementNode(
         maybePruneMaps(layoutImpl, prevElement, prevSceneState)
     }
 
-    override fun isMeasurementApproachComplete(lookaheadSize: IntSize): Boolean {
+    override fun isMeasurementApproachInProgress(lookaheadSize: IntSize): Boolean {
         // TODO(b/324191441): Investigate whether making this check more complex (checking if this
         // element is shared or transformed) would lead to better performance.
-        return layoutImpl.state.currentTransitions.isEmpty()
+        return layoutImpl.state.isTransitioning()
     }
 
-    override fun Placeable.PlacementScope.isPlacementApproachComplete(
+    override fun Placeable.PlacementScope.isPlacementApproachInProgress(
         lookaheadCoordinates: LayoutCoordinates
     ): Boolean {
         // TODO(b/324191441): Investigate whether making this check more complex (checking if this
         // element is shared or transformed) would lead to better performance.
-        return layoutImpl.state.currentTransitions.isEmpty()
+        return layoutImpl.state.isTransitioning()
     }
 
     @ExperimentalComposeUiApi

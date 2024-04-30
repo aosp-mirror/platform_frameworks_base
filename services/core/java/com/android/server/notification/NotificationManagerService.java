@@ -266,7 +266,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.permission.PermissionManager;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
@@ -313,7 +312,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.logging.InstanceId;
@@ -704,7 +702,6 @@ public class NotificationManagerService extends SystemService {
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
     private boolean mLockScreenAllowSecureNotifications = true;
-    boolean mSystemExemptFromDismissal = false;
     final ArrayMap<String, ArrayMap<Integer,
             RemoteCallbackList<ICallNotificationEventCallback>>>
             mCallNotificationEventCallbacks = new ArrayMap<>();
@@ -722,7 +719,6 @@ public class NotificationManagerService extends SystemService {
     private GroupHelper mGroupHelper;
     private int mAutoGroupAtCount;
     private boolean mIsTelevision;
-    private DeviceConfig.OnPropertiesChangedListener mDeviceConfigChangedListener;
     protected NotificationAttentionHelper mAttentionHelper;
 
     private int mWarnRemoteViewsSizeBytes;
@@ -973,18 +969,6 @@ public class NotificationManagerService extends SystemService {
     }
 
     protected void setDefaultAssistantForUser(int userId) {
-        String overrideDefaultAssistantString = DeviceConfig.getProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE);
-        if (overrideDefaultAssistantString != null) {
-            ArraySet<ComponentName> approved = mAssistants.queryPackageForServices(
-                    overrideDefaultAssistantString,
-                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                    userId);
-            for (int i = 0; i < approved.size(); i++) {
-                if (allowAssistant(userId, approved.valueAt(i))) return;
-            }
-        }
         ArraySet<ComponentName> defaults = mAssistants.getDefaultComponents();
         // We should have only one default assistant by default
         // allowAssistant should execute once in practice
@@ -2670,10 +2654,6 @@ public class NotificationManagerService extends SystemService {
         mStatsManager.clearPullAtomCallback(DND_MODE_RULE);
         mAppOps.stopWatchingMode(mAppOpsListener);
         mAlarmManager.cancelAll();
-
-        if (mDeviceConfigChangedListener != null) {
-            DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigChangedListener);
-        }
     }
 
     protected String[] getStringArrayResource(int key) {
@@ -2742,27 +2722,6 @@ public class NotificationManagerService extends SystemService {
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
         publishLocalService(NotificationManagerInternal.class, mInternalService);
-    }
-
-    void registerDeviceConfigChange() {
-        mDeviceConfigChangedListener = properties -> {
-            if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())) {
-                return;
-            }
-            for (String name : properties.getKeyset()) {
-                if (SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE.equals(name)) {
-                    mAssistants.resetDefaultAssistantsIfNecessary();
-                }
-            }
-        };
-        mSystemExemptFromDismissal = DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
-                /* name= */ "application_exemptions",
-                /* defaultValue= */ true);
-        DeviceConfig.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                new HandlerExecutor(mHandler),
-                mDeviceConfigChangedListener);
     }
 
     private void registerNotificationPreferencesPullers() {
@@ -2938,7 +2897,6 @@ public class NotificationManagerService extends SystemService {
             mAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
             mHistoryManager.onBootPhaseAppsCanStart();
-            registerDeviceConfigChange();
             migrateDefaultNAS();
             maybeShowInitialReviewPermissionsNotification();
 
@@ -7738,7 +7696,7 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
         // Check if an app has been given system exemption
-        return mSystemExemptFromDismissal && mAppOps.checkOpNoThrow(
+        return mAppOps.checkOpNoThrow(
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, ai.uid,
                 ai.packageName) == MODE_ALLOWED;
     }

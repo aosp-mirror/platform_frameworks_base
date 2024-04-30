@@ -57,12 +57,14 @@ import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNoti
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.asIndenting
+import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
 import dagger.Lazy
 import java.io.PrintWriter
+import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -107,7 +109,7 @@ constructor(
     private val authenticationInteractor: Lazy<AuthenticationInteractor>,
     private val windowController: NotificationShadeWindowController,
     private val deviceProvisioningInteractor: DeviceProvisioningInteractor,
-    private val centralSurfaces: CentralSurfaces,
+    private val centralSurfacesOptLazy: Lazy<Optional<CentralSurfaces>>,
     private val headsUpInteractor: HeadsUpNotificationInteractor,
     private val occlusionInteractor: SceneContainerOcclusionInteractor,
     private val faceUnlockInteractor: DeviceEntryFaceAuthInteractor,
@@ -115,6 +117,8 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val sceneBackInteractor: SceneBackInteractor,
 ) : CoreStartable {
+    private val centralSurfaces: CentralSurfaces?
+        get() = centralSurfacesOptLazy.get().getOrNull()
 
     override fun start() {
         if (SceneContainerFlag.isEnabled) {
@@ -542,7 +546,7 @@ constructor(
                 }
                 .collect { isInteractingOrNull ->
                     isInteractingOrNull?.let { isInteracting ->
-                        centralSurfaces.setInteracting(
+                        centralSurfaces?.setInteracting(
                             StatusBarManager.WINDOW_STATUS_BAR,
                             isInteracting,
                         )

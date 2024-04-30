@@ -308,6 +308,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.RemoveContentMode;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
+import android.view.WindowRelayoutResult;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.view.inputmethod.ImeTracker;
@@ -2268,12 +2269,54 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /** Relayouts window. */
+    public int relayoutWindow(Session session, IWindow client, LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
+            int lastSyncSeqId, WindowRelayoutResult outRelayoutResult) {
+        final ClientWindowFrames outFrames;
+        final MergedConfiguration outMergedConfiguration;
+        final SurfaceControl outSurfaceControl;
+        final InsetsState outInsetsState;
+        final InsetsSourceControl.Array outActiveControls;
+        if (outRelayoutResult != null) {
+            outFrames = outRelayoutResult.frames;
+            outMergedConfiguration = outRelayoutResult.mergedConfiguration;
+            outSurfaceControl = outRelayoutResult.surfaceControl;
+            outInsetsState = outRelayoutResult.insetsState;
+            outActiveControls = outRelayoutResult.activeControls;
+        } else {
+            outFrames = null;
+            outMergedConfiguration = null;
+            outSurfaceControl = null;
+            outInsetsState = null;
+            outActiveControls = null;
+        }
+        return relayoutWindowInner(session, client, attrs, requestedWidth, requestedHeight,
+                viewVisibility, flags, seq, lastSyncSeqId, outFrames, outMergedConfiguration,
+                outSurfaceControl, outInsetsState, outActiveControls, null /* outBundle */,
+                outRelayoutResult);
+    }
+
+    /** @deprecated */
+    @Deprecated
     public int relayoutWindow(Session session, IWindow client, LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
             int lastSyncSeqId, ClientWindowFrames outFrames,
             MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
             InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
             Bundle outBundle) {
+        return relayoutWindowInner(session, client, attrs, requestedWidth, requestedHeight,
+                viewVisibility, flags, seq, lastSyncSeqId, outFrames, outMergedConfiguration,
+                outSurfaceControl, outInsetsState, outActiveControls, outBundle,
+                null /* outRelayoutResult */);
+    }
+
+    private int relayoutWindowInner(Session session, IWindow client, LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
+            int lastSyncSeqId, ClientWindowFrames outFrames,
+            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
+            InsetsState outInsetsState, InsetsSourceControl.Array outActiveControls,
+            Bundle outBundle, WindowRelayoutResult outRelayoutResult) {
         if (outActiveControls != null) {
             outActiveControls.set(null);
         }
@@ -2608,8 +2651,14 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (outFrames != null && outMergedConfiguration != null) {
-                final boolean shouldReportActivityWindowInfo = outBundle != null
-                        && win.mLastReportedActivityWindowInfo != null;
+                final boolean shouldReportActivityWindowInfo;
+                if (Flags.windowSessionRelayoutInfo()) {
+                    shouldReportActivityWindowInfo = outRelayoutResult != null
+                            && win.mLastReportedActivityWindowInfo != null;
+                } else {
+                    shouldReportActivityWindowInfo = outBundle != null
+                            && win.mLastReportedActivityWindowInfo != null;
+                }
                 final ActivityWindowInfo outActivityWindowInfo = shouldReportActivityWindowInfo
                         ? new ActivityWindowInfo()
                         : null;
@@ -2618,8 +2667,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         outActivityWindowInfo, false /* useLatestConfig */, shouldRelayout);
 
                 if (shouldReportActivityWindowInfo) {
-                    outBundle.putParcelable(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
-                            outActivityWindowInfo);
+                    if (Flags.windowSessionRelayoutInfo()) {
+                        outRelayoutResult.activityWindowInfo = outActivityWindowInfo;
+                    } else {
+                        outBundle.putParcelable(
+                                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
+                                outActivityWindowInfo);
+                    }
                 }
 
                 // Set resize-handled here because the values are sent back to the client.
@@ -2650,7 +2704,19 @@ public class WindowManagerService extends IWindowManager.Stub
                         win.isVisible() /* visible */, false /* removed */);
             }
 
-            if (outBundle != null) {
+            if (Flags.windowSessionRelayoutInfo()) {
+                if (outRelayoutResult != null) {
+                    if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
+                            && win.mSyncSeqId > lastSyncSeqId) {
+                        outRelayoutResult.syncSeqId = win.shouldSyncWithBuffers()
+                                ? win.mSyncSeqId
+                                : -1;
+                        win.markRedrawForSyncReported();
+                    } else {
+                        outRelayoutResult.syncSeqId = -1;
+                    }
+                }
+            } else if (outBundle != null) {
                 final int maybeSyncSeqId;
                 if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
                         && win.mSyncSeqId > lastSyncSeqId) {
