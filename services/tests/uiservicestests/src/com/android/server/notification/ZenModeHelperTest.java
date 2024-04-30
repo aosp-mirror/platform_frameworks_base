@@ -6095,6 +6095,67 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(readPolicy.allowConversations()).isFalse();
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    @DisableFlags(Flags.FLAG_MODES_UI)
+    public void setNotificationPolicy_updatesRulePolicies_ifRulePolicyIsDefaultOrGlobalPolicy() {
+        ZenPolicy defaultZenPolicy = mZenModeHelper.getDefaultZenPolicy();
+        Policy previousManualPolicy = mZenModeHelper.mConfig.toNotificationPolicy();
+        ZenPolicy previousManualZenPolicy = ZenAdapters.notificationPolicyToZenPolicy(
+                previousManualPolicy);
+        ZenPolicy customZenPolicy = new ZenPolicy.Builder(defaultZenPolicy).allowConversations(
+                CONVERSATION_SENDERS_ANYONE).build();
+
+        mZenModeHelper.mConfig.automaticRules.clear();
+        addZenRule(mZenModeHelper.mConfig, "appWithDefault", "app.pkg",
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS, defaultZenPolicy);
+        addZenRule(mZenModeHelper.mConfig, "appWithSameAsManual", "app.pkg",
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS, previousManualZenPolicy);
+        addZenRule(mZenModeHelper.mConfig, "appWithCustom", "app.pkg",
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS, customZenPolicy);
+        addZenRule(mZenModeHelper.mConfig, "appWithOtherFilter", "app.pkg",
+                ZEN_MODE_ALARMS, null);
+        addZenRule(mZenModeHelper.mConfig, "systemWithDefault", "android",
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS, defaultZenPolicy);
+        addZenRule(mZenModeHelper.mConfig, "systemWithSameAsManual", "android",
+                ZEN_MODE_IMPORTANT_INTERRUPTIONS, previousManualZenPolicy);
+
+        Policy newManualPolicy = new Policy(PRIORITY_CATEGORY_EVENTS, 0, 0);
+        mZenModeHelper.setNotificationPolicy(newManualPolicy, UPDATE_ORIGIN_USER, 0);
+        ZenPolicy newManualZenPolicy = ZenAdapters.notificationPolicyToZenPolicy(newManualPolicy);
+
+        // Only app rules with default or same-as-manual policies were updated.
+        assertThat(mZenModeHelper.mConfig.automaticRules.get("appWithDefault").zenPolicy)
+                .isEqualTo(newManualZenPolicy);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get("appWithSameAsManual").zenPolicy)
+                .isEqualTo(newManualZenPolicy);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.get("appWithCustom").zenPolicy)
+                .isEqualTo(customZenPolicy);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get("appWithOtherFilter").zenPolicy)
+                .isNull();
+        assertThat(mZenModeHelper.mConfig.automaticRules.get("systemWithDefault").zenPolicy)
+                .isEqualTo(defaultZenPolicy);
+        assertThat(mZenModeHelper.mConfig.automaticRules.get("systemWithSameAsManual").zenPolicy)
+                .isEqualTo(previousManualZenPolicy);
+    }
+
+    private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,
+            @Nullable ZenPolicy zenPolicy) {
+        ZenRule rule = new ZenRule();
+        rule.id = id;
+        rule.pkg = ownerPkg;
+        rule.enabled = true;
+        rule.zenMode = zenMode;
+        rule.zenPolicy = zenPolicy;
+        // Plus stuff so that isValidAutomaticRule() passes
+        rule.name = String.format("Rule %s from %s with mode=%s and policy=%s", id, ownerPkg,
+                zenMode, zenPolicy);
+        rule.conditionId = Uri.parse(rule.name);
+
+        config.automaticRules.put(id, rule);
+    }
+
     private static final Correspondence<ZenRule, ZenRule> IGNORE_METADATA =
             Correspondence.transforming(zr -> {
                 Parcel p = Parcel.obtain();

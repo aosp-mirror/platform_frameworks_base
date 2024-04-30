@@ -1725,7 +1725,28 @@ public class ZenModeHelper {
         synchronized (mConfigLock) {
             if (policy == null || mConfig == null) return;
             final ZenModeConfig newConfig = mConfig.copy();
-            newConfig.applyNotificationPolicy(policy);
+            if (Flags.modesApi() && !Flags.modesUi()) {
+                // Fix for b/337193321 -- propagate changes to notificationPolicy to rules where
+                // the user cannot edit zen policy to emulate the previous "inheritance".
+                ZenPolicy previousPolicy = ZenAdapters.notificationPolicyToZenPolicy(
+                        newConfig.toNotificationPolicy());
+                ZenPolicy newPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
+
+                newConfig.applyNotificationPolicy(policy);
+
+                if (!previousPolicy.equals(newPolicy)) {
+                    for (ZenRule rule : newConfig.automaticRules.values()) {
+                        if (!SystemZenRules.isSystemOwnedRule(rule)
+                                && rule.zenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                                && (rule.zenPolicy == null || rule.zenPolicy.equals(previousPolicy)
+                                        || rule.zenPolicy.equals(getDefaultZenPolicy()))) {
+                            rule.zenPolicy = newPolicy;
+                        }
+                    }
+                }
+            } else {
+                newConfig.applyNotificationPolicy(policy);
+            }
             setConfigLocked(newConfig, null, origin, "setNotificationPolicy", callingUid);
         }
     }
