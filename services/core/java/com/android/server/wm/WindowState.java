@@ -5857,6 +5857,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return hasWallpaper();
     }
 
+    @Override
     boolean hasWallpaper() {
         return (mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0 || hasWallpaperForLetterboxBackground();
     }
