@@ -106,3 +106,13 @@ flag {
     }
 }
 
+flag {
+  name: "defer_show_soft_input_until_session_creation"
+  namespace: "input_method"
+  description: "Defers showSoftInput until the IME session has been created."
+  bug: "337766845"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
