@@ -45,6 +45,7 @@ import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
 import androidx.window.extensions.core.util.function.Consumer;
+import androidx.window.extensions.util.DeduplicateConsumer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +63,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private final Map<Context, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
+    private final Map<Context, DeduplicateConsumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
             new ArrayMap<>();
 
     @GuardedBy("mLock")
@@ -130,7 +131,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             if (mWindowLayoutChangeListeners.containsKey(context)
                     // In theory this method can be called on the same consumer with different
                     // context.
-                    || mWindowLayoutChangeListeners.containsValue(consumer)) {
+                    || containsConsumer(consumer)) {
                 return;
             }
             if (!context.isUiContext()) {
@@ -141,7 +142,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
                 consumer.accept(newWindowLayout);
             });
-            mWindowLayoutChangeListeners.put(context, consumer);
+            mWindowLayoutChangeListeners.put(context, new DeduplicateConsumer<>(consumer));
 
             final IBinder windowContextToken = context.getWindowContextToken();
             if (windowContextToken != null) {
@@ -176,19 +177,35 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     @Override
     public void removeWindowLayoutInfoListener(@NonNull Consumer<WindowLayoutInfo> consumer) {
         synchronized (mLock) {
+            DeduplicateConsumer<WindowLayoutInfo> consumerToRemove = null;
             for (Context context : mWindowLayoutChangeListeners.keySet()) {
-                if (!mWindowLayoutChangeListeners.get(context).equals(consumer)) {
+                final DeduplicateConsumer<WindowLayoutInfo> deduplicateConsumer =
+                        mWindowLayoutChangeListeners.get(context);
+                if (!deduplicateConsumer.matchesConsumer(consumer)) {
                     continue;
                 }
                 final IBinder token = context.getWindowContextToken();
+                consumerToRemove = deduplicateConsumer;
                 if (token != null) {
                     context.unregisterComponentCallbacks(mConfigurationChangeListeners.get(token));
                     mConfigurationChangeListeners.remove(token);
                 }
                 break;
             }
-            mWindowLayoutChangeListeners.values().remove(consumer);
+            if (consumerToRemove != null) {
+                mWindowLayoutChangeListeners.values().remove(consumerToRemove);
+            }
         }
+    }
+
+    @GuardedBy("mLock")
+    private boolean containsConsumer(@NonNull Consumer<WindowLayoutInfo> consumer) {
+        for (DeduplicateConsumer<WindowLayoutInfo> c : mWindowLayoutChangeListeners.values()) {
+            if (c.matchesConsumer(consumer)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @GuardedBy("mLock")
