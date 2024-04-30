@@ -20,8 +20,8 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
-import com.android.systemui.keyguard.shared.RefactorKeyguardDismissIntent
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +40,7 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        if (!RefactorKeyguardDismissIntent.isEnabled) {
+        if (!SceneContainerFlag.isEnabled) {
             return
         }
 

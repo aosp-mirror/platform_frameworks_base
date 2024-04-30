@@ -25,7 +25,6 @@ import com.android.systemui.Flags.FLAG_MEDIA_IN_SCENE_CONTAINER
 import com.android.systemui.Flags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.Flags.FLAG_NOTIFICATIONS_HEADS_UP_REFACTOR
 import com.android.systemui.Flags.FLAG_PREDICTIVE_BACK_SYSUI
-import com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 
 /**
@@ -42,7 +41,6 @@ import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
     FLAG_PREDICTIVE_BACK_SYSUI,
     FLAG_SCENE_CONTAINER,
     FLAG_DEVICE_ENTRY_UDFPS_REFACTOR,
-    FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT,
 )
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
