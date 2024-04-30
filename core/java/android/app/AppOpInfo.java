@@ -88,7 +88,7 @@ class AppOpInfo {
 
     /**
      * This specifies whether each option is only allowed to be read
-     * by apps with manage appops permission.
+     * by apps with privileged appops permission.
      */
     public final boolean restrictRead;
 
