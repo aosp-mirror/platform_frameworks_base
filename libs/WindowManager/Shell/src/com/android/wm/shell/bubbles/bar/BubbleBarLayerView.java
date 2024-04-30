@@ -33,6 +33,8 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import com.android.wm.shell.bubbles.Bubble;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -42,6 +44,8 @@ import com.android.wm.shell.bubbles.BubbleViewProvider;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedViewDragController.DragListener;
+import com.android.wm.shell.common.bubbles.BaseBubblePinController;
+import com.android.wm.shell.common.bubbles.BubbleBarLocation;
 import com.android.wm.shell.common.bubbles.DismissView;
 
 import kotlin.Unit;
@@ -115,7 +119,18 @@ public class BubbleBarLayerView extends FrameLayout
 
         mBubbleExpandedViewPinController = new BubbleExpandedViewPinController(
                 context, this, mPositioner);
-        mBubbleExpandedViewPinController.setListener(mBubbleController::setBubbleBarLocation);
+        mBubbleExpandedViewPinController.setListener(
+                new BaseBubblePinController.LocationChangeListener() {
+                    @Override
+                    public void onChange(@NonNull BubbleBarLocation bubbleBarLocation) {
+                        mBubbleController.animateBubbleBarLocation(bubbleBarLocation);
+                    }
+
+                    @Override
+                    public void onRelease(@NonNull BubbleBarLocation location) {
+                        mBubbleController.setBubbleBarLocation(location);
+                    }
+                });
 
         setOnClickListener(view -> hideMenuOrCollapse());
     }

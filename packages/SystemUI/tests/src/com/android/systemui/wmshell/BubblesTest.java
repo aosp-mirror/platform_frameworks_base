@@ -2388,6 +2388,10 @@ public class BubblesTest extends SysuiTestCase {
             mStateChangeCalls++;
             mLastUpdate = update;
         }
+
+        @Override
+        public void animateBubbleBarLocation(BubbleBarLocation location) {
+        }
     }
 
     private static class FakeBubbleProperties implements BubbleProperties {

@@ -725,6 +725,17 @@ public class BubbleController implements ConfigurationChangeListener,
         }
     }
 
+    /**
+     * Animate bubble bar to the given location. The location change is transient. It does not
+     * update the state of the bubble bar.
+     * To update bubble bar pinned location, use {@link #setBubbleBarLocation(BubbleBarLocation)}.
+     */
+    public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
+        if (canShowAsBubbleBar()) {
+            mBubbleStateListener.animateBubbleBarLocation(bubbleBarLocation);
+        }
+    }
+
     /** Whether this userId belongs to the current user. */
     private boolean isCurrentProfile(int userId) {
         return userId == UserHandle.USER_ALL
@@ -2250,15 +2261,19 @@ public class BubbleController implements ConfigurationChangeListener,
         private final SingleInstanceRemoteListener<BubbleController, IBubblesListener> mListener;
         private final Bubbles.BubbleStateListener mBubbleListener =
                 new Bubbles.BubbleStateListener() {
+                    @Override
+                    public void onBubbleStateChange(BubbleBarUpdate update) {
+                        Bundle b = new Bundle();
+                        b.setClassLoader(BubbleBarUpdate.class.getClassLoader());
+                        b.putParcelable(BubbleBarUpdate.BUNDLE_KEY, update);
+                        mListener.call(l -> l.onBubbleStateChange(b));
+                    }
 
-            @Override
-            public void onBubbleStateChange(BubbleBarUpdate update) {
-                Bundle b = new Bundle();
-                b.setClassLoader(BubbleBarUpdate.class.getClassLoader());
-                b.putParcelable(BubbleBarUpdate.BUNDLE_KEY, update);
-                mListener.call(l -> l.onBubbleStateChange(b));
-            }
-        };
+                    @Override
+                    public void animateBubbleBarLocation(BubbleBarLocation location) {
+                        mListener.call(l -> l.animateBubbleBarLocation(location));
+                    }
+                };
 
         IBubblesImpl(BubbleController controller) {
             mController = controller;
