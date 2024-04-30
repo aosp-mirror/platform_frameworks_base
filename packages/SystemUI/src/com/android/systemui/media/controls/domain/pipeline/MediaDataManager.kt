@@ -60,7 +60,7 @@ interface MediaDataManager {
     )
 
     /** Dismiss a media entry. Returns false if the key was not found. */
-    fun dismissMediaData(key: String, delay: Long): Boolean
+    fun dismissMediaData(key: String, delay: Long, userInitiated: Boolean): Boolean
 
     /**
      * Called whenever the recommendation has been expired or removed by the user. This will remove
@@ -136,7 +136,7 @@ interface MediaDataManager {
         ) {}
 
         /** Called whenever a previously existing Media notification was removed. */
-        override fun onMediaDataRemoved(key: String) {}
+        override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {}
 
         /**
          * Called whenever a previously existing Smartspace media data was removed.

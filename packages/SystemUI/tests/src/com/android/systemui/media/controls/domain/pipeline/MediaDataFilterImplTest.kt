@@ -205,9 +205,9 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
             assertThat(currentMedia).containsExactly(mediaCommonModel)
 
-            mediaDataFilter.onMediaDataRemoved(KEY)
+            mediaDataFilter.onMediaDataRemoved(KEY, false)
 
-            verify(listener).onMediaDataRemoved(eq(KEY))
+            verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
             assertThat(currentMedia).doesNotContain(mediaCommonModel)
         }
 
@@ -218,9 +218,9 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
             // GIVEN a media was removed for guest user
             mediaDataFilter.onMediaDataLoaded(KEY, null, dataGuest)
-            mediaDataFilter.onMediaDataRemoved(KEY)
+            mediaDataFilter.onMediaDataRemoved(KEY, false)
 
-            verify(listener, never()).onMediaDataRemoved(eq(KEY))
+            verify(listener, never()).onMediaDataRemoved(eq(KEY), eq(false))
             assertThat(currentMedia).isEmpty()
         }
 
@@ -239,7 +239,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             setUser(USER_GUEST)
 
             // THEN we should remove the main user's media
-            verify(listener).onMediaDataRemoved(eq(KEY))
+            verify(listener).onMediaDataRemoved(eq(KEY), eq(false))
             assertThat(currentMedia).isEmpty()
         }
 
@@ -291,7 +291,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
 
             val mediaLoadedStatesModel = MediaDataLoadingModel.Loaded(dataMain.instanceId)
             // THEN we should remove the private profile media
-            verify(listener).onMediaDataRemoved(eq(KEY_ALT))
+            verify(listener).onMediaDataRemoved(eq(KEY_ALT), eq(false))
             assertThat(currentMedia)
                 .containsExactly(MediaCommonModel.MediaControl(mediaLoadedStatesModel))
         }
@@ -502,7 +502,7 @@ class MediaDataFilterImplTest : SysuiTestCase() {
             val smartspaceMediaData by collectLastValue(repository.smartspaceMediaData)
 
             mediaDataFilter.onMediaDataLoaded(KEY, oldKey = null, data = dataMain)
-            mediaDataFilter.onMediaDataRemoved(KEY)
+            mediaDataFilter.onMediaDataRemoved(KEY, false)
             assertThat(hasAnyMediaOrRecommendation(selectedUserEntries, smartspaceMediaData))
                 .isFalse()
             assertThat(hasAnyMedia(selectedUserEntries)).isFalse()

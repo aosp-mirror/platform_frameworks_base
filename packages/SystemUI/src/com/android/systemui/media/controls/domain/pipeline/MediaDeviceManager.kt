@@ -111,10 +111,10 @@ constructor(
         }
     }
 
-    override fun onMediaDataRemoved(key: String) {
+    override fun onMediaDataRemoved(key: String, userInitiated: Boolean) {
         val token = entries.remove(key)
         token?.stop()
-        token?.let { listeners.forEach { it.onKeyRemoved(key) } }
+        token?.let { listeners.forEach { it.onKeyRemoved(key, userInitiated) } }
     }
 
     fun dump(pw: PrintWriter) {
@@ -136,7 +136,7 @@ constructor(
         /** Called when the route has changed for a given notification. */
         fun onMediaDeviceChanged(key: String, oldKey: String?, data: MediaDeviceData?)
         /** Called when the notification was removed. */
-        fun onKeyRemoved(key: String)
+        fun onKeyRemoved(key: String, userInitiated: Boolean)
     }
 
     private inner class Entry(
