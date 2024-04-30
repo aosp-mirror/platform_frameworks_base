@@ -234,7 +234,7 @@ public class WifiPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats);
+        processor.finish(aggregatedStats, 10_000);
 
         WifiPowerStatsLayout statsLayout =
                 new WifiPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -355,7 +355,7 @@ public class WifiPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats);
+        processor.finish(aggregatedStats, 10_000);
 
         WifiPowerStatsLayout statsLayout =
                 new WifiPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -454,7 +454,7 @@ public class WifiPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats);
+        processor.finish(aggregatedStats, 10_000);
 
         WifiPowerStatsLayout statsLayout =
                 new WifiPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());

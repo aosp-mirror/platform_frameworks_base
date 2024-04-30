@@ -200,7 +200,7 @@ public class BluetoothPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats);
+        processor.finish(aggregatedStats, 10_000);
 
         BluetoothPowerStatsLayout statsLayout =
                 new BluetoothPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -301,7 +301,7 @@ public class BluetoothPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats);
+        processor.finish(aggregatedStats, 10_000);
 
         BluetoothPowerStatsLayout statsLayout =
                 new BluetoothPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());
@@ -408,7 +408,7 @@ public class BluetoothPowerStatsProcessorTest {
 
         aggregatedStats.addPowerStats(collector.collectStats(), 10_000);
 
-        processor.finish(aggregatedStats);
+        processor.finish(aggregatedStats, 10_000);
 
         BluetoothPowerStatsLayout statsLayout =
                 new BluetoothPowerStatsLayout(aggregatedStats.getPowerStatsDescriptor());

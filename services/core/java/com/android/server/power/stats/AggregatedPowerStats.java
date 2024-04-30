@@ -19,6 +19,7 @@ package com.android.server.power.stats;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
+import android.os.BatteryStats;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.IndentingPrintWriter;
@@ -155,8 +156,14 @@ class AggregatedPowerStats {
         int powerComponentId = powerStats.descriptor.powerComponentId;
         for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
             if (stats.powerComponentId == powerComponentId) {
-                stats.addPowerStats(powerStats, time);
+                stats.getConfig().getProcessor().addPowerStats(stats, powerStats, time);
             }
+        }
+    }
+
+    public void noteStateChange(BatteryStats.HistoryItem item) {
+        for (PowerComponentAggregatedPowerStats stats : mPowerComponentStats) {
+            stats.getConfig().getProcessor().noteStateChange(stats, item);
         }
     }
 

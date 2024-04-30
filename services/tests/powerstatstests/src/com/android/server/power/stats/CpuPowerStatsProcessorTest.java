@@ -128,7 +128,7 @@ public class CpuPowerStatsProcessorTest {
                 states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED),
                 values(1500, 2000, 1000), 1.252578);
 
-        mProcessor.finish(mStats);
+        mProcessor.finish(mStats, 10_000);
 
         mStats.verifyPowerEstimates();
     }
@@ -173,7 +173,7 @@ public class CpuPowerStatsProcessorTest {
                 states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED),
                 values(1500, 2000, 1000), 0.80773);
 
-        mProcessor.finish(mStats);
+        mProcessor.finish(mStats, 10_000);
 
         mStats.verifyPowerEstimates();
     }
