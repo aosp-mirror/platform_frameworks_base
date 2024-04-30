@@ -56,7 +56,6 @@ import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shadeController
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
-import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
@@ -90,7 +89,6 @@ class KosmosJavaAdapter(
     val simBouncerInteractor by lazy { kosmos.simBouncerInteractor }
     val statusBarStateController by lazy { kosmos.statusBarStateController }
     val interactionJankMonitor by lazy { kosmos.interactionJankMonitor }
-    val screenOffAnimationController by lazy { kosmos.screenOffAnimationController }
     val fakeSceneContainerConfig by lazy { kosmos.sceneContainerConfig }
     val sceneInteractor by lazy { kosmos.sceneInteractor }
     val falsingCollector by lazy { kosmos.falsingCollector }
