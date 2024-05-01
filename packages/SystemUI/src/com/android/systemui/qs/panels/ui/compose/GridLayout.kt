@@ -25,6 +25,5 @@ interface GridLayout {
     fun TileGrid(
         tiles: List<TileViewModel>,
         modifier: Modifier,
-        tile: @Composable (TileViewModel) -> Unit,
     )
 }
