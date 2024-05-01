@@ -21,6 +21,7 @@ import android.graphics.drawable.TestStubDrawable
 import android.media.AudioDeviceInfo
 import android.media.AudioDevicePort
 import android.media.AudioManager
+import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.R
@@ -54,6 +55,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @SmallTest
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class AudioOutputInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
