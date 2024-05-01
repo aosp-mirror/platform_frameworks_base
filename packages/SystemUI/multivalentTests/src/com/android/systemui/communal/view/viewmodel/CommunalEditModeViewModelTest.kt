@@ -123,12 +123,12 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             // Widgets available.
             val widgets =
                 listOf(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 0,
                         priority = 30,
                         providerInfo = providerInfo,
                     ),
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         priority = 20,
                         providerInfo = providerInfo,
@@ -177,12 +177,12 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             // Widgets available.
             val widgets =
                 listOf(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 0,
                         priority = 30,
                         providerInfo = providerInfo,
                     ),
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         priority = 20,
                         providerInfo = providerInfo,

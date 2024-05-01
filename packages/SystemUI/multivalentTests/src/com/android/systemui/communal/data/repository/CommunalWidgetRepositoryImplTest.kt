@@ -22,10 +22,13 @@ import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTI
 import android.appwidget.AppWidgetProviderInfo.WIDGET_FEATURE_RECONFIGURABLE
 import android.content.ComponentName
 import android.content.applicationContext
+import android.graphics.Bitmap
 import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.data.repository.fakePackageChangeRepository
+import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
@@ -45,6 +48,7 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
@@ -80,6 +84,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
+    private val packageChangeRepository = kosmos.fakePackageChangeRepository
 
     private val fakeAllowlist =
         listOf(
@@ -115,6 +120,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                 logBuffer,
                 backupManager,
                 backupUtils,
+                packageChangeRepository,
             )
     }
 
@@ -130,7 +136,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             verify(communalWidgetDao).getWidgets()
             assertThat(communalWidgets)
                 .containsExactly(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = communalWidgetItemEntry.widgetId,
                         providerInfo = providerInfoA,
                         priority = communalItemRankEntry.rank,
@@ -166,12 +172,12 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             val communalWidgets by collectLastValue(underTest.communalWidgets)
             assertThat(communalWidgets)
                 .containsExactly(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         priority = 1,
                     ),
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         priority = 2,
@@ -198,14 +204,15 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
             // Expect two widgets
             val communalWidgets by collectLastValue(underTest.communalWidgets)
+            assertThat(communalWidgets).isNotNull()
             assertThat(communalWidgets)
                 .containsExactly(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         priority = 1,
                     ),
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         priority = 2,
@@ -222,13 +229,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
             assertThat(communalWidgets)
                 .containsExactly(
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 1,
                         // Verify that provider info updated
                         providerInfo = providerInfoC,
                         priority = 1,
                     ),
-                    CommunalWidgetContentModel(
+                    CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         priority = 2,
@@ -523,6 +530,103 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             assertThat(restoredWidget2.widgetId).isEqualTo(12)
             assertThat(restoredWidget2.componentName).isEqualTo(expectedWidget2.componentName)
             assertThat(restoredWidget2.rank).isEqualTo(expectedWidget2.rank)
+        }
+
+    @Test
+    fun pendingWidgets() =
+        testScope.runTest {
+            fakeWidgets.value =
+                mapOf(
+                    CommunalItemRank(uid = 1L, rank = 1) to
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                    CommunalItemRank(uid = 2L, rank = 2) to
+                        CommunalWidgetItem(uid = 2L, 2, "pk_2/cls_2", 2L),
+                )
+
+            // Widget 1 is installed
+            fakeProviders.value = mapOf(1 to providerInfoA)
+
+            // Widget 2 is pending install
+            val fakeIcon = mock<Bitmap>()
+            packageChangeRepository.setInstallSessions(
+                listOf(
+                    PackageInstallSession(
+                        sessionId = 1,
+                        packageName = "pk_2",
+                        icon = fakeIcon,
+                        user = UserHandle.CURRENT,
+                    )
+                )
+            )
+
+            val communalWidgets by collectLastValue(underTest.communalWidgets)
+            assertThat(communalWidgets)
+                .containsExactly(
+                    CommunalWidgetContentModel.Available(
+                        appWidgetId = 1,
+                        providerInfo = providerInfoA,
+                        priority = 1,
+                    ),
+                    CommunalWidgetContentModel.Pending(
+                        appWidgetId = 2,
+                        priority = 2,
+                        packageName = "pk_2",
+                        icon = fakeIcon,
+                        user = UserHandle.CURRENT,
+                    ),
+                )
+        }
+
+    @Test
+    fun pendingWidgets_pendingWidgetBecomesAvailableAfterInstall() =
+        testScope.runTest {
+            fakeWidgets.value =
+                mapOf(
+                    CommunalItemRank(uid = 1L, rank = 1) to
+                        CommunalWidgetItem(uid = 1L, 1, "pk_1/cls_1", 1L),
+                )
+
+            // Widget 1 is pending install
+            val fakeIcon = mock<Bitmap>()
+            packageChangeRepository.setInstallSessions(
+                listOf(
+                    PackageInstallSession(
+                        sessionId = 1,
+                        packageName = "pk_1",
+                        icon = fakeIcon,
+                        user = UserHandle.CURRENT,
+                    )
+                )
+            )
+
+            val communalWidgets by collectLastValue(underTest.communalWidgets)
+            assertThat(communalWidgets)
+                .containsExactly(
+                    CommunalWidgetContentModel.Pending(
+                        appWidgetId = 1,
+                        priority = 1,
+                        packageName = "pk_1",
+                        icon = fakeIcon,
+                        user = UserHandle.CURRENT,
+                    ),
+                )
+
+            // Package for widget 1 finished installing
+            packageChangeRepository.setInstallSessions(emptyList())
+
+            // Provider info for widget 1 becomes available
+            fakeProviders.value = mapOf(1 to providerInfoA)
+
+            runCurrent()
+
+            assertThat(communalWidgets)
+                .containsExactly(
+                    CommunalWidgetContentModel.Available(
+                        appWidgetId = 1,
+                        providerInfo = providerInfoA,
+                        priority = 1,
+                    ),
+                )
         }
 
     private fun setAppWidgetIds(ids: List<Int>) {

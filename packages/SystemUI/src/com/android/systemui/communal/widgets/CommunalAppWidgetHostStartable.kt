@@ -86,7 +86,15 @@ constructor(
     private fun validateWidgetsAndDeleteOrphaned(widgets: List<CommunalWidgetContentModel>) {
         val currentUserIds = userTracker.userProfiles.map { it.id }.toSet()
         widgets
-            .filter { widget -> !currentUserIds.contains(widget.providerInfo.profile?.identifier) }
+            .filter { widget ->
+                val uid =
+                    when (widget) {
+                        is CommunalWidgetContentModel.Available ->
+                            widget.providerInfo.profile?.identifier
+                        is CommunalWidgetContentModel.Pending -> widget.user.identifier
+                    }
+                !currentUserIds.contains(uid)
+            }
             .onEach { widget -> communalInteractor.deleteWidget(id = widget.appWidgetId) }
     }
 }
