@@ -2713,6 +2713,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!mVisibleBackgroundUserEnabled) {
             return true;
         }
+        if (isPrivate()) {
+            // UserManager doesn't track the user visibility for private displays.
+            return true;
+        }
         final int userId = UserHandle.getUserId(uid);
         return userId == UserHandle.USER_SYSTEM
                 || mWmService.mUmInternal.isUserVisible(userId, mDisplayId);
