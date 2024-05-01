@@ -563,22 +563,23 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
 
     /** Use to when split use intent to enter, check if this enter transition should be mixed or
      * not.*/
-    public boolean shouldSplitEnterMixed(PendingIntent intent) {
+    public boolean isIntentInPip(PendingIntent intent) {
         // Check if this intent package is same as pip one or not, if true we want let the pip
         // task enter split.
         if (mPipHandler != null) {
-            return mPipHandler.isInPipPackage(SplitScreenUtils.getPackageName(intent.getIntent()));
+            return mPipHandler
+                    .isPackageActiveInPip(SplitScreenUtils.getPackageName(intent.getIntent()));
         }
         return false;
     }
 
     /** Use to when split use taskId to enter, check if this enter transition should be mixed or
      * not.*/
-    public boolean shouldSplitEnterMixed(int taskId, ShellTaskOrganizer shellTaskOrganizer) {
+    public boolean isTaskInPip(int taskId, ShellTaskOrganizer shellTaskOrganizer) {
         // Check if this intent package is same as pip one or not, if true we want let the pip
         // task enter split.
         if (mPipHandler != null) {
-            return mPipHandler.isInPipPackage(
+            return mPipHandler.isPackageActiveInPip(
                     SplitScreenUtils.getPackageName(taskId, shellTaskOrganizer));
         }
         return false;
