@@ -21610,7 +21610,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
             }
 
-            if (Flags.headlessSingleUserFixes() && isSingleUserMode && !mInjector.isChangeEnabled(
+            if (Flags.headlessSingleUserFixes() && mInjector.userManagerIsHeadlessSystemUserMode()
+                    && isSingleUserMode && !mInjector.isChangeEnabled(
                     PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(), caller.getUserId())) {
                 throw new IllegalStateException("Device admin is not targeting Android V.");
             }
@@ -21629,7 +21630,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setLocale(provisioningParams.getLocale());
 
             int deviceOwnerUserId = Flags.headlessDeviceOwnerSingleUserEnabled()
-                    && isSingleUserMode
+                    && isSingleUserMode && mInjector.userManagerIsHeadlessSystemUserMode()
                     ? mUserManagerInternal.getMainUserId() : UserHandle.USER_SYSTEM;
 
             if (!removeNonRequiredAppsForManagedDevice(
