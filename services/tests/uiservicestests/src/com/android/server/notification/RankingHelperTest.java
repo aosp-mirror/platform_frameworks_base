@@ -517,10 +517,10 @@ public class RankingHelperTest extends UiServiceTestCase {
                         mUser, null, System.currentTimeMillis()), getLowChannel());
 
         ArrayList<NotificationRecord> expected = new ArrayList<>();
+        expected.add(unrelated);
         expected.add(summary);
         expected.add(child2);
         expected.add(child1);
-        expected.add(unrelated);
 
         ArrayList<NotificationRecord> actual = new ArrayList<>();
         actual.addAll(expected);
