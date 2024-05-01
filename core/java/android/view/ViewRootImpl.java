@@ -4257,8 +4257,8 @@ public final class ViewRootImpl implements ViewParent,
         // when the values are applicable.
         if (mDrawnThisFrame) {
             mDrawnThisFrame = false;
-            updateInfrequentCount();
             setCategoryFromCategoryCounts();
+            updateInfrequentCount();
             setPreferredFrameRate(mPreferredFrameRate);
             setPreferredFrameRateCategory(mPreferredFrameRateCategory);
             if (!mIsFrameRateConflicted) {
