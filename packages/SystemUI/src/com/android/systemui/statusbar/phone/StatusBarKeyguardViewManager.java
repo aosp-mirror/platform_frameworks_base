@@ -72,7 +72,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInte
 import com.android.systemui.keyguard.domain.interactor.KeyguardSurfaceBehindInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
-import com.android.systemui.keyguard.shared.RefactorKeyguardDismissIntent;
 import com.android.systemui.keyguard.shared.model.DismissAction;
 import com.android.systemui.keyguard.shared.model.KeyguardDone;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
@@ -800,7 +799,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
             boolean afterKeyguardGone, String message) {
-        if (RefactorKeyguardDismissIntent.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             if (r == null) {
                 return;
             }
@@ -852,7 +851,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     return;
                 }
 
-                if (!RefactorKeyguardDismissIntent.isEnabled()) {
+                if (!SceneContainerFlag.isEnabled()) {
                     mAfterKeyguardGoneAction = r;
                     mKeyguardGoneCancelAction = cancelAction;
                     mDismissActionWillAnimateOnKeyguard = r != null
@@ -920,7 +919,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Adds a {@param runnable} to be executed after Keyguard is gone.
      */
     public void addAfterKeyguardGoneRunnable(Runnable runnable) {
-        if (RefactorKeyguardDismissIntent.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             if (runnable != null) {
                 mKeyguardDismissActionInteractor.get().runAfterKeyguardGone(runnable);
             }
@@ -1112,7 +1111,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // We update the state (which will show the keyguard) only if an animation will run on
             // the keyguard. If there is no animation, we wait before updating the state so that we
             // go directly from bouncer to launcher/app.
-            if (RefactorKeyguardDismissIntent.isEnabled()) {
+            if (SceneContainerFlag.isEnabled()) {
                 if (mKeyguardDismissActionInteractor.get().runDismissAnimationOnKeyguard()) {
                     updateStates();
                 }
@@ -1239,7 +1238,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void executeAfterKeyguardGoneAction() {
-        if (RefactorKeyguardDismissIntent.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return;
         }
         if (mAfterKeyguardGoneAction != null) {
@@ -1629,8 +1628,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         pw.println("  isBouncerShowing(): " + isBouncerShowing());
         pw.println("  bouncerIsOrWillBeShowing(): " + primaryBouncerIsOrWillBeShowing());
         pw.println("  Registered KeyguardViewManagerCallbacks:");
-        pw.println(" refactorKeyguardDismissIntent enabled:"
-                + RefactorKeyguardDismissIntent.isEnabled());
+        pw.println(" SceneContainerFlag enabled:"
+                + SceneContainerFlag.isEnabled());
         for (KeyguardViewManagerCallback callback : mCallbacks) {
             pw.println("      " + callback);
         }
