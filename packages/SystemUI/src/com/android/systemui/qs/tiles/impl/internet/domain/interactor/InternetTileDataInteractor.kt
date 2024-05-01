@@ -26,6 +26,7 @@ import com.android.systemui.common.shared.model.ContentDescription.Companion.loa
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
@@ -38,7 +39,9 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
+import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +51,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 /** Observes internet state changes providing the [InternetTileModel]. */
@@ -55,6 +59,7 @@ class InternetTileDataInteractor
 @Inject
 constructor(
     private val context: Context,
+    @Main private val mainCoroutineContext: CoroutineContext,
     @Application private val scope: CoroutineScope,
     airplaneModeRepository: AirplaneModeRepository,
     private val connectivityRepository: ConnectivityRepository,
@@ -111,42 +116,48 @@ constructor(
                 notConnectedFlow
             } else {
                 combine(
-                    it.networkName,
-                    it.signalLevelIcon,
-                    mobileDataContentName,
-                ) { networkNameModel, signalIcon, dataContentDescription ->
-                    when (signalIcon) {
-                        is SignalIconModel.Cellular -> {
-                            val secondary =
-                                mobileDataContentConcat(
-                                    networkNameModel.name,
-                                    dataContentDescription
+                        it.networkName,
+                        it.signalLevelIcon,
+                        mobileDataContentName,
+                    ) { networkNameModel, signalIcon, dataContentDescription ->
+                        Triple(networkNameModel, signalIcon, dataContentDescription)
+                    }
+                    .mapLatestConflated { (networkNameModel, signalIcon, dataContentDescription) ->
+                        when (signalIcon) {
+                            is SignalIconModel.Cellular -> {
+                                val secondary =
+                                    mobileDataContentConcat(
+                                        networkNameModel.name,
+                                        dataContentDescription
+                                    )
+
+                                val drawable =
+                                    withContext(mainCoroutineContext) { SignalDrawable(context) }
+                                drawable.setLevel(signalIcon.level)
+                                val loadedIcon = Icon.Loaded(drawable, null)
+
+                                InternetTileModel.Active(
+                                    secondaryTitle = secondary,
+                                    icon = loadedIcon,
+                                    stateDescription =
+                                        ContentDescription.Loaded(secondary.toString()),
+                                    contentDescription = ContentDescription.Loaded(internetLabel),
                                 )
-
-                            val stateLevel = signalIcon.level
-                            val drawable = SignalDrawable(context)
-                            drawable.setLevel(stateLevel)
-                            val loadedIcon = Icon.Loaded(drawable, null)
-
-                            InternetTileModel.Active(
-                                secondaryTitle = secondary,
-                                icon = loadedIcon,
-                                stateDescription = ContentDescription.Loaded(secondary.toString()),
-                                contentDescription = ContentDescription.Loaded(internetLabel),
-                            )
-                        }
-                        is SignalIconModel.Satellite -> {
-                            val secondary =
-                                signalIcon.icon.contentDescription.loadContentDescription(context)
-                            InternetTileModel.Active(
-                                secondaryTitle = secondary,
-                                iconId = signalIcon.icon.res,
-                                stateDescription = ContentDescription.Loaded(secondary),
-                                contentDescription = ContentDescription.Loaded(internetLabel),
-                            )
+                            }
+                            is SignalIconModel.Satellite -> {
+                                val secondary =
+                                    signalIcon.icon.contentDescription.loadContentDescription(
+                                        context
+                                    )
+                                InternetTileModel.Active(
+                                    secondaryTitle = secondary,
+                                    iconId = signalIcon.icon.res,
+                                    stateDescription = ContentDescription.Loaded(secondary),
+                                    contentDescription = ContentDescription.Loaded(internetLabel),
+                                )
+                            }
                         }
                     }
-                }
             }
         }
 

@@ -58,13 +58,16 @@ import com.android.systemui.statusbar.policy.data.repository.FakeUserSetupReposi
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@TestableLooper.RunWithLooper
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class InternetTileDataInteractorTest : SysuiTestCase() {
@@ -141,6 +144,7 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
         underTest =
             InternetTileDataInteractor(
                 context,
+                testScope.coroutineContext,
                 testScope.backgroundScope,
                 airplaneModeRepository,
                 connectivityRepository,
@@ -433,8 +437,44 @@ class InternetTileDataInteractorTest : SysuiTestCase() {
                 .isEqualTo(expectedCd)
         }
 
+    /**
+     * We expect a RuntimeException because [underTest] instantiates a SignalDrawable on the
+     * provided context, and so the SignalDrawable constructor attempts to instantiate a Handler()
+     * on the mentioned context. Since that context does not have a looper assigned to it, the
+     * handler instantiation will throw a RuntimeException.
+     *
+     * TODO(b/338068066): Robolectric behavior differs in that it does not throw the exception
+     * So either we should make Robolectric behvase similar to the device test, or change this
+     * test to look for a different signal than the exception, when run by Robolectric. For now
+     * we just assume the test is not Robolectric.
+     */
+    @Test(expected = java.lang.RuntimeException::class)
+    fun mobileDefault_usesNetworkNameAndIcon_throwsRunTimeException() =
+        testScope.runTest {
+            assumeFalse(isRobolectricTest());
+
+            collectLastValue(underTest.tileData(testUser, flowOf(DataUpdateTrigger.InitialRequest)))
+
+            connectivityRepository.setMobileConnected()
+            mobileConnectionsRepository.mobileIsDefault.value = true
+            mobileConnectionRepository.apply {
+                setAllLevels(3)
+                setAllRoaming(false)
+                networkName.value = NetworkNameModel.Default("test network")
+            }
+
+            runCurrent()
+        }
+
+    /**
+     * See [mobileDefault_usesNetworkNameAndIcon_throwsRunTimeException] for description of the
+     * problem this test solves. The solution here is to assign a looper to the context via
+     * RunWithLooper. In the production code, the solution is to use a Main CoroutineContext for
+     * creating the SignalDrawable.
+     */
+    @TestableLooper.RunWithLooper
     @Test
-    fun mobileDefault_usesNetworkNameAndIcon() =
+    fun mobileDefault_run_withLooper_usesNetworkNameAndIcon() =
         testScope.runTest {
             val latest by
                 collectLastValue(
