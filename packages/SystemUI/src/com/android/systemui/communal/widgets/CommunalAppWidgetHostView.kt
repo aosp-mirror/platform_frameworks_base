@@ -22,10 +22,8 @@ import android.graphics.Outline
 import android.graphics.Rect
 import android.view.View
 import android.view.ViewOutlineProvider
-import android.view.accessibility.AccessibilityNodeInfo
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
-import com.android.systemui.res.R
 
 /** AppWidgetHostView that displays in communal hub with support for rounded corners. */
 class CommunalAppWidgetHostView(context: Context) : AppWidgetHostView(context), LaunchableView {
@@ -44,25 +42,6 @@ class CommunalAppWidgetHostView(context: Context) : AppWidgetHostView(context), 
     init {
         enforcedCornerRadius = RoundedCornerEnforcement.computeEnforcedRadius(context)
         enforcedRectangle = Rect()
-
-        accessibilityDelegate =
-            object : AccessibilityDelegate() {
-                override fun onInitializeAccessibilityNodeInfo(
-                    host: View,
-                    info: AccessibilityNodeInfo
-                ) {
-                    super.onInitializeAccessibilityNodeInfo(host, info)
-                    // Hint user to long press in order to enter edit mode
-                    info.addAction(
-                        AccessibilityNodeInfo.AccessibilityAction(
-                            AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
-                            context.getString(
-                                R.string.accessibility_action_label_edit_widgets
-                            ).lowercase()
-                        )
-                    )
-                }
-            }
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {

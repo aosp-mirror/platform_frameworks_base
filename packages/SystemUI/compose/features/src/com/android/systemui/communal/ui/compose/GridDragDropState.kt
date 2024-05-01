@@ -40,6 +40,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
@@ -274,6 +275,9 @@ fun LazyGridItemScope.DraggableItem(
         AnimatedVisibility(
             modifier =
                 Modifier.matchParentSize()
+                    // Avoid taking focus away from the content when using explore-by-touch with
+                    // accessibility tools.
+                    .clearAndSetSemantics {}
                     // Do not consume motion events in the highlighted item and pass them down to
                     // the content.
                     .pointerInteropFilter { false },
