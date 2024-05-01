@@ -7435,6 +7435,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         mDdmSyncStageUpdater.next(Stage.Running);
 
+        long timestampApplicationOnCreateNs = 0;
         try {
             // If the app is being launched for full backup or restore, bring it up in
             // a restricted environment with the base application class.
@@ -7477,8 +7478,10 @@ public final class ActivityThread extends ClientTransactionHandler
                     + data.instrumentationName + ": " + e.toString(), e);
             }
             try {
+                timestampApplicationOnCreateNs = SystemClock.elapsedRealtimeNanos();
                 mInstrumentation.callApplicationOnCreate(app);
             } catch (Exception e) {
+                timestampApplicationOnCreateNs = 0;
                 if (!mInstrumentation.onException(app, e)) {
                     throw new RuntimeException(
                       "Unable to create application " + app.getClass().getName()
@@ -7516,7 +7519,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         try {
-            mgr.finishAttachApplication(mStartSeq);
+            mgr.finishAttachApplication(mStartSeq, timestampApplicationOnCreateNs);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

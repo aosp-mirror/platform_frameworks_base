@@ -40,3 +40,13 @@ flag {
      description: "Add a new callback in Service to indicate a FGS has reached its timeout."
      bug: "317799821"
 }
+
+flag {
+     namespace: "system_performance"
+     name: "app_start_info_timestamps"
+     description: "Additional timestamps."
+     bug: "287153617"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}

@@ -5034,7 +5034,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public final void finishAttachApplication(long startSeq) {
+    public final void finishAttachApplication(long startSeq, long timestampApplicationOnCreateNs) {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
 
@@ -5053,6 +5053,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             finishAttachApplicationInner(startSeq, uid, pid);
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+
+        if (android.app.Flags.appStartInfoTimestamps() && timestampApplicationOnCreateNs > 0) {
+            addStartInfoTimestampInternal(ApplicationStartInfo.START_TIMESTAMP_APPLICATION_ONCREATE,
+                    timestampApplicationOnCreateNs, UserHandle.getUserId(uid), uid);
         }
     }
 
@@ -10253,10 +10258,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid, userId, true,
                 ALLOW_NON_FULL, "addStartInfoTimestamp", null);
 
-        final String packageName = Settings.getPackageNameForUid(mContext, callingUid);
+        addStartInfoTimestampInternal(key, timestampNs, userId, callingUid);
+    }
 
-        mProcessList.getAppStartInfoTracker().addTimestampToStart(packageName,
-                UserHandle.getUid(userId, UserHandle.getAppId(callingUid)), timestampNs, key);
+    private void addStartInfoTimestampInternal(int key, long timestampNs, int userId, int uid) {
+        mProcessList.getAppStartInfoTracker().addTimestampToStart(
+                Settings.getPackageNameForUid(mContext, uid),
+                UserHandle.getUid(userId, UserHandle.getAppId(uid)),
+                timestampNs,
+                key);
     }
 
     @Override

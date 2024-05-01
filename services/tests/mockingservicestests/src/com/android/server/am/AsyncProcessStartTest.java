@@ -197,7 +197,7 @@ public class AsyncProcessStartTest {
                     + Arrays.toString(invocation.getArguments()));
             if (!wedge) {
                 if (mRealAms.mConstants.mEnableWaitForFinishAttachApplication) {
-                    mRealAms.finishAttachApplication(0);
+                    mRealAms.finishAttachApplication(0, 0);
                 }
             }
             return null;
