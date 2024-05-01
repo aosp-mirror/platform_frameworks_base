@@ -161,13 +161,13 @@ class AnrTimerService {
     // A timer has expired.
     void expire(timer_id_t);
 
-    // Dump a small amount of state to the log file.
-    void dump(bool verbose) const;
-
     // Return the Java object associated with this instance.
     jweak jtimer() const {
         return notifierObject_;
     }
+
+    // Return the per-instance statistics.
+    std::vector<std::string> getDump() const;
 
   private:
     // The service cannot be copied.
@@ -199,7 +199,7 @@ class AnrTimerService {
     std::set<Timer> running_;
 
     // The maximum number of active timers.
-    size_t maxActive_;
+    size_t maxRunning_;
 
     // Simple counters
     struct Counters {
@@ -209,6 +209,7 @@ class AnrTimerService {
         size_t accepted;
         size_t discarded;
         size_t expired;
+        size_t extended;
 
         // The number of times there were zero active timers.
         size_t drained;
@@ -437,7 +438,9 @@ class AnrTimerService::Ticker {
 
     // Construct the ticker.  This creates the timerfd file descriptor and starts the monitor
     // thread.  The monitor thread is given a unique name.
-    Ticker() {
+    Ticker() :
+            id_(idGen_.fetch_add(1))
+    {
         timerFd_ = timer_create();
         if (timerFd_ < 0) {
             ALOGE("failed to create timerFd: %s", strerror(errno));
@@ -500,6 +503,11 @@ class AnrTimerService::Ticker {
                 i++;
             }
         }
+    }
+
+    // The unique ID of this particular ticker. Used for debug and logging.
+    size_t id() const {
+        return id_;
     }
 
     // Return the number of timers still running.
@@ -617,7 +625,15 @@ class AnrTimerService::Ticker {
     // The list of timers that are scheduled.  This set is sorted by timeout and then by timer
     // ID.  A set is sufficient (as opposed to a multiset) because timer IDs are unique.
     std::set<Entry> running_;
+
+    // A unique ID assigned to this instance.
+    const size_t id_;
+
+    // The ID generator.
+    static std::atomic<size_t> idGen_;
 };
+
+std::atomic<size_t> AnrTimerService::Ticker::idGen_;
 
 
 AnrTimerService::AnrTimerService(char const* label,
@@ -629,7 +645,7 @@ AnrTimerService::AnrTimerService(char const* label,
         ticker_(ticker) {
 
     // Zero the statistics
-    maxActive_ = 0;
+    maxRunning_ = 0;
     memset(&counters_, 0, sizeof(counters_));
 
     ALOGI_IF(DEBUG, "initialized %s", label);
@@ -739,6 +755,12 @@ void AnrTimerService::expire(timer_id_t timerId) {
         elapsed = now() - t.started;
     }
 
+    if (expired) {
+        counters_.expired++;
+    } else {
+        counters_.extended++;
+    }
+
     // Deliver the notification outside of the lock.
     if (expired) {
         if (!notifier_(timerId, pid, uid, elapsed, notifierCookie_, notifierObject_)) {
@@ -756,8 +778,8 @@ void AnrTimerService::insert(const Timer& t) {
     if (t.status == Running) {
         // Only forward running timers to the ticker.  Expired timers are handled separately.
         ticker_->insert(t.scheduled, t.id, this);
-        maxActive_ = std::max(maxActive_, running_.size());
     }
+    maxRunning_ = std::max(maxRunning_, running_.size());
 }
 
 AnrTimerService::Timer AnrTimerService::remove(timer_id_t timerId) {
@@ -767,29 +789,32 @@ AnrTimerService::Timer AnrTimerService::remove(timer_id_t timerId) {
         Timer result = *found;
         running_.erase(found);
         ticker_->remove(result.scheduled, result.id);
+        if (running_.size() == 0) counters_.drained++;
         return result;
     }
     return Timer();
 }
 
-void AnrTimerService::dump(bool verbose) const {
+std::vector<std::string> AnrTimerService::getDump() const {
+    std::vector<std::string> r;
     AutoMutex _l(lock_);
-    ALOGI("timer %s ops started=%zu canceled=%zu accepted=%zu discarded=%zu expired=%zu",
-          label_.c_str(),
-          counters_.started, counters_.canceled, counters_.accepted,
-          counters_.discarded, counters_.expired);
-    ALOGI("timer %s stats max-active=%zu/%zu running=%zu/%zu errors=%zu",
-          label_.c_str(),
-          maxActive_, ticker_->maxRunning(), running_.size(), ticker_->running(),
-          counters_.error);
-
-    if (verbose) {
-        nsecs_t time = now();
-        for (auto i = running_.begin(); i != running_.end(); i++) {
-            Timer t = *i;
-            ALOGI("   running %s", t.toString(time).c_str());
-        }
-    }
+    r.push_back(StringPrintf("started:%zu canceled:%zu accepted:%zu discarded:%zu expired:%zu",
+                             counters_.started,
+                             counters_.canceled,
+                             counters_.accepted,
+                             counters_.discarded,
+                             counters_.expired));
+    r.push_back(StringPrintf("extended:%zu drained:%zu error:%zu running:%zu maxRunning:%zu",
+                             counters_.extended,
+                             counters_.drained,
+                             counters_.error,
+                             running_.size(),
+                             maxRunning_));
+    r.push_back(StringPrintf("ticker:%zu ticking:%zu maxTicking:%zu",
+                             ticker_->id(),
+                             ticker_->running(),
+                             ticker_->maxRunning()));
+    return r;
 }
 
 /**
@@ -894,21 +919,26 @@ jboolean anrTimerDiscard(JNIEnv* env, jclass, jlong ptr, jint timerId) {
     return toService(ptr)->discard(timerId);
 }
 
-jint anrTimerDump(JNIEnv *env, jclass, jlong ptr, jboolean verbose) {
-    if (!nativeSupportEnabled) return -1;
-    toService(ptr)->dump(verbose);
-    return 0;
+jobjectArray anrTimerDump(JNIEnv *env, jclass, jlong ptr) {
+    if (!nativeSupportEnabled) return nullptr;
+    std::vector<std::string> stats = toService(ptr)->getDump();
+    jclass sclass = env->FindClass("java/lang/String");
+    jobjectArray r = env->NewObjectArray(stats.size(), sclass, nullptr);
+    for (size_t i = 0; i < stats.size(); i++) {
+        env->SetObjectArrayElement(r, i, env->NewStringUTF(stats[i].c_str()));
+    }
+    return r;
 }
 
 static const JNINativeMethod methods[] = {
     {"nativeAnrTimerSupported", "()Z",  (void*) anrTimerSupported},
-    {"nativeAnrTimerCreate", "(Ljava/lang/String;)J", (void*) anrTimerCreate},
-    {"nativeAnrTimerClose", "(J)I",     (void*) anrTimerClose},
-    {"nativeAnrTimerStart", "(JIIJZ)I", (void*) anrTimerStart},
-    {"nativeAnrTimerCancel", "(JI)Z",   (void*) anrTimerCancel},
-    {"nativeAnrTimerAccept", "(JI)Z",   (void*) anrTimerAccept},
-    {"nativeAnrTimerDiscard", "(JI)Z",  (void*) anrTimerDiscard},
-    {"nativeAnrTimerDump", "(JZ)V",     (void*) anrTimerDump},
+    {"nativeAnrTimerCreate",   "(Ljava/lang/String;)J", (void*) anrTimerCreate},
+    {"nativeAnrTimerClose",    "(J)I",     (void*) anrTimerClose},
+    {"nativeAnrTimerStart",    "(JIIJZ)I", (void*) anrTimerStart},
+    {"nativeAnrTimerCancel",   "(JI)Z",    (void*) anrTimerCancel},
+    {"nativeAnrTimerAccept",   "(JI)Z",    (void*) anrTimerAccept},
+    {"nativeAnrTimerDiscard",  "(JI)Z",    (void*) anrTimerDiscard},
+    {"nativeAnrTimerDump",     "(J)[Ljava/lang/String;", (void*) anrTimerDump},
 };
 
 } // anonymous namespace
