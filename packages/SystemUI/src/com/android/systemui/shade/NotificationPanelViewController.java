@@ -3991,7 +3991,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mExpandLatencyTracking = false;
             }
             float maxPanelHeight = getMaxPanelTransitionDistance();
-            if (mHeightAnimator == null) {
+            if (mHeightAnimator == null && !MigrateClocksToBlueprint.isEnabled()) {
+                // MigrateClocksToBlueprint - There is an edge case where swiping up slightly,
+                // and then swiping down will trigger overscroll logic. Even without this flag
+                // enabled, the notifications can then run into UDFPS. At this point it is
+                // safer to remove overscroll for this one case to prevent overlap.
+
                 // Split shade has its own overscroll logic
                 if (isTracking()) {
                     float overExpansionPixels = Math.max(0, h - maxPanelHeight);
