@@ -25,6 +25,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR;
 import static android.app.Flags.lifetimeExtensionRefactor;
+import static android.app.Flags.sortSectionByTime;
 import static android.app.Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
 import static android.app.Notification.EXTRA_BUILDER_APPLICATION_INFO;
 import static android.app.Notification.EXTRA_LARGE_ICON_BIG;
@@ -8593,7 +8594,7 @@ public class NotificationManagerService extends SystemService {
                         r.isUpdate = true;
                         final boolean isInterruptive = isVisuallyInterruptive(old, r);
                         r.setTextChanged(isInterruptive);
-                        if (android.app.Flags.updateRankingTime()) {
+                        if (sortSectionByTime()) {
                             if (isInterruptive) {
                                 r.resetRankingTime();
                             }
@@ -8738,7 +8739,7 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
 
-        if (android.app.Flags.updateRankingTime()) {
+        if (sortSectionByTime()) {
             // Ignore visual interruptions from FGS/UIJs because users
             // consider them one 'session'. Count them for everything else.
             if (r.getSbn().getNotification().isFgsOrUij()) {

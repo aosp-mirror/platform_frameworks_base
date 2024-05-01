@@ -98,7 +98,7 @@ class OngoingCallController @Inject constructor(
                     (entry.sbn.key == callNotificationInfo?.key)) {
                 val newOngoingCallInfo = CallNotificationInfo(
                         entry.sbn.key,
-                        entry.sbn.notification.`when`,
+                        entry.sbn.notification.getWhen(),
                         entry.sbn.notification.contentIntent,
                         entry.sbn.uid,
                         entry.sbn.notification.extras.getInt(
