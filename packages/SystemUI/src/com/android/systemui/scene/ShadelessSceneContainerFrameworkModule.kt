@@ -47,6 +47,11 @@ object ShadelessSceneContainerFrameworkModule {
                     Scenes.Bouncer,
                 ),
             initialSceneKey = Scenes.Lockscreen,
+            mapOf(
+                Scenes.Gone to 0,
+                Scenes.Lockscreen to 0,
+                Scenes.Bouncer to 1,
+            )
         )
     }
 }

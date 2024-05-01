@@ -2577,8 +2577,6 @@ public class AppOpsManager {
             OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
             OP_MEDIA_ROUTING_CONTROL,
             OP_READ_SYSTEM_GRAMMATICAL_GENDER,
-            OP_ARCHIVE_ICON_OVERLAY,
-            OP_UNARCHIVAL_CONFIRMATION,
     };
 
     static final AppOpInfo[] sAppOpInfos = new AppOpInfo[]{
@@ -3267,7 +3265,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Retrieve whether the op can be read by apps with manage appops permission.
+     * Retrieve whether the op can be read by apps with privileged appops permission.
      * @hide
      */
     public static boolean opRestrictsRead(int op) {
@@ -8788,6 +8786,18 @@ public class AppOpsManager {
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
      * @hide
      */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    public int unsafeCheckOpRawNoThrow(
+            @NonNull String op, @NonNull AttributionSource attributionSource) {
+        return unsafeCheckOpRawNoThrow(strOpToOp(op), attributionSource);
+    }
+
+    /**
+     * Returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     * @hide
+     */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
         return unsafeCheckOpRawNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
     }
@@ -8798,8 +8808,8 @@ public class AppOpsManager {
             if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
                 return mService.checkOperationRaw(op, uid, packageName, null);
             } else {
-                return mService.checkOperationRawForDevice(op, uid, packageName, null,
-                        Context.DEVICE_ID_DEFAULT);
+                return mService.checkOperationRawForDevice(
+                        op, uid, packageName, null, virtualDeviceId);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

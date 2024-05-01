@@ -33,7 +33,6 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-
 /**
  * False touch if proximity sensor is covered for more than a certain percentage of the gesture.
  *

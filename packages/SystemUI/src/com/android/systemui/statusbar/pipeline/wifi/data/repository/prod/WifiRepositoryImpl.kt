@@ -322,11 +322,6 @@ constructor(
                 wifiManager.registerTrafficStateCallback(mainExecutor, callback)
                 awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
             }
-            .logDiffsForTable(
-                tableLogger,
-                columnPrefix = ACTIVITY_PREFIX,
-                initialValue = ACTIVITY_DEFAULT,
-            )
             .stateIn(
                 scope,
                 started = SharingStarted.WhileSubscribed(),
@@ -441,7 +436,6 @@ constructor(
 
         private const val WIFI_STATE_DEFAULT = WifiManager.WIFI_STATE_DISABLED
 
-        private const val ACTIVITY_PREFIX = "wifiActivity"
         val ACTIVITY_DEFAULT = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
 
         private const val TAG = "WifiTrackerLibInputLog"

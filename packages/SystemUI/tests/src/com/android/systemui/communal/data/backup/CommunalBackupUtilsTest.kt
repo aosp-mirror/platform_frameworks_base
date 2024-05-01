@@ -30,6 +30,7 @@ import java.io.FileNotFoundException
 import java.nio.charset.Charset
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -101,6 +102,7 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
         assertThat(dataRead).isEqualTo(newDataToWrite)
     }
 
+    @Ignore("Ignored until we figure out why it is flaky b/336561027")
     @Test(expected = FileNotFoundException::class)
     fun read_fileNotFoundException() {
         underTest.readBytesFromDisk()

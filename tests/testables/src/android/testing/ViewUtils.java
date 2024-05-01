@@ -31,13 +31,20 @@ public class ViewUtils {
      * This is currently done by adding the view to a window.
      */
     public static void attachView(View view) {
+        attachView(view, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+    }
+
+    /**
+     * Causes the view (and its children) to have {@link View#onAttachedToWindow()} called.
+     *
+     * This is currently done by adding the view to a window.
+     */
+    public static void attachView(View view, int width, int height) {
         // Make sure hardware acceleration isn't turned on.
         view.getContext().getApplicationInfo().flags &=
                 ~(ApplicationInfo.FLAG_HARDWARE_ACCELERATED);
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                LayoutParams.TYPE_APPLICATION_OVERLAY,
-                0, PixelFormat.TRANSLUCENT);
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
+                LayoutParams.TYPE_APPLICATION_OVERLAY, 0, PixelFormat.TRANSLUCENT);
         view.getContext().getSystemService(WindowManager.class).addView(view, lp);
     }
 

@@ -36,7 +36,6 @@ import com.android.systemui.biometrics.FpsUnlockTracker
 import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor
 import com.android.systemui.biometrics.shared.model.AuthenticationReason.NotRunning
 import com.android.systemui.biometrics.shared.model.LottieCallback
 import com.android.systemui.biometrics.ui.viewmodel.SideFpsOverlayViewModel
@@ -73,10 +72,6 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        if (!SideFpsControllerRefactor.isEnabled) {
-            return
-        }
-
         applicationScope
             .launch {
                 sfpsSensorInteractor.get().isAvailable.collect { isSfpsAvailable ->
@@ -127,11 +122,9 @@ constructor(
         val overlayViewModel =
             SideFpsOverlayViewModel(
                 applicationContext,
-                biometricStatusInteractor.get(),
                 deviceEntrySideFpsOverlayInteractor.get(),
                 displayStateInteractor.get(),
                 sfpsSensorInteractor.get(),
-                sideFpsProgressBarViewModel.get()
             )
         bind(overlayView!!, overlayViewModel, fpsUnlockTracker.get(), windowManager.get())
         overlayView!!.visibility = View.INVISIBLE

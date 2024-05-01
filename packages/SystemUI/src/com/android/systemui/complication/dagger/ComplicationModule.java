@@ -34,6 +34,7 @@ import java.lang.annotation.Retention;
 
 import javax.inject.Named;
 import javax.inject.Scope;
+
 /**
  * Module for housing components related to rendering complications.
  */

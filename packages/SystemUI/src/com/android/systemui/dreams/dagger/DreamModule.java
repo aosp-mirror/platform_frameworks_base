@@ -36,6 +36,11 @@ import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
 import com.android.systemui.dreams.homecontrols.DreamActivityProvider;
 import com.android.systemui.dreams.homecontrols.DreamActivityProviderImpl;
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
+import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.pipeline.shared.TileSpec;
+import com.android.systemui.qs.tiles.viewmodel.QSTileConfig;
+import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy;
+import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig;
 import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 
@@ -44,6 +49,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+import dagger.multibindings.StringKey;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -70,6 +76,7 @@ public interface DreamModule {
     String DREAM_SUPPORTED = "dream_supported";
     String DREAM_OVERLAY_WINDOW_TITLE = "dream_overlay_window_title";
     String HOME_CONTROL_PANEL_DREAM_COMPONENT = "home_control_panel_dream_component";
+    String DREAM_TILE_SPEC = "dream";
 
     /**
      * Provides the dream component
@@ -177,6 +184,23 @@ public interface DreamModule {
     static String providesDreamOverlayWindowTitle(@Main Resources resources) {
         return resources.getString(R.string.app_label);
     }
+
+    /** Provides config for the dream tile */
+    @Provides
+    @IntoMap
+    @StringKey(DREAM_TILE_SPEC)
+    static QSTileConfig provideDreamTileConfig(QsEventLogger uiEventLogger) {
+        TileSpec tileSpec = TileSpec.create(DREAM_TILE_SPEC);
+        return new QSTileConfig(tileSpec,
+                new QSTileUIConfig.Resource(
+                        R.drawable.ic_qs_screen_saver,
+                        R.string.quick_settings_screensaver_label),
+                uiEventLogger.getNewInstanceId(),
+                tileSpec.getSpec(),
+                QSTilePolicy.NoRestrictions.INSTANCE
+                );
+    }
+
 
     /** Provides activity for dream service */
     @Binds

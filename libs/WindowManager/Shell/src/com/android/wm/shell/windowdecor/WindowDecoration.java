@@ -18,6 +18,8 @@ package com.android.wm.shell.windowdecor;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowInsets.Type.captionBar;
+import static android.view.WindowInsets.Type.mandatorySystemGestures;
 import static android.view.WindowInsets.Type.statusBars;
 
 import android.annotation.NonNull;
@@ -33,6 +35,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
+import android.os.Trace;
 import android.view.Display;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -40,11 +43,11 @@ import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.window.SurfaceSyncGroup;
 import android.window.TaskConstants;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -53,7 +56,9 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams.OccludingCaptionElement;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -130,8 +135,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     TaskDragResizer mTaskDragResizer;
     private boolean mIsCaptionVisible;
 
+    /** The most recent set of insets applied to this window decoration. */
+    private WindowDecorationInsets mWindowDecorationInsets;
     private final Binder mOwner = new Binder();
-    private final Rect mCaptionInsetsRect = new Rect();
     private final float[] mTmpColor = new float[3];
 
     WindowDecoration(
@@ -202,7 +208,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mLayoutResId = params.mLayoutResId;
 
         if (!mTaskInfo.isVisible) {
-            releaseViews();
+            releaseViews(wct);
             finishT.hide(mTaskSurface);
             return;
         }
@@ -225,7 +231,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 || mDisplay.getDisplayId() != mTaskInfo.displayId
                 || oldLayoutResId != mLayoutResId
                 || oldNightMode != newNightMode) {
-            releaseViews();
+            releaseViews(wct);
 
             if (!obtainDisplayOrRegisterListener()) {
                 outResult.mRootView = null;
@@ -299,8 +305,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             // Caption inset is the full width of the task with the |captionHeight| and
             // positioned at the top of the task bounds, also in absolute coordinates.
             // So just reuse the task bounds and adjust the bottom coordinate.
-            mCaptionInsetsRect.set(taskBounds);
-            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + outResult.mCaptionHeight;
+            final Rect captionInsetsRect = new Rect(taskBounds);
+            captionInsetsRect.bottom = captionInsetsRect.top + outResult.mCaptionHeight;
 
             // Caption bounding rectangles: these are optional, and are used to present finer
             // insets than traditional |Insets| to apps about where their content is occluded.
@@ -311,8 +317,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 boundingRects = null;
             } else {
                 // The customizable region can at most be equal to the caption bar.
-                if (params.mAllowCaptionInputFallthrough) {
-                    outResult.mCustomizableCaptionRegion.set(mCaptionInsetsRect);
+                if (params.hasInputFeatureSpy()) {
+                    outResult.mCustomizableCaptionRegion.set(captionInsetsRect);
                 }
                 boundingRects = new Rect[numOfElements];
                 for (int i = 0; i < numOfElements; i++) {
@@ -321,27 +327,28 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     final int elementWidthPx =
                             resources.getDimensionPixelSize(element.mWidthResId);
                     boundingRects[i] =
-                            calculateBoundingRect(element, elementWidthPx, mCaptionInsetsRect);
+                            calculateBoundingRect(element, elementWidthPx, captionInsetsRect);
                     // Subtract the regions used by the caption elements, the rest is
                     // customizable.
-                    if (params.mAllowCaptionInputFallthrough) {
+                    if (params.hasInputFeatureSpy()) {
                         outResult.mCustomizableCaptionRegion.op(boundingRects[i],
                                 Region.Op.DIFFERENCE);
                     }
                 }
             }
-            // Add this caption as an inset source.
-            wct.addInsetsSource(mTaskInfo.token,
-                    mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect,
-                    boundingRects);
-            wct.addInsetsSource(mTaskInfo.token,
-                    mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
-                    mCaptionInsetsRect, null /* boundingRects */);
+
+            final WindowDecorationInsets newInsets = new WindowDecorationInsets(
+                    mTaskInfo.token, mOwner, captionInsetsRect, boundingRects);
+            if (!newInsets.equals(mWindowDecorationInsets)) {
+                // Add or update this caption as an insets source.
+                mWindowDecorationInsets = newInsets;
+                mWindowDecorationInsets.addOrUpdate(wct);
+            }
         } else {
-            wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
-                    WindowInsets.Type.captionBar());
-            wct.removeInsetsSource(mTaskInfo.token, mOwner, 0 /* index */,
-                    WindowInsets.Type.mandatorySystemGestures());
+            if (mWindowDecorationInsets != null) {
+                mWindowDecorationInsets.remove(wct);
+                mWindowDecorationInsets = null;
+            }
         }
 
         // Task surface itself
@@ -378,6 +385,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             startT.unsetColor(mTaskSurface);
         }
 
+        Trace.beginSection("CaptionViewHostLayout");
         if (mCaptionWindowManager == null) {
             // Put caption under a container surface because ViewRootImpl sets the destination frame
             // of windowless window layers and BLASTBufferQueue#update() doesn't support offset.
@@ -394,24 +402,25 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                         WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         lp.setTitle("Caption of Task=" + mTaskInfo.taskId);
         lp.setTrustedOverlay();
-        if (params.mAllowCaptionInputFallthrough) {
-            lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_SPY;
-        } else {
-            lp.inputFeatures &= ~WindowManager.LayoutParams.INPUT_FEATURE_SPY;
-        }
+        lp.inputFeatures = params.mInputFeatures;
         if (mViewHost == null) {
+            Trace.beginSection("CaptionViewHostLayout-new");
             mViewHost = mSurfaceControlViewHostFactory.create(mDecorWindowContext, mDisplay,
                     mCaptionWindowManager);
             if (params.mApplyStartTransactionOnDraw) {
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
             }
             mViewHost.setView(outResult.mRootView, lp);
+            Trace.endSection();
         } else {
+            Trace.beginSection("CaptionViewHostLayout-relayout");
             if (params.mApplyStartTransactionOnDraw) {
                 mViewHost.getRootSurfaceControl().applyTransactionOnDraw(startT);
             }
             mViewHost.relayout(lp);
+            Trace.endSection();
         }
+        Trace.endSection(); // CaptionViewHostLayout
     }
 
     private Rect calculateBoundingRect(@NonNull OccludingCaptionElement element,
@@ -482,7 +491,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         return true;
     }
 
-    void releaseViews() {
+    void releaseViews(WindowContainerTransaction wct) {
         if (mViewHost != null) {
             mViewHost.release();
             mViewHost = null;
@@ -508,19 +517,21 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             t.apply();
         }
 
-        final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
-        wct.removeInsetsSource(mTaskInfo.token,
-                mOwner, 0 /* index */, WindowInsets.Type.captionBar());
-        wct.removeInsetsSource(mTaskInfo.token,
-                mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures());
-        mTaskOrganizer.applyTransaction(wct);
+        if (mWindowDecorationInsets != null) {
+            mWindowDecorationInsets.remove(wct);
+            mWindowDecorationInsets = null;
+        }
     }
 
     @Override
     public void close() {
+        Trace.beginSection("WindowDecoration#close");
         mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);
-        releaseViews();
+        final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
+        releaseViews(wct);
+        mTaskOrganizer.applyTransaction(wct);
         mTaskSurface.release();
+        Trace.endSection();
     }
 
     static int loadDimensionPixelSize(Resources resources, int resourceId) {
@@ -595,8 +606,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         final int captionHeight = loadDimensionPixelSize(mContext.getResources(), captionHeightId);
         final Rect captionInsets = new Rect(0, 0, 0, captionHeight);
-        wct.addInsetsSource(mTaskInfo.token, mOwner, 0 /* index */, WindowInsets.Type.captionBar(),
-                captionInsets, null /* boundingRects */);
+        final WindowDecorationInsets newInsets = new WindowDecorationInsets(mTaskInfo.token,
+                mOwner, captionInsets, null /* boundingRets */);
+        if (!newInsets.equals(mWindowDecorationInsets)) {
+            mWindowDecorationInsets = newInsets;
+            mWindowDecorationInsets.addOrUpdate(wct);
+        }
     }
 
     static class RelayoutParams {
@@ -605,7 +620,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionHeightId;
         int mCaptionWidthId;
         final List<OccludingCaptionElement> mOccludingCaptionElements = new ArrayList<>();
-        boolean mAllowCaptionInputFallthrough;
+        int mInputFeatures;
 
         int mShadowRadiusId;
         int mCornerRadius;
@@ -620,7 +635,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionHeightId = Resources.ID_NULL;
             mCaptionWidthId = Resources.ID_NULL;
             mOccludingCaptionElements.clear();
-            mAllowCaptionInputFallthrough = false;
+            mInputFeatures = 0;
 
             mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
@@ -628,6 +643,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mApplyStartTransactionOnDraw = false;
             mSetTaskPositionAndCrop = false;
             mWindowDecorConfig = null;
+        }
+
+        boolean hasInputFeatureSpy() {
+            return (mInputFeatures & WindowManager.LayoutParams.INPUT_FEATURE_SPY) != 0;
         }
 
         /**
@@ -671,6 +690,47 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         default SurfaceControlViewHost create(Context c, Display d,
                 WindowlessWindowManager wmm, String callsite) {
             return new SurfaceControlViewHost(c, d, wmm, callsite);
+        }
+    }
+
+    private static class WindowDecorationInsets {
+        private static final int INDEX = 0;
+        private final WindowContainerToken mToken;
+        private final Binder mOwner;
+        private final Rect mFrame;
+        private final Rect[] mBoundingRects;
+
+        private WindowDecorationInsets(WindowContainerToken token, Binder owner, Rect frame,
+                Rect[] boundingRects) {
+            mToken = token;
+            mOwner = owner;
+            mFrame = frame;
+            mBoundingRects = boundingRects;
+        }
+
+        void addOrUpdate(WindowContainerTransaction wct) {
+            wct.addInsetsSource(mToken, mOwner, INDEX, captionBar(), mFrame, mBoundingRects);
+            wct.addInsetsSource(mToken, mOwner, INDEX, mandatorySystemGestures(), mFrame,
+                    mBoundingRects);
+        }
+
+        void remove(WindowContainerTransaction wct) {
+            wct.removeInsetsSource(mToken, mOwner, INDEX, captionBar());
+            wct.removeInsetsSource(mToken, mOwner, INDEX, mandatorySystemGestures());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof WindowDecoration.WindowDecorationInsets that)) return false;
+            return Objects.equals(mToken, that.mToken) && Objects.equals(mOwner,
+                    that.mOwner) && Objects.equals(mFrame, that.mFrame)
+                    && Objects.deepEquals(mBoundingRects, that.mBoundingRects);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mToken, mOwner, mFrame, Arrays.hashCode(mBoundingRects));
         }
     }
 

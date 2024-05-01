@@ -22,7 +22,12 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testCase
 
 val Kosmos.looper by Fixture {
-    checkNotNull(TestableLooper.get(testCase).looper) {
-        "TestableLooper is returning null, make sure the test class is annotated with RunWithLooper"
+    val testableLooper = TestableLooper.get(testCase)
+    checkNotNull(testableLooper) {
+        "TestableLooper is null, make sure the test class is annotated with RunWithLooper"
+    }
+    checkNotNull(testableLooper.looper) {
+        "TestableLooper.getLooper() is returning null, make sure the test class is annotated " +
+            "with RunWithLooper"
     }
 }

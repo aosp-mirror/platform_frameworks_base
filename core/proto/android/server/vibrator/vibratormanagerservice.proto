@@ -116,7 +116,7 @@ message VibrationProto {
     reserved 6; // prev int32 status
 
     // Also used by VibrationReported from frameworks/proto_logging/stats/atoms.proto.
-    // Next Tag: 26
+    // Next Tag: 29
     enum Status {
         UNKNOWN = 0;
         RUNNING = 1;
@@ -135,7 +135,6 @@ message VibrationProto {
         IGNORED_ERROR_TOKEN= 14;
         IGNORED_APP_OPS = 15;
         IGNORED_BACKGROUND = 16;
-        IGNORED_UNKNOWN_VIBRATION = 17;
         IGNORED_UNSUPPORTED = 18;
         IGNORED_FOR_EXTERNAL = 19;
         IGNORED_FOR_HIGHER_IMPORTANCE = 20;
@@ -146,6 +145,8 @@ message VibrationProto {
         IGNORED_SUPERSEDED = 25;
         IGNORED_FROM_VIRTUAL_DEVICE = 26;
         IGNORED_ON_WIRELESS_CHARGER = 27;
+        IGNORED_MISSING_PERMISSION = 28;
+        reserved 17; // prev IGNORED_UNKNOWN_VIBRATION
     }
 }
 

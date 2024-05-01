@@ -90,6 +90,12 @@ public class DatabaseUtilsTest {
         assertEquals(ddl, getSqlStatementType("ALTER TABLE t1 ADD COLUMN j int"));
         assertEquals(ddl, getSqlStatementType("CREATE TABLE t1 (i int)"));
 
+        // Verify that the answers are case-insensitive
+        assertEquals(sel, getSqlStatementType("select"));
+        assertEquals(sel, getSqlStatementType("sElect"));
+        assertEquals(sel, getSqlStatementType("sELECT"));
+        assertEquals(sel, getSqlStatementType("seLECT"));
+
         // Short statements, leading comments, and WITH are decoded to "other" in the public API.
         final int othr = STATEMENT_OTHER;
         assertEquals(othr, getSqlStatementType("SE"));

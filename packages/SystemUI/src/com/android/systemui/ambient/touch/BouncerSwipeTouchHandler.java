@@ -27,6 +27,7 @@ import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.UiEvent;
@@ -94,13 +95,11 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
     private Boolean mCapture;
     private Boolean mExpanded;
 
-    private boolean mBouncerInitiallyShowing;
-
     private TouchSession mTouchSession;
 
-    private ValueAnimatorCreator mValueAnimatorCreator;
+    private final ValueAnimatorCreator mValueAnimatorCreator;
 
-    private VelocityTrackerFactory mVelocityTrackerFactory;
+    private final VelocityTrackerFactory mVelocityTrackerFactory;
 
     private final UiEventLogger mUiEventLogger;
 
@@ -118,17 +117,12 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
     private final GestureDetector.OnGestureListener mOnGestureListener =
             new GestureDetector.SimpleOnGestureListener() {
                 @Override
-                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2, float distanceX,
                         float distanceY) {
                     if (mCapture == null) {
-                        mBouncerInitiallyShowing = mCentralSurfaces
-                                .map(CentralSurfaces::isBouncerShowing)
-                                .orElse(false);
-
                         if (Flags.dreamOverlayBouncerSwipeDirectionFiltering()) {
                             mCapture = Math.abs(distanceY) > Math.abs(distanceX)
-                                    && ((distanceY < 0 && mBouncerInitiallyShowing)
-                                    || (distanceY > 0 && !mBouncerInitiallyShowing));
+                                    && distanceY > 0;
                         } else {
                             // If the user scrolling favors a vertical direction, begin capturing
                             // scrolls.
@@ -146,13 +140,8 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
                         return false;
                     }
 
-                    // Don't set expansion for downward scroll when the bouncer is hidden.
-                    if (!mBouncerInitiallyShowing && (e1.getY() < e2.getY())) {
-                        return true;
-                    }
-
-                    // Don't set expansion for upward scroll when the bouncer is shown.
-                    if (mBouncerInitiallyShowing && (e1.getY() > e2.getY())) {
+                    // Don't set expansion for downward scroll.
+                    if (e1.getY() < e2.getY()) {
                         return true;
                     }
 
@@ -176,8 +165,7 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
                     final float dragDownAmount = e2.getY() - e1.getY();
                     final float screenTravelPercentage = Math.abs(e1.getY() - e2.getY())
                             / mTouchSession.getBounds().height();
-                    setPanelExpansion(mBouncerInitiallyShowing
-                            ? screenTravelPercentage : 1 - screenTravelPercentage);
+                    setPanelExpansion(1 - screenTravelPercentage);
                     return true;
                 }
             };
@@ -223,9 +211,9 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
             LockPatternUtils lockPatternUtils,
             UserTracker userTracker,
             @Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_OPENING)
-                    FlingAnimationUtils flingAnimationUtils,
+            FlingAnimationUtils flingAnimationUtils,
             @Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_FLING_ANIMATION_UTILS_CLOSING)
-                    FlingAnimationUtils flingAnimationUtilsClosing,
+            FlingAnimationUtils flingAnimationUtilsClosing,
             @Named(BouncerSwipeModule.SWIPE_TO_BOUNCER_START_REGION) float swipeRegionPercentage,
             @Named(BouncerSwipeModule.MIN_BOUNCER_ZONE_SCREEN_PERCENTAGE) float minRegionPercentage,
             UiEventLogger uiEventLogger) {
@@ -247,17 +235,13 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
     public void getTouchInitiationRegion(Rect bounds, Region region, Rect exclusionRect) {
         final int width = bounds.width();
         final int height = bounds.height();
-        final float minBouncerHeight = height * mMinBouncerZoneScreenPercentage;
         final int minAllowableBottom = Math.round(height * (1 - mMinBouncerZoneScreenPercentage));
 
-        final boolean isBouncerShowing =
-                mCentralSurfaces.map(CentralSurfaces::isBouncerShowing).orElse(false);
-        final Rect normalRegion = isBouncerShowing
-                ? new Rect(0, 0, width, Math.round(height * mBouncerZoneScreenPercentage))
-                : new Rect(0, Math.round(height * (1 - mBouncerZoneScreenPercentage)),
-                        width, height);
+        final Rect normalRegion = new Rect(0,
+                Math.round(height * (1 - mBouncerZoneScreenPercentage)),
+                width, height);
 
-        if (!isBouncerShowing && exclusionRect != null) {
+        if (exclusionRect != null) {
             int lowestBottom = Math.min(Math.max(0, exclusionRect.bottom), minAllowableBottom);
             normalRegion.top = Math.max(normalRegion.top, lowestBottom);
         }
@@ -322,8 +306,7 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
                         : KeyguardBouncerConstants.EXPANSION_HIDDEN;
 
                 // Log the swiping up to show Bouncer event.
-                if (!mBouncerInitiallyShowing
-                        && expansion == KeyguardBouncerConstants.EXPANSION_VISIBLE) {
+                if (expansion == KeyguardBouncerConstants.EXPANSION_VISIBLE) {
                     mUiEventLogger.log(DreamEvent.DREAM_SWIPED);
                 }
 
@@ -335,17 +318,15 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
         }
     }
 
-    private ValueAnimator createExpansionAnimator(float targetExpansion, float expansionHeight) {
+    private ValueAnimator createExpansionAnimator(float targetExpansion) {
         final ValueAnimator animator =
                 mValueAnimatorCreator.create(mCurrentExpansion, targetExpansion);
         animator.addUpdateListener(
                 animation -> {
                     float expansionFraction = (float) animation.getAnimatedValue();
-                    float dragDownAmount = expansionFraction * expansionHeight;
                     setPanelExpansion(expansionFraction);
                 });
-        if (!mBouncerInitiallyShowing
-                && targetExpansion == KeyguardBouncerConstants.EXPANSION_VISIBLE) {
+        if (targetExpansion == KeyguardBouncerConstants.EXPANSION_VISIBLE) {
             animator.addListener(
                     new AnimatorListenerAdapter() {
                         @Override
@@ -381,8 +362,7 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
         final float viewHeight = mTouchSession.getBounds().height();
         final float currentHeight = viewHeight * mCurrentExpansion;
         final float targetHeight = viewHeight * expansion;
-        final float expansionHeight = targetHeight - currentHeight;
-        final ValueAnimator animator = createExpansionAnimator(expansion, expansionHeight);
+        final ValueAnimator animator = createExpansionAnimator(expansion);
         if (expansion == KeyguardBouncerConstants.EXPANSION_HIDDEN) {
             // Hides the bouncer, i.e., fully expands the space above the bouncer.
             mFlingAnimationUtilsClosing.apply(animator, currentHeight, targetHeight, velocity,

@@ -173,6 +173,11 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+cc_aconfig_library {
+    name: "com.android.window.flags.window-aconfig_flags_c_lib",
+    aconfig_declarations: "com.android.window.flags.window-aconfig",
+}
+
 // DeviceStateManager
 aconfig_declarations {
     name: "android.hardware.devicestate.feature.flags-aconfig",
@@ -379,6 +384,7 @@ cc_aconfig_library {
 aconfig_declarations {
     name: "com.android.internal.os.flags-aconfig",
     package: "com.android.internal.os",
+    container: "system",
     srcs: ["core/java/com/android/internal/os/flags.aconfig"],
 }
 
@@ -853,6 +859,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "com.android.server.contextualsearch.flags-aconfig",
     package: "com.android.server.contextualsearch.flags",
+    container: "system",
     srcs: ["services/contextualsearch/flags/flags.aconfig"],
 }
 

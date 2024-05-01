@@ -186,9 +186,14 @@ public class SettingsHelper {
         sendBroadcast = sBroadcastOnRestore.contains(name);
         sendBroadcastSystemUI = sBroadcastOnRestoreSystemUI.contains(name);
 
-        if (sendBroadcast || sendBroadcastSystemUI) {
+        if (sendBroadcast) {
             // TODO: http://b/22388012
             oldValue = table.lookup(cr, name, UserHandle.USER_SYSTEM);
+        } else if (sendBroadcastSystemUI) {
+            // This is only done for broadcasts sent to system ui as the consumers are known.
+            // It would probably be correct to do it for the ones sent to the system, but consumers
+            // may be depending on the current behavior.
+            oldValue = table.lookup(cr, name, context.getUserId());
         }
 
         try {
@@ -266,7 +271,7 @@ public class SettingsHelper {
                 if (sendBroadcastSystemUI) {
                     intent.setPackage(
                             context.getString(com.android.internal.R.string.config_systemUi));
-                    context.sendBroadcastAsUser(intent, UserHandle.SYSTEM, null);
+                    context.sendBroadcastAsUser(intent, context.getUser(), null);
                 }
             }
         }

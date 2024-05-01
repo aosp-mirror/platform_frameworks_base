@@ -30,8 +30,8 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.util.leak.RotationUtils;
 
 import org.junit.Before;

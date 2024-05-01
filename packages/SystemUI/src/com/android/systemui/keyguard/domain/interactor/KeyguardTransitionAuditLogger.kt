@@ -101,12 +101,6 @@ constructor(
         }
 
         scope.launch {
-            keyguardInteractor.isKeyguardDismissible.collect {
-                logger.log(TAG, VERBOSE, "isKeyguardDismissable", it)
-            }
-        }
-
-        scope.launch {
             keyguardInteractor.isAbleToDream.collect {
                 logger.log(TAG, VERBOSE, "isAbleToDream", it)
             }

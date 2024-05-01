@@ -67,6 +67,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.globalactions.domain.interactor.GlobalActionsInteractor;
 import com.android.systemui.kosmos.KosmosJavaAdapter;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
@@ -114,6 +115,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock private Resources mResources;
     @Mock private ConfigurationController mConfigurationController;
+    @Mock private ActivityStarter mActivityStarter;
     @Mock private UserTracker mUserTracker;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private UserManager mUserManager;
@@ -173,6 +175,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mVibratorHelper,
                 mResources,
                 mConfigurationController,
+                mActivityStarter,
                 mUserTracker,
                 mKeyguardStateController,
                 mUserManager,
@@ -458,6 +461,18 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
         }
     }
 
+    private static <T> void assertNoItemsOfType(List<T> stuff, Class<? extends T> klass) {
+        for (int i = 0; i < stuff.size(); i++) {
+            assertThat(stuff.get(i)).isNotInstanceOf(klass);
+        }
+    }
+
+    private static <T> void assertOneItemOfType(List<T> stuff, Class<? extends T> klass) {
+        List<?> classes = stuff.stream().map((item) -> item.getClass()).toList();
+        assertThat(classes).containsNoDuplicates();
+        assertThat(classes).contains(klass);
+    }
+
     @Test
     public void testCreateActionItems_lockdownEnabled_doesShowLockdown() {
         mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
@@ -639,6 +654,113 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     public void testInteractor_onDismiss() {
         mGlobalActionsDialogLite.onDismiss(mGlobalActionsDialogLite.mDialog);
         assertThat(mInteractor.isVisible().getValue()).isFalse();
+    }
+
+    @Test
+    public void testShouldLogSystemUpdatePress() {
+        GlobalActionsDialogLite.SystemUpdateAction systemUpdateAction =
+                mGlobalActionsDialogLite.new SystemUpdateAction();
+        systemUpdateAction.onPress();
+        verifyLogPosted(GlobalActionsDialogLite.GlobalActionsEvent.GA_SYSTEM_UPDATE_PRESS);
+    }
+
+    @Test
+    public void testCreateActionItems_systemUpdateEnabled_doesShowSystemUpdate() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(5).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayEmergency();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_SYSTEM_UPDATE
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+        mGlobalActionsDialogLite.createActionItems();
+
+        assertItemsOfType(mGlobalActionsDialogLite.mItems,
+                GlobalActionsDialogLite.EmergencyAction.class,
+                GlobalActionsDialogLite.LockDownAction.class,
+                GlobalActionsDialogLite.ShutDownAction.class,
+                GlobalActionsDialogLite.RestartAction.class,
+                GlobalActionsDialogLite.SystemUpdateAction.class);
+        assertThat(mGlobalActionsDialogLite.mOverflowItems).isEmpty();
+        assertThat(mGlobalActionsDialogLite.mPowerItems).isEmpty();
+    }
+
+    @Test
+    public void testCreateActionItems_systemUpdateDisabled_doesntShowSystemUpdateAction() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(5).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayEmergency();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        doReturn(true).when(mGlobalActionsDialogLite).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+        mGlobalActionsDialogLite.createActionItems();
+
+        assertNoItemsOfType(mGlobalActionsDialogLite.mItems,
+                GlobalActionsDialogLite.SystemUpdateAction.class);
+        assertThat(mGlobalActionsDialogLite.mOverflowItems).isEmpty();
+        assertThat(mGlobalActionsDialogLite.mPowerItems).isEmpty();
+    }
+
+    @Test
+    public void testCreateActionItems_systemUpdateEnabled_locked_showsSystemUpdate() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(5).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayEmergency();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_SYSTEM_UPDATE
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+
+        // Show dialog with keyguard showing
+        mGlobalActionsDialogLite.showOrHideDialog(true, true, null);
+
+        assertOneItemOfType(mGlobalActionsDialogLite.mItems,
+                GlobalActionsDialogLite.SystemUpdateAction.class);
+
+        // Hide dialog
+        mGlobalActionsDialogLite.showOrHideDialog(true, true, null);
+    }
+
+    @Test
+    public void testCreateActionItems_systemUpdateEnabled_notProvisioned_noSystemUpdate() {
+        mGlobalActionsDialogLite = spy(mGlobalActionsDialogLite);
+        doReturn(5).when(mGlobalActionsDialogLite).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayEmergency();
+        doReturn(true).when(mGlobalActionsDialogLite).shouldDisplayLockdown(any());
+        String[] actions = {
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialogLite.GLOBAL_ACTION_KEY_SYSTEM_UPDATE
+        };
+        doReturn(actions).when(mGlobalActionsDialogLite).getDefaultActions();
+
+        // Show dialog with keyguard showing
+        mGlobalActionsDialogLite.showOrHideDialog(false, false, null);
+
+        assertNoItemsOfType(mGlobalActionsDialogLite.mItems,
+                GlobalActionsDialogLite.SystemUpdateAction.class);
+
+        // Hide dialog
+        mGlobalActionsDialogLite.showOrHideDialog(false, false, null);
     }
 
     private UserInfo mockCurrentUser(int flags) {

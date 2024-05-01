@@ -654,7 +654,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun authenticateFallbacksToDetectionWhenUserIsAlreadyTrustedByTrustManager() =
+    fun authenticateFallbacksToDetectionWhenKeyguardIsAlreadyDismissible() =
         testScope.runTest {
             whenever(faceManager.sensorPropertiesInternal)
                 .thenReturn(listOf(createFaceSensorProperties(supportsFaceDetection = true)))
@@ -663,7 +663,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             initCollectors()
             allPreconditionsToRunFaceAuthAreTrue()
 
-            trustRepository.setCurrentUserTrusted(true)
+            keyguardRepository.setKeyguardDismissible(true)
             assertThat(canFaceAuthRun()).isFalse()
             underTest.requestAuthenticate(
                 FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER,
@@ -1060,6 +1060,25 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             faceAuthenticateIsNotCalled()
 
             biometricSettingsRepository.setIsFaceAuthCurrentlyAllowed(true)
+            faceAuthenticateIsCalled()
+        }
+
+    @Test
+    fun retryFaceAuthAfterCancel() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+            val isAuthRunning by collectLastValue(underTest.isAuthRunning)
+
+            underTest.requestAuthenticate(FaceAuthUiEvent.FACE_AUTH_CAMERA_AVAILABLE_CHANGED)
+            underTest.cancel()
+            clearInvocations(faceManager)
+            underTest.requestAuthenticate(FaceAuthUiEvent.FACE_AUTH_CAMERA_AVAILABLE_CHANGED)
+
+            advanceTimeBy(DeviceEntryFaceAuthRepositoryImpl.DEFAULT_CANCEL_SIGNAL_TIMEOUT)
+            runCurrent()
+
+            assertThat(isAuthRunning).isEqualTo(true)
             faceAuthenticateIsCalled()
         }
 

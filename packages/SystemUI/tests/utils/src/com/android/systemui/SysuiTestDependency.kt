@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Looper
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.animation.DialogTransitionAnimator
-import com.android.systemui.animation.fakeDialogTransitionAnimator
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
@@ -39,10 +38,7 @@ class SysuiTestDependency(
         // Ravenwood doesn't yet provide UI animations, so we sidestep this global configuration
         // step; any tests that rely on it are already being excluded under Ravenwood
         if (!SysuiTestCase.isRavenwoodTest()) {
-            dependency.injectTestDependency(
-                DialogTransitionAnimator::class.java,
-                fakeDialogTransitionAnimator()
-            )
+            dependency.injectMockDependency(DialogTransitionAnimator::class.java)
         }
 
         // Many tests end up creating a BroadcastDispatcher. Instead, give them a fake that will

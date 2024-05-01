@@ -178,15 +178,10 @@ object Flags {
 
     /** Flag meant to guard the talkback fix for the KeyguardIndicationTextView */
     // TODO(b/286563884): Tracking bug
-    @JvmField val KEYGUARD_TALKBACK_FIX = releasedFlag("keyguard_talkback_fix")
+    @JvmField val KEYGUARD_TALKBACK_FIX = unreleasedFlag("keyguard_talkback_fix")
 
     // TODO(b/287268101): Tracking bug.
     @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
-
-    /** Migrate the status bar view on keyguard from notification panel to keyguard root view. */
-    // TODO(b/299115332): Tracking Bug.
-    @JvmField val MIGRATE_KEYGUARD_STATUS_BAR_VIEW =
-        unreleasedFlag("migrate_keyguard_status_bar_view")
 
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug

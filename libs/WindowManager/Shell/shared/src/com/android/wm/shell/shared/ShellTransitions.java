@@ -28,13 +28,20 @@ import com.android.wm.shell.shared.annotations.ExternalThread;
 @ExternalThread
 public interface ShellTransitions {
     /**
-     * Registers a remote transition.
+     * Registers a remote transition for all operations excluding takeovers (see
+     * {@link ShellTransitions#registerRemoteForTakeover(TransitionFilter, RemoteTransition)}).
      */
     default void registerRemote(@NonNull TransitionFilter filter,
             @NonNull RemoteTransition remoteTransition) {}
 
     /**
-     * Unregisters a remote transition.
+     * Registers a remote transition for takeover operations only.
+     */
+    default void registerRemoteForTakeover(@NonNull TransitionFilter filter,
+            @NonNull RemoteTransition remoteTransition) {}
+
+    /**
+     * Unregisters a remote transition for all operations.
      */
     default void unregisterRemote(@NonNull RemoteTransition remoteTransition) {}
 }

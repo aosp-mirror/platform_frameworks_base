@@ -1563,18 +1563,28 @@ public class AppOpsService extends IAppOpsService.Stub {
     private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops,
             String persistentDeviceId) {
         ArrayList<AppOpsManager.OpEntry> resOps = null;
+        boolean shouldReturnRestrictedAppOps = mContext.checkPermission(
+                Manifest.permission.GET_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid())
+                == PackageManager.PERMISSION_GRANTED;
         if (ops == null) {
             resOps = new ArrayList<>();
-            for (int j=0; j<pkgOps.size(); j++) {
+            for (int j = 0; j < pkgOps.size(); j++) {
                 Op curOp = pkgOps.valueAt(j);
+                if (opRestrictsRead(curOp.op) && !shouldReturnRestrictedAppOps) {
+                    continue;
+                }
                 resOps.add(getOpEntryForResult(curOp, persistentDeviceId));
             }
         } else {
-            for (int j=0; j<ops.length; j++) {
+            for (int j = 0; j < ops.length; j++) {
                 Op curOp = pkgOps.get(ops[j]);
                 if (curOp != null) {
                     if (resOps == null) {
                         resOps = new ArrayList<>();
+                    }
+                    if (opRestrictsRead(curOp.op) && !shouldReturnRestrictedAppOps) {
+                        continue;
                     }
                     resOps.add(getOpEntryForResult(curOp, persistentDeviceId));
                 }
@@ -2773,15 +2783,15 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             code = AppOpsManager.opToSwitch(code);
             UidState uidState = getUidStateLocked(uid, false);
-            if (uidState != null
-                    && mAppOpsCheckingService.getUidMode(
-                                    uidState.uid, getPersistentId(virtualDeviceId), code)
-                            != AppOpsManager.opToDefaultMode(code)) {
-                final int rawMode =
-                        mAppOpsCheckingService.getUidMode(
-                                uidState.uid, getPersistentId(virtualDeviceId), code);
-                return raw ? rawMode : uidState.evalMode(code, rawMode);
+            if (uidState != null) {
+                int rawUidMode = mAppOpsCheckingService.getUidMode(
+                        uidState.uid, getPersistentId(virtualDeviceId), code);
+
+                if (rawUidMode != AppOpsManager.opToDefaultMode(code)) {
+                    return raw ? rawUidMode : uidState.evalMode(code, rawUidMode);
+                }
             }
+
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
@@ -3682,26 +3692,24 @@ public class AppOpsService extends IAppOpsService.Stub {
             isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag,
                     virtualDeviceId, pvr.bypass, false);
             final int switchCode = AppOpsManager.opToSwitch(code);
+
+            int rawUidMode;
             if (isOpAllowedForUid(uid)) {
                 // Op is always allowed for the UID, do nothing.
 
                 // If there is a non-default per UID policy (we set UID op mode only if
                 // non-default) it takes over, otherwise use the per package policy.
-            } else if (mAppOpsCheckingService.getUidMode(
-                    uidState.uid, getPersistentId(virtualDeviceId), switchCode)
+            } else if ((rawUidMode =
+                            mAppOpsCheckingService.getUidMode(
+                                    uidState.uid, getPersistentId(virtualDeviceId), switchCode))
                     != AppOpsManager.opToDefaultMode(switchCode)) {
-                final int uidMode =
-                        uidState.evalMode(
-                                code,
-                                mAppOpsCheckingService.getUidMode(
-                                        uidState.uid,
-                                        getPersistentId(virtualDeviceId),
-                                        switchCode));
+                final int uidMode = uidState.evalMode(code, rawUidMode);
                 if (!shouldStartForMode(uidMode, startIfModeDefault)) {
                     if (DEBUG) {
                         Slog.d(TAG, "startOperation: uid reject #" + uidMode + " for code "
                                 + switchCode + " (" + code + ") uid " + uid + " package "
-                                + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                                + packageName + " flags: "
+                                + AppOpsManager.flagsToString(flags));
                     }
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
@@ -3710,8 +3718,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
             } else {
-                final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
-                        : op;
+                final Op switchOp =
+                        switchCode != code ? getOpLocked(ops, switchCode, uid, true) : op;
                 final int mode =
                         switchOp.uidState.evalMode(
                                 switchOp.op,
@@ -3721,9 +3729,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                                         UserHandle.getUserId(switchOp.uid)));
                 if (mode != AppOpsManager.MODE_ALLOWED
                         && (!startIfModeDefault || mode != MODE_DEFAULT)) {
-                    if (DEBUG) Slog.d(TAG, "startOperation: reject #" + mode + " for code "
-                            + switchCode + " (" + code + ") uid " + uid + " package "
-                            + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    if (DEBUG) {
+                        Slog.d(TAG, "startOperation: reject #" + mode + " for code "
+                                + switchCode + " (" + code + ") uid " + uid + " package "
+                                + packageName + " flags: "
+                                + AppOpsManager.flagsToString(flags));
+                    }
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
                             virtualDeviceId, flags, mode, startType, attributionFlags,
@@ -3731,6 +3742,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
             }
+
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName + " restricted: " + isRestricted
                     + " flags: " + AppOpsManager.flagsToString(flags));
@@ -4242,10 +4254,21 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void verifyIncomingOp(int op) {
         if (op >= 0 && op < AppOpsManager._NUM_OP) {
-            // Enforce manage appops permission if it's a restricted read op.
+            // Enforce privileged appops permission if it's a restricted read op.
             if (opRestrictsRead(op)) {
-                mContext.enforcePermission(Manifest.permission.MANAGE_APPOPS,
-                        Binder.getCallingPid(), Binder.getCallingUid(), "verifyIncomingOp");
+                if (!(mContext.checkPermission(Manifest.permission.MANAGE_APPOPS,
+                        Binder.getCallingPid(), Binder.getCallingUid())
+                        == PackageManager.PERMISSION_GRANTED || mContext.checkPermission(
+                        Manifest.permission.GET_APP_OPS_STATS,
+                        Binder.getCallingPid(), Binder.getCallingUid())
+                        == PackageManager.PERMISSION_GRANTED || mContext.checkPermission(
+                        Manifest.permission.MANAGE_APP_OPS_MODES,
+                        Binder.getCallingPid(), Binder.getCallingUid())
+                        == PackageManager.PERMISSION_GRANTED)) {
+                    throw new SecurityException("verifyIncomingOp: uid " + Binder.getCallingUid()
+                            + " does not have any of {MANAGE_APPOPS, GET_APP_OPS_STATS, "
+                            + "MANAGE_APP_OPS_MODES}");
+                }
             }
             return;
         }

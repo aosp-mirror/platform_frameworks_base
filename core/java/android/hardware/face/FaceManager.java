@@ -20,6 +20,44 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_NONE;
+import static android.hardware.biometrics.BiometricFaceConstants.BIOMETRIC_ERROR_RE_ENROLL;
+import static android.hardware.biometrics.BiometricFaceConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_FACE_OBSCURED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_GOOD;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_INSUFFICIENT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_MOUTH_COVERING_DETECTED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_NOT_DETECTED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_PAN_TOO_EXTREME;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_POOR_GAZE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_RECALIBRATE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_ROLL_TOO_EXTREME;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_SENSOR_DIRTY;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_START;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TILT_TOO_EXTREME;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_CLOSE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DIFFERENT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_FAR;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_LOW;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_MUCH_MOTION;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_RIGHT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_SIMILAR;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_VENDOR;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_CANCELED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_NOT_PRESENT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_NOT_ENROLLED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_NO_SPACE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_USER_CANCELED;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_VENDOR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,7 +67,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.CryptoObject;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
@@ -58,7 +95,7 @@ import java.util.List;
  * @hide
  */
 @SystemService(Context.FACE_SERVICE)
-public class FaceManager implements BiometricAuthenticator, BiometricFaceConstants {
+public class FaceManager implements BiometricAuthenticator {
 
     private static final String TAG = "FaceManager";
 

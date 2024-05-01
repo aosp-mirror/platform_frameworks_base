@@ -18,7 +18,6 @@
 package com.android.keyguard
 
 import android.content.res.Configuration
-import android.hardware.biometrics.BiometricRequestConstants
 import android.media.AudioManager
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper.RunWithLooper
@@ -41,8 +40,6 @@ import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate
-import com.android.systemui.biometrics.SideFpsController
-import com.android.systemui.biometrics.SideFpsUiRequestSource
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.classifier.FalsingA11yDelegate
@@ -70,7 +67,6 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.FakeSceneDataSource
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
-import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -87,7 +83,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.GlobalSettings
 import com.google.common.truth.Truth
-import java.util.Optional
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -143,7 +138,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var userSwitcherController: UserSwitcherController
     @Mock private lateinit var sessionTracker: SessionTracker
     @Mock private lateinit var keyguardViewController: KeyguardViewController
-    @Mock private lateinit var sideFpsController: SideFpsController
     @Mock private lateinit var keyguardPasswordViewControllerMock: KeyguardPasswordViewController
     @Mock private lateinit var falsingA11yDelegate: FalsingA11yDelegate
     @Mock private lateinit var telephonyManager: TelephonyManager
@@ -214,9 +208,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         mSetFlagsRule.enableFlags(
             AConfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES,
         )
-        mSetFlagsRule.disableFlags(
-            FLAG_SIDEFPS_CONTROLLER_REFACTOR,
-        )
         if (!SceneContainerFlag.isEnabled) {
             mSetFlagsRule.disableFlags(
                 AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
@@ -273,7 +264,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 featureFlags,
                 globalSettings,
                 sessionTracker,
-                Optional.of(sideFpsController),
                 falsingA11yDelegate,
                 telephonyManager,
                 viewMediatorCallback,
@@ -778,24 +768,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         verify(viewFlipperController).clearViews()
         verify(viewFlipperController)
             .asynchronouslyInflateView(any(), any(), eq(onViewInflatedCallback))
-    }
-
-    @Test
-    fun sideFpsControllerShow() {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        underTest.updateSideFpsVisibility(/* isVisible= */ true)
-        verify(sideFpsController)
-            .show(
-                SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                BiometricRequestConstants.REASON_AUTH_KEYGUARD
-            )
-    }
-
-    @Test
-    fun sideFpsControllerHide() {
-        mSetFlagsRule.disableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-        underTest.updateSideFpsVisibility(/* isVisible= */ false)
-        verify(sideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER)
     }
 
     @Test

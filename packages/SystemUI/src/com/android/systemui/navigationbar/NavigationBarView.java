@@ -69,7 +69,6 @@ import com.android.systemui.navigationbar.buttons.ContextualButtonGroup;
 import com.android.systemui.navigationbar.buttons.DeadZone;
 import com.android.systemui.navigationbar.buttons.KeyButtonDrawable;
 import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
-import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.res.R;
@@ -153,7 +152,6 @@ public class NavigationBarView extends FrameLayout {
     private ShadeViewController mShadeViewController;
     @Nullable
     private PanelExpansionInteractor mPanelExpansionInteractor;
-    private RotationContextButton mRotationContextButton;
     private FloatingRotationButton mFloatingRotationButton;
     private RotationButtonController mRotationButtonController;
 
@@ -293,8 +291,6 @@ public class NavigationBarView extends FrameLayout {
                         R.drawable.ic_sysbar_accessibility_button);
         mContextualButtonGroup.addButton(imeSwitcherButton);
         mContextualButtonGroup.addButton(accessibilityButton);
-        mRotationContextButton = new RotationContextButton(R.id.rotate_suggestion,
-                mLightContext, R.drawable.ic_sysbar_rotate_button_ccw_start_0);
         mFloatingRotationButton = new FloatingRotationButton(mContext,
                 R.string.accessibility_rotate_button,
                 R.layout.rotate_suggestion,
@@ -433,10 +429,6 @@ public class NavigationBarView extends FrameLayout {
         return mButtonDispatchers.get(R.id.accessibility_button);
     }
 
-    public RotationContextButton getRotateSuggestionButton() {
-        return (RotationContextButton) mButtonDispatchers.get(R.id.rotate_suggestion);
-    }
-
     public ButtonDispatcher getHomeHandle() {
         return mButtonDispatchers.get(R.id.home_handle);
     }
@@ -483,18 +475,8 @@ public class NavigationBarView extends FrameLayout {
      * Updates the rotation button based on the current navigation mode.
      */
     void updateRotationButton() {
-        if (isGesturalMode(mNavBarMode)) {
-            mContextualButtonGroup.removeButton(R.id.rotate_suggestion);
-            mButtonDispatchers.remove(R.id.rotate_suggestion);
-            mRotationButtonController.setRotationButton(mFloatingRotationButton,
-                    mRotationButtonListener);
-        } else if (mContextualButtonGroup.getContextButton(R.id.rotate_suggestion) == null) {
-            mContextualButtonGroup.addButton(mRotationContextButton);
-            mButtonDispatchers.put(R.id.rotate_suggestion, mRotationContextButton);
-            mRotationButtonController.setRotationButton(mRotationContextButton,
-                    mRotationButtonListener);
-        }
-        mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
+        mRotationButtonController.setRotationButton(mFloatingRotationButton,
+                mRotationButtonListener);
     }
 
     public KeyButtonDrawable getBackDrawable() {
@@ -1143,7 +1125,6 @@ public class NavigationBarView extends FrameLayout {
         dumpButton(pw, "home", getHomeButton());
         dumpButton(pw, "handle", getHomeHandle());
         dumpButton(pw, "rcnt", getRecentsButton());
-        dumpButton(pw, "rota", getRotateSuggestionButton());
         dumpButton(pw, "a11y", getAccessibilityButton());
         dumpButton(pw, "ime", getImeSwitchButton());
 

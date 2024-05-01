@@ -16,20 +16,14 @@
 
 package com.android.systemui.haptics.qs
 
-import android.animation.ValueAnimator
 import android.os.VibrationEffect
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.VisibleForTesting
-import androidx.core.animation.doOnCancel
-import androidx.core.animation.doOnEnd
-import androidx.core.animation.doOnStart
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 
 /**
@@ -50,17 +44,14 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
 ) {
 
-    private var effectDuration = 0
+    var effectDuration = 0
+        private set
 
     /** Current state */
-    private var _state = MutableStateFlow(State.IDLE)
-    val state = _state.asStateFlow()
+    var state = State.IDLE
+        private set
 
-    /** Flows for view control and action */
-    private val _effectProgress = MutableStateFlow<Float?>(null)
-    val effectProgress = _effectProgress.asStateFlow()
-
-    // Actions to perform
+    /** Flow for view control and action */
     private val _postedActionType = MutableStateFlow<ActionType?>(null)
     val actionType: Flow<ActionType?> =
         combine(
@@ -85,29 +76,23 @@ constructor(
 
     private val snapEffect = LongPressHapticBuilder.createSnapEffect()
 
-    private var effectAnimator: ValueAnimator? = null
-
     val hasInitialized: Boolean
-        get() = longPressHint != null && effectAnimator != null
+        get() = longPressHint != null
 
     @VisibleForTesting
-    fun setState(state: State) {
-        _state.value = state
+    fun setState(newState: State) {
+        state = newState
     }
 
-    private fun reverse() {
-        effectAnimator?.let {
-            val pausedProgress = it.animatedFraction
-            val effect =
-                LongPressHapticBuilder.createReversedEffect(
-                    pausedProgress,
-                    durations?.get(0) ?: 0,
-                    effectDuration,
-                )
-            vibratorHelper?.cancel()
-            vibrate(effect)
-            it.reverse()
-        }
+    fun playReverseHaptics(pausedProgress: Float) {
+        val effect =
+            LongPressHapticBuilder.createReversedEffect(
+                pausedProgress,
+                durations?.get(0) ?: 0,
+                effectDuration,
+            )
+        vibratorHelper?.cancel()
+        vibrate(effect)
     }
 
     private fun vibrate(effect: VibrationEffect?) {
@@ -117,23 +102,23 @@ constructor(
     }
 
     fun handleActionDown() {
-        when (_state.value) {
+        when (state) {
             State.IDLE -> {
                 setState(State.TIMEOUT_WAIT)
             }
-            State.RUNNING_BACKWARDS -> effectAnimator?.cancel()
+            State.RUNNING_BACKWARDS -> _postedActionType.value = ActionType.CANCEL_ANIMATOR
             else -> {}
         }
     }
 
     fun handleActionUp() {
-        when (_state.value) {
+        when (state) {
             State.TIMEOUT_WAIT -> {
                 _postedActionType.value = ActionType.CLICK
                 setState(State.IDLE)
             }
             State.RUNNING_FORWARD -> {
-                reverse()
+                _postedActionType.value = ActionType.REVERSE_ANIMATOR
                 setState(State.RUNNING_BACKWARDS)
             }
             else -> {}
@@ -141,61 +126,47 @@ constructor(
     }
 
     fun handleActionCancel() {
-        when (_state.value) {
+        when (state) {
             State.TIMEOUT_WAIT -> {
                 setState(State.IDLE)
             }
             State.RUNNING_FORWARD -> {
-                reverse()
+                _postedActionType.value = ActionType.REVERSE_ANIMATOR
                 setState(State.RUNNING_BACKWARDS)
             }
             else -> {}
         }
     }
 
-    private fun handleAnimationStart() {
+    fun handleAnimationStart() {
         vibrate(longPressHint)
         setState(State.RUNNING_FORWARD)
     }
 
     /** This function is called both when an animator completes or gets cancelled */
-    private fun handleAnimationComplete() {
-        if (_state.value == State.RUNNING_FORWARD) {
+    fun handleAnimationComplete() {
+        if (state == State.RUNNING_FORWARD) {
             vibrate(snapEffect)
             _postedActionType.value = ActionType.LONG_PRESS
-            _effectProgress.value = null
         }
-        if (_state.value != State.TIMEOUT_WAIT) {
+        if (state != State.TIMEOUT_WAIT) {
             // This will happen if the animator did not finish by being cancelled
             setState(State.IDLE)
         }
     }
 
-    private fun handleAnimationCancel() {
-        _effectProgress.value = null
+    fun handleAnimationCancel() {
         setState(State.TIMEOUT_WAIT)
     }
 
     fun handleTimeoutComplete() {
-        if (_state.value == State.TIMEOUT_WAIT && effectAnimator?.isRunning == false) {
-            effectAnimator?.start()
+        if (state == State.TIMEOUT_WAIT) {
+            _postedActionType.value = ActionType.START_ANIMATOR
         }
     }
 
     fun clearActionType() {
         _postedActionType.value = null
-    }
-
-    /** Reset the effect by going back to a default [IDLE] state */
-    fun resetEffect() {
-        if (effectAnimator?.isRunning == true) {
-            effectAnimator?.cancel()
-        }
-        longPressHint = null
-        effectAnimator = null
-        _effectProgress.value = null
-        _postedActionType.value = null
-        setState(State.IDLE)
     }
 
     /**
@@ -205,27 +176,21 @@ constructor(
      * @return true if the effect initialized correctly
      */
     fun initializeEffect(duration: Int): Boolean {
-        // The effect can't reset if it is running
+        // The effect can't initialize with a negative duration
         if (duration <= 0) return false
 
-        resetEffect()
-        effectDuration = duration
-        effectAnimator =
-            ValueAnimator.ofFloat(0f, 1f).apply {
-                this.duration = effectDuration.toLong()
-                interpolator = AccelerateDecelerateInterpolator()
+        // There is no need to re-initialize if the duration has not changed
+        if (duration == effectDuration) return true
 
-                doOnStart { handleAnimationStart() }
-                addUpdateListener { _effectProgress.value = animatedValue as Float }
-                doOnEnd { handleAnimationComplete() }
-                doOnCancel { handleAnimationCancel() }
-            }
+        effectDuration = duration
         longPressHint =
             LongPressHapticBuilder.createLongPressHint(
                 durations?.get(0) ?: LongPressHapticBuilder.INVALID_DURATION,
                 durations?.get(1) ?: LongPressHapticBuilder.INVALID_DURATION,
                 effectDuration
             )
+        _postedActionType.value = ActionType.INITIALIZE_ANIMATOR
+        setState(State.IDLE)
         return true
     }
 
@@ -241,5 +206,9 @@ constructor(
         CLICK,
         LONG_PRESS,
         RESET_AND_LONG_PRESS,
+        START_ANIMATOR,
+        REVERSE_ANIMATOR,
+        CANCEL_ANIMATOR,
+        INITIALIZE_ANIMATOR,
     }
 }

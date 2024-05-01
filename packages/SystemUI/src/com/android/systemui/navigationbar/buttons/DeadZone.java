@@ -26,9 +26,9 @@ import android.view.MotionEvent;
 import android.view.Surface;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.res.R;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.res.R;
 
 import javax.inject.Inject;
 

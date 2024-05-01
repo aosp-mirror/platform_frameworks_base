@@ -48,8 +48,15 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     /**
      * Flag to indicate whether to restrict desktop mode to supported devices.
      */
+    @VisibleForTesting
+    static final String ENFORCE_DEVICE_RESTRICTIONS_KEY =
+            "persist.wm.debug.desktop_mode_enforce_device_restrictions";
+
+    /**
+     * Flag to indicate whether to restrict desktop mode to supported devices.
+     */
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
+            ENFORCE_DEVICE_RESTRICTIONS_KEY, true);
 
     private StringBuilder mLogBuilder;
 
@@ -114,6 +121,18 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             return RESULT_DONE;
         }
 
+        // TODO(b/336998072) - Find a better solution to this that makes use of the logic from
+        //  TaskLaunchParamsModifier. Put logic in common utils, return RESULT_CONTINUE, inherit
+        //  from parent class, etc.
+        if (outParams.mPreferredTaskDisplayArea == null && task.getRootTask() != null) {
+            appendLog("display-from-task=" + task.getRootTask().getDisplayId());
+            outParams.mPreferredTaskDisplayArea = task.getRootTask().getDisplayArea();
+        }
+
+        if (phase == PHASE_DISPLAY_AREA) {
+            return RESULT_DONE;
+        }
+
         if (!currentParams.mBounds.isEmpty()) {
             appendLog("currentParams has bounds set, not overriding");
             return RESULT_SKIP;
@@ -166,24 +185,24 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
      * Return {@code true} if desktop mode should be restricted to supported devices.
      */
     @VisibleForTesting
-    public boolean enforceDeviceRestrictions() {
+    static boolean enforceDeviceRestrictions() {
         return ENFORCE_DEVICE_RESTRICTIONS;
     }
 
     /**
      * Return {@code true} if the current device supports desktop mode.
      */
+    // TODO(b/337819319): use a companion object instead.
     @VisibleForTesting
-    public boolean isDesktopModeSupported(@NonNull Context context) {
+    static boolean isDesktopModeSupported(@NonNull Context context) {
         return context.getResources().getBoolean(R.bool.config_isDesktopModeSupported);
     }
 
     /**
      * Return {@code true} if desktop mode can be entered on the current device.
      */
-    boolean canEnterDesktopMode(@NonNull Context context) {
+    static boolean canEnterDesktopMode(@NonNull Context context) {
         return isDesktopModeEnabled()
                 && (!enforceDeviceRestrictions() || isDesktopModeSupported(context));
     }
-
 }

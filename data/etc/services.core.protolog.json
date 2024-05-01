@@ -1117,6 +1117,24 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/BlackFrame.java"
     },
+    "5256889109971284149": {
+      "message": "CameraManager cannot be found.",
+      "level": "ERROR",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/CameraStateMonitor.java"
+    },
+    "8116030277393789125": {
+      "message": "Display id=%d is notified that Camera %s is open for package %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/CameraStateMonitor.java"
+    },
+    "-3774458166471278611": {
+      "message": "Display id=%d is notified that Camera %s is closed.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/CameraStateMonitor.java"
+    },
     "-74949168947384056": {
       "message": "Sending to proc %s new compat %s",
       "level": "VERBOSE",
@@ -1771,32 +1789,20 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
-    "-8302211458579221117": {
-      "message": "Display id=%d is notified that Camera %s is open for package %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
-    },
     "-1534784331886673955": {
       "message": "DisplayRotationCompatPolicy: Multi-window toast not shown as package '%s' cannot be found.",
       "level": "ERROR",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
-    "1797195804376906831": {
-      "message": "Display id=%d is notified that Camera %s is closed, scheduling rotation update.",
+    "-5121743609317543819": {
+      "message": "Display id=%d is notified that camera is closed but activity is still refreshing. Rescheduling an update.",
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
-    "-8746776274432739264": {
-      "message": "Display id=%d is notified that Camera %s is closed but activity is still refreshing. Rescheduling an update.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
-    },
-    "3622181214422515679": {
-      "message": "Display id=%d is notified that Camera %s is closed, updating rotation.",
+    "1769752961776628557": {
+      "message": "Display id=%d is notified that Camera is closed, updating rotation.",
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"

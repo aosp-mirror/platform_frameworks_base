@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.ui.viewmodel
 
 import android.content.applicationContext
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
@@ -24,7 +25,7 @@ import com.android.systemui.media.controls.domain.pipeline.interactor.factory.me
 import com.android.systemui.media.controls.domain.pipeline.interactor.mediaCarouselInteractor
 import com.android.systemui.media.controls.util.mediaFlags
 import com.android.systemui.media.controls.util.mediaUiEventLogger
-import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
+import com.android.systemui.statusbar.notification.collection.provider.visualStabilityProvider
 
 val Kosmos.mediaCarouselViewModel by
     Kosmos.Fixture {
@@ -32,7 +33,8 @@ val Kosmos.mediaCarouselViewModel by
             applicationScope = applicationCoroutineScope,
             applicationContext = applicationContext,
             backgroundDispatcher = testDispatcher,
-            visualStabilityProvider = VisualStabilityProvider(),
+            backgroundExecutor = fakeExecutor,
+            visualStabilityProvider = visualStabilityProvider,
             interactor = mediaCarouselInteractor,
             controlInteractorFactory = mediaControlInteractorFactory,
             recommendationsViewModel = mediaRecommendationsViewModel,

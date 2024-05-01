@@ -171,3 +171,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "fix_misaligned_context_menu"
+  namespace: "text"
+  description: "Fix the context menu misalignment and incosistent icon size."
+  bug: "332542108"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -14,10 +14,7 @@ import org.junit.runners.model.Statement
 abstract class SystemUILintDetectorTest : LintDetectorTest() {
 
     companion object {
-        @ClassRule
-        @JvmField
-        val libraryChecker: LibraryExists =
-            LibraryExists("framework.jar", "androidx.annotation_annotation-nodeps.jar")
+        @ClassRule @JvmField val libraryChecker: LibraryExists = LibraryExists(*libraryNames)
     }
 
     class LibraryExists(vararg val libraryNames: String) : TestRule {

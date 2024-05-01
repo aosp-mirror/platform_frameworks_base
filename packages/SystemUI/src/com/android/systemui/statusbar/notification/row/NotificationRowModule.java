@@ -50,4 +50,12 @@ public abstract class NotificationRowModule {
     @SysUISingleton
     public abstract NotifRemoteViewsFactoryContainer provideNotifRemoteViewsFactoryContainer(
             NotifRemoteViewsFactoryContainerImpl containerImpl);
+
+    /**
+     * Provides heads up style manager
+     */
+    @Binds
+    @SysUISingleton
+    public abstract HeadsUpStyleProvider provideHeadsUpStyleManager(
+            HeadsUpStyleProviderImpl headsUpStyleManagerImpl);
 }

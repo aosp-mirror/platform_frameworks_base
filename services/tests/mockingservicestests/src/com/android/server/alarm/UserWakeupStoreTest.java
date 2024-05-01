@@ -116,7 +116,7 @@ public class UserWakeupStoreTest {
         mUserWakeupStore.addUserWakeup(USER_ID_1, TEST_TIMESTAMP - 7_000);
         mUserWakeupStore.addUserWakeup(USER_ID_1, finalAlarmTime);
         assertEquals(1, mUserWakeupStore.getUserIdsToWakeup(TEST_TIMESTAMP).length);
-        final long alarmTime = mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_1)
+        final long alarmTime = mUserWakeupStore.getWakeupTimeForUser(USER_ID_1)
                 + BUFFER_TIME_MS;
         assertTrue(finalAlarmTime + USER_START_TIME_DEVIATION_LIMIT_MS >= alarmTime);
         assertTrue(finalAlarmTime - USER_START_TIME_DEVIATION_LIMIT_MS <= alarmTime);
@@ -129,8 +129,8 @@ public class UserWakeupStoreTest {
         mUserWakeupStore.addUserWakeup(USER_ID_3, TEST_TIMESTAMP - 13_000);
         assertEquals(3, mUserWakeupStore.getUserIdsToWakeup(TEST_TIMESTAMP).length);
         mUserWakeupStore.removeUserWakeup(USER_ID_3);
-        assertEquals(-1, mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_3));
-        assertTrue(mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_2) > 0);
+        assertEquals(-1, mUserWakeupStore.getWakeupTimeForUser(USER_ID_3));
+        assertTrue(mUserWakeupStore.getWakeupTimeForUser(USER_ID_2) > 0);
     }
 
     @Test
@@ -139,10 +139,10 @@ public class UserWakeupStoreTest {
         mUserWakeupStore.addUserWakeup(USER_ID_2, TEST_TIMESTAMP - 3_000);
         mUserWakeupStore.addUserWakeup(USER_ID_3, TEST_TIMESTAMP - 13_000);
         assertEquals(mUserWakeupStore.getNextWakeupTime(),
-                mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_1));
+                mUserWakeupStore.getWakeupTimeForUser(USER_ID_1));
         mUserWakeupStore.removeUserWakeup(USER_ID_1);
         assertEquals(mUserWakeupStore.getNextWakeupTime(),
-                mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_3));
+                mUserWakeupStore.getWakeupTimeForUser(USER_ID_3));
     }
 
     @Test
@@ -154,16 +154,16 @@ public class UserWakeupStoreTest {
         mUserWakeupStore.init();
         final long realtime = SystemClock.elapsedRealtime();
         assertEquals(0, mUserWakeupStore.getUserIdsToWakeup(TEST_TIMESTAMP).length);
-        assertTrue(mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_2) > realtime);
-        assertTrue(mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_1)
-                < mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_3));
-        assertTrue(mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_3)
-                < mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_2));
-        assertTrue(mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_1) - realtime
+        assertTrue(mUserWakeupStore.getWakeupTimeForUser(USER_ID_2) > realtime);
+        assertTrue(mUserWakeupStore.getWakeupTimeForUser(USER_ID_1)
+                < mUserWakeupStore.getWakeupTimeForUser(USER_ID_3));
+        assertTrue(mUserWakeupStore.getWakeupTimeForUser(USER_ID_3)
+                < mUserWakeupStore.getWakeupTimeForUser(USER_ID_2));
+        assertTrue(mUserWakeupStore.getWakeupTimeForUser(USER_ID_1) - realtime
                 < BUFFER_TIME_MS + USER_START_TIME_DEVIATION_LIMIT_MS);
-        assertTrue(mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_3) - realtime
+        assertTrue(mUserWakeupStore.getWakeupTimeForUser(USER_ID_3) - realtime
                 < 2 * BUFFER_TIME_MS + USER_START_TIME_DEVIATION_LIMIT_MS);
-        assertTrue(mUserWakeupStore.getWakeupTimeForUserForTest(USER_ID_2) - realtime
+        assertTrue(mUserWakeupStore.getWakeupTimeForUser(USER_ID_2) - realtime
                 < 3 * BUFFER_TIME_MS + USER_START_TIME_DEVIATION_LIMIT_MS);
     }
     //TODO: b/330264023 - Add tests for I/O in usersWithAlarmClocks.xml.

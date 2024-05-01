@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.domain.interactor
 
+import com.android.internal.logging.uiEventLogger
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
@@ -36,9 +37,8 @@ import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
 import com.android.systemui.statusbar.notificationShadeWindowController
-import com.android.systemui.statusbar.phone.centralSurfaces
+import com.android.systemui.statusbar.phone.centralSurfacesOptional
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
-import dagger.Lazy
 
 val Kosmos.sceneContainerStartable by Fixture {
     SceneContainerStartable(
@@ -54,14 +54,16 @@ val Kosmos.sceneContainerStartable by Fixture {
         falsingCollector = falsingCollector,
         falsingManager = falsingManager,
         powerInteractor = powerInteractor,
-        simBouncerInteractor = Lazy { simBouncerInteractor },
-        authenticationInteractor = Lazy { authenticationInteractor },
+        simBouncerInteractor = { simBouncerInteractor },
+        authenticationInteractor = { authenticationInteractor },
         windowController = notificationShadeWindowController,
         deviceProvisioningInteractor = deviceProvisioningInteractor,
-        centralSurfaces = centralSurfaces,
+        centralSurfacesOptLazy = { centralSurfacesOptional },
         headsUpInteractor = headsUpNotificationInteractor,
         occlusionInteractor = sceneContainerOcclusionInteractor,
         faceUnlockInteractor = deviceEntryFaceAuthInteractor,
         shadeInteractor = shadeInteractor,
+        uiEventLogger = uiEventLogger,
+        sceneBackInteractor = sceneBackInteractor,
     )
 }

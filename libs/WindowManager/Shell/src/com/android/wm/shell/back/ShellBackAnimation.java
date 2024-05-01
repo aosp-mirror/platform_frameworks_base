@@ -42,11 +42,12 @@ public abstract class ShellBackAnimation {
     public abstract BackAnimationRunner getRunner();
 
     /**
-     * Prepare the next animation with customized animation.
+     * Prepare the next animation.
      *
      * @return true if this type of back animation should override the default.
      */
-    public boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo) {
+    public boolean prepareNextAnimation(BackNavigationInfo.CustomAnimationInfo animationInfo,
+            int letterboxColor) {
         return false;
     }
 

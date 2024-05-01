@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"Credential Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Cancelar"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuar"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"Guardar otra forma"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Guardar de otra forma"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Más información"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Mostrar contraseña"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Ocultar contraseña"</string>
@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Usar la llave de acceso guardada para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Usar la contraseña guardada para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Usar tu cuenta para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Usar el bloqueo de pantalla para acceder a <xliff:g id="APP_NAME">%1$s</xliff:g> con <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Desbloquear las opciones para acceder para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Elige una llave de acceso guardada para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Elige una contraseña guardada para <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

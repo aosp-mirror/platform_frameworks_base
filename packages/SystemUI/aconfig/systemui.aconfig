@@ -226,6 +226,13 @@ flag {
 }
 
 flag {
+    name: "dual_shade"
+    namespace: "systemui"
+    description: "Enables the BC25 Dual Shade (go/bc25-dual-shade-design)."
+    bug: "337259436"
+}
+
+flag {
     name: "keyguard_bottom_area_refactor"
     namespace: "systemui"
     description: "Bottom area of keyguard refactor move into KeyguardRootView. Includes "
@@ -497,7 +504,7 @@ flag {
 }
 
 flag {
-    name: "screenshot_shelf_ui"
+    name: "screenshot_shelf_ui2"
     namespace: "systemui"
     description: "Use new shelf UI flow for screenshots"
     bug: "329659738"
@@ -522,6 +529,13 @@ flag {
    namespace: "systemui"
    description: "Indicate Smartspace RemoteViews rendering"
    bug: "326292691"
+}
+
+flag {
+   name: "smartspace_lockscreen_viewmodel"
+   namespace: "systemui"
+   description: "Indicate Smartspace lockscreen viewmodel"
+   bug: "331451011"
 }
 
 flag {
@@ -776,6 +790,13 @@ flag {
 }
 
 flag {
+    name: "keyboard_shortcut_helper_rewrite"
+    namespace: "systemui"
+    description: "A new implementation of the keyboards shortcuts helper sheet."
+    bug: "327364197"
+}
+
+flag {
   name: "dream_overlay_bouncer_swipe_direction_filtering"
   namespace: "systemui"
   description: "do not initiate bouncer swipe when the direction is opposite of the expansion"
@@ -820,4 +841,14 @@ flag {
     namespace: "systemui"
     description: "Enforce BaseUserRestriction for DISALLOW_CONFIG_BRIGHTNESS."
     bug: "329205638"
+}
+
+flag {
+  name: "ambient_touch_monitor_listen_to_display_changes"
+  namespace: "systemui"
+  description: "listen to display changes and cache window metrics"
+  bug: "330906135"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

@@ -23,11 +23,11 @@ import kotlinx.coroutines.awaitCancellation
 
 object HapticSliderViewBinder {
     /**
-     * Binds a [SeekableSliderHapticPlugin] to a [View]. The binded view should be a
+     * Binds a [SeekbarHapticPlugin] to a [View]. The binded view should be a
      * [android.widget.SeekBar] or a container of a [android.widget.SeekBar]
      */
     @JvmStatic
-    fun bind(view: View?, plugin: SeekableSliderHapticPlugin) {
+    fun bind(view: View?, plugin: SeekbarHapticPlugin) {
         view?.repeatWhenAttached {
             plugin.startInScope(lifecycleScope)
             try {

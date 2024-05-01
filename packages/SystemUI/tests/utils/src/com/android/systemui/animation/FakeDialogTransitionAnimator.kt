@@ -15,15 +15,15 @@
 package com.android.systemui.animation
 
 import com.android.internal.jank.InteractionJankMonitor
-import org.mockito.Mockito.mock
+import com.android.systemui.jank.interactionJankMonitor
 
 /** A [DialogTransitionAnimator] to be used in tests. */
 @JvmOverloads
 fun fakeDialogTransitionAnimator(
     isUnlocked: Boolean = true,
     isShowingAlternateAuthOnUnlock: Boolean = false,
-    interactionJankMonitor: InteractionJankMonitor = mock(InteractionJankMonitor::class.java),
     isPredictiveBackQsDialogAnim: Boolean = false,
+    interactionJankMonitor: InteractionJankMonitor,
 ): DialogTransitionAnimator {
     return DialogTransitionAnimator(
         callback =

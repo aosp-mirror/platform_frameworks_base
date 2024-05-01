@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+    <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
 
     <uses-permission android:name="com.google.android.permission.INSTALL_WEARABLE_PACKAGES" />
 

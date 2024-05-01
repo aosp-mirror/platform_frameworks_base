@@ -269,6 +269,8 @@ class BackNavigationController {
                                     customAppTransition.mBackgroundColor);
                         }
                     }
+                    infoBuilder.setLetterboxColor(currentActivity.mLetterboxUiController
+                            .getLetterboxBackgroundColor().toArgb());
                     removedWindowContainer = currentActivity;
                     prevTask = prevActivities.get(0).getTask();
                     backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
@@ -300,7 +302,8 @@ class BackNavigationController {
                 } else if (prevTask.isActivityTypeHome()) {
                     removedWindowContainer = currentTask;
                     backType = BackNavigationInfo.TYPE_RETURN_TO_HOME;
-                    mShowWallpaper = true;
+                    final ActivityRecord ar = prevTask.getTopNonFinishingActivity();
+                    mShowWallpaper = ar != null && ar.hasWallpaper();
                 } else {
                     // If it reaches the top activity, we will check the below task from parent.
                     // If it's null or multi-window and has different parent task, fallback the type
@@ -308,7 +311,9 @@ class BackNavigationController {
                     // another task.
                     final Task prevParent = prevTask.getParent().asTask();
                     final Task currParent = currentTask.getParent().asTask();
-                    if (prevTask.inMultiWindowMode() && prevParent != currParent) {
+                    if ((prevTask.inMultiWindowMode() && prevParent != currParent)
+                            // Do not animate to translucent task, it could be trampoline.
+                            || hasTranslucentActivity(currentActivity, prevActivities)) {
                         backType = BackNavigationInfo.TYPE_CALLBACK;
                     } else {
                         removedWindowContainer = prevTask;
@@ -523,7 +528,7 @@ class BackNavigationController {
         }
         for (int i = prevActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord test = prevActivities.get(i);
-            if (!test.occludesParent() || test.showWallpaper()) {
+            if (!test.occludesParent() || test.hasWallpaper()) {
                 return true;
             }
         }

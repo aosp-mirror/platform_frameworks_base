@@ -25,6 +25,7 @@ import static com.android.systemui.flags.FlagManager.EXTRA_NAME;
 import static com.android.systemui.flags.FlagManager.EXTRA_VALUE;
 import static com.android.systemui.flags.FlagsCommonModule.ALL_FLAGS;
 import static com.android.systemui.shared.Flags.exampleSharedFlag;
+
 import static java.util.Objects.requireNonNull;
 
 import android.content.BroadcastReceiver;

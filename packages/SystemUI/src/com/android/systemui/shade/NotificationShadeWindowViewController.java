@@ -25,7 +25,6 @@ import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 import android.app.StatusBarManager;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -74,13 +73,13 @@ import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.util.time.SystemClock;
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
 import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
@@ -137,6 +136,11 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
 
+    /**
+     * If {@code true}, an external touch sent in {@link #handleExternalTouch(MotionEvent)} has been
+     * intercepted and all future touch events for the gesture should be processed by this view.
+     */
+    private boolean mExternalTouchIntercepted = false;
     private boolean mIsTrackingBarGesture = false;
     private boolean mIsOcclusionTransitionRunning = false;
     private DisableSubpixelTextTransitionListener mDisableSubpixelTextTransitionListener;
@@ -253,11 +257,28 @@ public class NotificationShadeWindowViewController implements Dumpable {
     }
 
     /**
-     * Handle a touch event while dreaming by forwarding the event to the content view.
+     * Handle a touch event while dreaming or on the hub by forwarding the event to the content
+     * view.
+     * <p>
+     * Since important logic for handling touches lives in the dispatch/intercept phases, we
+     * simulate going through all of these stages before sending onTouchEvent if intercepted.
+     *
      * @param event The event to forward.
      */
-    public void handleDreamTouch(MotionEvent event) {
-        mView.dispatchTouchEvent(event);
+    public void handleExternalTouch(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mExternalTouchIntercepted = false;
+        }
+
+        if (!mView.dispatchTouchEvent(event)) {
+            return;
+        }
+        if (!mExternalTouchIntercepted) {
+            mExternalTouchIntercepted = mView.onInterceptTouchEvent(event);
+        }
+        if (mExternalTouchIntercepted) {
+            mView.onTouchEvent(event);
+        }
     }
 
     /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */

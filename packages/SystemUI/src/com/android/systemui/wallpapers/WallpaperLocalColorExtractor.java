@@ -51,7 +51,7 @@ public class WallpaperLocalColorExtractor {
     private Bitmap mMiniBitmap;
 
     @VisibleForTesting
-    static final int SMALL_SIDE = 128;
+    static final int MINI_BITMAP_MAX_AREA = 112 * 112;
 
     private static final String TAG = WallpaperLocalColorExtractor.class.getSimpleName();
     private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
@@ -326,12 +326,12 @@ public class WallpaperLocalColorExtractor {
 
     private Bitmap createMiniBitmap(@NonNull Bitmap bitmap) {
         Trace.beginSection("WallpaperLocalColorExtractor#createMiniBitmap");
-        // if both sides of the image are larger than SMALL_SIDE, downscale the bitmap.
-        int smallestSide = Math.min(bitmap.getWidth(), bitmap.getHeight());
-        float scale = Math.min(1.0f, (float) SMALL_SIDE / smallestSide);
+        // if the area of the image is greater than MINI_BITMAP_MAX_AREA, downscale the bitmap.
+        int area = bitmap.getWidth() * bitmap.getHeight();
+        double scale = Math.min(1, Math.sqrt((double) MINI_BITMAP_MAX_AREA / area));
         Bitmap result = createMiniBitmap(bitmap,
-                (int) (scale * bitmap.getWidth()),
-                (int) (scale * bitmap.getHeight()));
+                Math.max(1, (int) (scale * bitmap.getWidth())),
+                Math.max(1, (int) (scale * bitmap.getHeight())));
         Trace.endSection();
         return result;
     }

@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.Rect
@@ -35,6 +36,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.Interpolator
 import android.window.BackEvent
 import android.window.BackMotionEvent
+import android.window.BackNavigationInfo
 import android.window.BackProgressAnimator
 import android.window.IOnBackInvokedCallback
 import com.android.internal.jank.Cuj
@@ -67,6 +69,7 @@ class CrossActivityBackAnimation @Inject constructor(
     private val currentEnteringRect = RectF()
 
     private val backAnimRect = Rect()
+    private val cropRect = Rect()
 
     private var cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
 
@@ -95,6 +98,10 @@ class CrossActivityBackAnimation @Inject constructor(
     private var maxScrimAlpha: Float = 0f
 
     private var isLetterboxed = false
+    private var enteringHasSameLetterbox = false
+    private var leftLetterboxLayer: SurfaceControl? = null
+    private var rightLetterboxLayer: SurfaceControl? = null
+    private var letterboxColor: Int = 0
 
     override fun onConfigurationChanged(newConfiguration: Configuration) {
         cornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
@@ -115,8 +122,12 @@ class CrossActivityBackAnimation @Inject constructor(
 
         transaction.setAnimationTransaction()
         isLetterboxed = closingTarget!!.taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed
-        if (isLetterboxed) {
-            // Include letterbox in back animation
+        enteringHasSameLetterbox = isLetterboxed &&
+                closingTarget!!.localBounds.equals(enteringTarget!!.localBounds)
+
+        if (isLetterboxed && !enteringHasSameLetterbox) {
+            // Play animation with letterboxes, if closing and entering target have mismatching
+            // letterboxes
             backAnimRect.set(closingTarget!!.windowConfiguration.bounds)
         } else {
             // otherwise play animation on localBounds only
@@ -144,12 +155,25 @@ class CrossActivityBackAnimation @Inject constructor(
         targetEnteringRect.set(startEnteringRect)
         targetEnteringRect.scaleCentered(MAX_SCALE)
 
-        // Draw background with task background color.
+        // Draw background with task background color (or letterbox color).
+        val backgroundColor = if (isLetterboxed) {
+            letterboxColor
+        } else {
+            enteringTarget!!.taskInfo.taskDescription!!.backgroundColor
+        }
         background.ensureBackground(
-            closingTarget!!.windowConfiguration.bounds,
-            enteringTarget!!.taskInfo.taskDescription!!.backgroundColor, transaction
+            closingTarget!!.windowConfiguration.bounds, backgroundColor, transaction
         )
         ensureScrimLayer()
+        if (isLetterboxed && enteringHasSameLetterbox) {
+            // crop left and right letterboxes
+            cropRect.set(closingTarget!!.localBounds.left, 0, closingTarget!!.localBounds.right,
+                    closingTarget!!.windowConfiguration.bounds.height())
+            // and add fake letterbox square surfaces instead
+            ensureLetterboxes()
+        } else {
+            cropRect.set(backAnimRect)
+        }
         applyTransaction()
     }
 
@@ -249,18 +273,25 @@ class CrossActivityBackAnimation @Inject constructor(
         }
         finishCallback = null
         removeScrimLayer()
+        removeLetterbox()
         isLetterboxed = false
+        enteringHasSameLetterbox = false
     }
 
     private fun applyTransform(leash: SurfaceControl?, rect: RectF, alpha: Float) {
         if (leash == null || !leash.isValid) return
         val scale = rect.width() / backAnimRect.width()
         transformMatrix.reset()
-        transformMatrix.setScale(scale, scale)
+        val scalePivotX = if (isLetterboxed && enteringHasSameLetterbox) {
+            closingTarget!!.localBounds.left.toFloat()
+        } else {
+            0f
+        }
+        transformMatrix.setScale(scale, scale, scalePivotX, 0f)
         transformMatrix.postTranslate(rect.left, rect.top)
         transaction.setAlpha(leash, alpha)
             .setMatrix(leash, transformMatrix, tmpFloat9)
-            .setCrop(leash, backAnimRect)
+            .setCrop(leash, cropRect)
             .setCornerRadius(leash, cornerRadius)
     }
 
@@ -297,15 +328,73 @@ class CrossActivityBackAnimation @Inject constructor(
     }
 
     private fun removeScrimLayer() {
-        scrimLayer?.let {
-            if (it.isValid) {
-                transaction.remove(it)
-                applyTransaction()
-            }
-        }
+        if (removeLayer(scrimLayer)) applyTransaction()
         scrimLayer = null
     }
 
+    /**
+     * Adds two "fake" letterbox square surfaces to the left and right of the localBounds of the
+     * closing target
+     */
+    private fun ensureLetterboxes() {
+        closingTarget?.let { t ->
+            if (t.localBounds.left != 0 && leftLetterboxLayer == null) {
+                val bounds = Rect(0, t.windowConfiguration.bounds.top, t.localBounds.left,
+                        t.windowConfiguration.bounds.bottom)
+                leftLetterboxLayer = ensureLetterbox(bounds)
+            }
+            if (t.localBounds.right != t.windowConfiguration.bounds.right &&
+                    rightLetterboxLayer == null) {
+                val bounds = Rect(t.localBounds.right, t.windowConfiguration.bounds.top,
+                        t.windowConfiguration.bounds.right, t.windowConfiguration.bounds.bottom)
+                rightLetterboxLayer = ensureLetterbox(bounds)
+            }
+        }
+    }
+
+    private fun ensureLetterbox(bounds: Rect): SurfaceControl {
+        val letterboxBuilder = SurfaceControl.Builder()
+                .setName("Cross-Activity back animation letterbox")
+                .setCallsite("CrossActivityBackAnimation")
+                .setColorLayer()
+                .setOpaque(true)
+                .setHidden(false)
+
+        rootTaskDisplayAreaOrganizer.attachToDisplayArea(Display.DEFAULT_DISPLAY, letterboxBuilder)
+        val layer = letterboxBuilder.build()
+        val colorComponents = floatArrayOf(Color.red(letterboxColor) / 255f,
+                Color.green(letterboxColor) / 255f, Color.blue(letterboxColor) / 255f)
+        transaction
+                .setColor(layer, colorComponents)
+                .setCrop(layer, bounds)
+                .setRelativeLayer(layer, closingTarget!!.leash, 1)
+                .show(layer)
+        return layer
+    }
+
+    private fun removeLetterbox() {
+        if (removeLayer(leftLetterboxLayer) || removeLayer(rightLetterboxLayer)) applyTransaction()
+        leftLetterboxLayer = null
+        rightLetterboxLayer = null
+    }
+
+    private fun removeLayer(layer: SurfaceControl?): Boolean {
+        layer?.let {
+            if (it.isValid) {
+                transaction.remove(it)
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun prepareNextAnimation(
+            animationInfo: BackNavigationInfo.CustomAnimationInfo?,
+            letterboxColor: Int
+    ): Boolean {
+        this.letterboxColor = letterboxColor
+        return false
+    }
 
     private inner class Callback : IOnBackInvokedCallback.Default() {
         override fun onBackStarted(backMotionEvent: BackMotionEvent) {

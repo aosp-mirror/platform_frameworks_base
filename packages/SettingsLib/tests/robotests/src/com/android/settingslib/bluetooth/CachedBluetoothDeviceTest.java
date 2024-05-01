@@ -697,7 +697,7 @@ public class CachedBluetoothDeviceTest {
         // Set device as Active for Hearing Aid and test connection state summary
         mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, left only");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active (left only)");
 
         // Set Hearing Aid profile to be disconnected and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.HEARING_AID);
@@ -717,7 +717,7 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.setHearingAidInfo(getLeftAshaHearingAidInfo());
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
         assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo(
-                "Active, left only");
+                "Active (left only)");
 
         // Set Hearing Aid profile to be disconnected and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.HEARING_AID);
@@ -794,7 +794,7 @@ public class CachedBluetoothDeviceTest {
 
         // Act & Assert:
         //   Get "Active" result without Battery Level.
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, right only");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active (right only)");
     }
 
     @Test
@@ -810,7 +810,7 @@ public class CachedBluetoothDeviceTest {
         // Act & Assert:
         //   Get "Active" result without Battery Level.
         assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo(
-                "Active, right only");
+                "Active (right only)");
     }
 
     @Test
@@ -828,7 +828,7 @@ public class CachedBluetoothDeviceTest {
 
         // Act & Assert:
         //   Get "Active" result without Battery Level.
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, left and right");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active (left and right)");
     }
 
     @Test
@@ -847,7 +847,7 @@ public class CachedBluetoothDeviceTest {
         // Act & Assert:
         //   Get "Active" result without Battery Level.
         assertThat(mCachedDevice.getTvConnectionSummary().toString())
-                .isEqualTo("Active, left and right");
+                .isEqualTo("Active (left and right)");
     }
 
     @Test
@@ -894,7 +894,7 @@ public class CachedBluetoothDeviceTest {
         // Set device as Active for LE Audio and test connection state summary
         mCachedDevice.setHearingAidInfo(getLeftLeAudioHearingAidInfo());
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.LE_AUDIO);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active, left only");
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Active (left only)");
 
         // Set LE Audio profile to be disconnected and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.LE_AUDIO);
@@ -915,7 +915,7 @@ public class CachedBluetoothDeviceTest {
         mCachedDevice.setHearingAidInfo(getLeftLeAudioHearingAidInfo());
         mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.LE_AUDIO);
         assertThat(mCachedDevice.getTvConnectionSummary().toString()).isEqualTo(
-                "Active, left only");
+                "Active (left only)");
 
         // Set LE Audio profile to be disconnected and test connection state summary
         mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.LE_AUDIO);

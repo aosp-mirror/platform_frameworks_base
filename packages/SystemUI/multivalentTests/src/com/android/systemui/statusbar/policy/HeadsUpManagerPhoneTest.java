@@ -49,6 +49,8 @@ import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
+import kotlinx.coroutines.flow.StateFlowKt;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -58,11 +60,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.List;
-
-import kotlinx.coroutines.flow.StateFlowKt;
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
+
+import java.util.List;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)

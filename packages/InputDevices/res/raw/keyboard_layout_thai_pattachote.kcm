@@ -1,0 +1,317 @@
+# Copyright 2024 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Thai Pattachote keyboard layout.
+#
+
+type OVERLAY
+
+map key 86 PLUS
+
+### ROW 1
+
+key GRAVE {
+    label:                              '_'
+    base:                               '_'
+    shift, capslock:                    '\u0e3f'
+}
+
+key 1 {
+    label:                              '='
+    base:                               '='
+    shift, capslock:                    '+'
+}
+
+key 2 {
+    label:                              '\u0e52'
+    base:                               '\u0e52'
+    shift, capslock:                    '\u0022'
+}
+
+key 3 {
+    label:                              '\u0e53'
+    base:                               '\u0e53'
+    shift, capslock:                    '/'
+}
+
+key 4 {
+    label:                              '\u0e54'
+    base:                               '\u0e54'
+    shift, capslock:                    ','
+}
+
+key 5 {
+    label:                              '\u0e55'
+    base:                               '\u0e55'
+    shift, capslock:                    '?'
+}
+
+key 6 {
+    label:                              '\u0e39'
+    base:                               '\u0e39'
+    shift, capslock:                    '\u0e38'
+}
+
+key 7 {
+    label:                              '\u0e57'
+    base:                               '\u0e57'
+    shift, capslock:                    '_'
+}
+
+key 8 {
+    label:                              '\u0e58'
+    base:                               '\u0e58'
+    shift, capslock:                    '.'
+}
+
+key 9 {
+    label:                              '\u0e59'
+    base:                               '\u0e59'
+    shift, capslock:                    '('
+}
+
+key 0 {
+    label:                              '\u0e50'
+    base:                               '\u0e50'
+    shift, capslock:                    ')'
+}
+
+key MINUS {
+    label:                              '\u0e51'
+    base:                               '\u0e51'
+    shift, capslock:                    '-'
+}
+
+key EQUALS {
+    label:                              '\u0e56'
+    base:                               '\u0e56'
+    shift, capslock:                    '%'
+}
+
+### ROW 2
+
+key Q {
+    label:                              '\u0e47'
+    base:                               '\u0e47'
+    shift, capslock:                    '\u0e4a'
+}
+
+key W {
+    label:                              '\u0e15'
+    base:                               '\u0e15'
+    shift, capslock:                    '\u0e24'
+}
+
+key E {
+    label:                              '\u0e22'
+    base:                               '\u0e22'
+    shift, capslock:                    '\u0e46'
+}
+
+key R {
+    label:                              '\u0e2d'
+    base:                               '\u0e2d'
+    shift, capslock:                    '\u0e0d'
+}
+
+key T {
+    label:                              '\u0e23'
+    base:                               '\u0e23'
+    shift, capslock:                    '\u0e29'
+}
+
+key Y {
+    label:                              '\u0e48'
+    base:                               '\u0e48'
+    shift, capslock:                    '\u0e36'
+}
+
+key U {
+    label:                              '\u0e14'
+    base:                               '\u0e14'
+    shift, capslock:                    '\u0e1d'
+}
+
+key I {
+    label:                              '\u0e21'
+    base:                               '\u0e21'
+    shift, capslock:                    '\u0e0b'
+}
+
+key O {
+    label:                              '\u0e27'
+    base:                               '\u0e27'
+    shift, capslock:                    '\u0e16'
+}
+
+key P {
+    label:                              '\u0e41'
+    base:                               '\u0e41'
+    shift, capslock:                    '\u0e12'
+}
+
+key LEFT_BRACKET {
+    label:                              '\u0e43'
+    base:                               '\u0e43'
+    shift, capslock:                    '\u0e2f'
+}
+
+key RIGHT_BRACKET {
+    label:                              '\u0e0c'
+    base:                               '\u0e0c'
+    shift, capslock:                    '\u0e26'
+}
+
+### ROW 3
+
+key A {
+    label:                              '\u0e49'
+    base:                               '\u0e49'
+    shift, capslock:                    '\u0e4b'
+}
+
+key S {
+    label:                              '\u0e17'
+    base:                               '\u0e17'
+    shift, capslock:                    '\u0e18'
+}
+
+key D {
+    label:                              '\u0e07'
+    base:                               '\u0e07'
+    shift, capslock:                    '\u0e33'
+}
+
+key F {
+    label:                              '\u0e01'
+    base:                               '\u0e01'
+    shift, capslock:                    '\u0e13'
+}
+
+key G {
+    label:                              '\u0e31'
+    base:                               '\u0e31'
+    shift, capslock:                    '\u0e4c'
+}
+
+key H {
+    label:                              '\u0e35'
+    base:                               '\u0e35'
+    shift, capslock:                    '\u0e37'
+}
+
+key J {
+    label:                              '\u0e32'
+    base:                               '\u0e32'
+    shift, capslock:                    '\u0e1c'
+}
+
+key K {
+    label:                              '\u0e19'
+    base:                               '\u0e19'
+    shift, capslock:                    '\u0e0a'
+}
+
+key L {
+    label:                              '\u0e40'
+    base:                               '\u0e40'
+    shift, capslock:                    '\u0e42'
+}
+
+key SEMICOLON {
+    label:                              '\u0e44'
+    base:                               '\u0e44'
+    shift, capslock:                    '\u0e06'
+}
+
+key APOSTROPHE {
+    label:                              '\u0e02'
+    base:                               '\u0e02'
+    shift, capslock:                    '\u0e11'
+}
+
+key BACKSLASH {
+    label:                              '\u0e45'
+    base:                               '\u0e45'
+    shift, capslock:                    '\u0e4d'
+}
+
+### ROW 4
+
+key PLUS {
+    label:                              '\u0e45'
+    base:                               '\u0e45'
+    shift, capslock:                    '\u0e4d'
+}
+
+key Z {
+    label:                              '\u0e1a'
+    base:                               '\u0e1a'
+    shift, capslock:                    '\u0e0e'
+}
+
+key X {
+    label:                              '\u0e1b'
+    base:                               '\u0e1b'
+    shift, capslock:                    '\u0e0f'
+}
+
+key C {
+    label:                              '\u0e25'
+    base:                               '\u0e25'
+    shift, capslock:                    '\u0e10'
+}
+
+key V {
+    label:                              '\u0e2b'
+    base:                               '\u0e2b'
+    shift, capslock:                    '\u0e20'
+}
+
+key B {
+    label:                              '\u0e34'
+    base:                               '\u0e34'
+    shift, capslock:                    '\u0e31'
+}
+
+key N {
+    label:                              '\u0e04'
+    base:                               '\u0e04'
+    shift, capslock:                    '\u0e28'
+}
+
+key M {
+    label:                              '\u0e2a'
+    base:                               '\u0e2a'
+    shift, capslock:                    '\u0e2e'
+}
+
+key COMMA {
+    label:                              '\u0e30'
+    base:                               '\u0e30'
+    shift, capslock:                    '\u0e1f'
+}
+
+key PERIOD {
+    label:                              '\u0e08'
+    base:                               '\u0e08'
+    shift, capslock:                    '\u0e09'
+}
+
+key SLASH {
+    label:                              '\u0e1e'
+    base:                               '\u0e1e'
+    shift, capslock:                    '\u0e2c'
+}

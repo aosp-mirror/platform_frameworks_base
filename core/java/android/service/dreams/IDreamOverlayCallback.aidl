@@ -23,9 +23,14 @@ package android.service.dreams;
 *
 * @hide
 */
-interface IDreamOverlayCallback {
+oneway interface IDreamOverlayCallback {
     /**
     * Invoked to request the dream exit.
     */
     void onExitRequested();
+
+    /**
+    * Invoked to redirect wake requests to overlay instead.
+    */
+    void onRedirectWake(boolean redirect);
 }

@@ -76,7 +76,7 @@
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"שידור אפליקציות מהטלפון"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"העברה של אפליקציות ותכונות מערכת אחרות בסטרימינג מהטלפון"</string>
-    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"‏גישה לרשימה של מכשירים זמינים ובחירה איזה מהם ישמש כדי לשדר או להעביר (cast) אודיו או וידאו מאפליקציות אחרות"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"‏גישה לרשימה של מכשירים זמינים ובחירה איזה מהם ישמש כדי לשדר אודיו או וידאו או להפעיל Cast שלהם מאפליקציות אחרות"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"טלפון"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"טאבלט"</string>
 </resources>

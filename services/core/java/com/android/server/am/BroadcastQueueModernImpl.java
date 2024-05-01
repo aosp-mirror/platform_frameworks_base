@@ -1339,8 +1339,14 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     MSG_DELIVERY_TIMEOUT, "BROADCAST_TIMEOUT", true);
         }
 
-        void start(@NonNull BroadcastProcessQueue queue, long timeoutMillis) {
-            start(queue, queue.app.getPid(), queue.app.uid, timeoutMillis);
+        @Override
+        public int getPid(@NonNull BroadcastProcessQueue queue) {
+            return (queue.app != null) ? queue.app.getPid() : 0;
+        }
+
+        @Override
+        public int getUid(@NonNull BroadcastProcessQueue queue) {
+            return (queue.app != null) ? queue.app.uid : 0;
         }
     }
 

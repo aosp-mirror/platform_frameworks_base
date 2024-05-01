@@ -96,7 +96,7 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
                 .loadAnimation(any(), eq(true));
 
         mCustomizeActivityAnimation.prepareNextAnimation(
-                new BackNavigationInfo.CustomAnimationInfo("TestPackage"));
+                new BackNavigationInfo.CustomAnimationInfo("TestPackage"), 0);
         final RemoteAnimationTarget close = createAnimationTarget(false);
         final RemoteAnimationTarget open = createAnimationTarget(true);
         // start animation with remote animation targets
@@ -129,7 +129,7 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
                 .loadAnimation(any(), eq(true));
 
         mCustomizeActivityAnimation.prepareNextAnimation(
-                new BackNavigationInfo.CustomAnimationInfo("TestPackage"));
+                new BackNavigationInfo.CustomAnimationInfo("TestPackage"), 0);
         final RemoteAnimationTarget close = createAnimationTarget(false);
         final RemoteAnimationTarget open = createAnimationTarget(true);
         // start animation with remote animation targets
@@ -155,7 +155,7 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
     @Test
     public void receiveFinishWithoutAnimationAfterInvoke() throws InterruptedException {
         mCustomizeActivityAnimation.prepareNextAnimation(
-                new BackNavigationInfo.CustomAnimationInfo("TestPackage"));
+                new BackNavigationInfo.CustomAnimationInfo("TestPackage"), 0);
         // start animation without any remote animation targets
         final CountDownLatch finishCalled = new CountDownLatch(1);
         final Runnable finishCallback = finishCalled::countDown;

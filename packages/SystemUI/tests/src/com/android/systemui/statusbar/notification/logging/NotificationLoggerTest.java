@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -27,8 +29,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.app.Notification;
 import android.os.Handler;
@@ -72,6 +72,8 @@ import com.android.systemui.util.time.FakeSystemClock;
 
 import com.google.android.collect.Lists;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,8 +85,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
-
-import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

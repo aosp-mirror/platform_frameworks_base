@@ -16,6 +16,7 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_START
 import android.hardware.face.FaceManager
 import com.android.systemui.biometrics.FaceHelpMessageDeferralFactory
 import com.android.systemui.dagger.SysUISingleton
@@ -86,7 +87,7 @@ constructor(
                     }
                 }
                 .collect {
-                    if (it.acquiredInfo == FaceManager.FACE_ACQUIRED_START) {
+                    if (it.acquiredInfo == FACE_ACQUIRED_START) {
                         faceHelpMessageDeferral.reset()
                     }
                     faceHelpMessageDeferral.processFrame(it.acquiredInfo)

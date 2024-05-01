@@ -24,7 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.andSceneContainer
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.DozeStateModel
@@ -80,7 +80,7 @@ class ShadeInteractorImplTest(flags: FlagsParameterization?) : SysuiTestCase() {
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+            return parameterizeSceneContainerFlag()
         }
     }
 

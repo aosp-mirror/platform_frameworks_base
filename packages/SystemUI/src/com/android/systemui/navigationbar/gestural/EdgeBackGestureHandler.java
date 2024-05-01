@@ -516,9 +516,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         SystemUiDeviceConfigFlags.BACK_GESTURE_SLOP_MULTIPLIER, 0.75f);
         mTouchSlop = mViewConfiguration.getScaledTouchSlop() * backGestureSlop;
         mBackSwipeLinearThreshold = res.getDimension(
-                R.dimen.navigation_edge_action_progress_threshold);
+                com.android.internal.R.dimen.navigation_edge_action_progress_threshold);
         mNonLinearFactor = getDimenFloat(res,
-                R.dimen.back_progress_non_linear_factor);
+                com.android.internal.R.dimen.back_progress_non_linear_factor);
         updateBackAnimationThresholds();
     }
 
@@ -1094,15 +1094,12 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         return;
                     } else if (dx > dy && dx > mTouchSlop) {
                         if (mAllowGesture) {
-                            mThresholdCrossed = true;
-                            // Capture inputs
-                            mInputMonitor.pilferPointers();
                             if (mBackAnimation != null) {
-                                mBackAnimation.onPilferPointers();
-                                // Notify FalsingManager that an intentional gesture has occurred.
-                                mFalsingManager.isFalseTouch(BACK_GESTURE);
+                                mBackAnimation.onThresholdCrossed();
+                            } else {
+                                pilferPointers();
                             }
-                            mInputEventReceiver.setBatchingEnabled(true);
+                            mThresholdCrossed = true;
                         } else {
                             logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_FAR_FROM_EDGE);
                         }
@@ -1116,6 +1113,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 dispatchToBackAnimation(ev);
             }
         }
+    }
+
+    private void pilferPointers() {
+        // Capture inputs
+        mInputMonitor.pilferPointers();
+        // Notify FalsingManager that an intentional gesture has occurred.
+        mFalsingManager.isFalseTouch(BACK_GESTURE);
+        mInputEventReceiver.setBatchingEnabled(true);
     }
 
     private boolean isButtonPressFromTrackpad(MotionEvent ev) {
@@ -1266,6 +1271,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
+        mBackAnimation.setPilferPointerCallback(() -> {
+            pilferPointers();
+        });
         updateBackAnimationThresholds();
         if (mLightBarControllerProvider.get() != null) {
             mBackAnimation.setStatusBarCustomizer((appearance) -> {

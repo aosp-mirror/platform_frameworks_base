@@ -49,7 +49,7 @@ internal class SceneTransitionLayoutImpl(
     internal var swipeSourceDetector: SwipeSourceDetector,
     internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
-    private val coroutineScope: CoroutineScope,
+    internal val coroutineScope: CoroutineScope,
 ) {
     /**
      * The map of [Scene]s.
@@ -251,8 +251,8 @@ private data class LayoutElement(private val layoutImpl: SceneTransitionLayoutIm
 
 private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
     Modifier.Node(), ApproachLayoutModifierNode {
-    override fun isMeasurementApproachComplete(lookaheadSize: IntSize): Boolean {
-        return layoutImpl.state.currentTransition == null
+    override fun isMeasurementApproachInProgress(lookaheadSize: IntSize): Boolean {
+        return layoutImpl.state.isTransitioning()
     }
 
     @ExperimentalComposeUiApi

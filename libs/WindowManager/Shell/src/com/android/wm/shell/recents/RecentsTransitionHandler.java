@@ -27,6 +27,7 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION;
 import static com.android.wm.shell.util.SplitBounds.KEY_EXTRA_SPLIT_BOUNDS;
 
 import android.annotation.Nullable;
@@ -54,6 +55,7 @@ import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowAnimationState;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -283,6 +285,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private IBinder mTransition = null;
         private boolean mKeyguardLocked = false;
         private boolean mWillFinishToHome = false;
+        private Transitions.TransitionHandler mTakeoverHandler = null;
 
         /** The animation is idle, waiting for the user to choose a task to switch to. */
         private static final int STATE_NORMAL = 0;
@@ -576,9 +579,13 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                     "Applying transaction=%d", t.getId());
             t.apply();
-            Bundle b = new Bundle(1 /*capacity*/);
+
+            mTakeoverHandler = mTransitions.getHandlerForTakeover(mTransition, info);
+
+            Bundle b = new Bundle(2 /*capacity*/);
             b.putParcelable(KEY_EXTRA_SPLIT_BOUNDS,
                     mRecentTasksController.getSplitBoundsForTaskId(closingSplitTaskId));
+            b.putBoolean(KEY_EXTRA_SHELL_CAN_HAND_OFF_ANIMATION, mTakeoverHandler != null);
             try {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.start: calling onAnimationStart with %d apps",
@@ -595,6 +602,63 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 cancel("onAnimationStart() failed");
             }
             return true;
+        }
+
+        @Override
+        public void handOffAnimation(
+                RemoteAnimationTarget[] targets, WindowAnimationState[] states) {
+            mExecutor.execute(() -> {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.handOffAnimation", mInstanceId);
+
+                if (mTakeoverHandler == null) {
+                    Slog.e(TAG, "Tried to hand off an animation without a valid takeover "
+                            + "handler.");
+                    return;
+                }
+
+                if (targets.length != states.length) {
+                    Slog.e(TAG, "Tried to hand off an animation, but the number of targets "
+                            + "(" + targets.length + ") doesn't match the number of states "
+                            + "(" + states.length + ")");
+                    return;
+                }
+
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.handOffAnimation: got %d states for %d "
+                                + "changes", mInstanceId, states.length, mInfo.getChanges().size());
+                WindowAnimationState[] updatedStates =
+                        new WindowAnimationState[mInfo.getChanges().size()];
+
+                // Ensure that the ordering of animation states is the same as that of  matching
+                // changes in mInfo. prefixOrderIndex is set up in reverse order to that of the
+                // changes, so that's what we use to get to the correct ordering.
+                for (int i = 0; i < targets.length; i++) {
+                    RemoteAnimationTarget target = targets[i];
+                    updatedStates[updatedStates.length - target.prefixOrderIndex] = states[i];
+                }
+
+                Transitions.TransitionFinishCallback finishCB = mFinishCB;
+                // Reset the callback here, so any stray calls that aren't coming from the new
+                // handler are ignored.
+                mFinishCB = null;
+
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.handOffAnimation: calling "
+                                + "takeOverAnimation with %d states", mInstanceId,
+                        updatedStates.length);
+                mTakeoverHandler.takeOverAnimation(
+                        mTransition, mInfo, new SurfaceControl.Transaction(),
+                        wct -> {
+                            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                    "[%d] RecentsController.handOffAnimation: finish "
+                                            + "callback", mInstanceId);
+                            // Set the callback once again so we can finish correctly.
+                            mFinishCB = finishCB;
+                            finishInner(true /* toHome */, false /* userLeave */,
+                                    null /* finishCb */);
+                        }, updatedStates);
+            });
         }
 
         /**

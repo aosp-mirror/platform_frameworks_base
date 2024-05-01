@@ -35,6 +35,7 @@ import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
+import static com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
@@ -43,9 +44,11 @@ import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SH
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
+import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.IBinder;
@@ -62,6 +65,7 @@ import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionMetrics;
 import android.window.TransitionRequestInfo;
+import android.window.WindowAnimationState;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
@@ -124,8 +128,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     static final String TAG = "ShellTransitions";
 
     /** Set to {@code true} to enable shell transitions. */
-    public static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+    public static final boolean ENABLE_SHELL_TRANSITIONS = getShellTransitEnabled();
     public static final boolean SHELL_TRANSITIONS_ROTATION = ENABLE_SHELL_TRANSITIONS
             && SystemProperties.getBoolean("persist.wm.debug.shell_transit_rotate", false);
 
@@ -419,10 +422,22 @@ public class Transitions implements RemoteCallable<Transitions>,
         mHandlers.set(0, handler);
     }
 
-    /** Register a remote transition to be used when `filter` matches an incoming transition */
+    /**
+     * Register a remote transition to be used for all operations except takeovers when `filter`
+     * matches an incoming transition.
+     */
     public void registerRemote(@NonNull TransitionFilter filter,
             @NonNull RemoteTransition remoteTransition) {
         mRemoteTransitionHandler.addFiltered(filter, remoteTransition);
+    }
+
+    /**
+     * Register a remote transition to be used for all operations except takeovers when `filter`
+     * matches an incoming transition.
+     */
+    public void registerRemoteForTakeover(@NonNull TransitionFilter filter,
+            @NonNull RemoteTransition remoteTransition) {
+        mRemoteTransitionHandler.addFilteredForTakeover(filter, remoteTransition);
     }
 
     /** Unregisters a remote transition and all associated filters */
@@ -1187,6 +1202,29 @@ public class Transitions implements RemoteCallable<Transitions>,
     }
 
     /**
+     * Checks whether a handler exists capable of taking over the given transition, and returns it.
+     * Otherwise it returns null.
+     */
+    @Nullable
+    public TransitionHandler getHandlerForTakeover(
+            @NonNull IBinder transition, @NonNull TransitionInfo info) {
+        if (!returnAnimationFrameworkLibrary()) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                    "Trying to get a handler for takeover but the flag is disabled");
+            return null;
+        }
+
+        for (TransitionHandler handler : mHandlers) {
+            TransitionHandler candidate = handler.getHandlerForTakeover(transition, info);
+            if (candidate != null) {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Finish running animations (almost) immediately when a SLEEP transition comes in. We use this
      * as both a way to reduce unnecessary work (animations not visible while screen off) and as a
      * failsafe to unblock "stuck" animations (in particular remote animations).
@@ -1328,6 +1366,49 @@ public class Transitions implements RemoteCallable<Transitions>,
                 @NonNull TransitionFinishCallback finishCallback) { }
 
         /**
+         * Checks whether this handler is capable of taking over a transition matching `info`.
+         * {@link TransitionHandler#takeOverAnimation(IBinder, TransitionInfo,
+         * SurfaceControl.Transaction, TransitionFinishCallback, WindowAnimationState[])} is
+         * guaranteed to succeed if called on the handler returned by this method.
+         *
+         * Note that the handler returned by this method can either be itself, or a different one
+         * selected by this handler to take care of the transition on its behalf.
+         *
+         * @param transition The transition that should be taken over.
+         * @param info Information about the transition to be taken over.
+         * @return A handler capable of taking over a matching transition, or null.
+         */
+        @Nullable
+        default TransitionHandler getHandlerForTakeover(
+                @NonNull IBinder transition, @NonNull TransitionInfo info) {
+            return null;
+        }
+
+        /**
+         * Attempt to take over a running transition. This must succeed if this handler was returned
+         * by {@link TransitionHandler#getHandlerForTakeover(IBinder, TransitionInfo)}.
+         *
+         * @param transition The transition that should be taken over.
+         * @param info Information about the what is changing in the transition.
+         * @param transaction Contains surface changes that resulted from the transition. Any
+         *                    additional changes should be added to this transaction and committed
+         *                    inside this method.
+         * @param finishCallback Call this at the end of the animation, if the take-over succeeds.
+         *                       Note that this will be called instead of the callback originally
+         *                       passed to startAnimation(), so the caller should make sure all
+         *                       necessary cleanup happens here. This MUST be called on main thread.
+         * @param states The animation states of the transition's window at the time this method was
+         *               called.
+         * @return true if the transition was taken over, false if not.
+         */
+        default boolean takeOverAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+                @NonNull SurfaceControl.Transaction transaction,
+                @NonNull TransitionFinishCallback finishCallback,
+                @NonNull WindowAnimationState[] states) {
+            return false;
+        }
+
+        /**
          * Potentially handles a startTransition request.
          *
          * @param transition The transition whose start is being requested.
@@ -1432,16 +1513,21 @@ public class Transitions implements RemoteCallable<Transitions>,
         @Override
         public void registerRemote(@NonNull TransitionFilter filter,
                 @NonNull RemoteTransition remoteTransition) {
-            mMainExecutor.execute(() -> {
-                mRemoteTransitionHandler.addFiltered(filter, remoteTransition);
-            });
+            mMainExecutor.execute(
+                    () -> mRemoteTransitionHandler.addFiltered(filter, remoteTransition));
+        }
+
+        @Override
+        public void registerRemoteForTakeover(@NonNull TransitionFilter filter,
+                @NonNull RemoteTransition remoteTransition) {
+            mMainExecutor.execute(() -> mRemoteTransitionHandler.addFilteredForTakeover(
+                    filter, remoteTransition));
         }
 
         @Override
         public void unregisterRemote(@NonNull RemoteTransition remoteTransition) {
-            mMainExecutor.execute(() -> {
-                mRemoteTransitionHandler.removeFiltered(remoteTransition);
-            });
+            mMainExecutor.execute(
+                    () -> mRemoteTransitionHandler.removeFiltered(remoteTransition));
         }
     }
 
@@ -1470,17 +1556,23 @@ public class Transitions implements RemoteCallable<Transitions>,
         public void registerRemote(@NonNull TransitionFilter filter,
                 @NonNull RemoteTransition remoteTransition) {
             executeRemoteCallWithTaskPermission(mTransitions, "registerRemote",
-                    (transitions) -> {
-                        transitions.mRemoteTransitionHandler.addFiltered(filter, remoteTransition);
-                    });
+                    (transitions) -> transitions.mRemoteTransitionHandler.addFiltered(
+                            filter, remoteTransition));
+        }
+
+        @Override
+        public void registerRemoteForTakeover(@NonNull TransitionFilter filter,
+                @NonNull RemoteTransition remoteTransition) {
+            executeRemoteCallWithTaskPermission(mTransitions, "registerRemoteForTakeover",
+                    (transitions) -> transitions.mRemoteTransitionHandler.addFilteredForTakeover(
+                            filter, remoteTransition));
         }
 
         @Override
         public void unregisterRemote(@NonNull RemoteTransition remoteTransition) {
             executeRemoteCallWithTaskPermission(mTransitions, "unregisterRemote",
-                    (transitions) -> {
-                        transitions.mRemoteTransitionHandler.removeFiltered(remoteTransition);
-                    });
+                    (transitions) ->
+                            transitions.mRemoteTransitionHandler.removeFiltered(remoteTransition));
         }
 
         @Override
@@ -1565,6 +1657,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             pw.println(" (" + Integer.toHexString(System.identityHashCode(handler)) + ")");
         }
 
+        mRemoteTransitionHandler.dump(pw, prefix);
+
         pw.println(prefix + "Observers:");
         for (TransitionObserver observer : mObservers) {
             pw.print(innerPrefix);
@@ -1616,5 +1710,17 @@ public class Transitions implements RemoteCallable<Transitions>,
                 pw.println(transition.mHandler);
             }
         }
+    }
+
+    private static boolean getShellTransitEnabled() {
+        try {
+            if (AppGlobals.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_AUTOMOTIVE, 0)) {
+                return SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+            }
+        } catch (RemoteException re) {
+            Log.w(TAG, "Error getting system features");
+        }
+        return true;
     }
 }

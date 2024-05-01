@@ -145,8 +145,6 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsController mUdfpsController;
     @Mock
-    private SideFpsController mSideFpsController;
-    @Mock
     private DisplayManager mDisplayManager;
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
@@ -1064,14 +1062,12 @@ public class AuthControllerTest extends SysuiTestCase {
         TestableAuthController(Context context) {
             super(context, null /* applicationCoroutineScope */,
                     mExecution, mCommandQueue, mActivityTaskManager, mWindowManager,
-                    mFingerprintManager, mFaceManager, () -> mUdfpsController,
-                    () -> mSideFpsController, mDisplayManager, mWakefulnessLifecycle,
-                    mPanelInteractionDetector, mUserManager, mLockPatternUtils, () -> mUdfpsLogger,
-                    () -> mLogContextInteractor,
-                    () -> mBiometricPromptCredentialInteractor,
-                    () -> mPromptSelectionInteractor, () -> mCredentialViewModel,
-                    () -> mPromptViewModel, mInteractionJankMonitor, mHandler, mBackgroundExecutor,
-                    mUdfpsUtils, mVibratorHelper);
+                    mFingerprintManager, mFaceManager, () -> mUdfpsController, mDisplayManager,
+                    mWakefulnessLifecycle, mPanelInteractionDetector, mUserManager,
+                    mLockPatternUtils, () -> mUdfpsLogger, () -> mLogContextInteractor,
+                    () -> mBiometricPromptCredentialInteractor, () -> mPromptSelectionInteractor,
+                    () -> mCredentialViewModel, () -> mPromptViewModel, mInteractionJankMonitor,
+                    mHandler, mBackgroundExecutor, mUdfpsUtils, mVibratorHelper);
         }
 
         @Override

@@ -326,7 +326,7 @@ public class SecureSettingsValidators {
                 Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(
-                Secure.ACCESSIBILITY_FLOATING_MENU_TARGETS,
+                Secure.ACCESSIBILITY_GESTURE_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_QS_TARGETS,
@@ -432,5 +432,6 @@ public class SecureSettingsValidators {
                 Secure.RESOLUTION_MODE_UNKNOWN, Secure.RESOLUTION_MODE_FULL));
         VALIDATORS.put(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
                 new InclusiveIntegerRangeValidator(0, 10));
+        VALIDATORS.put(Secure.CHARGE_OPTIMIZATION_MODE, new InclusiveIntegerRangeValidator(0, 10));
     }
 }

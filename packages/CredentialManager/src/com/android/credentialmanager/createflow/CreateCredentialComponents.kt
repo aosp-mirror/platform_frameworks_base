@@ -18,6 +18,7 @@ package com.android.credentialmanager.createflow
 
 import android.credentials.flags.Flags.selectorUiImprovementsEnabled
 import android.hardware.biometrics.BiometricPrompt
+import android.os.CancellationSignal
 import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -118,9 +119,11 @@ fun CreateCredentialScreen(
                                 fallbackToOriginalFlow =
                                 viewModel::fallbackFromBiometricToNormalFlow,
                                 getBiometricPromptState =
-                                viewModel::getBiometricPromptState,
+                                viewModel::getBiometricPromptStateStatus,
                                 onBiometricPromptStateChange =
-                                viewModel::onBiometricPromptStateChange
+                                viewModel::onBiometricPromptStateChange,
+                                getBiometricCancellationSignal =
+                                viewModel::getBiometricCancellationSignal
                             )
                         CreateScreenState.MORE_OPTIONS_SELECTION_ONLY -> MoreOptionsSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
@@ -638,6 +641,7 @@ internal fun BiometricSelectionPage(
     fallbackToOriginalFlow: (BiometricFlowType) -> Unit,
     getBiometricPromptState: () -> BiometricPromptState,
     onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
+    getBiometricCancellationSignal: () -> CancellationSignal,
 ) {
     if (biometricEntry == null) {
         fallbackToOriginalFlow(BiometricFlowType.CREATE)
@@ -655,5 +659,6 @@ internal fun BiometricSelectionPage(
         createProviderInfo = enabledProviderInfo,
         onBiometricFailureFallback = fallbackToOriginalFlow,
         onIllegalStateAndFinish = onIllegalScreenStateAndFinish,
+        getBiometricCancellationSignal = getBiometricCancellationSignal,
     )
 }

@@ -30,16 +30,14 @@ import kotlinx.coroutines.flow.update
 class FakeAudioRepository : AudioRepository {
 
     private val mutableMode = MutableStateFlow(0)
-    override val mode: StateFlow<Int>
-        get() = mutableMode.asStateFlow()
+    override val mode: StateFlow<Int> = mutableMode.asStateFlow()
 
     private val mutableRingerMode = MutableStateFlow(RingerMode(0))
-    override val ringerMode: StateFlow<RingerMode>
-        get() = mutableRingerMode.asStateFlow()
+    override val ringerMode: StateFlow<RingerMode> = mutableRingerMode.asStateFlow()
 
     private val mutableCommunicationDevice = MutableStateFlow<AudioDeviceInfo?>(null)
-    override val communicationDevice: StateFlow<AudioDeviceInfo?>
-        get() = mutableCommunicationDevice.asStateFlow()
+    override val communicationDevice: StateFlow<AudioDeviceInfo?> =
+        mutableCommunicationDevice.asStateFlow()
 
     private val models: MutableMap<AudioStream, MutableStateFlow<AudioStreamModel>> = mutableMapOf()
     private val lastAudibleVolumes: MutableMap<AudioStream, Int> = mutableMapOf()

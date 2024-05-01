@@ -49,14 +49,14 @@ import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import kotlinx.coroutines.CoroutineDispatcher;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

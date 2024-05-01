@@ -16,24 +16,27 @@
 
 package com.android.internal.view.menu;
 
+import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Parcelable;
+import android.text.ClientFlags;
+import android.text.TextFlags;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnKeyListener;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.MenuPopupWindow;
 import android.widget.PopupWindow;
-import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.TextView;
 
 import java.util.Objects;
 
@@ -44,6 +47,8 @@ import java.util.Objects;
 final class StandardMenuPopup extends MenuPopup implements OnDismissListener, OnItemClickListener,
         MenuPresenter, OnKeyListener {
     private static final int ITEM_LAYOUT = com.android.internal.R.layout.popup_menu_item_layout;
+    private static final int ITEM_LAYOUT_MATERIAL =
+            com.android.internal.R.layout.popup_menu_item_layout_material;
 
     private final Context mContext;
 
@@ -53,6 +58,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     private final int mPopupMaxWidth;
     private final int mPopupStyleAttr;
     private final int mPopupStyleRes;
+
     // The popup window is final in order to couple its lifecycle to the lifecycle of the
     // StandardMenuPopup.
     private final MenuPopupWindow mPopup;
@@ -114,10 +120,16 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     public StandardMenuPopup(Context context, MenuBuilder menu, View anchorView, int popupStyleAttr,
             int popupStyleRes, boolean overflowOnly) {
         mContext = Objects.requireNonNull(context);
+        boolean useNewContextMenu = AppGlobals.getIntCoreSetting(
+                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
+                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0;
+
         mMenu = menu;
         mOverflowOnly = overflowOnly;
         final LayoutInflater inflater = LayoutInflater.from(context);
-        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly, ITEM_LAYOUT);
+        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly,
+                ClientFlags.fixMisalignedContextMenu() && useNewContextMenu
+                        ? ITEM_LAYOUT_MATERIAL : ITEM_LAYOUT);
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
 

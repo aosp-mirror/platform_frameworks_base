@@ -48,7 +48,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-
 /** Platform implementation of the cast controller. **/
 @SysUISingleton
 public class CastControllerImpl implements CastController {

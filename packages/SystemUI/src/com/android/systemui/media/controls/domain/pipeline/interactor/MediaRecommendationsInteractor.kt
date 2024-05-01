@@ -49,7 +49,7 @@ class MediaRecommendationsInteractor
 constructor(
     @Application applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
-    repository: MediaFilterRepository,
+    private val repository: MediaFilterRepository,
     private val mediaDataProcessor: MediaDataProcessor,
     private val broadcastSender: BroadcastSender,
     private val activityStarter: ActivityStarter,
@@ -64,6 +64,8 @@ constructor(
             .map { it.isActive }
             .distinctUntilChanged()
             .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
+
+    val onAnyMediaConfigurationChange: Flow<Unit> = repository.onAnyMediaConfigurationChange
 
     fun removeMediaRecommendations(key: String, dismissIntent: Intent?, delayMs: Long) {
         mediaDataProcessor.dismissSmartspaceRecommendation(key, delayMs)
@@ -131,6 +133,10 @@ constructor(
                 mediaRecs = mediaRecs,
             )
         }
+    }
+
+    fun switchToMediaControl(packageName: String) {
+        repository.setMediaFromRecPackageName(packageName)
     }
 
     companion object {

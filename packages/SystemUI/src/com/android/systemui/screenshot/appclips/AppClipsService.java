@@ -38,9 +38,9 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.android.internal.statusbar.IAppClipsService;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;

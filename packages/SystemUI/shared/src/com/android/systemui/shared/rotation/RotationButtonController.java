@@ -17,7 +17,6 @@
 package com.android.systemui.shared.rotation;
 
 import static android.content.pm.PackageManager.FEATURE_PC;
-import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
@@ -38,8 +37,6 @@ import android.content.IntentFilter;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.HandlerExecutor;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -77,6 +74,7 @@ import java.util.function.Supplier;
  * Contains logic that deals with showing a rotate suggestion button with animation.
  */
 public class RotationButtonController {
+    public static final boolean DEBUG_ROTATION = false;
 
     private static final String TAG = "RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;

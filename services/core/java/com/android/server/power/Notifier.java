@@ -129,6 +129,7 @@ public class Notifier {
     private final WindowManagerPolicy mPolicy;
     private final FaceDownDetector mFaceDownDetector;
     private final ScreenUndimDetector mScreenUndimDetector;
+    private final WakefulnessSessionObserver mWakefulnessSessionObserver;
     private final ActivityManagerInternal mActivityManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
     private final InputMethodManagerInternal mInputMethodManagerInternal;
@@ -197,6 +198,7 @@ public class Notifier {
         mPolicy = policy;
         mFaceDownDetector = faceDownDetector;
         mScreenUndimDetector = screenUndimDetector;
+        mWakefulnessSessionObserver = new WakefulnessSessionObserver(mContext, null);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
@@ -286,6 +288,8 @@ public class Notifier {
         }
 
         mWakeLockLog.onWakeLockAcquired(tag, ownerUid, flags);
+
+        mWakefulnessSessionObserver.onWakeLockAcquired(flags);
     }
 
     public void onLongPartialWakeLockStart(String tag, int ownerUid, WorkSource workSource,
@@ -386,6 +390,16 @@ public class Notifier {
     public void onWakeLockReleased(int flags, String tag, String packageName,
             int ownerUid, int ownerPid, WorkSource workSource, String historyTag,
             IWakeLockCallback callback) {
+        onWakeLockReleased(flags, tag, packageName, ownerUid, ownerPid, workSource, historyTag,
+                callback, ScreenTimeoutOverridePolicy.RELEASE_REASON_UNKNOWN);
+    }
+
+    /**
+     * Called when a wake lock is released.
+     */
+    public void onWakeLockReleased(int flags, String tag, String packageName,
+            int ownerUid, int ownerPid, WorkSource workSource, String historyTag,
+            IWakeLockCallback callback, int releaseReason) {
         if (DEBUG) {
             Slog.d(TAG, "onWakeLockReleased: flags=" + flags + ", tag=\"" + tag
                     + "\", packageName=" + packageName
@@ -409,6 +423,8 @@ public class Notifier {
             }
         }
         mWakeLockLog.onWakeLockReleased(tag, ownerUid);
+
+        mWakefulnessSessionObserver.onWakeLockReleased(flags, releaseReason);
     }
 
     /** Shows the keyguard without requesting the device to immediately lock. */
@@ -670,6 +686,8 @@ public class Notifier {
             interactivity.changeStartTime = eventTime;
             interactivity.isChanging = true;
             handleEarlyInteractiveChange(groupId);
+            mWakefulnessSessionObserver.onWakefulnessChangeStarted(groupId, wakefulness,
+                    changeReason, eventTime);
         }
     }
 
@@ -680,6 +698,7 @@ public class Notifier {
      */
     public void onGroupRemoved(int groupId) {
         mInteractivityByGroupId.remove(groupId);
+        mWakefulnessSessionObserver.removePowerGroup(groupId);
     }
 
     /**
@@ -693,6 +712,8 @@ public class Notifier {
 
         try {
             mBatteryStats.noteUserActivity(uid, event);
+            mWakefulnessSessionObserver.notifyUserActivity(
+                    SystemClock.uptimeMillis(), displayGroupId, event);
         } catch (RemoteException ex) {
             // Ignore
         }
@@ -798,6 +819,8 @@ public class Notifier {
         if (mWakeLockLog != null) {
             mWakeLockLog.dump(pw);
         }
+
+        mWakefulnessSessionObserver.dump(pw);
     }
 
     private void updatePendingBroadcastLocked() {

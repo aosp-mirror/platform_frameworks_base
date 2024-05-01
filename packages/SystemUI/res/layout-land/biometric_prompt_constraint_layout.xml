@@ -19,12 +19,9 @@ android:layout_height="match_parent">
 
     <View
         android:id="@+id/panel"
+        style="@style/AuthCredentialPanelStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="?androidprv:attr/materialColorSurfaceBright"
-        android:clickable="true"
-        android:clipToOutline="true"
-        android:importantForAccessibility="no"
         android:paddingHorizontal="16dp"
         android:paddingVertical="16dp"
         android:visibility="visible"
@@ -177,7 +174,7 @@ android:layout_height="match_parent">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:accessibilityLiveRegion="polite"
+        android:accessibilityLiveRegion="assertive"
         android:fadingEdge="horizontal"
         android:gravity="center_horizontal"
         android:scrollHorizontally="true"

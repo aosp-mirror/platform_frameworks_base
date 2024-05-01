@@ -42,7 +42,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.testKosmos
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
@@ -86,8 +85,6 @@ class DeviceEntrySideFpsOverlayInteractorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR)
-
         primaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 bouncerRepository,

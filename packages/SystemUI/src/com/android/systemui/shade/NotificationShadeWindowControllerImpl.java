@@ -68,7 +68,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -131,7 +130,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mCallbacks = new ArrayList<>();
 
     private final SysuiColorExtractor mColorExtractor;
-    private final ScreenOffAnimationController mScreenOffAnimationController;
     /**
      * Layout params would be aggregated and dispatched all at once if this is > 0.
      *
@@ -159,7 +157,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             SysuiColorExtractor colorExtractor,
             DumpManager dumpManager,
             KeyguardStateController keyguardStateController,
-            ScreenOffAnimationController screenOffAnimationController,
             AuthController authController,
             Lazy<ShadeInteractor> shadeInteractorLazy,
             ShadeWindowLogger logger,
@@ -179,7 +176,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mKeyguardBypassController = keyguardBypassController;
         mBackgroundExecutor = backgroundExecutor;
         mColorExtractor = colorExtractor;
-        mScreenOffAnimationController = screenOffAnimationController;
         // prefix with {slow} to make sure this dumps at the END of the critical section.
         dumpManager.registerCriticalDumpable("{slow}NotificationShadeWindowControllerImpl", this);
         mAuthController = authController;
@@ -441,14 +437,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private void applyFocusableFlag(NotificationShadeWindowState state) {
         boolean panelFocusable = state.notificationShadeFocusable && state.shadeOrQsExpanded;
         if (state.bouncerShowing && (state.keyguardOccluded || state.keyguardNeedsInput)
-                || ENABLE_REMOTE_INPUT && state.remoteInputActive
-                // Make the panel focusable if we're doing the screen off animation, since the light
-                // reveal scrim is drawing in the panel and should consume touch events so that they
-                // don't go to the app behind.
-                || mScreenOffAnimationController.shouldIgnoreKeyguardTouches()) {
-            mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
-            mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        } else if (state.glanceableHubShowing) {
+                || (ENABLE_REMOTE_INPUT && state.remoteInputActive)
+                || state.glanceableHubShowing) {
             mLpChanged.flags &= ~LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {

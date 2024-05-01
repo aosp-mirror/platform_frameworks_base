@@ -215,12 +215,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final MediaCommunicationManager.SessionCallback mSession2TokenCallback =
             new MediaCommunicationManager.SessionCallback() {
                 @Override
-                // TODO (b/324266224): Deprecate this method once other overload is published.
-                public void onSession2TokenCreated(Session2Token token) {
-                    addSession(token, Process.INVALID_PID);
-                }
-
-                @Override
                 public void onSession2TokenCreated(Session2Token token, int pid) {
                     addSession(token, pid);
                 }
@@ -671,6 +665,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void addUserEngagedSession(MediaSessionRecordImpl mediaSessionRecord) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
         synchronized (mLock) {
             int uid = mediaSessionRecord.getUid();
             mUserEngagedSessionsForFgs.putIfAbsent(uid, new HashSet<>());
@@ -679,6 +676,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void removeUserEngagedSession(MediaSessionRecordImpl mediaSessionRecord) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
         synchronized (mLock) {
             int uid = mediaSessionRecord.getUid();
             Set<MediaSessionRecordImpl> mUidUserEngagedSessionsForFgs =

@@ -30,10 +30,10 @@ import android.util.DisplayMetrics;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
+import com.android.systemui.res.R;
 import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;

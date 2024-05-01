@@ -20,6 +20,7 @@ package com.android.systemui.biometrics.data.repository
 import android.graphics.Point
 import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.model.DevicePosture
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
@@ -41,6 +42,8 @@ class FakeFacePropertyRepository @Inject constructor() : FacePropertyRepository 
     private val currentCameraInfo = MutableStateFlow<CameraInfo?>(null)
     override val cameraInfo: StateFlow<CameraInfo?>
         get() = currentCameraInfo
+
+    override val supportedPostures: List<DevicePosture> = listOf(DevicePosture.CLOSED)
 
     fun setLockoutMode(userId: Int, mode: LockoutMode) {
         lockoutModesForUser[userId] = mode

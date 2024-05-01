@@ -44,7 +44,6 @@ import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.concurrent.Executor;
 
-
 /**
  * A view which can draw a scrim.  This view maybe be used in multiple windows running on different
  * threads, but is controlled by {@link com.android.systemui.statusbar.phone.ScrimController} so we

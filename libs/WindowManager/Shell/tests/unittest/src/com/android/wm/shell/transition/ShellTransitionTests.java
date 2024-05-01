@@ -73,6 +73,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.view.IRecentsAnimationRunner;
@@ -87,6 +88,7 @@ import android.window.RemoteTransitionStub;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowAnimationState;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
@@ -98,6 +100,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
+import com.android.systemui.shared.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
@@ -114,6 +117,7 @@ import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.util.StubTransaction;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -140,6 +144,9 @@ public class ShellTransitionTests extends ShellTestCase {
     private final ShellExecutor mAnimExecutor = new TestShellExecutor();
     private final TestTransitionHandler mDefaultHandler = new TestTransitionHandler();
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+
+    @Rule
+    public final SetFlagsRule setFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
@@ -475,11 +482,97 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
+    public void testRegisteredRemoteTransitionTakeover() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IRemoteTransition testRemote = new RemoteTransitionStub() {
+            @Override
+            public void startAnimation(IBinder token, TransitionInfo info,
+                    SurfaceControl.Transaction t,
+                    IRemoteTransitionFinishedCallback finishCallback) throws RemoteException {
+                final Transitions.TransitionHandler takeoverHandler =
+                        transitions.getHandlerForTakeover(token, info);
+
+                if (takeoverHandler == null) {
+                    finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
+                    return;
+                }
+
+                takeoverHandler.takeOverAnimation(token, info, new SurfaceControl.Transaction(),
+                        wct -> {
+                            try {
+                                finishCallback.onTransitionFinished(wct, null /* sct */);
+                            } catch (RemoteException e) {
+                                // Fail
+                            }
+                        }, new WindowAnimationState[info.getChanges().size()]);
+            }
+        };
+        final boolean[] takeoverRemoteCalled = new boolean[]{false};
+        IRemoteTransition testTakeoverRemote = new RemoteTransitionStub() {
+            @Override
+            public void startAnimation(IBinder token, TransitionInfo info,
+                    SurfaceControl.Transaction t,
+                    IRemoteTransitionFinishedCallback finishCallback) {}
+
+            @Override
+            public void takeOverAnimation(IBinder transition, TransitionInfo info,
+                    SurfaceControl.Transaction startTransaction,
+                    IRemoteTransitionFinishedCallback finishCallback, WindowAnimationState[] states)
+                    throws RemoteException {
+                takeoverRemoteCalled[0] = true;
+                finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
+            }
+        };
+
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+
+        transitions.registerRemote(filter, new RemoteTransition(testRemote, "Test"));
+        transitions.registerRemoteForTakeover(
+                filter, new RemoteTransition(testTakeoverRemote, "Test"));
+        mMainExecutor.flushAll();
+
+        // Takeover shouldn't happen when the flag is disabled.
+        setFlagsRule.disableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY);
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertFalse(takeoverRemoteCalled[0]);
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any());
+
+        // Takeover should happen when the flag is enabled.
+        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY);
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertTrue(takeoverRemoteCalled[0]);
+        mDefaultHandler.finishAll();
+        mMainExecutor.flushAll();
+        verify(mOrganizer, times(2)).finishTransition(eq(transitToken), any());
+    }
+
+    @Test
     public void testOneShotRemoteHandler() {
         Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
 
         final boolean[] remoteCalled = new boolean[]{false};
+        final boolean[] takeoverRemoteCalled = new boolean[]{false};
         final WindowContainerTransaction remoteFinishWCT = new WindowContainerTransaction();
         IRemoteTransition testRemote = new RemoteTransitionStub() {
             @Override
@@ -489,12 +582,22 @@ public class ShellTransitionTests extends ShellTestCase {
                 remoteCalled[0] = true;
                 finishCallback.onTransitionFinished(remoteFinishWCT, null /* sct */);
             }
+
+            @Override
+            public void takeOverAnimation(IBinder transition, TransitionInfo info,
+                    SurfaceControl.Transaction startTransaction,
+                    IRemoteTransitionFinishedCallback finishCallback, WindowAnimationState[] states)
+                    throws RemoteException {
+                takeoverRemoteCalled[0] = true;
+                finishCallback.onTransitionFinished(remoteFinishWCT, null /* sct */);
+            }
         };
 
         final int transitType = TRANSIT_FIRST_CUSTOM + 1;
 
         OneShotRemoteHandler oneShot = new OneShotRemoteHandler(mMainExecutor,
                 new RemoteTransition(testRemote, "Test"));
+
         // Verify that it responds to the remote but not other things.
         IBinder transitToken = new Binder();
         assertNotNull(oneShot.handleRequest(transitToken,
@@ -505,6 +608,7 @@ public class ShellTransitionTests extends ShellTestCase {
 
         Transitions.TransitionFinishCallback testFinish =
                 mock(Transitions.TransitionFinishCallback.class);
+
         // Verify that it responds to animation properly
         oneShot.setTransition(transitToken);
         IBinder anotherToken = new Binder();
@@ -514,6 +618,16 @@ public class ShellTransitionTests extends ShellTestCase {
         assertTrue(oneShot.startAnimation(transitToken, new TransitionInfo(transitType, 0),
                 new StubTransaction(), new StubTransaction(),
                 testFinish));
+        assertTrue(remoteCalled[0]);
+
+        // Verify that it handles takeovers properly
+        IBinder newToken = new Binder();
+        oneShot.setTransition(newToken);
+        assertFalse(oneShot.takeOverAnimation(transitToken, new TransitionInfo(transitType, 0),
+                new StubTransaction(), testFinish, new WindowAnimationState[0]));
+        assertTrue(oneShot.takeOverAnimation(newToken, new TransitionInfo(transitType, 0),
+                new StubTransaction(), testFinish, new WindowAnimationState[0]));
+        assertTrue(takeoverRemoteCalled[0]);
     }
 
     @Test

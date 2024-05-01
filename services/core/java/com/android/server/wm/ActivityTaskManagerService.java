@@ -1374,13 +1374,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final boolean debug = ((intent.getFlags() & Intent.FLAG_DEBUG_LOG_RESOLUTION) != 0);
 
+            final int userId = UserHandle.getCallingUserId();
             ActivityInfo aInfo = null;
             try {
                 List<ResolveInfo> resolves =
                         AppGlobals.getPackageManager().queryIntentActivities(
                                 intent, r.resolvedType,
                                 PackageManager.MATCH_DEFAULT_ONLY | STOCK_PM_FLAGS,
-                                UserHandle.getCallingUserId()).getList();
+                                userId).getList();
 
                 // Look for the original activity in the list...
                 final int N = resolves != null ? resolves.size() : 0;
@@ -1465,6 +1466,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         .setRealCallingPid(-1)
                         .setRealCallingUid(r.launchedFromUid)
                         .setActivityOptions(options)
+                        .setUserId(userId)
                         .execute();
                 r.finishing = wasFinishing;
                 return res == ActivityManager.START_SUCCESS;
@@ -3733,6 +3735,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // point, if it is
         if (!r.checkEnterPictureInPictureState("enterPictureInPictureMode",
                 false /* beforeStopping */)) {
+            return false;
+        }
+
+        // If the app is using auto-enter, and it explicitly requests entering PiP while pausing,
+        // return false immediately since auto-enter should take in place instead.
+        if (fromClient && r.isState(PAUSING) && params.isAutoEnterEnabled()) {
+            Slog.w(TAG, "Skip client enterPictureInPictureMode request while pausing,"
+                    + " auto-enter-pip is enabled");
             return false;
         }
 

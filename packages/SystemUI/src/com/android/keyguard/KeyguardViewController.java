@@ -27,7 +27,6 @@ import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.domain.interactor.ShadeLockscreenInteractor;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 /**
  *  Interface to control Keyguard View. It should be implemented by KeyguardViewManagers, which

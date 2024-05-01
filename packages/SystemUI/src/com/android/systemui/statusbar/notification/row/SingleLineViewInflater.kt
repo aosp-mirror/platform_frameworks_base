@@ -217,8 +217,9 @@ internal object SingleLineViewInflater {
         var currentGroup: MutableList<MessagingStyle.Message>? = null
         var currentSenderKey: CharSequence? = null
         val groups = mutableListOf<MutableList<MessagingStyle.Message>>()
-        for (i in 0 until (historicMessages.size + messages.size)) {
-            val message = if (i < historicMessages.size) historicMessages[i] else messages[i]
+        val histSize = historicMessages.size
+        for (i in 0 until (histSize + messages.size)) {
+            val message = if (i < histSize) historicMessages[i] else messages[i - histSize]
 
             val sender = message.senderPerson
             val senderKey = sender?.getKeyOrName()

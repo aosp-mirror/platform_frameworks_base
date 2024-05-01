@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -34,6 +35,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.compatui.AppCompatUtils.isSingleTopActivityTranslucent;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -272,10 +274,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mSplitScreenController.registerSplitScreenListener(new SplitScreen.SplitScreenListener() {
             @Override
             public void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {
-                if (visible) {
+                if (visible && stage != STAGE_TYPE_UNDEFINED) {
                     DesktopModeWindowDecoration decor = mWindowDecorByTaskId.get(taskId);
-                    if (decor != null && DesktopModeStatus.isEnabled()
-                            && decor.mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+                    if (decor != null && DesktopModeStatus.isEnabled()) {
                         mDesktopTasksController.moveToSplit(decor.mTaskInfo);
                     }
                 }
@@ -915,6 +916,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     @Nullable
     private DesktopModeWindowDecoration getRelevantWindowDecor(MotionEvent ev) {
+        // If we are mid-transition, dragged task's decor is always relevant.
+        final int draggedTaskId = mDesktopTasksController.getDraggingTaskId();
+        if (draggedTaskId != INVALID_TASK_ID) {
+            return mWindowDecorByTaskId.get(draggedTaskId);
+        }
         final DesktopModeWindowDecoration focusedDecor = getFocusedDecor();
         if (focusedDecor == null) {
             return null;
@@ -1037,7 +1043,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue,
                         mRootTaskDisplayAreaOrganizer);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
-        windowDecoration.createResizeVeil();
 
         final DragPositioningCallback dragPositioningCallback;
         if (!DesktopModeStatus.isVeiledResizeEnabled()) {

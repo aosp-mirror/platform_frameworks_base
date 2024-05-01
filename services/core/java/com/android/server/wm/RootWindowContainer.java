@@ -2477,6 +2477,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final DisplayContent display = getChildAt(displayNdx);
             final boolean curResult = result;
             boolean[] resumedOnDisplay = new boolean[1];
+            final ActivityRecord topOfDisplay = display.topRunningActivity();
             display.forAllRootTasks(rootTask -> {
                 final ActivityRecord topRunningActivity = rootTask.topRunningActivity();
                 if (!rootTask.isFocusableAndVisible() || topRunningActivity == null) {
@@ -2490,8 +2491,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     resumedOnDisplay[0] |= curResult;
                     return;
                 }
-                if (topRunningActivity.isState(RESUMED)
-                        && topRunningActivity == rootTask.getDisplayArea().topRunningActivity()) {
+                if (topRunningActivity.isState(RESUMED) && topRunningActivity == topOfDisplay) {
                     // Kick off any lingering app transitions form the MoveTaskToFront operation,
                     // but only consider the top activity on that display.
                     rootTask.executeAppTransition(targetOptions);

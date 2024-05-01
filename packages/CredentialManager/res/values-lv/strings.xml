@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Saglabātās piekļuves atslēgas izmantošana lietotnei <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Saglabātās paroles izmantošana lietotnei <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Sava konta izmantošana lietotnei <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Izmantojiet ekrāna bloķēšanas opciju, lai lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g> pierakstītos ar kontu <xliff:g id="USERNAME">%2$s</xliff:g>."</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> pierakstīšanās opciju atbloķēšana"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Saglabātas piekļuves atslēgas izvēle lietotnei <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Saglabātas paroles izvēle lietotnei <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

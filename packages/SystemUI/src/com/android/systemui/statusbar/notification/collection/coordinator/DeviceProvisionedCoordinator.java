@@ -16,10 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import android.Manifest;
 import android.app.Notification;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 

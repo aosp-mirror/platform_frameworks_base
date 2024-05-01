@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"CredentialManager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"रद्द करें"</string>
     <string name="string_continue" msgid="1346732695941131882">"जारी रखें"</string>
-    <string name="string_more_options" msgid="2763852250269945472">"दूसरा तरीका सेव करें"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"दूसरे तरीके से सेव करें"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ज़्यादा जानें"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड दिखाएं"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड छिपाएं"</string>
@@ -71,8 +71,7 @@
     <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए, सेव की गई पासकी का इस्तेमाल करें"</string>
     <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए सेव किया हुआ पासवर्ड इस्तेमाल करें"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन करने के लिए अपने खाते का इस्तेमाल करें"</string>
-    <!-- no translation found for get_dialog_description_single_tap (2797059565126030879) -->
-    <skip />
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"<xliff:g id="USERNAME">%2$s</xliff:g> से <xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए, स्क्रीन लॉक का इस्तेमाल करें"</string>
     <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"<xliff:g id="APP_NAME">%1$s</xliff:g> में साइन इन करने के लिए, विकल्पों को अनलॉक करें"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सेव की गई पासकी चुनें"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सेव किया गया पासवर्ड चुनें"</string>

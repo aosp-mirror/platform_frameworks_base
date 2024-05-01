@@ -77,6 +77,15 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         )
     }
 
+    fun logUsingSatelliteText(satelliteText: String) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { str1 = satelliteText },
+            { "┣ updateCarrierText: using satellite text. text=$str1" },
+        )
+    }
+
     /** De-structures the info object so that we don't have to generate new strings */
     fun logCallbackSentFromUpdate(info: CarrierTextCallbackInfo) {
         buffer.log(
@@ -129,6 +138,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
         const val REASON_ON_TELEPHONY_CAPABLE = 2
         const val REASON_SIM_ERROR_STATE_CHANGED = 3
         const val REASON_ACTIVE_DATA_SUB_CHANGED = 4
+        const val REASON_SATELLITE_CHANGED = 5
 
         @Retention(AnnotationRetention.SOURCE)
         @IntDef(
@@ -138,6 +148,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
                     REASON_ON_TELEPHONY_CAPABLE,
                     REASON_SIM_ERROR_STATE_CHANGED,
                     REASON_ACTIVE_DATA_SUB_CHANGED,
+                    REASON_SATELLITE_CHANGED,
                 ]
         )
         annotation class CarrierTextRefreshReason
@@ -148,6 +159,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
                 REASON_ON_TELEPHONY_CAPABLE -> "ON_TELEPHONY_CAPABLE"
                 REASON_SIM_ERROR_STATE_CHANGED -> "SIM_ERROR_STATE_CHANGED"
                 REASON_ACTIVE_DATA_SUB_CHANGED -> "ACTIVE_DATA_SUB_CHANGED"
+                REASON_SATELLITE_CHANGED -> "SATELLITE_CHANGED"
                 else -> "unknown"
             }
     }

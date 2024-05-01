@@ -21,6 +21,24 @@ flag {
 }
 
 flag {
+  name: "dream_wake_redirect"
+  namespace: "systemui"
+  description: "This flag enables using a host to handle displaying a dream's overlay rather than "
+      "relying on the dream's window"
+  bug: "334083490"
+}
+
+flag {
+    name: "dismiss_dream_on_keyguard_dismiss"
+    namespace: "systemui"
+    description: "Dismisses the dream in the keyguard-going-away transition, preventing it from being visible"
+    bug: "333829441"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "dream_tracks_focus"
   namespace: "communal"
   description: "This flag enables the ability for dreams to track whether or not they have focus"

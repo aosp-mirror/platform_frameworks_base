@@ -18,6 +18,9 @@ package com.android.compose.animation.scene
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +37,7 @@ import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 
 /**
  * The state of a [SceneTransitionLayout].
@@ -253,6 +257,12 @@ sealed interface TransitionState {
                 }
             }
 
+        /**
+         * An animatable that animates from 1f to 0f. This will be used to nicely animate the sudden
+         * jump of values when this transitions interrupts another one.
+         */
+        private var interruptionDecay: Animatable<Float, AnimationVector1D>? = null
+
         init {
             check(fromScene != toScene)
         }
@@ -288,6 +298,33 @@ sealed interface TransitionState {
         ) {
             fromOverscrollSpec = fromSpec
             toOverscrollSpec = toSpec
+        }
+
+        internal open fun interruptionProgress(
+            layoutImpl: SceneTransitionLayoutImpl,
+        ): Float {
+            if (!layoutImpl.state.enableInterruptions) {
+                return 0f
+            }
+
+            fun create(): Animatable<Float, AnimationVector1D> {
+                val animatable = Animatable(1f, visibilityThreshold = ProgressVisibilityThreshold)
+                layoutImpl.coroutineScope.launch {
+                    val swipeSpec = layoutImpl.state.transitions.defaultSwipeSpec
+                    val progressSpec =
+                        spring(
+                            stiffness = swipeSpec.stiffness,
+                            dampingRatio = swipeSpec.dampingRatio,
+                            visibilityThreshold = ProgressVisibilityThreshold,
+                        )
+                    animatable.animateTo(0f, progressSpec)
+                }
+
+                return animatable
+            }
+
+            val animatable = interruptionDecay ?: create().also { interruptionDecay = it }
+            return animatable.value
         }
     }
 

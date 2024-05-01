@@ -250,7 +250,10 @@ constructor(
             listOf(
                     *gatingConditionsForAuthAndDetect(),
                     Pair(isLockedOut.isFalse(), "isNotInLockOutState"),
-                    Pair(trustRepository.isCurrentUserTrusted.isFalse(), "currentUserIsNotTrusted"),
+                    Pair(
+                        keyguardRepository.isKeyguardDismissible.isFalse(),
+                        "keyguardIsNotDismissible"
+                    ),
                     Pair(
                         biometricSettingsRepository.isFaceAuthCurrentlyAllowed,
                         "isFaceAuthCurrentlyAllowed"
@@ -273,7 +276,7 @@ constructor(
                     Pair(
                         biometricSettingsRepository.isFaceAuthCurrentlyAllowed
                             .isFalse()
-                            .or(trustRepository.isCurrentUserTrusted),
+                            .or(keyguardRepository.isKeyguardDismissible),
                         "faceAuthIsNotCurrentlyAllowedOrCurrentUserIsTrusted"
                     ),
                     // We don't want to run face detect if fingerprint can be used to unlock the
@@ -515,9 +518,12 @@ constructor(
 
     private fun onFaceAuthRequestCompleted() {
         cancelNotReceivedHandlerJob?.cancel()
-        cancellationInProgress.value = false
         _isAuthRunning.value = false
         authCancellationSignal = null
+        // Updates to "cancellationInProgress" may re-trigger face auth
+        // (see processPendingAuthRequests()), so we must update this after setting _isAuthRunning
+        // to false.
+        cancellationInProgress.value = false
     }
 
     private val detectionCallback =

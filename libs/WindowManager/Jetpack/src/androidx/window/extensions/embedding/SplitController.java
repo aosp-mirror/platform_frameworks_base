@@ -67,7 +67,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -113,8 +112,7 @@ import java.util.function.BiConsumer;
 public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
         ActivityEmbeddingComponent, DividerPresenter.DragEventCallback {
     static final String TAG = "SplitController";
-    static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+    static final boolean ENABLE_SHELL_TRANSITIONS = true;
 
     // TODO(b/243518738): Move to WM Extensions if we have requirement of overlay without
     //  association. It's not set in WM Extensions nor Wm Jetpack library currently.

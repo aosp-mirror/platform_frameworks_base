@@ -835,8 +835,8 @@ public class Surface implements Parcelable {
     @Override
     public String toString() {
         synchronized (mLock) {
-            return "Surface(name=" + mName + ")/@0x" +
-                    Integer.toHexString(System.identityHashCode(this));
+            return "Surface(name=" + mName + " mNativeObject=" + mNativeObject + ")/@0x"
+                    + Integer.toHexString(System.identityHashCode(this));
         }
     }
 

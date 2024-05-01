@@ -39,7 +39,6 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.hardware.biometrics.BiometricRequestConstants;
 import android.media.AudioManager;
 import android.metrics.LogMaker;
 import android.os.SystemClock;
@@ -73,9 +72,6 @@ import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate;
-import com.android.systemui.biometrics.SideFpsController;
-import com.android.systemui.biometrics.SideFpsUiRequestSource;
-import com.android.systemui.biometrics.shared.SideFpsControllerRefactor;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
@@ -103,14 +99,13 @@ import com.android.systemui.util.settings.GlobalSettings;
 
 import dagger.Lazy;
 
+import kotlinx.coroutines.Job;
+
 import java.io.File;
 import java.util.Arrays;
-import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlinx.coroutines.Job;
 
 /** Controller for {@link KeyguardSecurityContainer} */
 @KeyguardBouncerScope
@@ -135,7 +130,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final GlobalSettings mGlobalSettings;
     private final FeatureFlags mFeatureFlags;
     private final SessionTracker mSessionTracker;
-    private final Optional<SideFpsController> mSideFpsController;
     private final FalsingA11yDelegate mFalsingA11yDelegate;
     private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private final BouncerMessageInteractor mBouncerMessageInteractor;
@@ -457,7 +451,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             FeatureFlags featureFlags,
             GlobalSettings globalSettings,
             SessionTracker sessionTracker,
-            Optional<SideFpsController> sideFpsController,
             FalsingA11yDelegate falsingA11yDelegate,
             TelephonyManager telephonyManager,
             ViewMediatorCallback viewMediatorCallback,
@@ -491,11 +484,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mFeatureFlags = featureFlags;
         mGlobalSettings = globalSettings;
         mSessionTracker = sessionTracker;
-        if (SideFpsControllerRefactor.isEnabled()) {
-            mSideFpsController = Optional.empty();
-        } else {
-            mSideFpsController = sideFpsController;
-        }
         mFalsingA11yDelegate = falsingA11yDelegate;
         mTelephonyManager = telephonyManager;
         mViewMediatorCallback = viewMediatorCallback;
@@ -578,28 +566,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.clearFocus();
     }
 
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    /**
-     * Shows and hides the side finger print sensor animation.
-     *
-     * @param isVisible sets whether we show or hide the side fps animation
-     */
-    public void updateSideFpsVisibility(boolean isVisible) {
-        SideFpsControllerRefactor.assertInLegacyMode();
-        if (!mSideFpsController.isPresent()) {
-            return;
-        }
-
-        if (isVisible) {
-            mSideFpsController.get().show(
-                    SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                    BiometricRequestConstants.REASON_AUTH_KEYGUARD
-            );
-        } else {
-            mSideFpsController.get().hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        }
-    }
-
     /**
      * Shows the primary security screen for the user. This will be either the multi-selector
      * or the user's security method.
@@ -611,6 +577,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         SecurityMode securityMode = whitelistIpcs(() -> mSecurityModel.getSecurityMode(
                 mSelectedUserInteractor.getSelectedUserId()));
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
+        mPrimaryBouncerInteractor.get().setLastShownPrimarySecurityScreen(securityMode);
         showSecurityScreen(securityMode);
     }
 

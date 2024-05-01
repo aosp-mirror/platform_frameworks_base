@@ -3541,13 +3541,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mAppProfiler.setAllowLowerMemLevelLocked(false);
                 doLowMem = false;
             }
+            if (doOomAdj) {
+                if (Flags.migrateFullOomadjUpdates()) {
+                    app.forEachConnectionHost((host) -> enqueueOomAdjTargetLocked(host));
+                }
+            }
+
             EventLogTags.writeAmProcDied(app.userId, pid, app.processName, setAdj, setProcState);
             if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
                 "Dying app: " + app + ", pid: " + pid + ", thread: " + thread.asBinder());
             handleAppDiedLocked(app, pid, false, true, fromBinderDied);
 
             if (doOomAdj) {
-                updateOomAdjLocked(OOM_ADJ_REASON_PROCESS_END);
+                if (Flags.migrateFullOomadjUpdates()) {
+                    updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_PROCESS_END);
+                } else {
+                    updateOomAdjLocked(OOM_ADJ_REASON_PROCESS_END);
+                }
             }
             if (doLowMem) {
                 mAppProfiler.doLowMemReportIfNeededLocked(app);
@@ -4436,8 +4446,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                         packageName, null, userId);
         }
 
-        final boolean clearPendingIntentsForStoppedApp = (android.content.pm.Flags.stayStopped()
-                && packageStateStopped);
+        boolean clearPendingIntentsForStoppedApp = false;
+        try {
+            clearPendingIntentsForStoppedApp = (packageStateStopped
+                    && android.content.pm.Flags.stayStopped());
+        } catch (IllegalStateException e) {
+            // It's unlikely for a package to be force-stopped early in the boot cycle. So, if we
+            // check for 'packageStateStopped' which should evaluate to 'false', then this should
+            // ensure we are not accessing the flag early in the boot cycle. As an additional
+            // safety measure, catch the exception and ignore to avoid causing a device restart.
+            clearPendingIntentsForStoppedApp = false;
+        }
         if (packageName == null || uninstalling || clearPendingIntentsForStoppedApp) {
             final int cancelReason;
             if (packageName == null) {
@@ -14606,6 +14625,53 @@ public class ActivityManagerService extends IActivityManager.Stub
     public Intent registerReceiverWithFeature(IApplicationThread caller, String callerPackage,
             String callerFeatureId, String receiverId, IIntentReceiver receiver,
             IntentFilter filter, String permission, int userId, int flags) {
+        traceRegistrationBegin(receiverId, receiver, filter, userId);
+        try {
+            return registerReceiverWithFeatureTraced(caller, callerPackage, callerFeatureId,
+                    receiverId, receiver, filter, permission, userId, flags);
+        } finally {
+            traceRegistrationEnd();
+        }
+    }
+
+    private static void traceRegistrationBegin(String receiverId, IIntentReceiver receiver,
+            IntentFilter filter, int userId) {
+        if (!Flags.traceReceiverRegistration()) {
+            return;
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            final StringBuilder sb = new StringBuilder("registerReceiver: ");
+            sb.append(Binder.getCallingUid()); sb.append('/');
+            sb.append(receiverId == null ? "null" : receiverId); sb.append('/');
+            final int actionsCount = filter.countActions();
+            if (actionsCount > 0) {
+                for (int i = 0; i < actionsCount; ++i) {
+                    sb.append(filter.getAction(i));
+                    if (i != actionsCount - 1) sb.append(',');
+                }
+            } else {
+                sb.append("null");
+            }
+            sb.append('/');
+            sb.append('u'); sb.append(userId); sb.append('/');
+            sb.append(receiver == null ? "null" : receiver.asBinder());
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, sb.toString());
+        }
+    }
+
+    private static void traceRegistrationEnd() {
+        if (!Flags.traceReceiverRegistration()) {
+            return;
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    private Intent registerReceiverWithFeatureTraced(IApplicationThread caller,
+            String callerPackage, String callerFeatureId, String receiverId,
+            IIntentReceiver receiver, IntentFilter filter, String permission,
+            int userId, int flags) {
         enforceNotIsolatedCaller("registerReceiver");
         ArrayList<StickyBroadcast> stickyBroadcasts = null;
         ProcessRecord callerApp = null;
@@ -14921,6 +14987,35 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public void unregisterReceiver(IIntentReceiver receiver) {
+        traceUnregistrationBegin(receiver);
+        try {
+            unregisterReceiverTraced(receiver);
+        } finally {
+            traceUnregistrationEnd();
+        }
+    }
+
+    private static void traceUnregistrationBegin(IIntentReceiver receiver) {
+        if (!Flags.traceReceiverRegistration()) {
+            return;
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    TextUtils.formatSimple("unregisterReceiver: %d/%s", Binder.getCallingUid(),
+                            receiver == null ? "null" : receiver.asBinder()));
+        }
+    }
+
+    private static void traceUnregistrationEnd() {
+        if (!Flags.traceReceiverRegistration()) {
+            return;
+        }
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    private void unregisterReceiverTraced(IIntentReceiver receiver) {
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Unregister receiver: " + receiver);
 
         final long origId = Binder.clearCallingIdentity();
@@ -17638,11 +17733,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy({"this", "mProcLock"})
-    final void setAppIdTempAllowlistStateLSP(int uid, boolean onAllowlist) {
-        mOomAdjuster.setAppIdTempAllowlistStateLSP(uid, onAllowlist);
-    }
-
-    @GuardedBy({"this", "mProcLock"})
     final void setUidTempAllowlistStateLSP(int uid, boolean onAllowlist) {
         mOomAdjuster.setUidTempAllowlistStateLSP(uid, onAllowlist);
     }
@@ -18604,7 +18694,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     } else {
                         mFgsStartTempAllowList.removeUid(changingUid);
                     }
-                    setAppIdTempAllowlistStateLSP(changingUid, adding);
+                    setUidTempAllowlistStateLSP(changingUid, adding);
                 }
             }
         }

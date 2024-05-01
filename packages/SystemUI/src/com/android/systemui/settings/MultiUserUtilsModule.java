@@ -36,10 +36,10 @@ import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
-import javax.inject.Provider;
-
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.CoroutineScope;
+
+import javax.inject.Provider;
 
 /**
  * Dagger Module for classes found within the com.android.systemui.settings package.

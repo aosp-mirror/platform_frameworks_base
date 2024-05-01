@@ -221,6 +221,18 @@ public class HdrClamperTest {
         assertEquals(0.04f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
     }
 
+    @Test
+    public void testCalmper_transitionRateOverriddenByOtherRequest() {
+        mHdrClamper.onAmbientLuxChange(499);
+
+        mClock.fastForward(3000);
+        mTestHandler.timeAdvance();
+        assertEquals(0.6f, mHdrClamper.getMaxBrightness(), FLOAT_TOLERANCE);
+        assertEquals(0.04, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
+        // getTransitionRate should reset transitionRate
+        assertEquals(-1f, mHdrClamper.getTransitionRate(), FLOAT_TOLERANCE);
+    }
+
     // MsgInfo.sendTime is calculated first by adding SystemClock.uptimeMillis()
     // (in Handler.sendMessageDelayed) and then by subtracting SystemClock.uptimeMillis()
     // (in TestHandler.sendMessageAtTime, there might be several milliseconds difference between

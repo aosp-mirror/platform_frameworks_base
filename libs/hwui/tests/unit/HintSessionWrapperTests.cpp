@@ -52,8 +52,8 @@ protected:
         void init() override;
 
         MOCK_METHOD(APerformanceHintManager*, fakeGetManager, ());
-        MOCK_METHOD(APerformanceHintSession*, fakeCreateSession,
-                    (APerformanceHintManager*, const int32_t*, size_t, int64_t));
+        MOCK_METHOD(APerformanceHintSession*, fakeCreateSessionInternal,
+                    (APerformanceHintManager*, const int32_t*, size_t, int64_t, SessionTag));
         MOCK_METHOD(void, fakeCloseSession, (APerformanceHintSession*));
         MOCK_METHOD(void, fakeUpdateTargetWorkDuration, (APerformanceHintSession*, int64_t));
         MOCK_METHOD(void, fakeReportActualWorkDuration, (APerformanceHintSession*, int64_t));
@@ -72,22 +72,28 @@ protected:
 
     // Must be static so we can point to them as normal fn pointers with HintSessionBinding
     static APerformanceHintManager* stubGetManager() { return sMockBinding->fakeGetManager(); };
-    static APerformanceHintSession* stubCreateSession(APerformanceHintManager* manager,
-                                                      const int32_t* ids, size_t idsSize,
-                                                      int64_t initialTarget) {
-        return sMockBinding->fakeCreateSession(manager, ids, idsSize, initialTarget);
+    static APerformanceHintSession* stubCreateSessionInternal(APerformanceHintManager* manager,
+                                                              const int32_t* ids, size_t idsSize,
+                                                              int64_t initialTarget,
+                                                              SessionTag tag) {
+        return sMockBinding->fakeCreateSessionInternal(manager, ids, idsSize, initialTarget,
+                                                       SessionTag::HWUI);
     }
-    static APerformanceHintSession* stubManagedCreateSession(APerformanceHintManager* manager,
-                                                             const int32_t* ids, size_t idsSize,
-                                                             int64_t initialTarget) {
+    static APerformanceHintSession* stubManagedCreateSessionInternal(
+            APerformanceHintManager* manager, const int32_t* ids, size_t idsSize,
+            int64_t initialTarget, SessionTag tag) {
         sMockBinding->allowCreationToFinish.get_future().wait();
-        return sMockBinding->fakeCreateSession(manager, ids, idsSize, initialTarget);
+        return sMockBinding->fakeCreateSessionInternal(manager, ids, idsSize, initialTarget,
+                                                       SessionTag::HWUI);
     }
-    static APerformanceHintSession* stubSlowCreateSession(APerformanceHintManager* manager,
-                                                          const int32_t* ids, size_t idsSize,
-                                                          int64_t initialTarget) {
+    static APerformanceHintSession* stubSlowCreateSessionInternal(APerformanceHintManager* manager,
+                                                                  const int32_t* ids,
+                                                                  size_t idsSize,
+                                                                  int64_t initialTarget,
+                                                                  SessionTag tag) {
         std::this_thread::sleep_for(50ms);
-        return sMockBinding->fakeCreateSession(manager, ids, idsSize, initialTarget);
+        return sMockBinding->fakeCreateSessionInternal(manager, ids, idsSize, initialTarget,
+                                                       SessionTag::HWUI);
     }
     static void stubCloseSession(APerformanceHintSession* session) {
         sMockBinding->fakeCloseSession(session);
@@ -139,14 +145,14 @@ void HintSessionWrapperTests::SetUp() {
     mWrapper = std::make_shared<HintSessionWrapper>(uiThreadId, renderThreadId);
     mWrapper->mBinding = sMockBinding;
     EXPECT_CALL(*sMockBinding, fakeGetManager).WillOnce(Return(managerPtr));
-    ON_CALL(*sMockBinding, fakeCreateSession).WillByDefault(Return(sessionPtr));
+    ON_CALL(*sMockBinding, fakeCreateSessionInternal).WillByDefault(Return(sessionPtr));
     ON_CALL(*sMockBinding, fakeSetThreads).WillByDefault(Return(0));
 }
 
 void HintSessionWrapperTests::MockHintSessionBinding::init() {
     sMockBinding->getManager = &stubGetManager;
-    if (sMockBinding->createSession == nullptr) {
-        sMockBinding->createSession = &stubCreateSession;
+    if (sMockBinding->createSessionInternal == nullptr) {
+        sMockBinding->createSessionInternal = &stubCreateSessionInternal;
     }
     sMockBinding->closeSession = &stubCloseSession;
     sMockBinding->updateTargetWorkDuration = &stubUpdateTargetWorkDuration;
@@ -163,14 +169,14 @@ void HintSessionWrapperTests::TearDown() {
 
 TEST_F(HintSessionWrapperTests, destructorClosesBackgroundSession) {
     EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
-    sMockBinding->createSession = stubSlowCreateSession;
+    sMockBinding->createSessionInternal = stubSlowCreateSessionInternal;
     mWrapper->init();
     mWrapper = nullptr;
     Mock::VerifyAndClearExpectations(sMockBinding.get());
 }
 
 TEST_F(HintSessionWrapperTests, sessionInitializesCorrectly) {
-    EXPECT_CALL(*sMockBinding, fakeCreateSession(managerPtr, _, Gt(1), _)).Times(1);
+    EXPECT_CALL(*sMockBinding, fakeCreateSessionInternal(managerPtr, _, Gt(1), _, _)).Times(1);
     mWrapper->init();
     waitForWrapperReady();
 }
@@ -219,7 +225,7 @@ TEST_F(HintSessionWrapperTests, delayedDeletionResolvesBeforeAsyncCreationFinish
     // Here we test whether queueing delayedDestroy works while creation is still happening, if
     // creation happens after
     EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
-    sMockBinding->createSession = &stubManagedCreateSession;
+    sMockBinding->createSessionInternal = &stubManagedCreateSessionInternal;
 
     // Start creating the session and destroying it at the same time
     mWrapper->init();
@@ -246,7 +252,7 @@ TEST_F(HintSessionWrapperTests, delayedDeletionResolvesAfterAsyncCreationFinishe
     // Here we test whether queueing delayedDestroy works while creation is still happening, if
     // creation happens before
     EXPECT_CALL(*sMockBinding, fakeCloseSession(sessionPtr)).Times(1);
-    sMockBinding->createSession = &stubManagedCreateSession;
+    sMockBinding->createSessionInternal = &stubManagedCreateSessionInternal;
 
     // Start creating the session and destroying it at the same time
     mWrapper->init();
@@ -352,7 +358,7 @@ TEST_F(HintSessionWrapperTests, manualSessionDestroyPlaysNiceWithDelayedDestruct
 }
 
 TEST_F(HintSessionWrapperTests, setThreadsUpdatesSessionThreads) {
-    EXPECT_CALL(*sMockBinding, fakeCreateSession(managerPtr, _, Gt(1), _)).Times(1);
+    EXPECT_CALL(*sMockBinding, fakeCreateSessionInternal(managerPtr, _, Gt(1), _, _)).Times(1);
     EXPECT_CALL(*sMockBinding, fakeSetThreads(sessionPtr, testing::IsSupersetOf({11, 22})))
             .Times(1);
     mWrapper->init();

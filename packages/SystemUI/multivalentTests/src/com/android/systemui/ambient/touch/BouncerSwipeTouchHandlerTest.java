@@ -66,6 +66,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
 import java.util.Optional;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
@@ -149,7 +150,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 mUiEventLogger);
 
         when(mScrimManager.getCurrentController()).thenReturn(mScrimController);
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
         when(mValueAnimatorCreator.create(anyFloat(), anyFloat())).thenReturn(mValueAnimator);
         when(mVelocityTrackerFactory.obtain()).thenReturn(mVelocityTracker);
         when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn(Float.MAX_VALUE);
@@ -193,11 +193,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                         2)).isTrue();
     }
 
-    private enum Direction {
-        DOWN,
-        UP,
-    }
-
     @Test
     public void testSwipeUp_whenBouncerInitiallyShowing_reduceHeightWithExclusionRects() {
         mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion,
@@ -210,7 +205,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                 SCREEN_HEIGHT_PX * MIN_BOUNCER_HEIGHT;
         final int minAllowableBottom = SCREEN_HEIGHT_PX - Math.round(minBouncerHeight);
 
-        expected.set(0, minAllowableBottom , SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX);
+        expected.set(0, minAllowableBottom, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX);
 
         assertThat(bounds).isEqualTo(expected);
 
@@ -278,69 +273,11 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     /**
-     * Makes sure swiping up when bouncer initially showing doesn't change the expansion amount.
-     */
-    @DisableFlags(Flags.FLAG_DREAM_OVERLAY_BOUNCER_SWIPE_DIRECTION_FILTERING)
-    @Test
-    public void testSwipeUp_whenBouncerInitiallyShowing_doesNotSetExpansion() {
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
-
-        mTouchHandler.onSessionStart(mTouchSession);
-        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
-                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
-        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
-
-        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
-
-        final float percent = .3f;
-        final float distanceY = SCREEN_HEIGHT_PX * percent;
-
-        // Swiping up near the top of the screen where the touch initiation region is.
-        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, distanceY, 0);
-        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, 0, 0);
-
-        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY)).isTrue();
-
-        verify(mScrimController, never()).expand(any());
-    }
-
-    /**
-     * Makes sure swiping up when bouncer initially showing doesn't change the expansion amount.
-     */
-    @Test
-    @EnableFlags(Flags.FLAG_DREAM_OVERLAY_BOUNCER_SWIPE_DIRECTION_FILTERING)
-    public void testSwipeUp_whenBouncerInitiallyShowing_doesNotSetExpansion_directionFiltering() {
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
-
-        mTouchHandler.onSessionStart(mTouchSession);
-        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
-                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
-        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
-
-        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
-
-        final float percent = .3f;
-        final float distanceY = SCREEN_HEIGHT_PX * percent;
-
-        // Swiping up near the top of the screen where the touch initiation region is.
-        final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, distanceY, 0);
-        final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, 0, 0);
-
-        assertThat(gestureListener.onScroll(event1, event2, 0, distanceY)).isFalse();
-
-        verify(mScrimController, never()).expand(any());
-    }
-
-    /**
-     * Makes sure swiping down when bouncer initially hidden doesn't change the expansion amount.
+     * Makes sure swiping down doesn't change the expansion amount.
      */
     @Test
     @DisableFlags(Flags.FLAG_DREAM_OVERLAY_BOUNCER_SWIPE_DIRECTION_FILTERING)
-    public void testSwipeDown_whenBouncerInitiallyHidden_doesNotSetExpansion() {
+    public void testSwipeDown_doesNotSetExpansion() {
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
                 ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
@@ -401,34 +338,8 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
 
-        verifyScroll(.3f, Direction.UP, false, gestureListener);
-
-        // Ensure that subsequent gestures are treated as expanding even if the bouncer state
-        // changes.
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
-        verifyScroll(.7f, Direction.UP, false, gestureListener);
-    }
-
-    /**
-     * Makes sure the expansion amount is proportional to scroll.
-     */
-    @Test
-    public void testSwipeDown_setsCorrectExpansionAmount() {
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
-
-        mTouchHandler.onSessionStart(mTouchSession);
-        ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
-                ArgumentCaptor.forClass(GestureDetector.OnGestureListener.class);
-        verify(mTouchSession).registerGestureListener(gestureListenerCaptor.capture());
-
-        final OnGestureListener gestureListener = gestureListenerCaptor.getValue();
-
-        verifyScroll(.3f, Direction.DOWN, true, gestureListener);
-
-        // Ensure that subsequent gestures are treated as collapsing even if the bouncer state
-        // changes.
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(false);
-        verifyScroll(.7f, Direction.DOWN, true, gestureListener);
+        verifyScroll(.3f, gestureListener);
+        verifyScroll(.7f, gestureListener);
     }
 
     /**
@@ -493,25 +404,24 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         verify(mCentralSurfaces, never()).awakenDreams();
     }
 
-    private void verifyScroll(float percent, Direction direction,
-            boolean isBouncerInitiallyShowing, GestureDetector.OnGestureListener gestureListener) {
+    private void verifyScroll(float percent,
+            OnGestureListener gestureListener) {
         final float distanceY = SCREEN_HEIGHT_PX * percent;
 
         final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, direction == Direction.UP ? SCREEN_HEIGHT_PX : 0, 0);
+                0, SCREEN_HEIGHT_PX, 0);
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, direction == Direction.UP ? SCREEN_HEIGHT_PX - distanceY : distanceY, 0);
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
 
         reset(mScrimController);
         assertThat(gestureListener.onScroll(event1, event2, 0,
-                direction == Direction.UP ? distanceY : -distanceY))
+                distanceY))
                 .isTrue();
 
         // Ensure only called once
         verify(mScrimController).expand(any());
 
-        final float expansion = isBouncerInitiallyShowing ? percent : 1 - percent;
-        final float dragDownAmount = event2.getY() - event1.getY();
+        final float expansion = 1 - percent;
 
         // Ensure correct expansion passed in.
         ShadeExpansionChangeEvent event =
@@ -529,7 +439,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float expansion = 1 - swipeUpPercentage;
         // The upward velocity is ignored.
         final float velocityY = -1;
-        swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
+        swipeToPosition(swipeUpPercentage, velocityY);
 
         verify(mValueAnimatorCreator).create(eq(expansion),
                 eq(KeyguardBouncerConstants.EXPANSION_HIDDEN));
@@ -552,7 +462,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float expansion = 1 - swipeUpPercentage;
         // The downward velocity is ignored.
         final float velocityY = 1;
-        swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
+        swipeToPosition(swipeUpPercentage, velocityY);
 
         verify(mValueAnimatorCreator).create(eq(expansion),
                 eq(KeyguardBouncerConstants.EXPANSION_VISIBLE));
@@ -570,57 +480,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
 
         endAnimationListener.onAnimationEnd(mValueAnimator);
         verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_BOUNCER_FULLY_VISIBLE);
-    }
-
-    /**
-     * Tests that ending a downward swipe above the set threshold will continue the expansion,
-     * but will not trigger logging of the DREAM_SWIPED event.
-     */
-    @Test
-    public void testSwipeDownPositionAboveThreshold_expandsBouncer_doesNotLog() {
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
-
-        final float swipeDownPercentage = .3f;
-        // The downward velocity is ignored.
-        final float velocityY = 1;
-        swipeToPosition(swipeDownPercentage, Direction.DOWN, velocityY);
-
-        verify(mValueAnimatorCreator).create(eq(swipeDownPercentage),
-                eq(KeyguardBouncerConstants.EXPANSION_VISIBLE));
-        verify(mValueAnimator, never()).addListener(any());
-
-        verify(mFlingAnimationUtils).apply(eq(mValueAnimator),
-                eq(SCREEN_HEIGHT_PX * swipeDownPercentage),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncerConstants.EXPANSION_VISIBLE),
-                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
-        verify(mValueAnimator).start();
-        verify(mUiEventLogger, never()).log(any());
-    }
-
-    /**
-     * Tests that swiping down with a speed above the set threshold leads to bouncer collapsing
-     * down.
-     */
-    @Test
-    public void testSwipeDownVelocityAboveMin_collapsesBouncer() {
-        when(mCentralSurfaces.isBouncerShowing()).thenReturn(true);
-        when(mFlingAnimationUtils.getMinVelocityPxPerSecond()).thenReturn((float) 0);
-
-        // The ending position above the set threshold is ignored.
-        final float swipeDownPercentage = .3f;
-        final float velocityY = 1;
-        swipeToPosition(swipeDownPercentage, Direction.DOWN, velocityY);
-
-        verify(mValueAnimatorCreator).create(eq(swipeDownPercentage),
-                eq(KeyguardBouncerConstants.EXPANSION_HIDDEN));
-        verify(mValueAnimator, never()).addListener(any());
-
-        verify(mFlingAnimationUtilsClosing).apply(eq(mValueAnimator),
-                eq(SCREEN_HEIGHT_PX * swipeDownPercentage),
-                eq(SCREEN_HEIGHT_PX * KeyguardBouncerConstants.EXPANSION_HIDDEN),
-                eq(velocityY), eq((float) SCREEN_HEIGHT_PX));
-        verify(mValueAnimator).start();
-        verify(mUiEventLogger, never()).log(any());
     }
 
     /**
@@ -634,7 +493,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float swipeUpPercentage = .3f;
         final float expansion = 1 - swipeUpPercentage;
         final float velocityY = -1;
-        swipeToPosition(swipeUpPercentage, Direction.UP, velocityY);
+        swipeToPosition(swipeUpPercentage, velocityY);
 
         verify(mValueAnimatorCreator).create(eq(expansion),
                 eq(KeyguardBouncerConstants.EXPANSION_VISIBLE));
@@ -654,26 +513,6 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         verify(mUiEventLogger).log(BouncerSwipeTouchHandler.DreamEvent.DREAM_BOUNCER_FULLY_VISIBLE);
     }
 
-    /**
-     * Ensures {@link CentralSurfaces}
-     */
-    @Test
-    public void testInformBouncerShowingOnExpand() {
-        swipeToPosition(1f, Direction.UP, 0);
-    }
-
-    /**
-     * Ensures {@link CentralSurfaces}
-     */
-    @Test
-    public void testInformBouncerHidingOnCollapse() {
-        // Must swipe up to set initial state.
-        swipeToPosition(1f, Direction.UP, 0);
-        Mockito.clearInvocations(mCentralSurfaces);
-
-        swipeToPosition(0f, Direction.DOWN, 0);
-    }
-
     @Test
     public void testTouchSessionOnRemovedCalledTwice() {
         mTouchHandler.onSessionStart(mTouchSession);
@@ -684,7 +523,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         onRemovedCallbackCaptor.getValue().onRemoved();
     }
 
-    private void swipeToPosition(float percent, Direction direction, float velocityY) {
+    private void swipeToPosition(float percent, float velocityY) {
         Mockito.clearInvocations(mTouchSession);
         mTouchHandler.onSessionStart(mTouchSession);
         ArgumentCaptor<GestureDetector.OnGestureListener> gestureListenerCaptor =
@@ -699,12 +538,12 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         final float distanceY = SCREEN_HEIGHT_PX * percent;
 
         final MotionEvent event1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, direction == Direction.UP ? SCREEN_HEIGHT_PX : 0, 0);
+                0, SCREEN_HEIGHT_PX, 0);
         final MotionEvent event2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE,
-                0, direction == Direction.UP ? SCREEN_HEIGHT_PX - distanceY : distanceY, 0);
+                0, SCREEN_HEIGHT_PX - distanceY, 0);
 
         assertThat(gestureListenerCaptor.getValue().onScroll(event1, event2, 0,
-                direction == Direction.UP ? distanceY : -distanceY))
+                distanceY))
                 .isTrue();
 
         final MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP,

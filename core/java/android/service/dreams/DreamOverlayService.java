@@ -16,6 +16,7 @@
 
 package android.service.dreams;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -84,11 +85,26 @@ public abstract class DreamOverlayService extends Service {
             mService.comeToFront(this);
         }
 
-        private void onExitRequested() {
+        @Override
+        public void onWakeRequested() {
+            if (Flags.dreamWakeRedirect()) {
+                mService.onWakeRequested();
+            }
+        }
+
+        private void requestExit() {
             try {
                 mDreamOverlayCallback.onExitRequested();
             } catch (RemoteException e) {
                 Log.e(TAG, "Could not request exit:" + e);
+            }
+        }
+
+        private void redirectWake(boolean redirect) {
+            try {
+                mDreamOverlayCallback.onRedirectWake(redirect);
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not request redirect wake", e);
             }
         }
 
@@ -229,7 +245,35 @@ public abstract class DreamOverlayService extends Service {
             throw new IllegalStateException("requested exit with no dream present");
         }
 
-        mCurrentClient.onExitRequested();
+        mCurrentClient.requestExit();
+    }
+
+    /**
+     * Called to inform the dream to redirect waking to this overlay rather than exiting.
+     * @param redirect {@code true} if waking up should be redirected. {@code false} otherwise.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    public final void redirectWake(boolean redirect) {
+        if (!Flags.dreamWakeRedirect()) {
+            return;
+        }
+
+        if (mCurrentClient == null) {
+            throw new IllegalStateException("redirected wake with no dream present");
+        }
+
+        mCurrentClient.redirectWake(redirect);
+    }
+
+    /**
+     * Invoked when the dream has requested to exit. This is only called if the dream overlay
+     * has explicitly requested exits to be redirected via {@link #redirectWake(boolean)}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_DREAM_WAKE_REDIRECT)
+    public void onWakeRequested() {
     }
 
     /**

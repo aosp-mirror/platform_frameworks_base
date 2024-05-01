@@ -83,6 +83,8 @@ constructor(
             .pairwiseBy(initialValue = false) { wasPlaying, isPlaying -> !wasPlaying && isPlaying }
             .distinctUntilChanged()
 
+    val onAnyMediaConfigurationChange: Flow<Unit> = repository.onAnyMediaConfigurationChange
+
     fun removeMediaControl(
         token: MediaSession.Token?,
         instanceId: InstanceId,

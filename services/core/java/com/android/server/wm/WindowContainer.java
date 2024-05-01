@@ -3889,6 +3889,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return false;
     }
 
+
+    /** @return {@code true} if this container wants to show wallpaper. */
+    boolean hasWallpaper() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mChildren.get(i);
+            if (child.hasWallpaper()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Nullable
     static WindowContainer fromBinder(IBinder binder) {
         return RemoteToken.fromBinder(binder).getContainer();

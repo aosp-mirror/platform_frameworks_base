@@ -28,6 +28,8 @@ import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanki
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,8 +43,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -98,6 +98,8 @@ import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.wmshell.BubblesManager;
 
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -108,8 +110,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.Optional;
-
-import kotlinx.coroutines.test.TestScope;
 
 /**
  * Tests for {@link NotificationGutsManager}.

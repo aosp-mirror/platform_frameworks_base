@@ -69,6 +69,7 @@ var Kosmos.volumePanelViewModel: VolumePanelViewModel by
     Kosmos.Fixture {
         VolumePanelViewModel(
             mainResources,
+            testScope.backgroundScope,
             KosmosVolumePanelComponentFactory(this),
             fakeConfigurationController,
         )

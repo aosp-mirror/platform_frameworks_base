@@ -2422,12 +2422,10 @@ public final class ActiveServices {
                                     getTimeLimitedFgsType(foregroundServiceType);
                             final TimeLimitedFgsInfo fgsTypeInfo = fgsInfo.get(timeLimitedFgsType);
                             if (fgsTypeInfo != null) {
-                                // TODO(b/330399444): check to see if all time book-keeping for
-                                //  time limited types should use elapsedRealtime instead of uptime
                                 final long before24Hr = Math.max(0,
                                             SystemClock.elapsedRealtime() - (24 * 60 * 60 * 1000));
                                 final long lastTimeOutAt = fgsTypeInfo.getTimeLimitExceededAt();
-                                if (fgsTypeInfo.getFirstFgsStartTime() < before24Hr
+                                if (fgsTypeInfo.getFirstFgsStartRealtime() < before24Hr
                                         || (lastTimeOutAt != Long.MIN_VALUE
                                             && r.app.mState.getLastTopTime() > lastTimeOutAt)) {
                                     // Reset the time limit info for this fgs type if it has been
@@ -3726,6 +3724,33 @@ public final class ActiveServices {
         return fgsType;
     }
 
+    /**
+     * @return the constant time limit defined for the given foreground service type.
+     */
+    private long getTimeLimitForFgsType(int foregroundServiceType) {
+        return switch (foregroundServiceType) {
+            case ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROCESSING ->
+                    mAm.mConstants.mMediaProcessingFgsTimeoutDuration;
+            case ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC ->
+                    mAm.mConstants.mDataSyncFgsTimeoutDuration;
+            // Add logic for time limits introduced in the future for other fgs types above.
+            default -> Long.MAX_VALUE;
+        };
+    }
+
+    /**
+     * @return the next stop time for the given type, based on how long it has already ran for.
+     * The total runtime is automatically reset 24hrs after the first fgs start of this type
+     * or if the app has recently been in the TOP state when the app calls startForeground().
+     */
+    private long getNextFgsStopTime(int fgsType, TimeLimitedFgsInfo fgsInfo) {
+        final long timeLimit = getTimeLimitForFgsType(fgsType);
+        if (timeLimit == Long.MAX_VALUE) {
+            return Long.MAX_VALUE;
+        }
+        return fgsInfo.getLastFgsStartTime() + Math.max(0, timeLimit - fgsInfo.getTotalRuntime());
+    }
+
     private void maybeUpdateFgsTrackingLocked(ServiceRecord sr, int previousFgsType) {
         final int previouslyTimeLimitedType = getTimeLimitedFgsType(previousFgsType);
         if (previouslyTimeLimitedType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE
@@ -3779,7 +3804,7 @@ public final class ActiveServices {
 
         final Message msg = mAm.mHandler.obtainMessage(
                 ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
-        final long timeoutCallbackTime = sr.getNextFgsStopTime(timeLimitedFgsType, fgsTypeInfo);
+        final long timeoutCallbackTime = getNextFgsStopTime(timeLimitedFgsType, fgsTypeInfo);
         if (timeoutCallbackTime == Long.MAX_VALUE) {
             // This should never happen since we only get to this point if the service record's
             // foregroundServiceType attribute contains a type that can be timed-out.
@@ -3831,10 +3856,26 @@ public final class ActiveServices {
     void onFgsTimeout(ServiceRecord sr) {
         synchronized (mAm) {
             final int fgsType = getTimeLimitedFgsType(sr.foregroundServiceType);
-            if (fgsType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
+            if (fgsType == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE || sr.app == null) {
                 mFGSAnrTimer.discard(sr);
                 return;
             }
+
+            final long lastTopTime = sr.app.mState.getLastTopTime();
+            final long constantTimeLimit = getTimeLimitForFgsType(fgsType);
+            final long nowUptime = SystemClock.uptimeMillis();
+            if (lastTopTime != Long.MIN_VALUE && constantTimeLimit > (nowUptime - lastTopTime)) {
+                // Discard any other messages for this service
+                mFGSAnrTimer.discard(sr);
+                mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
+                // The app was in the TOP state after the FGS was started so its time allowance
+                // should be counted from that time since this is considered a user interaction
+                final Message msg = mAm.mHandler.obtainMessage(
+                                        ActivityManagerService.SERVICE_FGS_TIMEOUT_MSG, sr);
+                mAm.mHandler.sendMessageAtTime(msg, lastTopTime + constantTimeLimit);
+                return;
+            }
+
             Slog.e(TAG_SERVICE, "FGS (" + ServiceInfo.foregroundServiceTypeToLabel(fgsType)
                     + ") timed out: " + sr);
             mFGSAnrTimer.accept(sr);
@@ -3845,7 +3886,6 @@ public final class ActiveServices {
                 final TimeLimitedFgsInfo fgsTypeInfo = fgsInfo.get(fgsType);
                 if (fgsTypeInfo != null) {
                     // Update total runtime for the time-limited fgs type and mark it as timed out.
-                    final long nowUptime = SystemClock.uptimeMillis();
                     fgsTypeInfo.updateTotalRuntime();
                     fgsTypeInfo.setTimeLimitExceededAt(nowUptime);
 
@@ -7562,8 +7602,14 @@ public final class ActiveServices {
             super(Objects.requireNonNull(am).mHandler, msg, label);
         }
 
-        void start(@NonNull ProcessRecord proc, long millis) {
-            start(proc, proc.getPid(), proc.uid, millis);
+        @Override
+        public int getPid(@NonNull ProcessRecord proc) {
+            return proc.getPid();
+        }
+
+        @Override
+        public int getUid(@NonNull ProcessRecord proc) {
+            return proc.uid;
         }
     }
 
@@ -7573,11 +7619,14 @@ public final class ActiveServices {
             super(Objects.requireNonNull(am).mHandler, msg, label);
         }
 
-        void start(@NonNull ServiceRecord service, long millis) {
-            start(service,
-                    (service.app != null) ? service.app.getPid() : 0,
-                    service.appInfo.uid,
-                    millis);
+        @Override
+        public int getPid(@NonNull ServiceRecord service) {
+            return (service.app != null) ? service.app.getPid() : 0;
+        }
+
+        @Override
+        public int getUid(@NonNull ServiceRecord service) {
+            return (service.appInfo != null) ? service.appInfo.uid : 0;
         }
     }
 

@@ -190,4 +190,4 @@ private class OneOffTransition(
 
 // TODO(b/290184746): Compute a good default visibility threshold that depends on the layout size
 // and screen density.
-private const val ProgressVisibilityThreshold = 1e-3f
+internal const val ProgressVisibilityThreshold = 1e-3f

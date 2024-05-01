@@ -1229,7 +1229,7 @@ public class Build {
         /**
          * Vanilla Ice Cream.
          */
-        public static final int VANILLA_ICE_CREAM = CUR_DEVELOPMENT;
+        public static final int VANILLA_ICE_CREAM = 35;
     }
 
     /** The type of build, like "user" or "eng". */

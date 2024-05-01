@@ -317,6 +317,70 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
     }
 
     @Test
+    public void testEnterPipModeWhenResumed_autoEnterEnabled_returnTrue() {
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        activity.pictureInPictureArgs = params;
+
+        doReturn(true).when(activity).isState(RESUMED);
+        doReturn(false).when(activity).inPinnedWindowingMode();
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        doReturn(true).when(params).isAutoEnterEnabled();
+
+        assertTrue(mAtm.enterPictureInPictureMode(activity, params,
+                true /* fromClient */, true /* isAutoEnter */));
+    }
+
+    @Test
+    public void testEnterPipModeWhenResumed_autoEnterDisabled_returnTrue() {
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        activity.pictureInPictureArgs = params;
+
+        doReturn(true).when(activity).isState(RESUMED);
+        doReturn(false).when(activity).inPinnedWindowingMode();
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        doReturn(false).when(params).isAutoEnterEnabled();
+
+        assertTrue(mAtm.enterPictureInPictureMode(activity, params,
+                true /* fromClient */, false /* isAutoEnter */));
+    }
+
+    @Test
+    public void testEnterPipModeWhenPausing_autoEnterEnabled_returnFalse() {
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        activity.pictureInPictureArgs = params;
+
+        doReturn(true).when(activity).isState(PAUSING);
+        doReturn(false).when(activity).inPinnedWindowingMode();
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        doReturn(true).when(params).isAutoEnterEnabled();
+
+        assertFalse(mAtm.enterPictureInPictureMode(activity, params,
+                true /* fromClient */, true /* isAutoEnter */));
+    }
+
+    @Test
+    public void testEnterPipModeWhenPausing_autoEnterDisabled_returnTrue() {
+        final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        PictureInPictureParams params = mock(PictureInPictureParams.class);
+        activity.pictureInPictureArgs = params;
+
+        doReturn(true).when(activity).isState(PAUSING);
+        doReturn(false).when(activity).inPinnedWindowingMode();
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        doReturn(false).when(params).isAutoEnterEnabled();
+
+        assertTrue(mAtm.enterPictureInPictureMode(activity, params,
+                true /* fromClient */, false /* isAutoEnter */));
+    }
+
+    @Test
     public void testResumeNextActivityOnCrashedAppDied() {
         mSupervisor.beginDeferResume();
         final ActivityRecord homeActivity = new ActivityBuilder(mAtm)

@@ -11254,8 +11254,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 width = des;
             } else {
                 if (mUseBoundsForWidth) {
-                    width = Math.max(boring.width,
-                            (int) Math.ceil(boring.getDrawingBoundingBox().width()));
+                    RectF bbox = boring.getDrawingBoundingBox();
+                    float rightMax = Math.max(bbox.right, boring.width);
+                    float leftMin = Math.min(bbox.left, 0);
+                    width = Math.max(boring.width, (int) Math.ceil(rightMax - leftMin));
                 } else {
                     width = boring.width;
                 }

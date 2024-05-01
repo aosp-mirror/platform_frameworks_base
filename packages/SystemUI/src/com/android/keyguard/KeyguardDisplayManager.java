@@ -49,7 +49,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-
 @SysUISingleton
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";

@@ -32,7 +32,10 @@ import kotlinx.coroutines.CoroutineScope
 
 class KosmosVolumePanelComponentFactory(private val kosmos: Kosmos) : VolumePanelComponentFactory {
 
-    override fun create(viewModel: VolumePanelViewModel): VolumePanelComponent =
+    override fun create(
+        viewModel: VolumePanelViewModel,
+        scope: CoroutineScope
+    ): VolumePanelComponent =
         object : VolumePanelComponent {
 
             override fun coroutineScope(): CoroutineScope = kosmos.testScope.backgroundScope

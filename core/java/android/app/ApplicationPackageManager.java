@@ -84,6 +84,7 @@ import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.res.ApkAssets;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -118,9 +119,11 @@ import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.AttributeSet;
 import android.util.LauncherIcons;
 import android.util.Log;
 import android.util.Slog;
+import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
@@ -131,6 +134,9 @@ import com.android.internal.util.UserIcons;
 import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
@@ -4088,6 +4094,40 @@ public class ApplicationPackageManager extends PackageManager {
                     Log.w(TAG, "Failed to close apkAssets", ignored);
                 }
             }
+        }
+    }
+
+    @Override
+    public TypedArray extractPackageItemInfoAttributes(PackageItemInfo info, String name,
+            String rootTag, int[] attributes) {
+        if (info == null || info.metaData == null) {
+            return null;
+        }
+
+        try (XmlResourceParser parser = info.loadXmlMetaData(this, name)) {
+            if (parser == null) {
+                Log.w(TAG, "No " + name + " metadata");
+                return null;
+            }
+
+            final AttributeSet attrs = Xml.asAttributeSet(parser);
+            while (true) {
+                final int type = parser.next();
+                if (type == XmlPullParser.END_DOCUMENT || type == XmlPullParser.START_TAG) {
+                    break;
+                }
+            }
+
+            if (!TextUtils.equals(parser.getName(), rootTag)) {
+                Log.w(TAG, "Metadata does not start with " + name + " tag");
+                return null;
+            }
+
+            return getResourcesForApplication(info.getApplicationInfo())
+                    .obtainAttributes(attrs, attributes);
+        } catch (PackageManager.NameNotFoundException | IOException | XmlPullParserException e) {
+            Log.e(TAG, "Error parsing: " + info.packageName, e);
+            return null;
         }
     }
 }

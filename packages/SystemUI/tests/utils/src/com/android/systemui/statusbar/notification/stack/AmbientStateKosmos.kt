@@ -33,5 +33,6 @@ val Kosmos.ambientState by Fixture {
         /*bypassController=*/ stackScrollAlgorithmBypassController,
         /*statusBarKeyguardViewManager=*/ statusBarKeyguardViewManager,
         /*largeScreenShadeInterpolator=*/ largeScreenShadeInterpolator,
+        /*avalancheController=*/ avalancheController,
     )
 }

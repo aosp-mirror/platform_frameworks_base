@@ -23,6 +23,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.statusbar.policy.AvalancheController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -41,6 +42,7 @@ class AmbientStateTest : SysuiTestCase() {
     private val bypassController = StackScrollAlgorithm.BypassController { false }
     private val statusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>()
     private val largeScreenShadeInterpolator = mock<LargeScreenShadeInterpolator>()
+    private val avalancheController = mock<AvalancheController>()
 
     private lateinit var sut: AmbientState
 
@@ -53,7 +55,8 @@ class AmbientStateTest : SysuiTestCase() {
                 sectionProvider,
                 bypassController,
                 statusBarKeyguardViewManager,
-                largeScreenShadeInterpolator
+                largeScreenShadeInterpolator,
+                avalancheController
             )
     }
 

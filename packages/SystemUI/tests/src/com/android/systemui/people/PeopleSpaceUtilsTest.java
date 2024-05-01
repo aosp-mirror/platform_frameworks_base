@@ -58,10 +58,10 @@ import android.util.DisplayMetrics;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.appwidget.IAppWidgetService;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.people.widget.PeopleTileKey;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;

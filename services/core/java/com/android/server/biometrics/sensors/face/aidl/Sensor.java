@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -28,7 +30,6 @@ import android.hardware.biometrics.common.ComponentInfo;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.SensorProps;
-import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Handler;
@@ -296,7 +297,7 @@ public class Sensor {
         if (client != null && client.isInterruptable()) {
             Slog.e(TAG, "Sending face hardware unavailable error for client: " + client);
             final ErrorConsumer errorConsumer = (ErrorConsumer) client;
-            errorConsumer.onError(FaceManager.FACE_ERROR_HW_UNAVAILABLE,
+            errorConsumer.onError(FACE_ERROR_HW_UNAVAILABLE,
                     0 /* vendorCode */);
 
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,

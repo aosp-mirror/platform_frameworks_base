@@ -73,6 +73,15 @@ interface SceneContainerFrameworkModule {
                         Scenes.Shade,
                     ),
                 initialSceneKey = Scenes.Lockscreen,
+                navigationDistances =
+                    mapOf(
+                        Scenes.Gone to 0,
+                        Scenes.Lockscreen to 0,
+                        Scenes.Communal to 1,
+                        Scenes.Shade to 2,
+                        Scenes.QuickSettings to 3,
+                        Scenes.Bouncer to 4,
+                    ),
             )
         }
     }

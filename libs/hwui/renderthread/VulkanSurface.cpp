@@ -322,11 +322,16 @@ bool VulkanSurface::UpdateWindow(ANativeWindow* window, const WindowInfo& window
         return false;
     }
 
-    err = native_window_set_buffer_count(window, windowInfo.bufferCount);
-    if (err != 0) {
-        ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffer_count(%zu) failed: %s (%d)",
-              windowInfo.bufferCount, strerror(-err), err);
-        return false;
+    // If bufferCount == 1 then we're in shared buffer mode and we cannot actually call
+    // set_buffer_count, it'll just fail.
+    if (windowInfo.bufferCount > 1) {
+        err = native_window_set_buffer_count(window, windowInfo.bufferCount);
+        if (err != 0) {
+            ALOGE("VulkanSurface::UpdateWindow() native_window_set_buffer_count(%zu) failed: %s "
+                  "(%d)",
+                  windowInfo.bufferCount, strerror(-err), err);
+            return false;
+        }
     }
 
     err = native_window_set_usage(window, windowInfo.windowUsageFlags);

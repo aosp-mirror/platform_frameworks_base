@@ -33,6 +33,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -41,13 +42,15 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class WallpaperRepositoryImplTest : SysuiTestCase() {
 
-    private val testScope = TestScope(StandardTestDispatcher())
+    private val testDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
     private val userRepository = FakeUserRepository()
     private val wallpaperManager: WallpaperManager = mock()
 
     private val underTest: WallpaperRepositoryImpl by lazy {
         WallpaperRepositoryImpl(
             testScope.backgroundScope,
+            testDispatcher,
             fakeBroadcastDispatcher,
             userRepository,
             wallpaperManager,
@@ -102,8 +105,10 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
             userRepository.setUserInfos(listOf(USER_WITH_SUPPORTED_WP))
             userRepository.setSelectedUserInfo(USER_WITH_SUPPORTED_WP)
 
-            // WHEN the repo initially starts up (underTest is lazy), then it fetches the current
-            // value for the wallpaper
+            // Start up the repo and let it run the initial fetch
+            underTest.wallpaperInfo
+            runCurrent()
+
             assertThat(underTest.wallpaperInfo.value).isEqualTo(SUPPORTED_WP)
         }
 
@@ -281,6 +286,10 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
                 .thenReturn(SUPPORTED_WP)
             userRepository.setUserInfos(listOf(USER_WITH_SUPPORTED_WP))
             userRepository.setSelectedUserInfo(USER_WITH_SUPPORTED_WP)
+
+            // Start up the repo and let it run the initial fetch
+            underTest.wallpaperSupportsAmbientMode
+            runCurrent()
 
             // WHEN the repo initially starts up (underTest is lazy), then it fetches the current
             // value for the wallpaper

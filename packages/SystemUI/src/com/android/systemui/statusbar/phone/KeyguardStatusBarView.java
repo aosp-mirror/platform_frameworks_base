@@ -48,17 +48,18 @@ import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange;
+import com.android.systemui.statusbar.phone.ui.TintedIconManager;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
 
 import kotlinx.coroutines.flow.FlowKt;
 import kotlinx.coroutines.flow.MutableStateFlow;
 import kotlinx.coroutines.flow.StateFlow;
 import kotlinx.coroutines.flow.StateFlowKt;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * The header group on Keyguard.
@@ -421,7 +422,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
-    void onThemeChanged(StatusBarIconController.TintedIconManager iconManager) {
+    void onThemeChanged(TintedIconManager iconManager) {
         mBatteryView.setColorsFromContext(mContext);
         updateIconsAndTextColors(iconManager);
     }
@@ -438,7 +439,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
         }
     }
 
-    private void updateIconsAndTextColors(StatusBarIconController.TintedIconManager iconManager) {
+    private void updateIconsAndTextColors(TintedIconManager iconManager) {
         @ColorInt int textColor = Utils.getColorAttrDefaultColor(mContext,
                 R.attr.wallpaperTextColor);
         float luminance = Color.luminance(textColor);

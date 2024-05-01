@@ -117,6 +117,7 @@ import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.TeeWriter;
 import android.util.proto.ProtoOutputStream;
+import android.view.Choreographer;
 import android.view.Display;
 import android.window.SplashScreen;
 
@@ -241,6 +242,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 case "start":
                 case "start-activity":
                     return runStartActivity(pw);
+                case "start-in-vsync":
+                    final ProgressWaiter waiter = new ProgressWaiter(0);
+                    final int[] startResult = new int[1];
+                    startResult[0] = -1;
+                    mInternal.mUiHandler.runWithScissors(
+                            () -> Choreographer.getInstance().postFrameCallback(frameTimeNanos -> {
+                                try {
+                                    startResult[0] = runStartActivity(pw);
+                                    waiter.onFinished(0, null /* extras */);
+                                } catch (Exception ex) {
+                                    getErrPrintWriter().println(
+                                            "Error: unable to start activity, " + ex);
+                                }
+                            }),
+                            USER_OPERATION_TIMEOUT_MS / 2);
+                    waiter.waitForFinish(USER_OPERATION_TIMEOUT_MS);
+                    return startResult[0];
                 case "startservice":
                 case "start-service":
                     return runStartService(pw, false);
@@ -281,6 +299,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runClearWatchHeap(pw);
                 case "clear-start-info":
                     return runClearStartInfo(pw);
+                case "start-info-detailed-monitoring":
+                    return runStartInfoDetailedMonitoring(pw);
                 case "clear-exit-info":
                     return runClearExitInfo(pw);
                 case "bug-report":
@@ -1395,12 +1415,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 "runClearStartInfo()");
         String opt;
         int userId = UserHandle.USER_CURRENT;
-        String packageName = null;
         while ((opt = getNextOption()) != null) {
             if (opt.equals("--user")) {
                 userId = UserHandle.parseUserArg(getNextArgRequired());
             } else {
-                packageName = opt;
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
             }
         }
         if (userId == UserHandle.USER_CURRENT) {
@@ -1411,21 +1431,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
             userId = user.id;
         }
         mInternal.mProcessList.getAppStartInfoTracker()
-                .clearHistoryProcessStartInfo(packageName, userId);
+                .clearHistoryProcessStartInfo(getNextArg(), userId);
         return 0;
     }
 
-    int runClearExitInfo(PrintWriter pw) throws RemoteException {
-        mInternal.enforceCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
-                "runClearExitInfo()");
+    int runStartInfoDetailedMonitoring(PrintWriter pw) throws RemoteException {
         String opt;
         int userId = UserHandle.USER_CURRENT;
-        String packageName = null;
         while ((opt = getNextOption()) != null) {
             if (opt.equals("--user")) {
                 userId = UserHandle.parseUserArg(getNextArgRequired());
             } else {
-                packageName = opt;
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
             }
         }
         if (userId == UserHandle.USER_CURRENT) {
@@ -1435,7 +1453,33 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             userId = user.id;
         }
-        mInternal.mProcessList.mAppExitInfoTracker.clearHistoryProcessExitInfo(packageName, userId);
+        mInternal.mProcessList.getAppStartInfoTracker()
+                .configureDetailedMonitoring(pw, getNextArg(), userId);
+        return 0;
+    }
+
+    int runClearExitInfo(PrintWriter pw) throws RemoteException {
+        mInternal.enforceCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
+                "runClearExitInfo()");
+        String opt;
+        int userId = UserHandle.USER_CURRENT;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        if (userId == UserHandle.USER_CURRENT) {
+            UserInfo user = mInterface.getCurrentUser();
+            if (user == null) {
+                return -1;
+            }
+            userId = user.id;
+        }
+        mInternal.mProcessList.mAppExitInfoTracker.clearHistoryProcessExitInfo(getNextArg(),
+                userId);
         return 0;
     }
 
@@ -4236,6 +4280,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --activityType <ACTIVITY_TYPE>: The activity type to launch the activity as.");
             pw.println("      --display <DISPLAY_ID>: The display to launch the activity into.");
             pw.println("      --splashscreen-icon: Show the splash screen icon on launch.");
+            pw.println("  start-in-vsync");
+            pw.println("      Start an Activity with vsync aligned. See `start-activity` for the");
+            pw.println("      possible options.");
             pw.println("  start-service [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
@@ -4356,10 +4403,15 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      above <HEAP-LIMIT> then a heap dump is collected for the user to report.");
             pw.println("  clear-watch-heap");
             pw.println("      Clear the previously set-watch-heap.");
-            pw.println("  clear-start-info [--user <USER_ID> | all | current] [package]");
-            pw.println("      Clear the process start-info for given package");
-            pw.println("  clear-exit-info [--user <USER_ID> | all | current] [package]");
-            pw.println("      Clear the process exit-info for given package");
+            pw.println("  clear-start-info [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      Clear process start-info for the given package.");
+            pw.println("      Clear start-info for all packages if no package is provided.");
+            pw.println("  start-info-detailed-monitoring [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      Enable application start info detailed monitoring for the given package.");
+            pw.println("      Disable if no package is supplied.");
+            pw.println("  clear-exit-info [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      Clear process exit-info for the given package.");
+            pw.println("      Clear exit-info for all packages if no package is provided.");
             pw.println("  bug-report [--progress | --telephony]");
             pw.println("      Request bug report generation; will launch a notification");
             pw.println("        when done to select where it should be delivered. Options are:");

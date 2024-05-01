@@ -64,7 +64,6 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-
 /**
  * Class to handle ugly dependencies throughout sysui until we determine the
  * long-term dependency injection solution.

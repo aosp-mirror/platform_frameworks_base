@@ -38,6 +38,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -67,10 +68,13 @@ class BouncerViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
     private val bouncerInteractor by lazy { kosmos.bouncerInteractor }
+    private val sceneContainerStartable = kosmos.sceneContainerStartable
+
     private lateinit var underTest: BouncerViewModel
 
     @Before
     fun setUp() {
+        sceneContainerStartable.start()
         underTest = kosmos.bouncerViewModel
     }
 

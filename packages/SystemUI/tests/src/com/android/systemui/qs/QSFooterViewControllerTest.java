@@ -34,9 +34,9 @@ import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
 import com.android.systemui.retail.data.repository.FakeRetailModeRepository;
 import com.android.systemui.retail.domain.interactor.RetailModeInteractorImpl;
 import com.android.systemui.settings.UserTracker;

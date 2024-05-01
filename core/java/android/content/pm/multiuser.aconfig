@@ -61,6 +61,13 @@ flag {
 }
 
 flag {
+    name: "new_multiuser_settings_ux"
+    namespace: "multiuser"
+    description: "Update multiuser settings UI"
+    bug: "298008926"
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
     is_exported: true
     namespace: "profile_experiences"
@@ -118,6 +125,16 @@ flag {
     namespace: "multiuser"
     description: "Talkback focus doesn't move to the 'If you change your Google Account picture…' after swiping next to move the focus from 'Choose a picture'"
     bug: "330835921"
+    metadata {
+    	purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "fix_avatar_picker_selected_read_back"
+    namespace: "multiuser"
+    description: "Talkback doesn't announce 'selected' after double tapping the button in the picture list in 'Choose a picture' page."
+    bug: "330840549"
     metadata {
     	purpose: PURPOSE_BUGFIX
   }

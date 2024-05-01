@@ -242,6 +242,9 @@ import dalvik.annotation.optimization.NeverCompile;
 
 import kotlin.Unit;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.flow.Flow;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -250,9 +253,6 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.flow.Flow;
 
 @SysUISingleton
 public final class NotificationPanelViewController implements ShadeSurface, Dumpable {

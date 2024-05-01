@@ -83,6 +83,8 @@ import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -90,8 +92,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * Controls both the scrim behind the notifications and in front of the notifications (when a

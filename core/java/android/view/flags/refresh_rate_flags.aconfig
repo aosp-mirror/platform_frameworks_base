@@ -61,7 +61,7 @@ flag {
     name: "toolkit_frame_rate_default_normal_read_only"
     namespace: "toolkit"
     description: "Feature flag for setting frame rate category as NORMAL for default"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -69,7 +69,7 @@ flag {
     name: "toolkit_frame_rate_by_size_read_only"
     namespace: "toolkit"
     description: "Feature flag for setting frame rate category based on size"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -77,7 +77,7 @@ flag {
     name: "toolkit_frame_rate_velocity_mapping_read_only"
     namespace: "toolkit"
     description: "Feature flag for setting frame rate based on velocity"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -85,7 +85,7 @@ flag {
     name: "toolkit_frame_rate_small_uses_percent_read_only"
     namespace: "toolkit"
     description: "VRR uses percent of size to consider a view to be small"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -93,7 +93,7 @@ flag {
     name: "toolkit_frame_rate_typing_read_only"
     namespace: "toolkit"
     description: "Feature flag for suppressing boost on typing"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -101,7 +101,7 @@ flag {
     name: "toolkit_frame_rate_function_enabling_read_only"
     namespace: "toolkit"
     description: "Feature flag to enable the functionality of the dVRR feature"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }
 
@@ -109,6 +109,6 @@ flag {
     name: "toolkit_frame_rate_view_enabling_read_only"
     namespace: "toolkit"
     description: "Feature flag to enable the functionality on views for the dVRR feature"
-    bug: "239979904"
+    bug: "335874198"
     is_fixed_read_only: true
 }

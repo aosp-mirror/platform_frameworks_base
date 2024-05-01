@@ -47,6 +47,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 
+import dagger.Lazy;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,8 +58,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

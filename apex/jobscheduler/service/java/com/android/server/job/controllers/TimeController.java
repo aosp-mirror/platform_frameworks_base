@@ -36,10 +36,9 @@ import com.android.server.AppSchedulingModuleThread;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 
+import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.PriorityQueue;
 import java.util.function.Predicate;
 
 /**
@@ -64,8 +63,17 @@ public final class TimeController extends StateController {
     private volatile long mLastFiredDelayExpiredElapsedMillis;
 
     private AlarmManager mAlarmService = null;
-    /** List of tracked jobs, sorted asc. by deadline */
-    private final List<JobStatus> mTrackedJobs = new LinkedList<>();
+
+    /** List of tracked jobs, ordered by deadline (lowest i.e. earliest first) */
+    private final PriorityQueue<JobStatus> mTrackedJobs =
+            new PriorityQueue<>(
+                    new Comparator<JobStatus>() {
+                        public int compare(JobStatus left, JobStatus right) {
+                            return Long.compare(
+                                    left.getLatestRunTimeElapsed(),
+                                    right.getLatestRunTimeElapsed());
+                        }
+                    });
 
     public TimeController(JobSchedulerService service) {
         super(service);
@@ -102,20 +110,7 @@ public final class TimeController extends StateController {
                 }
             }
 
-            boolean isInsert = false;
-            ListIterator<JobStatus> it = mTrackedJobs.listIterator(mTrackedJobs.size());
-            while (it.hasPrevious()) {
-                JobStatus ts = it.previous();
-                if (ts.getLatestRunTimeElapsed() < job.getLatestRunTimeElapsed()) {
-                    // Insert
-                    isInsert = true;
-                    break;
-                }
-            }
-            if (isInsert) {
-                it.next();
-            }
-            it.add(job);
+            mTrackedJobs.add(job);
 
             job.setTrackingController(JobStatus.TRACKING_TIME);
             WorkSource ws =
@@ -226,7 +221,7 @@ public final class TimeController extends StateController {
             String nextExpiryPackageName = null;
             final long nowElapsedMillis = sElapsedRealtimeClock.millis();
 
-            ListIterator<JobStatus> it = mTrackedJobs.listIterator();
+            Iterator<JobStatus> it = mTrackedJobs.iterator();
             while (it.hasNext()) {
                 JobStatus job = it.next();
                 if (!job.hasDeadlineConstraint()) {

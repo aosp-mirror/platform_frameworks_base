@@ -17,32 +17,30 @@
 #ifndef ANDROID_GUI_BUFFERITEMCONSUMER_H
 #define ANDROID_GUI_BUFFERITEMCONSUMER_H
 
-#include <utils/RefBase.h>
-
 #include <gui/ConsumerBase.h>
 #include <gui/IGraphicBufferConsumer.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
 class BufferItemConsumer : public ConsumerBase {
 public:
-    BufferItemConsumer(
-        const sp<IGraphicBufferConsumer>& consumer,
-        uint64_t consumerUsage,
-        int bufferCount,
-        bool controlledByApp) : mConsumer(consumer) {
-    }
+    BufferItemConsumer(const sp<IGraphicBufferConsumer>& consumer, uint64_t consumerUsage,
+                       int bufferCount, bool controlledByApp)
+          : mConsumer(consumer) {}
 
-    status_t acquireBuffer(BufferItem *item, nsecs_t presentWhen, bool waitForFence = true) {
+    status_t acquireBuffer(BufferItem* item, nsecs_t presentWhen, bool waitForFence = true) {
         return mConsumer->acquireBuffer(item, presentWhen, 0);
     }
 
-    status_t releaseBuffer(
-        const BufferItem &item, const sp<Fence>& releaseFence = Fence::NO_FENCE) { return OK; }
+    status_t releaseBuffer(const BufferItem& item,
+                           const sp<Fence>& releaseFence = Fence::NO_FENCE) {
+        return OK;
+    }
 
-    void setName(const String8& name) { }
+    void setName(const String8& name) {}
 
-    void setFrameAvailableListener(const wp<FrameAvailableListener>& listener) { }
+    void setFrameAvailableListener(const wp<FrameAvailableListener>& listener) {}
 
     status_t setDefaultBufferSize(uint32_t width, uint32_t height) {
         return mConsumer->setDefaultBufferSize(width, height);
@@ -56,16 +54,23 @@ public:
         return mConsumer->setDefaultBufferDataSpace(defaultDataSpace);
     }
 
-    void abandon() { }
+    void abandon() {}
 
-    status_t detachBuffer(int slot) { return OK; }
+    status_t detachBuffer(int slot) {
+        return OK;
+    }
 
-    status_t discardFreeBuffers() { return OK; }
+    status_t discardFreeBuffers() {
+        return OK;
+    }
 
-    void freeBufferLocked(int slotIndex) { }
+    void freeBufferLocked(int slotIndex) {}
 
-    status_t addReleaseFenceLocked(
-        int slot, const sp<GraphicBuffer> graphicBuffer, const sp<Fence>& fence) { return OK; }
+    status_t addReleaseFenceLocked(int slot, const sp<GraphicBuffer> graphicBuffer,
+                                   const sp<Fence>& fence) {
+        return OK;
+    }
+
 private:
     sp<IGraphicBufferConsumer> mConsumer;
 };

@@ -29,8 +29,25 @@ open class HostStubGenStats {
 
     private val stats = mutableMapOf<String, Stats>()
 
-    fun onVisitPolicyForMethod(fullClassName: String, methodName: String, descriptor: String,
-                               policy: FilterPolicyWithReason, access: Int) {
+    data class Api(
+        val fullClassName: String,
+        val methodName: String,
+        val methodDesc: String,
+    )
+
+    private val apis = mutableListOf<Api>()
+
+    fun onVisitPolicyForMethod(
+        fullClassName: String,
+        methodName: String,
+        descriptor: String,
+        policy: FilterPolicyWithReason,
+        access: Int
+    ) {
+        if (policy.policy.isSupported) {
+            apis.add(Api(fullClassName, methodName, descriptor))
+        }
+
         // Ignore methods that aren't public
         if ((access and Opcodes.ACC_PUBLIC) == 0) return
         // Ignore methods that are abstract
@@ -39,7 +56,7 @@ open class HostStubGenStats {
         if (policy.isIgnoredForStats) return
 
         val packageName = resolvePackageName(fullClassName)
-        val className = resolveClassName(fullClassName)
+        val className = resolveOuterClassName(fullClassName)
 
         // Ignore methods for certain generated code
         if (className.endsWith("Proto")
@@ -60,15 +77,29 @@ open class HostStubGenStats {
         classStats.total += 1
     }
 
-    fun dump(pw: PrintWriter) {
+    fun dumpOverview(pw: PrintWriter) {
         pw.printf("PackageName,ClassName,SupportedMethods,TotalMethods\n")
-        stats.forEach { (packageName, packageStats) ->
+        stats.toSortedMap().forEach { (packageName, packageStats) ->
             if (packageStats.supported > 0) {
-                packageStats.children.forEach { (className, classStats) ->
+                packageStats.children.toSortedMap().forEach { (className, classStats) ->
                     pw.printf("%s,%s,%d,%d\n", packageName, className,
                             classStats.supported, classStats.total)
                 }
             }
+        }
+    }
+
+    fun dumpApis(pw: PrintWriter) {
+        pw.printf("PackageName,ClassName,MethodName,MethodDesc\n")
+        apis.sortedWith(compareBy({ it.fullClassName }, { it.methodName }, { it.methodDesc }))
+            .forEach { api ->
+            pw.printf(
+                "%s,%s,%s,%s\n",
+                csvEscape(resolvePackageName(api.fullClassName)),
+                csvEscape(resolveClassName(api.fullClassName)),
+                csvEscape(api.methodName),
+                csvEscape(api.methodDesc),
+                )
         }
     }
 
@@ -77,13 +108,22 @@ open class HostStubGenStats {
         return fullClassName.substring(0, start).toHumanReadableClassName()
     }
 
-    private fun resolveClassName(fullClassName: String): String {
+    private fun resolveOuterClassName(fullClassName: String): String {
         val start = fullClassName.lastIndexOf('/')
         val end = fullClassName.indexOf('$')
         if (end == -1) {
             return fullClassName.substring(start + 1)
         } else {
             return fullClassName.substring(start + 1, end)
+        }
+    }
+
+    private fun resolveClassName(fullClassName: String): String {
+        val pos = fullClassName.lastIndexOf('/')
+        if (pos == -1) {
+            return fullClassName
+        } else {
+            return fullClassName.substring(pos + 1)
         }
     }
 }

@@ -43,7 +43,6 @@ import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
@@ -131,8 +130,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     @NonNull private final BiometricHandlerProvider mBiometricHandlerProvider;
     @Nullable private IFingerprint mDaemon;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    @Nullable private ISidefpsController mSidefpsController;
     private final AuthSessionCoordinator mAuthSessionCoordinator;
     @Nullable private AuthenticationStatsCollector mAuthenticationStatsCollector;
     @Nullable private IVirtualHal mVhal;
@@ -509,8 +506,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             BiometricsProtoEnums.CLIENT_UNKNOWN, mAuthenticationStatsCollector),
                     mBiometricContext,
                     mFingerprintSensors.get(sensorId).getSensorProperties(),
-                    mUdfpsOverlayController, mSidefpsController,
-                    mAuthenticationStateListeners, maxTemplatesPerUser, enrollReason, options);
+                    mUdfpsOverlayController, mAuthenticationStateListeners, maxTemplatesPerUser,
+                    enrollReason, options);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
         });
         return id;
@@ -565,8 +562,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mAuthenticationStatsCollector),
                     mBiometricContext, isStrongBiometric,
                     mTaskStackListener,
-                    mUdfpsOverlayController, mSidefpsController,
-                    mAuthenticationStateListeners, allowBackgroundAuthentication,
+                    mUdfpsOverlayController, mAuthenticationStateListeners,
+                    allowBackgroundAuthentication,
                     mFingerprintSensors.get(sensorId).getSensorProperties(),
                     Utils.getCurrentStrength(sensorId),
                     lockoutTracker);
@@ -799,12 +796,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             }
             ((PowerPressHandler) client).onPowerPressed();
         }
-    }
-
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    @Override
-    public void setSidefpsController(@NonNull ISidefpsController controller) {
-        mSidefpsController = controller;
     }
 
     @Override

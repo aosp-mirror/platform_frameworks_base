@@ -37,7 +37,6 @@ import static android.view.Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
 import static android.view.Surface.FRAME_RATE_COMPATIBILITY_GTE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_BOOST;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_CONFLICTED;
-import static android.view.View.FRAME_RATE_CATEGORY_REASON_IDLE;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_INVALID;
 import static android.view.View.FRAME_RATE_CATEGORY_REASON_LARGE;
@@ -74,6 +73,7 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -110,6 +110,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.accessibility.Flags.fixMergedContentChangeEventV2;
 import static android.view.accessibility.Flags.forceInvertColor;
 import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
+import static android.view.flags.Flags.addSchandleToVriSurface;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.flags.Flags.toolkitFrameRateFunctionEnablingReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateTypingReadOnly;
@@ -125,6 +126,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
+import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -1087,16 +1089,10 @@ public final class ViewRootImpl implements ViewParent,
     // The last preferred frame rate of the view that is mainly used to
     // track the difference between the current preferred frame rate and the previous value.
     private float mLastPreferredFrameRate = 0;
-    // Used to check if there were any view invalidations in
-    // the previous time frame (FRAME_RATE_IDLENESS_REEVALUATE_TIME).
-    private boolean mHasInvalidation = false;
     // Used to check if it is in the frame rate boosting period.
     private boolean mIsFrameRateBoosting = false;
     // Used to check if it is in touch boosting period.
     private boolean mIsTouchBoosting = false;
-    // Used to check if there is a message in the message queue
-    // for idleness handling.
-    private boolean mHasIdledMessage = false;
     private boolean mDrawnThisFrame = false;
     // Used to check if there is a conflict between different frame rate voting.
     // Take 24 and 30 as an example, 24 is not a divisor of 30.
@@ -1107,10 +1103,6 @@ public final class ViewRootImpl implements ViewParent,
             FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
     // time for touch boost period.
     private static final int FRAME_RATE_TOUCH_BOOST_TIME = 3000;
-    // time for checking idle status periodically.
-    private static final int FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS = 500;
-    // time for revaluating the idle status before lowering the frame rate.
-    private static final int FRAME_RATE_IDLENESS_REEVALUATE_TIME = 1000;
     // time for evaluating the interval between current time and
     // the time when frame rate was set previously.
     private static final int FRAME_RATE_SETTING_REEVALUATE_TIME = 100;
@@ -1143,7 +1135,14 @@ public final class ViewRootImpl implements ViewParent,
      * we get rid of synchronous relayout, until then, we use this bundle to channel the
      * integer back over relayout.
      */
-    private Bundle mRelayoutBundle = new Bundle();
+    private final Bundle mRelayoutBundle = windowSessionRelayoutInfo()
+            ? null
+            : new Bundle();
+
+    private final WindowRelayoutResult mRelayoutResult = windowSessionRelayoutInfo()
+            ? new WindowRelayoutResult(mTmpFrames, mPendingMergedConfiguration, mSurfaceControl,
+                    mTempInsets, mTempControls)
+            : null;
 
     private static volatile boolean sAnrReported = false;
     static BLASTBufferQueue.TransactionHangCallback sTransactionHangCallback =
@@ -1244,7 +1243,7 @@ public final class ViewRootImpl implements ViewParent,
         // TODO(b/222696368): remove getSfInstance usage and use vsyncId for transactions
         mChoreographer = Choreographer.getInstance();
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
-        mImeBackAnimationController = new ImeBackAnimationController(this);
+        mImeBackAnimationController = new ImeBackAnimationController(this, mInsetsController);
         mHandwritingInitiator = new HandwritingInitiator(
                 mViewConfiguration,
                 mContext.getSystemService(InputMethodManager.class));
@@ -1282,7 +1281,7 @@ public final class ViewRootImpl implements ViewParent,
         mImeFocusController = new ImeFocusController(this);
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
-        mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(context);
+        mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(context, Looper.myLooper());
         if (sensitiveContentAppProtection()) {
             mSensitiveContentProtectionService =
                     ISensitiveContentProtectionManager.Stub.asInterface(
@@ -2141,7 +2140,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private int adjustLayoutInDisplayCutoutMode(WindowManager.LayoutParams attrs) {
         final int originalMode = attrs.layoutInDisplayCutoutMode;
-        if ((attrs.privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
+        if ((attrs.privateFlags & (PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED
+                | PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)) != 0
                 && attrs.isFullscreen()
                 && attrs.getFitInsetsTypes() == 0
                 && attrs.getFitInsetsSides() == 0) {
@@ -2633,7 +2633,12 @@ public final class ViewRootImpl implements ViewParent,
         mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
                 mSurfaceSize.x, mSurfaceSize.y, mWindowAttributes.format);
         mBlastBufferQueue.setTransactionHangCallback(sTransactionHangCallback);
-        Surface blastSurface = mBlastBufferQueue.createSurface();
+        Surface blastSurface;
+        if (addSchandleToVriSurface()) {
+            blastSurface = mBlastBufferQueue.createSurfaceWithHandle();
+        } else {
+            blastSurface = mBlastBufferQueue.createSurface();
+        }
         // Only call transferFrom if the surface has changed to prevent inc the generation ID and
         // causing EGL resources to be recreated.
         mSurface.transferFrom(blastSurface);
@@ -4261,7 +4266,6 @@ public final class ViewRootImpl implements ViewParent,
                 mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
                         FRAME_RATE_SETTING_REEVALUATE_TIME);
             }
-            checkIdleness();
             mFrameRateCategoryHighCount = mFrameRateCategoryHighCount > 0
                     ? mFrameRateCategoryHighCount - 1 : mFrameRateCategoryHighCount;
             mFrameRateCategoryNormalCount = mFrameRateCategoryNormalCount > 0
@@ -5952,11 +5956,17 @@ public final class ViewRootImpl implements ViewParent,
         return handled;
     }
 
-    void setScrollY(int scrollY) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void setScrollY(int scrollY) {
         if (mScroller != null) {
             mScroller.abortAnimation();
         }
         mScrollY = scrollY;
+    }
+
+    @VisibleForTesting
+    public int getScrollY() {
+        return mScrollY;
     }
 
     /**
@@ -6443,8 +6453,6 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_REFRESH_POINTER_ICON";
                 case MSG_TOUCH_BOOST_TIMEOUT:
                     return "MSG_TOUCH_BOOST_TIMEOUT";
-                case MSG_CHECK_INVALIDATION_IDLE:
-                    return "MSG_CHECK_INVALIDATION_IDLE";
                 case MSG_FRAME_RATE_SETTING:
                     return "MSG_FRAME_RATE_SETTING";
             }
@@ -6712,27 +6720,6 @@ public final class ViewRootImpl implements ViewParent,
                     mIsFrameRateBoosting = false;
                     mIsTouchBoosting = false;
                     break;
-                case MSG_CHECK_INVALIDATION_IDLE:
-                    if (!mHasInvalidation && !mIsFrameRateBoosting && !mIsTouchBoosting) {
-                        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-                        mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_IDLE;
-                        mFrameRateCategoryView = null;
-                        setPreferredFrameRateCategory(mPreferredFrameRateCategory);
-                        mHasIdledMessage = false;
-                    } else {
-                        /**
-                         * If there is no invalidation within a certain period,
-                         * we consider the display is idled.
-                         * We then set the frame rate catetogry to NO_PREFERENCE.
-                         * Note that SurfaceFlinger also has a mechanism to lower the refresh rate
-                         * if there is no updates of the buffer.
-                         */
-                        mHasInvalidation = false;
-                        mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
-                                FRAME_RATE_IDLENESS_REEVALUATE_TIME);
-                        mHasIdledMessage = true;
-                    }
-                    break;
                 case MSG_REFRESH_POINTER_ICON:
                     if (mPointerIconEvent == null) {
                         break;
@@ -6742,7 +6729,6 @@ public final class ViewRootImpl implements ViewParent,
                 case MSG_FRAME_RATE_SETTING:
                     mPreferredFrameRate = 0;
                     mFrameRateCompatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
-                    setPreferredFrameRate(mPreferredFrameRate);
                     break;
             }
         }
@@ -9078,29 +9064,42 @@ public final class ViewRootImpl implements ViewParent,
                     insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, mRelayoutSeq,
                     mLastSyncSeqId);
         } else {
-            relayoutResult = mWindowSession.relayout(mWindow, params,
-                    requestedWidth, requestedHeight, viewVisibility,
-                    insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, mRelayoutSeq,
-                    mLastSyncSeqId, mTmpFrames, mPendingMergedConfiguration, mSurfaceControl,
-                    mTempInsets, mTempControls, mRelayoutBundle);
+            if (windowSessionRelayoutInfo()) {
+                relayoutResult = mWindowSession.relayout(mWindow, params,
+                        requestedWidth, requestedHeight, viewVisibility,
+                        insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
+                        mRelayoutSeq, mLastSyncSeqId, mRelayoutResult);
+            } else {
+                relayoutResult = mWindowSession.relayoutLegacy(mWindow, params,
+                        requestedWidth, requestedHeight, viewVisibility,
+                        insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
+                        mRelayoutSeq, mLastSyncSeqId, mTmpFrames, mPendingMergedConfiguration,
+                        mSurfaceControl, mTempInsets, mTempControls, mRelayoutBundle);
+            }
             mRelayoutRequested = true;
 
             if (activityWindowInfoFlag() && mPendingActivityWindowInfo != null) {
                 ActivityWindowInfo outInfo = null;
-                try {
-                    outInfo = mRelayoutBundle.getParcelable(
-                            IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
-                            ActivityWindowInfo.class);
-                    mRelayoutBundle.remove(IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO);
-                } catch (IllegalStateException e) {
-                    Log.e(TAG, "Failed to get ActivityWindowInfo from relayout Bundle", e);
+                if (windowSessionRelayoutInfo()) {
+                    outInfo = mRelayoutResult != null ? mRelayoutResult.activityWindowInfo : null;
+                } else {
+                    try {
+                        outInfo = mRelayoutBundle.getParcelable(
+                                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO,
+                                ActivityWindowInfo.class);
+                        mRelayoutBundle.remove(
+                                IWindowSession.KEY_RELAYOUT_BUNDLE_ACTIVITY_WINDOW_INFO);
+                    } catch (IllegalStateException e) {
+                        Log.e(TAG, "Failed to get ActivityWindowInfo from relayout Bundle", e);
+                    }
                 }
                 if (outInfo != null) {
                     mPendingActivityWindowInfo.set(outInfo);
                 }
             }
-            final int maybeSyncSeqId = mRelayoutBundle.getInt(
-                    IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID);
+            final int maybeSyncSeqId = windowSessionRelayoutInfo()
+                    ? mRelayoutResult.syncSeqId
+                    : mRelayoutBundle.getInt(IWindowSession.KEY_RELAYOUT_BUNDLE_SEQID);
             if (maybeSyncSeqId > 0) {
                 mSyncSeqId = maybeSyncSeqId;
             }
@@ -12566,6 +12565,13 @@ public final class ViewRootImpl implements ViewParent,
             case FRAME_RATE_CATEGORY_HIGH ->
                     mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
         }
+
+        // If it's currently an intermittent update,
+        // we should keep mPreferredFrameRateCategory as NORMAL
+        if (intermittentUpdateState() == INTERMITTENT_STATE_INTERMITTENT) {
+            return;
+        }
+
         if (mFrameRateCategoryHighCount > 0) {
             mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_HIGH;
         } else if (mFrameRateCategoryHighHintCount > 0) {
@@ -12647,7 +12653,6 @@ public final class ViewRootImpl implements ViewParent,
             case FRAME_RATE_CATEGORY_REASON_REQUESTED -> str = "requested";
             case FRAME_RATE_CATEGORY_REASON_INVALID -> str = "invalid frame rate";
             case FRAME_RATE_CATEGORY_REASON_VELOCITY -> str = "velocity";
-            case FRAME_RATE_CATEGORY_REASON_IDLE -> str = "idle";
             case FRAME_RATE_CATEGORY_REASON_UNKNOWN -> str = "unknown";
             case FRAME_RATE_CATEGORY_REASON_BOOST -> str = "boost";
             case FRAME_RATE_CATEGORY_REASON_TOUCH -> str = "touch";
@@ -12714,9 +12719,8 @@ public final class ViewRootImpl implements ViewParent,
         if (frameRateCategory > mPreferredFrameRateCategory) {
             mPreferredFrameRateCategory = frameRateCategory;
             mFrameRateCategoryChangeReason = reason;
-//            mFrameRateCategoryView = view == null ? "-" : view.getClass().getSimpleName();
+            // mFrameRateCategoryView = view == null ? "-" : view.getClass().getSimpleName();
         }
-        mHasInvalidation = true;
         mDrawnThisFrame = true;
     }
 
@@ -12790,7 +12794,6 @@ public final class ViewRootImpl implements ViewParent,
                 mFrameRateCategoryHighCount = FRAME_RATE_CATEGORY_COUNT;
                 mFrameRateCategoryChangeReason = FRAME_RATE_CATEGORY_REASON_VELOCITY;
                 mFrameRateCategoryView = null;
-                mHasInvalidation = true;
                 mDrawnThisFrame = true;
                 return;
             }
@@ -12822,7 +12825,6 @@ public final class ViewRootImpl implements ViewParent,
 
         mPreferredFrameRate = nextFrameRate;
         mFrameRateCompatibility = nextFrameRateCompatibility;
-        mHasInvalidation = true;
         mDrawnThisFrame = true;
     }
 
@@ -12942,19 +12944,8 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
-    private void checkIdleness() {
-        if (!mHasIdledMessage) {
-            // Check where the display is idled periodically.
-            // If so, set the frame rate category to NO_PREFERENCE
-            mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
-                    FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS);
-            mHasIdledMessage = true;
-        }
-    }
-
     private void removeVrrMessages() {
         mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
-        mHandler.removeMessages(MSG_CHECK_INVALIDATION_IDLE);
         mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
     }
 
@@ -12974,7 +12965,8 @@ public final class ViewRootImpl implements ViewParent,
         mMinusOneFrameIntervalMillis = timeIntervalMillis;
 
         mLastUpdateTimeMillis = currentTimeMillis;
-        if (timeIntervalMillis >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
+        if (timeIntervalMillis + mMinusTwoFrameIntervalMillis
+                >= INFREQUENT_UPDATE_INTERVAL_MILLIS) {
             int infrequentUpdateCount = mInfrequentUpdateCount;
             mInfrequentUpdateCount = infrequentUpdateCount == INFREQUENT_UPDATE_COUNTS
                     ? infrequentUpdateCount : infrequentUpdateCount + 1;

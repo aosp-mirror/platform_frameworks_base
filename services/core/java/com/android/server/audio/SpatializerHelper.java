@@ -88,6 +88,10 @@ public class SpatializerHelper {
     /*package*/ static final SparseIntArray SPAT_MODE_FOR_DEVICE_TYPE = new SparseIntArray(14) {
         {
             append(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, Spatialization.Mode.TRANSAURAL);
+            // Speaker safe is considered compatible with spatial audio because routing media usage
+            // to speaker safe only happens in transient situations and should not affect app
+            // decisions to play spatial audio content.
+            append(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER_SAFE, Spatialization.Mode.TRANSAURAL);
             append(AudioDeviceInfo.TYPE_WIRED_HEADSET, Spatialization.Mode.BINAURAL);
             append(AudioDeviceInfo.TYPE_WIRED_HEADPHONES, Spatialization.Mode.BINAURAL);
             // assumption for A2DP: mostly headsets
@@ -805,7 +809,7 @@ public class SpatializerHelper {
 
     private boolean isDeviceCompatibleWithSpatializationModes(@NonNull AudioDeviceAttributes ada) {
         // modeForDevice will be neither transaural or binaural for devices that do not support
-        // spatial audio. For instance mono devices like earpiece, speaker safe or sco must
+        // spatial audio. For instance mono devices like earpiece or sco must
         // not be included.
         final byte modeForDevice = (byte) SPAT_MODE_FOR_DEVICE_TYPE.get(ada.getType(),
                 /*default when type not found*/ -1);

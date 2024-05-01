@@ -40,7 +40,7 @@
                             <path
                                 android:name="_R_G_L_0_G_D_0_P_0"
                                 android:fillAlpha="0"
-                                android:fillColor="@color/biometric_dialog_accent"
+                                android:fillColor="@color/biometric_dialog_face_checkmark"
                                 android:fillType="nonZero"
                                 android:pathData=" M-116 -16.5 C-116,-16.5 -31.25,68.5 -31.25,68.5 C-31.25,68.5 108.75,-71.5 108.75,-71.5 "
                                 android:trimPathStart="0"
@@ -58,7 +58,7 @@
                                 android:pathData=" M-116 -16.5 C-116,-16.5 -31.25,68.5 -31.25,68.5 C-31.25,68.5 108.75,-71.5 108.75,-71.5 "
                                 android:strokeWidth="20"
                                 android:strokeAlpha="1"
-                                android:strokeColor="@color/biometric_dialog_accent"
+                                android:strokeColor="@color/biometric_dialog_face_checkmark"
                                 android:trimPathStart="0"
                                 android:trimPathEnd="0"
                                 android:trimPathOffset="0" />
@@ -68,7 +68,7 @@
                             android:pathData=" M30 6.2 C16.9,6.2 6.3,16.8 6.3,30 C6.3,43.2 16.9,53.8 30,53.8 C43.1,53.8 53.8,43.2 53.8,30 C53.8,16.8 43.1,6.2 30,6.2c "
                             android:strokeWidth="2.5"
                             android:strokeAlpha="1"
-                            android:strokeColor="@color/biometric_dialog_accent"
+                            android:strokeColor="@color/biometric_dialog_face_checkmark"
                             android:trimPathStart="0"
                             android:trimPathEnd="1"
                             android:trimPathOffset="0" />
@@ -387,7 +387,7 @@
                     android:propertyName="strokeColor"
                     android:startOffset="0"
                     android:valueFrom="@color/biometric_dialog_accent"
-                    android:valueTo="@color/biometric_dialog_accent"
+                    android:valueTo="@color/biometric_dialog_face_checkmark"
                     android:valueType="colorType">
                     <aapt:attr name="android:interpolator">
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
@@ -398,7 +398,7 @@
                     android:propertyName="strokeColor"
                     android:startOffset="67"
                     android:valueFrom="@color/biometric_dialog_accent"
-                    android:valueTo="@color/biometric_dialog_accent"
+                    android:valueTo="@color/biometric_dialog_face_checkmark"
                     android:valueType="colorType">
                     <aapt:attr name="android:interpolator">
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />

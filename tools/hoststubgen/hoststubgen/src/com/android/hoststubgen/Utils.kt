@@ -89,3 +89,10 @@ class ParseException : Exception, UserErrorException {
         }
     }
 }
+
+/**
+ * Escape a string for a CSV field.
+ */
+fun csvEscape(value: String): String {
+    return "\"" + value.replace("\"", "\"\"") + "\""
+}

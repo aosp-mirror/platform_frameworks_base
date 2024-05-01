@@ -93,7 +93,10 @@ import android.text.style.AbsoluteSizeSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
+import android.text.style.UnderlineSpan;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -3167,9 +3170,6 @@ public class Notification implements Parcelable
                     + " instance is a custom Parcelable and not allowed in Notification");
             return cs.toString();
         }
-        if (Flags.cleanUpSpansAndNewLines()) {
-            return stripStyling(cs);
-        }
 
         return removeTextSizeSpans(cs);
     }
@@ -4538,12 +4538,6 @@ public class Notification implements Parcelable
          */
         @NonNull
         public Builder setWhen(long when) {
-            if (updateRankingTime()) {
-                // don't show a timestamp that's decades old
-                if (mN.extras.getBoolean(EXTRA_SHOW_WHEN, true) && when == 0) {
-                    return this;
-                }
-            }
             mN.when = when;
             return this;
         }
@@ -5709,6 +5703,7 @@ public class Notification implements Parcelable
                 TemplateBindResult result) {
             p.headerless(resId == getBaseLayoutResource()
                     || resId == getHeadsUpBaseLayoutResource()
+                    || resId == getCompactHeadsUpBaseLayoutResource()
                     || resId == getMessagingLayoutResource()
                     || resId == R.layout.notification_template_material_media);
             RemoteViews contentView = new BuilderRemoteViews(mContext.getApplicationInfo(), resId);
@@ -6594,6 +6589,36 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Construct a RemoteViews for the final compact heads-up notification layout.
+         * @hide
+         */
+        public RemoteViews createCompactHeadsUpContentView() {
+            // TODO(b/336225281): re-evaluate custom view usage.
+            if (useExistingRemoteView(mN.headsUpContentView)) {
+                return fullyCustomViewRequiresDecoration(false /* fromStyle */)
+                        ? minimallyDecoratedHeadsUpContentView(mN.headsUpContentView)
+                        : mN.headsUpContentView;
+            } else if (mStyle != null) {
+                final RemoteViews styleView = mStyle.makeCompactHeadsUpContentView();
+                if (styleView != null) {
+                    return styleView;
+                }
+            }
+
+            final StandardTemplateParams p = mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .fillTextsFrom(this);
+            // Notification text is shown as secondary header text
+            // for the minimal hun when it is provided.
+            // Time(when and chronometer) is not shown for the minimal hun.
+            p.headerTextSecondary(p.mText).text(null).hideTime(true);
+
+            return applyStandardTemplate(
+                    getCompactHeadsUpBaseLayoutResource(), p,
+                    null /* result */);
+        }
+
+        /**
          * Construct a RemoteViews representing the heads up notification layout.
          *
          * @deprecated For performance and system health reasons, this API is no longer required to
@@ -7269,6 +7294,10 @@ public class Notification implements Parcelable
             return R.layout.notification_template_material_heads_up_base;
         }
 
+        private int getCompactHeadsUpBaseLayoutResource() {
+            return R.layout.notification_template_material_compact_heads_up_base;
+        }
+
         private int getBigBaseLayoutResource() {
             return R.layout.notification_template_material_big_base;
         }
@@ -7795,6 +7824,16 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Construct a Style-specific RemoteViews for the final compact HUN layout.
+         * return null to use the standard compact heads up view.
+         * @hide
+         */
+        @Nullable
+        public RemoteViews makeCompactHeadsUpContentView() {
+            return null;
+        }
+
+        /**
          * Apply any style-specific extras to this notification before shipping it out.
          * @hide
          */
@@ -8285,9 +8324,6 @@ public class Notification implements Parcelable
          */
         public BigTextStyle bigText(CharSequence cs) {
             mBigText = safeCharSequence(cs);
-            if (Flags.cleanUpSpansAndNewLines()) {
-                mBigText = cleanUpNewLines(mBigText);
-            }
             return this;
         }
 
@@ -8358,6 +8394,9 @@ public class Notification implements Parcelable
 
             // Replace the text with the big text, but only if the big text is not empty.
             CharSequence bigTextText = mBuilder.processLegacyText(mBigText);
+            if (Flags.cleanUpSpansAndNewLines()) {
+                bigTextText = cleanUpNewLines(stripStyling(bigTextText));
+            }
             if (!TextUtils.isEmpty(bigTextText)) {
                 p.text(bigTextText);
             }
@@ -9106,6 +9145,16 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
+        @Nullable
+        @Override
+        public RemoteViews makeCompactHeadsUpContentView() {
+            // TODO(b/336229954): Apply minimal HUN treatment to Messaging Notifications.
+            return makeHeadsUpContentView(false);
+        }
+
+        /**
+         * @hide
+         */
         @Override
         public void reduceImageSizes(Context context) {
             super.reduceImageSizes(context);
@@ -9273,11 +9322,43 @@ public class Notification implements Parcelable
              */
             public void ensureColorContrastOrStripStyling(int backgroundColor) {
                 if (Flags.cleanUpSpansAndNewLines()) {
-                    mText = stripStyling(mText);
+                    mText = stripNonStyleSpans(mText);
                 } else {
                     ensureColorContrast(backgroundColor);
                 }
             }
+
+            private CharSequence stripNonStyleSpans(CharSequence text) {
+
+                if (text instanceof Spanned) {
+                    Spanned ss = (Spanned) text;
+                    Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+                    SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+                    for (Object span : spans) {
+                        final Object resultSpan;
+                        if (span instanceof StyleSpan
+                                || span instanceof StrikethroughSpan
+                                || span instanceof UnderlineSpan) {
+                            resultSpan = span;
+                        } else if (span instanceof TextAppearanceSpan) {
+                            final TextAppearanceSpan originalSpan = (TextAppearanceSpan) span;
+                            resultSpan = new TextAppearanceSpan(
+                                    null,
+                                    originalSpan.getTextStyle(),
+                                    -1,
+                                    null,
+                                    null);
+                        } else {
+                            continue;
+                        }
+                        builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
+                                ss.getSpanFlags(span));
+                    }
+                    return builder;
+                }
+                return text;
+            }
+
             /**
              * Updates TextAppearance spans in the message text so it has sufficient contrast
              * against its background.
@@ -10238,6 +10319,16 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
             return makeCallLayout(StandardTemplateParams.VIEW_TYPE_HEADS_UP);
+        }
+
+        /**
+         * @hide
+         */
+        @Nullable
+        @Override
+        public RemoteViews makeCompactHeadsUpContentView() {
+            // TODO(b/336228700): Apply minimal HUN treatment for Call Style.
+            return makeHeadsUpContentView(false);
         }
 
         /**

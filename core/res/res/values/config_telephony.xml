@@ -190,6 +190,13 @@
     <integer name="config_satellite_nb_iot_inactivity_timeout_millis">180000</integer>
     <java-symbol type="integer" name="config_satellite_nb_iot_inactivity_timeout_millis" />
 
+    <!-- The time duration in millis after which cellular scanning will be enabled and satellite
+         will move to IDLE state. This timeout duration is used for satellite with NB IOT radio
+         technologies in demo mode.
+         -->
+    <integer name="config_satellite_demo_mode_nb_iot_inactivity_timeout_millis">60000</integer>
+    <java-symbol type="integer" name="config_satellite_demo_mode_nb_iot_inactivity_timeout_millis" />
+
     <!-- The time duration in millis needed to switch the modem image from TN to NTN. -->
     <integer name="config_satellite_modem_image_switching_duration_millis">20000</integer>
     <java-symbol type="integer" name="config_satellite_modem_image_switching_duration_millis" />

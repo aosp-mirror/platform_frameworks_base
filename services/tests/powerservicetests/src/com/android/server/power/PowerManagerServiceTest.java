@@ -1067,7 +1067,7 @@ public class PowerManagerServiceTest {
             wakelockMap.remove((String) inv.getArguments()[1]);
             return null;
         }).when(mNotifierMock).onWakeLockReleased(anyInt(), anyString(), anyString(), anyInt(),
-                anyInt(), any(), any(), any());
+                anyInt(), any(), any(), any(), anyInt());
 
         //
         // TEST STARTS HERE
@@ -2777,7 +2777,7 @@ public class PowerManagerServiceTest {
 
         mService.getBinderServiceInstance().releaseWakeLock(token, 0);
         verify(mNotifierMock).onWakeLockReleased(anyInt(), eq(tag), eq(packageName), anyInt(),
-                anyInt(), any(), any(), same(callback));
+                anyInt(), any(), any(), same(callback), anyInt());
     }
 
     /**
@@ -2796,8 +2796,8 @@ public class PowerManagerServiceTest {
         when(callback1.asBinder()).thenReturn(callbackBinder1);
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */, Display.INVALID_DISPLAY, callback1);
-        verify(mNotifierMock).onWakeLockAcquired(anyInt(), eq(tag), eq(packageName), anyInt(),
-                anyInt(), any(), any(), same(callback1));
+        verify(mNotifierMock).onWakeLockAcquired(anyInt(), eq(tag), eq(packageName),
+                anyInt(), anyInt(), any(), any(), same(callback1));
 
         final IWakeLockCallback callback2 = Mockito.mock(IWakeLockCallback.class);
         final IBinder callbackBinder2 = Mockito.mock(Binder.class);
@@ -2810,7 +2810,7 @@ public class PowerManagerServiceTest {
 
         mService.getBinderServiceInstance().releaseWakeLock(token, 0);
         verify(mNotifierMock).onWakeLockReleased(anyInt(), eq(tag), eq(packageName), anyInt(),
-                anyInt(), any(), any(), same(callback2));
+                anyInt(), any(), any(), same(callback2), anyInt());
     }
 
     @Test

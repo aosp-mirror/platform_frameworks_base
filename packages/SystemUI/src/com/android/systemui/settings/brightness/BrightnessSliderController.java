@@ -33,7 +33,7 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.haptics.slider.HapticSliderViewBinder;
-import com.android.systemui.haptics.slider.SeekableSliderHapticPlugin;
+import com.android.systemui.haptics.slider.SeekbarHapticPlugin;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
@@ -65,7 +65,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
     private final FalsingManager mFalsingManager;
     private final UiEventLogger mUiEventLogger;
 
-    private final SeekableSliderHapticPlugin mBrightnessSliderHapticPlugin;
+    private final SeekbarHapticPlugin mBrightnessSliderHapticPlugin;
     private final ActivityStarter mActivityStarter;
 
     private final Gefingerpoken mOnInterceptListener = new Gefingerpoken() {
@@ -89,7 +89,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             BrightnessSliderView brightnessSliderView,
             FalsingManager falsingManager,
             UiEventLogger uiEventLogger,
-            SeekableSliderHapticPlugin brightnessSliderHapticPlugin,
+            SeekbarHapticPlugin brightnessSliderHapticPlugin,
             ActivityStarter activityStarter) {
         super(brightnessSliderView);
         mFalsingManager = falsingManager;
@@ -314,7 +314,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             int layout = getLayout();
             BrightnessSliderView root = (BrightnessSliderView) LayoutInflater.from(context)
                     .inflate(layout, viewRoot, false);
-            SeekableSliderHapticPlugin plugin = new SeekableSliderHapticPlugin(
+            SeekbarHapticPlugin plugin = new SeekbarHapticPlugin(
                     mVibratorHelper,
                     mSystemClock);
             if (hapticBrightnessSlider()) {

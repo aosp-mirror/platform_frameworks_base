@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ViewState;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 
 import java.util.ArrayList;
 import java.util.List;

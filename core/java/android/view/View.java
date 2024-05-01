@@ -160,6 +160,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StateSet;
 import android.util.SuperNotCalledException;
+import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.CharacterTextSegmentIterator;
 import android.view.AccessibilityIterators.ParagraphTextSegmentIterator;
@@ -2429,12 +2430,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int FRAME_RATE_CATEGORY_REASON_VELOCITY = 0x0600_0000;
 
     /**
-     * This indicates that the frame rate category was chosen because it is idle.
-     * @hide
-     */
-    public static final int FRAME_RATE_CATEGORY_REASON_IDLE = 0x0700_0000;
-
-    /**
      * This indicates that the frame rate category was chosen because it is currently boosting.
      * @hide
      */
@@ -3809,6 +3804,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *      1                           PFLAG4_IS_COUNTED_AS_SENSITIVE
      *     1                            PFLAG4_HAS_DRAWN
      *    1                             PFLAG4_HAS_MOVED
+     *   1                              PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION
      * |-------|-------|-------|-------|
      */
 
@@ -3953,6 +3949,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Used by VRR to for quick detection of scrolling.
      */
     private static final int PFLAG4_HAS_MOVED = 0x10000000;
+
+    /**
+     * Whether the invalidateViewProperty is involked at current frame.
+     */
+    private static final int PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION = 0x20000000;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -4738,6 +4739,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mLeft;
     /**
+     * The mLeft from the previous frame. Used for detecting movement for purposes of variable
+     * refresh rate.
+     */
+    private int mLastFrameLeft;
+    /**
      * The distance in pixels from the left edge of this view's parent
      * to the right edge of this view.
      * {@hide}
@@ -4753,6 +4759,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(category = "layout")
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected int mTop;
+    /**
+     * The mTop from the previous frame. Used for detecting movement for purposes of variable
+     * refresh rate.
+     */
+    private int mLastFrameTop;
     /**
      * The distance in pixels from the top edge of this view's parent
      * to the bottom edge of this view.
@@ -18091,6 +18102,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Called by {@link #measure(int, int)} to check if the current frame presentation got
+     * delayed by an expensive view mesures during the input event dispatching. (e.g. scrolling)
+     */
+    private boolean hasExpensiveMeasuresDuringInputEvent() {
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo == null || attachInfo.mRootView == null) {
+            return false;
+        }
+        if (!attachInfo.mHandlingPointerEvent) {
+            return false;
+        }
+        final ViewFrameInfo info = attachInfo.mViewRootImpl.mViewFrameInfo;
+        final long durationFromVsyncTimeMs = (System.nanoTime()
+                - Choreographer.getInstance().getLastFrameTimeNanos()) / TimeUtils.NANOS_PER_MS;
+        return durationFromVsyncTimeMs > 3L || info.getAndIncreaseViewMeasuredCount() > 10;
+    }
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -19510,7 +19539,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public final void setTop(int top) {
         if (top != mTop) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (mAttachInfo != null) {
@@ -20402,7 +20430,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void offsetTopAndBottom(int offset) {
         if (offset != 0) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (isHardwareAccelerated()) {
@@ -20454,7 +20481,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void offsetLeftAndRight(int offset) {
         if (offset != 0) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             final boolean matrixIsIdentity = hasIdentityMatrix();
             if (matrixIsIdentity) {
                 if (isHardwareAccelerated()) {
@@ -20945,6 +20971,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             damageInParent();
         }
+        mPrivateFlags4 |= PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION;
     }
 
     /**
@@ -23641,14 +23668,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return renderNode;
         }
 
-        // For VRR to vote the preferred frame rate
-        if (sToolkitSetFrameRateReadOnlyFlagValue
-                && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
-            votePreferredFrameRate();
-        }
-
-        mPrivateFlags4 = (mPrivateFlags4 & ~PFLAG4_HAS_MOVED) | PFLAG4_HAS_DRAWN;
-
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
                 || !renderNode.hasDisplayList()
                 || (mRecreateDisplayList)) {
@@ -23691,6 +23710,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
                     mPrivateFlags &= ~PFLAG_DIRTY_MASK;
 
+                    // // For VRR to vote the preferred frame rate
+                    if (sToolkitSetFrameRateReadOnlyFlagValue
+                            && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                        votePreferredFrameRate();
+                    }
+
+                    mPrivateFlags4 |= PFLAG4_HAS_DRAWN;
+
                     // Fast path for layouts with no backgrounds
                     if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                         dispatchDraw(canvas);
@@ -23710,10 +23737,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 setDisplayListProperties(renderNode);
             }
         } else {
+            if ((mPrivateFlags4 & PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION)
+                    == PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION) {
+                // For VRR to vote the preferred frame rate
+                if (sToolkitSetFrameRateReadOnlyFlagValue
+                        && sToolkitFrameRateViewEnablingReadOnlyFlagValue) {
+                    votePreferredFrameRate();
+                }
+                mPrivateFlags4 &= ~PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION;
+            }
             mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
             mPrivateFlags &= ~PFLAG_DIRTY_MASK;
         }
-
+        mPrivateFlags4 &= ~PFLAG4_HAS_MOVED;
         mFrameContentVelocity = -1;
         return renderNode;
     }
@@ -25488,7 +25524,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (mLeft != left || mRight != right || mTop != top || mBottom != bottom) {
-            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
             changed = true;
 
             // Remember our drawn bit
@@ -28099,6 +28134,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (cacheIndex < 0 || sIgnoreMeasureCache) {
                 if (isTraversalTracingEnabled()) {
                     Trace.beginSection(mTracingStrings.onMeasure);
+                }
+                if (android.os.Flags.adpfMeasureDuringInputEventBoost()) {
+                    final boolean notifyRenderer = hasExpensiveMeasuresDuringInputEvent();
+                    if (notifyRenderer) {
+                        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                                "CPU_LOAD_UP: " + "hasExpensiveMeasuresDuringInputEvent");
+                        getViewRootImpl().notifyRendererOfExpensiveFrame();
+                        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                    }
                 }
                 // measure ourselves, this should set the measured dimension flag back
                 onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -33926,34 +33970,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return; // can't vote if not connected
         }
         float velocity = mFrameContentVelocity;
-        float frameRate = mPreferredFrameRate;
+        final float frameRate = mPreferredFrameRate;
         ViewParent parent = mParent;
         if (velocity <= 0 && Float.isNaN(frameRate)) {
             // The most common case is when nothing is set, so this special case is called
             // often.
             if (mAttachInfo.mViewVelocityApi
-                    && (mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)
+                    && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                    PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                    || mLastFrameTop != mTop)
                     && viewRootImpl.shouldCheckFrameRate(false)
                     && parent instanceof View
                     && ((View) parent).mFrameContentVelocity <= 0) {
                 viewRootImpl.votePreferredFrameRate(MAX_FRAME_RATE, FRAME_RATE_COMPATIBILITY_GTE);
             }
-            if (!willNotDraw() && viewRootImpl.shouldCheckFrameRateCategory()) {
+            if (viewRootImpl.shouldCheckFrameRateCategory()) {
                 int frameRateCategory = calculateFrameRateCategory();
                 int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
                 int reason = frameRateCategory & FRAME_RATE_CATEGORY_REASON_MASK;
                 viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
                 mLastFrameRateCategory = frameRateCategory;
             }
+            mLastFrameLeft = mLeft;
+            mLastFrameTop = mTop;
             return;
         }
         if (viewRootImpl.shouldCheckFrameRate(frameRate > 0f)) {
             float velocityFrameRate = 0f;
             if (mAttachInfo.mViewVelocityApi) {
                 if (velocity < 0f
-                        && (mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
-                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)
+                        && ((mPrivateFlags4 & (PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN)) == (
+                        PFLAG4_HAS_MOVED | PFLAG4_HAS_DRAWN) || mLastFrameLeft != mLeft
+                        || mLastFrameTop != mTop)
                         && mParent instanceof View
                         && ((View) mParent).mFrameContentVelocity <= 0
                 ) {
@@ -33966,17 +34014,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             if (velocityFrameRate > 0f || frameRate > 0f) {
                 int compatibility;
+                float frameRateToSet;
                 if (frameRate >= velocityFrameRate) {
                     compatibility = FRAME_RATE_COMPATIBILITY_FIXED_SOURCE;
+                    frameRateToSet = frameRate;
                 } else {
                     compatibility = FRAME_RATE_COMPATIBILITY_GTE;
-                    frameRate = velocityFrameRate;
+                    frameRateToSet = velocityFrameRate;
                 }
-                viewRootImpl.votePreferredFrameRate(frameRate, compatibility);
+                viewRootImpl.votePreferredFrameRate(frameRateToSet, compatibility);
             }
         }
 
-        if (!willNotDraw() && viewRootImpl.shouldCheckFrameRateCategory()) {
+        if (viewRootImpl.shouldCheckFrameRateCategory()) {
             if (sToolkitMetricsForFrameRateDecisionFlagValue) {
                 int width = mRight - mLeft;
                 int height = mBottom - mTop;
@@ -33984,7 +34034,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 viewRootImpl.recordViewPercentage(sizePercentage);
             }
 
-            int frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+            int frameRateCategory;
             if (Float.isNaN(frameRate)) {
                 frameRateCategory = calculateFrameRateCategory();
             } else if (frameRate < 0) {
@@ -34009,6 +34059,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                                 | FRAME_RATE_CATEGORY_REASON_INVALID;
                     }
                 }
+            } else {
+                // Category doesn't control it. It is directly controlled by frame rate
+                frameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE
+                        | FRAME_RATE_CATEGORY_REASON_REQUESTED;
             }
 
             int category = frameRateCategory & ~FRAME_RATE_CATEGORY_REASON_MASK;
@@ -34016,6 +34070,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             viewRootImpl.votePreferredFrameRateCategory(category, reason, this);
             mLastFrameRateCategory = frameRateCategory;
         }
+        mLastFrameLeft = mLeft;
+        mLastFrameTop = mTop;
     }
 
     private float convertVelocityToFrameRate(float velocityPps) {
@@ -34036,7 +34092,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_VIEW_VELOCITY_API)
     public void setFrameContentVelocity(float pixelsPerSecond) {
-        if (viewVelocityApi()) {
+        if (mAttachInfo != null && mAttachInfo.mViewVelocityApi) {
             mFrameContentVelocity = Math.abs(pixelsPerSecond);
 
             if (sToolkitMetricsForFrameRateDecisionFlagValue) {
@@ -34054,8 +34110,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @FlaggedApi(FLAG_VIEW_VELOCITY_API)
     public float getFrameContentVelocity() {
-        if (viewVelocityApi()) {
-            return (mFrameContentVelocity < 0f) ? 0f : mFrameContentVelocity;
+        if (mAttachInfo != null && mAttachInfo.mViewVelocityApi) {
+            return Math.max(mFrameContentVelocity, 0f);
         }
         return 0;
     }

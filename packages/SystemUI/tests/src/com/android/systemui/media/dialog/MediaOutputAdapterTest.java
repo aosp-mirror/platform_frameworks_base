@@ -46,8 +46,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 
 import com.google.common.collect.ImmutableList;
 

@@ -24,8 +24,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_ERROR_CANCELED;
 import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_SUCCESS;
 
-import static com.android.systemui.shared.Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR;
-
 import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertThrows;
@@ -452,7 +450,6 @@ public class AuthServiceTest {
     @Test
     public void testRegisterAuthenticationStateListener_callsFingerprintService()
             throws Exception {
-        mSetFlagsRule.enableFlags(FLAG_SIDEFPS_CONTROLLER_REFACTOR);
         setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
 
         mAuthService = new AuthService(mContext, mInjector);

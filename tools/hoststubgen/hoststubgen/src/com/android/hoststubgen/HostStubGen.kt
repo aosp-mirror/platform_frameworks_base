@@ -85,8 +85,12 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         // Dump statistics, if specified.
         options.statsFile.ifSet {
-            PrintWriter(it).use { pw -> stats.dump(pw) }
+            PrintWriter(it).use { pw -> stats.dumpOverview(pw) }
             log.i("Dump file created at $it")
+        }
+        options.apiListFile.ifSet {
+            PrintWriter(it).use { pw -> stats.dumpApis(pw) }
+            log.i("API list file created at $it")
         }
     }
 

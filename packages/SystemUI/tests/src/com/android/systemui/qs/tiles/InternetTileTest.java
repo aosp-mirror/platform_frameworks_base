@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +29,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -38,6 +38,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;

@@ -235,8 +235,8 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Obavještenja sa sjenčenjem."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Brze postavke."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Brze postavke i lokacija za obavještenja."</string>
-    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"Zaključavanje ekrana"</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključan ekran radnog profila"</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"Zaključani ekran"</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Zaključani ekran radnog profila"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zatvori"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"potpuna tišina"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"samo alarmi"</string>
@@ -270,20 +270,15 @@
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Prikaži sve"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Koristi Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Povezano"</string>
-    <!-- no translation found for quick_settings_bluetooth_device_audio_sharing (1496358082943301670) -->
-    <skip />
+    <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Dijeljenje zvuka"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Sačuvano"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"prekid veze"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiviranje"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Automatski uključi ponovo sutra"</string>
-    <!-- no translation found for turn_on_bluetooth_auto_info_disabled (682984290339848844) -->
-    <skip />
-    <!-- no translation found for turn_on_bluetooth_auto_info_enabled (7440944034584560279) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button (4499275822759907822) -->
-    <skip />
-    <!-- no translation found for quick_settings_bluetooth_audio_sharing_button_sharing (8626191139359072540) -->
-    <skip />
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Funkcije kao što su Quick Share i Pronađi moj uređaj koriste Bluetooth"</string>
+    <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth će se uključiti sutra ujutro"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Dijeljenje zvuka"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Dijeljenje zvuka"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> baterije"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Zvuk"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Slušalice"</string>
@@ -376,8 +371,7 @@
     <string name="quick_settings_hearing_devices_dialog_title" msgid="9004774017688484981">"Slušni aparati"</string>
     <string name="quick_settings_pair_hearing_devices" msgid="5987105102207447322">"Uparite novi uređaj"</string>
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknite da uparite novi uređaj"</string>
-    <!-- no translation found for hearing_devices_presets_error (350363093458408536) -->
-    <skip />
+    <string name="hearing_devices_presets_error" msgid="350363093458408536">"Ažuriranje zadane postavke nije uspjelo"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblokirati mikrofon uređaja?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Deblokirati kameru uređaja?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Deblokirati kameru i mikrofon uređaja?"</string>
@@ -463,6 +457,8 @@
     <string name="work_mode_off_title" msgid="5794818421357835873">"Pokrenuti poslovne aplikacije?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Ponovo pokreni"</string>
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Zatvaranje vidžeta na zaključanom ekranu"</string>
+    <!-- no translation found for accessibility_action_label_edit_widgets (3821868581348322346) -->
+    <skip />
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Vidžeti na zaključanom ekranu"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Zamijeni korisnika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"padajući meni"</string>
@@ -646,7 +642,7 @@
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Ažuriranje"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Otključajte da koristite"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Došlo je do problema prilikom preuzimanja vaših kartica. Pokušajte ponovo kasnije"</string>
-    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključavanja ekrana"</string>
+    <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključanog ekrana"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"Skener QR koda"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ažuriranje"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Radni profil"</string>
@@ -659,6 +655,10 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelit, slaba veza"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, dobra veza"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, veza je dostupna"</string>
+    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
+    <skip />
+    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Radni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Podešavač za korisnički interfejs sistema vam omogućava dodatne načine da podesite i prilagodite Androidov interfejs. Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
@@ -778,7 +778,7 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvaranje liste aplikacija"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvaranje postavki"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvaranje Asistenta"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključavanje ekrana"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Zaključani ekran"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Pisanje bilješke"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
     <string name="system_multitasking_rhs" msgid="8714224917276297810">"Korištenje podijeljenog ekrana s trenutnom aplikacijom na desnoj strani"</string>
@@ -1278,8 +1278,8 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Pređite na radni profil"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Instalirajte poslovnu aplikaciju za telefon"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Otkaži"</string>
-    <string name="lock_screen_settings" msgid="6152703934761402399">"Prilagodi zaključavanje ekrana"</string>
-    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Otključajte da prilagodite zaključavanje ekrana"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Prilagodi zaključani ekran"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Otključajte da prilagodite zaključani ekran"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"WiFi mreža nije dostupna"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera je blokirana"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera i mikrofon su blokirani"</string>

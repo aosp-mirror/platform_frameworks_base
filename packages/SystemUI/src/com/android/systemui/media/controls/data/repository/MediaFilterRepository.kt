@@ -16,24 +16,64 @@
 
 package com.android.systemui.media.controls.data.repository
 
+import android.content.Context
 import com.android.internal.logging.InstanceId
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.media.controls.data.model.MediaSortKeyModel
 import com.android.systemui.media.controls.shared.model.MediaCommonModel
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaLoadingModel
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.time.SystemClock
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import java.util.Locale
 import java.util.TreeMap
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** A repository that holds the state of filtered media data on the device. */
 @SysUISingleton
-class MediaFilterRepository @Inject constructor(private val systemClock: SystemClock) {
+class MediaFilterRepository
+@Inject
+constructor(
+    @Application applicationContext: Context,
+    private val systemClock: SystemClock,
+    private val configurationController: ConfigurationController,
+) {
+
+    val onAnyMediaConfigurationChange: Flow<Unit> = conflatedCallbackFlow {
+        val callback =
+            object : ConfigurationController.ConfigurationListener {
+                override fun onDensityOrFontScaleChanged() {
+                    trySend(Unit)
+                }
+
+                override fun onThemeChanged() {
+                    trySend(Unit)
+                }
+
+                override fun onUiModeChanged() {
+                    trySend(Unit)
+                }
+
+                override fun onLocaleListChanged() {
+                    if (locale != applicationContext.resources.configuration.locales.get(0)) {
+                        locale = applicationContext.resources.configuration.locales.get(0)
+                        trySend(Unit)
+                    }
+                }
+            }
+        configurationController.addCallback(callback)
+        trySend(Unit)
+        awaitClose { configurationController.removeCallback(callback) }
+    }
 
     /** Instance id of media control that recommendations card reactivated. */
     private val _reactivatedId: MutableStateFlow<InstanceId?> = MutableStateFlow(null)
@@ -71,6 +111,12 @@ class MediaFilterRepository @Inject constructor(private val systemClock: SystemC
         MutableStateFlow(TreeMap<MediaSortKeyModel, MediaCommonModel>(comparator))
     val sortedMedia: StateFlow<Map<MediaSortKeyModel, MediaCommonModel>> =
         _sortedMedia.asStateFlow()
+
+    private val _isMediaFromRec: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val isMediaFromRec: StateFlow<Boolean> = _isMediaFromRec.asStateFlow()
+
+    private var mediaFromRecPackageName: String? = null
+    private var locale: Locale = applicationContext.resources.configuration.locales.get(0)
 
     fun addMediaEntry(key: String, data: MediaData) {
         val entries = LinkedHashMap<String, MediaData>(_allUserEntries.value)
@@ -161,6 +207,12 @@ class MediaFilterRepository @Inject constructor(private val systemClock: SystemC
                 )
 
             if (mediaDataLoadingModel is MediaDataLoadingModel.Loaded) {
+                val isMediaFromRec = isMediaFromRec(it)
+
+                _isMediaFromRec.value = isMediaFromRec
+                if (isMediaFromRec) {
+                    mediaFromRecPackageName = null
+                }
                 sortedMap[sortKey] =
                     MediaCommonModel.MediaControl(mediaDataLoadingModel, canBeRemoved(it))
             }
@@ -195,7 +247,15 @@ class MediaFilterRepository @Inject constructor(private val systemClock: SystemC
         _sortedMedia.value = sortedMap
     }
 
+    fun setMediaFromRecPackageName(packageName: String) {
+        mediaFromRecPackageName = packageName
+    }
+
     private fun canBeRemoved(data: MediaData): Boolean {
         return data.isPlaying?.let { !it } ?: data.isClearable && !data.active
+    }
+
+    private fun isMediaFromRec(data: MediaData): Boolean {
+        return data.isPlaying == true && mediaFromRecPackageName == data.packageName
     }
 }

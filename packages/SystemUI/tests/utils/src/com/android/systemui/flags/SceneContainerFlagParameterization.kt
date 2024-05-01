@@ -58,3 +58,8 @@ fun FlagsParameterization.andSceneContainer(): Sequence<FlagsParameterization> =
  */
 fun List<FlagsParameterization>.andSceneContainer(): List<FlagsParameterization> =
     flatMap { it.andSceneContainer() }.toList()
+
+/** Parameterizes only the scene container flag. */
+fun parameterizeSceneContainerFlag(): List<FlagsParameterization> {
+    return FlagsParameterization.allCombinationsOf().andSceneContainer()
+}

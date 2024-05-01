@@ -29,7 +29,9 @@ import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.statusbar.notification.collection.provider.OnReorderingAllowedListener
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.util.Utils
+import com.android.systemui.util.kotlin.pairwiseBy
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -37,8 +39,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user inputs for media carousel */
@@ -49,6 +51,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Background private val backgroundExecutor: Executor,
     private val visualStabilityProvider: VisualStabilityProvider,
     private val interactor: MediaCarouselInteractor,
     private val controlInteractorFactory: MediaControlInteractorFactory,
@@ -66,8 +69,11 @@ constructor(
                 awaitClose { visualStabilityProvider.removeReorderingAllowedListener(listener) }
             }
             .flatMapLatest {
-                interactor.sortedMedia.map { sortedItems ->
+                combine(interactor.isMediaFromRec, interactor.sortedMedia) {
+                    isRecsToMedia,
+                    sortedItems ->
                     buildList {
+                        shouldReorder = isRecsToMedia
                         val reorderAllowed = isReorderingAllowed()
                         sortedItems.forEach { commonModel ->
                             if (!reorderAllowed || !modelsPendingRemoval.contains(commonModel)) {
@@ -85,6 +91,16 @@ constructor(
                     }
                 }
             }
+            .pairwiseBy { old, new ->
+                // This condition can only happen when view is attached. So the old emit is of the
+                // most recent list updated.
+                // If the old list is empty, it is okay to emit the new ordered list.
+                if (isReorderingAllowed() || shouldReorder || old.isEmpty()) {
+                    new
+                } else {
+                    old
+                }
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
@@ -97,6 +113,8 @@ constructor(
     private var mediaRecs: MediaCommonViewModel.MediaRecommendations? = null
 
     private var modelsPendingRemoval: MutableSet<MediaCommonModel> = mutableSetOf()
+
+    private var shouldReorder = true
 
     fun onSwipeToDismiss() {
         logger.logSwipeDismiss()
@@ -126,9 +144,9 @@ constructor(
 
     private fun createMediaControlViewModel(instanceId: InstanceId): MediaControlViewModel {
         return MediaControlViewModel(
-            applicationScope = applicationScope,
             applicationContext = applicationContext,
             backgroundDispatcher = backgroundDispatcher,
+            backgroundExecutor = backgroundExecutor,
             interactor = controlInteractorFactory.create(instanceId),
             logger = logger,
         )

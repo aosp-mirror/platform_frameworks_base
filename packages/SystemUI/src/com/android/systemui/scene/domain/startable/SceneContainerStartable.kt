@@ -21,11 +21,13 @@ package com.android.systemui.scene.domain.startable
 import android.app.StatusBarManager
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
+import com.android.systemui.bouncer.shared.logging.BouncerUiEvent
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -35,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
+import com.android.systemui.deviceentry.shared.model.DeviceUnlockSource
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.model.SceneContainerPlugin
 import com.android.systemui.model.SysUiState
@@ -42,6 +45,7 @@ import com.android.systemui.model.updateFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.FalsingBeliefListener
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -53,11 +57,14 @@ import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNoti
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
 import com.android.systemui.util.asIndenting
+import com.android.systemui.util.kotlin.getOrNull
+import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
 import dagger.Lazy
 import java.io.PrintWriter
+import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -102,12 +109,16 @@ constructor(
     private val authenticationInteractor: Lazy<AuthenticationInteractor>,
     private val windowController: NotificationShadeWindowController,
     private val deviceProvisioningInteractor: DeviceProvisioningInteractor,
-    private val centralSurfaces: CentralSurfaces,
+    private val centralSurfacesOptLazy: Lazy<Optional<CentralSurfaces>>,
     private val headsUpInteractor: HeadsUpNotificationInteractor,
     private val occlusionInteractor: SceneContainerOcclusionInteractor,
     private val faceUnlockInteractor: DeviceEntryFaceAuthInteractor,
     private val shadeInteractor: ShadeInteractor,
+    private val uiEventLogger: UiEventLogger,
+    private val sceneBackInteractor: SceneBackInteractor,
 ) : CoreStartable {
+    private val centralSurfaces: CentralSurfaces?
+        get() = centralSurfacesOptLazy.get().getOrNull()
 
     override fun start() {
         if (SceneContainerFlag.isEnabled) {
@@ -120,6 +131,7 @@ constructor(
             hydrateInteractionState()
             handleBouncerOverscroll()
             hydrateWindowController()
+            hydrateBackStack()
         } else {
             sceneLogger.logFrameworkEnabled(
                 isEnabled = false,
@@ -253,8 +265,7 @@ constructor(
             // Track the previous scene (sans Bouncer), so that we know where to go when the device
             // is unlocked whilst on the bouncer.
             val previousScene =
-                sceneInteractor
-                    .previousScene()
+                sceneBackInteractor.backScene
                     .filterNot { it == Scenes.Bouncer }
                     .stateIn(this, SharingStarted.Eagerly, initialValue = null)
             deviceUnlockedInteractor.deviceUnlockStatus
@@ -282,6 +293,12 @@ constructor(
                         }
                     }
 
+                    if (
+                        isOnBouncer &&
+                            deviceUnlockStatus.deviceUnlockSource == DeviceUnlockSource.TrustAgent
+                    ) {
+                        uiEventLogger.log(BouncerUiEvent.BOUNCER_DISMISS_EXTENDED_ACCESS)
+                    }
                     when {
                         isOnBouncer ->
                             // When the device becomes unlocked in Bouncer, go to previous scene,
@@ -529,7 +546,7 @@ constructor(
                 }
                 .collect { isInteractingOrNull ->
                     isInteractingOrNull?.let { isInteracting ->
-                        centralSurfaces.setInteracting(
+                        centralSurfaces?.setInteracting(
                             StatusBarManager.WINDOW_STATUS_BAR,
                             isInteracting,
                         )
@@ -570,5 +587,13 @@ constructor(
             toScene = targetSceneKey,
             loggingReason = loggingReason,
         )
+    }
+
+    private fun hydrateBackStack() {
+        applicationScope.launch {
+            sceneInteractor.currentScene.pairwise().collect { (from, to) ->
+                sceneBackInteractor.onSceneChange(from = from, to = to)
+            }
+        }
     }
 }

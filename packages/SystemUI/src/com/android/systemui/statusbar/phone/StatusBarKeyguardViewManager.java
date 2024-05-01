@@ -108,6 +108,10 @@ import dagger.Lazy;
 
 import kotlin.Unit;
 
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+import kotlinx.coroutines.Job;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -116,10 +120,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-import kotlinx.coroutines.Job;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back

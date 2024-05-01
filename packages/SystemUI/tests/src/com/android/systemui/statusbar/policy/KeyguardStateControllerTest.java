@@ -52,7 +52,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Random;
 
-
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner.class)

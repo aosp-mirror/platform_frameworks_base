@@ -154,11 +154,14 @@ public class ShellBackAnimationRegistry {
         if (type == BackNavigationInfo.TYPE_CROSS_ACTIVITY && mAnimationDefinition.contains(type)) {
             if (mCustomizeActivityAnimation != null
                     && mCustomizeActivityAnimation.prepareNextAnimation(
-                            backNavigationInfo.getCustomAnimationInfo())) {
+                            backNavigationInfo.getCustomAnimationInfo(), 0)) {
                 mAnimationDefinition.get(type).resetWaitingAnimation();
                 mAnimationDefinition.set(
                         BackNavigationInfo.TYPE_CROSS_ACTIVITY,
                         mCustomizeActivityAnimation.getRunner());
+            } else if (mDefaultCrossActivityAnimation != null) {
+                mDefaultCrossActivityAnimation.prepareNextAnimation(null,
+                        backNavigationInfo.getLetterboxColor());
             }
         }
         BackAnimationRunner runner = mAnimationDefinition.get(type);

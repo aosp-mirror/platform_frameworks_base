@@ -1841,8 +1841,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_TARGETS,
-                SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_TARGETS);
+                Settings.Secure.ACCESSIBILITY_GESTURE_TARGETS,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_GESTURE_TARGETS);
         dumpSetting(s, p,
                 Settings.Secure.ODI_CAPTIONS_VOLUME_UI_ENABLED,
                 SecureSettingsProto.Accessibility.ODI_CAPTIONS_VOLUME_UI_ENABLED);
@@ -2745,6 +2745,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED,
                 SecureSettingsProto.Zen.SETTINGS_SUGGESTION_VIEWED);
+        dumpSetting(s, p,
+                Settings.Secure.CHARGE_OPTIMIZATION_MODE,
+                SecureSettingsProto.CHARGE_OPTIMIZATION_MODE);
         p.end(zenToken);
 
         // Please insert new settings using the same order as in SecureSettingsProto.

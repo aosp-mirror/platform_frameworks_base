@@ -39,11 +39,11 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.CarrierTextManager;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.mobile.TelephonyIcons;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
@@ -199,7 +199,7 @@ public class ShadeCarrierGroupController {
 
         for (int i = 0; i < SIM_SLOTS; i++) {
             mInfos[i] = new CellSignalState(
-                    true,
+                    false,
                     R.drawable.ic_shade_no_calling_sms,
                     context.getText(AccessibilityContentDescriptions.NO_CALLING).toString(),
                     "",

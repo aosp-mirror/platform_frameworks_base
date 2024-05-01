@@ -16,13 +16,12 @@
 
 package com.android.systemui.statusbar.policy;
 import android.app.ActivityManager;
+import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.UserHandle;
-
-import android.content.Context;
 import android.service.notification.StatusBarNotification;
-import android.app.Notification;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;

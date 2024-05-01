@@ -65,7 +65,6 @@ import java.lang.Exception
  * ).
  *
  * The above are examples; the credential type can change depending on scenario.
- * // TODO(b/333445112) : Finalize once all the strings and create flow is iterated to completion
  */
 data class BiometricDisplayInfo(
     val providerIcon: Bitmap,
@@ -84,7 +83,8 @@ data class BiometricDisplayInfo(
 data class BiometricState(
     val biometricResult: BiometricResult? = null,
     val biometricError: BiometricError? = null,
-    val biometricStatus: BiometricPromptState = BiometricPromptState.INACTIVE
+    val biometricStatus: BiometricPromptState = BiometricPromptState.INACTIVE,
+    val biometricCancellationSignal: CancellationSignal = CancellationSignal(),
 )
 
 /**
@@ -118,6 +118,7 @@ fun runBiometricFlowForGet(
     getBiometricPromptState: () -> BiometricPromptState,
     onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
     onBiometricFailureFallback: (BiometricFlowType) -> Unit,
+    getBiometricCancellationSignal: () -> CancellationSignal,
     getRequestDisplayInfo: RequestDisplayInfo? = null,
     getProviderInfoList: List<ProviderInfo>? = null,
     getProviderDisplayInfo: ProviderDisplayInfo? = null,
@@ -141,11 +142,13 @@ fun runBiometricFlowForGet(
 
     val callback: BiometricPrompt.AuthenticationCallback =
         setupBiometricAuthenticationCallback(sendDataToProvider, biometricEntry,
-            onCancelFlowAndFinish, onIllegalStateAndFinish, onBiometricPromptStateChange)
+            onCancelFlowAndFinish, onIllegalStateAndFinish, onBiometricPromptStateChange,
+            getBiometricPromptState)
 
-    Log.d(TAG, "The BiometricPrompt API call begins.")
+    Log.d(TAG, "The BiometricPrompt API call begins for Get.")
     runBiometricFlow(context, biometricDisplayInfo, callback, openMoreOptionsPage,
-        onBiometricFailureFallback, BiometricFlowType.GET, onCancelFlowAndFinish)
+        onBiometricFailureFallback, BiometricFlowType.GET, onCancelFlowAndFinish,
+        getBiometricCancellationSignal)
 }
 
 /**
@@ -163,6 +166,7 @@ fun runBiometricFlowForCreate(
     getBiometricPromptState: () -> BiometricPromptState,
     onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
     onBiometricFailureFallback: (BiometricFlowType) -> Unit,
+    getBiometricCancellationSignal: () -> CancellationSignal,
     createRequestDisplayInfo: com.android.credentialmanager.createflow
     .RequestDisplayInfo? = null,
     createProviderInfo: EnabledProviderInfo? = null,
@@ -185,11 +189,13 @@ fun runBiometricFlowForCreate(
 
     val callback: BiometricPrompt.AuthenticationCallback =
         setupBiometricAuthenticationCallback(sendDataToProvider, biometricEntry,
-            onCancelFlowAndFinish, onIllegalStateAndFinish, onBiometricPromptStateChange)
+            onCancelFlowAndFinish, onIllegalStateAndFinish, onBiometricPromptStateChange,
+            getBiometricPromptState)
 
-    Log.d(TAG, "The BiometricPrompt API call begins.")
+    Log.d(TAG, "The BiometricPrompt API call begins for Create.")
     runBiometricFlow(context, biometricDisplayInfo, callback, openMoreOptionsPage,
-        onBiometricFailureFallback, BiometricFlowType.CREATE, onCancelFlowAndFinish)
+        onBiometricFailureFallback, BiometricFlowType.CREATE, onCancelFlowAndFinish,
+        getBiometricCancellationSignal)
 }
 
 /**
@@ -206,7 +212,8 @@ private fun runBiometricFlow(
     openMoreOptionsPage: () -> Unit,
     onBiometricFailureFallback: (BiometricFlowType) -> Unit,
     biometricFlowType: BiometricFlowType,
-    onCancelFlowAndFinish: () -> Unit
+    onCancelFlowAndFinish: () -> Unit,
+    getBiometricCancellationSignal: () -> CancellationSignal,
 ) {
     try {
         if (!canCallBiometricPrompt(biometricDisplayInfo, context)) {
@@ -217,12 +224,7 @@ private fun runBiometricFlow(
         val biometricPrompt = setupBiometricPrompt(context, biometricDisplayInfo,
             openMoreOptionsPage, biometricDisplayInfo.biometricRequestInfo, onCancelFlowAndFinish)
 
-        val cancellationSignal = CancellationSignal()
-        cancellationSignal.setOnCancelListener {
-            Log.d(TAG, "Your cancellation signal was called.")
-            // TODO(b/333445112) : Migrate towards passing along the developer cancellation signal
-            // or validate the necessity for this
-        }
+        val cancellationSignal = getBiometricCancellationSignal()
 
         val executor = getMainExecutor(context)
 
@@ -251,8 +253,6 @@ private fun getCryptoOpId(biometricDisplayInfo: BiometricDisplayInfo): Int? {
  * Note that if device credential is the only available modality but not requested, or if none
  * of the requested modalities are available, we fallback to the normal flow to ensure a selector
  * shows up.
- * // TODO(b/334197980) : While we already fallback in cases the selector doesn't show, confirm
- * // final plan.
  */
 private fun canCallBiometricPrompt(
     biometricDisplayInfo: BiometricDisplayInfo,
@@ -270,12 +270,12 @@ private fun canCallBiometricPrompt(
         return false
     }
 
-    if (ifOnlySupportsAtMostDeviceCredentials(biometricManager)) return false
+    if (onlySupportsAtMostDeviceCredentials(biometricManager)) return false
 
     return true
 }
 
-private fun ifOnlySupportsAtMostDeviceCredentials(biometricManager: BiometricManager): Boolean {
+private fun onlySupportsAtMostDeviceCredentials(biometricManager: BiometricManager): Boolean {
     if (biometricManager.canAuthenticate(Authenticators.BIOMETRIC_WEAK) !=
         BiometricManager.BIOMETRIC_SUCCESS &&
         biometricManager.canAuthenticate(Authenticators.BIOMETRIC_STRONG) !=
@@ -343,11 +343,11 @@ private fun setupBiometricAuthenticationCallback(
     selectedEntry: EntryInfo,
     onCancelFlowAndFinish: () -> Unit,
     onIllegalStateAndFinish: (String) -> Unit,
-    onBiometricPromptStateChange: (BiometricPromptState) -> Unit
+    onBiometricPromptStateChange: (BiometricPromptState) -> Unit,
+    getBiometricPromptState: () -> BiometricPromptState,
 ): BiometricPrompt.AuthenticationCallback {
     val callback: BiometricPrompt.AuthenticationCallback =
         object : BiometricPrompt.AuthenticationCallback() {
-            // TODO(b/333445772) : Validate remaining callbacks
             override fun onAuthenticationSucceeded(
                 authResult: BiometricPrompt.AuthenticationResult?
             ) {
@@ -374,6 +374,12 @@ private fun setupBiometricAuthenticationCallback(
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
                 super.onAuthenticationError(errorCode, errString)
                 Log.d(TAG, "Authentication error-ed out: $errorCode and $errString")
+                if (getBiometricPromptState() == BiometricPromptState.CANCELED && errorCode
+                    == BiometricPrompt.BIOMETRIC_ERROR_CANCELED) {
+                    Log.d(TAG, "Developer cancellation signal received. Nothing more to do.")
+                    // This unique edge case means a developer cancellation signal was sent.
+                    return
+                }
                 onBiometricPromptStateChange(BiometricPromptState.COMPLETE)
                 if (errorCode == BiometricPrompt.BIOMETRIC_ERROR_USER_CANCELED) {
                     // Note that because the biometric prompt is imbued directly
@@ -471,8 +477,7 @@ private fun retrieveBiometricGetDisplayValues(
     val singleEntryType = selectedEntry.credentialType
     val username = selectedEntry.userName
 
-    // TODO(b/330396140) : Finalize localization and parsing for specific sign in option flows
-    //  (fingerprint, face, etc...))
+    // TODO(b/336362538) : In W, utilize updated localization strings
     displayTitleText = context.getString(
         generateDisplayTitleTextResCode(singleEntryType),
         getRequestDisplayInfo.appName

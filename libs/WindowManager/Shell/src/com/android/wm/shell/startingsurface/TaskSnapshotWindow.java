@@ -21,13 +21,14 @@ import static android.graphics.Color.WHITE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
+import static com.android.window.flags.Flags.windowSessionRelayoutInfo;
+
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -43,6 +44,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowRelayoutResult;
 import android.window.ActivityWindowInfo;
 import android.window.ClientWindowFrames;
 import android.window.SnapshotDrawerUtils;
@@ -100,8 +102,6 @@ public class TaskSnapshotWindow {
             return null;
         }
 
-        final Point taskSize = snapshot.getTaskSize();
-        final Rect taskBounds = new Rect(0, 0, taskSize.x, taskSize.y);
         final int orientation = snapshot.getOrientation();
         final int displayId = runningTaskInfo.displayId;
 
@@ -139,9 +139,16 @@ public class TaskSnapshotWindow {
         }
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
-            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
-                    tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
-                    tmpControls, new Bundle());
+            if (windowSessionRelayoutInfo()) {
+                final WindowRelayoutResult outRelayoutResult = new WindowRelayoutResult(tmpFrames,
+                        tmpMergedConfiguration, surfaceControl, tmpInsetsState, tmpControls);
+                session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
+                        outRelayoutResult);
+            } else {
+                session.relayoutLegacy(window, layoutParams, -1, -1, View.VISIBLE, 0, 0, 0,
+                        tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
+                        tmpControls, new Bundle());
+            }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
@@ -150,7 +157,7 @@ public class TaskSnapshotWindow {
         }
 
         SnapshotDrawerUtils.drawSnapshotOnSurface(info, layoutParams, surfaceControl, snapshot,
-                taskBounds, tmpFrames.frame, topWindowInsetsState, true /* releaseAfterDraw */);
+                info.taskBounds, topWindowInsetsState, true /* releaseAfterDraw */);
         snapshotSurface.mHasDrawn = true;
         snapshotSurface.reportDrawn();
 

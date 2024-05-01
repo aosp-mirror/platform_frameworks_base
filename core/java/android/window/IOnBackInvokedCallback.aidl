@@ -56,4 +56,9 @@ oneway interface IOnBackInvokedCallback {
      * Wraps {@link OnBackInvokedCallback#onBackInvoked()}.
      */
     void onBackInvoked();
+
+    /**
+     * Sets whether the back gesture is past the trigger threshold.
+     */
+    void setTriggerBack(in boolean triggerBack);
 }

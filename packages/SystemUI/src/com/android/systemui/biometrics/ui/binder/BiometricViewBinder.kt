@@ -87,7 +87,9 @@ object BiometricViewBinder {
          *
          * TODO(b/288175072): May be able to remove this once constraint layout is implemented
          */
-        view.visibility = View.INVISIBLE
+        if (!constraintBp()) {
+            view.visibility = View.INVISIBLE
+        }
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
         val textColorError =
@@ -102,12 +104,14 @@ object BiometricViewBinder {
         val descriptionView = view.requireViewById<TextView>(R.id.description)
         val customizedViewContainer =
             view.requireViewById<LinearLayout>(R.id.customized_view_container)
+        val udfpsGuidanceView =
+            if (constraintBp()) {
+                view.requireViewById<View>(R.id.panel)
+            } else {
+                backgroundView
+            }
 
         // set selected to enable marquee unless a screen reader is enabled
-        logoView.isSelected =
-            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
-        logoDescriptionView.isSelected =
-            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         titleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
@@ -226,8 +230,8 @@ object BiometricViewBinder {
             }
 
             lifecycleScope.launch {
-                viewModel.showBpWithoutIconForCredential.collect {
-                    if (!it) {
+                viewModel.showBpWithoutIconForCredential.collect { showWithoutIcon ->
+                    if (!showWithoutIcon) {
                         PromptIconViewBinder.bind(
                             iconView,
                             iconOverlayView,
@@ -411,24 +415,11 @@ object BiometricViewBinder {
                         indicatorMessageView.isSelected =
                             !accessibilityManager.isEnabled ||
                                 !accessibilityManager.isTouchExplorationEnabled
-
-                        /**
-                         * Note: Talkback 14.0 has new rate-limitation design to reduce frequency of
-                         * TYPE_WINDOW_CONTENT_CHANGED events to once every 30 seconds. (context:
-                         * b/281765653#comment18) Using {@link View#announceForAccessibility}
-                         * instead as workaround since sending events exceeding this frequency is
-                         * required.
-                         */
-                        indicatorMessageView?.text?.let {
-                            if (it.isNotBlank()) {
-                                view.announceForAccessibility(it)
-                            }
-                        }
                     }
                 }
 
                 // Talkback directional guidance
-                backgroundView.setOnHoverListener { _, event ->
+                udfpsGuidanceView.setOnHoverListener { _, event ->
                     launch {
                         viewModel.onAnnounceAccessibilityHint(
                             event,

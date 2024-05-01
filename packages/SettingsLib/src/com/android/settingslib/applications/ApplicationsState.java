@@ -2131,7 +2131,13 @@ public class ApplicationsState {
         public boolean filterApp(AppEntry entry) {
             return !AppUtils.isInstant(entry.info)
                     && hasFlag(entry.info.privateFlags,
-                    ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS);
+                    ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS)
+                    && !entry.hideInQuietMode;
+        }
+
+        @Override
+        public void refreshAppEntryOnRebuild(@NonNull AppEntry appEntry, boolean hideInQuietMode) {
+            appEntry.hideInQuietMode = hideInQuietMode;
         }
     };
 

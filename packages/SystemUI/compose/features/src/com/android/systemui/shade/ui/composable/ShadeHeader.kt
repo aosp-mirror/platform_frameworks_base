@@ -69,10 +69,10 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ui.composable.ShadeHeader.Dimensions.CollapsedHeight
 import com.android.systemui.shade.ui.composable.ShadeHeader.Values.ClockScale
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
-import com.android.systemui.statusbar.phone.StatusBarIconController
-import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController
+import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernShadeCarrierGroupMobileView
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel
 import com.android.systemui.statusbar.policy.Clock
@@ -371,6 +371,20 @@ private fun BatteryIcon(
         factory = { context ->
             val batteryIcon = BatteryMeterView(context, null)
             batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ON)
+
+            val themedContext =
+                ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings_Header)
+            val fg = Utils.getColorAttrDefaultColor(themedContext, android.R.attr.textColorPrimary)
+            val bg =
+                Utils.getColorAttrDefaultColor(
+                    themedContext,
+                    android.R.attr.textColorPrimaryInverse,
+                )
+
+            // [BatteryMeterView.updateColors] is an old method that was built to distinguish
+            // between dual-tone colors and single-tone. The current icon is only single-tone, so
+            // the final [fg] is the only one we actually need
+            batteryIcon.updateColors(fg, bg, fg)
 
             val batteryMaterViewController =
                 createBatteryMeterViewController(batteryIcon, StatusBarLocation.QS)

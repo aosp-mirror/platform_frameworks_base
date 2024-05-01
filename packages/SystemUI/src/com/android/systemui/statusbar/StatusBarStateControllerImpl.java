@@ -106,7 +106,7 @@ public class StatusBarStateControllerImpl implements
 
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
     private final UiEventLogger mUiEventLogger;
-    private final InteractionJankMonitor mInteractionJankMonitor;
+    private final Lazy<InteractionJankMonitor> mInteractionJankMonitorLazy;
     private final JavaAdapter mJavaAdapter;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private final Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
@@ -173,14 +173,14 @@ public class StatusBarStateControllerImpl implements
     @Inject
     public StatusBarStateControllerImpl(
             UiEventLogger uiEventLogger,
-            InteractionJankMonitor interactionJankMonitor,
+            Lazy<InteractionJankMonitor> interactionJankMonitorLazy,
             JavaAdapter javaAdapter,
             Lazy<ShadeInteractor> shadeInteractorLazy,
             Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
             Lazy<SceneInteractor> sceneInteractorLazy,
             Lazy<KeyguardClockInteractor> keyguardClockInteractorLazy) {
         mUiEventLogger = uiEventLogger;
-        mInteractionJankMonitor = interactionJankMonitor;
+        mInteractionJankMonitorLazy = interactionJankMonitorLazy;
         mJavaAdapter = javaAdapter;
         mShadeInteractorLazy = shadeInteractorLazy;
         mDeviceUnlockedInteractorLazy = deviceUnlockedInteractorLazy;
@@ -482,7 +482,8 @@ public class StatusBarStateControllerImpl implements
     private void beginInteractionJankMonitor() {
         final boolean shouldPost =
                 (mIsDozing && mDozeAmount == 0) || (!mIsDozing && mDozeAmount == 1);
-        if (mInteractionJankMonitor != null && mView != null && mView.isAttachedToWindow()) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor != null && mView != null && mView.isAttachedToWindow()) {
             if (shouldPost) {
                 Choreographer.getInstance().postCallback(
                         Choreographer.CALLBACK_ANIMATION, this::beginInteractionJankMonitor, null);
@@ -490,23 +491,25 @@ public class StatusBarStateControllerImpl implements
                 Configuration.Builder builder = Configuration.Builder.withView(getCujType(), mView)
                         .setTag(getClockId())
                         .setDeferMonitorForAnimationStart(false);
-                mInteractionJankMonitor.begin(builder);
+                monitor.begin(builder);
             }
         }
     }
 
     private void endInteractionJankMonitor() {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
-        mInteractionJankMonitor.end(getCujType());
+        monitor.end(getCujType());
     }
 
     private void cancelInteractionJankMonitor() {
-        if (mInteractionJankMonitor == null) {
+        InteractionJankMonitor monitor = mInteractionJankMonitorLazy.get();
+        if (monitor == null) {
             return;
         }
-        mInteractionJankMonitor.cancel(getCujType());
+        monitor.cancel(getCujType());
     }
 
     private int getCujType() {

@@ -25,6 +25,7 @@ import android.graphics.Rect
 import android.util.MathUtils
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import com.android.systemui.res.R
@@ -34,7 +35,7 @@ import kotlin.math.sign
 
 class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
     private var animator: Animator? = null
-    private val screenshotPreview = view.requireViewById<View>(R.id.screenshot_preview)
+    private val screenshotPreview = view.requireViewById<ImageView>(R.id.screenshot_preview)
     private val flashView = view.requireViewById<View>(R.id.screenshot_flash)
     private val actionContainer = view.requireViewById<View>(R.id.actions_container_background)
     private val fastOutSlowIn =
@@ -155,6 +156,12 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
 
         val previewAnimator = AnimatorSet()
         previewAnimator.play(previewXAndScaleAnimator).with(previewYAnimator)
+        previewAnimator.doOnEnd {
+            screenshotPreview.scaleX = 1f
+            screenshotPreview.scaleY = 1f
+            screenshotPreview.x = endPos.x - screenshotPreview.width / 2f
+            screenshotPreview.y = endPos.y - screenshotPreview.height / 2f
+        }
 
         previewAnimator.doOnStart { screenshotPreview.visibility = View.VISIBLE }
         return previewAnimator

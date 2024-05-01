@@ -154,16 +154,31 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> després de <xliff:g id="TIME_DELAY">{2}</xliff:g> segons"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no s\'ha desviat"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no s\'ha desviat"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"Seguretat de la xarxa mòbil"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"Revisa la configuració"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"S\'ha accedit a l\'identificador del dispositiu"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"Una xarxa connectada a <xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> va gravar l\'identificador únic del teu dispositiu (IMSI) <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> vegades en el període entre els dies <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> i <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g>."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"Connexió encriptada a <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"Ara ja tens connexió a una xarxa mòbil més segura."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"Connexió no encriptada a <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"Tens connexió a una xarxa mòbil no encriptada. Els teus missatges, trucades i dades són vulnerables a intercepcions."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"Configuració de seguretat de la xarxa mòbil"</string>
+    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
+    <skip />
+    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
+    <skip />
+    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
+    <skip />
+    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
+    <skip />
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Més informació"</string>
+    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
+    <skip />
     <string name="fcComplete" msgid="1080909484660507044">"Codi de funció completat."</string>
     <string name="fcError" msgid="5325116502080221346">"Problema de connexió o codi de funció no vàlid."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"D\'acord"</string>
@@ -357,6 +372,8 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fer una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pot fer una captura de la pantalla."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Previsualitza, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparèixer a la barra d\'estat"</string>
@@ -829,14 +846,14 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Permet controlar la longitud i el nombre de caràcters permesos a les contrasenyes i als PIN del bloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Supervisar els intents de desbloqueig de la pantalla"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o n\'esborra totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han introduït en intentar desbloquejar la pantalla i bloqueja el dispositiu Android TV o esborra totes les dades del dispositiu si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el sistema d\'informació i entreteniment o n\'esborra totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el telèfon o esborra totes les dades del telèfon si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja la tauleta o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han introduït en intentar desbloquejar la pantalla i bloqueja el dispositiu Android TV o n\'esborra totes les dades de l\'usuari si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Supervisa el nombre de contrasenyes incorrectes introduïdes en desbloquejar la pantalla, i bloqueja el sistema d\'informació i entreteniment o esborra totes les dades d\'aquest perfil si s\'introdueixen massa contrasenyes incorrectes."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el telèfon o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o esborra\'n totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el dispositiu Android TV o esborra\'n totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el sistema d\'informació i entreteniment o esborra\'n totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el telèfon o esborra\'n totes les dades si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="2049038943004297474">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja la tauleta o esborra totes les dades d\'aquest usuari si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tv" msgid="8965224107449407052">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el dispositiu Android TV o esborra totes les dades d\'aquest usuari si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="automotive" msgid="7180857406058327941">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el sistema d\'informació i entreteniment o esborra totes les dades d\'aquest perfil si s\'introdueixen massa contrasenyes incorrectes."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="9177645136475155924">"Supervisa el nombre de contrasenyes incorrectes introduïdes per desbloquejar la pantalla i bloqueja el telèfon o esborra totes les dades d\'aquest usuari si s\'introdueixen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="214556238645096520">"Canviar el bloqueig de pantalla"</string>
     <string name="policydesc_resetPassword" msgid="4626419138439341851">"Canvia el bloqueig de pantalla."</string>
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloquejar la pantalla"</string>
@@ -1897,8 +1914,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Sol·licita el PIN per deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demana la contrasenya per deixar de fixar"</string>
-    <!-- no translation found for package_installed_device_owner (8684974629306529138) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"Instal·lat per l\'administrador.\nVes a la configuració per veure els permisos concedits."</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Suprimit per l\'administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"D\'acord"</string>
@@ -2216,6 +2232,10 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Vols canviar a l\'aplicació de treball?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"La teva organització només et permet fer trucades des d\'aplicacions de treball"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"La teva organització només et permet enviar missatges des d\'aplicacions de treball"</string>
+    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
+    <skip />
+    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilitza el navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilitza el navegador de treball"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Truca"</string>

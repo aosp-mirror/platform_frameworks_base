@@ -58,6 +58,7 @@ import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_INT
 import static android.app.admin.flags.Flags.FLAG_DEVICE_THEFT_API_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_DEVICE_POLICY_SIZE_TRACKING_ENABLED;
+import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED;
 import static android.app.admin.flags.Flags.FLAG_SECURITY_LOG_V2_ENABLED;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
@@ -17724,6 +17725,9 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_PROVISIONING_FIX_ENABLED)
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
     @DeviceAdminInfo.HeadlessDeviceOwnerMode
     public int getHeadlessDeviceOwnerMode() {
         if (!Flags.headlessDeviceOwnerProvisioningFixEnabled()) {

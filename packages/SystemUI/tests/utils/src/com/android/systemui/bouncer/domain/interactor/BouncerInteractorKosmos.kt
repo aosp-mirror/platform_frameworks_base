@@ -26,7 +26,7 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.sessionTracker
 import com.android.systemui.power.domain.interactor.powerInteractor
-import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 
 val Kosmos.bouncerInteractor by Fixture {
     BouncerInteractor(
@@ -38,6 +38,6 @@ val Kosmos.bouncerInteractor by Fixture {
         powerInteractor = powerInteractor,
         uiEventLogger = uiEventLogger,
         sessionTracker = sessionTracker,
-        sceneInteractor = sceneInteractor,
+        sceneBackInteractor = sceneBackInteractor,
     )
 }

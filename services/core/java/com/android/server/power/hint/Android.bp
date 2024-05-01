@@ -11,3 +11,10 @@ java_aconfig_library {
     name: "power_hint_flags_lib",
     aconfig_declarations: "power_hint_flags",
 }
+
+java_aconfig_library {
+    name: "power_hint_flags_lib_host",
+    aconfig_declarations: "power_hint_flags",
+    host_supported: true,
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}

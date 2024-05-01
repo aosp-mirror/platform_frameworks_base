@@ -17,12 +17,9 @@
 
 package com.android.systemui.biometrics.ui.binder
 
-import android.graphics.Rect
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.lottie.LottieAnimationView
@@ -77,83 +74,60 @@ object PromptIconViewBinder {
                         }
                     }
 
-                launch {
-                    var lottieOnCompositionLoadedListener: LottieOnCompositionLoadedListener? = null
+                if (!constraintBp()) {
+                    launch {
+                        var lottieOnCompositionLoadedListener: LottieOnCompositionLoadedListener? =
+                            null
 
-                    combine(viewModel.activeAuthType, viewModel.iconSize, ::Pair).collect {
-                        (activeAuthType, iconSize) ->
-                        // Every time after bp shows, [isIconViewLoaded] is set to false in
-                        // [BiometricViewSizeBinder]. Then when biometric prompt view is redrew
-                        // (when size or activeAuthType changes), we need to update
-                        // [isIconViewLoaded] here to keep it correct.
-                        when (activeAuthType) {
-                            AuthType.Fingerprint,
-                            AuthType.Coex -> {
-                                /**
-                                 * View is only set visible in BiometricViewSizeBinder once
-                                 * PromptSize is determined that accounts for iconView size, to
-                                 * prevent prompt resizing being visible to the user.
-                                 *
-                                 * TODO(b/288175072): May be able to remove this once constraint
-                                 *   layout is implemented
-                                 */
-                                if (lottieOnCompositionLoadedListener != null) {
-                                    iconView.removeLottieOnCompositionLoadedListener(
+                        combine(viewModel.activeAuthType, viewModel.iconSize, ::Pair).collect {
+                            (activeAuthType, iconSize) ->
+                            // Every time after bp shows, [isIconViewLoaded] is set to false in
+                            // [BiometricViewSizeBinder]. Then when biometric prompt view is redrew
+                            // (when size or activeAuthType changes), we need to update
+                            // [isIconViewLoaded] here to keep it correct.
+                            when (activeAuthType) {
+                                AuthType.Fingerprint,
+                                AuthType.Coex -> {
+                                    /**
+                                     * View is only set visible in BiometricViewSizeBinder once
+                                     * PromptSize is determined that accounts for iconView size, to
+                                     * prevent prompt resizing being visible to the user.
+                                     *
+                                     * TODO(b/288175072): May be able to remove this once constraint
+                                     *   layout is implemented
+                                     */
+                                    if (lottieOnCompositionLoadedListener != null) {
+                                        iconView.removeLottieOnCompositionLoadedListener(
+                                            lottieOnCompositionLoadedListener!!
+                                        )
+                                    }
+                                    lottieOnCompositionLoadedListener =
+                                        LottieOnCompositionLoadedListener {
+                                            promptViewModel.setIsIconViewLoaded(true)
+                                        }
+                                    iconView.addLottieOnCompositionLoadedListener(
                                         lottieOnCompositionLoadedListener!!
                                     )
                                 }
-                                lottieOnCompositionLoadedListener =
-                                    LottieOnCompositionLoadedListener {
-                                        promptViewModel.setIsIconViewLoaded(true)
-                                    }
-                                iconView.addLottieOnCompositionLoadedListener(
-                                    lottieOnCompositionLoadedListener!!
-                                )
+                                AuthType.Face -> {
+                                    /**
+                                     * Set to true by default since face icon is a drawable, which
+                                     * doesn't have a LottieOnCompositionLoadedListener equivalent.
+                                     *
+                                     * TODO(b/318569643): To be updated once face assets are updated
+                                     *   from drawables
+                                     */
+                                    promptViewModel.setIsIconViewLoaded(true)
+                                }
                             }
-                            AuthType.Face -> {
-                                /**
-                                 * Set to true by default since face icon is a drawable, which
-                                 * doesn't have a LottieOnCompositionLoadedListener equivalent.
-                                 *
-                                 * TODO(b/318569643): To be updated once face assets are updated
-                                 *   from drawables
-                                 */
-                                promptViewModel.setIsIconViewLoaded(true)
-                            }
-                        }
 
-                        if (iconViewLayoutParamSizeOverride == null) {
-                            iconView.layoutParams.width = iconSize.first
-                            iconView.layoutParams.height = iconSize.second
+                            if (iconViewLayoutParamSizeOverride == null) {
+                                iconView.layoutParams.width = iconSize.first
+                                iconView.layoutParams.height = iconSize.second
 
-                            iconOverlayView.layoutParams.width = iconSize.first
-                            iconOverlayView.layoutParams.height = iconSize.second
-                        }
-                    }
-                }
-
-                launch {
-                    viewModel.iconPosition.collect { position ->
-                        if (constraintBp() && position != Rect()) {
-                            val iconParams = iconView.layoutParams as ConstraintLayout.LayoutParams
-
-                            if (position.left != 0) {
-                                iconParams.endToEnd = ConstraintSet.UNSET
-                                iconParams.leftMargin = position.left
+                                iconOverlayView.layoutParams.width = iconSize.first
+                                iconOverlayView.layoutParams.height = iconSize.second
                             }
-                            if (position.top != 0) {
-                                iconParams.bottomToBottom = ConstraintSet.UNSET
-                                iconParams.topMargin = position.top
-                            }
-                            if (position.right != 0) {
-                                iconParams.startToStart = ConstraintSet.UNSET
-                                iconParams.rightMargin = position.right
-                            }
-                            if (position.bottom != 0) {
-                                iconParams.topToTop = ConstraintSet.UNSET
-                                iconParams.bottomMargin = position.bottom
-                            }
-                            iconView.layoutParams = iconParams
                         }
                     }
                 }

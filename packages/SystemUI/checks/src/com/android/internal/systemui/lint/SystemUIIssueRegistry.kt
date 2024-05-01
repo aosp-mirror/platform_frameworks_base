@@ -33,6 +33,7 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 BroadcastSentViaContextDetector.ISSUE,
                 CleanArchitectureDependencyViolationDetector.ISSUE,
                 DumpableNotRegisteredDetector.ISSUE,
+                FlowDetector.SHARED_FLOW_CREATION,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_ID_QUERY,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_INFO_QUERY,
                 NonInjectedMainThreadDetector.ISSUE,

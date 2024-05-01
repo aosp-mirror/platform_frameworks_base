@@ -8501,7 +8501,8 @@ public final class Settings {
 
         /**
          * Setting specifying the accessibility services, accessibility shortcut targets,
-         * or features to be toggled via the accessibility button in the navigation bar.
+         * or features to be toggled via the accessibility button in the navigation bar,
+         * or the floating accessibility button.
          *
          * <p> This is a colon-separated string list which contains the flattened
          * {@link ComponentName} and the class name of a system class implementing a supported
@@ -8513,7 +8514,7 @@ public final class Settings {
 
         /**
          * Setting specifying the accessibility services, shortcut targets or features
-         * to be toggled via the floating accessibility menu
+         * to be toggled via the gesture shortcut
          *
          * <p> This is a colon-separated string list which contains the flattened
          * {@link ComponentName} and the class name of a system class
@@ -8521,8 +8522,8 @@ public final class Settings {
          * @hide
          */
         @Readable
-        public static final String ACCESSIBILITY_FLOATING_MENU_TARGETS =
-                "accessibility_floating_menu_targets";
+        public static final String ACCESSIBILITY_GESTURE_TARGETS =
+                "accessibility_gesture_targets";
 
         /**
          * Setting specifying the accessibility services, accessibility shortcut targets,
@@ -12629,6 +12630,15 @@ public final class Settings {
          * @hide
          */
         public static final String V_TO_U_RESTORE_DENYLIST = "v_to_u_restore_denylist";
+
+        /**
+         * Integer property that determines which charging optimization mode is applied.
+         * [0-10] inclusive representing different modes, where 0 is the default indicating
+         * no optimization mode is applied.
+         *
+         * @hide
+         */
+        public static final String CHARGE_OPTIMIZATION_MODE = "charge_optimization_mode";
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.service.dreams.Flags.dismissDreamOnKeyguardDismiss;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
@@ -222,6 +223,20 @@ public class KeyguardService extends Service {
                 }
                 initAlphaForAnimationTargets(t, apps);
                 initAlphaForAnimationTargets(t, wallpapers);
+
+                // If the keyguard is going away, hide the dream if one exists.
+                if (dismissDreamOnKeyguardDismiss()
+                        && (info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) {
+                    for (RemoteAnimationTarget app : apps) {
+                        final boolean isDream = app.taskInfo != null
+                                && app.taskInfo.getActivityType()
+                                == WindowConfiguration.ACTIVITY_TYPE_DREAM;
+                        if (isDream && app.mode == RemoteAnimationTarget.MODE_CLOSING) {
+                            t.hide(app.leash);
+                            break;
+                        }
+                    }
+                }
 
                 t.apply();
 

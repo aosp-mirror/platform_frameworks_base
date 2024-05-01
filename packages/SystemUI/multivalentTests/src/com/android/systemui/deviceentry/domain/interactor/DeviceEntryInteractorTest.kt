@@ -16,6 +16,7 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
@@ -71,6 +72,7 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @EnableSceneContainer
+@TestableLooper.RunWithLooper
 class DeviceEntryInteractorTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()

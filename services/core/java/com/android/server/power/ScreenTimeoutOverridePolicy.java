@@ -23,6 +23,7 @@ import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_BRIG
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_DIM;
 import static com.android.server.power.PowerManagerService.WAKE_LOCK_SCREEN_TIMEOUT_OVERRIDE;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.IndentingPrintWriter;
@@ -31,6 +32,8 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
   * Policy that handle the screen timeout override wake lock behavior.
@@ -50,25 +53,62 @@ final class ScreenTimeoutOverridePolicy {
     public static final int RELEASE_REASON_NON_INTERACTIVE = 1;
 
     /**
-     * Release reason code: Release because user activity occurred.
-     */
-    public static final int RELEASE_REASON_USER_ACTIVITY = 2;
-    /**
      * Release reason code: Release because a screen lock is acquired.
      */
-    public static final int RELEASE_REASON_SCREEN_LOCK = 3;
+    public static final int RELEASE_REASON_SCREEN_LOCK = 2;
+
+    /**
+     * Release reason code: Release because user activity attention occurs.
+     */
+    public static final int RELEASE_REASON_USER_ACTIVITY_ATTENTION = 3;
+
+    /**
+     * Release reason code: Release because user activity other occurs.
+     */
+    public static final int RELEASE_REASON_USER_ACTIVITY_OTHER = 4;
+
+    /**
+     * Release reason code: Release because user activity button occurs.
+     */
+    public static final int RELEASE_REASON_USER_ACTIVITY_BUTTON = 5;
+
+    /**
+     * Release reason code: Release because user activity touch occurs.
+     */
+    public static final int RELEASE_REASON_USER_ACTIVITY_TOUCH = 6;
+
+    /**
+     * Release reason code: Release because user activity accessibility occurs.
+     */
+    public static final int RELEASE_REASON_USER_ACTIVITY_ACCESSIBILITY = 7;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RELEASE_REASON_" }, value = {
+            RELEASE_REASON_UNKNOWN,
+            RELEASE_REASON_NON_INTERACTIVE,
+            RELEASE_REASON_SCREEN_LOCK,
+            RELEASE_REASON_USER_ACTIVITY_ATTENTION,
+            RELEASE_REASON_USER_ACTIVITY_OTHER,
+            RELEASE_REASON_USER_ACTIVITY_BUTTON,
+            RELEASE_REASON_USER_ACTIVITY_TOUCH,
+            RELEASE_REASON_USER_ACTIVITY_ACCESSIBILITY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ReleaseReason{}
 
     // The screen timeout override config in milliseconds.
     private long mScreenTimeoutOverrideConfig;
 
     // The last reason that wake locks had been released by service.
-    private int mLastAutoReleaseReason = RELEASE_REASON_UNKNOWN;
+    private @ReleaseReason int mLastAutoReleaseReason = RELEASE_REASON_UNKNOWN;
 
     interface PolicyCallback {
         /**
          * Notify {@link PowerManagerService} to release all override wake locks.
          */
-        void releaseAllScreenTimeoutOverrideWakelocks();
+        void releaseAllScreenTimeoutOverrideWakelocks(@ReleaseReason int reason);
     }
     private PolicyCallback mPolicyCallback;
 
@@ -110,11 +150,20 @@ final class ScreenTimeoutOverridePolicy {
 
         switch (event) {
             case PowerManager.USER_ACTIVITY_EVENT_ATTENTION:
+                releaseAllWakeLocks(RELEASE_REASON_USER_ACTIVITY_ATTENTION);
+                return;
             case PowerManager.USER_ACTIVITY_EVENT_OTHER:
+                releaseAllWakeLocks(RELEASE_REASON_USER_ACTIVITY_OTHER);
+                return;
             case PowerManager.USER_ACTIVITY_EVENT_BUTTON:
+                releaseAllWakeLocks(RELEASE_REASON_USER_ACTIVITY_BUTTON);
+                return;
             case PowerManager.USER_ACTIVITY_EVENT_TOUCH:
+                releaseAllWakeLocks(RELEASE_REASON_USER_ACTIVITY_TOUCH);
+                return;
             case PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY:
-                releaseAllWakeLocks(RELEASE_REASON_USER_ACTIVITY);
+                releaseAllWakeLocks(RELEASE_REASON_USER_ACTIVITY_ACCESSIBILITY);
+                return;
         }
     }
 
@@ -154,8 +203,8 @@ final class ScreenTimeoutOverridePolicy {
                 + " (reason=" + mLastAutoReleaseReason + ")");
     }
 
-    private void releaseAllWakeLocks(int reason) {
-        mPolicyCallback.releaseAllScreenTimeoutOverrideWakelocks();
+    private void releaseAllWakeLocks(@ReleaseReason int reason) {
+        mPolicyCallback.releaseAllScreenTimeoutOverrideWakelocks(reason);
         mLastAutoReleaseReason = reason;
         logReleaseReason();
     }

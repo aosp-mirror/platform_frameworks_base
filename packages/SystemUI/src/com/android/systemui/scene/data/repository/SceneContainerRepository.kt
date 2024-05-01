@@ -24,8 +24,6 @@ import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSource
-import com.android.systemui.util.kotlin.WithPrev
-import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,7 +34,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Source of truth for scene framework application state. */
@@ -47,32 +44,7 @@ constructor(
     private val config: SceneContainerConfig,
     private val dataSource: SceneDataSource,
 ) {
-    private val previousAndCurrentScene: StateFlow<WithPrev<SceneKey?, SceneKey>> =
-        dataSource.currentScene
-            .pairwise()
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = WithPrev(null, dataSource.currentScene.value),
-            )
-
-    val currentScene: StateFlow<SceneKey> =
-        previousAndCurrentScene
-            .map { it.newValue }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = previousAndCurrentScene.value.newValue,
-            )
-
-    val previousScene: StateFlow<SceneKey?> =
-        previousAndCurrentScene
-            .map { it.previousValue }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = previousAndCurrentScene.value.previousValue,
-            )
+    val currentScene: StateFlow<SceneKey> = dataSource.currentScene
 
     private val _isVisible = MutableStateFlow(true)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
@@ -109,14 +81,6 @@ constructor(
         toScene: SceneKey,
         transitionKey: TransitionKey? = null,
     ) {
-        check(allSceneKeys().contains(toScene)) {
-            """
-                Cannot set the desired scene key to "$toScene". The configuration does not
-                contain a scene with that key.
-            """
-                .trimIndent()
-        }
-
         dataSource.changeScene(
             toScene = toScene,
             transitionKey = transitionKey,
