@@ -343,6 +343,30 @@ class CommunalViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
         }
 
     @Test
+    fun touchesAllowed_shadeNotExpanded() =
+        testScope.runTest {
+            val touchesAllowed by collectLastValue(underTest.touchesAllowed)
+
+            // On keyguard without any shade expansion.
+            kosmos.fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            shadeTestUtil.setLockscreenShadeExpansion(0f)
+            runCurrent()
+            assertThat(touchesAllowed).isTrue()
+        }
+
+    @Test
+    fun touchesAllowed_shadeExpanded() =
+        testScope.runTest {
+            val touchesAllowed by collectLastValue(underTest.touchesAllowed)
+
+            // On keyguard with shade fully expanded.
+            kosmos.fakeKeyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            shadeTestUtil.setLockscreenShadeExpansion(1f)
+            runCurrent()
+            assertThat(touchesAllowed).isFalse()
+        }
+
+    @Test
     fun isFocusable_isFalse_whenTransitioningAwayFromGlanceableHub() =
         testScope.runTest {
             val isFocusable by collectLastValue(underTest.isFocusable)
