@@ -39,6 +39,7 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONL
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
 import static com.android.window.flags.Flags.balDontBringExistingBackgroundTaskStackToFg;
+import static com.android.window.flags.Flags.balImprovedMetrics;
 import static com.android.window.flags.Flags.balImproveRealCallerVisibilityCheck;
 import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
 import static com.android.window.flags.Flags.balRequireOptInSameUid;
@@ -1660,26 +1661,61 @@ public class BackgroundActivityStartController {
                             (state.mOriginatingPendingIntent != null));
         }
 
-        @BalCode int code = finalVerdict.getCode();
-        int callingUid = state.mCallingUid;
-        int realCallingUid = state.mRealCallingUid;
-        Intent intent = state.mIntent;
+        if (balImprovedMetrics()) {
+            if (shouldLogStats(finalVerdict, state)) {
+                String activityName;
+                if (shouldLogIntentActivity(finalVerdict, state)) {
+                    Intent intent = state.mIntent;
+                    activityName = intent == null ? "noIntent" // should never happen
+                            : requireNonNull(intent.getComponent()).flattenToShortString();
+                } else {
+                    activityName = "";
+                }
+                writeBalAllowedLog(activityName, finalVerdict.getCode(), state);
+            }
+        } else {
+            @BalCode int code = finalVerdict.getCode();
+            int callingUid = state.mCallingUid;
+            int realCallingUid = state.mRealCallingUid;
+            Intent intent = state.mIntent;
 
-        if (code == BAL_ALLOW_PENDING_INTENT
-                && (callingUid < Process.FIRST_APPLICATION_UID
-                || realCallingUid < Process.FIRST_APPLICATION_UID)) {
-            String activityName = intent != null
-                    ? requireNonNull(intent.getComponent()).flattenToShortString() : "";
-            writeBalAllowedLog(activityName, BAL_ALLOW_PENDING_INTENT,
-                    state);
-        }
-        if (code == BAL_ALLOW_PERMISSION || code == BAL_ALLOW_FOREGROUND
-                || code == BAL_ALLOW_SAW_PERMISSION) {
-            // We don't need to know which activity in this case.
-            writeBalAllowedLog("", code, state);
-
+            if (code == BAL_ALLOW_PENDING_INTENT
+                    && (callingUid < Process.FIRST_APPLICATION_UID
+                    || realCallingUid < Process.FIRST_APPLICATION_UID)) {
+                String activityName = intent != null
+                        ? requireNonNull(intent.getComponent()).flattenToShortString() : "";
+                writeBalAllowedLog(activityName, BAL_ALLOW_PENDING_INTENT,
+                        state);
+            }
+            if (code == BAL_ALLOW_PERMISSION || code == BAL_ALLOW_FOREGROUND
+                    || code == BAL_ALLOW_SAW_PERMISSION) {
+                // We don't need to know which activity in this case.
+                writeBalAllowedLog("", code, state);
+            }
         }
         return finalVerdict;
+    }
+
+    @VisibleForTesting
+    boolean shouldLogStats(BalVerdict finalVerdict, BalState state) {
+        if (finalVerdict.blocks()) {
+            return false;
+        }
+        if (!state.isPendingIntent() && finalVerdict.getRawCode() == BAL_ALLOW_VISIBLE_WINDOW) {
+            return false;
+        }
+        if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()
+                && state.mResultForRealCaller.getRawCode() == BAL_ALLOW_VISIBLE_WINDOW) {
+            return false;
+        }
+        return true;
+    }
+
+    @VisibleForTesting
+    boolean shouldLogIntentActivity(BalVerdict finalVerdict, BalState state) {
+        return finalVerdict.mBasedOnRealCaller
+                ? state.mRealCallingUid < Process.FIRST_APPLICATION_UID
+                : state.mCallingUid < Process.FIRST_APPLICATION_UID;
     }
 
     @VisibleForTesting void writeBalAllowedLog(String activityName, int code, BalState state) {
