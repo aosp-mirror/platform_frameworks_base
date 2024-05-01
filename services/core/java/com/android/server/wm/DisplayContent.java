@@ -1307,6 +1307,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
+    /**
+     * @return The {@link DisplayRotationCompatPolicy} for this DisplayContent
+     */
+    // TODO(b/335387481) Allow access to DisplayRotationCompatPolicy only with getters
+    @Nullable
+    DisplayRotationCompatPolicy getDisplayRotationCompatPolicy() {
+        return mDisplayRotationCompatPolicy;
+    }
+
     @Override
     void migrateToNewSurfaceControl(Transaction t) {
         t.remove(mSurfaceControl);
