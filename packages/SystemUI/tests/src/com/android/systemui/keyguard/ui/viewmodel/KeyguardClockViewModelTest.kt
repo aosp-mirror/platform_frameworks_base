@@ -18,11 +18,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
@@ -45,14 +46,14 @@ import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(JUnit4::class)
-@DisableSceneContainer
-class KeyguardClockViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class KeyguardClockViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
     val underTest = kosmos.keyguardClockViewModel
@@ -64,6 +65,10 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
 
     var config = ClockConfig("TEST", "Test", "")
     var faceConfig = ClockFaceConfig()
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setup() {
@@ -276,5 +281,11 @@ class KeyguardClockViewModelTest : SysuiTestCase() {
 
     companion object {
         private const val KEYGUARD_STATUS_BAR_HEIGHT = 20
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
     }
 }
