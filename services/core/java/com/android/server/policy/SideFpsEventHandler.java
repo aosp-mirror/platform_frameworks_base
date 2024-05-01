@@ -38,6 +38,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -66,6 +67,7 @@ public class SideFpsEventHandler implements View.OnClickListener {
     private final int mDismissDialogTimeout;
     @Nullable
     private SideFpsToast mDialog;
+    private final AccessibilityManager mAccessibilityManager;
     private final Runnable mTurnOffDialog =
             () -> {
                 dismissDialog("mTurnOffDialog");
@@ -96,6 +98,7 @@ public class SideFpsEventHandler implements View.OnClickListener {
             DialogProvider provider) {
         mContext = context;
         mHandler = handler;
+        mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mPowerManager = powerManager;
         mBiometricState = STATE_IDLE;
         mSideFpsEventHandlerReady = new AtomicBoolean(false);
@@ -157,7 +160,9 @@ public class SideFpsEventHandler implements View.OnClickListener {
                                 mHandler.removeCallbacks(mTurnOffDialog);
                             }
                             showDialog(eventTime, "Enroll Power Press");
-                            mHandler.postDelayed(mTurnOffDialog, mDismissDialogTimeout);
+                            if (!mAccessibilityManager.isEnabled()) {
+                                mHandler.postDelayed(mTurnOffDialog, mDismissDialogTimeout);
+                            }
                         });
                 return true;
             case STATE_BP_AUTH:
@@ -231,6 +236,10 @@ public class SideFpsEventHandler implements View.OnClickListener {
                                         public void onBiometricAction(
                                                 @BiometricStateListener.Action int action) {
                                             Log.d(TAG, "onBiometricAction " + action);
+                                            if (mAccessibilityManager != null
+                                                    && mAccessibilityManager.isEnabled()) {
+                                                dismissDialog("mTurnOffDialog");
+                                            }
                                         }
                                     });
                             mSideFpsEventHandlerReady.set(true);
@@ -256,6 +265,9 @@ public class SideFpsEventHandler implements View.OnClickListener {
         mLastPowerPressTime = time;
         mDialog.show();
         mDialog.setOnClickListener(this);
+        if (mAccessibilityManager.isEnabled()) {
+            mDialog.addAccessibilityDelegate();
+        }
     }
 
     interface DialogProvider {

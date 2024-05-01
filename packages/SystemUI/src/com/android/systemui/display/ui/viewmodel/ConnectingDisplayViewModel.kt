@@ -32,9 +32,12 @@ import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
@@ -57,6 +60,7 @@ constructor(
     private var dialog: Dialog? = null
 
     /** Starts listening for pending displays. */
+    @OptIn(FlowPreview::class)
     override fun start() {
         val pendingDisplayFlow = connectedDisplayInteractor.pendingDisplay
         val concurrentDisplaysInProgessFlow =
@@ -66,6 +70,13 @@ constructor(
                 flow { emit(false) }
             }
         pendingDisplayFlow
+            // Let's debounce for 2 reasons:
+            // - prevent fast dialog flashes in case pending displays are available for just a few
+            // millis
+            // - Prevent jumps related to inset changes: when in 3 buttons navigation, device
+            // unlock triggers a change in insets that might result in a jump of the dialog (if a
+            // display was connected while on the lockscreen).
+            .debounce(200.milliseconds)
             .combine(concurrentDisplaysInProgessFlow) { pendingDisplay, concurrentDisplaysInProgress
                 ->
                 if (pendingDisplay == null) {

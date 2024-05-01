@@ -29,6 +29,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIE
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
@@ -509,6 +510,26 @@ final class LetterboxUiController {
     }
 
     /**
+     * Whether we should apply the min aspect ratio per-app override only when an app is connected
+     * to the camera.
+     * When this override is applied the min aspect ratio given in the app's manifest will be
+     * overridden to the largest enabled aspect ratio treatment unless the app's manifest value
+     * is higher. The treatment will also apply if no value is provided in the manifest.
+     *
+     * <p>This method returns {@code true} when the following conditions are met:
+     * <ul>
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Per-app override is enabled
+     * </ul>
+     */
+    boolean shouldOverrideMinAspectRatioForCamera() {
+        return mActivityRecord.isCameraActive()
+                && mAllowMinAspectRatioOverrideOptProp
+                .shouldEnableWithOptInOverrideAndOptOutProperty(
+                        isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA));
+    }
+
+    /**
      * Whether we should apply the force resize per-app override. When this override is applied it
      * forces the packages it is applied to to be resizable. It won't change whether the app can be
      * put into multi-windowing mode, but allow the app to resize without going into size-compat
@@ -942,7 +963,8 @@ final class LetterboxUiController {
 
     void recomputeConfigurationForCameraCompatIfNeeded() {
         if (isOverrideOrientationOnlyForCameraEnabled()
-                || isCameraCompatSplitScreenAspectRatioAllowed()) {
+                || isCameraCompatSplitScreenAspectRatioAllowed()
+                || shouldOverrideMinAspectRatioForCamera()) {
             mActivityRecord.recomputeConfiguration();
         }
     }

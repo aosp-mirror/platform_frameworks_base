@@ -59,6 +59,7 @@ import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -75,6 +76,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FIT_INSETS_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
@@ -1385,6 +1387,7 @@ public final class ViewRootImpl implements ViewParent,
                 // Keep track of the actual window flags supplied by the client.
                 mClientWindowLayoutFlags = attrs.flags;
 
+                adjustLayoutInDisplayCutoutMode(attrs);
                 setAccessibilityFocus(null, null);
 
                 if (view instanceof RootViewSurfaceTaker) {
@@ -1987,6 +1990,9 @@ public final class ViewRootImpl implements ViewParent,
             final int appearanceAndBehaviorPrivateFlags = mWindowAttributes.privateFlags
                     & (PRIVATE_FLAG_APPEARANCE_CONTROLLED | PRIVATE_FLAG_BEHAVIOR_CONTROLLED);
 
+            // Calling this before copying prevents redundant LAYOUT_CHANGED.
+            final int layoutInDisplayCutoutModeFromCaller = adjustLayoutInDisplayCutoutMode(attrs);
+
             final int changes = mWindowAttributes.copyFrom(attrs);
             if ((changes & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
                 // Recompute system ui visibility.
@@ -2002,6 +2008,9 @@ public final class ViewRootImpl implements ViewParent,
             if (mWindowAttributes.packageName == null) {
                 mWindowAttributes.packageName = mBasePackageName;
             }
+
+            // Restore the layoutInDisplayCutoutMode of the caller;
+            attrs.layoutInDisplayCutoutMode = layoutInDisplayCutoutModeFromCaller;
 
             // Restore preserved flags.
             mWindowAttributes.systemUiVisibility = systemUiVisibility;
@@ -2044,6 +2053,20 @@ public final class ViewRootImpl implements ViewParent,
             scheduleTraversals();
             setAccessibilityWindowAttributesIfNeeded();
         }
+    }
+
+    private int adjustLayoutInDisplayCutoutMode(WindowManager.LayoutParams attrs) {
+        final int originalMode = attrs.layoutInDisplayCutoutMode;
+        if ((attrs.privateFlags & (PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED
+                | PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE)) != 0
+                && attrs.isFullscreen()
+                && attrs.getFitInsetsTypes() == 0
+                && attrs.getFitInsetsSides() == 0) {
+            if (originalMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
+                attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            }
+        }
+        return originalMode;
     }
 
     void handleAppVisibility(boolean visible) {
