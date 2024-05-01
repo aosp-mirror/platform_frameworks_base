@@ -92,6 +92,8 @@ public class MessagingLinearLayout extends ViewGroup {
             final View child = getChildAt(i);
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             lp.hide = true;
+            // Child always needs to be measured to calculate hide property correctly in onMeasure.
+            child.requestLayout();
             if (child instanceof MessagingChild) {
                 MessagingChild messagingChild = (MessagingChild) child;
                 // Whenever we encounter the message first, it's always first in the layout
