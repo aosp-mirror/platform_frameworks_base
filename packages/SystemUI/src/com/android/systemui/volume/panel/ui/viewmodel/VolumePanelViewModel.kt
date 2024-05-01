@@ -17,11 +17,14 @@
 package com.android.systemui.volume.panel.ui.viewmodel
 
 import android.content.Context
+import android.content.IntentFilter
 import android.content.res.Resources
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
+import com.android.systemui.volume.VolumePanelDialogReceiver
 import com.android.systemui.volume.panel.dagger.VolumePanelComponent
 import com.android.systemui.volume.panel.dagger.factory.VolumePanelComponentFactory
 import com.android.systemui.volume.panel.domain.VolumePanelStartable
@@ -37,6 +40,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -49,6 +54,7 @@ class VolumePanelViewModel(
     coroutineScope: CoroutineScope,
     daggerComponentFactory: VolumePanelComponentFactory,
     configurationController: ConfigurationController,
+    broadcastDispatcher: BroadcastDispatcher,
 ) {
 
     private val volumePanelComponent: VolumePanelComponent =
@@ -113,6 +119,10 @@ class VolumePanelViewModel(
 
     init {
         volumePanelComponent.volumePanelStartables().onEach(VolumePanelStartable::start)
+        broadcastDispatcher
+            .broadcastFlow(IntentFilter(VolumePanelDialogReceiver.DISMISS_ACTION))
+            .onEach { dismissPanel() }
+            .launchIn(scope)
     }
 
     fun dismissPanel() {
@@ -125,6 +135,7 @@ class VolumePanelViewModel(
         @Application private val context: Context,
         private val daggerComponentFactory: VolumePanelComponentFactory,
         private val configurationController: ConfigurationController,
+        private val broadcastDispatcher: BroadcastDispatcher,
     ) {
 
         fun create(coroutineScope: CoroutineScope): VolumePanelViewModel {
@@ -133,6 +144,7 @@ class VolumePanelViewModel(
                 coroutineScope,
                 daggerComponentFactory,
                 configurationController,
+                broadcastDispatcher
             )
         }
     }

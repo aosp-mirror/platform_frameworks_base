@@ -244,6 +244,7 @@ import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.flow.Flow;
+import kotlinx.coroutines.flow.StateFlow;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -4052,6 +4053,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     float getExpandedFraction() {
         return mExpandedFraction;
+    }
+
+    @Override
+    public StateFlow<Float> getUdfpsTransitionToFullShadeProgress() {
+        return mShadeRepository.getUdfpsTransitionToFullShadeProgress();
     }
 
     @Override

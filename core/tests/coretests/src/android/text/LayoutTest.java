@@ -18,9 +18,6 @@ package android.text;
 
 import static com.android.graphics.hwui.flags.Flags.FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT;
 
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -47,6 +44,8 @@ import android.text.style.StrikethroughSpan;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.google.common.truth.Expect;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -63,7 +62,13 @@ public class LayoutTest {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
+    @Rule
+    public final Expect expect = Expect.create();
+
+    // Line count when using MockLayout
     private static final int LINE_COUNT = 5;
+    // Actual line count when using StaticLayout
+    private static final int STATIC_LINE_COUNT = 9;
     private static final int LINE_HEIGHT = 12;
     private static final int LINE_DESCENT = 4;
     private static final CharSequence LAYOUT_TEXT = "alwei\t;sdfs\ndf @";
@@ -655,8 +660,8 @@ public class LayoutTest {
     @Test
     @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
     public void highContrastTextEnabled_testDrawSelectionAndHighlight_drawsHighContrastSelectionAndHighlight() {
-        Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
-                mAlign, mSpacingMult, mSpacingAdd);
+        Layout layout = new StaticLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd, /* includePad= */ false);
 
         List<Path> highlightPaths = new ArrayList<>();
         List<Paint> highlightPaints = new ArrayList<>();
@@ -677,9 +682,12 @@ public class LayoutTest {
         layout.draw(c, highlightPaths, highlightPaints, selectionPath, selectionPaint,
                 /* cursorOffsetVertical= */ 0);
         List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
-        var textsDrawn = LINE_COUNT;
+        var textsDrawn = STATIC_LINE_COUNT;
         var highlightsDrawn = 2;
-        assertThat(drawCommands.size()).isEqualTo(textsDrawn + highlightsDrawn);
+        var backgroundRectsDrawn = STATIC_LINE_COUNT;
+        expect.withMessage("wrong number of drawCommands: " + drawCommands)
+                .that(drawCommands.size())
+                .isEqualTo(textsDrawn + backgroundRectsDrawn + highlightsDrawn);
 
         var highlightsFound = 0;
         var curLineIndex = 0;
@@ -687,29 +695,26 @@ public class LayoutTest {
             MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
 
             if (drawCommand.path != null) {
-                assertThat(drawCommand.path).isEqualTo(selectionPath);
-                assertThat(drawCommand.paint.getColor()).isEqualTo(Color.YELLOW);
-                assertThat(drawCommand.paint.getBlendMode()).isNotNull();
+                expect.that(drawCommand.path).isEqualTo(selectionPath);
+                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.YELLOW);
+                expect.that(drawCommand.paint.getBlendMode()).isNotNull();
                 highlightsFound++;
             } else if (drawCommand.text != null) {
-                int start = layout.getLineStart(curLineIndex);
-                int end = layout.getLineEnd(curLineIndex);
-                assertEquals(LAYOUT_TEXT.toString().substring(start, end), drawCommand.text);
                 curLineIndex++;
 
-                assertWithMessage("highlight is drawn on top of text")
+                expect.withMessage("highlight is drawn on top of text")
                         .that(highlightsFound).isEqualTo(0);
             }
         }
 
-        assertThat(highlightsFound).isEqualTo(2);
+        expect.that(highlightsFound).isEqualTo(2);
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
     public void highContrastTextEnabled_testDrawHighlight_drawsHighContrastHighlight() {
-        Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
-                mAlign, mSpacingMult, mSpacingAdd);
+        Layout layout = new StaticLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd, /* includePad= */ false);
 
         List<Path> highlightPaths = new ArrayList<>();
         List<Paint> highlightPaints = new ArrayList<>();
@@ -730,9 +735,12 @@ public class LayoutTest {
         layout.draw(c, highlightPaths, highlightPaints, /* selectionPath= */ null,
                 /* selectionPaint= */ null, /* cursorOffsetVertical= */ 0);
         List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
-        var textsDrawn = LINE_COUNT;
+        var textsDrawn = STATIC_LINE_COUNT;
         var highlightsDrawn = 1;
-        assertThat(drawCommands.size()).isEqualTo(textsDrawn + highlightsDrawn);
+        var backgroundRectsDrawn = STATIC_LINE_COUNT;
+        expect.withMessage("wrong number of drawCommands: " + drawCommands)
+                .that(drawCommands.size())
+                .isEqualTo(textsDrawn + backgroundRectsDrawn + highlightsDrawn);
 
         var highlightsFound = 0;
         var curLineIndex = 0;
@@ -740,29 +748,26 @@ public class LayoutTest {
             MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
 
             if (drawCommand.path != null) {
-                assertThat(drawCommand.path).isEqualTo(selectionPath);
-                assertThat(drawCommand.paint.getColor()).isEqualTo(Color.YELLOW);
-                assertThat(drawCommand.paint.getBlendMode()).isNotNull();
+                expect.that(drawCommand.path).isEqualTo(selectionPath);
+                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.YELLOW);
+                expect.that(drawCommand.paint.getBlendMode()).isNotNull();
                 highlightsFound++;
             } else if (drawCommand.text != null) {
-                int start = layout.getLineStart(curLineIndex);
-                int end = layout.getLineEnd(curLineIndex);
-                assertEquals(LAYOUT_TEXT.toString().substring(start, end), drawCommand.text);
                 curLineIndex++;
 
-                assertWithMessage("highlight is drawn on top of text")
+                expect.withMessage("highlight is drawn on top of text")
                         .that(highlightsFound).isEqualTo(0);
             }
         }
 
-        assertThat(highlightsFound).isEqualTo(1);
+        expect.that(highlightsFound).isEqualTo(1);
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
     public void highContrastTextDisabledByDefault_testDrawHighlight_drawsNormalHighlightBehind() {
-        Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
-                mAlign, mSpacingMult, mSpacingAdd);
+        Layout layout = new StaticLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd, /* includePad= */ false);
 
         List<Path> highlightPaths = new ArrayList<>();
         List<Paint> highlightPaints = new ArrayList<>();
@@ -782,9 +787,12 @@ public class LayoutTest {
         layout.draw(c, highlightPaths, highlightPaints, /* selectionPath= */ null,
                 /* selectionPaint= */ null, /* cursorOffsetVertical= */ 0);
         List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
-        var textsDrawn = LINE_COUNT;
+        var textsDrawn = STATIC_LINE_COUNT;
         var highlightsDrawn = 1;
-        assertThat(drawCommands.size()).isEqualTo(textsDrawn + highlightsDrawn);
+        var backgroundRectsDrawn = 0;
+        expect.withMessage("wrong number of drawCommands: " + drawCommands)
+                .that(drawCommands.size())
+                .isEqualTo(textsDrawn + backgroundRectsDrawn + highlightsDrawn);
 
         var highlightsFound = 0;
         var curLineIndex = 0;
@@ -792,29 +800,26 @@ public class LayoutTest {
             MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
 
             if (drawCommand.path != null) {
-                assertThat(drawCommand.path).isEqualTo(selectionPath);
-                assertThat(drawCommand.paint.getColor()).isEqualTo(Color.CYAN);
-                assertThat(drawCommand.paint.getBlendMode()).isNull();
+                expect.that(drawCommand.path).isEqualTo(selectionPath);
+                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.CYAN);
+                expect.that(drawCommand.paint.getBlendMode()).isNull();
                 highlightsFound++;
             } else if (drawCommand.text != null) {
-                int start = layout.getLineStart(curLineIndex);
-                int end = layout.getLineEnd(curLineIndex);
-                assertEquals(LAYOUT_TEXT.toString().substring(start, end), drawCommand.text);
                 curLineIndex++;
 
-                assertWithMessage("highlight is drawn behind text")
+                expect.withMessage("highlight is drawn behind text")
                         .that(highlightsFound).isGreaterThan(0);
             }
         }
 
-        assertThat(highlightsFound).isEqualTo(1);
+        expect.that(highlightsFound).isEqualTo(1);
     }
 
     @Test
     @RequiresFlagsDisabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
     public void highContrastTextEnabledButFlagOff_testDrawHighlight_drawsNormalHighlightBehind() {
-        Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
-                mAlign, mSpacingMult, mSpacingAdd);
+        Layout layout = new StaticLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd, /* includePad= */ false);
 
         List<Path> highlightPaths = new ArrayList<>();
         List<Paint> highlightPaints = new ArrayList<>();
@@ -835,9 +840,12 @@ public class LayoutTest {
         layout.draw(c, highlightPaths, highlightPaints, /* selectionPath= */ null,
                 /* selectionPaint= */ null, /* cursorOffsetVertical= */ 0);
         List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
-        var textsDrawn = LINE_COUNT;
+        var textsDrawn = STATIC_LINE_COUNT;
         var highlightsDrawn = 1;
-        assertThat(drawCommands.size()).isEqualTo(textsDrawn + highlightsDrawn);
+        var backgroundRectsDrawn = 0;
+        expect.withMessage("wrong number of drawCommands: " + drawCommands)
+                .that(drawCommands.size())
+                .isEqualTo(textsDrawn + backgroundRectsDrawn + highlightsDrawn);
 
         var highlightsFound = 0;
         var curLineIndex = 0;
@@ -845,33 +853,84 @@ public class LayoutTest {
             MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
 
             if (drawCommand.path != null) {
-                assertThat(drawCommand.path).isEqualTo(selectionPath);
-                assertThat(drawCommand.paint.getColor()).isEqualTo(Color.CYAN);
-                assertThat(drawCommand.paint.getBlendMode()).isNull();
+                expect.that(drawCommand.path).isEqualTo(selectionPath);
+                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.CYAN);
+                expect.that(drawCommand.paint.getBlendMode()).isNull();
                 highlightsFound++;
             } else if (drawCommand.text != null) {
-                int start = layout.getLineStart(curLineIndex);
-                int end = layout.getLineEnd(curLineIndex);
-                assertEquals(LAYOUT_TEXT.toString().substring(start, end), drawCommand.text);
                 curLineIndex++;
 
-                assertWithMessage("highlight is drawn behind text")
+                expect.withMessage("highlight is drawn behind text")
                         .that(highlightsFound).isGreaterThan(0);
             }
         }
 
-        assertThat(highlightsFound).isEqualTo(1);
+        expect.that(highlightsFound).isEqualTo(1);
     }
 
     @Test
     public void mockCanvasHighContrastOverridesCorrectly() {
         var canvas = new MockCanvas(100, 100);
 
-        assertThat(canvas.isHighContrastTextEnabled()).isFalse();
+        expect.that(canvas.isHighContrastTextEnabled()).isFalse();
         canvas.setHighContrastTextEnabled(true);
-        assertThat(canvas.isHighContrastTextEnabled()).isTrue();
+        expect.that(canvas.isHighContrastTextEnabled()).isTrue();
         canvas.setHighContrastTextEnabled(false);
-        assertThat(canvas.isHighContrastTextEnabled()).isFalse();
+        expect.that(canvas.isHighContrastTextEnabled()).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void highContrastTextEnabled_testDrawLightText_drawsBlackBackgroundRects() {
+        mTextPaint.setColor(Color.parseColor("#CCAA33"));
+        Layout layout = new StaticLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd, /* includePad= */ false);
+
+        final int width = 256;
+        final int height = 256;
+        MockCanvas c = new MockCanvas(width, height);
+        c.setHighContrastTextEnabled(true);
+        layout.draw(
+                c,
+                /* highlightPaths= */ null,
+                /* highlightPaints= */ null,
+                /* selectionPath= */ null,
+                /* selectionPaint= */ null,
+                /* cursorOffsetVertical= */ 0
+        );
+        List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
+        var textsDrawn = STATIC_LINE_COUNT;
+        var highlightsDrawn = 0;
+        var backgroundRectsDrawn = STATIC_LINE_COUNT;
+        expect.withMessage("wrong number of drawCommands: " + drawCommands)
+                .that(drawCommands.size())
+                .isEqualTo(textsDrawn + backgroundRectsDrawn + highlightsDrawn);
+
+        int numBackgroundsFound = 0;
+        var curLineIndex = 0;
+        for (int i = 0; i < drawCommands.size(); i++) {
+            MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
+
+            if (drawCommand.rect != null) {
+                numBackgroundsFound++;
+                expect.that(drawCommand.paint.getColor()).isEqualTo(Color.BLACK);
+                expect.that(drawCommand.rect.height()).isAtLeast(LINE_HEIGHT);
+                expect.that(drawCommand.rect.width()).isGreaterThan(0);
+                float expectedY = (numBackgroundsFound) * (LINE_HEIGHT + LINE_DESCENT);
+                expect.that(drawCommand.rect.bottom).isAtLeast(expectedY);
+            } else if (drawCommand.text != null) {
+                // draw text
+                curLineIndex++;
+
+                expect.withMessage("background is drawn on top of text")
+                        .that(numBackgroundsFound).isEqualTo(backgroundRectsDrawn);
+            } else {
+                fail("unexpected path drawn");
+            }
+        }
+
+        // One for each line
+        expect.that(numBackgroundsFound).isEqualTo(backgroundRectsDrawn);
     }
 
     private static final class MockCanvas extends Canvas {
@@ -881,22 +940,46 @@ public class LayoutTest {
             public final float x;
             public final float y;
             public final Path path;
+            public final RectF rect;
             public final Paint paint;
 
             DrawCommand(String text, float x, float y, Paint paint) {
                 this.text = text;
                 this.x = x;
                 this.y = y;
-                this.paint = paint;
+                this.paint = new Paint(paint);
                 path = null;
+                rect = null;
             }
 
             DrawCommand(Path path, Paint paint) {
                 this.path = path;
-                this.paint = paint;
+                this.paint = new Paint(paint);
                 y = 0;
                 x = 0;
                 text = null;
+                rect = null;
+            }
+
+            DrawCommand(RectF rect, Paint paint) {
+                this.rect = new RectF(rect);
+                this.paint = new Paint(paint);
+                path = null;
+                y = 0;
+                x = 0;
+                text = null;
+            }
+
+            @Override
+            public String toString() {
+                return "DrawCommand{"
+                        + "text='" + text + '\''
+                        + ", x=" + x
+                        + ", y=" + y
+                        + ", path=" + path
+                        + ", rect=" + rect
+                        + ", paint=" + paint
+                        + '}';
             }
         }
 
@@ -954,6 +1037,11 @@ public class LayoutTest {
         @Override
         public void drawPath(Path path, Paint p) {
             mDrawCommands.add(new DrawCommand(path, p));
+        }
+
+        @Override
+        public void drawRect(RectF rect, Paint p) {
+            mDrawCommands.add(new DrawCommand(rect, p));
         }
 
         List<DrawCommand> getDrawCommands() {

@@ -2638,7 +2638,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSoundResetsRankingTime() throws Exception {
-        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_UPDATE_RANKING_TIME);
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
         initAttentionHelper(flagResolver);
 

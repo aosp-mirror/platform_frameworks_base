@@ -105,18 +105,21 @@ class BubbleExpandedViewPinControllerTest {
     }
 
     @Test
-    fun onDragUpdate_stayOnSameSide() {
+    fun drag_stayOnSameSide() {
         runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
             controller.onDragUpdate(pointOnRight.x, pointOnRight.y)
+            controller.onDragEnd()
         }
         waitForAnimateIn()
         assertThat(dropTargetView).isNull()
         assertThat(testListener.locationChanges).isEmpty()
+        assertThat(testListener.locationReleases).containsExactly(BubbleBarLocation.RIGHT)
     }
 
     @Test
-    fun onDragUpdate_toLeft() {
+    fun drag_toLeft() {
+        // Drag to left, but don't finish
         runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
             controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
@@ -132,10 +135,16 @@ class BubbleExpandedViewPinControllerTest {
             .isEqualTo(expectedDropTargetBounds.height())
 
         assertThat(testListener.locationChanges).containsExactly(BubbleBarLocation.LEFT)
+        assertThat(testListener.locationReleases).isEmpty()
+
+        // Finish the drag
+        runOnMainSync { controller.onDragEnd() }
+        assertThat(testListener.locationReleases).containsExactly(BubbleBarLocation.LEFT)
     }
 
     @Test
-    fun onDragUpdate_toLeftAndBackToRight() {
+    fun drag_toLeftAndBackToRight() {
+        // Drag to left
         runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
             controller.onDragUpdate(pointOnLeft.x, pointOnLeft.y)
@@ -143,6 +152,7 @@ class BubbleExpandedViewPinControllerTest {
         waitForAnimateIn()
         assertThat(dropTargetView).isNotNull()
 
+        // Drag to right
         runOnMainSync { controller.onDragUpdate(pointOnRight.x, pointOnRight.y) }
         // We have to wait for existing drop target to animate out and new to animate in
         waitForAnimateOut()
@@ -158,10 +168,15 @@ class BubbleExpandedViewPinControllerTest {
 
         assertThat(testListener.locationChanges)
             .containsExactly(BubbleBarLocation.LEFT, BubbleBarLocation.RIGHT)
+        assertThat(testListener.locationReleases).isEmpty()
+
+        // Release the view
+        runOnMainSync { controller.onDragEnd() }
+        assertThat(testListener.locationReleases).containsExactly(BubbleBarLocation.RIGHT)
     }
 
     @Test
-    fun onDragUpdate_toLeftInExclusionRect() {
+    fun drag_toLeftInExclusionRect() {
         runOnMainSync {
             controller.onDragStart(initialLocationOnLeft = false)
             // Exclusion rect is around the bottom center area of the screen
@@ -170,6 +185,10 @@ class BubbleExpandedViewPinControllerTest {
         waitForAnimateIn()
         assertThat(dropTargetView).isNull()
         assertThat(testListener.locationChanges).isEmpty()
+        assertThat(testListener.locationReleases).isEmpty()
+
+        runOnMainSync { controller.onDragEnd() }
+        assertThat(testListener.locationReleases).containsExactly(BubbleBarLocation.RIGHT)
     }
 
     @Test
@@ -256,8 +275,13 @@ class BubbleExpandedViewPinControllerTest {
 
     internal class TestLocationChangeListener : BaseBubblePinController.LocationChangeListener {
         val locationChanges = mutableListOf<BubbleBarLocation>()
+        val locationReleases = mutableListOf<BubbleBarLocation>()
         override fun onChange(location: BubbleBarLocation) {
             locationChanges.add(location)
+        }
+
+        override fun onRelease(location: BubbleBarLocation) {
+            locationReleases.add(location)
         }
     }
 }

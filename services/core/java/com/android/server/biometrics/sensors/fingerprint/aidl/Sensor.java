@@ -242,6 +242,7 @@ public class Sensor {
     }
 
     @Nullable protected AidlSession getSessionForUser(int userId) {
+        Slog.d(TAG, "getSessionForUser: mCurrentSession: " + mCurrentSession);
         if (mCurrentSession != null && mCurrentSession.getUserId() == userId) {
             return mCurrentSession;
         } else {

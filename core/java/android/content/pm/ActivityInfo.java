@@ -1348,6 +1348,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long OVERRIDE_MIN_ASPECT_RATIO = 174042980L; // buganizer id
 
     /**
+     * This change id restricts treatments that force a given min aspect ratio to
+     * only when an app is connected to the camera
+     *
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA = 325586858L; // buganizer id
+
+    /**
      * This change id restricts treatments that force a given min aspect ratio to activities
      * whose orientation is fixed to portrait.
      *

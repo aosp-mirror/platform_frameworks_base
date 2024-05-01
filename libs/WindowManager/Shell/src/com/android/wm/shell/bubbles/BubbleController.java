@@ -474,11 +474,16 @@ public class BubbleController implements ConfigurationChangeListener,
 
         mDisplayController.addDisplayChangingController(
                 (displayId, fromRotation, toRotation, newDisplayAreaInfo, t) -> {
-                    // This is triggered right before the rotation is applied
-                    if (fromRotation != toRotation) {
+                    Rect newScreenBounds = new Rect();
+                    if (newDisplayAreaInfo != null) {
+                        newScreenBounds =
+                                newDisplayAreaInfo.configuration.windowConfiguration.getBounds();
+                    }
+                    // This is triggered right before the rotation or new screen size is applied
+                    if (fromRotation != toRotation || !newScreenBounds.equals(mScreenBounds)) {
                         if (mStackView != null) {
                             // Layout listener set on stackView will update the positioner
-                            // once the rotation is applied
+                            // once the rotation or screen change is applied
                             mStackView.onOrientationChanged();
                         }
                     }
@@ -722,6 +727,17 @@ public class BubbleController implements ConfigurationChangeListener,
             BubbleBarUpdate bubbleBarUpdate = new BubbleBarUpdate();
             bubbleBarUpdate.bubbleBarLocation = bubbleBarLocation;
             mBubbleStateListener.onBubbleStateChange(bubbleBarUpdate);
+        }
+    }
+
+    /**
+     * Animate bubble bar to the given location. The location change is transient. It does not
+     * update the state of the bubble bar.
+     * To update bubble bar pinned location, use {@link #setBubbleBarLocation(BubbleBarLocation)}.
+     */
+    public void animateBubbleBarLocation(BubbleBarLocation bubbleBarLocation) {
+        if (canShowAsBubbleBar()) {
+            mBubbleStateListener.animateBubbleBarLocation(bubbleBarLocation);
         }
     }
 
@@ -2250,15 +2266,19 @@ public class BubbleController implements ConfigurationChangeListener,
         private final SingleInstanceRemoteListener<BubbleController, IBubblesListener> mListener;
         private final Bubbles.BubbleStateListener mBubbleListener =
                 new Bubbles.BubbleStateListener() {
+                    @Override
+                    public void onBubbleStateChange(BubbleBarUpdate update) {
+                        Bundle b = new Bundle();
+                        b.setClassLoader(BubbleBarUpdate.class.getClassLoader());
+                        b.putParcelable(BubbleBarUpdate.BUNDLE_KEY, update);
+                        mListener.call(l -> l.onBubbleStateChange(b));
+                    }
 
-            @Override
-            public void onBubbleStateChange(BubbleBarUpdate update) {
-                Bundle b = new Bundle();
-                b.setClassLoader(BubbleBarUpdate.class.getClassLoader());
-                b.putParcelable(BubbleBarUpdate.BUNDLE_KEY, update);
-                mListener.call(l -> l.onBubbleStateChange(b));
-            }
-        };
+                    @Override
+                    public void animateBubbleBarLocation(BubbleBarLocation location) {
+                        mListener.call(l -> l.animateBubbleBarLocation(location));
+                    }
+                };
 
         IBubblesImpl(BubbleController controller) {
             mController = controller;

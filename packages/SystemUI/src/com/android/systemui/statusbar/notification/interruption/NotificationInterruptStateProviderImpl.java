@@ -623,7 +623,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        final long when = notification.when;
+        final long when = notification.getWhen();
         final long now = mSystemClock.currentTimeMillis();
         final long age = now - when;
 

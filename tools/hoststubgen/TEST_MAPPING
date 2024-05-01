@@ -1,12 +1,62 @@
+// Keep the following two TEST_MAPPINGs in sync:
+// frameworks/base/ravenwood/TEST_MAPPING
+// frameworks/base/tools/hoststubgen/TEST_MAPPING
 {
   "presubmit": [
     { "name": "tiny-framework-dump-test" },
     { "name": "hoststubgentest" },
-    { "name": "hoststubgen-invoke-test" }
+    { "name": "hoststubgen-invoke-test" },
+    {
+      "name": "RavenwoodMockitoTest_device"
+    },
+    {
+      "name": "RavenwoodBivalentTest_device"
+    },
+    // The sysui tests should match vendor/unbundled_google/packages/SystemUIGoogle/TEST_MAPPING
+    {
+      "name": "SystemUIGoogleTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "presubmit-large": [
+    {
+      "name": "SystemUITests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
   ],
   "ravenwood-presubmit": [
     {
+      "name": "RavenwoodMinimumTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodMockitoTest",
+      "host": true
+    },
+    {
       "name": "CtsUtilTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "RavenwoodCoreTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodBivalentTest",
       "host": true
     }
   ]

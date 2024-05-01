@@ -30,6 +30,7 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dock.DockManagerFake
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
@@ -83,6 +84,7 @@ import org.mockito.MockitoAnnotations
 )
 @SmallTest
 @RunWith(Parameterized::class)
+@DisableSceneContainer
 class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
 
     companion object {

@@ -18,7 +18,7 @@ package com.android.server.notification;
 import static android.app.Flags.restrictAudioAttributesAlarm;
 import static android.app.Flags.restrictAudioAttributesCall;
 import static android.app.Flags.restrictAudioAttributesMedia;
-import static android.app.Flags.updateRankingTime;
+import static android.app.Flags.sortSectionByTime;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -580,7 +580,7 @@ public final class NotificationRecord {
         pw.println(prefix + "deleteIntent=" + notification.deleteIntent);
         pw.println(prefix + "number=" + notification.number);
         pw.println(prefix + "groupAlertBehavior=" + notification.getGroupAlertBehavior());
-        pw.println(prefix + "when=" + notification.when);
+        pw.println(prefix + "when=" + notification.when + "/" + notification.getWhen());
 
         pw.print(prefix + "tickerText=");
         if (!TextUtils.isEmpty(notification.tickerText)) {
@@ -1092,9 +1092,9 @@ public final class NotificationRecord {
     private long calculateRankingTimeMs(long previousRankingTimeMs) {
         Notification n = getNotification();
         // Take developer provided 'when', unless it's in the future.
-        if (updateRankingTime()) {
-            if (n.hasAppProvidedWhen() && n.when <= getSbn().getPostTime()){
-                return n.when;
+        if (sortSectionByTime()) {
+            if (n.hasAppProvidedWhen() && n.getWhen() <= getSbn().getPostTime()){
+                return n.getWhen();
             }
         } else {
             if (n.when != 0 && n.when <= getSbn().getPostTime()) {
@@ -1211,7 +1211,7 @@ public final class NotificationRecord {
     }
 
     public void resetRankingTime() {
-        if (updateRankingTime()) {
+        if (sortSectionByTime()) {
             mRankingTimeMs = calculateRankingTimeMs(getSbn().getPostTime());
         }
     }

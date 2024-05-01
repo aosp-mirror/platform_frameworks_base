@@ -20,6 +20,8 @@ import android.appwidget.AppWidgetHostView
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.util.SizeF
+import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
+import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -103,6 +105,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -115,8 +118,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.core.view.setPadding
 import androidx.window.layout.WindowMetricsCalculator
-import com.android.compose.modifiers.height
-import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
@@ -300,7 +301,7 @@ fun CommunalHub(
                             viewModel.onHidePopup()
                             viewModel.onOpenWidgetEditor(selectedKey.value)
                         },
-                        onHide = { viewModel.onHidePopup()}
+                        onHide = { viewModel.onHidePopup() }
                     )
                 }
                 null -> {}
@@ -374,7 +375,7 @@ private fun ScrollOnUpdatedLiveContentEffect(
             liveContentKeys.indexOfFirst { !prevLiveContentKeys.contains(it) }
 
         // Scroll if current position is behind the first updated content
-        if (indexOfFirstUpdatedContent in 0..<gridState.firstVisibleItemIndex) {
+        if (indexOfFirstUpdatedContent in 0 until gridState.firstVisibleItemIndex) {
             // Launching with a scope to prevent the job from being canceled in the case of a
             // recomposition during scrolling
             coroutineScope.launch { gridState.animateScrollToItem(indexOfFirstUpdatedContent) }
@@ -841,17 +842,31 @@ private fun WidgetContent(
     widgetConfigurator: WidgetConfigurator?,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+    val isFocusable by viewModel.isFocusable.collectAsState(initial = false)
+    val accessibilityLabel =
+        remember(model, context) {
+            model.providerInfo.loadLabel(context.packageManager).toString().trim()
+        }
+    val clickActionLabel = stringResource(R.string.accessibility_action_label_select_widget)
     Box(
         modifier =
-            modifier.thenIf(!viewModel.isEditMode && model.inQuietMode) {
-                Modifier.pointerInput(Unit) {
-                    // consume tap to prevent the child view from triggering interactions with the
-                    // app widget
-                    observeTaps(shouldConsume = true) { _ ->
-                        viewModel.onOpenEnableWorkProfileDialog()
+            modifier
+                .thenIf(!viewModel.isEditMode && model.inQuietMode) {
+                    Modifier.pointerInput(Unit) {
+                        // consume tap to prevent the child view from triggering interactions with
+                        // the app widget
+                        observeTaps(shouldConsume = true) { _ ->
+                            viewModel.onOpenEnableWorkProfileDialog()
+                        }
                     }
                 }
-            }
+                .thenIf(viewModel.isEditMode) {
+                    Modifier.semantics {
+                        contentDescription = accessibilityLabel
+                        onClick(label = clickActionLabel, action = null)
+                    }
+                }
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
@@ -863,7 +878,18 @@ private fun WidgetContent(
                         // Remove the extra padding applied to AppWidgetHostView to allow widgets to
                         // occupy the entire box.
                         setPadding(0)
+                        accessibilityDelegate = viewModel.widgetAccessibilityDelegate
                     }
+            },
+            update = {
+                it.apply {
+                    importantForAccessibility =
+                        if (isFocusable) {
+                            IMPORTANT_FOR_ACCESSIBILITY_AUTO
+                        } else {
+                            IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                        }
+                }
             },
             // For reusing composition in lazy lists.
             onReset = {},

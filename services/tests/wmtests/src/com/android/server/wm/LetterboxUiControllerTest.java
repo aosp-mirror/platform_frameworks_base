@@ -29,6 +29,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIE
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
@@ -73,6 +74,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.Nullable;
@@ -1086,6 +1089,39 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
     }
 
+    @Test
+    public void testRecomputeConfigurationForCameraCompatIfNeeded() {
+        spyOn(mController);
+        doReturn(false).when(mController).isOverrideOrientationOnlyForCameraEnabled();
+        doReturn(false).when(mController).isCameraCompatSplitScreenAspectRatioAllowed();
+        doReturn(false).when(mController).shouldOverrideMinAspectRatioForCamera();
+        clearInvocations(mActivity);
+
+        mController.recomputeConfigurationForCameraCompatIfNeeded();
+
+        verify(mActivity, never()).recomputeConfiguration();
+
+        // isOverrideOrientationOnlyForCameraEnabled
+        doReturn(true).when(mController).isOverrideOrientationOnlyForCameraEnabled();
+        clearInvocations(mActivity);
+        mController.recomputeConfigurationForCameraCompatIfNeeded();
+        verify(mActivity).recomputeConfiguration();
+
+        // isCameraCompatSplitScreenAspectRatioAllowed
+        doReturn(false).when(mController).isOverrideOrientationOnlyForCameraEnabled();
+        doReturn(true).when(mController).isCameraCompatSplitScreenAspectRatioAllowed();
+        clearInvocations(mActivity);
+        mController.recomputeConfigurationForCameraCompatIfNeeded();
+        verify(mActivity).recomputeConfiguration();
+
+        // shouldOverrideMinAspectRatioForCamera
+        doReturn(false).when(mController).isCameraCompatSplitScreenAspectRatioAllowed();
+        doReturn(true).when(mController).shouldOverrideMinAspectRatioForCamera();
+        clearInvocations(mActivity);
+        mController.recomputeConfigurationForCameraCompatIfNeeded();
+        verify(mActivity).recomputeConfiguration();
+    }
+
     private void prepareActivityForShouldApplyUserMinAspectRatioOverride(
             boolean orientationRequest) {
         spyOn(mController);
@@ -1277,6 +1313,78 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mController = new LetterboxUiController(mWm, mActivity);
 
         assertFalse(mController.shouldOverrideMinAspectRatio());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
+    public void shouldOverrideMinAspectRatioForCamera_overrideEnabled_returnsTrue() {
+        doReturn(true).when(mActivity).isCameraActive();
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldOverrideMinAspectRatioForCamera());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
+    public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideEnabled_returnsTrue()
+            throws Exception {
+        doReturn(true).when(mActivity).isCameraActive();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldOverrideMinAspectRatioForCamera());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
+    public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideEnabled_returnsFalse()
+            throws Exception {
+        doReturn(false).when(mActivity).isCameraActive();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
+    }
+
+    @Test
+    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
+    public void shouldOverrideMinAspectRatioForCamera_propertyTrue_overrideDisabled_returnsFalse()
+            throws Exception {
+        doReturn(true).when(mActivity).isCameraActive();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
+    }
+
+    @Test
+    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
+    public void shouldOverrideMinAspectRatioForCamera_overrideDisabled_returnsFalse() {
+        doReturn(true).when(mActivity).isCameraActive();
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
+    public void shouldOverrideMinAspectRatioForCamera_propertyFalse_overrideEnabled_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
+    }
+
+    @Test
+    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR_CAMERA})
+    public void shouldOverrideMinAspectRatioForCamera_propertyFalse_noOverride_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
+        doReturn(true).when(mActivity).isCameraActive();
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatioForCamera());
     }
 
     @Test

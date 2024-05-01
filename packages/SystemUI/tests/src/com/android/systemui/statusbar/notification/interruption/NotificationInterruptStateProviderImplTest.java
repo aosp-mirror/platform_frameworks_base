@@ -49,6 +49,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.Flags;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
@@ -58,6 +59,7 @@ import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -469,6 +471,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_SORT_SECTION_BY_TIME)
     public void testShouldHeadsUp_oldWhen_whenZero() throws Exception {
         ensureStateForHeadsUpWhenAwake();
 

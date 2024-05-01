@@ -28,7 +28,7 @@ interface ShadeRepository {
      * Amount qs has expanded, [0-1]. 0 means fully collapsed, 1 means fully expanded. Quick
      * Settings can be expanded without the full shade expansion.
      */
-    val qsExpansion: StateFlow<Float>
+    @Deprecated("Use ShadeInteractor.qsExpansion instead") val qsExpansion: StateFlow<Float>
 
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>

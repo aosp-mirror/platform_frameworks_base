@@ -39,14 +39,18 @@ dump() {
     local jar=$1
     local file=$2
 
-    sed -e '1d' -e "s/^/$jar,/"  $file
+    # Use sed to remove the header + prepend the jar filename.
+    sed -e '1d' -e "s/^/$jar,/" $file
 }
 
 collect_stats() {
     local out="$1"
     {
-        echo 'Jar,PackageName,ClassName,SupportedMethods,TotalMethods'
-        dump "framework-minus-apex"  hoststubgen_framework-minus-apex_stats.csv
+        # Copy the header, with the first column appended.
+        echo -n "Jar,"
+        head -n 1 hoststubgen_framework-minus-apex_stats.csv
+
+        dump "framework-minus-apex" hoststubgen_framework-minus-apex_stats.csv
         dump "service.core"  hoststubgen_services.core_stats.csv
     } > "$out"
 
@@ -56,7 +60,10 @@ collect_stats() {
 collect_apis() {
     local out="$1"
     {
-        echo 'Jar,PackageName,ClassName,MethodName,Descriptor'
+        # Copy the header, with the first column appended.
+        echo -n "Jar,"
+        head -n 1 hoststubgen_framework-minus-apex_apis.csv
+
         dump "framework-minus-apex"  hoststubgen_framework-minus-apex_apis.csv
         dump "service.core"  hoststubgen_services.core_apis.csv
     } > "$out"

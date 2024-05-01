@@ -1561,14 +1561,14 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
                 false, mClock);
-        loadByteArrayXml(baos.toByteArray(), false, USER_SYSTEM);
+        loadByteArrayXml(baos.toByteArray(), false, USER_ALL);
 
         // Trigger 2nd restore pass
-        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UID_P);
+        when(mPm.getPackageUidAsUser(PKG_R, USER_SYSTEM)).thenReturn(UID_R);
         mXmlHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_R},
-                new int[]{UID_P});
+                new int[]{UID_R});
 
-        NotificationChannel channel = mXmlHelper.getNotificationChannel(PKG_R, UID_P, id,
+        NotificationChannel channel = mXmlHelper.getNotificationChannel(PKG_R, UID_R, id,
                 false);
         assertThat(channel.getImportance()).isEqualTo(2);
         assertThat(channel.canShowBadge()).isTrue();
@@ -1616,7 +1616,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mXmlHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger, mAppOpsManager, mUserProfiles,
                 false, mClock);
-        loadByteArrayXml(xml.getBytes(), false, USER_SYSTEM);
+        loadByteArrayXml(xml.getBytes(), false, USER_ALL);
 
         // Trigger 2nd restore pass
         mXmlHelper.onPackagesChanged(false, USER_SYSTEM, new String[]{PKG_R},

@@ -54,7 +54,6 @@ import com.android.wm.shell.transition.Transitions;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Responsible supplying PiP Transitions.
@@ -125,12 +124,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
 
     /**
      * Called when the Shell wants to start resizing Pip transition/animation.
-     *
-     * @param onFinishResizeCallback callback guaranteed to execute when animation ends and
-     *                               client completes any potential draws upon WM state updates.
      */
-    public void startResizeTransition(WindowContainerTransaction wct,
-            Consumer<Rect> onFinishResizeCallback) {
+    public void startResizeTransition(WindowContainerTransaction wct) {
         // Default implementation does nothing.
     }
 
@@ -266,9 +261,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /** Whether a particular package is same as current pip package. */
-    public boolean isInPipPackage(String packageName) {
+    public boolean isPackageActiveInPip(String packageName) {
         final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
-        return packageName != null && inPipTask != null
+        return packageName != null && inPipTask != null && mPipOrganizer.isInPip()
                 && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
     }
 

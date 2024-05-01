@@ -87,7 +87,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
         when(mMockContext.getSharedPreferences(
                 eq(WorkProfileMessageController.SHARED_PREFERENCES_NAME),
                 eq(Context.MODE_PRIVATE))).thenReturn(mSharedPreferences);
-        when(mMockContext.getString(R.string.config_sceenshotWorkProfileFilesApp))
+        when(mMockContext.getString(R.string.config_screenshotFilesApp))
                 .thenReturn(FILES_APP_COMPONENT);
         when(mMockContext.getString(R.string.screenshot_default_files_app_name))
                 .thenReturn(DEFAULT_FILES_APP_LABEL);
@@ -149,7 +149,7 @@ public class WorkProfileMessageControllerTest extends SysuiTestCase {
 
     @Test
     public void testOnScreenshotTaken_noFilesAppComponentDefined() {
-        when(mMockContext.getString(R.string.config_sceenshotWorkProfileFilesApp))
+        when(mMockContext.getString(R.string.config_screenshotFilesApp))
                 .thenReturn("");
 
         WorkProfileMessageController.WorkProfileFirstRunData data =

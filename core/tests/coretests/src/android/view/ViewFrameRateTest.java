@@ -36,6 +36,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.Instrumentation;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -47,6 +48,7 @@ import android.widget.FrameLayout;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -537,6 +539,28 @@ public class ViewFrameRateTest {
         });
         waitForAfterDraw();
     }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+    })
+    public void frameRateReset() throws Throwable {
+        mMovingView.setRequestedFrameRate(120f);
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> mMovingView.setVisibility(View.INVISIBLE));
+
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        for (int i = 0; i < 120; i++) {
+            mActivityRule.runOnUiThread(() -> {
+                mMovingView.getParent().onDescendantInvalidated(mMovingView, mMovingView);
+            });
+            instrumentation.waitForIdleSync();
+        }
+
+        assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
+    }
+
     private void runAfterDraw(@NonNull Runnable runnable) {
         Handler handler = new Handler(Looper.getMainLooper());
         mAfterDrawLatch = new CountDownLatch(1);

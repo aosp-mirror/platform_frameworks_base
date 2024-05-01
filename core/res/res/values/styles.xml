@@ -1685,4 +1685,9 @@ please see styles_device_defaults.xml.
         <item name="android:paddingStart">8dp</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
+
+    <style name="AccessibilityButtonChooserDialog"
+           parent="@style/Theme.DeviceDefault.Resolver">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
 </resources>

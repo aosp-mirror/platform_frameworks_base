@@ -126,10 +126,9 @@ constructor(
             ) { shouldShow, connectionState ->
                 if (shouldShow) {
                     when (connectionState) {
+                        SatelliteConnectionState.On,
                         SatelliteConnectionState.Connected ->
                             context.getString(R.string.satellite_connected_carrier_text)
-                        SatelliteConnectionState.On ->
-                            context.getString(R.string.satellite_not_connected_carrier_text)
                         SatelliteConnectionState.Off,
                         SatelliteConnectionState.Unknown -> null
                     }

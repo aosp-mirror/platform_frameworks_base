@@ -225,10 +225,12 @@ sealed class TransitionInteractor(
         if (!KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
                 keyguardInteractor.onCameraLaunchDetected.filterRelevantKeyguardState().collect {
-                    startTransitionTo(
-                        toState = KeyguardState.OCCLUDED,
-                        modeOnCanceled = TransitionModeOnCanceled.RESET,
-                    )
+                    if (!maybeHandleInsecurePowerGesture()) {
+                        startTransitionTo(
+                            toState = KeyguardState.OCCLUDED,
+                            modeOnCanceled = TransitionModeOnCanceled.RESET,
+                        )
+                    }
                 }
             }
         }

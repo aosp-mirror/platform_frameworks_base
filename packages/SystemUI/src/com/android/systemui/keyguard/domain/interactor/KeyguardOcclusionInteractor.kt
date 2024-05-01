@@ -77,7 +77,9 @@ constructor(
         // transition, to ensure we don't transition while moving between, for example,
         // *_BOUNCER -> LOCKSCREEN.
         return powerInteractor.detailedWakefulness.value.powerButtonLaunchGestureTriggered &&
-            KeyguardState.deviceIsAsleepInState(transitionInteractor.getStartedState())
+            KeyguardState.deviceIsAsleepInState(
+                transitionInteractor.currentTransitionInfoInternal.value.to
+            )
     }
 
     /**

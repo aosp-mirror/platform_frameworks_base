@@ -86,6 +86,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -126,6 +127,7 @@ public class NotificationTest {
 
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
@@ -1833,6 +1835,36 @@ public class NotificationTest {
         Bitmap resultBitmap = result.getBackground();
         assertNotNull(resultBitmap);
         Assert.assertEquals(bitmap, resultBitmap);
+    }
+
+    @Test
+    public void testGetWhen_zero() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setWhen(0)
+                .build();
+
+        mSetFlagsRule.disableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(0);
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(n.creationTime);
+    }
+
+    @Test
+    public void testGetWhen_devProvidedNonZero() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setWhen(9)
+                .build();
+
+        mSetFlagsRule.disableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(9);
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_SORT_SECTION_BY_TIME);
+
+        assertThat(n.getWhen()).isEqualTo(9);
     }
 
     private void assertValid(Notification.Colors c) {

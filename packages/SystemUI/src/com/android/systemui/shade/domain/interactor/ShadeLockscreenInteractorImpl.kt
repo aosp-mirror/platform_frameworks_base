@@ -20,6 +20,7 @@ import com.android.keyguard.LockIconViewController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.ShadeRepository
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -32,7 +33,12 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
     private val lockIconViewController: LockIconViewController,
+    shadeRepository: ShadeRepository,
 ) : ShadeLockscreenInteractor {
+
+    override val udfpsTransitionToFullShadeProgress =
+        shadeRepository.udfpsTransitionToFullShadeProgress
+
     override fun expandToNotifications() {
         changeToShadeScene()
     }

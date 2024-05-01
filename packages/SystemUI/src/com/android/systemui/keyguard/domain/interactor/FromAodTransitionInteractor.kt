@@ -168,11 +168,13 @@ constructor(
             keyguardInteractor.isKeyguardOccluded
                 .filterRelevantKeyguardStateAnd { isOccluded -> isOccluded }
                 .collect {
-                    startTransitionTo(
-                        toState = KeyguardState.OCCLUDED,
-                        modeOnCanceled = TransitionModeOnCanceled.RESET,
-                        ownerReason = "isOccluded = true",
-                    )
+                    if (!maybeHandleInsecurePowerGesture()) {
+                        startTransitionTo(
+                            toState = KeyguardState.OCCLUDED,
+                            modeOnCanceled = TransitionModeOnCanceled.RESET,
+                            ownerReason = "isOccluded = true",
+                        )
+                    }
                 }
         }
     }

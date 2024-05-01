@@ -98,10 +98,10 @@ private class ClickableSliceView(
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        return onClick != null || super.onInterceptTouchEvent(ev)
+        return (isSliceViewClickable && onClick != null) || super.onInterceptTouchEvent(ev)
     }
 
     override fun onClick(v: View?) {
-        onClick?.let { it() } ?: super.onClick(v)
+        onClick?.takeIf { isSliceViewClickable }?.let { it() } ?: super.onClick(v)
     }
 }
