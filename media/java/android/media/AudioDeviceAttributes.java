@@ -64,7 +64,8 @@ public final class AudioDeviceAttributes implements Parcelable {
     /**
      * The unique address of the device. Some devices don't have addresses, only an empty string.
      */
-    private @NonNull String mAddress;
+    private final @NonNull String mAddress;
+
     /**
      * Is input or output device
      */
@@ -134,18 +135,6 @@ public final class AudioDeviceAttributes implements Parcelable {
 
     /**
      * @hide
-     * Copy Constructor.
-     * @param ada the copied AudioDeviceAttributes
-     */
-    public AudioDeviceAttributes(AudioDeviceAttributes ada) {
-        mRole = ada.getRole();
-        mType = ada.getType();
-        mAddress = ada.getAddress();
-        mNativeType = ada.getInternalType();
-    }
-
-    /**
-     * @hide
      * Returns the role of a device
      * @return the role
      */
@@ -172,15 +161,6 @@ public final class AudioDeviceAttributes implements Parcelable {
     @SystemApi
     public @NonNull String getAddress() {
         return mAddress;
-    }
-
-    /**
-     * @hide
-     * Sets the device address. Only used by audio service.
-     */
-    public void setAddress(@NonNull String address) {
-        Objects.requireNonNull(address);
-        mAddress = address;
     }
 
     /**
