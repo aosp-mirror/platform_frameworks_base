@@ -147,11 +147,9 @@ public class RankingHelper {
                 if (sortSectionByTime()) {
                     final String groupKey = record.getGroupKey();
                     NotificationRecord existingProxy = mProxyByGroupTmp.get(groupKey);
-                    // summaries are mostly hidden in systemui - if there is a child notification
-                    // with better information, use its rank
-                    if (existingProxy == null
-                            || (existingProxy.getNotification().isGroupSummary()
-                            && !existingProxy.getNotification().hasAppProvidedWhen())) {
+                    // summaries are mostly hidden in systemui - if there is a child notification,
+                    // use its rank
+                    if (existingProxy == null || existingProxy.getNotification().isGroupSummary()) {
                         mProxyByGroupTmp.put(groupKey, record);
                     }
                 } else {
