@@ -15,8 +15,13 @@
  */
 package com.android.systemui.shade.domain.interactor
 
+import kotlinx.coroutines.flow.StateFlow
+
 /** Allows the lockscreen to control the shade. */
 interface ShadeLockscreenInteractor {
+
+    /** Amount shade has expanded with regard to the UDFPS location */
+    val udfpsTransitionToFullShadeProgress: StateFlow<Float>
 
     /**
      * Expand shade so that notifications are visible. Non-split shade: just expanding shade or

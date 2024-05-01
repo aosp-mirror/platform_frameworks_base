@@ -19,6 +19,7 @@ package com.android.systemui.shade.domain.interactor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.util.mockito.mock
 
 val Kosmos.shadeLockscreenInteractor by
@@ -28,5 +29,6 @@ val Kosmos.shadeLockscreenInteractor by
             shadeInteractor = shadeInteractorImpl,
             sceneInteractor = sceneInteractor,
             lockIconViewController = mock(),
+            shadeRepository = shadeRepository,
         )
     }
