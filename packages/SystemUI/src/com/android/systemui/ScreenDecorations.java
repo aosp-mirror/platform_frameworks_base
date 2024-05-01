@@ -121,6 +121,9 @@ public class ScreenDecorations implements
             SystemProperties.getBoolean("debug.disable_screen_decorations", false);
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
+
+    private static final boolean sToolkitSetFrameRateReadOnly =
+            android.view.flags.Flags.toolkitSetFrameRateReadOnly();
     private boolean mDebug = DEBUG_SCREENSHOT_ROUNDED_CORNERS;
     private int mDebugColor = Color.RED;
 
@@ -892,6 +895,10 @@ public class ScreenDecorations implements
         lp.width = MATCH_PARENT;
         lp.height = MATCH_PARENT;
         lp.setTitle("ScreenDecorHwcOverlay");
+        if (sToolkitSetFrameRateReadOnly) {
+            lp.setFrameRateBoostOnTouchEnabled(false);
+            lp.setFrameRatePowerSavingsBalanced(false);
+        }
         lp.gravity = Gravity.TOP | Gravity.START;
         if (!mDebug) {
             lp.setColorMode(ActivityInfo.COLOR_MODE_A8);
