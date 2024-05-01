@@ -82,12 +82,17 @@ constructor(
     }
 
     /**
-     * Transitions to a blueprint.
+     * Transitions to a blueprint, or refreshes it if already applied.
      *
      * @param blueprintId
      * @return whether the transition has succeeded.
      */
-    fun transitionToBlueprint(blueprintId: String): Boolean {
+    fun transitionOrRefreshBlueprint(blueprintId: String): Boolean {
+        if (blueprintId == blueprint.value.id) {
+            refreshBlueprint()
+            return true
+        }
+
         return keyguardBlueprintRepository.applyBlueprint(blueprintId)
     }
 
@@ -97,7 +102,7 @@ constructor(
      * @param blueprintId
      * @return whether the transition has succeeded.
      */
-    fun transitionToBlueprint(blueprintId: Int): Boolean {
+    fun transitionToBlueprint(blueprintId: String): Boolean {
         return keyguardBlueprintRepository.applyBlueprint(blueprintId)
     }
 
