@@ -159,6 +159,11 @@ public class DisplayManagerFlags {
             Flags::enablePeakRefreshRatePhysicalLimit
     );
 
+    private final FlagState mIgnoreAppPreferredRefreshRate = new FlagState(
+            Flags.FLAG_IGNORE_APP_PREFERRED_REFRESH_RATE_REQUEST,
+            Flags::ignoreAppPreferredRefreshRateRequest
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -319,6 +324,13 @@ public class DisplayManagerFlags {
 
     public boolean isPeakRefreshRatePhysicalLimitEnabled() {
         return mPeakRefreshRatePhysicalLimit.isEnabled();
+    }
+
+    /**
+     * @return Whether to ignore preferredRefreshRate app request or not
+     */
+    public boolean ignoreAppPreferredRefreshRateRequest() {
+        return mIgnoreAppPreferredRefreshRate.isEnabled();
     }
 
     /**
