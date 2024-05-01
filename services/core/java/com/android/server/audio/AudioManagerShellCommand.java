@@ -61,6 +61,8 @@ class AudioManagerShellCommand extends ShellCommand {
                 return getSoundDoseValue();
             case "reset-sound-dose-timeout":
                 return resetSoundDoseTimeout();
+            case "set-ringer-mode":
+                return setRingerMode();
             case "set-volume":
                 return setVolume();
             case "set-device-volume":
@@ -100,6 +102,8 @@ class AudioManagerShellCommand extends ShellCommand {
         pw.println("    Returns the current sound dose value");
         pw.println("  reset-sound-dose-timeout");
         pw.println("    Resets the sound dose timeout used for momentary exposure");
+        pw.println("  set-ringer-mode NORMAL|SILENT|VIBRATE");
+        pw.println("    Sets the Ringer mode to one of NORMAL|SILENT|VIBRATE");
         pw.println("  set-volume STREAM_TYPE VOLUME_INDEX");
         pw.println("    Sets the volume for STREAM_TYPE to VOLUME_INDEX");
         pw.println("  set-device-volume STREAM_TYPE VOLUME_INDEX NATIVE_DEVICE_TYPE");
@@ -148,6 +152,34 @@ class AudioManagerShellCommand extends ShellCommand {
         final AudioManager am = context.getSystemService(AudioManager.class);
         am.setSurroundFormatEnabled(surroundFormat, isSurroundFormatEnabled);
         return 0;
+    }
+
+    private int setRingerMode() {
+        String ringerModeText = getNextArg();
+        if (ringerModeText == null) {
+            getErrPrintWriter().println("Error: no ringer mode specified");
+            return 1;
+        }
+
+        final int ringerMode = getRingerMode(ringerModeText);
+        if (!AudioManager.isValidRingerMode(ringerMode)) {
+            getErrPrintWriter().println(
+                    "Error: invalid value of ringerMode, should be one of NORMAL|SILENT|VIBRATE");
+            return 1;
+        }
+
+        final AudioManager am = mService.mContext.getSystemService(AudioManager.class);
+        am.setRingerModeInternal(ringerMode);
+        return 0;
+    }
+
+    private int getRingerMode(String ringerModeText) {
+        return switch (ringerModeText) {
+            case "NORMAL" -> AudioManager.RINGER_MODE_NORMAL;
+            case "VIBRATE" -> AudioManager.RINGER_MODE_VIBRATE;
+            case "SILENT" -> AudioManager.RINGER_MODE_SILENT;
+            default -> -1;
+        };
     }
 
     private int getIsSurroundFormatEnabled() {
