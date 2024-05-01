@@ -897,15 +897,16 @@ public class Notification implements Parcelable
     /**
      * Sphere of visibility of this notification, which affects how and when the SystemUI reveals
      * the notification's presence and contents in untrusted situations (namely, on the secure
-     * lockscreen).
+     * lockscreen and during screen sharing).
      *
      * The default level, {@link #VISIBILITY_PRIVATE}, behaves exactly as notifications have always
      * done on Android: The notification's {@link #icon} and {@link #tickerText} (if available) are
      * shown in all situations, but the contents are only available if the device is unlocked for
-     * the appropriate user.
+     * the appropriate user and there is no active screen sharing session.
      *
      * A more permissive policy can be expressed by {@link #VISIBILITY_PUBLIC}; such a notification
-     * can be read even in an "insecure" context (that is, above a secure lockscreen).
+     * can be read even in an "insecure" context (that is, above a secure lockscreen or while
+     * screen sharing with a remote viewer).
      * To modify the public version of this notification—for example, to redact some portions—see
      * {@link Builder#setPublicVersion(Notification)}.
      *
@@ -924,7 +925,8 @@ public class Notification implements Parcelable
     public @interface Visibility {}
 
     /**
-     * Notification visibility: Show this notification in its entirety on all lockscreens.
+     * Notification visibility: Show this notification in its entirety on all lockscreens and while
+     * screen sharing.
      *
      * {@see #visibility}
      */
@@ -932,14 +934,16 @@ public class Notification implements Parcelable
 
     /**
      * Notification visibility: Show this notification on all lockscreens, but conceal sensitive or
-     * private information on secure lockscreens.
+     * private information on secure lockscreens. Conceal sensitive or private information while
+     * screen sharing.
      *
      * {@see #visibility}
      */
     public static final int VISIBILITY_PRIVATE = 0;
 
     /**
-     * Notification visibility: Do not reveal any part of this notification on a secure lockscreen.
+     * Notification visibility: Do not reveal any part of this notification on a secure lockscreen
+     * or while screen sharing.
      *
      * {@see #visibility}
      */
