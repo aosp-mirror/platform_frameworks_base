@@ -21,29 +21,24 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.server.wm.DesktopModeLaunchParamsModifier.DESKTOP_MODE_INITIAL_BOUNDS_SCALE;
-import static com.android.server.wm.DesktopModeLaunchParamsModifier.ENFORCE_DEVICE_RESTRICTIONS_KEY;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import android.content.res.Resources;
 import android.graphics.Rect;
-import android.os.SystemProperties;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.R;
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier.Result;
 import com.android.window.flags.Flags;
 
@@ -51,7 +46,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 
 /**
  * Tests for desktop mode task bounds.
@@ -79,6 +73,8 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
         mCurrent.reset();
         mResult = new LaunchParamsController.LaunchParams();
         mResult.reset();
+
+        mTarget = new DesktopModeLaunchParamsModifier(mContext);
     }
 
     @Test
@@ -207,15 +203,10 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
 
     private void setupDesktopModeLaunchParamsModifier(boolean isDesktopModeSupported,
             boolean enforceDeviceRestrictions) {
-        Resources mockResources = Mockito.mock(Resources.class);
-        when(mockResources.getBoolean(eq(R.bool.config_isDesktopModeSupported)))
-                .thenReturn(isDesktopModeSupported);
-        doReturn(mockResources).when(mContext).getResources();
-
-        SystemProperties.set(ENFORCE_DEVICE_RESTRICTIONS_KEY,
-                String.valueOf(enforceDeviceRestrictions));
-
-        mTarget = new DesktopModeLaunchParamsModifier(mContext);
+        doReturn(isDesktopModeSupported)
+                .when(() -> DesktopModeLaunchParamsModifier.isDesktopModeSupported(any()));
+        doReturn(enforceDeviceRestrictions)
+                .when(DesktopModeLaunchParamsModifier::enforceDeviceRestrictions);
     }
 
     private class CalculateRequestBuilder {

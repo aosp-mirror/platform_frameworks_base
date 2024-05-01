@@ -48,15 +48,8 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     /**
      * Flag to indicate whether to restrict desktop mode to supported devices.
      */
-    @VisibleForTesting
-    static final String ENFORCE_DEVICE_RESTRICTIONS_KEY =
-            "persist.wm.debug.desktop_mode_enforce_device_restrictions";
-
-    /**
-     * Flag to indicate whether to restrict desktop mode to supported devices.
-     */
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
-            ENFORCE_DEVICE_RESTRICTIONS_KEY, true);
+            "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
     private StringBuilder mLogBuilder;
 
