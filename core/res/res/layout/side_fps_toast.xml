@@ -18,28 +18,26 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:minWidth="350dp"
               android:layout_gravity="center"
+              android:minWidth="350dp"
               android:background="@color/side_fps_toast_background">
     <TextView
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="6"
         android:text="@string/fp_power_button_enrollment_title"
-        android:singleLine="true"
-        android:ellipsize="end"
         android:textColor="@color/side_fps_text_color"
         android:paddingLeft="20dp"/>
     <Space
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
+        android:layout_width="5dp"
+        android:layout_height="match_parent" />
     <Button
         android:id="@+id/turn_off_screen"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="3"
         android:text="@string/fp_power_button_enrollment_button_text"
-        android:paddingRight="20dp"
         style="?android:attr/buttonBarNegativeButtonStyle"
         android:textColor="@color/side_fps_button_color"
-        android:maxLines="1"/>
+        />
 </LinearLayout>
