@@ -2261,6 +2261,9 @@
     <!-- Accessibility description when QS tile is to be added, indicating the destination position [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_tile_add_to_position">Add to position <xliff:g id="position" example="5">%1$d</xliff:g></string>
 
+    <!-- Accessibility description when QS tile would be added or moved, but the current position is not valid for adding or moving to [CHAR LIMIT=NONE] -->
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position">Position invalid.</string>
+
     <!-- Accessibility description indicating the currently selected tile's position. Only used for tiles that are currently in use [CHAR LIMIT=NONE] -->
     <string name="accessibility_qs_edit_position">Position <xliff:g id="position" example="5">%1$d</xliff:g></string>
 
