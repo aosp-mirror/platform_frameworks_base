@@ -461,10 +461,11 @@
          This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_screenshotEditor" translatable="false"></string>
 
-    <!-- ComponentName for the file browsing app that the system would expect to be used in work
-         profile. The icon for this app will be shown to the user when informing them that a
-         screenshot has been saved to work profile. If blank, a default icon will be shown. -->
-    <string name="config_sceenshotWorkProfileFilesApp" translatable="false"></string>
+    <!-- ComponentName for the file browsing app that the system would expect to be used for
+         screenshots. The icon for this app will be shown to the user when informing them that a
+         screenshot has been saved to a different profile (e.g. work profile). If blank, a default
+         icon will be shown. -->
+    <string name="config_screenshotFilesApp" translatable="false"></string>
 
     <!-- The component name of the screenshot editing activity that provides the App Clips flow.
          The App Clips flow includes taking a screenshot, showing user screenshot cropping activity
