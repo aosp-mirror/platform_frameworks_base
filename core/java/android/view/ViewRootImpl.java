@@ -4261,7 +4261,9 @@ public final class ViewRootImpl implements ViewParent,
             updateInfrequentCount();
             setPreferredFrameRate(mPreferredFrameRate);
             setPreferredFrameRateCategory(mPreferredFrameRateCategory);
-            if (!mIsFrameRateConflicted) {
+            if (mPreferredFrameRate > 0
+                    || (mLastPreferredFrameRate != 0 && mPreferredFrameRate == 0)
+            ) {
                 mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
                 mHandler.sendEmptyMessageDelayed(MSG_FRAME_RATE_SETTING,
                         FRAME_RATE_SETTING_REEVALUATE_TIME);
