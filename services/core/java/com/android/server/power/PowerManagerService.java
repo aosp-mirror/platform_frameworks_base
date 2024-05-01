@@ -444,6 +444,9 @@ public final class PowerManagerService extends SystemService
     // Refer to autosuspend.h.
     private boolean mHalAutoSuspendModeEnabled;
 
+    // True if the device uses auto-suspend mode.
+    private final boolean mUseAutoSuspend;
+
     // True if interactive mode is enabled.
     // Refer to power.h.
     private boolean mHalInteractiveModeEnabled;
@@ -1202,6 +1205,9 @@ public final class PowerManagerService extends SystemService
         mDeviceConfigProvider = mInjector.createDeviceConfigParameterProvider();
 
         mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
+
+        mUseAutoSuspend = mContext.getResources().getBoolean(com.android.internal.R.bool
+                .config_useAutoSuspend);
 
         // Save brightness values:
         // Get float values from config.
@@ -3918,6 +3924,9 @@ public final class PowerManagerService extends SystemService
 
     @GuardedBy("mLock")
     private void setHalAutoSuspendModeLocked(boolean enable) {
+        if (!mUseAutoSuspend) {
+            return;
+        }
         if (enable != mHalAutoSuspendModeEnabled) {
             if (DEBUG) {
                 Slog.d(TAG, "Setting HAL auto-suspend mode to " + enable);
@@ -4661,6 +4670,7 @@ public final class PowerManagerService extends SystemService
                 pw.println("  mEnhancedDischargePredictionIsPersonalized="
                         + mEnhancedDischargePredictionIsPersonalized);
             }
+            pw.println("  mUseAutoSuspend=" + mUseAutoSuspend);
             pw.println("  mHalAutoSuspendModeEnabled=" + mHalAutoSuspendModeEnabled);
             pw.println("  mHalInteractiveModeEnabled=" + mHalInteractiveModeEnabled);
             pw.println("  mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary));
