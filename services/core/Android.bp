@@ -256,6 +256,7 @@ java_library_static {
         "stats_flags_lib",
         "core_os_flags_lib",
         "connectivity_flags_lib",
+        "dreams_flags_lib",
     ],
     javac_shard_size: 50,
     javacflags: [
