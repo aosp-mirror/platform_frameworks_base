@@ -32,6 +32,7 @@ import com.android.systemui.volume.domain.model.AudioOutputDevice
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaOutputInteractor
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.shared.model.filterData
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -69,6 +70,7 @@ constructor(
                     }
                 } else {
                     mediaOutputInteractor.defaultActiveMediaSession
+                        .filterData()
                         .flatMapLatest {
                             localMediaRepositoryFactory
                                 .create(it?.packageName)

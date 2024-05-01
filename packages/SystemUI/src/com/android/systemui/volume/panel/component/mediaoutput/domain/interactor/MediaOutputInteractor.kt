@@ -28,6 +28,9 @@ import com.android.systemui.volume.panel.component.mediaoutput.data.repository.L
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSessions
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.shared.model.Result
+import com.android.systemui.volume.panel.shared.model.filterData
+import com.android.systemui.volume.panel.shared.model.wrapInResult
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -72,7 +75,7 @@ constructor(
         }
 
     /** Returns the default [MediaDeviceSession] from [activeMediaDeviceSessions] */
-    val defaultActiveMediaSession: StateFlow<MediaDeviceSession?> =
+    val defaultActiveMediaSession: StateFlow<Result<MediaDeviceSession?>> =
         activeMediaControllers
             .map {
                 when {
@@ -82,11 +85,13 @@ constructor(
                     else -> null
                 }
             }
+            .wrapInResult()
             .flowOn(backgroundCoroutineContext)
-            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .stateIn(coroutineScope, SharingStarted.Eagerly, Result.Loading())
 
     private val localMediaRepository: SharedFlow<LocalMediaRepository> =
         defaultActiveMediaSession
+            .filterData()
             .map { it?.packageName }
             .distinctUntilChanged()
             .map { localMediaRepositoryFactory.create(it) }

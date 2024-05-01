@@ -16,6 +16,10 @@
 
 package com.android.systemui.volume.panel.shared.model
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+
 /** Models a loadable result */
 sealed interface Result<T> {
 
@@ -25,3 +29,9 @@ sealed interface Result<T> {
     /** The data is loaded successfully */
     data class Data<T>(val data: T) : Result<T>
 }
+
+/** Wraps flow into [Result]. */
+fun <T> Flow<T>.wrapInResult(): Flow<Result<T>> = map { Result.Data(it) }
+
+/** Filters only [Result.Data] from the flow. */
+fun <T> Flow<Result<T>>.filterData(): Flow<T> = mapNotNull { it as? Result.Data<T> }.map { it.data }
