@@ -26,7 +26,6 @@ import static com.android.server.wm.DesktopModeLaunchParamsModifier.ENFORCE_DEVI
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
-import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 import static org.junit.Assert.assertEquals;
@@ -101,12 +100,12 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    public void testReturnsDoneIfDesktopWindowingIsEnabledAndUnsupportedDeviceOverridden() {
+    public void testReturnsContinueIfDesktopWindowingIsEnabledAndUnsupportedDeviceOverridden() {
         setupDesktopModeLaunchParamsModifier(/*isDesktopModeSupported=*/ true,
                 /*enforceDeviceRestrictions=*/ false);
 
         final Task task = new TaskBuilder(mSupervisor).build();
-        assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
     }
 
     @Test
@@ -139,22 +138,22 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    public void testReturnsDoneIfTaskUsingActivityTypeStandard() {
+    public void testReturnsContinueIfTaskUsingActivityTypeStandard() {
         setupDesktopModeLaunchParamsModifier();
 
         final Task task = new TaskBuilder(mSupervisor).setActivityType(
                 ACTIVITY_TYPE_STANDARD).build();
-        assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
     }
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    public void testReturnsDoneIfTaskUsingActivityTypeUndefined() {
+    public void testReturnsContinueIfTaskUsingActivityTypeUndefined() {
         setupDesktopModeLaunchParamsModifier();
 
         final Task task = new TaskBuilder(mSupervisor).setActivityType(
                 ACTIVITY_TYPE_UNDEFINED).build();
-        assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
     }
 
     @Test
@@ -180,7 +179,7 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
         task.getDisplayArea().setBounds(new Rect(0, 0, displayWidth, displayHeight));
         final int desiredWidth = (int) (displayWidth * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
         final int desiredHeight = (int) (displayHeight * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
         assertEquals(desiredWidth, mResult.mBounds.width());
         assertEquals(desiredHeight, mResult.mBounds.height());
     }
@@ -196,7 +195,7 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
         mCurrent.mPreferredTaskDisplayArea = mockTaskDisplayArea;
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
 
-        assertEquals(RESULT_DONE, new CalculateRequestBuilder().setTask(task).calculate());
+        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(task).calculate());
         assertEquals(mockTaskDisplayArea, mResult.mPreferredTaskDisplayArea);
         assertEquals(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode);
     }

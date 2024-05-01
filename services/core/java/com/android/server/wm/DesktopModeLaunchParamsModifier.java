@@ -118,19 +118,7 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         if (phase == PHASE_WINDOWING_MODE) {
-            return RESULT_DONE;
-        }
-
-        // TODO(b/336998072) - Find a better solution to this that makes use of the logic from
-        //  TaskLaunchParamsModifier. Put logic in common utils, return RESULT_CONTINUE, inherit
-        //  from parent class, etc.
-        if (outParams.mPreferredTaskDisplayArea == null && task.getRootTask() != null) {
-            appendLog("display-from-task=" + task.getRootTask().getDisplayId());
-            outParams.mPreferredTaskDisplayArea = task.getRootTask().getDisplayArea();
-        }
-
-        if (phase == PHASE_DISPLAY_AREA) {
-            return RESULT_DONE;
+            return RESULT_CONTINUE;
         }
 
         if (!currentParams.mBounds.isEmpty()) {
@@ -142,7 +130,7 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
         appendLog("setting desktop mode task bounds to %s", outParams.mBounds);
 
-        return RESULT_DONE;
+        return RESULT_CONTINUE;
     }
 
     /**
