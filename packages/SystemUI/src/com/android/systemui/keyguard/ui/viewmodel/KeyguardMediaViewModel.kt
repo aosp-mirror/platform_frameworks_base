@@ -16,10 +16,10 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
-class MediaCarouselViewModel @Inject constructor(private val mediaDataManager: MediaDataManager) {
-    val isMediaVisible: Boolean
-        get() = mediaDataManager.hasActiveMediaOrRecommendation()
+class KeyguardMediaViewModel @Inject constructor(mediaCarouselInteractor: MediaCarouselInteractor) {
+    val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasActiveMediaOrRecommendation
 }

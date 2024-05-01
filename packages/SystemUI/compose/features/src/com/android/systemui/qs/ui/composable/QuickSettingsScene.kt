@@ -332,8 +332,10 @@ private fun SceneScope.QuickSettingsScene(
                         modifier = Modifier.sysuiResTag("expanded_qs_scroll_view")
                     )
 
+                    val isMediaVisible by viewModel.isMediaVisible.collectAsState()
+
                     MediaCarousel(
-                        isVisible = viewModel::isMediaVisible,
+                        isVisible = isMediaVisible,
                         mediaHost = mediaHost,
                         modifier = Modifier.fillMaxWidth(),
                         carouselController = mediaCarouselController,

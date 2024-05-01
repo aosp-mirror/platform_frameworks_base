@@ -27,7 +27,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
+import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
@@ -60,7 +60,7 @@ constructor(
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val notifications: NotificationsPlaceholderViewModel,
     val brightnessMirrorViewModel: BrightnessMirrorViewModel,
-    val mediaDataManager: MediaDataManager,
+    val mediaCarouselInteractor: MediaCarouselInteractor,
     shadeInteractor: ShadeInteractor,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
@@ -108,6 +108,8 @@ constructor(
 
     val shadeMode: StateFlow<ShadeMode> = shadeInteractor.shadeMode
 
+    val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasActiveMediaOrRecommendation
+
     /**
      * Amount of X-axis translation to apply to various elements as the unfolded foldable is folded
      * slightly, in pixels.
@@ -123,11 +125,6 @@ constructor(
         }
 
         sceneInteractor.changeScene(Scenes.Lockscreen, "Shade empty content clicked")
-    }
-
-    fun isMediaVisible(): Boolean {
-        // TODO(b/296122467): handle updates to carousel visibility while scene is still visible
-        return mediaDataManager.hasActiveMediaOrRecommendation()
     }
 
     private val footerActionsControllerInitialized = AtomicBoolean(false)
