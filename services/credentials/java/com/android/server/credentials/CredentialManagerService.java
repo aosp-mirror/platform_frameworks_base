@@ -295,7 +295,7 @@ public final class CredentialManagerService
         }
     }
 
-    private static Set<ComponentName> getPrimaryProvidersForUserId(Context context, int userId) {
+    static Set<ComponentName> getPrimaryProvidersForUserId(Context context, int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(
                 Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false,

@@ -86,7 +86,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             @NonNull ComponentName serviceComponent,
             int userId,
-            boolean isSystemProvider)
+            boolean isSystemProvider,
+            boolean isPrimary)
             throws PackageManager.NameNotFoundException {
         return create(
                 context,
@@ -94,7 +95,7 @@ public final class CredentialProviderInfoFactory {
                 isSystemProvider,
                 /* disableSystemAppVerificationForTests= */ false,
                 /* isEnabled= */ false,
-                /* isPrimary= */ false);
+                isPrimary);
     }
 
     /**
