@@ -64,8 +64,10 @@ package android.nfc {
   }
 
   public final class NfcAdapter {
+    method @FlaggedApi("android.nfc.nfc_state_change") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean disable();
     method public void disableForegroundDispatch(android.app.Activity);
     method public void disableReaderMode(android.app.Activity);
+    method @FlaggedApi("android.nfc.nfc_state_change") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enable();
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]);
     method public void enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
