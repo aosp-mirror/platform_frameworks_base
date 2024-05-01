@@ -26,6 +26,15 @@ public class RavenwoodUtils {
     private RavenwoodUtils() {
     }
 
+    private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
+
+    // LibcoreRavenwoodUtils calls it with reflections.
+    public static void loadRavenwoodNativeRuntime() {
+        if (RavenwoodRule.isOnRavenwood()) {
+            RavenwoodUtils.loadJniLibrary(RAVENWOOD_NATIVE_RUNTIME_NAME);
+        }
+    }
+
     /**
      * Load a JNI library respecting {@code java.library.path}
      * (which reflects {@code LD_LIBRARY_PATH}).

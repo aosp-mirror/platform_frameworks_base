@@ -29,6 +29,10 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public final class RavenwoodJniTest {
     static {
+        initializeJni();
+    }
+
+    public static void initializeJni() {
         RavenwoodUtils.loadJniLibrary("ravenwoodbivalenttest_jni");
     }
 
