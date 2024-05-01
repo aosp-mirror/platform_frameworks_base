@@ -29,6 +29,7 @@ import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
+import com.android.systemui.keyguard.data.repository.keyguardBlueprintRepository
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.kosmos.testScope
@@ -40,6 +41,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -54,7 +56,7 @@ import org.mockito.MockitoAnnotations
 class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val underTest by lazy { kosmos.keyguardBlueprintInteractor }
+    private val underTest = kosmos.keyguardBlueprintInteractor
     private val clockRepository by lazy { kosmos.fakeKeyguardClockRepository }
     private val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
     private val fingerprintPropertyRepository by lazy { kosmos.fakeFingerprintPropertyRepository }
@@ -79,8 +81,9 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
             val blueprintId by collectLastValue(underTest.blueprintId)
             kosmos.shadeRepository.setShadeMode(ShadeMode.Single)
             configurationRepository.onConfigurationChange()
-            runCurrent()
 
+            runCurrent()
+            advanceUntilIdle()
             assertThat(blueprintId).isEqualTo(DefaultKeyguardBlueprint.Companion.DEFAULT)
         }
     }
@@ -92,8 +95,9 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
             val blueprintId by collectLastValue(underTest.blueprintId)
             kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             configurationRepository.onConfigurationChange()
-            runCurrent()
 
+            runCurrent()
+            advanceUntilIdle()
             assertThat(blueprintId).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
         }
     }
@@ -102,12 +106,13 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
     fun fingerprintPropertyInitialized_updatesBlueprint() {
         testScope.runTest {
-            val blueprintId by collectLastValue(underTest.blueprintId)
-            kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
-            fingerprintPropertyRepository.supportsUdfps() // initialize properties
-            runCurrent()
+            assertThat(kosmos.keyguardBlueprintRepository.targetTransitionConfig).isNull()
 
-            assertThat(blueprintId).isEqualTo(SplitShadeKeyguardBlueprint.Companion.ID)
+            fingerprintPropertyRepository.supportsUdfps() // initialize properties
+
+            runCurrent()
+            advanceUntilIdle()
+            assertThat(kosmos.keyguardBlueprintRepository.targetTransitionConfig).isNotNull()
         }
     }
 
@@ -119,9 +124,23 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
             kosmos.shadeRepository.setShadeMode(ShadeMode.Split)
             clockRepository.setCurrentClock(clockController)
             configurationRepository.onConfigurationChange()
-            runCurrent()
 
+            runCurrent()
+            advanceUntilIdle()
             assertThat(blueprintId).isEqualTo(DefaultKeyguardBlueprint.DEFAULT)
+        }
+    }
+
+    @Test
+    fun testRefreshFromConfigChange() {
+        testScope.runTest {
+            assertThat(kosmos.keyguardBlueprintRepository.targetTransitionConfig).isNull()
+
+            configurationRepository.onConfigurationChange()
+
+            runCurrent()
+            advanceUntilIdle()
+            assertThat(kosmos.keyguardBlueprintRepository.targetTransitionConfig).isNotNull()
         }
     }
 }

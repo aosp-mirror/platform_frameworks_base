@@ -66,25 +66,19 @@ class KeyguardBlueprintCommandListenerTest : SysuiTestCase() {
     fun testHelp() {
         command().execute(pw, listOf("help"))
         verify(pw, atLeastOnce()).println(anyString())
-        verify(keyguardBlueprintInteractor, never()).transitionToBlueprint(anyString())
+        verify(keyguardBlueprintInteractor, never()).transitionOrRefreshBlueprint(anyString())
     }
 
     @Test
     fun testBlank() {
         command().execute(pw, listOf())
         verify(pw, atLeastOnce()).println(anyString())
-        verify(keyguardBlueprintInteractor, never()).transitionToBlueprint(anyString())
+        verify(keyguardBlueprintInteractor, never()).transitionOrRefreshBlueprint(anyString())
     }
 
     @Test
     fun testValidArg() {
         command().execute(pw, listOf("fake"))
-        verify(keyguardBlueprintInteractor).transitionToBlueprint("fake")
-    }
-
-    @Test
-    fun testValidArg_Int() {
-        command().execute(pw, listOf("1"))
-        verify(keyguardBlueprintInteractor).transitionToBlueprint(1)
+        verify(keyguardBlueprintInteractor).transitionOrRefreshBlueprint("fake")
     }
 }
