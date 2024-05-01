@@ -13775,7 +13775,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 });
             }
-            boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
+            boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUidInternal(
                     ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
                     callingUid);
             ActivityManagerUtils.logUnsafeIntentEvent(

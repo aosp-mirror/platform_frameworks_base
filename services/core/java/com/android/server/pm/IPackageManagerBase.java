@@ -1139,7 +1139,7 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         return mResolveIntentHelper.resolveIntentInternal(snapshot(), intent,
                 resolvedType, flags, 0 /*privateResolveFlags*/, userId, false,
-                Binder.getCallingUid());
+                Binder.getCallingUid(), Binder.getCallingPid());
     }
 
     @Override

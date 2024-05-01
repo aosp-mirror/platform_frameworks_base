@@ -611,17 +611,9 @@ public abstract class PackageManagerInternal {
             @NonNull Set<String> outInvalidPackageNames);
 
     /**
-     * Resolves an activity intent, allowing instant apps to be resolved.
-     */
-    public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            @PackageManager.ResolveInfoFlagsBits long flags,
-            @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
-            int filterCallingUid);
-
-    /**
      * Resolves an exported activity intent, allowing instant apps to be resolved.
      */
-    public abstract ResolveInfo resolveIntentExported(Intent intent, String resolvedType,
+    public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
             @PackageManager.ResolveInfoFlagsBits long flags,
             @PrivateResolveFlags long privateResolveFlags, int userId, boolean resolveForStart,
             int filterCallingUid, int callingPid);
