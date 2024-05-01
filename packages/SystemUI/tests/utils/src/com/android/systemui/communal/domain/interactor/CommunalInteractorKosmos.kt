@@ -23,14 +23,15 @@ import com.android.systemui.communal.data.repository.communalPrefsRepository
 import com.android.systemui.communal.data.repository.communalRepository
 import com.android.systemui.communal.data.repository.communalWidgetRepository
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
-import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
@@ -42,6 +43,7 @@ import com.android.systemui.util.mockito.mock
 val Kosmos.communalInteractor by Fixture {
     CommunalInteractor(
         applicationScope = applicationCoroutineScope,
+        bgDispatcher = testDispatcher,
         broadcastDispatcher = broadcastDispatcher,
         communalRepository = communalRepository,
         widgetRepository = communalWidgetRepository,
@@ -49,13 +51,13 @@ val Kosmos.communalInteractor by Fixture {
         mediaRepository = communalMediaRepository,
         smartspaceRepository = smartspaceRepository,
         keyguardInteractor = keyguardInteractor,
+        keyguardTransitionInteractor = keyguardTransitionInteractor,
         communalSettingsInteractor = communalSettingsInteractor,
         appWidgetHost = mock(),
         editWidgetsActivityStarter = editWidgetsActivityStarter,
         userTracker = userTracker,
         activityStarter = activityStarter,
         userManager = userManager,
-        dockManager = fakeDockManager,
         sceneInteractor = sceneInteractor,
         logBuffer = logcatLogBuffer("CommunalInteractor"),
         tableLogBuffer = mock(),

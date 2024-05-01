@@ -87,12 +87,15 @@ constructor(
             scope.launch {
                 keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop
                     .filterRelevantKeyguardStateAnd { onTop -> !onTop }
-                    .sample(communalInteractor.isIdleOnCommunal, communalInteractor.showByDefault)
-                    .collect { (_, isIdleOnCommunal, showCommunalByDefault) ->
+                    .sample(
+                        communalInteractor.isIdleOnCommunal,
+                        communalInteractor.showCommunalFromOccluded,
+                    )
+                    .collect { (_, isIdleOnCommunal, showCommunalFromOccluded) ->
                         // Occlusion signals come from the framework, and should interrupt any
                         // existing transition
                         val to =
-                            if (isIdleOnCommunal || showCommunalByDefault) {
+                            if (isIdleOnCommunal || showCommunalFromOccluded) {
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
@@ -106,16 +109,16 @@ constructor(
                     .sample(
                         keyguardInteractor.isKeyguardShowing,
                         communalInteractor.isIdleOnCommunal,
-                        communalInteractor.showByDefault,
+                        communalInteractor.showCommunalFromOccluded,
                     )
                     .filterRelevantKeyguardStateAnd { (isOccluded, isShowing, _, _) ->
                         !isOccluded && isShowing
                     }
-                    .collect { (_, _, isIdleOnCommunal, showCommunalByDefault) ->
+                    .collect { (_, _, isIdleOnCommunal, showCommunalFromOccluded) ->
                         // Occlusion signals come from the framework, and should interrupt any
                         // existing transition
                         val to =
-                            if (isIdleOnCommunal || showCommunalByDefault) {
+                            if (isIdleOnCommunal || showCommunalFromOccluded) {
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN

@@ -44,9 +44,10 @@ import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dock.DockManager
-import com.android.systemui.dock.retrieveIsDocked
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -64,6 +65,7 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
@@ -77,9 +79,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
@@ -92,6 +96,7 @@ class CommunalInteractor
 @Inject
 constructor(
     @Application val applicationScope: CoroutineScope,
+    @Background val bgDispatcher: CoroutineDispatcher,
     broadcastDispatcher: BroadcastDispatcher,
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
@@ -99,13 +104,13 @@ constructor(
     mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     keyguardInteractor: KeyguardInteractor,
-    private val communalSettingsInteractor: CommunalSettingsInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    communalSettingsInteractor: CommunalSettingsInteractor,
     private val appWidgetHost: CommunalAppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter,
     private val userTracker: UserTracker,
     private val activityStarter: ActivityStarter,
     private val userManager: UserManager,
-    private val dockManager: DockManager,
     sceneInteractor: SceneInteractor,
     @CommunalLog logBuffer: LogBuffer,
     @CommunalTableLog tableLogBuffer: TableLogBuffer,
@@ -145,8 +150,18 @@ constructor(
                 replay = 1,
             )
 
-    /** Whether to show communal by default */
-    val showByDefault: Flow<Boolean> = and(isCommunalAvailable, dockManager.retrieveIsDocked())
+    /** Whether to show communal when exiting the occluded state. */
+    val showCommunalFromOccluded: Flow<Boolean> =
+        keyguardTransitionInteractor.startedKeyguardTransitionStep
+            .filter { step -> step.to == KeyguardState.OCCLUDED }
+            .combine(isCommunalAvailable, ::Pair)
+            .map { (step, available) -> available && step.from == KeyguardState.GLANCEABLE_HUB }
+            .flowOn(bgDispatcher)
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through [changeScene].

@@ -26,8 +26,8 @@ import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.dock.DockManager
 import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -1229,23 +1229,22 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun occludedToGlanceableHubWhenDocked() =
+    fun occludedToGlanceableHubWhenInitiallyOnHub() =
         testScope.runTest {
-            // GIVEN a device on lockscreen
+            // GIVEN a device on lockscreen and communal is available
             keyguardRepository.setKeyguardShowing(true)
+            kosmos.setCommunalAvailable(true)
             runCurrent()
 
-            // GIVEN a prior transition has run to OCCLUDED
+            // GIVEN a prior transition has run to OCCLUDED from GLANCEABLE_HUB
             runTransitionAndSetWakefulness(KeyguardState.GLANCEABLE_HUB, KeyguardState.OCCLUDED)
             keyguardRepository.setKeyguardOccluded(true)
             runCurrent()
 
-            // GIVEN device is docked/communal is available
-            dockManager.setIsDocked(true)
-            dockManager.setDockEvent(DockManager.STATE_DOCKED)
+            // GIVEN on blank scene
             val idleTransitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(CommunalScenes.Communal)
+                    ObservableTransitionState.Idle(CommunalScenes.Blank)
                 )
             communalInteractor.setTransitionState(idleTransitionState)
             runCurrent()

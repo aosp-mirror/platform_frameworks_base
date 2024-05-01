@@ -63,8 +63,8 @@ constructor(
             )
             .distinctUntilChanged()
 
-    /** Whether to show communal by default */
-    val showByDefault: Flow<Boolean> = communalInteractor.showByDefault
+    /** Whether to show communal when exiting the occluded state. */
+    val showCommunalFromOccluded: Flow<Boolean> = communalInteractor.showCommunalFromOccluded
 
     val transitionFromOccludedEnded =
         keyguardTransitionInteractor.transitionStepsFromState(KeyguardState.OCCLUDED).filter { step
@@ -74,8 +74,11 @@ constructor(
         }
 
     val recentsBackgroundColor: Flow<Color?> =
-        combine(showByDefault, communalColors.backgroundColor) { showByDefault, backgroundColor ->
-            if (showByDefault) {
+        combine(showCommunalFromOccluded, communalColors.backgroundColor) {
+            showCommunalFromOccluded,
+            backgroundColor,
+            ->
+            if (showCommunalFromOccluded) {
                 backgroundColor
             } else {
                 null
