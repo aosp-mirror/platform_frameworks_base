@@ -291,9 +291,15 @@ public class PersistentDataBlockService extends SystemService {
 
     private void setOldSettingForBackworkCompatibility(boolean isActive) {
         // Set the SECURE_FRP_MODE flag, for backward compatibility with clients who use it.
-        // They should switch to calling #isFrpActive().
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.SECURE_FRP_MODE, isActive ? 1 : 0);
+        // They should switch to calling #isFrpActive().  Clear calling ID since this can happen
+        // during an app call.
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Settings.Global.SECURE_FRP_MODE, isActive ? 1 : 0);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
     }
 
     private void setOemUnlockEnabledProperty(boolean oemUnlockEnabled) {
