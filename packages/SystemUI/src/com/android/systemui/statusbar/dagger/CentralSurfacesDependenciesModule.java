@@ -31,6 +31,7 @@ import com.android.systemui.animation.AnimationFeatureFlags;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
@@ -68,6 +69,8 @@ import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
+import java.util.concurrent.Executor;
+
 import javax.inject.Provider;
 
 /**
@@ -94,14 +97,16 @@ public interface CentralSurfacesDependenciesModule {
             NotifPipeline notifPipeline,
             NotifCollection notifCollection,
             MediaDataManager mediaDataManager,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            @Background Executor backgroundExecutor) {
         return new NotificationMediaManager(
                 context,
                 visibilityProvider,
                 notifPipeline,
                 notifCollection,
                 mediaDataManager,
-                dumpManager);
+                dumpManager,
+                backgroundExecutor);
     }
 
     /** */
