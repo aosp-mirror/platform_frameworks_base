@@ -32,7 +32,6 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -47,11 +46,6 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
     private val underTest by lazy { kosmos.alternateBouncerToPrimaryBouncerTransitionViewModel }
-
-    @Before
-    fun setup() {
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT)
-    }
 
     @Test
     fun deviceEntryParentViewDisappear() =

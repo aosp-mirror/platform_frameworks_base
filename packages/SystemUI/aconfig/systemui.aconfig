@@ -26,13 +26,6 @@ flag {
 }
 
 flag {
-   name: "refactor_keyguard_dismiss_intent"
-   namespace: "systemui"
-   description: "Update how keyguard dismiss intents are stored."
-   bug: "275069969"
-}
-
-flag {
 
     name: "notification_heads_up_cycling"
     namespace: "systemui"
@@ -369,13 +362,6 @@ flag {
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
     bug: "310005730"
-}
-
-flag {
-   name: "media_in_scene_container"
-   namespace: "systemui"
-   description: "Enable media in the scene container framework"
-   bug: "296122467"
 }
 
 flag {
