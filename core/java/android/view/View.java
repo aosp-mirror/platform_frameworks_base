@@ -912,12 +912,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final String AUTOFILL_LOG_TAG = "View.Autofill";
 
     /**
-     * The logging tag used by this class when logging verbose and chatty (high volume)
-     * autofill-related messages.
-     */
-    private static final String AUTOFILL_CHATTY_LOG_TAG = "View.Autofill.Chatty";
-
-    /**
      * The logging tag used by this class when logging content capture-related messages.
      */
     private static final String CONTENT_CAPTURE_LOG_TAG = "View.ContentCapture";
@@ -8708,8 +8702,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @CallSuper
     protected void onFocusChanged(boolean gainFocus, @FocusDirection int direction,
             @Nullable Rect previouslyFocusedRect) {
-        if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-            Log.v(AUTOFILL_CHATTY_LOG_TAG, "onFocusChanged() entered. gainFocus: "
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "onFocusChanged() entered. gainFocus: "
                     + gainFocus);
         }
         if (gainFocus) {
@@ -8777,8 +8771,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (canNotifyAutofillEnterExitEvent()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-                    Log.v(AUTOFILL_CHATTY_LOG_TAG, this + " afm is not null");
+                if (DBG) {
+                    Log.d(VIEW_LOG_TAG, this + " afm is not null");
                 }
                 if (enter) {
                     // We have not been laid out yet, hence cannot evaluate
@@ -8791,8 +8785,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // animation beginning. On the time, the view is not visible
                     // to the user. And then as the animation progresses, the view
                     // becomes visible to the user.
-                    if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-                        Log.v(AUTOFILL_CHATTY_LOG_TAG,
+                    if (DBG) {
+                        Log.d(VIEW_LOG_TAG,
                                 "notifyEnterOrExitForAutoFillIfNeeded:"
                                 + " isLaidOut(): " + isLaidOut()
                                 + " isVisibleToUser(): " + isVisibleToUser()
@@ -11024,28 +11018,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean isAutofillable() {
-        if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-            Log.v(AUTOFILL_CHATTY_LOG_TAG, "isAutofillable() entered.");
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "isAutofillable() entered.");
         }
         if (getAutofillType() == AUTOFILL_TYPE_NONE) {
-            if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-                Log.v(AUTOFILL_CHATTY_LOG_TAG, "getAutofillType() returns AUTOFILL_TYPE_NONE");
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "getAutofillType() returns AUTOFILL_TYPE_NONE");
             }
             return false;
         }
 
         final AutofillManager afm = getAutofillManager();
         if (afm == null) {
-            if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-                Log.v(AUTOFILL_CHATTY_LOG_TAG, "AutofillManager is null");
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "AutofillManager is null");
             }
             return false;
         }
 
         // Check whether view is not part of an activity. If it's not, return false.
         if (getAutofillViewId() <= LAST_APP_AUTOFILL_ID) {
-            if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-                Log.v(AUTOFILL_CHATTY_LOG_TAG, "getAutofillViewId()<=LAST_APP_AUTOFILL_ID");
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "getAutofillViewId()<=LAST_APP_AUTOFILL_ID");
             }
             return false;
         }
@@ -11056,9 +11050,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((isImportantForAutofill() && afm.isTriggerFillRequestOnFilteredImportantViewsEnabled())
                 || (!isImportantForAutofill()
                     && afm.isTriggerFillRequestOnUnimportantViewEnabled())) {
-            if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-                Log.v(AUTOFILL_CHATTY_LOG_TAG,
-                        "isImportantForAutofill(): " + isImportantForAutofill()
+            if (DBG) {
+                Log.d(VIEW_LOG_TAG, "isImportantForAutofill(): " + isImportantForAutofill()
                         + "afm.isAutofillable(): " + afm.isAutofillable(this));
             }
             return afm.isAutofillable(this) ? true : notifyAugmentedAutofillIfNeeded(afm);
@@ -11066,8 +11059,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         // If the previous condition is not met, fall back to the previous way to trigger fill
         // request based on autofill importance instead.
-        if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-            Log.v(AUTOFILL_CHATTY_LOG_TAG, "isImportantForAutofill(): " + isImportantForAutofill());
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "isImportantForAutofill(): " + isImportantForAutofill());
         }
         return isImportantForAutofill() ? true : notifyAugmentedAutofillIfNeeded(afm);
     }
@@ -11083,8 +11076,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /** @hide */
     public boolean canNotifyAutofillEnterExitEvent() {
-        if (Log.isLoggable(AUTOFILL_CHATTY_LOG_TAG, Log.VERBOSE)) {
-            Log.v(AUTOFILL_CHATTY_LOG_TAG, "canNotifyAutofillEnterExitEvent() entered. "
+        if (DBG) {
+            Log.d(VIEW_LOG_TAG, "canNotifyAutofillEnterExitEvent() entered. "
                     + " isAutofillable(): " + isAutofillable()
                     + " isAttachedToWindow(): " + isAttachedToWindow());
         }
