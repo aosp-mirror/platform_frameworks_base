@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.unfold.config
 
-interface UnfoldTransitionConfig {
-    val isEnabled: Boolean
-    val isHingeAngleEnabled: Boolean
-    val isHapticsEnabled: Boolean
-    val halfFoldedTimeoutMillis: Int
-}
+package com.android.systemui.unfold
+
+import com.android.systemui.unfold.util.TestFoldProvider
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.unfold.config.TestUnfoldTransitionConfig
+
+var Kosmos.foldProvider: TestFoldProvider by Kosmos.Fixture { TestFoldProvider() }
+
+var Kosmos.unfoldTransitionConfig: TestUnfoldTransitionConfig
+    by Kosmos.Fixture { TestUnfoldTransitionConfig() }
