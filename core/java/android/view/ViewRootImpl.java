@@ -317,6 +317,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_SCROLL_CAPTURE = false || LOCAL_LOGV;
     private static final boolean DEBUG_TOUCH_NAVIGATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_BLAST = false || LOCAL_LOGV;
+    private static final boolean DEBUG_SENSITIVE_CONTENT = false || LOCAL_LOGV;
     private static final int LOGTAG_INPUT_FOCUS = 62001;
     private static final int LOGTAG_VIEWROOT_DRAW_EVENT = 60004;
 
@@ -4334,12 +4335,34 @@ public final class ViewRootImpl implements ViewParent,
             if (mSensitiveContentProtectionService == null) {
                 return;
             }
+            if (DEBUG_SENSITIVE_CONTENT) {
+                Log.d(TAG, "Notify sensitive content, package=" + mContext.getPackageName()
+                        + ", token=" + getWindowToken() + ", flag=" + showSensitiveContent);
+            }
             // The window would be blocked during screen share if it shows sensitive content.
             mSensitiveContentProtectionService.setSensitiveContentProtection(
                     getWindowToken(), mContext.getPackageName(), showSensitiveContent);
         } catch (RemoteException ex) {
             Log.e(TAG, "Unable to protect sensitive content during screen share", ex);
         }
+    }
+
+    /**
+     * Sensitive protection is removed on transaction commit to avoid prematurely removing
+     * the protection.
+     */
+    void removeSensitiveContentProtectionOnTransactionCommit() {
+        if (DEBUG_SENSITIVE_CONTENT) {
+            Log.d(TAG, "Add transaction to remove sensitive content protection, package="
+                    + mContext.getPackageName() + ", token=" + getWindowToken());
+        }
+        Transaction t = new Transaction();
+        t.addTransactionCommittedListener(mExecutor, () -> {
+            if (mAttachInfo.mSensitiveViewsCount == 0) {
+                notifySensitiveContentAppProtection(false);
+            }
+        });
+        applyTransactionOnDraw(t);
     }
 
     private void notifyContentCaptureEvents() {
