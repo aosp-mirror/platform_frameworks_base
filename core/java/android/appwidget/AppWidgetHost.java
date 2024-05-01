@@ -35,6 +35,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 import android.widget.RemoteViews;
 import android.widget.RemoteViews.InteractionHandler;
@@ -52,12 +53,15 @@ import java.util.List;
  */
 public class AppWidgetHost {
 
+    private static final String TAG = "AppWidgetHost";
+
     static final int HANDLE_UPDATE = 1;
     static final int HANDLE_PROVIDER_CHANGED = 2;
     static final int HANDLE_PROVIDERS_CHANGED = 3;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final int HANDLE_VIEW_DATA_CHANGED = 4;
     static final int HANDLE_APP_WIDGET_REMOVED = 5;
+    static final int HANDLE_VIEW_UPDATE_DEFERRED = 6;
 
     final static Object sServiceLock = new Object();
     @UnsupportedAppUsage
@@ -131,6 +135,15 @@ public class AppWidgetHost {
             msg.sendToTarget();
         }
 
+        public void updateAppWidgetDeferred(int appWidgetId) {
+            Handler handler = mWeakHandler.get();
+            if (handler == null) {
+                return;
+            }
+            Message msg = handler.obtainMessage(HANDLE_VIEW_UPDATE_DEFERRED, appWidgetId, 0, null);
+            msg.sendToTarget();
+        }
+
         private static boolean isLocalBinder() {
             return Process.myPid() == Binder.getCallingPid();
         }
@@ -161,6 +174,10 @@ public class AppWidgetHost {
                 }
                 case HANDLE_VIEW_DATA_CHANGED: {
                     viewDataChanged(msg.arg1, msg.arg2);
+                    break;
+                }
+                case HANDLE_VIEW_UPDATE_DEFERRED: {
+                    updateAppWidgetDeferred(msg.arg1);
                     break;
                 }
             }
@@ -480,12 +497,30 @@ public class AppWidgetHost {
         void onUpdateProviderInfo(@Nullable AppWidgetProviderInfo appWidget);
 
         /**
-         * This function is called when the RemoteViews of the app widget is updated
-         * @param views The new RemoteViews to be set for the app widget
+         * This function is called when the {@code RemoteViews} of the app widget is updated
+         * @param views The new {@code RemoteViews} to be set for the app widget
          *
          * @hide
          */
         void updateAppWidget(@Nullable RemoteViews views);
+
+        /**
+         * Called for the listener to handle deferred {@code RemoteViews} updates. Default
+         * implementation is to update the widget directly.
+         * @param packageName The package name used for uid verification on the service side
+         * @param appWidgetId The widget id of the listener
+         *
+         * @hide
+         */
+        default void updateAppWidgetDeferred(String packageName, int appWidgetId) {
+            RemoteViews latestViews = null;
+            try {
+                latestViews = sService.getAppWidgetViews(packageName, appWidgetId);
+            } catch (Exception e) {
+                Log.e(TAG, "updateAppWidgetDeferred: ", e);
+            }
+            updateAppWidget(latestViews);
+        }
 
         /**
          * This function is called when the view ID is changed for the app widget
@@ -561,6 +596,15 @@ public class AppWidgetHost {
         if (v != null) {
             v.onViewDataChanged(viewId);
         }
+    }
+
+    private void updateAppWidgetDeferred(int appWidgetId) {
+        AppWidgetHostListener v = getListener(appWidgetId);
+        if (v == null) {
+            Log.e(TAG, "updateAppWidgetDeferred: null listener for id: " + appWidgetId);
+            return;
+        }
+        v.updateAppWidgetDeferred(mContextOpPackageName, appWidgetId);
     }
 
     /**
