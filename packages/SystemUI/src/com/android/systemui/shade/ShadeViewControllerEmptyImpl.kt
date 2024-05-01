@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import java.util.function.Consumer
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 /** Empty implementation of ShadeViewController for variants with no shade. */
@@ -92,6 +93,7 @@ open class ShadeViewControllerEmptyImpl @Inject constructor() :
     override val shadeFoldAnimator = ShadeFoldAnimatorEmptyImpl()
     @Deprecated("Use SceneInteractor.currentScene instead.")
     override val legacyPanelExpansion = flowOf(0f)
+    override val udfpsTransitionToFullShadeProgress = MutableStateFlow(0f)
 }
 
 class ShadeHeadsUpTrackerEmptyImpl : ShadeHeadsUpTracker {
