@@ -28,7 +28,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -56,7 +55,6 @@ class ActionExecutorTest : SysuiTestCase() {
 
     private lateinit var actionExecutor: ActionExecutor
 
-    @Ignore // Fixed with newer mockito version (in main)
     @Test
     fun startSharedTransition_callsLaunchIntent() = runTest {
         actionExecutor = createActionExecutor()
