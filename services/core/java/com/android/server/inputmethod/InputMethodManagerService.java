@@ -3400,7 +3400,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         mBindingController.setCurrentMethodVisible();
         final IInputMethodInvoker curMethod = getCurMethodLocked();
         ImeTracker.forLogging().onCancelled(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
-        if (curMethod != null) {
+        final boolean readyToDispatchToIme;
+        if (Flags.deferShowSoftInputUntilSessionCreation()) {
+            readyToDispatchToIme =
+                    curMethod != null && mCurClient != null && mCurClient.mCurSession != null;
+        } else {
+            readyToDispatchToIme = curMethod != null;
+        }
+        if (readyToDispatchToIme) {
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_HAS_IME);
             mCurStatsToken = null;
 
