@@ -71,7 +71,7 @@ public class PackageMonitorTest {
 
         spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
         assertThat(spyPackageMonitor.getRegisteredHandler()).isEqualTo(mMockHandler);
-        verify(mMockContext, times(1)).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
+        verify(mMockContext, never()).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
                 eq(null), eq(mMockHandler));
 
         assertThrows(IllegalStateException.class,
@@ -97,11 +97,21 @@ public class PackageMonitorTest {
 
     @Test
     public void testPackageMonitorNotRegisterWithoutSupportPackageRestartQuery() throws Exception {
-        PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor(false));
+        PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor());
 
         spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
 
         verify(mMockContext, never()).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
+                eq(null), eq(mMockHandler));
+    }
+
+    @Test
+    public void testPackageMonitorRegisterWithSupportPackageRestartQuery() throws Exception {
+        PackageMonitor spyPackageMonitor = spy(new TestPackageMonitor(true));
+
+        spyPackageMonitor.register(mMockContext, UserHandle.ALL, mMockHandler);
+
+        verify(mMockContext, times(1)).registerReceiverAsUser(any(), eq(UserHandle.ALL), any(),
                 eq(null), eq(mMockHandler));
     }
 
@@ -487,7 +497,7 @@ public class PackageMonitorTest {
         }
 
         public TestPackageMonitor() {
-            super();
+            super(false);
         }
     }
 }

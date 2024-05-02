@@ -852,7 +852,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void registerBroadcastReceivers() {
-        mPackageMonitor = new PackageMonitor() {
+        mPackageMonitor = new PackageMonitor(true) {
             @Override
             public void onSomePackagesChanged() {
                 if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_PACKAGE_BROADCAST_RECEIVER)) {
