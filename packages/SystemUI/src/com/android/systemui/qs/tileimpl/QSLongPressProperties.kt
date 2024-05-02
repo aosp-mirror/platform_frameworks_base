@@ -22,8 +22,8 @@ package com.android.systemui.qs.tileimpl
  * These properties are used during animation if a tile supports a long-press action.
  */
 data class QSLongPressProperties(
-    var xScale: Float,
-    var yScale: Float,
+    var height: Float,
+    var width: Float,
     var cornerRadius: Float,
     var backgroundColor: Int,
     var labelColor: Int,

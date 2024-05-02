@@ -25,6 +25,7 @@ import android.content.res.Configuration
 import android.content.res.Resources.ID_NULL
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -46,6 +47,7 @@ import android.widget.LinearLayout
 import android.widget.Switch
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
+import androidx.core.graphics.drawable.updateBounds
 import com.android.app.tracing.traceSection
 import com.android.settingslib.Utils
 import com.android.systemui.Flags
@@ -62,7 +64,6 @@ import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH
 import com.android.systemui.res.R
-import com.android.systemui.util.children
 import kotlinx.coroutines.DisposableHandle
 import java.util.Objects
 
@@ -83,6 +84,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
         const val UNAVAILABLE_ALPHA = 0.3f
         @VisibleForTesting
         internal const val TILE_STATE_RES_PREFIX = "tile_states_"
+        @VisibleForTesting
+        internal const val LONG_PRESS_EFFECT_WIDTH_SCALE = 1.1f
+        @VisibleForTesting
+        internal const val LONG_PRESS_EFFECT_HEIGHT_SCALE = 1.2f
     }
 
     private val icon: QSIconViewImpl = QSIconViewImpl(context)
@@ -180,6 +185,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val locInScreen = IntArray(2)
 
     /** Visuo-haptic long-press effects */
+    private var haveLongPressPropertiesBeenReset = true
+    private var paddingForLaunch = Rect()
     private var initialLongPressProperties: QSLongPressProperties? = null
     private var finalLongPressProperties: QSLongPressProperties? = null
     private val colorEvaluator = ArgbEvaluator.getInstance()
@@ -326,7 +333,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private fun updateHeight() {
         // TODO(b/332900989): Find a more robust way of resetting the tile if not reset by the
         //  launch animation.
-        if (scaleX != 1f || scaleY != 1f) {
+        if (!haveLongPressPropertiesBeenReset && longPressEffect != null) {
             // The launch animation of a long-press effect did not reset the long-press effect so
             // we must do it here
             resetLongPressEffectProperties()
@@ -632,7 +639,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
                     )
             }
             showRippleEffect = false
-            initializeLongPressProperties()
+            initializeLongPressProperties(measuredHeight, measuredWidth)
         } else {
             // Long-press effects might have been enabled before but the new state does not
             // handle a long-press. In this case, we go back to the behaviour of a regular tile
@@ -765,8 +772,60 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun onActivityLaunchAnimationEnd() = resetLongPressEffectProperties()
 
+    fun prepareForLaunch() {
+        val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
+        val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
+        val deltaH = finalLongPressProperties?.height?.minus(startingHeight)?.toInt() ?: 0
+        val deltaW = finalLongPressProperties?.width?.minus(startingWidth)?.toInt() ?: 0
+        paddingForLaunch.left = -deltaW / 2
+        paddingForLaunch.top = -deltaH / 2
+        paddingForLaunch.right = deltaW / 2
+        paddingForLaunch.bottom = deltaH / 2
+    }
+
+    override fun getPaddingForLaunchAnimation(): Rect = paddingForLaunch
+
     fun updateLongPressEffectProperties(effectProgress: Float) {
         if (!isLongClickable || longPressEffect == null) return
+
+        if (haveLongPressPropertiesBeenReset) haveLongPressPropertiesBeenReset = false
+
+        // Dimensions change
+        val newHeight =
+            interpolateFloat(
+                effectProgress,
+                initialLongPressProperties?.height ?: 0f,
+                finalLongPressProperties?.height ?: 0f,
+            ).toInt()
+        val newWidth =
+            interpolateFloat(
+                effectProgress,
+                initialLongPressProperties?.width ?: 0f,
+                finalLongPressProperties?.width ?: 0f,
+            ).toInt()
+
+        val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
+        val startingWidth = initialLongPressProperties?.width?.toInt() ?: 0
+        val deltaH = (newHeight - startingHeight) / 2
+        val deltaW = (newWidth - startingWidth) / 2
+
+        background.updateBounds(
+            left = -deltaW,
+            top = -deltaH,
+            right = newWidth - deltaW,
+            bottom = newHeight - deltaH,
+        )
+
+        // Radius change
+        val newRadius =
+            interpolateFloat(
+                effectProgress,
+                initialLongPressProperties?.cornerRadius ?: 0f,
+                finalLongPressProperties?.cornerRadius ?: 0f,
+            )
+        changeCornerRadius(newRadius)
+
+        // Color change
         setAllColors(
             colorEvaluator.evaluate(
                 effectProgress,
@@ -802,32 +861,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 finalLongPressProperties?.iconColor ?: 0,
             ) as Int,
         )
-
-        val newScaleX =
-            interpolateFloat(
-                effectProgress,
-                initialLongPressProperties?.xScale ?: 1f,
-                finalLongPressProperties?.xScale ?: 1f,
-            )
-        val newScaleY =
-            interpolateFloat(
-                effectProgress,
-                initialLongPressProperties?.xScale ?: 1f,
-                finalLongPressProperties?.xScale ?: 1f,
-            )
-        val newRadius =
-            interpolateFloat(
-                effectProgress,
-                initialLongPressProperties?.cornerRadius ?: 0f,
-                finalLongPressProperties?.cornerRadius ?: 0f,
-            )
-        scaleX = newScaleX
-        scaleY = newScaleY
-        for (child in children) {
-            child.scaleX = 1f / newScaleX
-            child.scaleY = 1f / newScaleY
-        }
-        changeCornerRadius(newRadius)
     }
 
     private fun unbindLongPressEffect() {
@@ -839,12 +872,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
         start + fraction * (end - start)
 
     fun resetLongPressEffectProperties() {
-        scaleY = 1f
-        scaleX = 1f
-        for (child in children) {
-            child.scaleY = 1f
-            child.scaleX = 1f
-        }
+        background.updateBounds(
+            left = 0,
+            top = 0,
+            right = initialLongPressProperties?.width?.toInt() ?: 0,
+            bottom = initialLongPressProperties?.height?.toInt() ?: 0,
+        )
         changeCornerRadius(resources.getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat())
         setAllColors(
             getBackgroundColorForState(lastState, lastDisabledByPolicy),
@@ -854,13 +887,15 @@ open class QSTileViewImpl @JvmOverloads constructor(
             getOverlayColorForState(lastState),
         )
         icon.setTint(icon.mIcon as ImageView, lastIconTint)
+        haveLongPressPropertiesBeenReset = true
     }
 
-    private fun initializeLongPressProperties() {
+    @VisibleForTesting
+    fun initializeLongPressProperties(startingHeight: Int, startingWidth: Int) {
         initialLongPressProperties =
             QSLongPressProperties(
-                /* xScale= */1f,
-                /* yScale= */1f,
+                height = startingHeight.toFloat(),
+                width = startingWidth.toFloat(),
                 resources.getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat(),
                 getBackgroundColorForState(lastState),
                 getLabelColorForState(lastState),
@@ -872,8 +907,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
         finalLongPressProperties =
             QSLongPressProperties(
-                /* xScale= */1.1f,
-                /* yScale= */1.2f,
+                height = LONG_PRESS_EFFECT_HEIGHT_SCALE * startingHeight,
+                width = LONG_PRESS_EFFECT_WIDTH_SCALE * startingWidth,
                 resources.getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat() - 20,
                 getBackgroundColorForState(Tile.STATE_ACTIVE),
                 getLabelColorForState(Tile.STATE_ACTIVE),
