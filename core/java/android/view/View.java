@@ -33944,8 +33944,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected int calculateFrameRateCategory() {
         int category;
         switch (getViewRootImpl().intermittentUpdateState()) {
-            case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT ->
-                    category = FRAME_RATE_CATEGORY_NORMAL | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
+            case ViewRootImpl.INTERMITTENT_STATE_INTERMITTENT -> category =
+                    (sToolkitFrameRateBySizeReadOnlyFlagValue ? FRAME_RATE_CATEGORY_LOW
+                            : FRAME_RATE_CATEGORY_NORMAL) | FRAME_RATE_CATEGORY_REASON_INTERMITTENT;
             case ViewRootImpl.INTERMITTENT_STATE_NOT_INTERMITTENT ->
                     category = mSizeBasedFrameRateCategoryAndReason;
             default -> category = mLastFrameRateCategory;
