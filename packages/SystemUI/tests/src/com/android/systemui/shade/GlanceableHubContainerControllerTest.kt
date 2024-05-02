@@ -33,6 +33,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.ambient.touch.TouchHandler
 import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.fakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.communalInteractor
@@ -42,10 +43,8 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.andSceneContainer
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -238,11 +237,7 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
                 goToScene(CommunalScenes.Communal)
 
                 // Bouncer is visible.
-                fakeKeyguardTransitionRepository.sendTransitionSteps(
-                    KeyguardState.GLANCEABLE_HUB,
-                    KeyguardState.PRIMARY_BOUNCER,
-                    testScope
-                )
+                fakeKeyguardBouncerRepository.setPrimaryShow(true)
                 testableLooper.processAllMessages()
 
                 // Touch events are not intercepted.
@@ -368,11 +363,7 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
                 goToScene(CommunalScenes.Communal)
 
                 // Bouncer is visible.
-                fakeKeyguardTransitionRepository.sendTransitionSteps(
-                    KeyguardState.GLANCEABLE_HUB,
-                    KeyguardState.PRIMARY_BOUNCER,
-                    testScope
-                )
+                fakeKeyguardBouncerRepository.setPrimaryShow(true)
                 testableLooper.processAllMessages()
 
                 assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
@@ -387,11 +378,7 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
                 goToScene(CommunalScenes.Communal)
 
                 // Bouncer is visible.
-                fakeKeyguardTransitionRepository.sendTransitionSteps(
-                    KeyguardState.GLANCEABLE_HUB,
-                    KeyguardState.ALTERNATE_BOUNCER,
-                    testScope
-                )
+                fakeKeyguardBouncerRepository.setAlternateVisible(true)
                 testableLooper.processAllMessages()
 
                 assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.STARTED)
@@ -449,6 +436,53 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
                             /* bottom */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
                         )
                     )
+            }
+        }
+
+    @Test
+    fun gestureExclusionZone_unsetWhenShadeOpen() =
+        with(kosmos) {
+            testScope.runTest {
+                goToScene(CommunalScenes.Communal)
+
+                // Shade shows up.
+                shadeTestUtil.setQsExpansion(1.0f)
+                testableLooper.processAllMessages()
+
+                // Exclusion rects are unset.
+                assertThat(containerView.systemGestureExclusionRects).isEmpty()
+            }
+        }
+
+    @Test
+    fun gestureExclusionZone_unsetWhenBouncerOpen() =
+        with(kosmos) {
+            testScope.runTest {
+                goToScene(CommunalScenes.Communal)
+
+                // Bouncer is visible.
+                fakeKeyguardBouncerRepository.setPrimaryShow(true)
+                testableLooper.processAllMessages()
+
+                // Exclusion rects are unset.
+                assertThat(containerView.systemGestureExclusionRects).isEmpty()
+            }
+        }
+
+    @Test
+    fun gestureExclusionZone_unsetWhenHubClosed() =
+        with(kosmos) {
+            testScope.runTest {
+                goToScene(CommunalScenes.Communal)
+
+                // Exclusion rect is set.
+                assertThat(containerView.systemGestureExclusionRects).hasSize(1)
+
+                // Leave the hub.
+                goToScene(CommunalScenes.Blank)
+
+                // Exclusion rect is unset.
+                assertThat(containerView.systemGestureExclusionRects).isEmpty()
             }
         }
 
