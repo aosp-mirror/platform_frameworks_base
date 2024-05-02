@@ -196,7 +196,7 @@ public class ViewFrameRateTest {
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
             FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
-    public void highVelocity140() throws Throwable {
+    public void highVelocity120() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -208,7 +208,7 @@ public class ViewFrameRateTest {
             mMovingView.setFrameContentVelocity(1_000_000_000f);
             mMovingView.invalidate();
             runAfterDraw(() -> {
-                assertEquals(140f, mViewRoot.getLastPreferredFrameRate(), 0f);
+                assertEquals(120f, mViewRoot.getLastPreferredFrameRate(), 0f);
             });
         });
         waitForAfterDraw();

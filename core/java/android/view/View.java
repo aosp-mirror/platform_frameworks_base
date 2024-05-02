@@ -5774,7 +5774,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
 
-    static final float MAX_FRAME_RATE = 140;
+    static final float MAX_FRAME_RATE = 120;
 
     // The preferred frame rate of the view that is mainly used for
     // touch boosting, view velocity handling, and TextureView.
