@@ -117,7 +117,7 @@ public class SaveEventLogger {
 
   private final int mSessionId;
   private Optional<SaveEventInternal> mEventInternal;
-  private long mSessionStartTimestamp;
+  private final long mSessionStartTimestamp;
 
   private SaveEventLogger(int sessionId, long sessionStartTimestamp) {
       mSessionId = sessionId;
@@ -227,13 +227,11 @@ public class SaveEventLogger {
     });
   }
 
-  /* Returns timestamp (relative to mSessionStartTimestamp) or  UNINITIATED_TIMESTAMP if mSessionStartTimestamp is not set */
-  private long getCurrentTimestamp() {
-    long timestamp = UNINITIATED_TIMESTAMP;
-    if (mSessionStartTimestamp != UNINITIATED_TIMESTAMP) {
-      timestamp = SystemClock.elapsedRealtime() - mSessionStartTimestamp;
-    }
-    return timestamp;
+  /**
+   * Returns timestamp (relative to mSessionStartTimestamp)
+   */
+  private long getElapsedTime() {
+    return SystemClock.elapsedRealtime() - mSessionStartTimestamp;
   }
 
   /**
@@ -247,7 +245,7 @@ public class SaveEventLogger {
 
   /** Set latency_save_ui_display_millis as long as mEventInternal presents. */
   public void maybeSetLatencySaveUiDisplayMillis() {
-    maybeSetLatencySaveUiDisplayMillis(getCurrentTimestamp());
+    maybeSetLatencySaveUiDisplayMillis(getElapsedTime());
   }
 
   /**
@@ -261,7 +259,7 @@ public class SaveEventLogger {
 
   /** Set latency_save_request_millis as long as mEventInternal presents. */
   public void maybeSetLatencySaveRequestMillis() {
-    maybeSetLatencySaveRequestMillis(getCurrentTimestamp());
+    maybeSetLatencySaveRequestMillis(getElapsedTime());
   }
 
   /**
@@ -275,7 +273,7 @@ public class SaveEventLogger {
 
   /** Set latency_save_finish_millis as long as mEventInternal presents. */
   public void maybeSetLatencySaveFinishMillis() {
-    maybeSetLatencySaveFinishMillis(getCurrentTimestamp());
+    maybeSetLatencySaveFinishMillis(getElapsedTime());
   }
 
   /**
@@ -349,9 +347,9 @@ public class SaveEventLogger {
     boolean mCancelButtonClicked = false;
     boolean mDialogDismissed = false;
     boolean mIsSaved = false;
-    long mLatencySaveUiDisplayMillis = 0;
-    long mLatencySaveRequestMillis = 0;
-    long mLatencySaveFinishMillis = 0;
+    long mLatencySaveUiDisplayMillis = UNINITIATED_TIMESTAMP;
+    long mLatencySaveRequestMillis = UNINITIATED_TIMESTAMP;
+    long mLatencySaveFinishMillis = UNINITIATED_TIMESTAMP;
     boolean mIsFrameworkCreatedSaveInfo = false;
 
     SaveEventInternal() {

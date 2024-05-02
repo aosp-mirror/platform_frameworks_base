@@ -2446,9 +2446,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mSessionFlags.mShowingSaveUi = false;
             // Log onSaveRequest result.
             mSaveEventLogger.maybeSetIsSaved(true);
-            final long saveRequestFinishTimestamp =
-                SystemClock.elapsedRealtime() - mLatencyBaseTime;
-            mSaveEventLogger.maybeSetLatencySaveFinishMillis(saveRequestFinishTimestamp);
+            mSaveEventLogger.maybeSetLatencySaveFinishMillis();
             mSaveEventLogger.logAndEndEvent();
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onSaveRequestSuccess() rejected - session: "
@@ -2479,9 +2477,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         synchronized (mLock) {
             mSessionFlags.mShowingSaveUi = false;
             // Log onSaveRequest result.
-            final long saveRequestFinishTimestamp =
-                SystemClock.elapsedRealtime() - mLatencyBaseTime;
-            mSaveEventLogger.maybeSetLatencySaveFinishMillis(saveRequestFinishTimestamp);
+            mSaveEventLogger.maybeSetLatencySaveFinishMillis();
             mSaveEventLogger.logAndEndEvent();
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onSaveRequestFailure() rejected - session: "
@@ -2627,8 +2623,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 return;
             }
         }
-        final long saveRequestStartTimestamp = SystemClock.elapsedRealtime() - mLatencyBaseTime;
-        mSaveEventLogger.maybeSetLatencySaveRequestMillis(saveRequestStartTimestamp);
+        mSaveEventLogger.maybeSetLatencySaveRequestMillis();
         mHandler.sendMessage(obtainMessage(
                 AutofillManagerServiceImpl::handleSessionSave,
                 mService, this));
