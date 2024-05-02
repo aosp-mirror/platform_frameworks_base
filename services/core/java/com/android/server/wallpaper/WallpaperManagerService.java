@@ -1346,6 +1346,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     class MyPackageMonitor extends PackageMonitor {
+        private MyPackageMonitor() {
+            super(true);
+        }
+
         @Override
         public void onPackageUpdateFinished(String packageName, int uid) {
             synchronized (mLock) {

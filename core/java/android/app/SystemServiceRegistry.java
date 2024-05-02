@@ -300,6 +300,16 @@ public final class SystemServiceRegistry {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     static final long ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN = 330902016;
 
+    /**
+     * The corresponding vendor API for Android V
+     *
+     * <p>Starting with Android V, the vendor API format has switched to YYYYMM.
+     *
+     * @see <a href="https://preview.source.android.com/docs/core/architecture/api-flags">Vendor API
+     *     level</a>
+     */
+    private static final int VENDOR_API_FOR_ANDROID_V = 202404;
+
     // Service registry information.
     // This information is never changed once static initialization has completed.
     private static final Map<Class<?>, String> SYSTEM_SERVICE_NAMES =
@@ -465,9 +475,10 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<VcnManager>() {
             @Override
             public VcnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                if (shouldCheckTelephonyFeatures()
-                    && !ctx.getPackageManager().hasSystemFeature(
-                            PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)) {
+                final String telephonyFeatureToCheck = getVcnFeatureDependency();
+
+                if (telephonyFeatureToCheck != null
+                    && !ctx.getPackageManager().hasSystemFeature(telephonyFeatureToCheck)) {
                     return null;
                 }
 
@@ -1768,16 +1779,24 @@ public final class SystemServiceRegistry {
     // partition SDK level, not application's target SDK version (which BTW we
     // also check through Compatibility framework a few lines below).
     @SuppressWarnings("AndroidFrameworkCompatChange")
-    private static boolean shouldCheckTelephonyFeatures() {
+    @Nullable
+    private static String getVcnFeatureDependency() {
+        // Check SDK version of the client app. Apps targeting pre-V SDK might
+        // have not checked for existence of these features.
+        if (!Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN)) {
+            return null;
+        }
+
         // Check SDK version of the vendor partition. Pre-V devices might have
         // incorrectly under-declared telephony features.
         final int vendorApiLevel = SystemProperties.getInt(
                 "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
-        if (vendorApiLevel < Build.VERSION_CODES.VANILLA_ICE_CREAM) return false;
+        if (vendorApiLevel < VENDOR_API_FOR_ANDROID_V) {
+            return PackageManager.FEATURE_TELEPHONY;
+        } else {
+            return PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION;
+        }
 
-        // Check SDK version of the client app. Apps targeting pre-V SDK might
-        // have not checked for existence of these features.
-        return Compatibility.isChangeEnabled(ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN);
     }
 
     /**

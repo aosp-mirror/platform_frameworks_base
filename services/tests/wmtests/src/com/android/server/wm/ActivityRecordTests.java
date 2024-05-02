@@ -525,10 +525,13 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // The activity shouldn't start relaunching since it doesn't have any desk resources.
         assertFalse(activity.isRelaunching());
+        // The activity configuration ui mode should match.
+        final var activityConfig = activity.getConfiguration();
+        assertEquals(newConfig.uiMode, activityConfig.uiMode);
 
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
         final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, newConfig,
+                ActivityConfigurationChangeItem.obtain(activity.token, activityConfig,
                         activity.getActivityWindowInfo());
         verify(mClientLifecycleManager).scheduleTransactionItem(
                 eq(activity.app.getThread()), eq(expected));

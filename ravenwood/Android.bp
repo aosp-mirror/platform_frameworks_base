@@ -155,6 +155,31 @@ filegroup {
     visibility: ["//frameworks/base"],
 }
 
+cc_library_shared {
+    name: "libravenwood_runtime",
+    host_supported: true,
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+
+    srcs: [
+        "runtime-helper-src/jni/*.cpp",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "liblog",
+        "libnativehelper",
+        "libutils",
+        "libcutils",
+    ],
+    visibility: ["//frameworks/base"],
+}
+
 // For collecting the *stats.csv files in a known directory under out/host/linux-x86/testcases/.
 // The "test" just shows the available stats filenames.
 sh_test_host {

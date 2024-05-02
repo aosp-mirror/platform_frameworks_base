@@ -84,6 +84,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
+import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService.HotPath;
 
 import java.io.IOException;
@@ -324,8 +325,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     private volatile int mActivityStateFlags = ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
 
-    private final boolean mCanUseSystemGrammaticalGender;
-
     public WindowProcessController(@NonNull ActivityTaskManagerService atm,
             @NonNull ApplicationInfo info, String name, int uid, int userId, Object owner,
             @NonNull WindowProcessListener listener) {
@@ -349,9 +348,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
                 && (isSysUiPackage || mAtm.isCallerRecents(uid));
 
-        mCanUseSystemGrammaticalGender = mAtm.mGrammaticalManagerInternal != null
-                && mAtm.mGrammaticalManagerInternal.canGetSystemGrammaticalGender(mUid,
-                mInfo.packageName);
         onConfigurationChanged(atm.getGlobalConfiguration());
         mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
@@ -1612,11 +1608,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
-        if (mCanUseSystemGrammaticalGender) {
-            config.setGrammaticalGender(
-                    mAtm.mGrammaticalManagerInternal.getSystemGrammaticalGender(mUserId));
-        }
-
         if (mPauseConfigurationDispatchCount > 0) {
             mHasPendingConfigurationChange = true;
             return;
@@ -2138,5 +2129,35 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         mListener.dumpDebug(proto, fieldId);
+    }
+
+    @Override
+    protected boolean setOverrideGender(Configuration requestsTmpConfig, int gender) {
+        return applyConfigGenderOverride(requestsTmpConfig, gender,
+                mAtm.mGrammaticalManagerInternal, mUid);
+    }
+
+    static boolean applyConfigGenderOverride(@NonNull Configuration overrideConfig,
+            @Configuration.GrammaticalGender int override,
+            GrammaticalInflectionManagerInternal service, int uid) {
+        final boolean canGetSystemValue = service != null
+                && service.canGetSystemGrammaticalGender(uid);
+
+        // The priority here is as follows:
+        // - app-specific override if set
+        // - system value if allowed to see it
+        // - global configuration otherwise
+        final int targetValue = (override != Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED)
+                ? override
+                : canGetSystemValue
+                        ? Configuration.GRAMMATICAL_GENDER_UNDEFINED
+                        : service != null
+                                ? service.getGrammaticalGenderFromDeveloperSettings()
+                                : Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
+        if (overrideConfig.getGrammaticalGenderRaw() == targetValue) {
+            return false;
+        }
+        overrideConfig.setGrammaticalGender(targetValue);
+        return true;
     }
 }

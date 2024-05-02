@@ -45,7 +45,6 @@ android_ravenwood_test {
     jni_libs: [
         "libravenwoodbivalenttest_jni",
     ],
-    sdk_version: "test_current",
     auto_gen_config: true,
 }
 

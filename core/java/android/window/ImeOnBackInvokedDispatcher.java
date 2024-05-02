@@ -16,6 +16,8 @@
 
 package android.window;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -26,6 +28,8 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.ViewRootImpl;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 
@@ -280,7 +284,8 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         sendStopDispatching();
     }
 
-    static class ImeOnBackInvokedCallback implements OnBackInvokedCallback {
+    @VisibleForTesting(visibility = PACKAGE)
+    public static class ImeOnBackInvokedCallback implements OnBackInvokedCallback {
         @NonNull
         private final IOnBackInvokedCallback mIOnBackInvokedCallback;
         /**
@@ -327,7 +332,8 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
      * Subclass of ImeOnBackInvokedCallback indicating that a predictive IME back animation may be
      * played instead of invoking the callback.
      */
-    static class DefaultImeOnBackAnimationCallback extends ImeOnBackInvokedCallback {
+    @VisibleForTesting(visibility = PACKAGE)
+    public static class DefaultImeOnBackAnimationCallback extends ImeOnBackInvokedCallback {
         DefaultImeOnBackAnimationCallback(@NonNull IOnBackInvokedCallback iCallback, int id,
                 int priority) {
             super(iCallback, id, priority);

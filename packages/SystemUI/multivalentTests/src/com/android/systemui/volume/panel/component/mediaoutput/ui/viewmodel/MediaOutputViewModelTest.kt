@@ -30,6 +30,8 @@ import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.volume.domain.interactor.audioModeInteractor
+import com.android.systemui.volume.domain.interactor.audioOutputInteractor
 import com.android.systemui.volume.localMediaController
 import com.android.systemui.volume.localMediaRepository
 import com.android.systemui.volume.mediaControllerRepository
@@ -64,6 +66,8 @@ class MediaOutputViewModelTest : SysuiTestCase() {
                     testScope.backgroundScope,
                     mediaOutputActionsInteractor,
                     mediaDeviceSessionInteractor,
+                    audioOutputInteractor,
+                    audioModeInteractor,
                     mediaOutputInteractor,
                     uiEventLogger,
                 )

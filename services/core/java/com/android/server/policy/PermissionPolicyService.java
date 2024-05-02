@@ -494,6 +494,7 @@ public final class PermissionPolicyService extends SystemService {
         PhoneCarrierPrivilegesCallback(int phoneId) {
             mPhoneId = phoneId;
         }
+
         @Override
         public void onCarrierPrivilegesChanged(
                 @NonNull Set<String> privilegedPackageNames,
@@ -563,7 +564,11 @@ public final class PermissionPolicyService extends SystemService {
 
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("Permission_grant_default_permissions-" + userId);
-        grantOrUpgradeDefaultRuntimePermissionsIfNeeded(userId);
+        if (mPackageManagerInternal.isPermissionUpgradeNeeded(userId)) {
+            grantOrUpgradeDefaultRuntimePermissions(userId);
+            updateUserSensitive(userId);
+            mPackageManagerInternal.updateRuntimePermissionsFingerprint(userId);
+        }
         t.traceEnd();
 
         final OnInitializedCallback callback;
@@ -595,57 +600,54 @@ public final class PermissionPolicyService extends SystemService {
         }
     }
 
-    private void grantOrUpgradeDefaultRuntimePermissionsIfNeeded(@UserIdInt int userId) {
+    private void grantOrUpgradeDefaultRuntimePermissions(@UserIdInt int userId) {
         if (PermissionManager.USE_ACCESS_CHECKING_SERVICE) {
             return;
         }
 
-        if (DEBUG) Slog.i(LOG_TAG, "grantOrUpgradeDefaultPermsIfNeeded(" + userId + ")");
+        if (DEBUG) Slog.i(LOG_TAG, "grantOrUpgradeDefaultPerms(" + userId + ")");
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        final PackageManagerInternal packageManagerInternal =
-                LocalServices.getService(PackageManagerInternal.class);
-        final PermissionManagerServiceInternal permissionManagerInternal =
-                LocalServices.getService(PermissionManagerServiceInternal.class);
-        if (packageManagerInternal.isPermissionUpgradeNeeded(userId)) {
-            if (DEBUG) Slog.i(LOG_TAG, "defaultPermsWereGrantedSinceBoot(" + userId + ")");
+        // Now call into the permission controller to apply policy around permissions
+        final AndroidFuture<Boolean> future = new AndroidFuture<>();
 
-            // Now call into the permission controller to apply policy around permissions
-            final AndroidFuture<Boolean> future = new AndroidFuture<>();
-
-            // We need to create a local manager that does not schedule work on the main
-            // there as we are on the main thread and want to block until the work is
-            // completed or we time out.
-            final PermissionControllerManager permissionControllerManager =
-                    new PermissionControllerManager(
-                            getUserContext(getContext(), UserHandle.of(userId)),
-                            PermissionThread.getHandler());
-            permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
-                    PermissionThread.getExecutor(), successful -> {
-                        if (successful) {
-                            future.complete(null);
-                        } else {
-                            // We are in an undefined state now, let us crash and have
-                            // rescue party suggest a wipe to recover to a good one.
-                            final String message = "Error granting/upgrading runtime permissions"
-                                    + " for user " + userId;
-                            Slog.wtf(LOG_TAG, message);
-                            future.completeExceptionally(new IllegalStateException(message));
-                        }
-                    });
-            try {
-                t.traceBegin("Permission_callback_waiting-" + userId);
-                future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new IllegalStateException(e);
-            } finally {
-                t.traceEnd();
-            }
-
-            permissionControllerManager.updateUserSensitive();
-
-            packageManagerInternal.updateRuntimePermissionsFingerprint(userId);
+        // We need to create a local manager that does not schedule work on the main
+        // there as we are on the main thread and want to block until the work is
+        // completed or we time out.
+        final PermissionControllerManager permissionControllerManager =
+                new PermissionControllerManager(
+                        getUserContext(getContext(), UserHandle.of(userId)),
+                        PermissionThread.getHandler());
+        permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
+                PermissionThread.getExecutor(), successful -> {
+                    if (successful) {
+                        future.complete(null);
+                    } else {
+                        // We are in an undefined state now, let us crash and have
+                        // rescue party suggest a wipe to recover to a good one.
+                        final String message = "Error granting/upgrading runtime permissions"
+                                + " for user " + userId;
+                        Slog.wtf(LOG_TAG, message);
+                        future.completeExceptionally(new IllegalStateException(message));
+                    }
+                });
+        try {
+            t.traceBegin("Permission_callback_waiting-" + userId);
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            t.traceEnd();
         }
+    }
+
+    private void updateUserSensitive(@UserIdInt int userId) {
+        if (DEBUG) Slog.i(LOG_TAG, "updateUserSensitive(" + userId + ")");
+        final PermissionControllerManager permissionControllerManager =
+                new PermissionControllerManager(
+                        getUserContext(getContext(), UserHandle.of(userId)),
+                        PermissionThread.getHandler());
+        permissionControllerManager.updateUserSensitive();
     }
 
     private static @Nullable Context getUserContext(@NonNull Context context,
@@ -695,12 +697,10 @@ public final class PermissionPolicyService extends SystemService {
         if (DEBUG) Slog.i(LOG_TAG, "synchronizePermissionsAndAppOpsForUser(" + userId + ")");
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
         final PermissionToOpSynchroniser synchronizer = new PermissionToOpSynchroniser(
                 getUserContext(getContext(), UserHandle.of(userId)));
         t.traceBegin("Permission_synchronize_addPackages-" + userId);
-        packageManagerInternal.forEachPackage(
+        mPackageManagerInternal.forEachPackage(
                 (pkg) -> synchronizer.addPackage(pkg.getPackageName()));
         t.traceEnd();
         t.traceBegin("Permission_syncPackages-" + userId);
@@ -1052,13 +1052,11 @@ public final class PermissionPolicyService extends SystemService {
          * @param pkgName The package to add for later processing.
          */
         void addPackage(@NonNull String pkgName) {
-            PackageManagerInternal pmInternal =
-                    LocalServices.getService(PackageManagerInternal.class);
             final PackageInfo pkgInfo;
             final AndroidPackage pkg;
             try {
                 pkgInfo = mPackageManager.getPackageInfo(pkgName, GET_PERMISSIONS);
-                pkg = pmInternal.getPackage(pkgName);
+                pkg = mPackageManagerInternal.getPackage(pkgName);
             } catch (NameNotFoundException e) {
                 return;
             }

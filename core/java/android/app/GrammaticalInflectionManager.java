@@ -104,7 +104,7 @@ public class GrammaticalInflectionManager {
      * Sets the current grammatical gender for all privileged applications. The value will be
      * stored in an encrypted file at {@link android.os.Environment#getDataSystemCeDirectory(int)}
      *
-     * @param grammaticalGender the terms of address the user preferred in system.
+     * @param grammaticalGender the grammatical gender set by the user for the system.
      *
      * @see Configuration#getGrammaticalGender
      * @hide
@@ -123,12 +123,12 @@ public class GrammaticalInflectionManager {
     }
 
     /**
-     * Get the current grammatical gender of privileged application from the encrypted file.
+     * Allows privileged preloaded applications to get the system grammatical gender when set.
      *
-     * @return the value of system grammatical gender only if the calling app has the permission,
-     * otherwise throwing an exception.
+     * @return The value of system grammatical gender only if the calling app has the
+     * permission, otherwise throwing an exception.
      *
-     * @throws SecurityException if the caller does not have the required permission.
+     * @throws SecurityException If the caller does not have the required permission.
      *
      * @see Configuration#getGrammaticalGender
      */

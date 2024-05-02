@@ -91,7 +91,15 @@ constructor(
             .queryIntentServicesAsUser(INTENT, FLAGS, userId)
             .mapNotNull { it.serviceInfo }
             .filter { it.permission == BIND_QUICK_SETTINGS_TILE }
-            .filter { packageManager.isComponentActuallyEnabled(it) }
+            .filter {
+                try {
+                    packageManager.isComponentActuallyEnabled(it)
+                } catch (e: IllegalArgumentException) {
+                    // If the package is not found, it means it was uninstalled between query
+                    // and now. So it's clearly not enabled.
+                    false
+                }
+            }
             .mapTo(mutableSetOf()) { it.componentName }
     }
 

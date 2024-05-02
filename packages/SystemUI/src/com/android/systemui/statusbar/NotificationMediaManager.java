@@ -382,16 +382,16 @@ public class NotificationMediaManager implements Dumpable {
 
     private void clearCurrentMediaNotificationSession() {
         mMediaMetadata = null;
-        mBackgroundExecutor.execute(() -> {
-            if (mMediaController != null) {
-                if (DEBUG_MEDIA) {
-                    Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
-                            + mMediaController.getPackageName());
-                }
+        if (mMediaController != null) {
+            if (DEBUG_MEDIA) {
+                Log.v(TAG, "DEBUG_MEDIA: Disconnecting from old controller: "
+                        + mMediaController.getPackageName());
+            }
+            mBackgroundExecutor.execute(() -> {
                 mMediaController.unregisterCallback(mMediaListener);
                 mMediaController = null;
-            }
-        });
+            });
+        }
     }
 
     public interface MediaListener {
