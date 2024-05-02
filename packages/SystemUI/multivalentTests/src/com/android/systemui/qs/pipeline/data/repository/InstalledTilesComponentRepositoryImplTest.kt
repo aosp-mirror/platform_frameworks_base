@@ -245,6 +245,33 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
             assertThat(flowForUser2).isNotEqualTo(flowForUser1)
         }
 
+    // Tests that a ServiceInfo that is returned by queryIntentServicesAsUser but shortly
+    // after uninstalled, doesn't crash SystemUI.
+    @Test
+    fun packageUninstalledAfterQuery_noCrash_noComponent() =
+        testScope.runTest {
+            val userId = 0
+            val resolveInfo =
+                ResolveInfo(TEST_COMPONENT, hasPermission = true, defaultEnabled = true)
+
+            val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+
+            whenever(
+                    packageManager.queryIntentServicesAsUser(
+                        matchIntent(),
+                        matchFlags(),
+                        eq(userId)
+                    )
+                )
+                .thenReturn(listOf(resolveInfo))
+            whenever(packageManager.getComponentEnabledSetting(TEST_COMPONENT))
+                .thenThrow(IllegalArgumentException())
+            kosmos.fakePackageChangeRepository.notifyChange(PackageChangeModel.Empty)
+            runCurrent()
+
+            assertThat(componentNames).isEmpty()
+        }
+
     companion object {
         private val INTENT = Intent(TileService.ACTION_QS_TILE)
         private val FLAGS =
