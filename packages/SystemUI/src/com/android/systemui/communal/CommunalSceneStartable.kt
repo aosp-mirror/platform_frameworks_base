@@ -17,7 +17,6 @@
 package com.android.systemui.communal
 
 import android.provider.Settings
-import android.service.dreams.Flags.dreamTracksFocus
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.CoreStartable
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
@@ -143,12 +142,10 @@ constructor(
                 }
         }
 
-        if (dreamTracksFocus()) {
-            bgScope.launch {
-                communalInteractor.isIdleOnCommunal.collectLatest {
-                    withContext(mainDispatcher) {
-                        notificationShadeWindowController.setGlanceableHubShowing(it)
-                    }
+        bgScope.launch {
+            communalInteractor.isIdleOnCommunal.collectLatest {
+                withContext(mainDispatcher) {
+                    notificationShadeWindowController.setGlanceableHubShowing(it)
                 }
             }
         }

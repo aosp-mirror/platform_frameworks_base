@@ -20,7 +20,7 @@ import static android.Manifest.permission.BIND_DREAM_SERVICE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.service.dreams.Flags.dreamTracksFocus;
+import static android.service.dreams.Flags.dreamHandlesBeingObscured;
 
 import static com.android.server.wm.ActivityInterceptorCallback.DREAM_MANAGER_ORDERED_ID;
 
@@ -428,7 +428,7 @@ public final class DreamManagerService extends SystemService {
             // Can't start dreaming if we are already dreaming and the dream has focus. If we are
             // dreaming but the dream does not have focus, then the dream can be brought to the
             // front so it does have focus.
-            if (isScreenOn && isDreamingInternal() && dreamHasFocus()) {
+            if (isScreenOn && isDreamingInternal() && dreamIsFrontmost()) {
                 return false;
             }
 
@@ -463,9 +463,10 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
-    private boolean dreamHasFocus() {
-        // Dreams always had focus before they were able to track it.
-        return !dreamTracksFocus() || mController.dreamHasFocus();
+    private boolean dreamIsFrontmost() {
+        // Dreams were always considered frontmost before they began tracking whether they are
+        // obscured.
+        return !dreamHandlesBeingObscured() || mController.dreamIsFrontmost();
     }
 
     protected void requestStartDreamFromShell() {
@@ -473,7 +474,7 @@ public final class DreamManagerService extends SystemService {
     }
 
     private void requestDreamInternal() {
-        if (isDreamingInternal() && !dreamHasFocus() && mController.bringDreamToFront()) {
+        if (isDreamingInternal() && !dreamIsFrontmost() && mController.bringDreamToFront()) {
             return;
         }
 
@@ -1159,10 +1160,16 @@ public final class DreamManagerService extends SystemService {
         }
 
         @Override
-        public void onDreamFocusChanged(boolean hasFocus) {
+        public void setDreamIsObscured(boolean isObscured) {
+            if (!dreamHandlesBeingObscured()) {
+                return;
+            }
+
+            checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
+
             final long ident = Binder.clearCallingIdentity();
             try {
-                mController.setDreamHasFocus(hasFocus);
+                mHandler.post(() -> mController.setDreamIsObscured(isObscured));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

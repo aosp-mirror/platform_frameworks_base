@@ -48,5 +48,6 @@ interface IDreamManager {
     void setSystemDreamComponent(in ComponentName componentName);
     void registerDreamOverlayService(in ComponentName componentName);
     void startDreamActivity(in Intent intent);
-    void onDreamFocusChanged(in boolean hasFocus);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)")
+    oneway void setDreamIsObscured(in boolean isObscured);
 }

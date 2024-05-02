@@ -249,14 +249,14 @@ final class DreamController {
         mCurrentDream.mAppTask = appTask;
     }
 
-    void setDreamHasFocus(boolean hasFocus) {
+    void setDreamIsObscured(boolean isObscured) {
         if (mCurrentDream != null) {
-            mCurrentDream.mDreamHasFocus = hasFocus;
+            mCurrentDream.mDreamIsObscured = isObscured;
         }
     }
 
-    boolean dreamHasFocus() {
-        return mCurrentDream != null && mCurrentDream.mDreamHasFocus;
+    boolean dreamIsFrontmost() {
+        return mCurrentDream != null && mCurrentDream.dreamIsFrontmost();
     }
 
     /**
@@ -451,7 +451,7 @@ final class DreamController {
         private String mStopReason;
         private long mDreamStartTime;
         public boolean mWakingGently;
-        public boolean mDreamHasFocus;
+        private boolean mDreamIsObscured;
 
         private final Runnable mStopPreviousDreamsIfNeeded = this::stopPreviousDreamsIfNeeded;
         private final Runnable mReleaseWakeLockIfNeeded = this::releaseWakeLockIfNeeded;
@@ -548,6 +548,10 @@ final class DreamController {
                 mWakeLock = null;
                 mHandler.removeCallbacks(mReleaseWakeLockIfNeeded);
             }
+        }
+
+        boolean dreamIsFrontmost() {
+            return !mDreamIsObscured;
         }
     }
 }

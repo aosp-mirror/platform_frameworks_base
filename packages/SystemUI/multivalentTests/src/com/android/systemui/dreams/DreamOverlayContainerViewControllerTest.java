@@ -27,6 +27,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.DreamManager;
 import android.content.res.Resources;
 import android.graphics.Region;
 import android.os.Handler;
@@ -45,8 +46,10 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.ambient.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
+import com.android.systemui.communal.domain.interactor.CommunalInteractor;
 import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -115,6 +118,12 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     DreamOverlayStateController mStateController;
     @Mock
     KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    @Mock
+    ShadeInteractor mShadeInteractor;
+    @Mock
+    CommunalInteractor mCommunalInteractor;
+    @Mock
+    private DreamManager mDreamManager;
 
     DreamOverlayContainerViewController mController;
 
@@ -146,7 +155,10 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mAnimationsController,
                 mStateController,
                 mBouncerlessScrimController,
-                mKeyguardTransitionInteractor);
+                mKeyguardTransitionInteractor,
+                mShadeInteractor,
+                mCommunalInteractor,
+                mDreamManager);
     }
 
     @Test
