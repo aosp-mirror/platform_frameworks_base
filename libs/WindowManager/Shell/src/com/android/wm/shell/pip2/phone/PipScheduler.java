@@ -21,21 +21,16 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Rect;
-import android.view.SurfaceControl;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
@@ -43,7 +38,6 @@ import com.android.wm.shell.pip.PipTransitionController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.function.Consumer;
 
 /**
  * Scheduler for Shell initiated PiP transitions and animations.
@@ -55,30 +49,9 @@ public class PipScheduler {
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
     private final ShellExecutor mMainExecutor;
-    private final ShellTaskOrganizer mShellTaskOrganizer;
+    private final PipTransitionState mPipTransitionState;
     private PipSchedulerReceiver mSchedulerReceiver;
     private PipTransitionController mPipTransitionController;
-
-    // pinned PiP task's WC token
-    @Nullable
-    private WindowContainerToken mPipTaskToken;
-
-    // pinned PiP task's leash
-    @Nullable
-    private SurfaceControl mPinnedTaskLeash;
-
-    // true if Launcher has started swipe PiP to home animation
-    private boolean mInSwipePipToHomeTransition;
-
-    // Overlay leash potentially used during swipe PiP to home transition;
-    // if null while mInSwipePipToHomeTransition is true, then srcRectHint was invalid.
-    @Nullable
-    SurfaceControl mSwipePipToHomeOverlay;
-
-    // App bounds used when as a starting point to swipe PiP to home animation in Launcher;
-    // these are also used to calculate the app icon overlay buffer size.
-    @NonNull
-    final Rect mSwipePipToHomeAppBounds = new Rect();
 
     /**
      * Temporary PiP CUJ codes to schedule PiP related transitions directly from Shell.
@@ -118,11 +91,11 @@ public class PipScheduler {
     public PipScheduler(Context context,
             PipBoundsState pipBoundsState,
             ShellExecutor mainExecutor,
-            ShellTaskOrganizer shellTaskOrganizer) {
+            PipTransitionState pipTransitionState) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mMainExecutor = mainExecutor;
-        mShellTaskOrganizer = shellTaskOrganizer;
+        mPipTransitionState = pipTransitionState;
 
         if (PipUtils.isPip2ExperimentEnabled()) {
             // temporary broadcast receiver to initiate exit PiP via expand
@@ -140,25 +113,17 @@ public class PipScheduler {
         mPipTransitionController = pipTransitionController;
     }
 
-    void setPinnedTaskLeash(SurfaceControl pinnedTaskLeash) {
-        mPinnedTaskLeash = pinnedTaskLeash;
-    }
-
-    void setPipTaskToken(@Nullable WindowContainerToken pipTaskToken) {
-        mPipTaskToken = pipTaskToken;
-    }
-
     @Nullable
     private WindowContainerTransaction getExitPipViaExpandTransaction() {
-        if (mPipTaskToken == null) {
+        if (mPipTransitionState.mPipTaskToken == null) {
             return null;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         // final expanded bounds to be inherited from the parent
-        wct.setBounds(mPipTaskToken, null);
+        wct.setBounds(mPipTransitionState.mPipTaskToken, null);
         // if we are hitting a multi-activity case
         // windowing mode change will reparent to original host task
-        wct.setWindowingMode(mPipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.setWindowingMode(mPipTransitionState.mPipTaskToken, WINDOWING_MODE_UNDEFINED);
         return wct;
     }
 
@@ -183,43 +148,12 @@ public class PipScheduler {
     /**
      * Animates resizing of the pinned stack given the duration.
      */
-    public void scheduleAnimateResizePip(Rect toBounds, Consumer<Rect> onFinishResizeCallback) {
-        if (mPipTaskToken == null) {
+    public void scheduleAnimateResizePip(Rect toBounds) {
+        if (mPipTransitionState.mPipTaskToken == null || !mPipTransitionState.isInPip()) {
             return;
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        wct.setBounds(mPipTaskToken, toBounds);
-        mPipTransitionController.startResizeTransition(wct, onFinishResizeCallback);
-    }
-
-    void onSwipePipToHomeAnimationStart(int taskId, ComponentName componentName,
-            Rect destinationBounds, SurfaceControl overlay, Rect appBounds) {
-        mInSwipePipToHomeTransition = true;
-        mSwipePipToHomeOverlay = overlay;
-        mSwipePipToHomeAppBounds.set(appBounds);
-        if (overlay != null) {
-            // Shell transitions might use a root animation leash, which will be removed when
-            // the Recents transition is finished. Launcher attaches the overlay leash to this
-            // animation target leash; thus, we need to reparent it to the actual Task surface now.
-            // PipTransition is responsible to fade it out and cleanup when finishing the enter PIP
-            // transition.
-            SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-            mShellTaskOrganizer.reparentChildSurfaceToTask(taskId, overlay, tx);
-            tx.setLayer(overlay, Integer.MAX_VALUE);
-            tx.apply();
-        }
-    }
-
-    void setInSwipePipToHomeTransition(boolean inSwipePipToHome) {
-        mInSwipePipToHomeTransition = inSwipePipToHome;
-    }
-
-    boolean isInSwipePipToHomeTransition() {
-        return mInSwipePipToHomeTransition;
-    }
-
-    void onExitPip() {
-        mPipTaskToken = null;
-        mPinnedTaskLeash = null;
+        wct.setBounds(mPipTransitionState.mPipTaskToken, toBounds);
+        mPipTransitionController.startResizeTransition(wct);
     }
 }

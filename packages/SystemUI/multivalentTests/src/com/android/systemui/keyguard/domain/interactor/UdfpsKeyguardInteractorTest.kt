@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,20 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.android.systemui.keyguard.domain.interactor
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
-import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -33,7 +32,10 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
-import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.domain.interactor.shadeLockscreenInteractor
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.argumentCaptor
@@ -50,15 +52,18 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @ExperimentalCoroutinesApi
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class UdfpsKeyguardInteractorTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class UdfpsKeyguardInteractorTest(flags: FlagsParameterization?) : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
-    val configRepository = kosmos.fakeConfigurationRepository
     val keyguardRepository = kosmos.fakeKeyguardRepository
+    val shadeRepository = kosmos.fakeShadeRepository
+    val shadeTestUtil by lazy { kosmos.shadeTestUtil }
 
     private val burnInProgress = 1f
     private val burnInYOffset = 20
@@ -67,7 +72,6 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
     private lateinit var bouncerRepository: KeyguardBouncerRepository
     private lateinit var fakeCommandQueue: FakeCommandQueue
     private lateinit var burnInInteractor: BurnInInteractor
-    private lateinit var shadeRepository: FakeShadeRepository
     private lateinit var powerInteractor: PowerInteractor
 
     @Mock private lateinit var burnInHelper: BurnInHelperWrapper
@@ -75,11 +79,22 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
 
     private lateinit var underTest: UdfpsKeyguardInteractor
 
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         bouncerRepository = FakeKeyguardBouncerRepository()
-        shadeRepository = FakeShadeRepository()
         fakeCommandQueue = FakeCommandQueue()
         burnInInteractor =
             BurnInInteractor(
@@ -93,10 +108,10 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
 
         underTest =
             UdfpsKeyguardInteractor(
-                configRepository,
                 burnInInteractor,
                 kosmos.keyguardInteractor,
-                shadeRepository,
+                kosmos.shadeInteractor,
+                kosmos.shadeLockscreenInteractor,
                 dialogManager,
             )
     }
@@ -183,13 +198,13 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
             val qsProgress by collectLastValue(underTest.qsProgress)
             assertThat(qsProgress).isEqualTo(0f)
 
-            shadeRepository.setQsExpansion(.22f)
+            shadeTestUtil.setQsExpansion(.22f)
             assertThat(qsProgress).isEqualTo(.44f)
 
-            shadeRepository.setQsExpansion(.5f)
+            shadeTestUtil.setQsExpansion(.5f)
             assertThat(qsProgress).isEqualTo(1f)
 
-            shadeRepository.setQsExpansion(.7f)
+            shadeTestUtil.setQsExpansion(.7f)
             assertThat(qsProgress).isEqualTo(1f)
         }
 

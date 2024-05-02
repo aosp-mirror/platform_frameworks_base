@@ -255,3 +255,14 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "ignore_app_preferred_refresh_rate_request"
+    namespace: "display_manager"
+    description: "Feature flag for DisplayManager to ignore preferred refresh rate app request. It will be handled by SF only."
+    bug: "330810426"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

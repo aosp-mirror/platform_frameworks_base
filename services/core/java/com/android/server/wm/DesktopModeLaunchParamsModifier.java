@@ -48,15 +48,8 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
     /**
      * Flag to indicate whether to restrict desktop mode to supported devices.
      */
-    @VisibleForTesting
-    static final String ENFORCE_DEVICE_RESTRICTIONS_KEY =
-            "persist.wm.debug.desktop_mode_enforce_device_restrictions";
-
-    /**
-     * Flag to indicate whether to restrict desktop mode to supported devices.
-     */
     private static final boolean ENFORCE_DEVICE_RESTRICTIONS = SystemProperties.getBoolean(
-            ENFORCE_DEVICE_RESTRICTIONS_KEY, true);
+            "persist.wm.debug.desktop_mode_enforce_device_restrictions", true);
 
     private StringBuilder mLogBuilder;
 
@@ -118,19 +111,7 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         if (phase == PHASE_WINDOWING_MODE) {
-            return RESULT_DONE;
-        }
-
-        // TODO(b/336998072) - Find a better solution to this that makes use of the logic from
-        //  TaskLaunchParamsModifier. Put logic in common utils, return RESULT_CONTINUE, inherit
-        //  from parent class, etc.
-        if (outParams.mPreferredTaskDisplayArea == null && task.getRootTask() != null) {
-            appendLog("display-from-task=" + task.getRootTask().getDisplayId());
-            outParams.mPreferredTaskDisplayArea = task.getRootTask().getDisplayArea();
-        }
-
-        if (phase == PHASE_DISPLAY_AREA) {
-            return RESULT_DONE;
+            return RESULT_CONTINUE;
         }
 
         if (!currentParams.mBounds.isEmpty()) {
@@ -142,7 +123,7 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
         appendLog("setting desktop mode task bounds to %s", outParams.mBounds);
 
-        return RESULT_DONE;
+        return RESULT_CONTINUE;
     }
 
     /**

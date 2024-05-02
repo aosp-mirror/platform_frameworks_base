@@ -38,6 +38,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
@@ -79,6 +81,12 @@ class ToggleButtonComponent(
                     modifier =
                         Modifier.fillMaxSize().padding(8.dp).semantics {
                             role = Role.Switch
+                            toggleableState =
+                                if (viewModel.isActive) {
+                                    ToggleableState.On
+                                } else {
+                                    ToggleableState.Off
+                                }
                             contentDescription = label
                         },
                     onClick = { onCheckedChange(!viewModel.isActive) },

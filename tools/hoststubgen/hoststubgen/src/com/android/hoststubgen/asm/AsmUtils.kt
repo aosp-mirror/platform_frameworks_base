@@ -76,17 +76,45 @@ fun findAnnotationValueAsString(an: AnnotationNode, propertyName: String): Strin
     return null
 }
 
-private val removeLastElement = """[./][^./]*$""".toRegex()
+val periodOrSlash = charArrayOf('.', '/')
 
-fun getPackageNameFromClassName(className: String): String {
-    return className.replace(removeLastElement, "")
+fun getPackageNameFromFullClassName(fullClassName: String): String {
+    val pos = fullClassName.lastIndexOfAny(periodOrSlash)
+    if (pos == -1) {
+        return ""
+    } else {
+        return fullClassName.substring(0, pos)
+    }
 }
 
-fun resolveClassName(className: String, packageName: String): String {
+fun getClassNameFromFullClassName(fullClassName: String): String {
+    val pos = fullClassName.lastIndexOfAny(periodOrSlash)
+    if (pos == -1) {
+        return fullClassName
+    } else {
+        return fullClassName.substring(pos + 1)
+    }
+}
+
+fun getOuterClassNameFromFullClassName(fullClassName: String): String {
+    val start = fullClassName.lastIndexOfAny(periodOrSlash)
+    val end = fullClassName.indexOf('$')
+    if (end == -1) {
+        return fullClassName.substring(start + 1)
+    } else {
+        return fullClassName.substring(start + 1, end)
+    }
+}
+
+/**
+ * If [className] is a fully qualified name, just return it.
+ * Otherwise, prepend [defaultPackageName].
+ */
+fun resolveClassNameWithDefaultPackage(className: String, defaultPackageName: String): String {
     if (className.contains('.') || className.contains('/')) {
         return className
     }
-    return "$packageName.$className"
+    return "$defaultPackageName.$className"
 }
 
 fun String.toJvmClassName(): String {

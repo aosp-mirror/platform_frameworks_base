@@ -16,22 +16,26 @@
 
 package com.android.systemui.volume.panel.ui.viewmodel
 
+import android.content.Intent
+import android.content.applicationContext
 import android.content.res.Configuration
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.panel.componentByKey
 import com.android.systemui.volume.panel.componentsLayoutManager
 import com.android.systemui.volume.panel.criteriaByKey
-import com.android.systemui.volume.panel.dagger.factory.KosmosVolumePanelComponentFactory
 import com.android.systemui.volume.panel.mockVolumePanelUiComponentProvider
 import com.android.systemui.volume.panel.shared.model.VolumePanelComponentKey
 import com.android.systemui.volume.panel.ui.layout.DefaultComponentsLayoutManager
 import com.android.systemui.volume.panel.unavailableCriteria
+import com.android.systemui.volume.panel.volumePanelViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -51,67 +55,49 @@ class VolumePanelViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: VolumePanelViewModel
 
-    private fun initUnderTest() {
-        underTest =
-            VolumePanelViewModel(
-                testableResources.resources,
-                kosmos.testScope.backgroundScope,
-                KosmosVolumePanelComponentFactory(kosmos),
-                kosmos.fakeConfigurationController,
+    @Test
+    fun dismissingPanel_changesVisibility() = test {
+        testScope.runTest {
+            assertThat(underTest.volumePanelState.value.isVisible).isTrue()
+
+            underTest.dismissPanel()
+            runCurrent()
+
+            assertThat(underTest.volumePanelState.value.isVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun orientationChanges_panelOrientationChanges() = test {
+        testScope.runTest {
+            val volumePanelState by collectLastValue(underTest.volumePanelState)
+            testableResources.overrideConfiguration(
+                Configuration().apply { orientation = Configuration.ORIENTATION_PORTRAIT }
             )
-    }
+            assertThat(volumePanelState!!.orientation).isEqualTo(Configuration.ORIENTATION_PORTRAIT)
 
-    @Test
-    fun dismissingPanel_changesVisibility() {
-        with(kosmos) {
-            testScope.runTest {
-                initUnderTest()
-                assertThat(underTest.volumePanelState.value.isVisible).isTrue()
+            fakeConfigurationController.onConfigurationChanged(
+                Configuration().apply { orientation = Configuration.ORIENTATION_LANDSCAPE }
+            )
+            runCurrent()
 
-                underTest.dismissPanel()
-                runCurrent()
-
-                assertThat(underTest.volumePanelState.value.isVisible).isFalse()
-            }
+            assertThat(volumePanelState!!.orientation)
+                .isEqualTo(Configuration.ORIENTATION_LANDSCAPE)
         }
     }
 
     @Test
-    fun orientationChanges_panelOrientationChanges() {
-        with(kosmos) {
-            testScope.runTest {
-                initUnderTest()
-                val volumePanelState by collectLastValue(underTest.volumePanelState)
-                testableResources.overrideConfiguration(
-                    Configuration().apply { orientation = Configuration.ORIENTATION_PORTRAIT }
+    fun components_areReturned() =
+        test({
+            componentByKey =
+                mapOf(
+                    COMPONENT_1 to mockVolumePanelUiComponentProvider,
+                    COMPONENT_2 to mockVolumePanelUiComponentProvider,
+                    BOTTOM_BAR to mockVolumePanelUiComponentProvider,
                 )
-                assertThat(volumePanelState!!.orientation)
-                    .isEqualTo(Configuration.ORIENTATION_PORTRAIT)
-
-                fakeConfigurationController.onConfigurationChanged(
-                    Configuration().apply { orientation = Configuration.ORIENTATION_LANDSCAPE }
-                )
-                runCurrent()
-
-                assertThat(volumePanelState!!.orientation)
-                    .isEqualTo(Configuration.ORIENTATION_LANDSCAPE)
-            }
-        }
-    }
-
-    @Test
-    fun components_areReturned() {
-        with(kosmos) {
+            criteriaByKey = mapOf(COMPONENT_2 to unavailableCriteria)
+        }) {
             testScope.runTest {
-                componentByKey =
-                    mapOf(
-                        COMPONENT_1 to mockVolumePanelUiComponentProvider,
-                        COMPONENT_2 to mockVolumePanelUiComponentProvider,
-                        BOTTOM_BAR to mockVolumePanelUiComponentProvider,
-                    )
-                criteriaByKey = mapOf(COMPONENT_2 to unavailableCriteria)
-                initUnderTest()
-
                 val componentsLayout by collectLastValue(underTest.componentsLayout)
                 runCurrent()
 
@@ -124,11 +110,45 @@ class VolumePanelViewModelTest : SysuiTestCase() {
                 assertThat(componentsLayout!!.bottomBarComponent.isVisible).isTrue()
             }
         }
+
+    @Test
+    fun dismissPanel_dismissesPanel() = test {
+        testScope.runTest {
+            val volumePanelState by collectLastValue(underTest.volumePanelState)
+            underTest.dismissPanel()
+            runCurrent()
+
+            assertThat(volumePanelState!!.isVisible).isFalse()
+        }
     }
+
+    @Test
+    fun dismissBroadcast_dismissesPanel() = test {
+        testScope.runTest {
+            runCurrent() // run the flows to let allow the receiver to be registered
+            val volumePanelState by collectLastValue(underTest.volumePanelState)
+            broadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                applicationContext,
+                Intent(DISMISS_ACTION),
+            )
+            runCurrent()
+
+            assertThat(volumePanelState!!.isVisible).isFalse()
+        }
+    }
+
+    private fun test(setup: Kosmos.() -> Unit = {}, test: Kosmos.() -> Unit) =
+        with(kosmos) {
+            setup()
+            underTest = volumePanelViewModel
+            test()
+        }
 
     private companion object {
         const val BOTTOM_BAR: VolumePanelComponentKey = "test_bottom_bar"
         const val COMPONENT_1: VolumePanelComponentKey = "test_component:1"
         const val COMPONENT_2: VolumePanelComponentKey = "test_component:2"
+
+        const val DISMISS_ACTION = "com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG"
     }
 }

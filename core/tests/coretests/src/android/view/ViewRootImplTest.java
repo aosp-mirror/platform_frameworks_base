@@ -1138,6 +1138,8 @@ public class ViewRootImplTest {
         mView = new View(sContext);
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+        int expected = toolkitFrameRateDefaultNormalReadOnly()
+                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
 
         sInstrumentation.runOnMainSync(() -> {
             WindowManager wm = sContext.getSystemService(WindowManager.class);
@@ -1157,8 +1159,6 @@ public class ViewRootImplTest {
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
             mView.invalidate();
-            int expected = toolkitFrameRateDefaultNormalReadOnly()
-                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
             runAfterDraw(() -> assertEquals(expected,
                     mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
@@ -1168,8 +1168,6 @@ public class ViewRootImplTest {
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
             mView.invalidate();
-            int expected = toolkitFrameRateDefaultNormalReadOnly()
-                    ? FRAME_RATE_CATEGORY_NORMAL : FRAME_RATE_CATEGORY_HIGH;
             runAfterDraw(() -> assertEquals(expected,
                     mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
@@ -1177,12 +1175,26 @@ public class ViewRootImplTest {
         // Infrequent update
         Thread.sleep(delay);
         sInstrumentation.runOnMainSync(() -> {
-            mView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_DEFAULT);
             mView.invalidate();
             runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_NORMAL,
                     mViewRootImpl.getLastPreferredFrameRateCategory()));
         });
         waitForAfterDraw();
+
+        // When the View vote, it's still considered as intermittent update state
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_NORMAL,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // Becomes frequent update state
+        sInstrumentation.runOnMainSync(() -> {
+            mView.invalidate();
+            runAfterDraw(() -> assertEquals(expected,
+                    mViewRootImpl.getLastPreferredFrameRateCategory()));
+        });
     }
 
     /**

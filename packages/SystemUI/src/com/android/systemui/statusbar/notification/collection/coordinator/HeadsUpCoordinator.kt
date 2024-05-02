@@ -296,7 +296,9 @@ class HeadsUpCoordinator @Inject constructor(
         locationLookupByKey: (String) -> GroupLocation,
     ): NotificationEntry? = postedEntries.asSequence()
         .filter { posted -> !posted.entry.sbn.notification.isGroupSummary }
-        .sortedBy { posted -> -posted.entry.sbn.notification.`when` }
+        .sortedBy { posted ->
+            -posted.entry.sbn.notification.getWhen()
+        }
         .firstOrNull()
         ?.let { posted ->
             posted.entry.takeIf { entry ->
@@ -317,7 +319,7 @@ class HeadsUpCoordinator @Inject constructor(
         .filter { locationLookupByKey(it.key) != GroupLocation.Detached }
         .sortedWith(compareBy(
             { !mPostedEntries.contains(it.key) },
-            { -it.sbn.notification.`when` },
+            { -it.sbn.notification.getWhen() },
         ))
         .firstOrNull()
 

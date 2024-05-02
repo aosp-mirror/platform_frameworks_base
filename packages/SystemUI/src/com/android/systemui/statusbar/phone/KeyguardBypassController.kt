@@ -21,7 +21,6 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
-import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.ListenersTracing.forEachTraced
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
@@ -32,7 +31,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
-import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm
@@ -41,23 +40,24 @@ import com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POST
 import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
+import dagger.Lazy
+import java.io.PrintWriter
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.io.PrintWriter
-import javax.inject.Inject
 
 @SysUISingleton
 class KeyguardBypassController @Inject constructor(
         @Main resources: Resources,
         packageManager: PackageManager,
-        @Application applicationScope: CoroutineScope,
+        @Application private val applicationScope: CoroutineScope,
         tunerService: TunerService,
         private val statusBarStateController: StatusBarStateController,
         lockscreenUserManager: NotificationLockscreenUserManager,
         private val keyguardStateController: KeyguardStateController,
-        private val shadeRepository: ShadeRepository,
+        private val shadeInteractorLazy: Lazy<ShadeInteractor>,
         devicePostureController: DevicePostureController,
         private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
         dumpManager: DumpManager
@@ -144,7 +144,6 @@ class KeyguardBypassController @Inject constructor(
                     }
                 }
             })
-            listenForQsExpandedChange(applicationScope)
             val dismissByDefault = if (resources.getBoolean(
                             com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
             tunerService.addTunable({ key, _ ->
@@ -159,10 +158,9 @@ class KeyguardBypassController @Inject constructor(
         }
     }
 
-    @VisibleForTesting
-    fun listenForQsExpandedChange(scope: CoroutineScope) =
-        scope.launch {
-            shadeRepository.qsExpansion.map { it > 0f }.distinctUntilChanged()
+    fun listenForQsExpandedChange() =
+        applicationScope.launch {
+            shadeInteractorLazy.get().qsExpansion.map { it > 0f }.distinctUntilChanged()
                 .collect { isQsExpanded ->
                     val changed = qsExpanded != isQsExpanded
                     qsExpanded = isQsExpanded

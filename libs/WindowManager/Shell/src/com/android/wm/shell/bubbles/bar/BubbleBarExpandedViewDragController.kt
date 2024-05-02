@@ -135,9 +135,9 @@ class BubbleBarExpandedViewDragController(
 
         private fun finishDrag() {
             if (!isStuckToDismiss) {
-                animationHelper.animateToRestPosition()
                 pinController.onDragEnd()
                 dragListener.onReleased(inDismiss = false)
+                animationHelper.animateToRestPosition()
                 dismissView.hide()
             }
             isMoving = false

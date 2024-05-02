@@ -855,6 +855,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mBubblesOptional.ifPresent(this::initBubbles);
+        mKeyguardBypassController.listenForQsExpandedChange();
 
         mStatusBarSignalPolicy.init();
         mKeyguardIndicationController.init();

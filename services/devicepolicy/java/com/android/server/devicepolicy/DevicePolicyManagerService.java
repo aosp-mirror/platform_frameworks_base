@@ -5673,18 +5673,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean resetPasswordInternal(String password, long tokenHandle, byte[] token,
             int flags, CallerIdentity caller) {
-        final boolean isPin = PasswordMetrics.isNumericOnly(password);
-        try (LockscreenCredential newCredential =
-                isPin ? LockscreenCredential.createPin(password) :
-                       LockscreenCredential.createPasswordOrNone(password)) {
-            return resetPasswordInternal(newCredential, tokenHandle, token, flags, caller);
-        }
-    }
-
-    private boolean resetPasswordInternal(LockscreenCredential newCredential,
-            long tokenHandle, byte[] token, int flags, CallerIdentity caller) {
         final int callingUid = caller.getUid();
         final int userHandle = UserHandle.getUserId(callingUid);
+        final boolean isPin = PasswordMetrics.isNumericOnly(password);
+        final LockscreenCredential newCredential;
+        if (isPin) {
+            newCredential = LockscreenCredential.createPin(password);
+        } else {
+            newCredential = LockscreenCredential.createPasswordOrNone(password);
+        }
         synchronized (getLockObject()) {
             final PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userHandle);
             final int complexity = getAggregatedPasswordComplexityLocked(userHandle);
@@ -21613,7 +21610,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
             }
 
-            if (Flags.headlessSingleUserFixes() && isSingleUserMode && !mInjector.isChangeEnabled(
+            if (Flags.headlessSingleUserFixes() && mInjector.userManagerIsHeadlessSystemUserMode()
+                    && isSingleUserMode && !mInjector.isChangeEnabled(
                     PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(), caller.getUserId())) {
                 throw new IllegalStateException("Device admin is not targeting Android V.");
             }
@@ -21632,7 +21630,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setLocale(provisioningParams.getLocale());
 
             int deviceOwnerUserId = Flags.headlessDeviceOwnerSingleUserEnabled()
-                    && isSingleUserMode
+                    && isSingleUserMode && mInjector.userManagerIsHeadlessSystemUserMode()
                     ? mUserManagerInternal.getMainUserId() : UserHandle.USER_SYSTEM;
 
             if (!removeNonRequiredAppsForManagedDevice(

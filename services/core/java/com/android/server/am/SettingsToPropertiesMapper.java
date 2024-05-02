@@ -35,6 +35,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Maps system settings to system properties.
@@ -320,15 +324,30 @@ public class SettingsToPropertiesMapper {
             NAMESPACE_REBOOT_STAGING,
             AsyncTask.THREAD_POOL_EXECUTOR,
             (DeviceConfig.Properties properties) -> {
-              String scope = properties.getNamespace();
-              for (String key : properties.getKeyset()) {
-                String aconfigPropertyName = makeAconfigFlagStagedPropertyName(key);
-                if (aconfigPropertyName == null) {
-                    log("unable to construct system property for " + scope + "/" + key);
-                    return;
+
+              HashMap<String, HashMap<String, String>> propsToStage =
+                  getStagedFlagsWithValueChange(properties);
+
+              for (HashMap.Entry<String, HashMap<String, String>> entry : propsToStage.entrySet()) {
+                String actualNamespace = entry.getKey();
+                HashMap<String, String> flagValuesToStage = entry.getValue();
+
+                for (String flagName : flagValuesToStage.keySet()) {
+                  String stagedValue = flagValuesToStage.get(flagName);
+                  String propertyName = "next_boot." + makeAconfigFlagPropertyName(
+                      actualNamespace, flagName);
+
+                  if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
+                      || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
+                    log("unable to construct system property for " + actualNamespace
+                        + "/" + flagName);
+                    continue;
+                  }
+
+                  setProperty(propertyName, stagedValue);
                 }
-                setProperty(aconfigPropertyName, properties.getString(key, null));
               }
+
             });
     }
 
@@ -401,35 +420,6 @@ public class SettingsToPropertiesMapper {
     }
 
     /**
-     * system property name constructing rule for staged aconfig flags, the flag name
-     * is in the form of [namespace]*[actual flag name], we should push the following
-     * to system properties
-     * "next_boot.[actual sys prop name]".
-     * If the name contains invalid characters or substrings for system property name,
-     * will return null.
-     * @param flagName
-     * @return
-     */
-    @VisibleForTesting
-    static String makeAconfigFlagStagedPropertyName(String flagName) {
-        int idx = flagName.indexOf(NAMESPACE_REBOOT_STAGING_DELIMITER);
-        if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
-            log("invalid staged flag: " + flagName);
-            return null;
-        }
-
-        String propertyName = "next_boot." + makeAconfigFlagPropertyName(
-                flagName.substring(0, idx), flagName.substring(idx+1));
-
-        if (!propertyName.matches(SYSTEM_PROPERTY_VALID_CHARACTERS_REGEX)
-                || propertyName.contains(SYSTEM_PROPERTY_INVALID_SUBSTRING)) {
-            return null;
-        }
-
-        return propertyName;
-    }
-
-    /**
      * system property name constructing rule for aconfig flags:
      * "persist.device_config.aconfig_flags.[category_name].[flag_name]".
      * If the name contains invalid characters or substrings for system property name,
@@ -449,6 +439,63 @@ public class SettingsToPropertiesMapper {
         }
 
         return propertyName;
+    }
+
+    /**
+     * Get the flags that need to be staged in sys prop, only these with a real value
+     * change needs to be staged in sys prop. Otherwise, the flag stage is useless and
+     * create performance problem at sys prop side.
+     * @param properties
+     * @return a hash map of namespace name to actual flags to stage
+     */
+    @VisibleForTesting
+    static HashMap<String, HashMap<String, String>> getStagedFlagsWithValueChange(
+        DeviceConfig.Properties properties) {
+
+      // sort flags by actual namespace of the flag
+      HashMap<String, HashMap<String, String>> stagedProps = new HashMap<>();
+      for (String flagName : properties.getKeyset()) {
+        int idx = flagName.indexOf(NAMESPACE_REBOOT_STAGING_DELIMITER);
+        if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
+          log("invalid staged flag: " + flagName);
+          continue;
+        }
+        String actualNamespace = flagName.substring(0, idx);
+        String actualFlagName = flagName.substring(idx+1);
+        HashMap<String, String> flagStagedValues = stagedProps.get(actualNamespace);
+        if (flagStagedValues == null) {
+          flagStagedValues = new HashMap<String, String>();
+          stagedProps.put(actualNamespace, flagStagedValues);
+        }
+        flagStagedValues.put(actualFlagName, properties.getString(flagName, null));
+      }
+
+      // for each namespace, find flags with real flag value change
+      HashMap<String, HashMap<String, String>> propsToStage = new HashMap<>();
+      for (HashMap.Entry<String, HashMap<String, String>> entry : stagedProps.entrySet()) {
+        String actualNamespace = entry.getKey();
+        HashMap<String, String> flagStagedValues = entry.getValue();
+        Map<String, String> flagCurrentValues = Settings.Config.getStrings(
+            actualNamespace, new ArrayList<String>(flagStagedValues.keySet()));
+
+        HashMap<String, String> flagsToStage = new HashMap<>();
+        for (String flagName : flagStagedValues.keySet()) {
+          String stagedValue = flagStagedValues.get(flagName);
+          String currentValue = flagCurrentValues.get(flagName);
+          if (currentValue == null) {
+            currentValue = new String("false");
+          }
+          if (stagedValue != null && !stagedValue.equalsIgnoreCase(currentValue)) {
+            flagsToStage.put(flagName, stagedValue);
+          }
+        }
+
+        if (!flagsToStage.isEmpty()) {
+          propsToStage.put(actualNamespace, flagsToStage);
+        }
+      }
+
+      return propsToStage;
     }
 
     private void setProperty(String key, String value) {

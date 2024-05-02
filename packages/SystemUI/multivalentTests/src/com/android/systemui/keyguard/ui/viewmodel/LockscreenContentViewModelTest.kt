@@ -16,13 +16,15 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.authController
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.shared.model.ClockSize
@@ -40,14 +42,28 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class LockscreenContentViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class LockscreenContentViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
     private val kosmos: Kosmos = testKosmos()
 
     lateinit var underTest: LockscreenContentViewModel
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setup() {
@@ -77,6 +93,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun clockSize_withLargeClock_true() =
         with(kosmos) {
             testScope.runTest {
@@ -87,6 +104,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun clockSize_withSmallClock_false() =
         with(kosmos) {
             testScope.runTest {
@@ -109,6 +127,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun areNotificationsVisible_withSmallClock_true() =
         with(kosmos) {
             testScope.runTest {
@@ -119,6 +138,7 @@ class LockscreenContentViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableSceneContainer
     fun areNotificationsVisible_withLargeClock_false() =
         with(kosmos) {
             testScope.runTest {

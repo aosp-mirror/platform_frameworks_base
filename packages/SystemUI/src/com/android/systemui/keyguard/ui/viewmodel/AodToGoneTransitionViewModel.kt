@@ -57,5 +57,15 @@ constructor(
         )
     }
 
+    fun notificationAlpha(viewState: ViewStateAccessor): Flow<Float> {
+        var startAlpha = 1f
+        return transitionAnimation.sharedFlow(
+            duration = 200.milliseconds,
+            onStart = { startAlpha = viewState.alpha() },
+            onStep = { startAlpha },
+            onFinish = { 1f },
+        )
+    }
+
     override val deviceEntryParentViewAlpha = transitionAnimation.immediatelyTransitionTo(0f)
 }

@@ -40,6 +40,7 @@ import java.lang.ref.WeakReference;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -211,10 +212,6 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     @GuardedBy("mLock")
     private int mTotalStarted = 0;
 
-    /** The total number of timers that were restarted without an explicit cancel. */
-    @GuardedBy("mLock")
-    private int mTotalRestarted = 0;
-
     /** The total number of errors detected. */
     @GuardedBy("mLock")
     private int mTotalErrors = 0;
@@ -368,7 +365,7 @@ public abstract class AnrTimer<V> implements AutoCloseable {
 
         abstract boolean enabled();
 
-        abstract void dump(PrintWriter pw, boolean verbose);
+        abstract void dump(IndentingPrintWriter pw, boolean verbose);
 
         abstract void close();
     }
@@ -410,9 +407,14 @@ public abstract class AnrTimer<V> implements AutoCloseable {
             return false;
         }
 
-        /** dump() is a no-op when the feature is disabled. */
+        /** Dump the limited statistics captured when the feature is disabled. */
         @Override
-        void dump(PrintWriter pw, boolean verbose) {
+        void dump(IndentingPrintWriter pw, boolean verbose) {
+            synchronized (mLock) {
+                pw.format("started=%d maxStarted=%d running=%d expired=%d errors=%d\n",
+                        mTotalStarted, mMaxStarted, mTimerIdMap.size(),
+                        mTotalExpired, mTotalErrors);
+            }
         }
 
         /** close() is a no-op when the feature is disabled. */
@@ -440,6 +442,10 @@ public abstract class AnrTimer<V> implements AutoCloseable {
          * native timer is created and it is set back to zero when the native timer is freed.
          */
         private long mNative = 0;
+
+        /** The total number of timers that were restarted without an explicit cancel. */
+        @GuardedBy("mLock")
+        private int mTotalRestarted = 0;
 
         /** Fetch the native tag (an integer) for the given label. */
         FeatureEnabled() {
@@ -537,13 +543,22 @@ public abstract class AnrTimer<V> implements AutoCloseable {
 
         /** Dump statistics from the native layer. */
         @Override
-        void dump(PrintWriter pw, boolean verbose) {
+        void dump(IndentingPrintWriter pw, boolean verbose) {
             synchronized (mLock) {
-                if (mNative != 0) {
-                    nativeAnrTimerDump(mNative, verbose);
-                } else {
+                if (mNative == 0) {
                     pw.println("closed");
+                    return;
                 }
+                String[] nativeDump = nativeAnrTimerDump(mNative);
+                if (nativeDump == null) {
+                    pw.println("no-data");
+                    return;
+                }
+                for (String s : nativeDump) {
+                    pw.println(s);
+                }
+                // The following counter is only available at the Java level.
+                pw.println("restarted:" + mTotalRestarted);
             }
         }
 
@@ -690,11 +705,8 @@ public abstract class AnrTimer<V> implements AutoCloseable {
         synchronized (mLock) {
             pw.format("timer: %s\n", mLabel);
             pw.increaseIndent();
-            pw.format("started=%d maxStarted=%d  restarted=%d running=%d expired=%d errors=%d\n",
-                    mTotalStarted, mMaxStarted, mTotalRestarted, mTimerIdMap.size(),
-                    mTotalExpired, mTotalErrors);
-            pw.decreaseIndent();
             mFeature.dump(pw, false);
+            pw.decreaseIndent();
         }
     }
 
@@ -755,6 +767,14 @@ public abstract class AnrTimer<V> implements AutoCloseable {
         recordErrorLocked(operation, "notFound", arg);
     }
 
+    /** Compare two AnrTimers in display order. */
+    private static final Comparator<AnrTimer> sComparator =
+            Comparator.nullsLast(new Comparator<>() {
+                    @Override
+                    public int compare(AnrTimer o1, AnrTimer o2) {
+                        return o1.mLabel.compareTo(o2.mLabel);
+                    }});
+
     /** Dumpsys output, allowing for overrides. */
     @VisibleForTesting
     static void dump(@NonNull PrintWriter pw, boolean verbose, @NonNull Injector injector) {
@@ -764,11 +784,18 @@ public abstract class AnrTimer<V> implements AutoCloseable {
         ipw.println("AnrTimer statistics");
         ipw.increaseIndent();
         synchronized (sAnrTimerList) {
+            // Find the currently live instances and sort them by their label.  The goal is to
+            // have consistent output ordering.
             final int size = sAnrTimerList.size();
-            ipw.println("reporting " + size + " timers");
+            AnrTimer[] active = new AnrTimer[size];
+            int valid = 0;
             for (int i = 0; i < size; i++) {
                 AnrTimer a = sAnrTimerList.valueAt(i).get();
-                if (a != null) a.dump(ipw);
+                if (a != null) active[valid++] = a;
+            }
+            Arrays.sort(active, 0, valid, sComparator);
+            for (int i = 0; i < valid; i++) {
+                if (active[i] != null) active[i].dump(ipw);
             }
         }
         if (verbose) dumpErrors(ipw);
@@ -827,6 +854,6 @@ public abstract class AnrTimer<V> implements AutoCloseable {
     /** Discard an expired timer by ID.  Return true if the timer was found.  */
     private static native boolean nativeAnrTimerDiscard(long service, int timerId);
 
-    /** Prod the native library to log a few statistics. */
-    private static native void nativeAnrTimerDump(long service, boolean verbose);
+    /** Retrieve runtime dump information from the native layer. */
+    private static native String[] nativeAnrTimerDump(long service);
 }

@@ -9817,10 +9817,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLetterboxUiController.shouldApplyUserMinAspectRatioOverride()) {
             return mLetterboxUiController.getUserMinAspectRatio();
         }
-        if (!mLetterboxUiController.shouldOverrideMinAspectRatio()) {
+        if (!mLetterboxUiController.shouldOverrideMinAspectRatio()
+                && !mLetterboxUiController.shouldOverrideMinAspectRatioForCamera()) {
             return info.getMinAspectRatio();
         }
-
         if (info.isChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY)
                 && !ActivityInfo.isFixedOrientationPortrait(
                         getOverrideOrientation())) {
@@ -9939,6 +9939,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         return updateReportedConfigurationAndSend();
+    }
+
+    /**
+     * @return {@code true} if the Camera is active for the current activity
+     */
+    boolean isCameraActive() {
+        return mDisplayContent != null
+                && mDisplayContent.getDisplayRotationCompatPolicy() != null
+                && mDisplayContent.getDisplayRotationCompatPolicy()
+                    .isCameraActive(this, /* mustBeFullscreen */ true);
     }
 
     boolean updateReportedConfigurationAndSend() {

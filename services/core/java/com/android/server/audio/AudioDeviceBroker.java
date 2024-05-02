@@ -1772,6 +1772,7 @@ public class AudioDeviceBroker {
 
         @Override
         public void handleMessage(Message msg) {
+            int muteCheckDelayMs = BTA2DP_MUTE_CHECK_DELAY_MS;
             switch (msg.what) {
                 case MSG_RESTORE_DEVICES:
                     synchronized (mSetModeLock) {
@@ -1870,7 +1871,7 @@ public class AudioDeviceBroker {
                             btInfo.mDevice, btInfo.mProfile, btInfo.mIsLeOutput,
                             "MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE");
                     synchronized (mDeviceStateLock) {
-                        mDeviceInventory.onBluetoothDeviceConfigChange(btInfo,
+                        muteCheckDelayMs += mDeviceInventory.onBluetoothDeviceConfigChange(btInfo,
                                 codecAndChanged.first, codecAndChanged.second,
                                 BtHelper.EVENT_DEVICE_CONFIG_CHANGE);
                     }
@@ -2060,7 +2061,7 @@ public class AudioDeviceBroker {
             // Give some time to Bluetooth service to post a connection message
             // in case of active device switch
             if (MESSAGES_MUTE_MUSIC.contains(msg.what)) {
-                sendMsg(MSG_CHECK_MUTE_MUSIC, SENDMSG_REPLACE, BTA2DP_MUTE_CHECK_DELAY_MS);
+                sendMsg(MSG_CHECK_MUTE_MUSIC, SENDMSG_REPLACE, muteCheckDelayMs);
             }
 
             if (isMessageHandledUnderWakelock(msg.what)) {

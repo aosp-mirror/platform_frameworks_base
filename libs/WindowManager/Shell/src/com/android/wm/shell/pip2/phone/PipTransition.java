@@ -34,6 +34,7 @@ import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -43,6 +44,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.util.Preconditions;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -54,23 +56,33 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
-import java.util.function.Consumer;
-
 /**
  * Implementation of transitions for PiP on phone.
  */
-public class PipTransition extends PipTransitionController {
+public class PipTransition extends PipTransitionController implements
+        PipTransitionState.PipTransitionStateChangedListener {
     private static final String TAG = PipTransition.class.getSimpleName();
+    private static final String PIP_TASK_TOKEN = "pip_task_token";
+    private static final String PIP_TASK_LEASH = "pip_task_leash";
+
     /**
      * The fixed start delay in ms when fading out the content overlay from bounds animation.
      * The fadeout animation is guaranteed to start after the client has drawn under the new config.
      */
     private static final int CONTENT_OVERLAY_FADE_OUT_DELAY_MS = 400;
 
+    //
+    // Dependencies
+    //
+
     private final Context mContext;
     private final PipScheduler mPipScheduler;
-    @Nullable
-    private WindowContainerToken mPipTaskToken;
+    private final PipTransitionState mPipTransitionState;
+
+    //
+    // Transition tokens
+    //
+
     @Nullable
     private IBinder mEnterTransition;
     @Nullable
@@ -78,7 +90,14 @@ public class PipTransition extends PipTransitionController {
     @Nullable
     private IBinder mResizeTransition;
 
-    private Consumer<Rect> mFinishResizeCallback;
+    //
+    // Internal state and relevant cached info
+    //
+
+    @Nullable
+    private WindowContainerToken mPipTaskToken;
+    @Nullable
+    private SurfaceControl mPipLeash;
 
     public PipTransition(
             Context context,
@@ -88,13 +107,16 @@ public class PipTransition extends PipTransitionController {
             PipBoundsState pipBoundsState,
             PipMenuController pipMenuController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipScheduler pipScheduler) {
+            PipScheduler pipScheduler,
+            PipTransitionState pipTransitionState) {
         super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
                 pipBoundsAlgorithm);
 
         mContext = context;
         mPipScheduler = pipScheduler;
         mPipScheduler.setPipTransitionController(this);
+        mPipTransitionState = pipTransitionState;
+        mPipTransitionState.addPipTransitionStateChangedListener(this);
     }
 
     @Override
@@ -103,6 +125,10 @@ public class PipTransition extends PipTransitionController {
             mTransitions.addHandler(this);
         }
     }
+
+    //
+    // Transition collection stage lifecycle hooks
+    //
 
     @Override
     public void startExitTransition(int type, WindowContainerTransaction out,
@@ -117,13 +143,11 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
-    public void startResizeTransition(WindowContainerTransaction wct,
-            Consumer<Rect> onFinishResizeCallback) {
+    public void startResizeTransition(WindowContainerTransaction wct) {
         if (wct == null) {
             return;
         }
         mResizeTransition = mTransitions.startTransition(TRANSIT_RESIZE_PIP, wct, this);
-        mFinishResizeCallback = onFinishResizeCallback;
     }
 
     @Nullable
@@ -146,6 +170,10 @@ public class PipTransition extends PipTransitionController {
         }
     }
 
+    //
+    // Transition playing stage lifecycle hooks
+    //
+
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
@@ -163,7 +191,19 @@ public class PipTransition extends PipTransitionController {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (transition == mEnterTransition || info.getType() == TRANSIT_PIP) {
             mEnterTransition = null;
-            if (mPipScheduler.isInSwipePipToHomeTransition()) {
+            // If we are in swipe PiP to Home transition we are ENTERING_PIP as a jumpcut transition
+            // is being carried out.
+            TransitionInfo.Change pipChange = getPipChange(info);
+
+            // If there is no PiP change, exit this transition handler and potentially try others.
+            if (pipChange == null) return false;
+
+            Bundle extra = new Bundle();
+            extra.putParcelable(PIP_TASK_TOKEN, pipChange.getContainer());
+            extra.putParcelable(PIP_TASK_LEASH, pipChange.getLeash());
+            mPipTransitionState.setState(PipTransitionState.ENTERING_PIP, extra);
+
+            if (mPipTransitionState.isInSwipePipToHomeTransition()) {
                 // If this is the second transition as a part of swipe PiP to home cuj,
                 // handle this transition as a special case with no-op animation.
                 return handleSwipePipToHomeTransition(info, startTransaction, finishTransaction,
@@ -179,9 +219,11 @@ public class PipTransition extends PipTransitionController {
                     finishCallback);
         } else if (transition == mExitViaExpandTransition) {
             mExitViaExpandTransition = null;
+            mPipTransitionState.setState(PipTransitionState.EXITING_PIP);
             return startExpandAnimation(info, startTransaction, finishTransaction, finishCallback);
         } else if (transition == mResizeTransition) {
             mResizeTransition = null;
+            mPipTransitionState.setState(PipTransitionState.CHANGING_PIP_BOUNDS);
             return startResizeAnimation(info, startTransaction, finishTransaction, finishCallback);
         }
 
@@ -190,6 +232,10 @@ public class PipTransition extends PipTransitionController {
         }
         return false;
     }
+
+    //
+    // Animation schedulers and entry points
+    //
 
     private boolean startResizeAnimation(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
@@ -236,11 +282,7 @@ public class PipTransition extends PipTransitionController {
         if (pipChange == null) {
             return false;
         }
-        mPipScheduler.setInSwipePipToHomeTransition(false);
-        mPipTaskToken = pipChange.getContainer();
-
-        // cache the PiP task token and leash
-        mPipScheduler.setPipTaskToken(mPipTaskToken);
+        WindowContainerToken pipTaskToken = pipChange.getContainer();
         SurfaceControl pipLeash = pipChange.getLeash();
 
         PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
@@ -264,9 +306,9 @@ public class PipTransition extends PipTransitionController {
         } else {
             final float scaleX = (float) destinationBounds.width() / startBounds.width();
             final float scaleY = (float) destinationBounds.height() / startBounds.height();
-            final int overlaySize = PipContentOverlay.PipAppIconOverlay
-                    .getOverlaySize(mPipScheduler.mSwipePipToHomeAppBounds, destinationBounds);
-            SurfaceControl overlayLeash = mPipScheduler.mSwipePipToHomeOverlay;
+            final int overlaySize = PipContentOverlay.PipAppIconOverlay.getOverlaySize(
+                    mPipTransitionState.getSwipePipToHomeAppBounds(), destinationBounds);
+            SurfaceControl overlayLeash = mPipTransitionState.getSwipePipToHomeOverlay();
 
             startTransaction.setPosition(pipLeash, destinationBounds.left, destinationBounds.top)
                     .setScale(pipLeash, scaleX, scaleY)
@@ -274,7 +316,7 @@ public class PipTransition extends PipTransitionController {
                     .reparent(overlayLeash, pipLeash)
                     .setLayer(overlayLeash, Integer.MAX_VALUE);
 
-            if (mPipTaskToken != null) {
+            if (pipTaskToken != null) {
                 SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
                 tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
                                 this::onClientDrawAtTransitionEnd)
@@ -282,7 +324,7 @@ public class PipTransition extends PipTransitionController {
                         .setPosition(overlayLeash,
                                 (destinationBounds.width() - overlaySize) / 2f,
                                 (destinationBounds.height() - overlaySize) / 2f);
-                finishWct.setBoundsChangeTransaction(mPipTaskToken, tx);
+                finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
             }
         }
         startTransaction.apply();
@@ -293,14 +335,6 @@ public class PipTransition extends PipTransitionController {
         return true;
     }
 
-    private void onClientDrawAtTransitionEnd() {
-        startOverlayFadeoutAnimation();
-    }
-
-    //
-    // Subroutines setting up and starting transitions' animations.
-    //
-
     private void startOverlayFadeoutAnimation() {
         ValueAnimator animator = ValueAnimator.ofFloat(1f, 0f);
         animator.setDuration(CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
@@ -309,15 +343,17 @@ public class PipTransition extends PipTransitionController {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-                tx.remove(mPipScheduler.mSwipePipToHomeOverlay);
+                tx.remove(mPipTransitionState.getSwipePipToHomeOverlay());
                 tx.apply();
-                mPipScheduler.mSwipePipToHomeOverlay = null;
+
+                // We have fully completed enter-PiP animation after the overlay is gone.
+                mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
             }
         });
         animator.addUpdateListener(animation -> {
             float alpha = (float) animation.getAnimatedValue();
             SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-            tx.setAlpha(mPipScheduler.mSwipePipToHomeOverlay, alpha).apply();
+            tx.setAlpha(mPipTransitionState.getSwipePipToHomeOverlay(), alpha).apply();
         });
         animator.start();
     }
@@ -330,10 +366,8 @@ public class PipTransition extends PipTransitionController {
         if (pipChange == null) {
             return false;
         }
-        mPipTaskToken = pipChange.getContainer();
-
         // cache the PiP task token and leash
-        mPipScheduler.setPipTaskToken(mPipTaskToken);
+        WindowContainerToken pipTaskToken = pipChange.getContainer();
 
         startTransaction.apply();
         // TODO: b/275910498 Use a new implementation of the PiP animator here.
@@ -349,10 +383,8 @@ public class PipTransition extends PipTransitionController {
         if (pipChange == null) {
             return false;
         }
-        mPipTaskToken = pipChange.getContainer();
-
         // cache the PiP task token and leash
-        mPipScheduler.setPipTaskToken(mPipTaskToken);
+        WindowContainerToken pipTaskToken = pipChange.getContainer();
 
         startTransaction.apply();
         finishCallback.onTransitionFinished(null);
@@ -366,7 +398,7 @@ public class PipTransition extends PipTransitionController {
         startTransaction.apply();
         // TODO: b/275910498 Use a new implementation of the PiP animator here.
         finishCallback.onTransitionFinished(null);
-        onExitPip();
+        mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
         return true;
     }
 
@@ -376,12 +408,20 @@ public class PipTransition extends PipTransitionController {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         startTransaction.apply();
         finishCallback.onTransitionFinished(null);
-        onExitPip();
+        mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
         return true;
     }
 
+    /**
+     * TODO: b/275910498 Use a new implementation of the PiP animator here.
+     */
+    private void startResizeAnimation(SurfaceControl leash, Rect startBounds,
+            Rect endBounds, int duration) {
+        mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
+    }
+
     //
-    // Utility methods for checking PiP-related transition info and requests.
+    // Various helpers to resolve transition requests and infos
     //
 
     @Nullable
@@ -442,11 +482,11 @@ public class PipTransition extends PipTransitionController {
     }
 
     private boolean isRemovePipTransition(@NonNull TransitionInfo info) {
-        if (mPipTaskToken == null) {
+        if (mPipTransitionState.mPipTaskToken == null) {
             // PiP removal makes sense if enter-PiP has cached a valid pinned task token.
             return false;
         }
-        TransitionInfo.Change pipChange = info.getChange(mPipTaskToken);
+        TransitionInfo.Change pipChange = info.getChange(mPipTransitionState.mPipTaskToken);
         if (pipChange == null) {
             // Search for the PiP change by token since the windowing mode might be FULLSCREEN now.
             return false;
@@ -460,14 +500,43 @@ public class PipTransition extends PipTransitionController {
         return isPipMovedToBack || isPipClosed;
     }
 
-    /**
-     * TODO: b/275910498 Use a new implementation of the PiP animator here.
-     */
-    private void startResizeAnimation(SurfaceControl leash, Rect startBounds,
-            Rect endBounds, int duration) {}
+    //
+    // Miscellaneous callbacks and listeners
+    //
 
-    private void onExitPip() {
-        mPipTaskToken = null;
-        mPipScheduler.onExitPip();
+    private void onClientDrawAtTransitionEnd() {
+        if (mPipTransitionState.getSwipePipToHomeOverlay() != null) {
+            startOverlayFadeoutAnimation();
+        } else if (mPipTransitionState.getState() == PipTransitionState.ENTERING_PIP) {
+            // If we were entering PiP (i.e. playing the animation) with a valid srcRectHint,
+            // and then we get a signal on client finishing its draw after the transition
+            // has ended, then we have fully entered PiP.
+            mPipTransitionState.setState(PipTransitionState.ENTERED_PIP);
+        }
+    }
+
+    @Override
+    public void onPipTransitionStateChanged(@PipTransitionState.TransitionState int oldState,
+            @PipTransitionState.TransitionState int newState, @Nullable Bundle extra) {
+        switch (newState) {
+            case PipTransitionState.ENTERING_PIP:
+                Preconditions.checkState(extra != null,
+                        "No extra bundle for " + mPipTransitionState);
+
+                mPipTransitionState.mPipTaskToken = extra.getParcelable(
+                        PIP_TASK_TOKEN, WindowContainerToken.class);
+                mPipTransitionState.mPinnedTaskLeash = extra.getParcelable(
+                        PIP_TASK_LEASH, SurfaceControl.class);
+                boolean hasValidTokenAndLeash = mPipTransitionState.mPipTaskToken != null
+                        && mPipTransitionState.mPinnedTaskLeash != null;
+
+                Preconditions.checkState(hasValidTokenAndLeash,
+                        "Unexpected bundle for " + mPipTransitionState);
+                break;
+            case PipTransitionState.EXITED_PIP:
+                mPipTransitionState.mPipTaskToken = null;
+                mPipTransitionState.mPinnedTaskLeash = null;
+                break;
+        }
     }
 }

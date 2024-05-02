@@ -33,6 +33,12 @@ class ResourceUnfoldTransitionConfig @Inject constructor() : UnfoldTransitionCon
         Resources.getSystem().getBoolean(id)
     }
 
+    override val isHapticsEnabled: Boolean by lazy {
+        val id = Resources.getSystem()
+            .getIdentifier("config_unfoldTransitionHapticsEnabled", "bool", "android")
+        Resources.getSystem().getBoolean(id)
+    }
+
     override val halfFoldedTimeoutMillis: Int by lazy {
         val id = Resources.getSystem()
             .getIdentifier("config_unfoldTransitionHalfFoldedTimeout", "integer", "android")

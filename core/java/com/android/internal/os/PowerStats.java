@@ -473,7 +473,14 @@ public final class PowerStats {
         } finally {
             // Unconditionally skip to the end of the written data, even if the actual parcel
             // format is incompatible
-            parcel.setDataPosition(endPos);
+            if (endPos > parcel.dataPosition()) {
+                if (endPos >= parcel.dataSize()) {
+                    throw new IndexOutOfBoundsException(
+                            "PowerStats end position: " + endPos + " is outside the parcel bounds: "
+                                    + parcel.dataSize());
+                }
+                parcel.setDataPosition(endPos);
+            }
         }
     }
 

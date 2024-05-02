@@ -21,6 +21,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.alternateBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
+import com.android.systemui.keyguard.ui.viewmodel.aodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.aodToOccludedTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.dozingToLockscreenTransitionViewModel
@@ -60,6 +61,7 @@ val Kosmos.sharedNotificationContainerViewModel by Fixture {
         shadeInteractor = shadeInteractor,
         notificationStackAppearanceInteractor = notificationStackAppearanceInteractor,
         alternateBouncerToGoneTransitionViewModel = alternateBouncerToGoneTransitionViewModel,
+        aodToGoneTransitionViewModel = aodToGoneTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         aodToOccludedTransitionViewModel = aodToOccludedTransitionViewModel,
         dozingToLockscreenTransitionViewModel = dozingToLockscreenTransitionViewModel,

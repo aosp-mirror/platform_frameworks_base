@@ -26,6 +26,7 @@ import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
+import static android.os.UserHandle.USER_SYSTEM;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
@@ -139,6 +140,8 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";
     private static final String ATT_UID = "uid";
+
+    private static final String ATT_USERID = "userid";
     private static final String ATT_ID = "id";
     private static final String ATT_ALLOW_BUBBLE = "allow_bubble";
     private static final String ATT_PRIORITY = "priority";
@@ -268,7 +271,7 @@ public class PreferencesHelper implements RankingConfig {
                 }
                 if (type == XmlPullParser.START_TAG) {
                     if (TAG_STATUS_ICONS.equals(tag)) {
-                        if (forRestore && userId != UserHandle.USER_SYSTEM) {
+                        if (forRestore && userId != USER_SYSTEM) {
                             continue;
                         }
                         mHideSilentStatusBarIcons = parser.getAttributeBoolean(null,
@@ -311,8 +314,16 @@ public class PreferencesHelper implements RankingConfig {
                     : parser.getAttributeInt(null, ATT_ALLOW_BUBBLE, DEFAULT_BUBBLE_PREFERENCE);
             int appImportance = parser.getAttributeInt(null, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
 
+            // when data is loaded from disk it's loaded as USER_ALL, but restored data that
+            // is pending app install needs the user id that the data was restored to
+            int fixedUserId = userId;
+            if (Flags.persistIncompleteRestoreData()) {
+                if (!forRestore && uid == UNKNOWN_UID) {
+                    fixedUserId = parser.getAttributeInt(null, ATT_USERID, USER_SYSTEM);
+                }
+            }
             PackagePreferences r = getOrCreatePackagePreferencesLocked(
-                    name, userId, uid,
+                    name, fixedUserId, uid,
                     appImportance,
                     parser.getAttributeInt(null, ATT_PRIORITY, DEFAULT_PRIORITY),
                     parser.getAttributeInt(null, ATT_VISIBILITY, DEFAULT_VISIBILITY),
@@ -504,6 +515,9 @@ public class PreferencesHelper implements RankingConfig {
             }
 
             if (r.uid == UNKNOWN_UID) {
+                if (Flags.persistIncompleteRestoreData()) {
+                    r.userId = userId;
+                }
                 mRestoredWithoutUids.put(unrestoredPackageKey(pkg, userId), r);
             } else {
                 mPackagePreferences.put(key, r);
@@ -674,6 +688,7 @@ public class PreferencesHelper implements RankingConfig {
 
         if (Flags.persistIncompleteRestoreData() && r.uid == UNKNOWN_UID) {
             out.attributeLong(null, ATT_CREATION_TIME, r.creationTime);
+            out.attributeInt(null, ATT_USERID, r.userId);
         }
 
         if (!forBackup) {
@@ -2946,6 +2961,8 @@ public class PreferencesHelper implements RankingConfig {
 
         boolean migrateToPm = false;
         long creationTime;
+
+        @UserIdInt int userId;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();

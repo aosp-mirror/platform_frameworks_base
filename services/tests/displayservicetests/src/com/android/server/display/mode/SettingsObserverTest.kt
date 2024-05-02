@@ -146,8 +146,8 @@ class SettingsObserverTest {
 
         val modes = arrayOf(
             Display.Mode(1, 1000, 1000, 60f),
-            Display.Mode(1, 1000, 1000, 90f),
-            Display.Mode(1, 1000, 1000, 120f)
+            Display.Mode(2, 1000, 1000, 90f),
+            Display.Mode(3, 1000, 1000, 120f)
         )
         displayModeDirector.injectSupportedModesByDisplay(SparseArray<Array<Display.Mode>>().apply {
             append(Display.DEFAULT_DISPLAY, modes)

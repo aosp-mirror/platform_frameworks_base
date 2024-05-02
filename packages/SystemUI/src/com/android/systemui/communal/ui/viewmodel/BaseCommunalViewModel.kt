@@ -18,6 +18,7 @@ package com.android.systemui.communal.ui.viewmodel
 
 import android.content.ComponentName
 import android.os.UserHandle
+import android.view.View
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
@@ -37,8 +38,8 @@ abstract class BaseCommunalViewModel(
 ) {
     val currentScene: Flow<SceneKey> = communalInteractor.desiredScene
 
-    /** Whether communal hub can be focused to enable accessibility actions. */
-    val isFocusable: Flow<Boolean> = communalInteractor.isIdleOnCommunal
+    /** Whether communal hub should be focused by accessibility tools. */
+    open val isFocusable: Flow<Boolean> = MutableStateFlow(false)
 
     /** Whether widgets are currently being re-ordered. */
     open val reorderingWidgets: StateFlow<Boolean> = MutableStateFlow(false)
@@ -48,6 +49,9 @@ abstract class BaseCommunalViewModel(
     /** The key of the currently selected item, or null if no item selected. */
     val selectedKey: StateFlow<String?>
         get() = _selectedKey
+
+    /** Accessibility delegate to be set on CommunalAppWidgetHostView. */
+    open val widgetAccessibilityDelegate: View.AccessibilityDelegate? = null
 
     fun signalUserInteraction() {
         communalInteractor.signalUserInteraction()

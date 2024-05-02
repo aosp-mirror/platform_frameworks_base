@@ -17,6 +17,7 @@
 package com.android.systemui.volume.panel
 
 import android.content.res.mainResources
+import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.policy.fakeConfigurationController
@@ -72,5 +73,6 @@ var Kosmos.volumePanelViewModel: VolumePanelViewModel by
             testScope.backgroundScope,
             KosmosVolumePanelComponentFactory(this),
             fakeConfigurationController,
+            broadcastDispatcher,
         )
     }

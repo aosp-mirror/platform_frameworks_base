@@ -18,6 +18,7 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.Context
 import android.media.AudioManager
+import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
@@ -144,6 +145,7 @@ constructor(
             if (isMutedOrNoVolume) {
                 when (audioStream.value) {
                     AudioManager.STREAM_MUSIC -> R.drawable.ic_volume_off
+                    AudioManager.STREAM_BLUETOOTH_SCO -> R.drawable.ic_volume_off
                     AudioManager.STREAM_VOICE_CALL -> R.drawable.ic_volume_off
                     AudioManager.STREAM_RING ->
                         if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
@@ -158,12 +160,18 @@ constructor(
                             R.drawable.ic_volume_off
                         }
                     AudioManager.STREAM_ALARM -> R.drawable.ic_volume_off
-                    else -> null
+                    else -> {
+                        Log.wtf(TAG, "No icon for the stream: $audioStream")
+                        R.drawable.ic_volume_off
+                    }
                 }
             } else {
                 iconsByStream[audioStream]
+                    ?: run {
+                        Log.wtf(TAG, "No icon for the stream: $audioStream")
+                        R.drawable.ic_music_note
+                    }
             }
-                ?: error("No icon for the stream: $audioStream")
         return Icon.Resource(iconRes, null)
     }
 
@@ -196,4 +204,8 @@ constructor(
      * when using [AudioStream] directly because it expects another type.
      */
     class FactoryAudioStreamWrapper(val audioStream: AudioStream)
+
+    private companion object {
+        const val TAG = "AudioStreamSliderViewModel"
+    }
 }

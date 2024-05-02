@@ -222,7 +222,7 @@ public class DisplayModeDirector {
                 displayManagerFlags.isRefreshRateVotingTelemetryEnabled());
         mSupportedModesByDisplay = new SparseArray<>();
         mDefaultModeByDisplay = new SparseArray<>();
-        mAppRequestObserver = new AppRequestObserver();
+        mAppRequestObserver = new AppRequestObserver(displayManagerFlags);
         mConfigParameterProvider = new DeviceConfigParameterProvider(injector.getDeviceConfig());
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mSettingsObserver = new SettingsObserver(context, handler, displayManagerFlags);
@@ -1205,22 +1205,54 @@ public class DisplayModeDirector {
     public final class AppRequestObserver {
         private final SparseArray<Display.Mode> mAppRequestedModeByDisplay;
         private final SparseArray<RefreshRateRange> mAppPreferredRefreshRateRangeByDisplay;
+        private final boolean mIgnorePreferredRefreshRate;
 
-        AppRequestObserver() {
+        AppRequestObserver(DisplayManagerFlags flags) {
             mAppRequestedModeByDisplay = new SparseArray<>();
             mAppPreferredRefreshRateRangeByDisplay = new SparseArray<>();
+            mIgnorePreferredRefreshRate = flags.ignoreAppPreferredRefreshRateRequest();
         }
 
         /**
          * Sets refresh rates from app request
          */
-        public void setAppRequest(int displayId, int modeId,
+        public void setAppRequest(int displayId, int modeId, float requestedRefreshRate,
                 float requestedMinRefreshRateRange, float requestedMaxRefreshRateRange) {
+
+            if (modeId == 0 && requestedRefreshRate != 0 && !mIgnorePreferredRefreshRate) {
+                // Scan supported modes returned to find a mode with the same
+                // size as the default display mode but with the specified refresh rate instead.
+                Display.Mode mode = findDefaultModeByRefreshRate(displayId, requestedRefreshRate);
+                if (mode != null) {
+                    modeId = mode.getModeId();
+                } else {
+                    Slog.e(TAG, "Couldn't find a mode for the requestedRefreshRate: "
+                            + requestedRefreshRate + " on Display: " + displayId);
+                }
+            }
+
             synchronized (mLock) {
                 setAppRequestedModeLocked(displayId, modeId);
                 setAppPreferredRefreshRateRangeLocked(displayId, requestedMinRefreshRateRange,
                         requestedMaxRefreshRateRange);
             }
+        }
+
+        @Nullable
+        private Display.Mode findDefaultModeByRefreshRate(int displayId, float refreshRate) {
+            Display.Mode[] modes;
+            Display.Mode defaultMode;
+            synchronized (mLock) {
+                modes = mSupportedModesByDisplay.get(displayId);
+                defaultMode = mDefaultModeByDisplay.get(displayId);
+            }
+            for (int i = 0; i < modes.length; i++) {
+                if (modes[i].matches(defaultMode.getPhysicalWidth(),
+                        defaultMode.getPhysicalHeight(), refreshRate)) {
+                    return modes[i];
+                }
+            }
+            return null;
         }
 
         private void setAppRequestedModeLocked(int displayId, int modeId) {

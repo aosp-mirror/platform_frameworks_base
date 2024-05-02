@@ -19,6 +19,7 @@ package com.android.server.os;
 import static android.app.admin.flags.Flags.onboardingBugreportV2Enabled;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.AppOpsManager;
@@ -68,6 +69,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
@@ -335,14 +337,22 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     }
 
     static class Injector {
+        class RoleManagerWrapper {
+            List<String> getRoleHolders(@NonNull String roleName) {
+                return mContext.getSystemService(RoleManager.class).getRoleHolders(roleName);
+            }
+        }
+
         Context mContext;
         ArraySet<String> mAllowlistedPackages;
         AtomicFile mMappingFile;
+        RoleManagerWrapper mRoleManagerWrapper;
 
         Injector(Context context, ArraySet<String> allowlistedPackages, AtomicFile mappingFile) {
             mContext = context;
             mAllowlistedPackages = allowlistedPackages;
             mMappingFile = mappingFile;
+            mRoleManagerWrapper = new RoleManagerWrapper();
         }
 
         Context getContext() {
@@ -367,6 +377,10 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         void setSystemProperty(String key, String value) {
             SystemProperties.set(key, value);
+        }
+
+        RoleManagerWrapper getRoleManagerWrapper() {
+            return mRoleManagerWrapper;
         }
     }
 
@@ -546,7 +560,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         if (!allowlisted) {
             final long token = Binder.clearCallingIdentity();
             try {
-                allowlisted = mContext.getSystemService(RoleManager.class).getRoleHolders(
+                allowlisted = mInjector.getRoleManagerWrapper().getRoleHolders(
                         ROLE_SYSTEM_AUTOMOTIVE_PROJECTION).contains(callingPackage);
             } finally {
                 Binder.restoreCallingIdentity(token);

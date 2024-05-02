@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.helpers
 
+import android.graphics.Rect
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -32,6 +33,14 @@ import androidx.test.uiautomator.Until
  */
 open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     IStandardAppHelper by innerHelper {
+
+    enum class Corners {
+        LEFT_TOP,
+        RIGHT_TOP,
+        LEFT_BOTTOM,
+        RIGHT_BOTTOM
+    }
+
     private val TIMEOUT_MS = 3_000L
     private val CAPTION = "desktop_mode_caption"
     private val CAPTION_HANDLE = "caption_handle"
@@ -119,6 +128,41 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
 
         return captions.find {
             wmHelper.getWindowRegion(innerHelper).bounds.contains(it.visibleBounds)
+        }
+    }
+
+    /** Resize a desktop app from its corners. */
+    fun cornerResize(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        corner: Corners,
+        horizontalChange: Int,
+        verticalChange: Int
+    ) {
+        val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
+        val (startX, startY) = getStartCoordinatesForCornerResize(windowRect, corner)
+
+        // The position we want to drag to
+        val endY = startY + verticalChange
+        val endX = startX + horizontalChange
+
+        // drag the specified corner of the window to the end coordinate.
+        device.drag(startX, startY, endX, endY, 100)
+        wmHelper
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .waitForAndVerify()
+    }
+
+    private fun getStartCoordinatesForCornerResize(
+        windowRect: Rect,
+        corner: Corners
+    ): Pair<Int, Int> {
+        return when (corner) {
+            Corners.LEFT_TOP -> Pair(windowRect.left, windowRect.top)
+            Corners.RIGHT_TOP -> Pair(windowRect.right, windowRect.top)
+            Corners.LEFT_BOTTOM -> Pair(windowRect.left, windowRect.bottom)
+            Corners.RIGHT_BOTTOM -> Pair(windowRect.right, windowRect.bottom)
         }
     }
 }
