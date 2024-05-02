@@ -1527,6 +1527,20 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     + " currentUserId=" + mCurrentUserId);
         }
 
+        // Clean up stuff for mCurrentUserId, which soon becomes the previous user.
+
+        // TODO(b/338461930): Check if this is still necessary or not.
+        onUnbindCurrentMethodByReset();
+
+        // Note that in b/197848765 we want to see if we can keep the binding alive for better
+        // profile switching.
+        mBindingController.unbindCurrentMethod();
+        // TODO(b/325515685): No need to do this once BindingController becomes per-user.
+        mBindingController.setSelectedMethodId(null);
+        unbindCurrentClientLocked(UnbindReason.SWITCH_USER);
+
+        // Hereafter we start initializing things for "newUserId".
+
         maybeInitImeNavbarConfigLocked(newUserId);
 
         // ContentObserver should be registered again when the user is changed
@@ -1547,10 +1561,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Even in such cases, IMMS works fine because it will find the most applicable
         // IME for that user.
         final boolean initialUserSwitch = TextUtils.isEmpty(defaultImiId);
-
-        // The mSystemReady flag is set during boot phase,
-        // and user switch would not happen at that time.
-        resetCurrentMethodAndClientLocked(UnbindReason.SWITCH_USER);
 
         final InputMethodSettings newSettings = InputMethodSettingsRepository.get(newUserId);
         postInputMethodSettingUpdatedLocked(initialUserSwitch /* resetDefaultEnabledIme */);
@@ -2500,6 +2510,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     void resetCurrentMethodAndClientLocked(@UnbindReason int unbindClientReason) {
         mBindingController.setSelectedMethodId(null);
         // Callback before clean-up binding states.
+        // TODO(b/338461930): Check if this is still necessary or not.
         onUnbindCurrentMethodByReset();
         mBindingController.unbindCurrentMethod();
         unbindCurrentClientLocked(unbindClientReason);
