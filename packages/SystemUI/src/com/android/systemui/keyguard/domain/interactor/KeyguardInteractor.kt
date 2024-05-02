@@ -90,6 +90,7 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
+    private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
     sharedNotificationContainerInteractor: Provider<SharedNotificationContainerInteractor>,
     @Application applicationScope: CoroutineScope,
 ) {
@@ -423,6 +424,11 @@ constructor(
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
     fun showKeyguard() {
         fromGoneTransitionInteractor.get().showKeyguard()
+    }
+
+    /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
+    fun dismissKeyguard() {
+        fromLockscreenTransitionInteractor.get().dismissKeyguard()
     }
 
     companion object {
