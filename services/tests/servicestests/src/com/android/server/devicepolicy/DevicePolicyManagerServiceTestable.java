@@ -441,11 +441,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         public void runCryptoSelfTest() {}
 
-        @Override
-        public String[] getPersonalAppsForSuspension(int userId) {
-            return new String[]{};
-        }
-
         public void setSystemCurrentTimeMillis(long value) {
             mCurrentTimeMillis = value;
         }

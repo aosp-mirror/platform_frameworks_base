@@ -1994,11 +1994,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             CryptoTestHelper.runAndLogSelfTest();
         }
 
-        public String[] getPersonalAppsForSuspension(@UserIdInt int userId) {
-            return PersonalAppsSuspensionHelper.forUser(mContext, userId)
-                    .getPersonalAppsForSuspension();
-        }
-
         public long systemCurrentTimeMillis() {
             return System.currentTimeMillis();
         }

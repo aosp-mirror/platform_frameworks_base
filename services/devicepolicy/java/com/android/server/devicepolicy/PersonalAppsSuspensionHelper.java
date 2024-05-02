@@ -37,7 +37,6 @@ import android.provider.Telephony;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
-import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.inputmethod.InputMethodInfo;
@@ -106,10 +105,6 @@ public final class PersonalAppsSuspensionHelper {
                 mPackageManager.getUnsuspendablePackages(result.toArray(new String[0]));
         for (final String pkg : unsuspendablePackages) {
             result.remove(pkg);
-        }
-
-        if (Log.isLoggable(LOG_TAG, Log.INFO)) {
-            Slogf.i(LOG_TAG, "Packages subject to suspension: %s", String.join(",", result));
         }
         return result.toArray(new String[0]);
     }
