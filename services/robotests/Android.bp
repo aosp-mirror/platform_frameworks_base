@@ -64,6 +64,8 @@ android_robolectric_test {
     instrumentation_for: "FrameworksServicesLib",
 
     upstream: true,
+
+    strict_mode: false,
 }
 
 filegroup {

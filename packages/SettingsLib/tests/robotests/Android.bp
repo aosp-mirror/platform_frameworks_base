@@ -64,6 +64,8 @@ android_robolectric_test {
         timeout: 36000,
     },
     upstream: true,
+
+    strict_mode: false,
 }
 
 java_genrule {
