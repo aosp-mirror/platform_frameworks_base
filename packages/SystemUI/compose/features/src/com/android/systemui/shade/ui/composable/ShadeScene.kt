@@ -201,9 +201,19 @@ private fun SceneScope.SingleShade(
         animateSceneFloatAsState(value = 1f, key = QuickSettings.SharedValues.TilesSquishiness)
     val isClickable by viewModel.isClickable.collectAsState()
 
-    // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this scene
-    // (and not the one under it) during a scene transition.
-    Box(modifier = modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
+    val shouldPunchHoleBehindScrim =
+        layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
+            layoutState.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade)
+
+    Box(
+        modifier =
+            modifier.thenIf(shouldPunchHoleBehindScrim) {
+                // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this
+                // scene
+                // (and not the one under it) during a scene transition.
+                Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            }
+    ) {
         Box(
             modifier =
                 Modifier.fillMaxSize()
@@ -256,6 +266,7 @@ private fun SceneScope.SingleShade(
                         NotificationScrollingStack(
                             viewModel = viewModel.notifications,
                             maxScrimTop = { maxNotifScrimTop.value },
+                            shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
                         )
                     },
                 )
@@ -427,6 +438,7 @@ private fun SceneScope.SplitShade(
                 NotificationScrollingStack(
                     viewModel = viewModel.notifications,
                     maxScrimTop = { 0f },
+                    shouldPunchHoleBehindScrim = false,
                     modifier =
                         Modifier.weight(1f)
                             .fillMaxHeight()
