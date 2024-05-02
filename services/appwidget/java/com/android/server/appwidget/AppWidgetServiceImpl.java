@@ -2292,7 +2292,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         args.arg4 = requestId;
         args.argi1 = widget.appWidgetId;
 
-        if (updateViews.isLegacyListRemoteViews()) {
+        if (updateViews != null && updateViews.isLegacyListRemoteViews()) {
             mCallbackHandler.obtainMessage(
                     CallbackHandler.MSG_NOTIFY_UPDATE_APP_WIDGET_DEFERRED,
                     args).sendToTarget();
