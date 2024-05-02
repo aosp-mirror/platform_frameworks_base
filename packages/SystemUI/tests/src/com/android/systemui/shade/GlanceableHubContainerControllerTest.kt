@@ -27,6 +27,7 @@ import android.widget.FrameLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
@@ -43,7 +44,6 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -55,6 +55,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -117,7 +118,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     dialogFactory,
-                    keyguardTransitionInteractor,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,
@@ -160,7 +160,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         communalInteractor,
                         communalViewModel,
                         dialogFactory,
-                        keyguardTransitionInteractor,
                         keyguardInteractor,
                         shadeInteractor,
                         powerManager,
@@ -206,13 +205,39 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    fun onTouchEvent_communalTransitioning_interceptsTouches() =
+        with(kosmos) {
+            testScope.runTest {
+                // Communal is opening.
+                communalRepository.setTransitionState(
+                    flowOf(
+                        ObservableTransitionState.Transition(
+                            fromScene = CommunalScenes.Blank,
+                            toScene = CommunalScenes.Communal,
+                            currentScene = flowOf(CommunalScenes.Blank),
+                            progress = flowOf(0.5f),
+                            isInitiatedByUserInput = true,
+                            isUserInputOngoing = flowOf(true)
+                        )
+                    )
+                )
+                testableLooper.processAllMessages()
+
+                // Touch events are intercepted.
+                assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
+                // User activity sent to PowerManager.
+                verify(powerManager).userActivity(any(), any(), any())
+            }
+        }
+
+    @Test
     fun onTouchEvent_communalOpen_interceptsTouches() =
         with(kosmos) {
             testScope.runTest {
                 // Communal is open.
                 goToScene(CommunalScenes.Communal)
 
-                // Touch events are intercepted outside of any gesture areas.
+                // Touch events are intercepted.
                 assertThat(underTest.onTouchEvent(DOWN_EVENT)).isTrue()
                 // User activity sent to PowerManager.
                 verify(powerManager).userActivity(any(), any(), any())
@@ -279,7 +304,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     dialogFactory,
-                    keyguardTransitionInteractor,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,
@@ -299,7 +323,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     communalInteractor,
                     communalViewModel,
                     dialogFactory,
-                    keyguardTransitionInteractor,
                     keyguardInteractor,
                     shadeInteractor,
                     powerManager,

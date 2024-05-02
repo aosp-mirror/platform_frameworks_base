@@ -70,7 +70,6 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     private val communalViewModel: CommunalViewModel,
     private val dialogFactory: SystemUIDialogFactory,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val powerManager: PowerManager,
@@ -103,12 +102,9 @@ constructor(
     private var rightEdgeSwipeRegionWidth: Int = 0
 
     /**
-     * True if we are currently tracking a gesture for opening the hub that started in the edge
-     * swipe region.
+     * True if we are currently tracking a touch intercepted by the hub, either because the hub is
+     * open or being opened.
      */
-    private var isTrackingOpenGesture = false
-
-    /** True if we are currently tracking a touch on the hub while it's open. */
     private var isTrackingHubTouch = false
 
     /**
@@ -154,7 +150,7 @@ constructor(
     /**
      * Creates the container view containing the glanceable hub UI.
      *
-     * @throws RuntimeException if [isEnabled] is false or the view is already initialized
+     * @throws RuntimeException if the view is already initialized
      */
     fun initView(
         context: Context,
@@ -229,7 +225,7 @@ constructor(
 
         // BouncerSwipeTouchHandler has a larger gesture area than we want, set an exclusion area so
         // the gesture area doesn't overlap with widgets.
-        // TODO(b/323035776): adjust gesture areaa for portrait mode
+        // TODO(b/323035776): adjust gesture area for portrait mode
         containerView.repeatWhenAttached {
             // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and not
             // occluded.
@@ -263,7 +259,7 @@ constructor(
         )
         collectFlow(
             containerView,
-            communalInteractor.isCommunalShowing,
+            communalInteractor.isCommunalVisible,
             {
                 hubShowing = it
                 updateTouchHandlingState()
@@ -331,67 +327,25 @@ constructor(
     }
 
     private fun handleTouchEventOnCommunalView(view: View, ev: MotionEvent): Boolean {
-        // If the hub is fully visible, send all touch events to it, other than top and bottom edge
-        // swipes.
-        return if (hubShowing) {
-            handleHubOpenTouch(view, ev)
-        } else {
-            handleHubClosedTouch(view, ev)
-        }
-    }
-
-    private fun handleHubOpenTouch(view: View, ev: MotionEvent): Boolean {
         val isDown = ev.actionMasked == MotionEvent.ACTION_DOWN
         val isUp = ev.actionMasked == MotionEvent.ACTION_UP
         val isCancel = ev.actionMasked == MotionEvent.ACTION_CANCEL
 
         val hubOccluded = anyBouncerShowing || shadeShowing
-
-        if (isDown && !hubOccluded) {
-            // Only intercept down events if the hub isn't occluded by the bouncer or
-            // notification shade.
-            isTrackingHubTouch = true
-        }
-
-        if (isTrackingHubTouch) {
-            // Tracking a touch on the hub UI itself.
-            if (isUp || isCancel) {
-                isTrackingHubTouch = false
-            }
-            dispatchTouchEvent(view, ev)
-            // Return true regardless of dispatch result as some touches at the start of a
-            // gesture
-            // may return false from dispatchTouchEvent.
-            return true
-        }
-
-        return false
-    }
-
-    private fun handleHubClosedTouch(view: View, ev: MotionEvent): Boolean {
-        val isDown = ev.actionMasked == MotionEvent.ACTION_DOWN
-        val isUp = ev.actionMasked == MotionEvent.ACTION_UP
-        val isCancel = ev.actionMasked == MotionEvent.ACTION_CANCEL
-
-        val hubOccluded = anyBouncerShowing || shadeShowing
-
-        if (rightEdgeSwipeRegionWidth == 0) {
-            // If the edge region width has not been read yet for whatever reason, don't bother
-            // intercepting touches to open the hub.
-            return false
-        }
 
         if (isDown && !hubOccluded) {
             val x = ev.rawX
             val inOpeningSwipeRegion: Boolean = x >= view.width - rightEdgeSwipeRegionWidth
-            if (inOpeningSwipeRegion) {
-                isTrackingOpenGesture = true
+            if (inOpeningSwipeRegion || hubShowing) {
+                // Steal touch events when the hub is open, or if the touch started in the opening
+                // gesture region.
+                isTrackingHubTouch = true
             }
         }
 
-        if (isTrackingOpenGesture) {
+        if (isTrackingHubTouch) {
             if (isUp || isCancel) {
-                isTrackingOpenGesture = false
+                isTrackingHubTouch = false
             }
             dispatchTouchEvent(view, ev)
             // Return true regardless of dispatch result as some touches at the start of a gesture
