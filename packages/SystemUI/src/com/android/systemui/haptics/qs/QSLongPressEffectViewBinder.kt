@@ -67,8 +67,32 @@ object QSLongPressEffectViewBinder {
                                     qsLongPressEffect.clearActionType()
                                 }
                                 QSLongPressEffect.ActionType.START_ANIMATOR -> {
-                                    if (effectAnimator?.isRunning == false) {
-                                        effectAnimator?.start()
+                                    if (effectAnimator?.isRunning != true) {
+                                        effectAnimator =
+                                            ValueAnimator.ofFloat(0f, 1f).apply {
+                                                this.duration =
+                                                    qsLongPressEffect.effectDuration.toLong()
+                                                interpolator = AccelerateDecelerateInterpolator()
+
+                                                doOnStart {
+                                                    qsLongPressEffect.handleAnimationStart()
+                                                }
+                                                addUpdateListener {
+                                                    val value = animatedValue as Float
+                                                    if (value == 0f) {
+                                                        tile.bringToFront()
+                                                    } else {
+                                                        tile.updateLongPressEffectProperties(value)
+                                                    }
+                                                }
+                                                doOnEnd {
+                                                    qsLongPressEffect.handleAnimationComplete()
+                                                }
+                                                doOnCancel {
+                                                    qsLongPressEffect.handleAnimationCancel()
+                                                }
+                                                start()
+                                            }
                                     }
                                 }
                                 QSLongPressEffect.ActionType.REVERSE_ANIMATOR -> {
@@ -81,26 +105,6 @@ object QSLongPressEffectViewBinder {
                                 QSLongPressEffect.ActionType.CANCEL_ANIMATOR -> {
                                     tile.resetLongPressEffectProperties()
                                     effectAnimator?.cancel()
-                                }
-                                QSLongPressEffect.ActionType.INITIALIZE_ANIMATOR -> {
-                                    effectAnimator =
-                                        ValueAnimator.ofFloat(0f, 1f).apply {
-                                            this.duration =
-                                                qsLongPressEffect.effectDuration.toLong()
-                                            interpolator = AccelerateDecelerateInterpolator()
-
-                                            doOnStart { qsLongPressEffect.handleAnimationStart() }
-                                            addUpdateListener {
-                                                val value = animatedValue as Float
-                                                if (value == 0f) {
-                                                    tile.bringToFront()
-                                                } else {
-                                                    tile.updateLongPressEffectProperties(value)
-                                                }
-                                            }
-                                            doOnEnd { qsLongPressEffect.handleAnimationComplete() }
-                                            doOnCancel { qsLongPressEffect.handleAnimationCancel() }
-                                        }
                                 }
                             }
                         }
