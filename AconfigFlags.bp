@@ -532,6 +532,7 @@ aconfig_declarations {
     name: "android.content.pm.flags-aconfig",
     package: "android.content.pm",
     container: "system",
+    exportable: true,
     srcs: ["core/java/android/content/pm/flags.aconfig"],
 }
 
@@ -539,6 +540,18 @@ java_aconfig_library {
     name: "android.content.pm.flags-aconfig-java",
     aconfig_declarations: "android.content.pm.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+java_aconfig_library {
+    name: "android.content.pm.flags-aconfig-java-export",
+    aconfig_declarations: "android.content.pm.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    mode: "exported",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.permission",
+    ],
 }
 
 java_aconfig_library {
