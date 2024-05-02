@@ -538,9 +538,7 @@ public class TaskFragmentContainerTest {
         // container1.
         container2.setInfo(mTransaction, mInfo);
 
-        assertTrue(container1.hasActivity(mActivity.getActivityToken()));
-        assertFalse(container2.hasActivity(mActivity.getActivityToken()));
-
+        assertTrue(container2.hasActivity(mActivity.getActivityToken()));
         // When the pending appeared record is removed from container1, we respect the appeared
         // record in container2.
         container1.removePendingAppearedActivity(mActivity.getActivityToken());

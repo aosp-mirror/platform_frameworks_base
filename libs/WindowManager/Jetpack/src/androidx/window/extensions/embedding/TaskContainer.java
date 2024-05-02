@@ -43,6 +43,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.window.extensions.core.util.function.Predicate;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
@@ -313,6 +314,38 @@ class TaskContainer {
             final Activity activity = container.getTopNonFinishingActivity();
             if (activity != null) {
                 return activity;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
+        return getContainer(container -> container.hasAppearedActivity(activityToken)
+                || container.hasPendingAppearedActivity(activityToken));
+    }
+
+    @Nullable
+    TaskFragmentContainer getContainer(@NonNull Predicate<TaskFragmentContainer> predicate) {
+        for (int i = mContainers.size() - 1; i >= 0; i--) {
+            final TaskFragmentContainer container = mContainers.get(i);
+            if (predicate.test(container)) {
+                return container;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    SplitContainer getActiveSplitForContainer(@Nullable TaskFragmentContainer container) {
+        if (container == null) {
+            return null;
+        }
+        for (int i = mSplitContainers.size() - 1; i >= 0; i--) {
+            final SplitContainer splitContainer = mSplitContainers.get(i);
+            if (container.equals(splitContainer.getSecondaryContainer())
+                    || container.equals(splitContainer.getPrimaryContainer())) {
+                return splitContainer;
             }
         }
         return null;
