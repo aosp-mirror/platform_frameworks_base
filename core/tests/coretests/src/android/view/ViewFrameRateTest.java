@@ -564,6 +564,26 @@ public class ViewFrameRateTest {
         assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
     }
 
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+    })
+    public void frameRateResetWithInvalidations() throws Throwable {
+        mMovingView.setRequestedFrameRate(120f);
+        waitForFrameRateCategoryToSettle();
+        mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_NORMAL);
+
+        for (int i = 0; i < 120; i++) {
+            mActivityRule.runOnUiThread(() -> {
+                mMovingView.invalidate();
+                runAfterDraw(() -> {});
+            });
+            waitForAfterDraw();
+        }
+
+        assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
+    }
+
     private void runAfterDraw(@NonNull Runnable runnable) {
         Handler handler = new Handler(Looper.getMainLooper());
         mAfterDrawLatch = new CountDownLatch(1);
