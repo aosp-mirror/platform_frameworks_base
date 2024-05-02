@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.net.LocalSocketAddress;
+import android.net.LocalSocket;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.SystemProperties;
@@ -30,6 +32,14 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import android.aconfigd.Aconfigd.StorageRequestMessage;
+import android.aconfigd.Aconfigd.StorageRequestMessages;
+import android.aconfigd.Aconfigd.StorageReturnMessage;
+import android.aconfigd.Aconfigd.StorageReturnMessages;
+import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -224,6 +234,8 @@ public class SettingsToPropertiesMapper {
     public static final String NAMESPACE_REBOOT_STAGING = "staged";
     public static final String NAMESPACE_REBOOT_STAGING_DELIMITER = "*";
 
+    public static final String NAMESPACE_LOCAL_OVERRIDES = "device_config_overrides";
+
     private final String[] mGlobalSettings;
 
     private final String[] mDeviceConfigScopes;
@@ -329,6 +341,7 @@ public class SettingsToPropertiesMapper {
               HashMap<String, HashMap<String, String>> propsToStage =
                   getStagedFlagsWithValueChange(properties);
 
+              // send prop stage request to sys prop
               for (HashMap.Entry<String, HashMap<String, String>> entry : propsToStage.entrySet()) {
                 String actualNamespace = entry.getKey();
                 HashMap<String, String> flagValuesToStage = entry.getValue();
@@ -349,7 +362,118 @@ public class SettingsToPropertiesMapper {
                 }
               }
 
-            });
+              // send prop stage request to new storage
+              if (enableAconfigStorageDaemon()) {
+                  stageFlagsInNewStorage(propsToStage);
+              }
+
+        });
+
+        // add prop sync callback for flag local overrides
+        DeviceConfig.addOnPropertiesChangedListener(
+            NAMESPACE_LOCAL_OVERRIDES,
+            AsyncTask.THREAD_POOL_EXECUTOR,
+            (DeviceConfig.Properties properties) -> {
+                if (enableAconfigStorageDaemon()) {
+                    setLocalOverridesInNewStorage(properties);
+                }
+        });
+    }
+
+    /**
+     * apply flag local override in aconfig new storage
+     * @param props
+     * @return aconfigd socket return
+     */
+    public static StorageReturnMessages sendAconfigdRequests(StorageRequestMessages requests) {
+        // connect to aconfigd socket
+        LocalSocket client = new LocalSocket();
+        try{
+            client.connect(new LocalSocketAddress(
+                "aconfigd", LocalSocketAddress.Namespace.RESERVED));
+            log("connected to aconfigd socket");
+        } catch (IOException ioe) {
+            log("failed to connect to aconfigd socket", ioe);
+            return null;
+        }
+
+        DataInputStream inputStream = null;
+        DataOutputStream outputStream = null;
+        try {
+            inputStream = new DataInputStream(client.getInputStream());
+            outputStream = new DataOutputStream(client.getOutputStream());
+        } catch (IOException ioe) {
+            log("failed to get local socket iostreams", ioe);
+            return null;
+        }
+
+        // send requests
+        try {
+            byte[] requests_bytes = requests.toByteArray();
+            outputStream.writeInt(requests_bytes.length);
+            outputStream.write(requests_bytes, 0, requests_bytes.length);
+            log(requests.getMsgsCount() + " flag override requests sent to aconfigd");
+        } catch (IOException ioe) {
+            log("failed to send requests to aconfigd", ioe);
+            return null;
+        }
+
+        // read return
+        StorageReturnMessages return_msgs = null;
+        try {
+            int num_bytes = inputStream.readInt();
+            byte[] buffer = new byte[num_bytes];
+            inputStream.read(buffer, 0, num_bytes);
+            return_msgs = StorageReturnMessages.parseFrom(buffer);
+            log(return_msgs.getMsgsCount() + " acknowledgement received from aconfigd");
+        } catch (IOException ioe) {
+            log("failed to read requests return from aconfigd", ioe);
+            return null;
+        }
+
+        return return_msgs;
+    }
+
+    /**
+     * apply flag local override in aconfig new storage
+     * @param props
+     */
+    public static void setLocalOverridesInNewStorage(DeviceConfig.Properties props) {
+        StorageRequestMessages.Builder requests_builder = StorageRequestMessages.newBuilder();
+        for (String flagName : props.getKeyset()) {
+            String flagValue = props.getString(flagName, null);
+            if (flagName == null || flagValue == null) {
+                continue;
+            }
+
+            int idx = flagName.indexOf(":");
+            if (idx == -1 || idx == flagName.length() - 1 || idx == 0) {
+                log("invalid local flag override: " + flagName);
+                continue;
+            }
+            String actualNamespace = flagName.substring(0, idx);
+            String fullFlagName = flagName.substring(idx+1);
+            idx = fullFlagName.lastIndexOf(".");
+            if (idx == -1) {
+              log("invalid flag name: " + fullFlagName);
+              continue;
+            }
+            String packageName = fullFlagName.substring(0, idx);
+            String realFlagName = fullFlagName.substring(idx+1);
+
+            StorageRequestMessage.FlagOverrideMessage.Builder override_msg_builder =
+                StorageRequestMessage.FlagOverrideMessage.newBuilder();
+            override_msg_builder.setPackageName(packageName);
+            override_msg_builder.setFlagName(realFlagName);
+            override_msg_builder.setFlagValue(flagValue);
+            override_msg_builder.setIsLocal(true);
+
+            StorageRequestMessage.Builder request_builder = StorageRequestMessage.newBuilder();
+            request_builder.setFlagOverrideMessage(override_msg_builder.build());
+            requests_builder.addMsgs(request_builder.build());
+        }
+        StorageRequestMessages requests = requests_builder.build();
+        StorageReturnMessages acks = sendAconfigdRequests(requests);
     }
 
     public static SettingsToPropertiesMapper start(ContentResolver contentResolver) {
@@ -421,6 +545,43 @@ public class SettingsToPropertiesMapper {
     }
 
     /**
+     * stage flags in aconfig new storage
+     * @param propsToStage
+     */
+    @VisibleForTesting
+    static void stageFlagsInNewStorage(HashMap<String, HashMap<String, String>> propsToStage) {
+        // create storage request proto
+        StorageRequestMessages.Builder requests_builder = StorageRequestMessages.newBuilder();
+        for (HashMap.Entry<String, HashMap<String, String>> entry : propsToStage.entrySet()) {
+            String actualNamespace = entry.getKey();
+            HashMap<String, String> flagValuesToStage = entry.getValue();
+            for (String fullFlagName : flagValuesToStage.keySet()) {
+                String stagedValue = flagValuesToStage.get(fullFlagName);
+                int idx = fullFlagName.lastIndexOf(".");
+                if (idx == -1) {
+                    log("invalid flag name: " + fullFlagName);
+                    continue;
+                }
+                String packageName = fullFlagName.substring(0, idx);
+                String flagName = fullFlagName.substring(idx+1);
+
+                StorageRequestMessage.FlagOverrideMessage.Builder override_msg_builder =
+                    StorageRequestMessage.FlagOverrideMessage.newBuilder();
+                override_msg_builder.setPackageName(packageName);
+                override_msg_builder.setFlagName(flagName);
+                override_msg_builder.setFlagValue(stagedValue);
+                override_msg_builder.setIsLocal(false);
+
+                StorageRequestMessage.Builder request_builder = StorageRequestMessage.newBuilder();
+                request_builder.setFlagOverrideMessage(override_msg_builder.build());
+                requests_builder.addMsgs(request_builder.build());
+            }
+        }
+        StorageRequestMessages requests = requests_builder.build();
+        StorageReturnMessages acks = sendAconfigdRequests(requests);
+    }
+
+    /**
      * system property name constructing rule for aconfig flags:
      * "persist.device_config.aconfig_flags.[category_name].[flag_name]".
      * If the name contains invalid characters or substrings for system property name,
@@ -483,10 +644,10 @@ public class SettingsToPropertiesMapper {
         for (String flagName : flagStagedValues.keySet()) {
           String stagedValue = flagStagedValues.get(flagName);
           String currentValue = flagCurrentValues.get(flagName);
-          if (currentValue == null) {
-            currentValue = new String("false");
+          if (stagedValue == null) {
+            continue;
           }
-          if (stagedValue != null && !stagedValue.equalsIgnoreCase(currentValue)) {
+          if (currentValue == null || !stagedValue.equalsIgnoreCase(currentValue)) {
             flagsToStage.put(flagName, stagedValue);
           }
         }
