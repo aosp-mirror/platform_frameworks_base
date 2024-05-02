@@ -186,7 +186,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     // The specified orientation for this window container.
     // Shouldn't be accessed directly since subclasses can override getOverrideOrientation.
     @ScreenOrientation
-    private int mOverrideOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+    private int mOverrideOrientation = SCREEN_ORIENTATION_UNSET;
 
     /**
      * The window container which decides its orientation since the last time
@@ -1683,8 +1683,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
 
-            // TODO: Maybe mOverrideOrientation should default to SCREEN_ORIENTATION_UNSET vs.
-            // SCREEN_ORIENTATION_UNSPECIFIED?
             final int orientation = wc.getOrientation(candidate == SCREEN_ORIENTATION_BEHIND
                     ? SCREEN_ORIENTATION_BEHIND : SCREEN_ORIENTATION_UNSET);
             if (orientation == SCREEN_ORIENTATION_BEHIND) {
@@ -1700,7 +1698,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 continue;
             }
 
-            if (wc.providesOrientation() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+            if (orientation != SCREEN_ORIENTATION_UNSPECIFIED || wc.providesOrientation()) {
                 // Use the orientation if the container can provide or requested an explicit
                 // orientation that isn't SCREEN_ORIENTATION_UNSPECIFIED.
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "%s is requesting orientation %d (%s)",
