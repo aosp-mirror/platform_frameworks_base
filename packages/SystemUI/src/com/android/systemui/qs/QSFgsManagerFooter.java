@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.dagger.QSScope;
 
 import java.util.concurrent.Executor;
@@ -51,6 +52,7 @@ public class QSFgsManagerFooter implements View.OnClickListener,
     private final Context mContext;
     private final Executor mMainExecutor;
     private final Executor mExecutor;
+    private final ActivityStarter mActivityStarter;
 
     private final FgsManagerController mFgsManagerController;
 
@@ -69,7 +71,8 @@ public class QSFgsManagerFooter implements View.OnClickListener,
     @Inject
     QSFgsManagerFooter(@Named(QS_FGS_MANAGER_FOOTER_VIEW) View rootView,
             @Main Executor mainExecutor, @Background Executor executor,
-            FgsManagerController fgsManagerController) {
+            FgsManagerController fgsManagerController,
+            ActivityStarter activityStarter) {
         mRootView = rootView;
         mFooterText = mRootView.findViewById(R.id.footer_text);
         mTextContainer = mRootView.findViewById(R.id.fgs_text_container);
@@ -81,6 +84,7 @@ public class QSFgsManagerFooter implements View.OnClickListener,
         mMainExecutor = mainExecutor;
         mExecutor = executor;
         mFgsManagerController = fgsManagerController;
+        mActivityStarter = activityStarter;
     }
 
     /**
@@ -128,7 +132,14 @@ public class QSFgsManagerFooter implements View.OnClickListener,
 
     @Override
     public void onClick(View view) {
-        mFgsManagerController.showDialog(mRootView);
+        mActivityStarter.dismissKeyguardThenExecute(
+            () -> {
+                mFgsManagerController.showDialog(mRootView);
+                return false /* if the dismiss should be deferred */;
+            },
+            null /* cancelAction */,
+            true /* afterKeyguardGone */
+        );
     }
 
     public void refreshState() {
