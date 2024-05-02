@@ -27,7 +27,6 @@ import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.ComposeLockscreen
-import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
 import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
 
@@ -43,7 +42,6 @@ object SceneContainerFlag {
             ComposeLockscreen.isEnabled &&
                 KeyguardBottomAreaRefactor.isEnabled &&
                 KeyguardWmStateRefactor.isEnabled &&
-                MediaInSceneContainerFlag.isEnabled &&
                 MigrateClocksToBlueprint.isEnabled &&
                 NotificationsHeadsUpRefactor.isEnabled &&
                 PredictiveBackSysUiFlag.isEnabled &&
@@ -59,7 +57,6 @@ object SceneContainerFlag {
             ComposeLockscreen.token,
             KeyguardBottomAreaRefactor.token,
             KeyguardWmStateRefactor.token,
-            MediaInSceneContainerFlag.token,
             MigrateClocksToBlueprint.token,
             NotificationsHeadsUpRefactor.token,
             PredictiveBackSysUiFlag.token,
