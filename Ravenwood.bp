@@ -30,7 +30,7 @@ java_genrule {
     name: "framework-minus-apex.ravenwood-base",
     tools: ["hoststubgen"],
     cmd: "$(location hoststubgen) " +
-        "@$(location ravenwood/texts/ravenwood-standard-options.txt) " +
+        "@$(location :ravenwood-standard-options) " +
 
         "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
         "--stats-file $(location hoststubgen_framework-minus-apex_stats.csv) " +
@@ -42,13 +42,13 @@ java_genrule {
         "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
 
         "--in-jar $(location :framework-minus-apex-for-hoststubgen) " +
-        "--policy-override-file $(location ravenwood/texts/framework-minus-apex-ravenwood-policies.txt) " +
-        "--annotation-allowed-classes-file $(location ravenwood/texts/ravenwood-annotation-allowed-classes.txt) ",
+        "--policy-override-file $(location :ravenwood-framework-policies) " +
+        "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) ",
     srcs: [
         ":framework-minus-apex-for-hoststubgen",
-        "ravenwood/texts/framework-minus-apex-ravenwood-policies.txt",
-        "ravenwood/texts/ravenwood-standard-options.txt",
-        "ravenwood/texts/ravenwood-annotation-allowed-classes.txt",
+        ":ravenwood-framework-policies",
+        ":ravenwood-standard-options",
+        ":ravenwood-annotation-allowed-classes",
     ],
     out: [
         "ravenwood.jar",
@@ -118,7 +118,7 @@ java_genrule {
     name: "services.core.ravenwood-base",
     tools: ["hoststubgen"],
     cmd: "$(location hoststubgen) " +
-        "@$(location ravenwood/texts/ravenwood-standard-options.txt) " +
+        "@$(location :ravenwood-standard-options) " +
 
         "--debug-log $(location hoststubgen_services.core.log) " +
         "--stats-file $(location hoststubgen_services.core_stats.csv) " +
@@ -130,13 +130,13 @@ java_genrule {
         "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
 
         "--in-jar $(location :services.core-for-hoststubgen) " +
-        "--policy-override-file $(location ravenwood/texts/services.core-ravenwood-policies.txt) " +
-        "--annotation-allowed-classes-file $(location ravenwood/texts/ravenwood-annotation-allowed-classes.txt) ",
+        "--policy-override-file $(location :ravenwood-services-policies) " +
+        "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) ",
     srcs: [
         ":services.core-for-hoststubgen",
-        "ravenwood/texts/services.core-ravenwood-policies.txt",
-        "ravenwood/texts/ravenwood-standard-options.txt",
-        "ravenwood/texts/ravenwood-annotation-allowed-classes.txt",
+        ":ravenwood-services-policies",
+        ":ravenwood-standard-options",
+        ":ravenwood-annotation-allowed-classes",
     ],
     out: [
         "ravenwood.jar",
