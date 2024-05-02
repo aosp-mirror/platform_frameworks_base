@@ -68,4 +68,6 @@ android_robolectric_test {
     upstream: true,
     java_resource_dirs: ["config"],
     instrumentation_for: "InputRoboApp",
+
+    strict_mode: false,
 }

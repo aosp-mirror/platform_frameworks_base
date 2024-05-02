@@ -456,6 +456,8 @@ android_robolectric_test {
     plugins: [
         "dagger2-compiler",
     ],
+
+    strict_mode: false,
 }
 
 // Opt-out config for optimizing the SystemUI target using R8.
