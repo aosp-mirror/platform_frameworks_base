@@ -18,7 +18,7 @@ package com.android.systemui.shade
 
 import android.graphics.Rect
 import android.os.PowerManager
-import android.platform.test.flag.junit.FlagsParameterization
+import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
 import android.view.MotionEvent
@@ -42,16 +42,12 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.util.CommunalColors
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -71,14 +67,12 @@ import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4
-import platform.test.runner.parameterized.Parameters
 
 @ExperimentalCoroutinesApi
-@RunWith(ParameterizedAndroidJunit4::class)
+@RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class GlanceableHubContainerControllerTest : SysuiTestCase() {
     private val kosmos: Kosmos =
         testKosmos().apply {
             // UnconfinedTestDispatcher makes testing simpler due to CommunalInteractor flows using
@@ -99,10 +93,6 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
 
     private lateinit var communalRepository: FakeCommunalRepository
     private lateinit var underTest: GlanceableHubContainerController
-
-    init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
-    }
 
     @Before
     fun setUp() {
@@ -501,13 +491,6 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
     }
 
     private fun goToScene(scene: SceneKey) {
-        if (SceneContainerFlag.isEnabled) {
-            if (scene == CommunalScenes.Communal) {
-                kosmos.sceneInteractor.changeScene(Scenes.Communal, "test")
-            } else {
-                kosmos.sceneInteractor.changeScene(Scenes.Lockscreen, "test")
-            }
-        }
         communalRepository.changeScene(scene)
         testableLooper.processAllMessages()
     }
@@ -536,11 +519,5 @@ class GlanceableHubContainerControllerTest(flags: FlagsParameterization?) : Sysu
             MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, CONTAINER_WIDTH.toFloat(), 0f, 0)
         private val MOVE_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
         private val UP_EVENT = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
-
-        @JvmStatic
-        @Parameters(name = "{0}")
-        fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf().andSceneContainer()
-        }
     }
 }

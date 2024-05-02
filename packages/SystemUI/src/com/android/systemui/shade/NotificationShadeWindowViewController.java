@@ -52,6 +52,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -357,7 +358,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
 
-                if (mGlanceableHubContainerController.onTouchEvent(ev)) {
+                if (!SceneContainerFlag.isEnabled()
+                        && mGlanceableHubContainerController.onTouchEvent(ev)) {
+                    // GlanceableHubContainerController is only used pre-flexiglass.
                     return logDownDispatch(ev, "dispatched to glanceable hub container", true);
                 }
                 if (mDreamingWakeupGestureHandler != null
@@ -621,6 +624,10 @@ public class NotificationShadeWindowViewController implements Dumpable {
      * The layout lives in {@link R.id.communal_ui_stub}.
      */
     public void setupCommunalHubLayout() {
+        if (SceneContainerFlag.isEnabled()) {
+            // GlanceableHubContainerController is only used pre-flexiglass.
+            return;
+        }
         collectFlow(
                 mView,
                 mGlanceableHubContainerController.communalAvailable(),

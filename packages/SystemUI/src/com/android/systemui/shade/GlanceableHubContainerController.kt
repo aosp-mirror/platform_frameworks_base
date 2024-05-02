@@ -47,6 +47,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -197,6 +198,7 @@ constructor(
     /** Override for testing. */
     @VisibleForTesting
     internal fun initView(containerView: View): View {
+        SceneContainerFlag.assertInLegacyMode()
         if (communalContainerView != null) {
             throw RuntimeException("Communal view has already been initialized")
         }
@@ -306,6 +308,7 @@ constructor(
 
     /** Removes the container view from its parent. */
     fun disposeView() {
+        SceneContainerFlag.assertInLegacyMode()
         communalContainerView?.let {
             (it.parent as ViewGroup).removeView(it)
             lifecycleRegistry.currentState = Lifecycle.State.CREATED
@@ -323,6 +326,7 @@ constructor(
      * to be fully in control of its own touch handling.
      */
     fun onTouchEvent(ev: MotionEvent): Boolean {
+        SceneContainerFlag.assertInLegacyMode()
         return communalContainerView?.let { handleTouchEventOnCommunalView(it, ev) } ?: false
     }
 
