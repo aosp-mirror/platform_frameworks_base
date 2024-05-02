@@ -135,7 +135,7 @@ public class SystemDataTransferProcessor {
      */
     public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
             @UserIdInt int userId, int associationId) {
-        if (PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName)) {
+        if (PackageUtils.isPermSyncAutoEnabled(mContext, mPackageManager, packageName)) {
             Slog.i(LOG_TAG, "User consent Intent should be skipped. Returning null.");
             // Auto enable perm sync for the allowlisted packages, but don't override user decision
             PermissionSyncRequest request = getPermissionSyncRequest(associationId);
