@@ -40,6 +40,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.flags.Flags.sensitiveContentPrematureProtectionRemovedFix;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
@@ -32237,7 +32238,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         void decreaseSensitiveViewsCount() {
             mSensitiveViewsCount--;
             if (mSensitiveViewsCount == 0) {
-                mViewRootImpl.notifySensitiveContentAppProtection(false);
+                if (sensitiveContentPrematureProtectionRemovedFix()) {
+                    mViewRootImpl.removeSensitiveContentProtectionOnTransactionCommit();
+                } else {
+                    mViewRootImpl.notifySensitiveContentAppProtection(false);
+                }
             }
             if (mSensitiveViewsCount < 0) {
                 Log.wtf(VIEW_LOG_TAG, "mSensitiveViewsCount is negative" + mSensitiveViewsCount);
