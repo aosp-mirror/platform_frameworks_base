@@ -513,7 +513,11 @@ final class DeletePackageHelper {
                 // Legacy behavior to report appId as UID here.
                 // The final broadcasts will contain a per-user UID.
                 outInfo.mUid = ps.getAppId();
-                outInfo.mIsAppIdRemoved = true;
+                // Only send Intent.ACTION_UID_REMOVED when flag & DELETE_KEEP_DATA is 0
+                // i.e. the mDataRemoved is true
+                if (outInfo.mDataRemoved) {
+                    outInfo.mIsAppIdRemoved = true;
+                }
                 mPm.scheduleWritePackageRestrictions(user);
                 return;
             }
