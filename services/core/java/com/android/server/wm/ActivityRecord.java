@@ -9492,6 +9492,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return false;
     }
 
+    @Override
+    protected boolean setOverrideGender(Configuration requestsTmpConfig, int gender) {
+        return WindowProcessController.applyConfigGenderOverride(
+                requestsTmpConfig, gender, mAtmService.mGrammaticalManagerInternal, getUid());
+    }
+
     @VisibleForTesting
     @Override
     Rect getAnimationBounds(int appRootTaskClipMode) {
