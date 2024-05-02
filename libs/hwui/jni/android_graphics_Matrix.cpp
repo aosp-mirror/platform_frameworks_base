@@ -376,11 +376,24 @@ static const JNINativeMethod methods[] = {
     {"nEquals", "(JJ)Z", (void*) SkMatrixGlue::equals}
 };
 
+static const JNINativeMethod extra_methods[] = {
+        {"nGetNativeFinalizer", "()J", (void*)SkMatrixGlue::getNativeFinalizer},
+        {"nCreate", "(J)J", (void*)SkMatrixGlue::create},
+};
+
 static jclass sClazz;
 static jfieldID sNativeInstanceField;
 static jmethodID sCtor;
 
 int register_android_graphics_Matrix(JNIEnv* env) {
+    // Methods only used on Ravenwood (for now). See the javadoc on Matrix$ExtraNativesx
+    // for why we need it.
+    //
+    // We don't need it on non-ravenwood, but we don't (yet) have a way to detect ravenwood
+    // environment, so we just always run it.
+    RegisterMethodsOrDie(env, "android/graphics/Matrix$ExtraNatives", extra_methods,
+                         NELEM(extra_methods));
+
     int result = RegisterMethodsOrDie(env, "android/graphics/Matrix", methods, NELEM(methods));
 
     jclass clazz = FindClassOrDie(env, "android/graphics/Matrix");

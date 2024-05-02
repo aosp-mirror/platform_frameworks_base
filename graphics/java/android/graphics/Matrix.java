@@ -28,6 +28,9 @@ import java.io.PrintWriter;
 /**
  * The Matrix class holds a 3x3 matrix for transforming coordinates.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodClassLoadHook(
+        android.ravenwood.annotation.RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public class Matrix {
 
     public static final int MSCALE_X = 0;   //!< use with getValues/setValues
@@ -229,7 +232,7 @@ public class Matrix {
     private static class NoImagePreloadHolder {
         public static final NativeAllocationRegistry sRegistry =
                 NativeAllocationRegistry.createMalloced(
-                Matrix.class.getClassLoader(), nGetNativeFinalizer());
+                Matrix.class.getClassLoader(), nGetNativeFinalizerWrapper());
     }
 
     private final long native_instance;
@@ -238,7 +241,7 @@ public class Matrix {
      * Create an identity matrix
      */
     public Matrix() {
-        native_instance = nCreate(0);
+        native_instance = nCreateWrapper(0);
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, native_instance);
     }
 
@@ -248,7 +251,7 @@ public class Matrix {
      * @param src The matrix to copy into this matrix
      */
     public Matrix(Matrix src) {
-        native_instance = nCreate(src != null ? src.native_instance : 0);
+        native_instance = nCreateWrapper(src != null ? src.native_instance : 0);
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, native_instance);
     }
 
@@ -846,6 +849,34 @@ public class Matrix {
         return native_instance;
     }
 
+    /**
+     * Wrapper method we use to switch to ExtraNatives.nCreate(src) only on Ravenwood.
+     *
+     * @see ExtraNatives
+     */
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static long nCreateWrapper(long src) {
+        return nCreate(src);
+    }
+
+    private static long nCreateWrapper$ravenwood(long src) {
+        return ExtraNatives.nCreate(src);
+    }
+
+    /**
+     * Wrapper method we use to switch to ExtraNatives.nGetNativeFinalizer(src) only on Ravenwood.
+     *
+     * @see ExtraNatives
+     */
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static long nGetNativeFinalizerWrapper() {
+        return nGetNativeFinalizer();
+    }
+
+    private static long nGetNativeFinalizerWrapper$ravenwood() {
+        return ExtraNatives.nGetNativeFinalizer();
+    }
+
     // ------------------ Regular JNI ------------------------
 
     private static native long nCreate(long nSrc_or_zero);
@@ -943,4 +974,25 @@ public class Matrix {
     private static native float nMapRadius(long nObject, float radius);
     @CriticalNative
     private static native boolean nEquals(long nA, long nB);
+
+    /**
+     * Due to b/337329128, native methods that are called by the static initializers cannot be
+     * in the same class when running on a host side JVM (such as on Ravenwood and Android Studio).
+     *
+     * There are two methods that are called by the static initializers (either directly or
+     * indirectly) in this class, namely nCreate() and nGetNativeFinalizer(). On Ravenwood
+     * these methods can't be on the Matrix class itself, so we use a nested class to host them.
+     *
+     * We still keep the original nCreate() method and call it on non-ravenwood environment,
+     * in order to avoid problems in downstream (such as Android Studio).
+     *
+     * @see #nCreateWrapper(long)
+     * @see #nGetNativeFinalizerWrapper()
+     *
+     * TODO(b/337110712) Clean it up somehow. (remove the original nCreate() and unify the code?)
+     */
+    private static class ExtraNatives {
+        static native long nCreate(long nSrc_or_zero);
+        static native long nGetNativeFinalizer();
+    }
 }

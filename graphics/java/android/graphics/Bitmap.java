@@ -465,6 +465,11 @@ public final class Bitmap implements Parcelable {
      * how pixels are stored. This affects the quality (color depth) as
      * well as the ability to display transparent/translucent colors.
      */
+    // It's touched by Graphics.cpp, so we need to make this enum usable on Ravenwood.
+    // Otherwise, all the ctors would throw, which would make the class unloadable
+    // because the static initializer needs the enum members because of `sConfigs`.
+    // TODO: Remove it once we expose the outer class.
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public enum Config {
         // these native values must match up with the enum in SkBitmap.h
 
