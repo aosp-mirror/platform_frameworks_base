@@ -29,6 +29,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.PermissionManager;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 
@@ -127,6 +128,7 @@ public class RecentAppOpsAccess {
         final long now = mClock.millis();
         final UserManager um = mContext.getSystemService(UserManager.class);
         final List<UserHandle> profiles = um.getUserProfiles();
+        ArrayMap<UserHandle, Boolean> shouldIncludeAppsByUsers = new ArrayMap<>();
 
         for (int i = 0; i < appOpsCount; ++i) {
             AppOpsManager.PackageOps ops = appOps.get(i);
@@ -134,9 +136,13 @@ public class RecentAppOpsAccess {
             int uid = ops.getUid();
             UserHandle user = UserHandle.getUserHandleForUid(uid);
 
+            if (!shouldIncludeAppsByUsers.containsKey(user)) {
+                shouldIncludeAppsByUsers.put(user, shouldHideUser(um, user));
+            }
+
             // Don't show apps belonging to background users except for profiles that shouldn't
             // be shown in quiet mode.
-            if (!profiles.contains(user) || isHideInQuietEnabledForProfile(um, user)) {
+            if (!profiles.contains(user) || !shouldIncludeAppsByUsers.get(user)) {
                 continue;
             }
 
@@ -200,7 +206,7 @@ public class RecentAppOpsAccess {
         return accesses;
     }
 
-    private boolean isHideInQuietEnabledForProfile(UserManager userManager, UserHandle userHandle) {
+    private boolean shouldHideUser(UserManager userManager, UserHandle userHandle) {
         if (android.multiuser.Flags.enablePrivateSpaceFeatures()
                 && android.multiuser.Flags.handleInterleavedSettingsForPrivateSpace()) {
             return userManager.isQuietModeEnabled(userHandle)
