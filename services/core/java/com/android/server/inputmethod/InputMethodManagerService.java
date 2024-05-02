@@ -471,11 +471,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return mBindingController.getSelectedMethodId();
     }
 
-    @GuardedBy("ImfLock.class")
-    private void setSelectedMethodIdLocked(@Nullable String selectedMethodId) {
-        mBindingController.setSelectedMethodId(selectedMethodId);
-    }
-
     /**
      * The current binding sequence number, incremented every time there is
      * a new bind performed.
@@ -2501,7 +2496,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @GuardedBy("ImfLock.class")
     void resetCurrentMethodAndClientLocked(@UnbindReason int unbindClientReason) {
-        setSelectedMethodIdLocked(null);
+        mBindingController.setSelectedMethodId(null);
         // Callback before clean-up binding states.
         onUnbindCurrentMethodByReset();
         mBindingController.unbindCurrentMethod();
@@ -3081,7 +3076,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // mCurMethodId should be updated after setSelectedInputMethodAndSubtypeLocked()
             // because mCurMethodId is stored as a history in
             // setSelectedInputMethodAndSubtypeLocked().
-            setSelectedMethodIdLocked(id);
+            mBindingController.setSelectedMethodId(id);
 
             if (mActivityManagerInternal.isSystemReady()) {
                 Intent intent = new Intent(Intent.ACTION_INPUT_METHOD_CHANGED);
