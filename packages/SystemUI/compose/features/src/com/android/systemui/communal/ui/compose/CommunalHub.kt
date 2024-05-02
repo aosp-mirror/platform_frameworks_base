@@ -24,7 +24,11 @@ import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
 import android.widget.FrameLayout
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
@@ -83,10 +87,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.motionEventSpy
@@ -289,23 +296,21 @@ fun CommunalHub(
                 removeEnabled = removeButtonEnabled
             )
         }
+        if (currentPopup == PopupType.CtaTile) {
+            PopupOnDismissCtaTile(viewModel::onHidePopup)
+        }
 
-        if (currentPopup != null) {
-            when (currentPopup) {
-                PopupType.CtaTile -> {
-                    PopupOnDismissCtaTile(viewModel::onHidePopup)
-                }
-                PopupType.CustomizeWidgetButton -> {
-                    ButtonToEditWidgets(
-                        onClick = {
-                            viewModel.onHidePopup()
-                            viewModel.onOpenWidgetEditor(selectedKey.value)
-                        },
-                        onHide = { viewModel.onHidePopup() }
-                    )
-                }
-                null -> {}
-            }
+        AnimatedVisibility(
+            visible = currentPopup == PopupType.CustomizeWidgetButton,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            ButtonToEditWidgets(
+                onClick = {
+                    viewModel.onHidePopup()
+                    viewModel.onOpenWidgetEditor(selectedKey.value)
+                },
+                onHide = { viewModel.onHidePopup() }
+            )
         }
 
         if (viewModel is CommunalViewModel && dialogFactory != null) {
@@ -654,30 +659,67 @@ private fun Toolbar(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun ButtonToEditWidgets(
+private fun AnimatedVisibilityScope.ButtonToEditWidgets(
     onClick: () -> Unit,
     onHide: () -> Unit,
 ) {
-    Popup(alignment = Alignment.TopCenter, offset = IntOffset(0, 40), onDismissRequest = onHide) {
+    Popup(
+        alignment = Alignment.TopCenter,
+        offset = IntOffset(0, 40),
+        onDismissRequest = onHide,
+    ) {
         val colors = LocalAndroidColorScheme.current
         Button(
             modifier =
-                Modifier.height(56.dp).background(colors.secondary, RoundedCornerShape(50.dp)),
+                Modifier.height(56.dp)
+                    .graphicsLayer { transformOrigin = TransformOrigin(0f, 0f) }
+                    .animateEnterExit(
+                        enter =
+                            fadeIn(
+                                initialAlpha = 0f,
+                                animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+                            ),
+                        exit =
+                            fadeOut(
+                                animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+                            )
+                    )
+                    .background(colors.secondary, RoundedCornerShape(50.dp)),
             onClick = onClick,
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Widgets,
-                contentDescription = stringResource(R.string.button_to_configure_widgets_text),
-                tint = colors.onSecondary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = stringResource(R.string.button_to_configure_widgets_text),
-                style = MaterialTheme.typography.titleSmall,
-                color = colors.onSecondary,
-            )
+            Row(
+                modifier =
+                    Modifier.animateEnterExit(
+                        enter =
+                            fadeIn(
+                                animationSpec =
+                                    tween(
+                                        durationMillis = 167,
+                                        delayMillis = 500,
+                                        easing = LinearEasing
+                                    )
+                            ),
+                        exit =
+                            fadeOut(
+                                animationSpec = tween(durationMillis = 167, easing = LinearEasing)
+                            )
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Widgets,
+                    contentDescription = stringResource(R.string.button_to_configure_widgets_text),
+                    tint = colors.onSecondary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = stringResource(R.string.button_to_configure_widgets_text),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = colors.onSecondary
+                )
+            }
         }
     }
 }
