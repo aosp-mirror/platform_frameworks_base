@@ -17153,10 +17153,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Handle a key event before it is processed by any input method
-     * associated with the view hierarchy.  This can be used to intercept
+     * associated with the view hierarchy. This can be used to intercept
      * key events in special situations before the IME consumes them; a
      * typical example would be handling the BACK key to update the application's
-     * UI instead of allowing the IME to see it and close itself.
+     * UI instead of allowing the IME to see it and close itself. Due to a bug,
+     * this function is not called for BACK key events on Android T and U, when
+     * the IME is shown.
      *
      * @param keyCode The value in event.getKeyCode().
      * @param event Description of the key event.
