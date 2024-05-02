@@ -307,19 +307,27 @@ constructor(
         configurationInteractor
             .dimensionPixelSize(R.dimen.keyguard_translate_distance_on_swipe_up)
             .flatMapLatest { translationDistance ->
-                combine(
+                combineTransform(
                     shadeRepository.legacyShadeExpansion.onStart { emit(0f) },
                     keyguardTransitionInteractor.transitionValue(GONE).onStart { emit(0f) },
                 ) { legacyShadeExpansion, goneValue ->
-                    if (goneValue == 1f || legacyShadeExpansion == 0f) {
+                    if (goneValue == 1f || (goneValue == 0f && legacyShadeExpansion == 0f)) {
                         // Reset the translation value
-                        0f
-                    } else {
-                        // On swipe up, translate the keyguard to reveal the bouncer
-                        MathUtils.lerp(
-                            translationDistance,
-                            0,
-                            Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(legacyShadeExpansion)
+                        emit(0f)
+                    } else if (legacyShadeExpansion > 0f && legacyShadeExpansion < 1f) {
+                        // On swipe up, translate the keyguard to reveal the bouncer, OR a GONE
+                        // transition is running, which means this is a swipe to dismiss. Values of
+                        // 0f and 1f need to be ignored in the legacy shade expansion. These can
+                        // flip arbitrarily as the legacy shade is reset, and would cause the
+                        // translation value to jump around unexpectedly.
+                        emit(
+                            MathUtils.lerp(
+                                translationDistance,
+                                0,
+                                Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(
+                                    legacyShadeExpansion
+                                ),
+                            )
                         )
                     }
                 }
