@@ -55,7 +55,7 @@ constructor(
 
         val transitionState = sceneInteractor.get().transitionState.value
         val idleTransitionStateOrNull = transitionState as? ObservableTransitionState.Idle
-        val currentSceneOrNull = idleTransitionStateOrNull?.scene
+        val currentSceneOrNull = idleTransitionStateOrNull?.currentScene
         val invisibleDueToOcclusion = occlusionInteractor.get().invisibleDueToOcclusion.value
         return currentSceneOrNull?.let { sceneKey ->
             EvaluatorByFlag[flag]?.invoke(

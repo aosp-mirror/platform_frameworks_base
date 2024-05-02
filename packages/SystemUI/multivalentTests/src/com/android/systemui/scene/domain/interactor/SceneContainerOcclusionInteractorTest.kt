@@ -152,6 +152,7 @@ class SceneContainerOcclusionInteractorTest : SysuiTestCase() {
             ObservableTransitionState.Transition(
                 fromScene = sceneDataSource.currentScene.value,
                 toScene = Scenes.Shade,
+                currentScene = flowOf(sceneDataSource.currentScene.value),
                 progress = progress,
                 isInitiatedByUserInput = true,
                 isUserInputOngoing = flowOf(true),
@@ -178,6 +179,7 @@ class SceneContainerOcclusionInteractorTest : SysuiTestCase() {
             ObservableTransitionState.Transition(
                 fromScene = Scenes.Shade,
                 toScene = Scenes.Lockscreen,
+                currentScene = flowOf(Scenes.Shade),
                 progress = progress,
                 isInitiatedByUserInput = true,
                 isUserInputOngoing = flowOf(true),

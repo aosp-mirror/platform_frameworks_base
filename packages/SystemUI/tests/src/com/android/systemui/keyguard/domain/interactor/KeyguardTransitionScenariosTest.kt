@@ -1463,6 +1463,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = currentScene,
                         toScene = targetScene,
+                        currentScene = flowOf(targetScene),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -1645,6 +1646,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = currentScene,
                         toScene = targetScene,
+                        currentScene = flowOf(targetScene),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -1701,6 +1703,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = currentScene,
                         toScene = targetScene,
+                        currentScene = flowOf(targetScene),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -1874,6 +1877,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = currentScene,
                         toScene = targetScene,
+                        currentScene = flowOf(targetScene),
                         progress = flowOf(0f, 0.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),

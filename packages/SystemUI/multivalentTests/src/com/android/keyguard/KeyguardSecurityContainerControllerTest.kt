@@ -795,6 +795,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Lockscreen,
                     Scenes.Bouncer,
+                    flowOf(Scenes.Bouncer),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -818,6 +819,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Bouncer,
                     Scenes.Gone,
+                    flowOf(Scenes.Gone),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -837,6 +839,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Gone,
                     Scenes.Bouncer,
+                    flowOf(Scenes.Bouncer),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -858,6 +861,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Bouncer,
                     Scenes.Gone,
+                    flowOf(Scenes.Gone),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -876,6 +880,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Gone,
                     Scenes.Lockscreen,
+                    flowOf(Scenes.Lockscreen),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),
@@ -896,6 +901,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     Scenes.Lockscreen,
                     Scenes.Gone,
+                    flowOf(Scenes.Gone),
                     flowOf(.5f),
                     false,
                     isUserInputOngoing = flowOf(false),

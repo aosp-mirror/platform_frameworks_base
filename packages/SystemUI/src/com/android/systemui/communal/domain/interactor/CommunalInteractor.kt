@@ -201,7 +201,7 @@ constructor(
             .flatMapLatest { state ->
                 when (state) {
                     is ObservableTransitionState.Idle ->
-                        flowOf(CommunalTransitionProgress.Idle(state.scene))
+                        flowOf(CommunalTransitionProgress.Idle(state.currentScene))
                     is ObservableTransitionState.Transition ->
                         if (state.toScene == targetScene) {
                             state.progress.map {
@@ -264,7 +264,9 @@ constructor(
      */
     val isIdleOnCommunal: StateFlow<Boolean> =
         communalRepository.transitionState
-            .map { it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Communal }
+            .map {
+                it is ObservableTransitionState.Idle && it.currentScene == CommunalScenes.Communal
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -278,7 +280,7 @@ constructor(
      */
     val isCommunalVisible: Flow<Boolean> =
         communalRepository.transitionState.map {
-            !(it is ObservableTransitionState.Idle && it.scene == CommunalScenes.Blank)
+            !(it is ObservableTransitionState.Idle && it.currentScene == CommunalScenes.Blank)
         }
 
     /**

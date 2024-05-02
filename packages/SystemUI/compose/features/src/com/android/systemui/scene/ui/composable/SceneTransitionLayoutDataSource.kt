@@ -19,7 +19,6 @@
 package com.android.systemui.scene.ui.composable
 
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
-import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.observableTransitionState
@@ -29,8 +28,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -48,19 +45,7 @@ class SceneTransitionLayoutDataSource(
     override val currentScene: StateFlow<SceneKey> =
         state
             .observableTransitionState()
-            .flatMapLatest { observableTransitionState ->
-                when (observableTransitionState) {
-                    is ObservableTransitionState.Idle -> flowOf(observableTransitionState.scene)
-                    is ObservableTransitionState.Transition ->
-                        observableTransitionState.isUserInputOngoing.map { isUserInputOngoing ->
-                            if (isUserInputOngoing) {
-                                observableTransitionState.fromScene
-                            } else {
-                                observableTransitionState.toScene
-                            }
-                        }
-                }
-            }
+            .flatMapLatest { it.currentScene() }
             .stateIn(
                 scope = coroutineScope,
                 started = SharingStarted.WhileSubscribed(),

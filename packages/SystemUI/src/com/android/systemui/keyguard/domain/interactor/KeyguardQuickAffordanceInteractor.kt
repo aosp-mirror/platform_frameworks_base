@@ -113,7 +113,8 @@ constructor(
                     .transitionState
                     .map {
                         when (it) {
-                            is ObservableTransitionState.Idle -> it.scene == Scenes.Lockscreen
+                            is ObservableTransitionState.Idle ->
+                                it.currentScene == Scenes.Lockscreen
                             is ObservableTransitionState.Transition ->
                                 it.fromScene == Scenes.Lockscreen || it.toScene == Scenes.Lockscreen
                         }

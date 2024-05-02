@@ -496,7 +496,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
      */
     private fun getCurrentSceneInUi(): SceneKey {
         return when (val state = transitionState.value) {
-            is ObservableTransitionState.Idle -> state.scene
+            is ObservableTransitionState.Idle -> state.currentScene
             is ObservableTransitionState.Transition -> state.fromScene
         }
     }
@@ -558,6 +558,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             ObservableTransitionState.Transition(
                 fromScene = getCurrentSceneInUi(),
                 toScene = to,
+                currentScene = flowOf(to),
                 progress = progressFlow,
                 isInitiatedByUserInput = false,
                 isUserInputOngoing = flowOf(false),
