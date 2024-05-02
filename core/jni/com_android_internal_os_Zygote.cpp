@@ -1828,10 +1828,10 @@ static void BindMountSyspropOverride(fail_fn_t fail_fn, JNIEnv* env) {
   std::string source = "/dev/__properties__/appcompat_override";
   std::string target = "/dev/__properties__";
   if (access(source.c_str(), F_OK) != 0) {
-    fail_fn(CREATE_ERROR("Error accessing %s: %s", source.c_str(), strerror(errno)));
+      return;
   }
   if (access(target.c_str(), F_OK) != 0) {
-    fail_fn(CREATE_ERROR("Error accessing %s: %s", target.c_str(), strerror(errno)));
+      return;
   }
   BindMount(source, target, fail_fn);
   // Reload the system properties file, to ensure new values are read into memory
