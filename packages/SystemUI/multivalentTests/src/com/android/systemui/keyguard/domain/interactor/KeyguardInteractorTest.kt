@@ -327,6 +327,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Gone,
                     toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Lockscreen),
                     progress = flowOf(0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

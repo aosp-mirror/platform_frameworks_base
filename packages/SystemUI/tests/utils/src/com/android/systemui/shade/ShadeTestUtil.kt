@@ -23,6 +23,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import org.junit.Assert
@@ -178,6 +179,7 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
                 ObservableTransitionState.Transition(
                     fromScene = from,
                     toScene = to,
+                    currentScene = flowOf(to),
                     progress = MutableStateFlow(progress),
                     isInitiatedByUserInput = true,
                     isUserInputOngoing = isUserInputOngoing,

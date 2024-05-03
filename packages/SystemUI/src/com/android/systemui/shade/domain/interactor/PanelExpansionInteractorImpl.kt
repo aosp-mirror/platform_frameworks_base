@@ -55,7 +55,7 @@ constructor(
             when (state) {
                 is ObservableTransitionState.Idle ->
                     flowOf(
-                        if (state.scene != Scenes.Gone) {
+                        if (state.currentScene != Scenes.Gone) {
                             // When resting on a non-Gone scene, the panel is fully expanded.
                             1f
                         } else {

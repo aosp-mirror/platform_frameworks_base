@@ -19,6 +19,7 @@ package com.android.compose.animation.scene
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * A scene transition state.
@@ -33,14 +34,26 @@ import kotlinx.coroutines.flow.distinctUntilChanged
  *    [ObservableTransitionState.Transition.toScene] will never be equal, while
  *    [TransitionState.Transition.fromScene] and [TransitionState.Transition.toScene] can be equal.
  */
-sealed class ObservableTransitionState {
+sealed interface ObservableTransitionState {
+    /**
+     * The current effective scene. If a new transition was triggered, it would start from this
+     * scene.
+     */
+    fun currentScene(): Flow<SceneKey> {
+        return when (this) {
+            is Idle -> flowOf(currentScene)
+            is Transition -> currentScene
+        }
+    }
+
     /** No transition/animation is currently running. */
-    data class Idle(val scene: SceneKey) : ObservableTransitionState()
+    data class Idle(val currentScene: SceneKey) : ObservableTransitionState
 
     /** There is a transition animating between two scenes. */
-    data class Transition(
+    class Transition(
         val fromScene: SceneKey,
         val toScene: SceneKey,
+        val currentScene: Flow<SceneKey>,
         val progress: Flow<Float>,
 
         /**
@@ -60,7 +73,7 @@ sealed class ObservableTransitionState {
          * the transition completes/settles.
          */
         val isUserInputOngoing: Flow<Boolean>,
-    ) : ObservableTransitionState()
+    ) : ObservableTransitionState
 }
 
 /**
@@ -76,6 +89,7 @@ fun SceneTransitionLayoutState.observableTransitionState(): Flow<ObservableTrans
                     ObservableTransitionState.Transition(
                         fromScene = state.fromScene,
                         toScene = state.toScene,
+                        currentScene = snapshotFlow { state.currentScene },
                         progress = snapshotFlow { state.progress },
                         isInitiatedByUserInput = state.isInitiatedByUserInput,
                         isUserInputOngoing = snapshotFlow { state.isUserInputOngoing },
