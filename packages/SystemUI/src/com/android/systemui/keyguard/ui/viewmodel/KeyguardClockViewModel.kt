@@ -84,8 +84,8 @@ constructor(
         combine(
                 isLargeClockVisible,
                 currentClock,
-            ) { isLargeClock, clock ->
-                clock?.let { clock ->
+            ) { isLargeClock, currentClock ->
+                currentClock?.let { clock ->
                     val face = if (isLargeClock) clock.largeClock else clock.smallClock
                     face.config.hasCustomWeatherDataDisplay
                 }
