@@ -45,6 +45,13 @@ val SceneContainerTransitions = transitions {
     }
     from(
         Scenes.Gone,
+        to = Scenes.QuickSettings,
+        key = CollapseShadeInstantly,
+    ) {
+        goneToQuickSettingsTransition(durationScale = 0.0)
+    }
+    from(
+        Scenes.Gone,
         to = Scenes.Shade,
         key = SlightlyFasterShadeCollapse,
     ) {
