@@ -1180,7 +1180,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Մեկ աստղ՝ {max}-ից}one{# աստղ՝ {max}-ից}other{# աստղ՝ {max}-ից}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ընթացքում է"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Ավարտել գործողությունը` օգտագործելով"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"Եզրափակել գործողությունը՝ օգտագործելով %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"Կատարել՝ օգտագործելով %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Ավարտել գործողությունը"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Բացել հետևյալ ծրագրով՝"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Բացել հավելվածով՝ %1$s"</string>

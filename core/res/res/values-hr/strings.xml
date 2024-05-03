@@ -1181,7 +1181,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{Jedna zvjezdica od {max}}one{# zvjezdica od {max}}few{# zvjezdice od {max}}other{# zvjezdica od {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"u tijeku"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Radnju dovrši pomoću stavke"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"Dovršavanje radnje pomoću aplikacije %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"Dovršite radnju putem aplikacije %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Dovrši radnju"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Otvaranje pomoću aplikacije"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Otvaranje pomoću aplikacije %1$s"</string>
