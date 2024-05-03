@@ -182,12 +182,14 @@ object SceneWindowRootViewBinder {
                         right >= getDisplayWidth(context) -> CutoutLocation.RIGHT
                         else -> CutoutLocation.CENTER
                     }
+                val viewDisplayCutout = it?.displayCutout
                 DisplayCutout(
                     left,
                     top,
                     right,
                     bottom,
                     location,
+                    viewDisplayCutout,
                 )
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), DisplayCutout())
