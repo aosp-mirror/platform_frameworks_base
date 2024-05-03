@@ -354,7 +354,7 @@
     <string name="debug_input_category" msgid="7349460906970849771">"Vnos"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Risanje"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Upodabljanje s strojnim pospeševanjem"</string>
-    <string name="media_category" msgid="8122076702526144053">"Predstavnosti"</string>
+    <string name="media_category" msgid="8122076702526144053">"Predstavnost"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Spremljanje"</string>
     <string name="strict_mode" msgid="889864762140862437">"Strog način je omogočen"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Osveži zaslon pri dolgih postopkih v glavni niti."</string>
