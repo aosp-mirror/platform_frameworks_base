@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.AnimatorListenerAdapter;
@@ -163,6 +164,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
      * Ensures expansion only happens when touch down happens in valid part of the screen.
      */
     @Test
+    @DisableFlags(Flags.FLAG_COMMUNAL_BOUNCER_DO_NOT_MODIFY_PLUGIN_OPEN)
     public void testSessionStart() {
         mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion, null);
 
@@ -193,7 +195,31 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
                         2)).isTrue();
     }
 
+
+    /**
+     * Ensures expansion only happens when touch down happens in valid part of the screen.
+     */
     @Test
+    @EnableFlags(Flags.FLAG_COMMUNAL_BOUNCER_DO_NOT_MODIFY_PLUGIN_OPEN)
+    public void testSessionStart_doesNotModifyNotificationShadeWindow() {
+        mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion, null);
+
+        verify(mRegion).union(mRectCaptor.capture());
+        final Rect bounds = mRectCaptor.getValue();
+
+        final Rect expected = new Rect();
+
+        expected.set(0, Math.round(SCREEN_HEIGHT_PX * (1 - TOUCH_REGION)), SCREEN_WIDTH_PX,
+                SCREEN_HEIGHT_PX);
+
+        assertThat(bounds).isEqualTo(expected);
+
+        mTouchHandler.onSessionStart(mTouchSession);
+        verifyNoMoreInteractions(mNotificationShadeWindowController);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_COMMUNAL_BOUNCER_DO_NOT_MODIFY_PLUGIN_OPEN)
     public void testSwipeUp_whenBouncerInitiallyShowing_reduceHeightWithExclusionRects() {
         mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion,
                 new Rect(0, 0, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX));
@@ -213,6 +239,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_COMMUNAL_BOUNCER_DO_NOT_MODIFY_PLUGIN_OPEN)
     public void testSwipeUp_exclusionRectAtTop_doesNotIntersectGestureArea() {
         mTouchHandler.getTouchInitiationRegion(SCREEN_BOUNDS, mRegion,
                 new Rect(0, 0, SCREEN_WIDTH_PX, SCREEN_HEIGHT_PX / 4));
@@ -228,6 +255,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_COMMUNAL_BOUNCER_DO_NOT_MODIFY_PLUGIN_OPEN)
     public void testSwipeUp_exclusionRectBetweenNormalAndMinimumSwipeArea() {
         final int normalSwipeAreaTop = SCREEN_HEIGHT_PX
                 - Math.round(SCREEN_HEIGHT_PX * TOUCH_REGION);

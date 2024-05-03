@@ -254,7 +254,11 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
         mVelocityTracker = mVelocityTrackerFactory.obtain();
         mTouchSession = session;
         mVelocityTracker.clear();
-        mNotificationShadeWindowController.setForcePluginOpen(true, this);
+
+        if (!Flags.communalBouncerDoNotModifyPluginOpen()) {
+            mNotificationShadeWindowController.setForcePluginOpen(true, this);
+        }
+
         mScrimManager.addCallback(mScrimManagerCallback);
         mCurrentScrimController = mScrimManager.getCurrentController();
 
@@ -265,7 +269,10 @@ public class BouncerSwipeTouchHandler implements TouchHandler {
             }
             mScrimManager.removeCallback(mScrimManagerCallback);
             mCapture = null;
-            mNotificationShadeWindowController.setForcePluginOpen(false, this);
+
+            if (!Flags.communalBouncerDoNotModifyPluginOpen()) {
+                mNotificationShadeWindowController.setForcePluginOpen(false, this);
+            }
         });
 
         session.registerGestureListener(mOnGestureListener);
