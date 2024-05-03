@@ -203,7 +203,11 @@ constructor(
     }
 
     override fun expandToQs() {
-        sceneInteractor.changeScene(Scenes.QuickSettings, "ShadeController.animateExpandQs")
+        val shadeMode = shadeInteractor.shadeMode.value
+        sceneInteractor.changeScene(
+            if (shadeMode is ShadeMode.Dual) Scenes.QuickSettingsShade else Scenes.QuickSettings,
+            "ShadeController.animateExpandQs"
+        )
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {

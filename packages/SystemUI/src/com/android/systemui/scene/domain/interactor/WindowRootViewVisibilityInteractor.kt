@@ -78,13 +78,16 @@ constructor(
                         is ObservableTransitionState.Idle ->
                             state.currentScene == Scenes.Shade ||
                                 state.currentScene == Scenes.NotificationsShade ||
+                                state.currentScene == Scenes.QuickSettingsShade ||
                                 state.currentScene == Scenes.Lockscreen
                         is ObservableTransitionState.Transition ->
                             state.toScene == Scenes.Shade ||
                                 state.toScene == Scenes.NotificationsShade ||
+                                state.toScene == Scenes.QuickSettingsShade ||
                                 state.toScene == Scenes.Lockscreen ||
                                 state.fromScene == Scenes.Shade ||
                                 state.fromScene == Scenes.NotificationsShade ||
+                                state.fromScene == Scenes.QuickSettingsShade ||
                                 state.fromScene == Scenes.Lockscreen
                     }
                 }
