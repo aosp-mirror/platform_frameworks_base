@@ -30,6 +30,7 @@ import static com.android.systemui.accessibility.accessibilitymenu.Accessibility
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.INTENT_TOGGLE_MENU;
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.PACKAGE_NAME;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -45,11 +46,11 @@ import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.platform.uiautomator_helpers.WaitUtils;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -69,6 +70,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -112,6 +114,7 @@ public class AccessibilityMenuServiceTest {
         sPowerManager = context.getSystemService(PowerManager.class);
         sKeyguardManager = context.getSystemService(KeyguardManager.class);
         sDisplayManager = context.getSystemService(DisplayManager.class);
+        unlockSignal();
 
         // Disable all a11yServices if any are active.
         if (!sAccessibilityManager.getEnabledAccessibilityServiceList(
@@ -176,28 +179,32 @@ public class AccessibilityMenuServiceTest {
     }
 
     private static boolean isMenuVisible() {
+        sUiDevice.waitForIdle();
         AccessibilityNodeInfo root = sUiAutomation.getRootInActiveWindow();
         return root != null && root.getPackageName().toString().equals(PACKAGE_NAME);
     }
 
-    private static void wakeUpScreen() throws RemoteException {
-        sUiDevice.wakeUp();
+    private static void wakeUpScreen() throws IOException {
+        sUiDevice.pressKeyCode(KeyEvent.KEYCODE_WAKEUP);
         WaitUtils.waitForValueToSettle("Screen On", AccessibilityMenuServiceTest::isScreenOn);
         assertWithMessage("Screen is on").that(isScreenOn()).isTrue();
     }
 
     private static void closeScreen() throws Throwable {
-        sUiAutomation.performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
+        // go/adb-cheats#lock-screen
+        sUiDevice.pressKeyCode(KeyEvent.KEYCODE_SLEEP);
         WaitUtils.waitForValueToSettle("Screen Off", AccessibilityMenuServiceTest::isScreenOff);
         assertWithMessage("Screen is off").that(isScreenOff()).isTrue();
+        WaitUtils.ensureThat(
+                "Screen is locked", () -> sKeyguardManager.isKeyguardLocked());
     }
 
     private static void openMenu() throws Throwable {
         unlockSignal();
         if (!isMenuVisible()) {
             sInstrumentation.getTargetContext().sendBroadcast(INTENT_OPEN_MENU);
-            sUiDevice.waitForIdle();
-            WaitUtils.ensureThat("Accessibility Menu is visible", () -> isMenuVisible());
+            WaitUtils.ensureThat("Accessibility Menu is visible",
+                    AccessibilityMenuServiceTest::isMenuVisible);
         }
     }
 
@@ -449,6 +456,7 @@ public class AccessibilityMenuServiceTest {
         openMenu();
         closeScreen();
         wakeUpScreen();
+        assertThat(sKeyguardManager.isKeyguardLocked()).isTrue();
 
         TestUtils.waitUntil("Menu did not close.",
                 TIMEOUT_UI_CHANGE_S,
@@ -460,6 +468,8 @@ public class AccessibilityMenuServiceTest {
     public void testOnScreenLock_cannotOpenMenu() throws Throwable {
         closeScreen();
         wakeUpScreen();
+        assertThat(sKeyguardManager.isKeyguardLocked()).isTrue();
+
         sInstrumentation.getContext().sendBroadcast(INTENT_OPEN_MENU);
         sUiDevice.waitForIdle();
 
@@ -468,10 +478,7 @@ public class AccessibilityMenuServiceTest {
                 sOpenBlocked::get);
     }
 
-    private static void unlockSignal() throws RemoteException {
-        if (!sKeyguardManager.isKeyguardLocked()) {
-            return;
-        }
+    private static void unlockSignal() throws IOException {
         // go/adb-cheats#unlock-screen
         wakeUpScreen();
         if (sKeyguardManager.isKeyguardLocked()) {
