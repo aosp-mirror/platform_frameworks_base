@@ -14,8 +14,9 @@
 
 # Warning: this is actually a product definition, to be inherited from
 
-PRODUCT_PACKAGES += \
-    keylayout_data \
-    keychars_data \
-    idc_data
+PRODUCT_COPY_FILES := \
+  $(call find-copy-subdir-files,*.kl,$(LOCAL_PATH),system/usr/keylayout) \
+  $(call find-copy-subdir-files,*.kcm,$(LOCAL_PATH),system/usr/keychars) \
+  $(call find-copy-subdir-files,*.idc,$(LOCAL_PATH),system/usr/idc)
+
 
