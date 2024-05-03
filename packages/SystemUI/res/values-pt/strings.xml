@@ -97,6 +97,8 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Borda esquerda em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Borda direita em <xliff:g id="PERCENT">%1$d</xliff:g> por cento"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Salva no app <xliff:g id="APP">%1$s</xliff:g> no perfil de trabalho"</string>
+    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"O app <xliff:g id="APPNAME">%1$s</xliff:g> detectou essa captura de tela."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> e outros apps abertos detectaram essa captura de tela."</string>
@@ -457,9 +459,10 @@
     <string name="work_mode_off_title" msgid="5794818421357835873">"Reativar apps de trabalho?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"Reativar"</string>
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Fechar widgets na tela de bloqueio"</string>
-    <!-- no translation found for accessibility_action_label_edit_widgets (3821868581348322346) -->
-    <skip />
+    <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Personalizar widgets"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Widgets na tela de bloqueio"</string>
+    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Trocar usuário"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu suspenso"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todos os apps e dados nesta sessão serão excluídos."</string>
@@ -554,7 +557,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Seus apps pessoais estão conectados à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. As atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o provedor de VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir configurações de VPN"</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerenciado pelo seu familiar responsável, que pode ver e gerenciar informações como os apps que você usa, sua localização e seu tempo de uso."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerenciado pelo seu familiar responsável, que pode ver e gerenciar informações como os apps que você usa, sua localização e seu tempo de tela."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Desbloqueado pelo TrustAgent"</string>
     <string name="kg_prompt_after_adaptive_auth_lock" msgid="2587481497846342760">"O dispositivo foi bloqueado devido a muitas tentativas de autenticação"</string>
@@ -628,6 +631,8 @@
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"ativar o som de %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Tocando <xliff:g id="LABEL">%s</xliff:g> em"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"O áudio vai tocar em"</string>
+    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
+    <skip />
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sintonizador System UI"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de status"</string>
     <string name="demo_mode" msgid="263484519766901593">"Modo de demonstração da interface do sistema"</string>
@@ -655,9 +660,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satélite, conexão ruim"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satélite, conexão boa"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satélite, conexão disponível"</string>
-    <!-- no translation found for satellite_connected_carrier_text (7942466244369263272) -->
-    <skip />
-    <!-- no translation found for satellite_not_connected_carrier_text (3471375076594005077) -->
+    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
     <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabalho"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversão para alguns, mas não para todos"</string>
@@ -863,6 +866,8 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Adicionar bloco"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover para <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Adicionar à posição <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
+    <skip />
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posição <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Bloco adicionado"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Bloco removido"</string>
