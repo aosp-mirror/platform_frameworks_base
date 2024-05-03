@@ -2027,7 +2027,7 @@ class PermissionService(private val service: AccessCheckingService) :
 
         val writer = IndentingPrintWriter(pw, "  ")
 
-        if (args.isNullOrEmpty()) {
+        if (args.isNullOrEmpty() || args[0] == "-a") {
             service.getState {
                 writer.dumpSystemState(state)
                 getAllAppIdPackageNames(state).forEachIndexed { _, appId, packageNames ->
