@@ -143,7 +143,7 @@ constructor(
                 null,
             )
 
-    fun onBarClick(expandable: Expandable) {
+    fun onBarClick(expandable: Expandable?) {
         uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_MEDIA_OUTPUT_CLICKED)
         val result = sessionWithPlaybackState.value
         actionsInteractor.onBarClick((result as? Result.Data)?.data, expandable)
