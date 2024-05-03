@@ -3768,7 +3768,6 @@ public class HdmiControlService extends SystemService {
         return mWakeUpMessageReceived;
     }
 
-    @VisibleForTesting
     protected boolean isStandbyMessageReceived() {
         return mStandbyMessageReceived;
     }
