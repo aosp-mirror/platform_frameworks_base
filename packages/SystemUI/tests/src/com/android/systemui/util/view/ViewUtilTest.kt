@@ -19,17 +19,20 @@ package com.android.systemui.util.view
 import android.graphics.Rect
 import android.view.View
 import android.widget.TextView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.`when`
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ViewUtilTest : SysuiTestCase() {
     private val viewUtil = ViewUtil()
     private lateinit var view: View
@@ -45,11 +48,13 @@ class ViewUtilTest : SysuiTestCase() {
         location[1] = VIEW_TOP
         `when`(view.locationOnScreen).thenReturn(location)
         doAnswer { invocation ->
-            val pos = invocation.arguments[0] as IntArray
-            pos[0] = VIEW_LEFT
-            pos[1] = VIEW_TOP
-            null
-        }.`when`(view).getLocationInWindow(any())
+                val pos = invocation.arguments[0] as IntArray
+                pos[0] = VIEW_LEFT
+                pos[1] = VIEW_TOP
+                null
+            }
+            .`when`(view)
+            .getLocationInWindow(any())
     }
 
     @Test
@@ -59,9 +64,8 @@ class ViewUtilTest : SysuiTestCase() {
 
     @Test
     fun touchIsWithinView_onTopLeftCorner_returnsTrue() {
-        assertThat(viewUtil.touchIsWithinView(
-            view, VIEW_LEFT.toFloat(), VIEW_TOP.toFloat())
-        ).isTrue()
+        assertThat(viewUtil.touchIsWithinView(view, VIEW_LEFT.toFloat(), VIEW_TOP.toFloat()))
+            .isTrue()
     }
 
     @Test

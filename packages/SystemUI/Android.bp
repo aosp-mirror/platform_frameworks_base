@@ -78,11 +78,23 @@ filegroup {
     visibility: ["//visibility:private"],
 }
 
+filegroup {
+    name: "SystemUI-tests-broken-robofiles-run",
+    srcs: [
+        "tests/src/**/systemui/util/LifecycleFragmentTest.java",
+        "tests/src/**/systemui/util/TestableAlertDialogTest.kt",
+        "tests/src/**/systemui/util/kotlin/PairwiseFlowTest",
+        "tests/src/**/systemui/util/sensors/AsyncManagerTest.java",
+        "tests/src/**/systemui/util/sensors/ThresholdSensorImplTest.java",
+        "tests/src/**/systemui/util/wakelock/KeepAwakeAnimationListenerTest.java",
+    ],
+}
+
 // We are running robolectric tests in the tests directory as well as
 // multivalent tests.  If you add a test, and it doesn't run in robolectric,
 // it should be added to this exclusion list. go/multivalent-tests
 filegroup {
-    name: "SystemUI-tests-broken-robofiles",
+    name: "SystemUI-tests-broken-robofiles-compile",
     srcs: [
         "tests/src/**/*DeviceOnlyTest.java",
         "tests/src/**/*DeviceOnlyTest.kt",
@@ -700,7 +712,8 @@ android_robolectric_test {
         ":SystemUI-tests-robofiles",
     ],
     exclude_srcs: [
-        ":SystemUI-tests-broken-robofiles",
+        ":SystemUI-tests-broken-robofiles-compile",
+        ":SystemUI-tests-broken-robofiles-run",
     ],
     static_libs: [
         "RoboTestLibraries",
