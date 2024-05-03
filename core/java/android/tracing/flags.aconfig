@@ -30,3 +30,11 @@ flag {
     is_fixed_read_only: true
     bug: "276433199"
 }
+
+flag {
+    name: "perfetto_view_capture_tracing"
+    namespace: "windowing_tools"
+    description: "Migrate ViewCapture tracing to Perfetto"
+    is_fixed_read_only: true
+    bug: "323166383"
+}
