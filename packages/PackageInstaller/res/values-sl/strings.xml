@@ -78,7 +78,7 @@
     <string name="uninstalling" msgid="8709566347688966845">"Odstranjevanje …"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Odmeščanje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Odstranitev je končana."</string>
-    <string name="uninstall_done_app" msgid="4588850984473605768">"Aplikacija <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> je bila odstranjena."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"Aplikacija <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> je bila odmeščena."</string>
     <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Klonirana aplikacija <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> je izbrisana"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Odstranitev ni uspela."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Odmeščanje aplikacije <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ni uspelo."</string>
