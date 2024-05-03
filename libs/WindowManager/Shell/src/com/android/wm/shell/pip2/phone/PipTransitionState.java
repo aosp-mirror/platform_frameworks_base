@@ -257,6 +257,7 @@ public class PipTransitionState {
     private String stateToString() {
         switch (mState) {
             case UNDEFINED: return "undefined";
+            case SWIPING_TO_PIP: return "swiping_to_pip";
             case ENTERING_PIP: return "entering-pip";
             case ENTERED_PIP: return "entered-pip";
             case CHANGING_PIP_BOUNDS: return "changing-bounds";

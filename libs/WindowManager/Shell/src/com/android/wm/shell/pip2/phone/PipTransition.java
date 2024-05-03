@@ -45,7 +45,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.util.Preconditions;
-import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
@@ -64,6 +63,9 @@ public class PipTransition extends PipTransitionController implements
     private static final String TAG = PipTransition.class.getSimpleName();
     private static final String PIP_TASK_TOKEN = "pip_task_token";
     private static final String PIP_TASK_LEASH = "pip_task_leash";
+    private static final String PIP_START_TX = "pip_start_tx";
+    private static final String PIP_FINISH_TX = "pip_finish_tx";
+    private static final String PIP_DESTINATION_BOUNDS = "pip_dest_bounds";
 
     /**
      * The fixed start delay in ms when fading out the content overlay from bounds animation.
@@ -98,6 +100,8 @@ public class PipTransition extends PipTransitionController implements
     private WindowContainerToken mPipTaskToken;
     @Nullable
     private SurfaceControl mPipLeash;
+    @Nullable
+    private Transitions.TransitionFinishCallback mFinishCallback;
 
     public PipTransition(
             Context context,
@@ -223,7 +227,6 @@ public class PipTransition extends PipTransitionController implements
             return startExpandAnimation(info, startTransaction, finishTransaction, finishCallback);
         } else if (transition == mResizeTransition) {
             mResizeTransition = null;
-            mPipTransitionState.setState(PipTransitionState.CHANGING_PIP_BOUNDS);
             return startResizeAnimation(info, startTransaction, finishTransaction, finishCallback);
         }
 
@@ -246,31 +249,27 @@ public class PipTransition extends PipTransitionController implements
             return false;
         }
         SurfaceControl pipLeash = pipChange.getLeash();
-        Rect destinationBounds = pipChange.getEndAbsBounds();
 
         // Even though the final bounds and crop are applied with finishTransaction since
         // this is a visible change, we still need to handle the app draw coming in. Snapshot
         // covering app draw during collection will be removed by startTransaction. So we make
-        // the crop equal to the final bounds and then scale the leash back to starting bounds.
+        // the crop equal to the final bounds and then let the current
+        // animator scale the leash back to starting bounds.
+        // Note: animator is responsible for applying the startTx but NOT finishTx.
         startTransaction.setWindowCrop(pipLeash, pipChange.getEndAbsBounds().width(),
                 pipChange.getEndAbsBounds().height());
-        startTransaction.setScale(pipLeash,
-                (float) mPipBoundsState.getBounds().width() / destinationBounds.width(),
-                (float) mPipBoundsState.getBounds().height() / destinationBounds.height());
-        startTransaction.apply();
 
-        finishTransaction.setScale(pipLeash,
-                (float) mPipBoundsState.getBounds().width() / destinationBounds.width(),
-                (float) mPipBoundsState.getBounds().height() / destinationBounds.height());
-
-        // We are done with the transition, but will continue animating leash to final bounds.
-        finishCallback.onTransitionFinished(null);
-
-        // Animate the pip leash with the new buffer
-        final int duration = mContext.getResources().getInteger(
-                R.integer.config_pipResizeAnimationDuration);
         // TODO: b/275910498 Couple this routine with a new implementation of the PiP animator.
-        startResizeAnimation(pipLeash, mPipBoundsState.getBounds(), destinationBounds, duration);
+        // Classes interested in continuing the animation would subscribe to this state update
+        // getting info such as endBounds, startTx, and finishTx as an extra Bundle once
+        // animators are in place. Once done state needs to be updated to CHANGED_PIP_BOUNDS.
+        Bundle extra = new Bundle();
+        extra.putParcelable(PIP_START_TX, startTransaction);
+        extra.putParcelable(PIP_FINISH_TX, finishTransaction);
+        extra.putParcelable(PIP_DESTINATION_BOUNDS, pipChange.getEndAbsBounds());
+
+        mFinishCallback = finishCallback;
+        mPipTransitionState.setState(PipTransitionState.CHANGING_PIP_BOUNDS, extra);
         return true;
     }
 
@@ -285,12 +284,17 @@ public class PipTransition extends PipTransitionController implements
         WindowContainerToken pipTaskToken = pipChange.getContainer();
         SurfaceControl pipLeash = pipChange.getLeash();
 
+        if (pipTaskToken == null || pipLeash == null) {
+            return false;
+        }
+
         PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
         Rect srcRectHint = params.getSourceRectHint();
         Rect startBounds = pipChange.getStartAbsBounds();
         Rect destinationBounds = pipChange.getEndAbsBounds();
 
         WindowContainerTransaction finishWct = new WindowContainerTransaction();
+        SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
 
         if (PipBoundsAlgorithm.isSourceRectHintValidForEnterPip(srcRectHint, destinationBounds)) {
             final float scale = (float) destinationBounds.width() / srcRectHint.width();
@@ -316,18 +320,16 @@ public class PipTransition extends PipTransitionController implements
                     .reparent(overlayLeash, pipLeash)
                     .setLayer(overlayLeash, Integer.MAX_VALUE);
 
-            if (pipTaskToken != null) {
-                SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-                tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
-                                this::onClientDrawAtTransitionEnd)
-                        .setScale(overlayLeash, 1f, 1f)
-                        .setPosition(overlayLeash,
-                                (destinationBounds.width() - overlaySize) / 2f,
-                                (destinationBounds.height() - overlaySize) / 2f);
-                finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
-            }
+            // Overlay needs to be adjusted once a new draw comes in resetting surface transform.
+            tx.setScale(overlayLeash, 1f, 1f);
+            tx.setPosition(overlayLeash, (destinationBounds.width() - overlaySize) / 2f,
+                    (destinationBounds.height() - overlaySize) / 2f);
         }
         startTransaction.apply();
+
+        tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
+                        this::onClientDrawAtTransitionEnd);
+        finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
 
         // Note that finishWct should be free of any actual WM state changes; we are using
         // it for syncing with the client draw after delayed configuration changes are dispatched.
@@ -410,14 +412,6 @@ public class PipTransition extends PipTransitionController implements
         finishCallback.onTransitionFinished(null);
         mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
         return true;
-    }
-
-    /**
-     * TODO: b/275910498 Use a new implementation of the PiP animator here.
-     */
-    private void startResizeAnimation(SurfaceControl leash, Rect startBounds,
-            Rect endBounds, int duration) {
-        mPipTransitionState.setState(PipTransitionState.CHANGED_PIP_BOUNDS);
     }
 
     //
@@ -536,6 +530,15 @@ public class PipTransition extends PipTransitionController implements
             case PipTransitionState.EXITED_PIP:
                 mPipTransitionState.mPipTaskToken = null;
                 mPipTransitionState.mPinnedTaskLeash = null;
+                break;
+            case PipTransitionState.CHANGED_PIP_BOUNDS:
+                // Note: this might not be the end of the animation, rather animator just finished
+                // adjusting startTx and finishTx and is ready to finishTransition(). The animator
+                // can still continue playing the leash into the destination bounds after.
+                if (mFinishCallback != null) {
+                    mFinishCallback.onTransitionFinished(null);
+                    mFinishCallback = null;
+                }
                 break;
         }
     }
