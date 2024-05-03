@@ -81,6 +81,13 @@ flag {
 }
 
 flag {
+    name: "significant_places"
+    namespace: "biometrics"
+    description: "Enabled significant place monitoring"
+    bug: "337870680"
+}
+
+flag {
     name: "report_primary_auth_attempts"
     namespace: "biometrics"
     description: "Report primary auth attempts from LockSettingsService"
