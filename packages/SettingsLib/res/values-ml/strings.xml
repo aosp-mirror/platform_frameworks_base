@@ -96,10 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"കണ‌ക്റ്റ് ചെയ്‌തു (ഫോണോ മീഡിയയോ ഇല്ല), ബാറ്ററി നില <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"സജീവം. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"സജീവം. ഇടതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, വലതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ബാറ്ററി."</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"സജീവം. ഇടതുഭാഗത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"സജീവം. വലതുഭാഗത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"ബാറ്ററി ചാർജ് <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ആണ്"</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"ഇടതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, വലതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ബാറ്ററി."</string>
@@ -107,12 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"വലത് വശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"സജീവം"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"സംരക്ഷിച്ചു"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"സജീവമാണ് (ഇടതുഭാഗത്ത് മാത്രം)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"സജീവമാണ് (വലതുഭാഗത്ത് മാത്രം)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"സജീവമാണ് (ഇടതുഭാഗത്തും വലതുഭാഗത്തും)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"സജീവം (മീഡിയ മാത്രം). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"സജീവം (മീഡിയ മാത്രം). ഇടതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ബാറ്ററി, വലതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"കണക്റ്റ് ചെയ്തു (ഓഡിയോ പങ്കിടൽ പിന്തുണയ്ക്കുന്നു). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
@@ -726,4 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"നപുംസകലിംഗം"</string>
     <string name="feminine" msgid="1529155595310784757">"സ്ത്രീലിംഗം"</string>
     <string name="masculine" msgid="4653978041013996303">"പുല്ലിംഗം"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"സിസ്റ്റം അപ്ഡേറ്റുകൾ"</string>
 </resources>

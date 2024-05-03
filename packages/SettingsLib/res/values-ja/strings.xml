@@ -96,10 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"接続済み（電話、メディアなし）、バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>: <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"有効。バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"有効。左: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>、右: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>。"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"アクティブ。左: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"アクティブ。右: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"バッテリー <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>、右: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>。"</string>
@@ -107,12 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"右: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"有効"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"保存済み"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"アクティブ（左のみ）"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"アクティブ（右のみ）"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"アクティブ（左と右）"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"有効（メディアのみ）。バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"有効（メディアのみ）。左: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>、右: バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>。"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"接続済み（音声の共有をサポート）。バッテリー残量 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>。"</string>
@@ -240,7 +235,7 @@
     <string name="choose_profile" msgid="343803890897657450">"プロファイルの選択"</string>
     <string name="category_personal" msgid="6236798763159385225">"個人用"</string>
     <string name="category_work" msgid="4014193632325996115">"仕事用"</string>
-    <string name="category_private" msgid="4244892185452788977">"非公開"</string>
+    <string name="category_private" msgid="4244892185452788977">"プライベート"</string>
     <string name="category_clone" msgid="1554511758987195974">"クローン"</string>
     <string name="development_settings_title" msgid="140296922921597393">"開発者向けオプション"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"開発者向けオプションの有効化"</string>
@@ -726,4 +721,6 @@
     <string name="neuter" msgid="2075249330106127310">"中性"</string>
     <string name="feminine" msgid="1529155595310784757">"女性"</string>
     <string name="masculine" msgid="4653978041013996303">"男性"</string>
+    <!-- no translation found for system_update_settings_list_item_title (6618098383615432484) -->
+    <skip />
 </resources>
