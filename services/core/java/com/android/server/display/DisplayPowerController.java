@@ -1448,7 +1448,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
                 // Use the auto-brightness curve and the last observed lux
                 rawBrightnessState = mAutomaticBrightnessController
-                        .getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                        .getAutomaticScreenBrightnessBasedOnLastUsedLux(
                                 mTempBrightnessEvent);
             } else {
                 rawBrightnessState = getDozeBrightnessForOffload();

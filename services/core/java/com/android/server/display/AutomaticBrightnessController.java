@@ -181,7 +181,7 @@ public class AutomaticBrightnessController {
     private long mLightSensorEnableTime;
 
     // The currently accepted nominal ambient light level.
-    private float mAmbientLux;
+    private float mAmbientLux = INVALID_LUX;
 
     // The last calculated ambient light level (long time window).
     private float mSlowAmbientLux;
@@ -434,23 +434,23 @@ public class AutomaticBrightnessController {
      * entering doze - we disable the light sensor, invalidate the lux, but we still need to set
      * the initial brightness in doze mode.
      */
-    public float getAutomaticScreenBrightnessBasedOnLastObservedLux(
+    public float getAutomaticScreenBrightnessBasedOnLastUsedLux(
             BrightnessEvent brightnessEvent) {
-        if (mLastObservedLux == INVALID_LUX) {
+        float lastUsedLux = mAmbientLux;
+        if (lastUsedLux == INVALID_LUX) {
             return PowerManager.BRIGHTNESS_INVALID_FLOAT;
         }
 
-        float brightness = mCurrentBrightnessMapper.getBrightness(mLastObservedLux,
+        float brightness = mCurrentBrightnessMapper.getBrightness(lastUsedLux,
                 mForegroundAppPackageName, mForegroundAppCategory);
         if (shouldApplyDozeScaleFactor()) {
             brightness *= mDozeScaleFactor;
         }
 
         if (brightnessEvent != null) {
-            brightnessEvent.setLux(mLastObservedLux);
+            brightnessEvent.setLux(lastUsedLux);
             brightnessEvent.setRecommendedBrightness(brightness);
             brightnessEvent.setFlags(brightnessEvent.getFlags()
-                    | (mLastObservedLux == INVALID_LUX ? BrightnessEvent.FLAG_INVALID_LUX : 0)
                     | (shouldApplyDozeScaleFactor() ? BrightnessEvent.FLAG_DOZE_SCALE : 0));
             brightnessEvent.setAutoBrightnessMode(getMode());
         }
