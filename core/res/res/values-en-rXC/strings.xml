@@ -2144,6 +2144,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‎‏‏‏‎‎‏‏‏‎‏‏‎‎‎‏‏‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‏‎‎‎‎‎‏‏‎‎‏‎‎‏‎‏‎‏‏‎‎‎‎‎‎Routine Mode info notification‎‏‎‎‏‎"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‎‏‎‏‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‏‎‎‏‏‎‏‏‏‏‎‎‎‎‏‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‏‎Battery Saver turned on‎‏‎‎‏‎"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‎‎‏‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎Reducing battery usage to extend battery life‎‏‎‎‏‎"</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‎‎‎‎‎‎‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‏‎‏‎‏‎‏‏‎‏‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‏‏‎‎‎‏‎Battery Saver‎‏‎‎‏‎"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‏‏‏‎‏‎‎‎‏‏‎‎‎‎‎‎‎‎‏‏‎Battery Saver turned off‎‏‎‎‏‎"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‏‏‏‎‎‎‏‏‏‎‏‏‏‏‎‏‎‎‎‏‏‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎‏‎‏‏‎‎‏‎‏‎‏‏‎‏‏‏‏‎Phone has enough charge. Features no longer restricted.‎‏‎‎‏‎"</string>
@@ -2399,6 +2403,10 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‏‎‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‏‎‎‏‏‎‏‎‏‏‏‎‎‎‎‎‏‏‎‏‏‏‏‏‏‎‎‏‏‏‎‎‎‏‎‏‎Work 3‎‏‎‎‏‎"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‎‎‎‏‏‏‏‎‏‎‎‎‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‏‏‏‎‎‎‏‎‏‏‎Test‎‏‎‎‏‎"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‎‏‎‏‎‎‏‏‎‎‏‎‎‎‏‏‎‏‏‏‎‎‏‎‎‎‎‎‏‏‏‎‎‎‏‎‏‎‎‎‎‏‎‏‎‏‎‏‏‎Communal‎‏‎‎‏‎"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‎‏‏‏‎‎‎‎‏‎‎‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‎‏‎‏‏‎‏‎‏‎‏‏‎‏‏‎‎‎‏‏‎‏‏‎‎‎‎‎‏‎Work profile‎‏‎‎‏‎"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‏‎‎‎‎‏‎‎‎‏‏‏‏‎‏‏‎‏‏‎‏‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‎‏‎‎‏‎Private space‎‏‎‎‏‎"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‎‎‏‎‏‏‏‎‎‏‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‎‏‎‏‏‏‎‎‎‎‏‎‎‏‏‎‏‏‏‎‏‎‎‏‎‎‎‎‎‎‎Clone‎‏‎‎‏‎"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‏‏‏‏‎‎‎‏‏‏‎‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‎‏‏‎‏‏‏‏‏‏‏‎‎‏‏‏‎‎‎‎‏‏‏‎‎‎‎‏‏‏‎Communal‎‏‎‎‏‎"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‎‎‏‏‎‏‎‎‎‏‏‎‏‏‎‏‎‎‏‎‏‏‎‏‏‏‎‎‎‎‏‎‎‏‏‎‎‏‏‏‏‎‏‎‏‏‎‎‏‎‏‎‎‎‎‎Sensitive notification content hidden‎‏‎‎‏‎"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‏‎‏‎‎‏‎‎‎‏‎‏‎‏‏‎‏‏‎‏‎‎‎‎‎‏‎‏‎‎‏‏‏‏‎‎‎‎‎‏‏‏‎‏‎‏‏‎‎‏‎‎‏‎App content hidden from screen share for security‎‏‎‎‏‎"</string>

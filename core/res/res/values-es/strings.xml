@@ -154,31 +154,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> transcurridos <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: No desviada"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: No desviada"</string>
-    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
-    <skip />
-    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
-    <skip />
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Seguridad de redes móviles"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Cifrado, notificaciones sobre redes no cifradas"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Se ha accedido al ID del dispositivo"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"A las <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una red cercana registró el ID único de tu dispositivo (IMSI o IMEI) mientras usabas la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"A las <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, una red cercana registró el ID único de tu dispositivo (IMSI o IMEI) mientras usabas la SIM de <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nEsto significa que se ha registrado tu ubicación, actividad o identidad. Se trata de una práctica habitual, pero puede ser un problema para aquellos a quienes les preocupa su privacidad."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Conectado a la red cifrada <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Ahora, la conexión con la SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g> es más segura"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Conectado a una red no cifrada"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Tus llamadas, mensajes y datos son más vulnerables mientras uses la SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Tus llamadas, mensajes y datos son más vulnerables mientras uses la SIM de <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nCuando tu conexión vuelva a cifrarse, recibirás una notificación."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Ajustes de seguridad de redes móviles"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Más información"</string>
-    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
-    <skip />
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"Entendido"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Código de función completo"</string>
     <string name="fcError" msgid="5325116502080221346">"Se ha producido un problema de conexión o el código de la función no es válido."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Aceptar"</string>
@@ -372,8 +360,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Hacer captura"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puede hacer capturas de la pantalla."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"Vista previa, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"cerrar"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inhabilitar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite que la aplicación inhabilite la barra de estado o añada y elimine iconos del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparecer en la barra de estado"</string>
@@ -2158,6 +2145,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación sobre el modo rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ahorro de batería activado"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduciendo el uso de batería para prolongar su duración"</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Ahorro de batería"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Ahorro de batería desactivado"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"El teléfono tiene suficiente batería. Las funciones ya no están restringidas."</string>
@@ -2232,10 +2223,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"¿Cambiar a la aplicación de trabajo?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Tu organización solo te permite hacer llamadas desde aplicaciones de trabajo"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Tu organización solo te permite enviar mensajes desde aplicaciones de trabajo"</string>
-    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
-    <skip />
-    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
-    <skip />
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"Solo puedes hacer llamadas desde tu aplicación personal Teléfono. Las llamadas que hagas desde Teléfono se añadirán a tu historial de llamadas."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Solo puedes enviar mensajes SMS desde tu aplicación personal Mensajes."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar navegador de trabajo"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Llamar"</string>
@@ -2415,8 +2404,11 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Trabajo 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Prueba"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Común"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Perfil de trabajo"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espacio privado"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clon"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Común"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"Contenido sensible de la notificación oculto"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contenido de la aplicación oculto en pantalla compartida por motivos de seguridad"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Conectado automáticamente al satélite"</string>
