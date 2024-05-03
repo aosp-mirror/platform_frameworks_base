@@ -670,7 +670,7 @@ public class BubbleStackView extends FrameLayout
             // First, see if the magnetized object consumes the event - if so, we shouldn't move the
             // bubble since it's stuck to the target.
             if (!passEventToMagnetizedObject(ev)) {
-                updateBubbleShadows(true /* showForAllBubbles */);
+                updateBubbleShadows(true /* isExpanded */);
                 if (mBubbleData.isExpanded()) {
                     mExpandedAnimationController.dragBubbleOut(
                             v, viewInitialX + dx, viewInitialY + dy);
@@ -720,6 +720,7 @@ public class BubbleStackView extends FrameLayout
             }
 
             mIsDraggingStack = false;
+            mMagnetizedObject = null;
 
             // Hide the stack after a delay, if needed.
             updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
@@ -890,18 +891,17 @@ public class BubbleStackView extends FrameLayout
 
         mMainExecutor = mainExecutor;
         mManager = bubbleStackViewManager;
+        mPositioner = bubblePositioner;
         mBubbleData = data;
         mSysuiProxyProvider = sysuiProxyProvider;
 
         Resources res = getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.bubble_size);
-        mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
+        mBubbleElevation = mPositioner.getBubbleElevation();
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
 
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
-        int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
-        mPositioner = bubblePositioner;
 
         final TypedArray ta = mContext.obtainStyledAttributes(
                 new int[]{android.R.attr.dialogCornerRadius});
@@ -934,12 +934,12 @@ public class BubbleStackView extends FrameLayout
 
         mBubbleContainer = new PhysicsAnimationLayout(context);
         mBubbleContainer.setActiveController(mStackAnimationController);
-        mBubbleContainer.setElevation(elevation);
+        mBubbleContainer.setElevation(mBubbleElevation);
         mBubbleContainer.setClipChildren(false);
         addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
         mExpandedViewContainer = new FrameLayout(context);
-        mExpandedViewContainer.setElevation(elevation);
+        mExpandedViewContainer.setElevation(mBubbleElevation);
         mExpandedViewContainer.setClipChildren(false);
         addView(mExpandedViewContainer);
 
@@ -1861,7 +1861,7 @@ public class BubbleStackView extends FrameLayout
         bubble.getIconView().setDotBadgeOnLeft(!mStackOnLeftOrWillBe /* onLeft */);
         bubble.getIconView().setOnClickListener(mBubbleClickListener);
         bubble.getIconView().setOnTouchListener(mBubbleTouchListener);
-        updateBubbleShadows(false /* showForAllBubbles */);
+        updateBubbleShadows(mIsExpanded);
         animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
@@ -1964,7 +1964,7 @@ public class BubbleStackView extends FrameLayout
         if (mIsExpanded || isExpansionAnimating()) {
             reorder.run();
             updateBadges(false /* setBadgeForCollapsedStack */);
-            updateZOrder();
+            updateBubbleShadows(true /* isExpanded */);
         } else {
             List<View> bubbleViews = bubbles.stream()
                     .map(b -> b.getIconView()).collect(Collectors.toList());
@@ -2207,7 +2207,7 @@ public class BubbleStackView extends FrameLayout
             mBubbleContainer.addView(bubble.getIconView(), index,
                     new LayoutParams(mPositioner.getBubbleSize(),
                             mPositioner.getBubbleSize()));
-            updateBubbleShadows(false /* showForAllBubbles */);
+            updateBubbleShadows(mIsExpanded);
             requestUpdate();
         }
     }
@@ -2340,7 +2340,7 @@ public class BubbleStackView extends FrameLayout
         beforeExpandedViewAnimation();
 
         showScrim(true, null /* runnable */);
-        updateZOrder();
+        updateBubbleShadows(mIsExpanded);
         updateBadges(false /* setBadgeForCollapsedStack */);
         mBubbleContainer.setActiveController(mExpandedAnimationController);
         updateOverflowVisibility();
@@ -2493,6 +2493,7 @@ public class BubbleStackView extends FrameLayout
                         () -> {
                             mBubbleContainer.setActiveController(mStackAnimationController);
                             updateOverflowVisibility();
+                            animateShadows();
                         });
 
         final Runnable after = () -> {
@@ -2503,7 +2504,6 @@ public class BubbleStackView extends FrameLayout
                 mManageEduView.hide();
             }
 
-            updateZOrder();
             updateBadges(true /* setBadgeForCollapsedStack */);
             afterExpandedViewAnimation();
             if (previouslySelected != null) {
@@ -3338,19 +3338,23 @@ public class BubbleStackView extends FrameLayout
      * Updates whether each of the bubbles should show shadows. When collapsed & resting, only the
      * visible bubbles (top 2) will show a shadow. When the stack is being dragged, everything
      * shows a shadow. When an individual bubble is dragged out, it should show a shadow.
+     * The bubble overflow is a special case and never has a shadow as it's ordered below the
+     * rest of the bubbles and isn't visible unless the stack is expanded.
+     *
+     * @param isExpanded whether the stack will be expanded or not when the shadows are applied.
      */
-    private void updateBubbleShadows(boolean showForAllBubbles) {
-        int bubbleCount = getBubbleCount();
-        for (int i = 0; i < bubbleCount; i++) {
-            final float z = (mPositioner.getMaxBubbles() * mBubbleElevation) - i;
-            BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
-            boolean isDraggedOut = mMagnetizedObject != null
+    private void updateBubbleShadows(boolean isExpanded) {
+        final int childCount = mBubbleContainer.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
+            final boolean isOverflow = BubbleOverflow.KEY.equals(bv.getKey());
+            final boolean isDraggedOut = mMagnetizedObject != null
                     && mMagnetizedObject.getUnderlyingObject().equals(bv);
-            if (showForAllBubbles || isDraggedOut) {
-                bv.setZ(z);
+            if (isDraggedOut) {
+                // If it's dragged out, it's above all the other bubbles
+                bv.setZ((mPositioner.getMaxBubbles() * mBubbleElevation) + 1);
             } else {
-                final float tz = i < NUM_VISIBLE_WHEN_RESTING ? z : 0f;
-                bv.setZ(tz);
+                bv.setZ(mPositioner.getZTranslation(i, isOverflow, isExpanded));
             }
         }
     }
@@ -3368,16 +3372,6 @@ public class BubbleStackView extends FrameLayout
             if (!fullShadow) {
                 bv.animate().translationZ(0).start();
             }
-        }
-    }
-
-    private void updateZOrder() {
-        int bubbleCount = getBubbleCount();
-        for (int i = 0; i < bubbleCount; i++) {
-            BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
-            bv.setZ(i < NUM_VISIBLE_WHEN_RESTING
-                    ? (mPositioner.getMaxBubbles() * mBubbleElevation) - i
-                    : 0f);
         }
     }
 
