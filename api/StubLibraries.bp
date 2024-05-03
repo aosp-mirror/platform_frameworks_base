@@ -1214,6 +1214,32 @@ droidstubs {
     api_levels_sdk_type: "module-lib",
 }
 
+// Create a single jar containing the whole module-lib API surface.
+// This is needed because Metalava only consumes the first jar file it is given
+// and ignores the rest.
+java_library {
+    name: "android_module_stubs_complete_current_with_test_libs",
+    static_libs: [
+        "android_module_stubs_current_with_test_libs",
+        "framework-updatable-stubs-module_libs_api-exportable",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+// Produces an `api-versions.xml` file that includes up-to-date information
+// about all the module-lib APIs, both updatable and non-updatable and historic
+// information about all previous dessert and SDK extension releases.
+droidstubs {
+    name: "api_versions_module_lib_complete",
+    defaults: ["api_versions_complete_defaults"],
+    srcs: [":android_module_stubs_complete_current_with_test_libs{.jar}"],
+    api_levels_sdk_type: "module-lib",
+}
+
 // Produces an `api-versions.xml` file that includes up-to-date information
 // about only the non-updatable system-server APIs and historic information
 // about all previous dessert and SDK extension releases. That historic
@@ -1223,6 +1249,36 @@ droidstubs {
     name: "api_versions_system_server",
     defaults: ["api_versions_non_updatable_defaults"],
     srcs: [":android_system_server_stubs_current_with_test_libs{.jar}"],
+    api_levels_sdk_type: "system-server",
+}
+
+// Create a single jar containing the whole system-server API surface.
+// This is needed because Metalava only consumes the first jar file it is given
+// and ignores the rest.
+java_library {
+    name: "android_system_server_stubs_complete_current_with_test_libs",
+    static_libs: [
+        "android_system_server_stubs_current_with_test_libs",
+        // system-server extends module-lib but libraries which only service-*
+        // libraries provided system-server APIs, so include module-lib APIs for
+        // the others, e.g. framework-* libraries.
+        "framework-updatable-stubs-module_libs_api-exportable",
+        "framework-updatable-stubs-system_server_api-exportable",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+// Produces an `api-versions.xml` file that includes up-to-date information
+// about all the system-server APIs, both updatable and non-updatable and
+// historic information about all previous dessert and SDK extension releases.
+droidstubs {
+    name: "api_versions_system_server_complete",
+    defaults: ["api_versions_complete_defaults"],
+    srcs: [":android_system_server_stubs_complete_current_with_test_libs{.jar}"],
     api_levels_sdk_type: "system-server",
 }
 
