@@ -97,6 +97,8 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"<xliff:g id="PERCENT">%1$d</xliff:g> אחוז מהשוליים השמאליים"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"<xliff:g id="PERCENT">%1$d</xliff:g> אחוז מהשוליים הימניים"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"נשמר באפליקציה <xliff:g id="APP">%1$s</xliff:g> בתוך פרופיל העבודה"</string>
+    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"קבצים"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> זיהתה את צילום המסך הזה."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> ואפליקציות פתוחות נוספות זיהו את צילום המסך הזה."</string>
@@ -457,9 +459,10 @@
     <string name="work_mode_off_title" msgid="5794818421357835873">"להפעיל את האפליקציות לעבודה?"</string>
     <string name="work_mode_turn_on" msgid="907813741770247267">"ביטול ההשהיה"</string>
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"סגירת ווידג\'טים במסך הנעילה"</string>
-    <!-- no translation found for accessibility_action_label_edit_widgets (3821868581348322346) -->
-    <skip />
+    <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"התאמה אישית של ווידג\'טים"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ווידג\'טים במסך הנעילה"</string>
+    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"תפריט במשיכה למטה"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"כל האפליקציות והנתונים בסשן הזה יימחקו."</string>
@@ -628,6 +631,8 @@
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"‏ביטול ההשתקה של %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"הפעלה של <xliff:g id="LABEL">%s</xliff:g> במכשיר"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"האודיו יופעל במכשיר"</string>
+    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
+    <skip />
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"שורת סטטוס"</string>
     <string name="demo_mode" msgid="263484519766901593">"מצב הדגמה בממשק המשתמש של המערכת"</string>
@@ -655,8 +660,8 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"לוויין, חיבור באיכות ירודה"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"לוויין, חיבור באיכות טובה"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"לוויין, יש חיבור זמין"</string>
-    <string name="satellite_connected_carrier_text" msgid="7942466244369263272">"יש חיבור ללוויין"</string>
-    <string name="satellite_not_connected_carrier_text" msgid="3471375076594005077">"אין חיבור ללוויין"</string>
+    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
+    <skip />
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"פרופיל עבודה"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"מהנה בשביל חלק מהאנשים, אבל לא בשביל כולם"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"‏התכונה System UI Tuner מספקת לך דרכים נוספות להתאים אישית את ממשק המשתמש של Android. התכונות הניסיוניות האלה עשויות להשתנות, לא לעבוד כראוי או להיעלם בגרסאות עתידיות. יש להמשיך בזהירות."</string>
@@ -861,6 +866,8 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"הוספת לחצן"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"העברה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"הוספה למיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
+    <skip />
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"מיקום <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"הלחצן נוסף"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"הלחצן הוסר"</string>

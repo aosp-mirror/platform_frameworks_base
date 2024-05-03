@@ -97,6 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Iphesenti elingu-<xliff:g id="PERCENT">%1$d</xliff:g> lomngcele ongakwesobunxele"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Iphesenti elingu-<xliff:g id="PERCENT">%1$d</xliff:g> lomngcele ongakwesokudla"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Kulondolozwe ku-<xliff:g id="APP">%1$s</xliff:g> kuphrofayela yomsebenzi"</string>
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"Kulondolozwe kokuthi <xliff:g id="APP">%1$s</xliff:g> ephrofayeleni egodliwe"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Amafayela"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"I-<xliff:g id="APPNAME">%1$s</xliff:g> ithole lesi sithombe-skrini."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"I-<xliff:g id="APPNAME">%1$s</xliff:g> namanye ama-app avuliwe athole lesi sithombe-skrini."</string>
@@ -459,6 +460,7 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Vala amawijethi ekukhiyeni isikrini"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Yenza ngokwezifiso amawijethi"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Amawijethi ekukhiyeni isikrini"</string>
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"khetha iwijethi"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Shintsha umsebenzisi"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"imenyu yokudonsela phansi"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Wonke ama-app nedatha kulesi sikhathi azosuswa."</string>
@@ -627,6 +629,8 @@
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"susa ukuthula kwe-%s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Idlala ku-<xliff:g id="LABEL">%s</xliff:g>"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Umsindo uzodlala"</string>
+    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
+    <skip />
     <string name="system_ui_tuner" msgid="1471348823289954729">"Isishuni se-UI yesistimu"</string>
     <string name="status_bar" msgid="4357390266055077437">"Ibha yesimo"</string>
     <string name="demo_mode" msgid="263484519766901593">"Imodi yedemo ye-UI yesistimu"</string>
@@ -654,8 +658,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Isathelayithi, uxhumano olungalungile"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Isethelayithi, uxhumano oluhle"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Isethelayithi, uxhumano luyatholakala"</string>
-    <string name="satellite_connected_carrier_text" msgid="7942466244369263272">"Ixhunywe esethelayithini"</string>
-    <string name="satellite_not_connected_carrier_text" msgid="3471375076594005077">"Ayixhunyiwe esethelayithini"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Isethelayithi yokuxhumana ngezimo eziphuthumayo"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Iphrofayela yomsebenzi"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Kuyajabulisa kwabanye kodwa hhayi bonke"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Isishuni se-UI sesistimu sikunika izindlela ezingeziwe zokuhlobisa nokwenza ngezifiso isixhumanisi sokubona se-Android. Lezi zici zesilingo zingashintsha, zephuke, noma zinyamalale ekukhishweni kwangakusasa. Qhubeka ngokuqaphela."</string>
@@ -860,6 +863,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Engeza ithayela"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Hambisa ku-<xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Engeza kusikhundla se-<xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Indawo ayivumelekile."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Isikhundla se-<xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Ithayela lingeziwe"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Ithayela likhishiwe"</string>
