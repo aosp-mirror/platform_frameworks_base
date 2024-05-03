@@ -16,18 +16,27 @@
 
 package com.android.internal.widget;
 
+import android.annotation.Nullable;
 import android.app.Flags;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
+import android.view.RemotableViewMethod;
 import android.widget.RemoteViews;
-
-import androidx.annotation.Nullable;
 
 /**
  * An image view that holds the icon displayed on the left side of a notification row.
  */
 @RemoteViews.RemoteView
 public class NotificationRowIconView extends CachingIconView {
+    private boolean mApplyCircularCrop = false;
+
     public NotificationRowIconView(Context context) {
         super(context);
     }
@@ -56,5 +65,83 @@ public class NotificationRowIconView extends CachingIconView {
         }
 
         super.onFinishInflate();
+    }
+
+    @Nullable
+    @Override
+    Drawable loadSizeRestrictedIcon(@Nullable Icon icon) {
+        final Drawable original = super.loadSizeRestrictedIcon(icon);
+        final Drawable result;
+        if (mApplyCircularCrop) {
+            result = makeCircularDrawable(original);
+        } else {
+            result = original;
+        }
+
+        return result;
+    }
+
+    /**
+     * Enables circle crop that makes given image circular
+     */
+    @RemotableViewMethod(asyncImpl = "setApplyCircularCropAsync")
+    public void setApplyCircularCrop(boolean applyCircularCrop) {
+        mApplyCircularCrop = applyCircularCrop;
+    }
+
+    /**
+     * Async version of {@link NotificationRowIconView#setApplyCircularCrop}
+     */
+    public Runnable setApplyCircularCropAsync(boolean applyCircularCrop) {
+        mApplyCircularCrop = applyCircularCrop;
+        return () -> {
+        };
+    }
+
+    @Nullable
+    private Drawable makeCircularDrawable(@Nullable Drawable original) {
+        if (original == null) {
+            return original;
+        }
+
+        final Bitmap source = drawableToBitmap(original);
+
+        int size = Math.min(source.getWidth(), source.getHeight());
+
+        Bitmap squared = Bitmap.createScaledBitmap(source, size, size, /* filter= */ false);
+        Bitmap result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+
+        final Canvas canvas = new Canvas(result);
+        final Paint paint = new Paint();
+        paint.setShader(
+                new BitmapShader(squared, BitmapShader.TileMode.CLAMP,
+                        BitmapShader.TileMode.CLAMP));
+        paint.setAntiAlias(true);
+        float radius = size / 2f;
+        canvas.drawCircle(radius, radius, radius, paint);
+        return new BitmapDrawable(getResources(), result);
+    }
+
+    private static Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable bitmapDrawable) {
+            final Bitmap bitmap = bitmapDrawable.getBitmap();
+            if (bitmap.getConfig() == Bitmap.Config.HARDWARE) {
+                return bitmap.copy(Bitmap.Config.ARGB_8888, false);
+            } else {
+                return bitmap;
+            }
+        }
+
+        int width = drawable.getIntrinsicWidth();
+        width = width > 0 ? width : 1;
+        int height = drawable.getIntrinsicHeight();
+        height = height > 0 ? height : 1;
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }

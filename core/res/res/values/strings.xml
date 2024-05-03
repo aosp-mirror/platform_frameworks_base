@@ -794,6 +794,9 @@
     <!-- The divider symbol between different parts of the notification header including spaces. not translatable [CHAR LIMIT=3] -->
     <string name="notification_header_divider_symbol_with_spaces" translatable="false">" • "</string>
 
+    <!-- Text for inline reply button for compact conversation heads ups -->
+    <string name="notification_compact_heads_up_reply">Reply</string>
+
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">New notification</string>
 

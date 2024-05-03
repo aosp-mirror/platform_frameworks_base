@@ -24,7 +24,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 /**
  * Compact Heads up Notifications template that doesn't set feedback icon and audibly alert icons
  */
-class NotificationCompactHeadsUpTemplateViewWrapper(
+open class NotificationCompactHeadsUpTemplateViewWrapper(
     ctx: Context,
     view: View,
     row: ExpandableNotificationRow
