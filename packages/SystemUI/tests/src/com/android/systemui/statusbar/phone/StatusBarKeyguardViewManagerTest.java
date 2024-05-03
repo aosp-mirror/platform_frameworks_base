@@ -187,8 +187,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mBouncerViewDelegate.getBackCallback()).thenReturn(mBouncerViewDelegateBackCallback);
         mSetFlagsRule.disableFlags(
                 com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR,
-                com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
-                com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT
+                com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
         );
 
         when(mNotificationShadeWindowController.getWindowRootView())

@@ -211,7 +211,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         if (!SceneContainerFlag.isEnabled) {
             mSetFlagsRule.disableFlags(
                 AConfigFlags.FLAG_KEYGUARD_WM_STATE_REFACTOR,
-                AConfigFlags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT,
             )
         }
 

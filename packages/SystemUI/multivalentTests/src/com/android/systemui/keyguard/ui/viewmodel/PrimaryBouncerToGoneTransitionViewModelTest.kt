@@ -55,7 +55,6 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT)
         whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(false)
         sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(false)
     }
