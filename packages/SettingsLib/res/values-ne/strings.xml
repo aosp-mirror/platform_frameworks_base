@@ -96,10 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"जडान गरियो (फोन वा मिडियाबाहेक), ब्याट्री <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"सक्रिय। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ब्याट्री।"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"सक्रिय। बायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, दायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ब्याट्री।"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"सक्रिय छ। बायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ब्याट्री।"</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"सक्रिय छ। दायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ब्याट्री।"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"ब्याट्रीको स्तर: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"ब्याट्री <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"बायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, दायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ब्याट्री।"</string>
@@ -107,12 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"दायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ब्याट्री"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"सक्रिय"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"सेभ गरिएको"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"सक्रिय छ (बायाँ मात्र)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"सक्रिय छ (दायाँ मात्र)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"सक्रिय छ (दायाँ र बायाँ)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"सक्रिय छ (मिडिया मात्र)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ब्याट्री।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"सक्रिय छ (मिडिया मात्र)। बायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, दायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ब्याट्री।"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"कनेक्ट गरिएको छ (अडियो सेयर गर्न मिल्छ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ब्याट्री।"</string>
@@ -726,4 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"नपुंसक लिङ्ग"</string>
     <string name="feminine" msgid="1529155595310784757">"स्त्रीलिङ्ग"</string>
     <string name="masculine" msgid="4653978041013996303">"पुलिङ्ग"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"सिस्टम अपडेटहरू"</string>
 </resources>

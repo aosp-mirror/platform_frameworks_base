@@ -96,10 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"منسلک ہے (فون یا میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"فعال۔ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"‏فعال۔ L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، ‏R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری۔"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"فعال ہے۔ بایاں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"فعال ہے۔ دایاں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"‏L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، ‏R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری۔"</string>
@@ -107,12 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"دائيں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"فعال"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"محفوظ ہے"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"فعال ہے (صرف بایاں)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"فعال ہے (صرف دایاں)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"فعال ہے (بایاں اور دایاں)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"فعال (صرف میڈیا)۔ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"‏فعال (صرف میڈیا)۔ L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، ‏R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)۔ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
@@ -726,4 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"غیر واضح"</string>
     <string name="feminine" msgid="1529155595310784757">"مؤنث"</string>
     <string name="masculine" msgid="4653978041013996303">"مذکر"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"سسٹم اپ ڈیٹس"</string>
 </resources>
