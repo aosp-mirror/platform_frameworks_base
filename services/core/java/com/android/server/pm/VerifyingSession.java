@@ -141,6 +141,8 @@ final class VerifyingSession {
     @NonNull
     private final PackageManagerService mPm;
 
+    private final int mInstallReason;
+
     VerifyingSession(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             int installerUid, SigningDetails signingDetails, int sessionId, PackageLite lite,
@@ -168,6 +170,7 @@ final class VerifyingSession {
         mUserActionRequiredType = sessionParams.requireUserAction;
         mIsInherit = sessionParams.mode == MODE_INHERIT_EXISTING;
         mIsStaged = sessionParams.isStaged;
+        mInstallReason = sessionParams.installReason;
     }
 
     @Override
@@ -190,7 +193,9 @@ final class VerifyingSession {
         // Perform package verification and enable rollback (unless we are simply moving the
         // package).
         if (!mOriginInfo.mExisting) {
-            if (!isApex() && !isArchivedInstallation()) {
+            final boolean verifyForRollback = Flags.recoverabilityDetection()
+                    ? !isARollback() : true;
+            if (!isApex() && !isArchivedInstallation() && verifyForRollback) {
                 // TODO(b/182426975): treat APEX as APK when APK verification is concerned
                 sendApkVerificationRequest(pkgLite);
             }
@@ -198,6 +203,11 @@ final class VerifyingSession {
                 sendEnableRollbackRequest();
             }
         }
+    }
+
+    private boolean isARollback() {
+        return mInstallReason == PackageManager.INSTALL_REASON_ROLLBACK
+                && mInstallSource.mInitiatingPackageName.equals("android");
     }
 
     private void sendApkVerificationRequest(PackageInfoLite pkgLite) {

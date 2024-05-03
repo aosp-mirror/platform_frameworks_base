@@ -47,6 +47,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
+import android.crashrecovery.flags.Flags;
 import android.credentials.CredentialManager;
 import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.database.sqlite.SQLiteGlobal;
@@ -1195,11 +1196,13 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
-        // Now that we have the bare essentials of the OS up and running, take
-        // note that we just booted, which might send out a rescue party if
-        // we're stuck in a runtime restart loop.
-        RescueParty.registerHealthObserver(mSystemContext);
-        PackageWatchdog.getInstance(mSystemContext).noteBoot();
+        if (!Flags.recoverabilityDetection()) {
+            // Now that we have the bare essentials of the OS up and running, take
+            // note that we just booted, which might send out a rescue party if
+            // we're stuck in a runtime restart loop.
+            RescueParty.registerHealthObserver(mSystemContext);
+            PackageWatchdog.getInstance(mSystemContext).noteBoot();
+        }
 
         // Manages LEDs and display backlight so we need it to bring up the display.
         t.traceBegin("StartLightsService");
@@ -1469,9 +1472,12 @@ public final class SystemServer implements Dumpable {
         boolean enableVrService = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE);
 
-        // For debugging RescueParty
-        if (Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.crash_system", false)) {
-            throw new RuntimeException();
+        if (!Flags.recoverabilityDetection()) {
+            // For debugging RescueParty
+            if (Build.IS_DEBUGGABLE
+                    && SystemProperties.getBoolean("debug.crash_system", false)) {
+                throw new RuntimeException();
+            }
         }
 
         try {
@@ -2909,6 +2915,14 @@ public final class SystemServer implements Dumpable {
         mPackageManagerService.systemReady();
         t.traceEnd();
 
+        if (Flags.recoverabilityDetection()) {
+            // Now that we have the essential services needed for rescue party, initialize
+            // RescuParty. note that we just booted, which might send out a rescue party if
+            // we're stuck in a runtime restart loop.
+            RescueParty.registerHealthObserver(mSystemContext);
+            PackageWatchdog.getInstance(mSystemContext).noteBoot();
+        }
+
         t.traceBegin("MakeDisplayManagerServiceReady");
         try {
             // TODO: use boot phase and communicate this flag some other way
@@ -3312,6 +3326,14 @@ public final class SystemServer implements Dumpable {
      * are updated outside of OTA; and to avoid breaking dependencies from system into apexes.
      */
     private void startApexServices(@NonNull TimingsTraceAndSlog t) {
+        if (Flags.recoverabilityDetection()) {
+            // For debugging RescueParty
+            if (Build.IS_DEBUGGABLE
+                    && SystemProperties.getBoolean("debug.crash_system", false)) {
+                throw new RuntimeException();
+            }
+        }
+
         t.traceBegin("startApexServices");
         // TODO(b/192880996): get the list from "android" package, once the manifest entries
         // are migrated to system manifest.
