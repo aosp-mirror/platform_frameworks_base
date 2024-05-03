@@ -2610,6 +2610,15 @@ public class OomAdjuster {
                 }
             }
 
+            // Sandbox should be able to control audio only when bound client
+            // has this capability.
+            if ((cstate.getCurCapability()
+                    & PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL) != 0) {
+                if (app.isSdkSandbox) {
+                    capability |= PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
+                }
+            }
+
             if (couldRecurse && shouldSkipDueToCycle(app, cstate, procState, adj, cycleReEval)) {
                 return false;
             }
