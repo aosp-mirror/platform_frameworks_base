@@ -589,8 +589,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"వైబ్రేట్"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s వాల్యూమ్ నియంత్రణలు"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు రింగ్ అవుతాయి (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>‌లో ప్లే అవుతోంది"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ఆడియో ప్లే అవుతుంది"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g>‌ ప్లే అయ్యే డివైజ్"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"ఆడియో ప్లే డివైజ్"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"సిస్టమ్ UI ట్యూనర్"</string>
     <string name="status_bar" msgid="4357390266055077437">"స్టేటస్‌ బార్‌"</string>
     <string name="demo_mode" msgid="263484519766901593">"సిస్టమ్ UI డెమో మోడ్"</string>

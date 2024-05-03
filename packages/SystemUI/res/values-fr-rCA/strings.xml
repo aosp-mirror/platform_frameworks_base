@@ -20,13 +20,13 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4811759950673118541">"IU système"</string>
-    <string name="battery_low_title" msgid="5319680173344341779">"Activer l\'économiseur de pile?"</string>
+    <string name="battery_low_title" msgid="5319680173344341779">"Activer l\'Économiseur de pile?"</string>
     <string name="battery_low_description" msgid="3282977755476423966">"Il vous reste <xliff:g id="PERCENTAGE">%s</xliff:g> d\'autonomie. L\'économiseur de pile active le thème sombre, limite l\'activité en arrière-plan et retarde les notifications."</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"L\'économiseur de pile active le thème sombre, limite l\'activité en arrière-plan et retarde les notifications."</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Impossible de charger l\'appareil par USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Servez-vous du chargeur fourni avec votre appareil"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer l\'économiseur de pile?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Activer l\'Économiseur de pile?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"À propos du mode Économiseur de pile"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activer"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Activer"</string>
