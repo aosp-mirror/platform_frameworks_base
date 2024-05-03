@@ -272,7 +272,7 @@ public class DisplayManagerServiceTest {
             return new VirtualDisplayAdapter(syncRoot, context, handler, displayAdapterListener,
                     new VirtualDisplayAdapter.SurfaceControlDisplayFactory() {
                         @Override
-                        public IBinder createDisplay(String name, boolean secure,
+                        public IBinder createDisplay(String name, boolean secure, String uniqueId,
                                 float requestedRefreshRate) {
                             return mMockDisplayToken;
                         }
