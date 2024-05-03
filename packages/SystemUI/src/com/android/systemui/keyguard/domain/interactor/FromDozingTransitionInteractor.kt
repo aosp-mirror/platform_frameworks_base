@@ -66,7 +66,7 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
-    private val canDismissLockScreen: Flow<Boolean> =
+    private val canTransitionToGoneOnWake: Flow<Boolean> =
         combine(
             keyguardInteractor.isKeyguardShowing,
             keyguardInteractor.isKeyguardDismissible,
@@ -87,7 +87,7 @@ constructor(
                     keyguardInteractor.biometricUnlockState,
                     keyguardInteractor.isKeyguardOccluded,
                     communalInteractor.isIdleOnCommunal,
-                    canDismissLockScreen,
+                    canTransitionToGoneOnWake,
                     keyguardInteractor.primaryBouncerShowing,
                 )
                 .collect {
@@ -96,12 +96,12 @@ constructor(
                         biometricUnlockState,
                         occluded,
                         isIdleOnCommunal,
-                        canDismissLockScreen,
+                        canTransitionToGoneOnWake,
                         primaryBouncerShowing) ->
                     startTransitionTo(
                         if (isWakeAndUnlock(biometricUnlockState.mode)) {
                             KeyguardState.GONE
-                        } else if (canDismissLockScreen) {
+                        } else if (canTransitionToGoneOnWake) {
                             KeyguardState.GONE
                         } else if (primaryBouncerShowing) {
                             KeyguardState.PRIMARY_BOUNCER
@@ -129,7 +129,7 @@ constructor(
                 .sample(
                     communalInteractor.isIdleOnCommunal,
                     keyguardInteractor.biometricUnlockState,
-                    canDismissLockScreen,
+                    canTransitionToGoneOnWake,
                     keyguardInteractor.primaryBouncerShowing,
                 )
                 .collect {
