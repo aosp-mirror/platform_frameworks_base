@@ -18,4 +18,4 @@ package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.iconTilesRepository by Kosmos.Fixture { IconTilesRepositoryImpl() }
+var Kosmos.iconTilesRepository: IconTilesRepository by Kosmos.Fixture { IconTilesRepositoryImpl() }

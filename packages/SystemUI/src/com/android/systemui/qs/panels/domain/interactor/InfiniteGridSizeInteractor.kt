@@ -16,8 +16,12 @@
 
 package com.android.systemui.qs.panels.domain.interactor
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.data.repository.InfiniteGridSizeRepository
+import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }
+@SysUISingleton
+class InfiniteGridSizeInteractor @Inject constructor(repo: InfiniteGridSizeRepository) {
+    val columns: StateFlow<Int> = repo.columns
+}

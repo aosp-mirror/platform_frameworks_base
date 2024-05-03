@@ -18,4 +18,5 @@ package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.gridLayoutTypeRepository by Kosmos.Fixture { GridLayoutTypeRepository() }
+var Kosmos.gridLayoutTypeRepository: GridLayoutTypeRepository by
+    Kosmos.Fixture { GridLayoutTypeRepositoryImpl() }

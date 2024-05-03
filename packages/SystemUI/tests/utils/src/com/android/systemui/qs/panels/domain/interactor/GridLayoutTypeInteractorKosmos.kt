@@ -27,3 +27,6 @@ val Kosmos.gridLayoutTypeInteractor by
 
 val Kosmos.gridLayoutMap: Map<GridLayoutType, GridLayout> by
     Kosmos.Fixture { mapOf(Pair(InfiniteGridLayoutType, infiniteGridLayout)) }
+
+var Kosmos.gridConsistencyInteractorsMap: Map<GridLayoutType, GridTypeConsistencyInteractor> by
+    Kosmos.Fixture { mapOf(Pair(InfiniteGridLayoutType, infiniteGridConsistencyInteractor)) }

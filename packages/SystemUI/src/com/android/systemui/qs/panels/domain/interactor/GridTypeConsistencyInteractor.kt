@@ -16,8 +16,12 @@
 
 package com.android.systemui.qs.panels.domain.interactor
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
+import com.android.systemui.qs.pipeline.shared.TileSpec
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesInteractor, infiniteGridSizeInteractor) }
+interface GridTypeConsistencyInteractor {
+    /**
+     * Given a list of tiles, return the best list of the same tiles (preserving as much order as
+     * possible, such that it's consistent with the current layout.
+     */
+    fun reconcileTiles(tiles: List<TileSpec>): List<TileSpec>
+}
