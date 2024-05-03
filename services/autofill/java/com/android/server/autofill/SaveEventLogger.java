@@ -286,6 +286,16 @@ public class SaveEventLogger {
   }
 
   /**
+   * Set autofill_service_uid as long as mEventInternal presents.
+   */
+  public void maybeSetAutofillServiceUid(int uid) {
+        mEventInternal.ifPresent(
+                event -> {
+                    event.mServiceUid = uid;
+                });
+  }
+
+  /**
    * Log an AUTOFILL_SAVE_EVENT_REPORTED event.
    */
   public void logAndEndEvent() {
@@ -312,7 +322,8 @@ public class SaveEventLogger {
           + " mLatencySaveUiDisplayMillis=" + event.mLatencySaveUiDisplayMillis
           + " mLatencySaveRequestMillis=" + event.mLatencySaveRequestMillis
           + " mLatencySaveFinishMillis=" + event.mLatencySaveFinishMillis
-          + " mIsFrameworkCreatedSaveInfo=" + event.mIsFrameworkCreatedSaveInfo);
+          + " mIsFrameworkCreatedSaveInfo=" + event.mIsFrameworkCreatedSaveInfo
+          + " mServiceUid=" + event.mServiceUid);
     }
     FrameworkStatsLog.write(
         AUTOFILL_SAVE_EVENT_REPORTED,
@@ -331,7 +342,8 @@ public class SaveEventLogger {
         event.mLatencySaveUiDisplayMillis,
         event.mLatencySaveRequestMillis,
         event.mLatencySaveFinishMillis,
-        event.mIsFrameworkCreatedSaveInfo);
+        event.mIsFrameworkCreatedSaveInfo,
+        event.mServiceUid);
     mEventInternal = Optional.empty();
   }
 
@@ -351,7 +363,7 @@ public class SaveEventLogger {
     long mLatencySaveRequestMillis = UNINITIATED_TIMESTAMP;
     long mLatencySaveFinishMillis = UNINITIATED_TIMESTAMP;
     boolean mIsFrameworkCreatedSaveInfo = false;
-
+    int mServiceUid = -1;
     SaveEventInternal() {
     }
   }

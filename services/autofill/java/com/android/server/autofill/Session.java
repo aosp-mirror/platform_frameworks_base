@@ -1336,8 +1336,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mPresentationStatsEventLogger.maybeSetIsCredentialRequest(isCredmanRequested);
         mPresentationStatsEventLogger.maybeSetFieldClassificationRequestId(
                 mFieldClassificationIdSnapshot);
+        mPresentationStatsEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
         mFillRequestEventLogger.maybeSetRequestId(requestId);
         mFillRequestEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
+        mSaveEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
+        mSessionCommittedEventLogger.maybeSetAutofillServiceUid(getAutofillServiceUid());
         if (mSessionFlags.mInlineSupportedByService) {
             mFillRequestEventLogger.maybeSetInlineSuggestionHostUid(mContext, userId);
         }
