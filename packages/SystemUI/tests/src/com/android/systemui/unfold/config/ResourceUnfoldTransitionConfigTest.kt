@@ -47,6 +47,12 @@ class ResourceUnfoldTransitionConfigTest : SysuiTestCase() {
     }
 
     @Test
+    fun testHapticsEnabled() {
+        assertThat(config.isHapticsEnabled).isEqualTo(mContext.resources
+            .getBoolean(com.android.internal.R.bool.config_unfoldTransitionHapticsEnabled))
+    }
+
+    @Test
     fun testHalfFoldedTimeout() {
         assertThat(config.halfFoldedTimeoutMillis).isEqualTo(mContext.resources
             .getInteger(com.android.internal.R.integer.config_unfoldTransitionHalfFoldedTimeout))

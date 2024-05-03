@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.unfold.config
 
-interface UnfoldTransitionConfig {
-    val isEnabled: Boolean
-    val isHingeAngleEnabled: Boolean
-    val isHapticsEnabled: Boolean
-    val halfFoldedTimeoutMillis: Int
-}
+class TestUnfoldTransitionConfig(
+    override var isEnabled: Boolean = false,
+    override var isHingeAngleEnabled: Boolean = false,
+    override var isHapticsEnabled: Boolean = false,
+    override var halfFoldedTimeoutMillis: Int = 1000
+) : UnfoldTransitionConfig
