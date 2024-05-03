@@ -23,7 +23,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/screenshot_static"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false">
         <FrameLayout
             android:id="@+id/actions_container_background"
             android:visibility="gone"
