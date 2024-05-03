@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTANT;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -26,8 +25,6 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
-import android.app.IUnsafeIntentStrictModeCallback;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -45,7 +42,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -56,9 +52,6 @@ import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.LocalServices;
-import com.android.server.am.ActivityManagerService;
-import com.android.server.am.ActivityManagerUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -89,10 +82,6 @@ final class ResolveIntentHelper {
     private final Supplier<ResolveInfo> mResolveInfoSupplier;
     @NonNull
     private final Supplier<ActivityInfo> mInstantAppInstallerActivitySupplier;
-    @NonNull
-    private final Handler mHandler;
-    @NonNull
-    private final ActivityManagerInternal mActivityManagerInternal;
 
     ResolveIntentHelper(@NonNull Context context,
             @NonNull PreferredActivityHelper preferredActivityHelper,
@@ -100,9 +89,7 @@ final class ResolveIntentHelper {
             @NonNull DomainVerificationManagerInternal domainVerificationManager,
             @NonNull UserNeedsBadgingCache userNeedsBadgingCache,
             @NonNull Supplier<ResolveInfo> resolveInfoSupplier,
-            @NonNull Supplier<ActivityInfo> instantAppInstallerActivitySupplier,
-            @NonNull Handler handler,
-            @NonNull ActivityManagerInternal activityManagerInternal) {
+            @NonNull Supplier<ActivityInfo> instantAppInstallerActivitySupplier) {
         mContext = context;
         mPreferredActivityHelper = preferredActivityHelper;
         mPlatformCompat = platformCompat;
@@ -111,46 +98,6 @@ final class ResolveIntentHelper {
         mUserNeedsBadging = userNeedsBadgingCache;
         mResolveInfoSupplier = resolveInfoSupplier;
         mInstantAppInstallerActivitySupplier = instantAppInstallerActivitySupplier;
-        mHandler = handler;
-        mActivityManagerInternal = activityManagerInternal;
-    }
-
-    private void filterNonExportedComponents(Intent intent, int filterCallingUid,
-            int callingPid, List<ResolveInfo> query, PlatformCompat platformCompat,
-            String resolvedType, Handler handler) {
-        if (query == null
-                || intent.getPackage() != null
-                || intent.getComponent() != null
-                || ActivityManager.canAccessUnexportedComponents(filterCallingUid)) {
-            return;
-        }
-        ActivityManagerInternal activityManagerInternal = LocalServices
-                .getService(ActivityManagerInternal.class);
-        final IUnsafeIntentStrictModeCallback callback = mActivityManagerInternal
-                .getRegisteredStrictModeCallback(callingPid);
-        for (int i = query.size() - 1; i >= 0; i--) {
-            if (!query.get(i).getComponentInfo().exported) {
-                boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUidInternal(
-                        ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
-                        filterCallingUid);
-                ActivityManagerUtils.logUnsafeIntentEvent(
-                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
-                        filterCallingUid, intent, resolvedType, hasToBeExportedToMatch);
-                if (callback != null) {
-                    handler.post(() -> {
-                        try {
-                            callback.onImplicitIntentMatchedInternalComponent(intent.cloneFilter());
-                        } catch (RemoteException e) {
-                            activityManagerInternal.unregisterStrictModeCallback(callingPid);
-                        }
-                    });
-                }
-                if (!hasToBeExportedToMatch) {
-                    return;
-                }
-                query.remove(i);
-            }
-        }
     }
 
     /**
@@ -177,9 +124,10 @@ final class ResolveIntentHelper {
             final List<ResolveInfo> query = computer.queryIntentActivitiesInternal(intent,
                     resolvedType, flags, privateResolveFlags, filterCallingUid, userId,
                     resolveForStart, true /*allowDynamicSplits*/);
-            filterNonExportedComponents(intent, filterCallingUid, callingPid, query,
-                    mPlatformCompat, resolvedType, mHandler);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+
+            SaferIntentUtils.filterNonExportedComponents(mPlatformCompat, intent,
+                    resolvedType, query, filterCallingUid, callingPid);
 
             final boolean queryMayBeFiltered =
                     UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
@@ -442,7 +390,7 @@ final class ResolveIntentHelper {
                     ri.activityInfo = ai;
                     list = new ArrayList<>(1);
                     list.add(ri);
-                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+                    SaferIntentUtils.enforceIntentFilterMatching(
                             mPlatformCompat, computer, list, true, intent,
                             resolvedType, filterCallingUid);
                 }
@@ -464,13 +412,13 @@ final class ResolveIntentHelper {
                     list = result;
                 }
             }
-            PackageManagerServiceUtils.applyNullActionBlocking(
+            SaferIntentUtils.blockNullAction(
                     mPlatformCompat, computer, list, true, intent, filterCallingUid);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+            SaferIntentUtils.enforceIntentFilterMatching(
                     mPlatformCompat, computer,
                     list, true, originalIntent, resolvedType, filterCallingUid);
         }

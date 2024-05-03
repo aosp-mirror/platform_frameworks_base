@@ -1101,19 +1101,9 @@ public abstract class ActivityManagerInternal {
     public abstract ArraySet<String> getClientPackages(String servicePackageName);
 
     /**
-     * Retrieve an IUnsafeIntentStrictModeCallback matching the given callingUid.
-     * Returns null no match is found.
-     * @param callingPid The PID mapped with the callback.
-     * @return The callback, if it exists.
+     * Trigger an unsafe intent usage strict mode violation.
      */
-    public abstract IUnsafeIntentStrictModeCallback getRegisteredStrictModeCallback(
-            int callingPid);
-
-    /**
-     * Unregisters an IUnsafeIntentStrictModeCallback matching the given callingUid.
-     * @param callingPid The PID mapped with the callback.
-     */
-    public abstract void unregisterStrictModeCallback(int callingPid);
+    public abstract void triggerUnsafeIntentStrictMode(int callingPid, Intent intent);
 
     /**
      * Start a foreground service delegate.

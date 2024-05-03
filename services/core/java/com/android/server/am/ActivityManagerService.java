@@ -137,7 +137,6 @@ import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROC
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
-import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.sdksandbox.flags.Flags.sdkSandboxInstrumentationInfo;
 import static com.android.server.am.ActiveServices.FGS_SAW_RESTRICTIONS;
@@ -268,9 +267,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
-import android.compat.annotation.Overridable;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
@@ -467,7 +464,7 @@ import com.android.server.net.NetworkManagementInternal;
 import com.android.server.os.NativeTombstoneManager;
 import com.android.server.pm.Computer;
 import com.android.server.pm.Installer;
-import com.android.server.pm.PackageManagerServiceUtils;
+import com.android.server.pm.SaferIntentUtils;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -664,18 +661,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private static final long DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED = 161145287L;
-
-    /**
-     * Apps targeting Android U and above will need to export components in order to invoke them
-     * through implicit intents.
-     *
-     * If a component is not exported and invoked, it will be removed from the list of receivers.
-     * This applies specifically to activities and broadcasts.
-     */
-    @ChangeId
-    @Overridable
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
-    public static final long IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS = 229362273;
 
     /**
      * The maximum number of bytes that {@link #setProcessStateSummary} accepts.
@@ -13731,64 +13716,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Filters out non-exported components in a given list of broadcast filters
-     * @param intent the original intent
-     * @param callingUid the calling UID
-     * @param query the list of broadcast filters
-     * @param platformCompat the instance of platform compat
-     */
-    private void filterNonExportedComponents(Intent intent, int callingUid, int callingPid,
-            List query, PlatformCompat platformCompat, String callerPackage, String resolvedType) {
-        if (query == null
-                || intent.getPackage() != null
-                || intent.getComponent() != null
-                || ActivityManager.canAccessUnexportedComponents(callingUid)) {
-            return;
-        }
-        IUnsafeIntentStrictModeCallback callback = mStrictModeCallbacks.get(callingPid);
-        for (int i = query.size() - 1; i >= 0; i--) {
-            String componentInfo;
-            ResolveInfo resolveInfo;
-            BroadcastFilter broadcastFilter;
-            if (query.get(i) instanceof ResolveInfo) {
-                resolveInfo = (ResolveInfo) query.get(i);
-                if (resolveInfo.getComponentInfo().exported) {
-                    continue;
-                }
-                componentInfo = resolveInfo.getComponentInfo()
-                        .getComponentName().flattenToShortString();
-            } else if (query.get(i) instanceof BroadcastFilter) {
-                broadcastFilter = (BroadcastFilter) query.get(i);
-                if (broadcastFilter.exported) {
-                    continue;
-                }
-                componentInfo = broadcastFilter.packageName;
-            } else {
-                continue;
-            }
-            if (callback != null) {
-                mHandler.post(() -> {
-                    try {
-                        callback.onImplicitIntentMatchedInternalComponent(intent.cloneFilter());
-                    } catch (RemoteException e) {
-                        mStrictModeCallbacks.remove(callingPid);
-                    }
-                });
-            }
-            boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUidInternal(
-                    ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
-                    callingUid);
-            ActivityManagerUtils.logUnsafeIntentEvent(
-                    UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
-                    callingUid, intent, resolvedType, hasToBeExportedToMatch);
-            if (!hasToBeExportedToMatch) {
-                return;
-            }
-            query.remove(i);
-        }
-    }
-
-    /**
      * Main code for cleaning up a process when it has gone away.  This is
      * called both as a result of the process dying, or directly when stopping
      * a process when running in single process mode.
@@ -16009,7 +15936,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         resolvedType, false /*defaultOnly*/, userId);
             }
             if (registeredReceivers != null) {
-                PackageManagerServiceUtils.applyNullActionBlocking(
+                SaferIntentUtils.blockNullAction(
                         mPlatformCompat, snapshot, registeredReceivers,
                         true, intent, callingUid);
             }
@@ -16033,8 +15960,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        filterNonExportedComponents(intent, callingUid, callingPid, registeredReceivers,
-                mPlatformCompat, callerPackage, resolvedType);
         int NR = registeredReceivers != null ? registeredReceivers.size() : 0;
 
         // Merge into one list.
@@ -16117,8 +16042,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if ((receivers != null && receivers.size() > 0)
                 || resultTo != null) {
             BroadcastQueue queue = mBroadcastQueue;
-            filterNonExportedComponents(intent, callingUid, callingPid, receivers,
-                    mPlatformCompat, callerPackage, resolvedType);
+            SaferIntentUtils.filterNonExportedComponents(mPlatformCompat, intent,
+                    resolvedType, receivers, callingUid, callingPid);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
@@ -19926,13 +19851,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public IUnsafeIntentStrictModeCallback getRegisteredStrictModeCallback(int callingPid) {
-            return mStrictModeCallbacks.get(callingPid);
-        }
-
-        @Override
-        public void unregisterStrictModeCallback(int callingPid) {
-            mStrictModeCallbacks.remove(callingPid);
+        public void triggerUnsafeIntentStrictMode(int callingPid, Intent intent) {
+            final IUnsafeIntentStrictModeCallback callback;
+            final Intent i = intent.cloneFilter();
+            synchronized (ActivityManagerService.this) {
+                callback = mStrictModeCallbacks.get(callingPid);
+            }
+            if (callback != null) {
+                BackgroundThread.getExecutor().execute(() -> {
+                    try {
+                        callback.onImplicitIntentMatchedInternalComponent(i);
+                    } catch (RemoteException e) {
+                        synchronized (ActivityManagerService.this) {
+                            mStrictModeCallbacks.remove(callingPid);
+                        }
+                    }
+                });
+            }
         }
 
         @Override

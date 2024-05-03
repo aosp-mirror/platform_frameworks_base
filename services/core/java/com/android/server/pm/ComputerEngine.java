@@ -583,7 +583,7 @@ public class ComputerEngine implements Computer {
                     ri.userHandle = UserHandle.of(userId);
                     list = new ArrayList<>(1);
                     list.add(ri);
-                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+                    SaferIntentUtils.enforceIntentFilterMatching(
                             mInjector.getCompatibility(), this, list, false, intent,
                             resolvedType, filterCallingUid);
                 }
@@ -609,13 +609,13 @@ public class ComputerEngine implements Computer {
                 }
                 list = lockedResult.result;
             }
-            PackageManagerServiceUtils.applyNullActionBlocking(
+            SaferIntentUtils.blockNullAction(
                     mInjector.getCompatibility(), this, list, false, intent, filterCallingUid);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+            SaferIntentUtils.enforceIntentFilterMatching(
                     mInjector.getCompatibility(), this, list, false, originalIntent,
                     resolvedType, filterCallingUid);
         }
@@ -699,7 +699,7 @@ public class ComputerEngine implements Computer {
                     ri.serviceInfo = si;
                     list = new ArrayList<>(1);
                     list.add(ri);
-                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+                    SaferIntentUtils.enforceIntentFilterMatching(
                             mInjector.getCompatibility(), this, list, false, intent,
                             resolvedType, callingUid);
                 }
@@ -707,13 +707,13 @@ public class ComputerEngine implements Computer {
         } else {
             list = queryIntentServicesInternalBody(intent, resolvedType, flags,
                     userId, callingUid, instantAppPkgName);
-            PackageManagerServiceUtils.applyNullActionBlocking(
+            SaferIntentUtils.blockNullAction(
                     mInjector.getCompatibility(), this, list, false, intent, callingUid);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+            SaferIntentUtils.enforceIntentFilterMatching(
                     mInjector.getCompatibility(), this, list, false, originalIntent,
                     resolvedType, callingUid);
         }
