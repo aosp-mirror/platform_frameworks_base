@@ -2144,6 +2144,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ເປີດໃຊ້ຕົວປະຢັດແບັດເຕີຣີແລ້ວ"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ກຳລັງຫຼຸດການໃຊ້ແບັດເຕີຣີເພື່ອຍືດອາຍຸແບັດເຕີຣີ"</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ຕົວປະຢັດແບັດເຕີຣີ"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ປິດຕົວປະຢັດແບັດເຕີຣີແລ້ວ"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ໂທລະສັບມີໄຟພຽງພໍແລ້ວ. ບໍ່ມີການຈຳກັດຄຸນສົມບັດອີກຕໍ່ໄປແລ້ວ."</string>
@@ -2399,6 +2403,10 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ວຽກ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ທົດສອບ"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ສ່ວນກາງ"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ພື້ນທີ່ສ່ວນບຸກຄົນ"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ໂຄລນ"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"ສ່ວນກາງ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"ເນື້ອຫາການແຈ້ງເຕືອນທີ່ລະອຽດອ່ອນເຊື່ອງຢູ່"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ເນື້ອຫາແອັບຖືກເຊື່ອງໄວ້ຈາກການແບ່ງປັນໜ້າຈໍເພື່ອຄວາມປອດໄພ"</string>

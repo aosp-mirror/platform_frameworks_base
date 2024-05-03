@@ -153,31 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> সেকেন্ড পরে"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ফরওয়ার্ড করা হয়নি"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ফরওয়ার্ড করা হয়নি"</string>
-    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
-    <skip />
-    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
-    <skip />
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"মোবাইল নেটওয়ার্ক সুরক্ষা"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"এনক্রিপশন, এনক্রিপটেড নয় এমন নেটওয়ার্কের জন্য বিজ্ঞপ্তি"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ডিভাইস আইডি অ্যাক্সেস করা হয়েছে"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"আপনার <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> সিম কার্ড ব্যবহার করে <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>-এ, আশেপাশের নেটওয়ার্ক আপনার ডিভাইসের অনন্য আইডি (IMSI অথবা IMEI) রেকর্ড করেছে"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"আপনার <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> সিম কার্ড ব্যবহার করে <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>-এ, আশেপাশের নেটওয়ার্ক আপনার ডিভাইসের অনন্য আইডি (IMSI অথবা IMEI) রেকর্ড করেছে।\n\nএটির মানে হল আপনার লোকেশন, অ্যাক্টিভিটি বা পরিচিতি লগ-ইন করা হয়েছে। এটি সাধারণ পদ্ধতি কিন্তু সেইসব লোকজনের জন্য সমস্যা হতে পারে যারা নিজেদের গোপনীয়তা নিয়ে উদ্বেগে থাকেন।"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> এনক্রিপটেড নেটওয়ার্কের সাথে কানেক্ট করা রয়েছে"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"এখন <xliff:g id="NETWORK_NAME">%1$s</xliff:g> সিম কার্ডের কানেকশন আরও সুরক্ষিত"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"এনক্রিপটেড নয় এমন নেটওয়ার্কের সাথে কানেক্ট করা রয়েছে"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> সিম কার্ড ব্যবহার করার সময়, কল, মেসেজ এবং ডেটা হ্যাক হওয়ার সম্ভাবনা বর্তমানে আরও বেশি রয়েছে"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> সিম কার্ড ব্যবহার করার সময়, কল, মেসেজ এবং ডেটা হ্যাক হওয়ার সম্ভাবনা বর্তমানে আরও বেশি রয়েছে।\n\nআপনার কানেকশন আবার এনক্রিপ্ট করা হলে, আপনি অন্য একটি বিজ্ঞপ্তি পাবেন।"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"মোবাইল নেটওয়ার্ক সুরক্ষা সেটিংস"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"আরও জানুন"</string>
-    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
-    <skip />
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"বুঝেছি"</string>
     <string name="fcComplete" msgid="1080909484660507044">"বৈশিষ্ট্যসূচক কোড সম্পূর্ণ হয়েছে৷"</string>
     <string name="fcError" msgid="5325116502080221346">"সংযোগ সমস্যা বা অবৈধ বৈশিষ্ট্যসূচক কোড৷"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ঠিক আছে"</string>
@@ -371,8 +359,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"স্ক্রিনশট নিন"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ডিসপ্লের একটি স্ক্রিনশট নিতে পারেন।"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"প্রিভিউ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"বাতিল করুন"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"স্ট্যাটাস বার নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"অ্যাপ্লিকেশনকে স্ট্যাটাস বার অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"স্থিতি দন্ডে থাকুন"</string>
@@ -1224,7 +1211,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}টির মধ্যে একটি স্টার}one{#টির মধ্যে {max}টি স্টার}other{#টির মধ্যে {max}টি স্টার}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"কাজ চলছে"</string>
     <string name="whichApplication" msgid="5432266899591255759">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে কাজটি করুন"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"এর মাধ্যমে খুলুন"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s দিয়ে খুলুন"</string>
@@ -1250,7 +1237,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s দিয়ে ছবি তুলুন"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"ছবি তুলুন"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"এই ক্রিয়াটির জন্য এটিকে ডিফল্টরুপে ব্যবহার করুন৷"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"আলাদা কোনো অ্যাপ্লিকেশান ব্যবহার করুন"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"আলাদা কোনও অ্যাপ ব্যবহার করুন"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"সিস্টেম সেটিংস &gt; অ্যাপ্স &gt; ডাউনলোড করাগুলি এ গিয়ে ডিফল্ট সরিয়ে দিন৷"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"একটি ক্রিয়া বেছে নিন"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USB ডিভাইসটির জন্য একটি অ্যাপ্লিকেশান বেছে নিন"</string>
@@ -2157,6 +2144,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"রুটিন মোডের তথ্য সংক্রান্ত বিজ্ঞপ্তি"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"\'ব্যাটারি সেভার\' ফিচার চালু করা হয়েছে"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ব্যাটারির আয়ু বাড়াতে ব্যাটারির ব্যবহার কমানো হচ্ছে"</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ব্যাটারি সেভার"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ব্যাটারি সেভার বন্ধ করা আছে"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ফোনের ব্যাটারিতে যথেষ্ট চার্জ আছে। ফিচারগুলির উপর আর বিধিনিষেধ নেই।"</string>
@@ -2231,10 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"অফিসের অ্যাপে পরিবর্তন করবেন?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"আপনার সংস্থা শুধু অফিসের অ্যাপ থেকেই আপনাকে কল করার অনুমতি দেয়"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"আপনার সংস্থা শুধু অফিসের অ্যাপ থেকেই আপনাকে মেসেজ পাঠানোর অনুমতি দেয়"</string>
-    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
-    <skip />
-    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
-    <skip />
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"আপনার ব্যক্তিগত ফোন অ্যাপ থেকে শুধুমাত্র ফোন কল করতে পারবেন। ব্যক্তিগত ফোন থেকে করা কল আপনার ব্যক্তিগত কলের ইতিহাসে যোগ করা হবে।"</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"আপনার ব্যক্তিগত Messages অ্যাপ থেকে শুধুমাত্র এসএমএস মেসেজ পাঠাতে পারবেন।"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ব্যক্তিগত ব্রাউজার ব্যবহার করুন"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"অফিস ব্রাউজার ব্যবহার করুন"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"কল করুন"</string>
@@ -2414,8 +2403,15 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"৩য় অফিস"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"পরীক্ষা"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"কমিউনাল"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
+    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
     <skip />
+    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
+    <skip />
+    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
+    <skip />
+    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
+    <skip />
+    <string name="redacted_notification_message" msgid="1520587845842228816">"সংবেদনশীল বিজ্ঞপ্তির কন্টেন্ট লুকানো আছে"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"নিরাপত্তার জন্য স্ক্রিন শেয়ার করা থেকে লুকানো অ্যাপের কন্টেন্ট"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"স্যাটেলাইটের সাথে অটোমেটিক কানেক্ট করা হয়েছে"</string>

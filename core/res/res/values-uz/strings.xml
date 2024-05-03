@@ -153,31 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>  <xliff:g id="TIME_DELAY">{2}</xliff:g> soniyadan so‘ng"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Yo‘naltirilmadi"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: yo‘naltirilmadi"</string>
-    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
-    <skip />
-    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
-    <skip />
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Mobil tarmoq xavfsizligi"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Shifrlash, shifrlanmagan tarmoqlar haqidagi bildirishnomalar"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Qurilma identifikatoriga ruxsat olingan"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> da SIM karta (<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>) ishlatilganda atrofdagi tarmoqda qurilmaning unikal identifikatori (IMSI yoki IMEI) qayd qilingan"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> da SIM karta (<xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>) ishlatilganda atrofdagi tarmoqda qurilmaning unikal identifikatori (IMSI yoki IMEI) qayd qilingan.\n\nJoylashuvingiz, faolligingiz yoki kimligingiz qayd qilingan. Bu odatiy holat boʻlsa ham, maxfiyligi haqida xavotirlanuvchi odamlar uchun muammo boʻlishi mumkin."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Shifrlangan tarmoqqa (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>) ulandi"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Endi SIM karta (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>) aloqasi yanada xavfsiz"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Shifrlanmagan tarmoqqa ulandi"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Hozir SIM karta (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>) orqali chaqiruvlar, xabarlar va maʼlumotlar himoyasi zaif"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Hozir SIM karta (<xliff:g id="NETWORK_NAME">%1$s</xliff:g>) orqali chaqiruvlar, xabarlar va maʼlumotlar himoyasi zaif.\n\nAloqa qayta shifrlanganda boshqa bildirishnoma olasiz."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Mobil tarmoq xavfsizligi sozlamalari"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Batafsil"</string>
-    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
-    <skip />
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"OK"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Maxsus kod bajarildi."</string>
     <string name="fcError" msgid="5325116502080221346">"Tarmoqda xato yoki maxsus kod noto‘g‘ri."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -2156,6 +2144,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Quvvat tejalishi yoqildi"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Batareya tejalganda batareya quvvati uzoqroq vaqtga yetadi"</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Quvvat tejash"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Quvvat tejash rejimi faolsizlantirildi"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon yetarli quvvatlandi. Funksiyalar endi cheklovlarsiz ishlaydi."</string>
@@ -2230,10 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Ishga oid ilovaga almashtirilsinmi?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Tashkilotingiz faqat ishga oid ilovalar orqali chaqiruvga ruxsat beradi"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Tashkilotingiz faqat ishga oid ilovalar orqali xabarlar yuborishga ruxsat beradi"</string>
-    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
-    <skip />
-    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
-    <skip />
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"Siz faqat shaxsiy Telefon ilovasi orqali telefon qila olasiz. Shaxsiy Telefon orqali amalga oshgan chaqiruvlar shaxsiy chaqiruvlar tarixida saqlanadi."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Siz faqat shaxsiy Xabarlar ilovasi orqali SMS yubora olasiz."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Shaxsiy brauzerdan foydalanish"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Ishga oid brauzerdan foydalanish"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Chaqiruv"</string>
@@ -2406,15 +2396,18 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Klaviatura terilmasi bunga sozlandi: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Oʻzgartirish uchun ustiga bosing."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tashqi klaviaturalar sozlandi"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klaviaturalarni ochish uchun ustiga bosing"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Yopiq"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Maxfiy"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Nusxasini yaratish"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Ish"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Ish 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Ish 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Test"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Umumiy"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Ish profili"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Maxfiy makon"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Nusxalash"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Umumiy"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"Bildirishnomadagi maxfiy axborot berkitildi"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Ekran namoyishida xavfsizlik maqsadida ilova kontenti berkitildi"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Sputnikka avtomatik ulandi"</string>
