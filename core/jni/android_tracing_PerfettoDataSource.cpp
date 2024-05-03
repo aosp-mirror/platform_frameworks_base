@@ -244,8 +244,8 @@ static jlong nativeGetFinalizer(JNIEnv* /* env */, jclass /* clazz */) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&nativeDestroy));
 }
 
-void nativeFlush(JNIEnv* env, jclass clazz, jlong ds_ptr, jobjectArray packets) {
-    ALOG(LOG_DEBUG, LOG_TAG, "nativeFlush(%p)", (void*)ds_ptr);
+void nativeWritePackets(JNIEnv* env, jclass clazz, jlong ds_ptr, jobjectArray packets) {
+    ALOG(LOG_DEBUG, LOG_TAG, "nativeWritePackets(%p)", (void*)ds_ptr);
     sp<PerfettoDataSource> datasource = reinterpret_cast<PerfettoDataSource*>(ds_ptr);
     datasource->WritePackets(env, packets);
 }
@@ -431,11 +431,12 @@ const JNINativeMethod gMethods[] = {
         {"nativePerfettoDsTraceIterateBegin", "(J)Z", (void*)nativePerfettoDsTraceIterateBegin},
         {"nativePerfettoDsTraceIterateNext", "(J)Z", (void*)nativePerfettoDsTraceIterateNext},
         {"nativePerfettoDsTraceIterateBreak", "(J)V", (void*)nativePerfettoDsTraceIterateBreak},
-        {"nativeGetPerfettoDsInstanceIndex", "(J)I", (void*)nativeGetPerfettoDsInstanceIndex}};
+        {"nativeGetPerfettoDsInstanceIndex", "(J)I", (void*)nativeGetPerfettoDsInstanceIndex},
+
+        {"nativeWritePackets", "(J[[B)V", (void*)nativeWritePackets}};
 
 const JNINativeMethod gMethodsTracingContext[] = {
         /* name, signature, funcPtr */
-        {"nativeFlush", "(J[[B)V", (void*)nativeFlush},
         {"nativeGetCustomTls", "(J)Ljava/lang/Object;", (void*)nativeGetCustomTls},
         {"nativeGetIncrementalState", "(J)Ljava/lang/Object;", (void*)nativeGetIncrementalState},
         {"nativeSetCustomTls", "(JLjava/lang/Object;)V", (void*)nativeSetCustomTls},
