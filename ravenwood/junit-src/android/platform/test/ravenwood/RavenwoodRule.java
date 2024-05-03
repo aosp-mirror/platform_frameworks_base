@@ -426,4 +426,15 @@ public class RavenwoodRule implements TestRule {
             return ENABLE_OPTIONAL_VALIDATION;
         }
     }
+
+    /**
+     * Returns the "real" result from {@link System#currentTimeMillis()}.
+     *
+     * Currently, it's the same thing as calling {@link System#currentTimeMillis()},
+     * but this one is guaranteeed to return the real value, even when Ravenwood supports
+     * injecting a time to{@link System#currentTimeMillis()}.
+     */
+    public long realCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
 }

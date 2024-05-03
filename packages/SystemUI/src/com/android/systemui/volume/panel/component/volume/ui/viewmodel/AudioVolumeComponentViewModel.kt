@@ -26,6 +26,7 @@ import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.Au
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.CastVolumeSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderViewModel
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.shared.model.filterData
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -80,9 +81,13 @@ constructor(
     val isExpanded: StateFlow<Boolean> =
         merge(
                 mutableIsExpanded,
-                mediaOutputInteractor.defaultActiveMediaSession.flatMapLatest {
-                    if (it == null) flowOf(true)
-                    else mediaDeviceSessionInteractor.playbackState(it).map { it?.isActive != true }
+                mediaOutputInteractor.defaultActiveMediaSession.filterData().flatMapLatest { session
+                    ->
+                    if (session == null) flowOf(true)
+                    else
+                        mediaDeviceSessionInteractor.playbackState(session).map {
+                            it?.isActive != true
+                        }
                 },
             )
             .stateIn(scope, SharingStarted.Eagerly, false)

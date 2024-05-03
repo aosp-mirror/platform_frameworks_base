@@ -270,6 +270,7 @@ android_ravenwood_libgroup {
     ],
     jni_libs: [
         "libandroid_runtime",
+        "libravenwood_runtime",
     ],
 }
 

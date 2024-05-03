@@ -949,7 +949,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         configuration.setGrammaticalGender(
-                mGrammaticalManagerInternal.retrieveSystemGrammaticalGender(configuration));
+                mGrammaticalManagerInternal.mergedFinalSystemGrammaticalGender());
 
         synchronized (mGlobalLock) {
             mForceResizableActivities = forceResizable;

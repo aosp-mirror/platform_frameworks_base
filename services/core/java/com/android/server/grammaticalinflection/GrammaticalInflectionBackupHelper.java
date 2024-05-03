@@ -123,8 +123,7 @@ public class GrammaticalInflectionBackupHelper {
      * Returns the system-gender to be backed up as a data-blob.
      */
     public byte[] getSystemBackupPayload(int userId) {
-        int gender = mGrammaticalGenderService.getSystemGrammaticalGender(mAttributionSource,
-                userId);
+        int gender = mGrammaticalGenderService.getSystemGrammaticalGender(userId);
         return intToByteArray(gender);
     }
 
@@ -167,7 +166,7 @@ public class GrammaticalInflectionBackupHelper {
         BackupManager.dataChanged(SYSTEM_BACKUP_PACKAGE_KEY);
     }
 
-    private byte[] convertToByteArray(HashMap<String, Integer> pkgGenderInfo) {
+    private static byte[] convertToByteArray(HashMap<String, Integer> pkgGenderInfo) {
         try (final ByteArrayOutputStream out = new ByteArrayOutputStream();
              final ObjectOutputStream objStream = new ObjectOutputStream(out)) {
             objStream.writeObject(pkgGenderInfo);
@@ -178,22 +177,22 @@ public class GrammaticalInflectionBackupHelper {
         }
     }
 
-    private byte[] intToByteArray(final int gender) {
+    private static byte[] intToByteArray(final int gender) {
         ByteBuffer bb = ByteBuffer.allocate(4);
         bb.putInt(gender);
         return bb.array();
     }
 
-    private int convertByteArrayToInt(byte[] intBytes) {
+    private static int convertByteArrayToInt(byte[] intBytes) {
         ByteBuffer byteBuffer = ByteBuffer.wrap(intBytes);
         return byteBuffer.getInt();
     }
 
-    private HashMap<String, Integer> readFromByteArray(byte[] payload) {
+    private static HashMap<String, Integer> readFromByteArray(byte[] payload) {
         HashMap<String, Integer> data = new HashMap<>();
 
-        try (ByteArrayInputStream byteIn = new ByteArrayInputStream(payload);
-             ObjectInputStream in = new ObjectInputStream(byteIn)) {
+        try (var byteIn = new ByteArrayInputStream(payload);
+                var in = new ObjectInputStream(byteIn)) {
             data = (HashMap<String, Integer>) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             Log.e(TAG, "cannot convert payload to HashMap.", e);
@@ -205,10 +204,10 @@ public class GrammaticalInflectionBackupHelper {
     private void cleanStagedDataForOldEntries() {
         for (int i = 0; i < mCache.size(); i++) {
             int userId = mCache.keyAt(i);
-            StagedData stagedData = mCache.get(userId);
+            StagedData stagedData = mCache.valueAt(userId);
             if (stagedData.mCreationTimeMillis
                     < mClock.millis() - STAGE_DATA_RETENTION_PERIOD.toMillis()) {
-                mCache.remove(userId);
+                mCache.removeAt(i--);
             }
         }
     }

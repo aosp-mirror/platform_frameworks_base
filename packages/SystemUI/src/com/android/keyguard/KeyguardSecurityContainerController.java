@@ -81,7 +81,6 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.shared.RefactorKeyguardDismissIntent;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -304,7 +303,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
          */
         @Override
         public void finish(int targetUserId) {
-            if (!RefactorKeyguardDismissIntent.isEnabled()) {
+            if (!SceneContainerFlag.isEnabled()) {
                 // If there's a pending runnable because the user interacted with a widget
                 // and we're leaving keyguard, then run it.
                 boolean deferKeyguardDone = false;
@@ -614,7 +613,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      * @param action callback to be invoked when keyguard disappear animation completes.
      */
     public void setOnDismissAction(ActivityStarter.OnDismissAction action, Runnable cancelAction) {
-        if (RefactorKeyguardDismissIntent.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             return;
         }
         if (mCancelAction != null) {
@@ -908,7 +907,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mUiEventLogger.log(uiEvent, getSessionId());
         }
 
-        if (RefactorKeyguardDismissIntent.isEnabled()) {
+        if (SceneContainerFlag.isEnabled()) {
             if (authenticatedWithPrimaryAuth) {
                 mPrimaryBouncerInteractor.get()
                         .notifyKeyguardAuthenticatedPrimaryAuth(targetUserId);

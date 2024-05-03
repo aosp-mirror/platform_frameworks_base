@@ -523,8 +523,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         ViewRootImpl viewRootImpl = getViewRootImpl();
         if (viewRootImpl != null) {
             viewRootImpl.getOnBackInvokedDispatcher().onMotionEvent(event);
-            // Intercept touch if back dispatching is active.
-            if (viewRootImpl.getOnBackInvokedDispatcher().isDispatching()) {
+            // Intercept touch if back gesture is in progress.
+            if (viewRootImpl.getOnBackInvokedDispatcher().isBackGestureInProgress()) {
                 return true;
             }
         }

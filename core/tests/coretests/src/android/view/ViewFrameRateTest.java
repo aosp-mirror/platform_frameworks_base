@@ -488,16 +488,19 @@ public class ViewFrameRateTest {
         waitForFrameRateCategoryToSettle();
         for (int i = 0; i < 5; i++) {
             int expectedCategory;
-            if (i < 4) {
+            if (i < 2) {
                 // not intermittent yet.
                 // It takes 2 frames of intermittency before Views vote as intermittent.
-                // It takes 4 more frames for the category to drop to the next category.
                 expectedCategory =
                         toolkitFrameRateDefaultNormalReadOnly() ? FRAME_RATE_CATEGORY_NORMAL
                                 : FRAME_RATE_CATEGORY_HIGH;
             } else {
                 // intermittent
-                expectedCategory = FRAME_RATE_CATEGORY_NORMAL;
+                // Even though this is not a small View, step 3 is triggered by this flag, which
+                // brings intermittent to LOW
+                expectedCategory = toolkitFrameRateBySizeReadOnly()
+                        ? FRAME_RATE_CATEGORY_LOW
+                        : FRAME_RATE_CATEGORY_NORMAL;
             }
             mActivityRule.runOnUiThread(() -> {
                 mMovingView.invalidate();

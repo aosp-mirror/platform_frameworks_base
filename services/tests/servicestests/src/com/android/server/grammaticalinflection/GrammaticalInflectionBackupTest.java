@@ -112,7 +112,7 @@ public class GrammaticalInflectionBackupTest {
     public void testSystemBackupPayload_returnsGender()
             throws IOException, ClassNotFoundException {
         doReturn(Configuration.GRAMMATICAL_GENDER_MASCULINE).when(mGrammaticalInflectionService)
-                .getSystemGrammaticalGender(any(), eq(DEFAULT_USER_ID));
+                .getSystemGrammaticalGender(eq(DEFAULT_USER_ID));
 
         int gender = convertByteArrayToInt(mBackupHelper.getSystemBackupPayload(DEFAULT_USER_ID));
 

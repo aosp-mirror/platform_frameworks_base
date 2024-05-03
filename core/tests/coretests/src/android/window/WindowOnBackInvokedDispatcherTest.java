@@ -40,6 +40,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IWindow;
 import android.view.IWindowSession;
+import android.view.ImeBackAnimationController;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
@@ -50,6 +51,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -77,6 +79,12 @@ public class WindowOnBackInvokedDispatcherTest {
     @Mock
     private OnBackAnimationCallback mCallback2;
     @Mock
+    private ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback mImeCallback;
+    @Mock
+    private ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback mDefaultImeCallback;
+    @Mock
+    private ImeBackAnimationController mImeBackAnimationController;
+    @Mock
     private Context mContext;
     @Mock
     private ApplicationInfo mApplicationInfo;
@@ -103,7 +111,7 @@ public class WindowOnBackInvokedDispatcherTest {
         doReturn(mApplicationInfo).when(mContext).getApplicationInfo();
 
         mDispatcher = new WindowOnBackInvokedDispatcher(mContext, Looper.getMainLooper());
-        mDispatcher.attachToWindow(mWindowSession, mWindow, null);
+        mDispatcher.attachToWindow(mWindowSession, mWindow, mImeBackAnimationController);
     }
 
     private void waitForIdle() {
@@ -365,6 +373,34 @@ public class WindowOnBackInvokedDispatcherTest {
     }
 
     @Test
+    public void onBackCancelled_calledBeforeOnBackStartedOfNewGesture() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
+        OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
+
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+
+        waitForIdle();
+        verify(mCallback1).onBackStarted(any(BackEvent.class));
+        clearInvocations(mCallback1);
+
+        callbackInfo.getCallback().onBackCancelled();
+
+        waitForIdle();
+        // verify onBackCancelled not yet called (since BackProgressAnimator animates
+        // progress to 0 first)
+        verify(mCallback1, never()).onBackCancelled();
+
+        // simulate start of new gesture while cancel animation is still running
+        callbackInfo.getCallback().onBackStarted(mBackEvent);
+        waitForIdle();
+
+        // verify that onBackCancelled is called before onBackStarted
+        InOrder orderVerifier = Mockito.inOrder(mCallback1);
+        orderVerifier.verify(mCallback1).onBackCancelled();
+        orderVerifier.verify(mCallback1).onBackStarted(any(BackEvent.class));
+    }
+
+    @Test
     public void onDetachFromWindow_cancelCallbackAndIgnoreOnBackInvoked() throws RemoteException {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
 
@@ -392,11 +428,11 @@ public class WindowOnBackInvokedDispatcherTest {
 
         callbackInfo.getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        assertTrue(mDispatcher.isDispatching());
+        assertTrue(mDispatcher.isBackGestureInProgress());
 
         callbackInfo.getCallback().onBackInvoked();
         waitForIdle();
-        assertFalse(mDispatcher.isDispatching());
+        assertFalse(mDispatcher.isBackGestureInProgress());
     }
 
     @Test
@@ -411,12 +447,36 @@ public class WindowOnBackInvokedDispatcherTest {
 
         callbackInfo.getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        assertTrue(mDispatcher.isDispatching());
+        assertTrue(mDispatcher.isBackGestureInProgress());
         assertTrue(mDispatcher.mTouchTracker.isActive());
 
         main.runWithScissors(() -> mDispatcher.onMotionEvent(mMotionEvent), 100);
         waitForIdle();
         // onBackPressed is called from animator, so it can happen more than once.
         verify(mCallback1, atLeast(1)).onBackProgressed(any());
+    }
+
+    @Test
+    public void registerImeCallbacks_onBackInvokedCallbackEnabled() throws RemoteException {
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mDefaultImeCallback);
+        assertCallbacksSize(/* default */ 1, /* overlay */ 0);
+        assertSetCallbackInfo();
+        assertTopCallback(mImeBackAnimationController);
+
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mImeCallback);
+        assertCallbacksSize(/* default */ 2, /* overlay */ 0);
+        assertSetCallbackInfo();
+        assertTopCallback(mImeCallback);
+    }
+
+    @Test
+    public void registerImeCallbacks_legacyBack() throws RemoteException {
+        doReturn(false).when(mApplicationInfo).isOnBackInvokedCallbackEnabled();
+
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mDefaultImeCallback);
+        assertNoSetCallbackInfo();
+
+        mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mImeCallback);
+        assertNoSetCallbackInfo();
     }
 }

@@ -465,7 +465,7 @@ class TaskFragmentContainer {
             return;
         }
         // Early return if this container is not an overlay with activity association.
-        if (!isOverlay() || !isAssociatedWithActivity()) {
+        if (!isOverlayWithActivityAssociation()) {
             return;
         }
         if (mAssociatedActivityToken == activityToken) {
@@ -500,7 +500,7 @@ class TaskFragmentContainer {
         // sure the controller considers this container as the one containing the activity.
         // This is needed when the activity is added as pending appeared activity to one
         // TaskFragment while it is also an appeared activity in another.
-        return mController.getContainerWithActivity(activityToken) == this;
+        return mTaskContainer.getContainerWithActivity(activityToken) == this;
     }
 
     /** Whether this activity has appeared in the TaskFragment on the server side. */
@@ -1019,16 +1019,16 @@ class TaskFragmentContainer {
         return mAssociatedActivityToken;
     }
 
-    boolean isAssociatedWithActivity() {
-        return mAssociatedActivityToken != null;
-    }
-
     /**
      * Returns {@code true} if the overlay container should be always on top, which should be
      * a non-fill-parent overlay without activity association.
      */
     boolean isAlwaysOnTopOverlay() {
-        return isOverlay() && !isAssociatedWithActivity();
+        return isOverlay() && mAssociatedActivityToken == null;
+    }
+
+    boolean isOverlayWithActivityAssociation() {
+        return isOverlay() && mAssociatedActivityToken != null;
     }
 
     @Override
@@ -1050,7 +1050,7 @@ class TaskFragmentContainer {
                 + " runningActivityCount=" + getRunningActivityCount()
                 + " isFinished=" + mIsFinished
                 + " overlayTag=" + mOverlayTag
-                + " associatedActivity" + mAssociatedActivityToken
+                + " associatedActivityToken=" + mAssociatedActivityToken
                 + " lastRequestedBounds=" + mLastRequestedBounds
                 + " pendingAppearedActivities=" + mPendingAppearedActivities
                 + (includeContainersToFinishOnExit ? " containersToFinishOnExit="

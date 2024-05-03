@@ -25,5 +25,8 @@
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.ravenwood.bivalenttest" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
+
+        <!-- Need to use MODULE_LIBRARIES APIs, so no hidden API check. -->
+        <option name="hidden-api-checks" value="false" />
     </test>
 </configuration>

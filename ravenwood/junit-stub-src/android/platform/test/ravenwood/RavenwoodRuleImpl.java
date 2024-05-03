@@ -39,4 +39,8 @@ public class RavenwoodRuleImpl {
     public static void validate(Statement base, Description description,
             boolean enableOptionalValidation) {
     }
+
+    public static long realCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
 }

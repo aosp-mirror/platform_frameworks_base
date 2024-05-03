@@ -25,6 +25,7 @@ import com.android.systemui.volume.panel.component.mediaoutput.shared.model.Medi
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.isTheSameSession
 import com.android.systemui.volume.panel.component.volume.domain.model.SliderType
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
+import com.android.systemui.volume.panel.shared.model.filterData
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
@@ -46,7 +47,7 @@ constructor(
     val volumePanelSliders: StateFlow<List<SliderType>> =
         combineTransform(
                 mediaOutputInteractor.activeMediaDeviceSessions,
-                mediaOutputInteractor.defaultActiveMediaSession,
+                mediaOutputInteractor.defaultActiveMediaSession.filterData(),
                 audioRepository.communicationDevice,
             ) { activeSessions, defaultSession, communicationDevice ->
                 coroutineScope {

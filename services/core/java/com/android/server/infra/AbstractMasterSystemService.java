@@ -986,7 +986,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     private void startTrackingPackageChanges() {
-        final PackageMonitor monitor = new PackageMonitor() {
+        final PackageMonitor monitor = new PackageMonitor(true) {
 
             @Override
             public void onPackageUpdateStarted(@NonNull String packageName, int uid) {

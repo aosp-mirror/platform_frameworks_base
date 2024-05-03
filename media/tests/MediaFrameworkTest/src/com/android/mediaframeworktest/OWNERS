@@ -1,0 +1,5 @@
+# Bug component: 1344
+include platform/frameworks/base:/media/OWNERS
+
+# Camera
+per-file *Camera* = file:platform/frameworks/av:/camera/OWNERS

@@ -19,11 +19,11 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
-import com.android.systemui.keyguard.shared.RefactorKeyguardDismissIntent
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import dagger.Lazy
@@ -48,7 +48,7 @@ constructor(
 ) {
     /** Common fade for scrim alpha values during *BOUNCER->GONE */
     fun scrimAlpha(duration: Duration, fromState: KeyguardState): Flow<ScrimAlpha> {
-        return if (RefactorKeyguardDismissIntent.isEnabled) {
+        return if (SceneContainerFlag.isEnabled) {
             keyguardDismissActionInteractor
                 .get()
                 .willAnimateDismissActionOnLockscreen

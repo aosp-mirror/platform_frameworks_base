@@ -51,8 +51,7 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlagsClass
     fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
 
     /** Check whether to use scene framework */
-    fun isSceneContainerEnabled() =
-        SceneContainerFlag.isEnabled && MediaInSceneContainerFlag.isEnabled
+    fun isSceneContainerEnabled() = SceneContainerFlag.isEnabled
 
     /** Check whether to use media refactor code */
     fun isMediaControlsRefactorEnabled() = MediaControlsRefactorFlag.isEnabled

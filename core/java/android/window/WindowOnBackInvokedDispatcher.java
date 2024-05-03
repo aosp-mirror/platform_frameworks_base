@@ -114,7 +114,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /** Updates the dispatcher state on a new {@link MotionEvent}. */
     public void onMotionEvent(MotionEvent ev) {
-        if (!isDispatching() || ev == null || ev.getAction() != MotionEvent.ACTION_MOVE) {
+        if (!isBackGestureInProgress() || ev == null || ev.getAction() != MotionEvent.ACTION_MOVE) {
             return;
         }
         mTouchTracker.update(ev.getX(), ev.getY(), Float.NaN, Float.NaN);
@@ -174,6 +174,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         synchronized (mLock) {
             if (mImeDispatcher != null) {
                 mImeDispatcher.registerOnBackInvokedCallback(priority, callback);
+                return;
+            }
+            if ((callback instanceof ImeOnBackInvokedDispatcher.DefaultImeOnBackAnimationCallback
+                    || callback instanceof ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
+                    && !isOnBackInvokedCallbackEnabled()) {
+                // Fall back to compat back key injection if legacy back behaviour should be used.
                 return;
             }
             if (!mOnBackInvokedCallbacks.containsKey(priority)) {
@@ -240,9 +246,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     /**
-     * Indicates if the dispatcher is actively dispatching to a callback.
+     * Indicates if a user gesture is currently in progress.
      */
-    public boolean isDispatching() {
+    public boolean isBackGestureInProgress() {
         synchronized (mLock) {
             return mTouchTracker.isActive() || mImeDispatchingActive;
         }
@@ -469,12 +475,17 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
             mHandler.post(() -> {
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+
+                // reset progress animator before dispatching onBackStarted to callback. This
+                // ensures that onBackCancelled (of a previous gesture) is always dispatched
+                // before onBackStarted
+                if (callback != null) mProgressAnimator.reset();
                 mTouchTracker.setState(BackTouchTracker.TouchTrackerState.ACTIVE);
                 mTouchTracker.setShouldUpdateStartLocation(true);
                 mTouchTracker.setGestureStartLocation(
                         backEvent.getTouchX(), backEvent.getTouchY(), backEvent.getSwipeEdge());
 
-                final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {
                     callback.onBackStarted(new BackEvent(
                             backEvent.getTouchX(),
@@ -493,14 +504,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         public void onBackCancelled() {
             mHandler.post(() -> {
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
-                if (callback == null) {
-                    mTouchTracker.reset();
-                    return;
-                }
-                mProgressAnimator.onBackCancelled(() -> {
-                    mTouchTracker.reset();
-                    callback.onBackCancelled();
-                });
+                mTouchTracker.reset();
+                if (callback == null) return;
+                mProgressAnimator.onBackCancelled(callback::onBackCancelled);
             });
         }
 

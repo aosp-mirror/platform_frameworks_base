@@ -934,6 +934,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
          */
         private ArrayList<String> mDataClearedPackages = new ArrayList<>();
 
+        private MyPackageMonitor() {
+            super(true);
+        }
+
         @GuardedBy("ImfLock.class")
         void clearKnownImePackageNamesLocked() {
             mKnownImePackageNames.clear();

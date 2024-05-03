@@ -64,3 +64,10 @@ flag {
     description: "Hides the App Handle when in fullscreen immersive mode"
     bug: "336368019"
 }
+
+flag {
+    name: "enable_desktop_windowing_quick_switch"
+    namespace: "lse_desktop_experience"
+    description: "Enables quick switch for desktop mode"
+    bug: "338066529"
+}

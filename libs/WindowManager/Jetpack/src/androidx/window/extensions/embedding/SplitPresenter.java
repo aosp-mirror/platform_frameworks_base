@@ -591,16 +591,14 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull TaskFragmentContainer container,
             @NonNull ActivityStackAttributes attributes,
             @Nullable Size minDimensions) {
-        final Rect taskBounds = container.getTaskContainer().getBounds();
         final Rect relativeBounds = sanitizeBounds(attributes.getRelativeBounds(), minDimensions,
-                taskBounds);
+                container);
         final boolean isFillParent = relativeBounds.isEmpty();
         // Note that we only set isolated navigation for overlay container without activity
         // association. Activity will be launched to an expanded container on top of the overlay
         // if the overlay is associated with an activity. Thus, an overlay with activity association
         // will never be isolated navigated.
-        final boolean isIsolatedNavigated = container.isOverlay()
-                && !container.isAssociatedWithActivity() && !isFillParent;
+        final boolean isIsolatedNavigated = container.isAlwaysOnTopOverlay() && !isFillParent;
         final boolean dimOnTask = !isFillParent
                 && attributes.getWindowAttributes().getDimAreaBehavior() == DIM_AREA_ON_TASK
                 && Flags.fullscreenDimFlag();
@@ -624,7 +622,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      */
     @NonNull
     static Rect sanitizeBounds(@NonNull Rect bounds, @Nullable Size minDimension,
-                               @NonNull Rect taskBounds) {
+                        @NonNull TaskFragmentContainer container) {
         if (bounds.isEmpty()) {
             // Don't need to check if the bounds follows the task bounds.
             return bounds;
@@ -633,10 +631,33 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             // Expand the bounds if the bounds are smaller than minimum dimensions.
             return new Rect();
         }
+        final TaskContainer taskContainer = container.getTaskContainer();
+        final Rect taskBounds = taskContainer.getBounds();
         if (!taskBounds.contains(bounds)) {
             // Expand the bounds if the bounds exceed the task bounds.
             return new Rect();
         }
+
+        if (!container.isOverlay()) {
+            // Stop here if the container is not an overlay.
+            return bounds;
+        }
+
+        final IBinder associatedActivityToken = container.getAssociatedActivityToken();
+
+        if (associatedActivityToken == null) {
+            // Stop here if the container is an always-on-top overlay.
+            return bounds;
+        }
+
+        // Expand the overlay with activity association if the associated activity is part of a
+        // split, or we may need to handle three change transition together.
+        final TaskFragmentContainer associatedContainer = taskContainer
+                .getContainerWithActivity(associatedActivityToken);
+        if (taskContainer.getActiveSplitForContainer(associatedContainer) != null) {
+            return new Rect();
+        }
+
         return bounds;
     }
 
