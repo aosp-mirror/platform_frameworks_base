@@ -16,6 +16,7 @@
 
 package com.android.internal.inputmethod;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.ActivityThread;
@@ -144,7 +145,7 @@ public abstract class ImeTracing {
      *
      * @param where Place where the trace was triggered.
      */
-    public abstract void triggerManagerServiceDump(String where);
+    public abstract void triggerManagerServiceDump(String where, @NonNull ServiceDumper dumper);
 
     /**
      * Being called while taking a bugreport so that tracing files can be included in the bugreport

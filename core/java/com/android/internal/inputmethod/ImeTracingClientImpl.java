@@ -83,7 +83,7 @@ class ImeTracingClientImpl extends ImeTracing {
     }
 
     @Override
-    public void triggerManagerServiceDump(String where) {
+    public void triggerManagerServiceDump(String where, @NonNull ServiceDumper dumper) {
         // Intentionally left empty, this is implemented in ImeTracingServerImpl
     }
 
