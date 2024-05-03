@@ -73,9 +73,11 @@ public final class FontFamily {
      * A builder class for creating new FontFamily.
      */
     public static final class Builder {
-        private static final NativeAllocationRegistry sFamilyRegistory =
-                NativeAllocationRegistry.createMalloced(FontFamily.class.getClassLoader(),
-                    nGetReleaseNativeFamily());
+        private static class NoImagePreloadHolder {
+            private static final NativeAllocationRegistry sFamilyRegistry =
+                    NativeAllocationRegistry.createMalloced(FontFamily.class.getClassLoader(),
+                            nGetReleaseNativeFamily());
+        }
 
         private final ArrayList<Font> mFonts = new ArrayList<>();
         // Most FontFamily only has  regular, bold, italic, bold-italic. Thus 4 should be good for
@@ -183,7 +185,7 @@ public final class FontFamily {
             final long ptr = nBuild(builderPtr, langTags, variant, isCustomFallback,
                     isDefaultFallback, variableFamilyType);
             final FontFamily family = new FontFamily(ptr);
-            sFamilyRegistory.registerNativeAllocation(family, ptr);
+            NoImagePreloadHolder.sFamilyRegistry.registerNativeAllocation(family, ptr);
             return family;
         }
 
