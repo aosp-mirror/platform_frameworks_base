@@ -2,6 +2,7 @@
 aconfig_declarations {
     name: "service-deviceidle.flags-aconfig",
     package: "com.android.server.deviceidle",
+    container: "system",
     srcs: [
         "device_idle.aconfig",
     ],
@@ -17,6 +18,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "service-job.flags-aconfig",
     package: "com.android.server.job",
+    container: "system",
     srcs: [
         "job.aconfig",
     ],
