@@ -386,6 +386,26 @@ func createMergedFrameworkModuleLibStubs(ctx android.LoadHookContext, modules []
 	ctx.CreateModule(java.LibraryFactory, &props)
 }
 
+func createMergedFrameworkSystemServerExportableStubs(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
+	// The user of this module compiles against the "core" SDK and against non-updatable bootclasspathModules,
+	// so remove to avoid dupes.
+	bootclasspathModules := removeAll(bootclasspath, core_libraries_modules)
+	bootclasspathModules = removeAll(bootclasspath, non_updatable_modules)
+	modules := append(
+		// Include all the module-lib APIs from the bootclasspath libraries.
+		transformArray(bootclasspathModules, "", ".stubs.exportable.module_lib"),
+		// Then add all the system-server APIs from the service-* libraries.
+		transformArray(system_server_classpath, "", ".stubs.exportable.system_server")...,
+	)
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("framework-updatable-stubs-system_server_api-exportable")
+	props.Static_libs = modules
+	props.Sdk_version = proptools.StringPtr("system_server_current")
+	props.Visibility = []string{"//frameworks/base"}
+	props.Is_stubs_module = proptools.BoolPtr(true)
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
 func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules []string) {
 	props := fgProps{}
 	props.Name = proptools.StringPtr("all-modules-public-stubs-source")
@@ -531,6 +551,7 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedSystemExportableStubs(ctx, bootclasspath)
 	createMergedTestExportableStubsForNonUpdatableModules(ctx)
 	createMergedFrameworkModuleLibExportableStubs(ctx, bootclasspath)
+	createMergedFrameworkSystemServerExportableStubs(ctx, bootclasspath, system_server_classpath)
 
 	createMergedAnnotationsFilegroups(ctx, bootclasspath, system_server_classpath)
 
