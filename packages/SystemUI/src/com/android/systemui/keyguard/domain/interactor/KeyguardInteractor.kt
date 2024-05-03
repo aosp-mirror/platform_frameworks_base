@@ -33,7 +33,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
-import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
@@ -235,13 +234,7 @@ constructor(
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
 
-    /** Source of the most recent biometric unlock, such as fingerprint or face. */
-    val biometricUnlockSource: Flow<BiometricUnlockSource?> = repository.biometricUnlockSource
-
-    /**
-     * Observable for [BiometricUnlockModel] when biometrics like face or any fingerprint (rear,
-     * side, under display) is used to unlock the device.
-     */
+    /** Observable for [BiometricUnlockModel] when biometrics are used to unlock the device. */
     val biometricUnlockState: Flow<BiometricUnlockModel> = repository.biometricUnlockState
 
     /** Keyguard is present and is not occluded. */
