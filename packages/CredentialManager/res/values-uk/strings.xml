@@ -48,7 +48,7 @@
     <string name="passwords" msgid="5419394230391253816">"паролі"</string>
     <string name="sign_ins" msgid="4710739369149469208">"дані для входу"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"дані для входу"</string>
-    <string name="save_credential_to_title" msgid="3172811692275634301">"Зберегти <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> в"</string>
+    <string name="save_credential_to_title" msgid="3172811692275634301">"Де слід зберегти <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>?"</string>
     <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Створити ключ доступу на іншому пристрої?"</string>
     <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Зберегти пароль на іншому пристрої?"</string>
     <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Зберегти дані для входу на іншому пристрої?"</string>
