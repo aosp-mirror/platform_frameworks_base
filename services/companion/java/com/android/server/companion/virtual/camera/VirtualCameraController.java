@@ -187,9 +187,9 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
         fout.println(indent + "VirtualCameraController:");
         indent += indent;
         synchronized (mCameras) {
-            fout.printf("%sRegistered cameras:%d%n\n", indent, mCameras.size());
+            fout.println(indent + "Registered cameras: " + mCameras.size());
             for (CameraDescriptor descriptor : mCameras.values()) {
-                fout.printf("%s token: %s\n", indent, descriptor.mConfig);
+                fout.println(indent + " token: " +  descriptor.mConfig);
             }
         }
     }
