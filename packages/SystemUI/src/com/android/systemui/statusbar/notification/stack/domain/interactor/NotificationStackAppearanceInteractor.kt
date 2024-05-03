@@ -75,6 +75,10 @@ constructor(
     /** The height in px of the contents of the HUN. */
     val headsUpHeight: StateFlow<Float> = viewHeightRepository.headsUpHeight.asStateFlow()
 
+    /** The alpha of the Notification Stack for the brightness mirror */
+    val alphaForBrightnessMirror: StateFlow<Float> =
+        placeholderRepository.alphaForBrightnessMirror.asStateFlow()
+
     /** The y-coordinate in px of top of the contents of the notification stack. */
     val stackTop: StateFlow<Float> = placeholderRepository.stackTop.asStateFlow()
 
@@ -100,6 +104,11 @@ constructor(
      * necessary to scroll up to keep expanding the notification.
      */
     val syntheticScroll: Flow<Float> = viewHeightRepository.syntheticScroll.asStateFlow()
+
+    /** Sets the alpha to apply to the NSSL for the brightness mirror */
+    fun setAlphaForBrightnessMirror(alpha: Float) {
+        placeholderRepository.alphaForBrightnessMirror.value = alpha
+    }
 
     /** Sets the position of the notification stack in the current scene. */
     fun setShadeScrimBounds(bounds: ShadeScrimBounds?) {

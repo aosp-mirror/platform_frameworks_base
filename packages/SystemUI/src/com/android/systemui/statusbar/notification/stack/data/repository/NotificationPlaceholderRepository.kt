@@ -27,6 +27,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
  */
 @SysUISingleton
 class NotificationPlaceholderRepository @Inject constructor() {
+
+    /** The alpha of the shade in order to show brightness. */
+    val alphaForBrightnessMirror = MutableStateFlow(1f)
+
     /**
      * The bounds of the notification shade scrim / container in the current scene.
      *

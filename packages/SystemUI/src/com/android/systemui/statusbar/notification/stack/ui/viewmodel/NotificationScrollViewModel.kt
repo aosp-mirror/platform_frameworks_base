@@ -32,12 +32,12 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.Notificati
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 @SysUISingleton
@@ -121,6 +121,14 @@ constructor(
                 )
             }
             .dumpWhileCollecting("shadeScrimShape")
+
+    /**
+     * Max alpha to apply directly to the view based on the compose placeholder.
+     *
+     * TODO(b/338590620): Migrate alphas from [SharedNotificationContainerViewModel] into this flow
+     */
+    val maxAlpha: Flow<Float> =
+        stackAppearanceInteractor.alphaForBrightnessMirror.dumpValue("maxAlpha")
 
     /** The y-coordinate in px of top of the contents of the notification stack. */
     val stackTop: Flow<Float> = stackAppearanceInteractor.stackTop.dumpValue("stackTop")
