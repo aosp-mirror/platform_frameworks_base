@@ -165,7 +165,7 @@
     <string name="accessibility_wifi_other_device" msgid="2815627624555795918">"Tengt við tækið þitt."</string>
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Opið net"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Öruggt net"</string>
-    <string name="process_kernel_label" msgid="950292573930336765">"Android stýrikerfið"</string>
+    <string name="process_kernel_label" msgid="950292573930336765">"Android-stýrikerfið"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Fjarlægð forrit"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Fjarlægð forrit og notendur"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Kerfisuppfærslur"</string>

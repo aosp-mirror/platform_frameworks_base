@@ -101,7 +101,7 @@
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Izquierdo: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Derecho: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Activado"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Activo"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Guardado"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Activo; solo oído izquierdo"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Activo; solo oído derecho"</string>

@@ -273,7 +273,7 @@
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ચેતવણી: જ્યારે આ સેટિંગ ચાલુ હોય ત્યારે આ ઉપકરણ પર ઉપકરણ સંરક્ષણ સુવિધાઓ કાર્ય કરશે નહીં."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"મોક લોકેશન ઍપ પસંદ કરો"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"કોઈ મોક લોકેશન ઍપ સેટ કરાયેલું નથી"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"મોક સ્થાન ઍપ્લિકેશન: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"મૉક લોકેશન ઍપ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"નેટવર્કિંગ"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"વાયરલેસ ડિસ્પ્લે પ્રમાણન"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"વાઇ-ફાઇ વર્બોઝ લૉગિંગ ચાલુ કરો"</string>
@@ -585,7 +585,7 @@
     <string name="help_label" msgid="3528360748637781274">"સહાય અને પ્રતિસાદ"</string>
     <string name="storage_category" msgid="2287342585424631813">"સ્ટોરેજ"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"શેર કરેલો ડેટા"</string>
-    <string name="shared_data_summary" msgid="5516326713822885652">"શેર કરેલા ડેટાને જુઓ અને તેને સંશોધિત કરો"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"શેર કરેલા ડેટાને જુઓ અને તેમાં ફેરફાર કરો"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"આ વપરાશકર્તા માટે કોઈ શેર કરેલો ડેટા નથી."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"શેર કરેલો ડેટા મેળવવામાં ભૂલ આવી હતી. ફરી પ્રયાસ કરો."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"શેર કરેલા ડેટાનું ID: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>

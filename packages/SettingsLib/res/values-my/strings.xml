@@ -357,7 +357,7 @@
     <string name="media_category" msgid="8122076702526144053">"မီဒီယာ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"စောင့်ကြည့်စစ်ဆေးခြင်း"</string>
     <string name="strict_mode" msgid="889864762140862437">"တင်းကြပ်သောစနစ် ဖွင့်ရန်"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"အက်ပ်လုပ်ဆောင်မှု ရှည်ကြာလျှင် စကရင်ပြန်စပါ"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"အက်ပ်လုပ်ဆောင်မှု ရှည်ကြာလျှင် စကရင်ပြန်စသည်"</string>
     <string name="pointer_location" msgid="7516929526199520173">"မြား၏တည်နေရာ"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"လက်ရှိထိတွေ့မှုဒေတာကို ဖန်သားပေါ်တွင်ထပ်၍ ပြသသည်"</string>
     <string name="show_touches" msgid="8437666942161289025">"တို့ခြင်းများကို ပြပါ"</string>
@@ -375,8 +375,8 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"GPU ကိုမျက်နှာပြင်ခင်းကျင်းရာတွင် အမြဲသုံးပါ။"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"အရောင်စနစ် ပြောင်းရန်"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ခြေရာခံခြင်းဖွင့်ပါ။"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB အသံလမ်းကြောင်း ပိတ်ခြင်း"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB အသံစက်ပစ္စည်းများသို့ အလိုအလျောက် ချိတ်ဆက်ခြင်းကို ပိတ်ရန်"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB အသံလမ်းကြောင်း ပိတ်ရန်"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB အသံစက်ပစ္စည်းများသို့ အလိုအလျောက် ချိတ်ဆက်ခြင်းကို ပိတ်သည်"</string>
     <string name="debug_layout" msgid="1659216803043339741">"ပြကွက်၏ဘောင်များ ပြရန်"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ဖြတ်ပိုင်းအနားသတ်များ၊ အနားများ စသဖြင့် ပြပါ။"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL အပြင်အဆင်အတိုင်း ဖြစ်စေခြင်း"</string>
