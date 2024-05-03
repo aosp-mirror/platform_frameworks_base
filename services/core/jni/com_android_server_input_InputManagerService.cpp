@@ -178,6 +178,7 @@ static struct {
     jfieldID lightTypeInput;
     jfieldID lightTypePlayerId;
     jfieldID lightTypeKeyboardBacklight;
+    jfieldID lightTypeKeyboardMicMute;
     jfieldID lightCapabilityBrightness;
     jfieldID lightCapabilityColorRgb;
 } gLightClassInfo;
@@ -2432,6 +2433,9 @@ static jobject nativeGetLights(JNIEnv* env, jobject nativeImplObj, jint deviceId
         } else if (lightInfo.type == InputDeviceLightType::KEYBOARD_BACKLIGHT) {
             jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
                                              gLightClassInfo.lightTypeKeyboardBacklight);
+        } else if (lightInfo.type == InputDeviceLightType::KEYBOARD_MIC_MUTE) {
+            jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
+                                             gLightClassInfo.lightTypeKeyboardMicMute);
         } else {
             ALOGW("Unknown light type %d", lightInfo.type);
             continue;
@@ -3165,6 +3169,8 @@ int register_android_server_InputManager(JNIEnv* env) {
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_PLAYER_ID", "I");
     gLightClassInfo.lightTypeKeyboardBacklight =
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_KEYBOARD_BACKLIGHT", "I");
+    gLightClassInfo.lightTypeKeyboardMicMute =
+            env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_TYPE_KEYBOARD_MIC_MUTE", "I");
     gLightClassInfo.lightCapabilityBrightness =
             env->GetStaticFieldID(gLightClassInfo.clazz, "LIGHT_CAPABILITY_BRIGHTNESS", "I");
     gLightClassInfo.lightCapabilityColorRgb =

@@ -42,6 +42,7 @@ import android.test.mock.MockContentResolver
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.util.test.FakeSettingsProvider
 import com.google.common.truth.Truth.assertThat
+import com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -151,7 +152,9 @@ class InputManagerServiceTests {
     fun testInputSettingsUpdatedOnSystemRunning() {
         verifyZeroInteractions(native)
 
-        service.systemRunning()
+        runWithShellPermissionIdentity {
+            service.systemRunning()
+        }
 
         verify(native).setPointerSpeed(anyInt())
         verify(native).setTouchpadPointerSpeed(anyInt())
