@@ -270,9 +270,9 @@ internal class UnfoldRotationProviderInternalModule {
     @UnfoldMain
     fun provideRotationChangeProvider(
         rotationChangeProviderFactory: RotationChangeProvider.Factory,
-        @UnfoldMain mainHandler: Handler,
+        @UnfoldMain callbackHandler: Handler,
     ): RotationChangeProvider {
-        return rotationChangeProviderFactory.create(mainHandler)
+        return rotationChangeProviderFactory.create(callbackHandler)
     }
 
     @Provides
@@ -280,8 +280,9 @@ internal class UnfoldRotationProviderInternalModule {
     @UnfoldBg
     fun provideBgRotationChangeProvider(
         rotationChangeProviderFactory: RotationChangeProvider.Factory,
-        @UnfoldBg bgHandler: Handler,
+        @UnfoldBg callbackHandler: Handler,
     ): RotationChangeProvider {
-        return rotationChangeProviderFactory.create(bgHandler)
+        // For UnfoldBg RotationChangeProvider we use bgHandler as callbackHandler
+        return rotationChangeProviderFactory.create(callbackHandler)
     }
 }
