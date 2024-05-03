@@ -30,9 +30,11 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.MathUtils;
+import android.view.DisplayCutout;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.animation.Animator;
 import androidx.core.animation.AnimatorListenerAdapter;
@@ -582,6 +584,17 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         }
         mView.setAlpha(alpha);
         mView.setVisibility(visibility);
+    }
+
+    /**
+     * Passes the given {@link DisplayCutout} to the view.
+     *
+     * <p>This isn't needed when the view is part of a real view hierarchy. Only call this when the
+     * view is added to a Compose hierarchy where it doesn't actually receive any callback to its
+     * {@code OnApplyWindowInsetsListener}s.
+     */
+    public void setDisplayCutout(@Nullable DisplayCutout displayCutout) {
+        mView.setDisplayCutout(displayCutout, mInsetsProvider);
     }
 
     /**

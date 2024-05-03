@@ -41,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
@@ -291,7 +292,16 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     private boolean updateLayoutConsideringCutout(StatusBarContentInsetsProvider insetsProvider) {
-        mDisplayCutout = getRootWindowInsets().getDisplayCutout();
+        return setDisplayCutout(
+                getRootWindowInsets().getDisplayCutout(),
+                insetsProvider);
+    }
+
+    /** Sets the {@link DisplayCutout}, updating the view to render around the cutout. */
+    public boolean setDisplayCutout(
+            @Nullable DisplayCutout displayCutout,
+            StatusBarContentInsetsProvider insetsProvider) {
+        mDisplayCutout = displayCutout;
         updateKeyguardStatusBarHeight();
         updatePadding(insetsProvider);
         if (mDisplayCutout == null || insetsProvider.currentRotationHasCornerCutout()) {
