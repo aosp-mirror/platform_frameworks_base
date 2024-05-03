@@ -366,7 +366,7 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Folosește mereu GPU pentru compunerea ecranului"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulează spațiu culoare"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Monitorizări OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Dezactivați rutarea audio USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Dezactivează rutarea audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Dezact. rutarea automată către perif. audio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Afișează limite aspect"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afișează limitele clipului, marginile etc."</string>
