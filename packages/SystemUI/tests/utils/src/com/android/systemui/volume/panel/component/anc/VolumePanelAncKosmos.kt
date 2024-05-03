@@ -20,10 +20,13 @@ import androidx.slice.SliceViewManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.volume.domain.interactor.audioOutputInteractor
 import com.android.systemui.volume.panel.component.anc.data.repository.FakeAncSliceRepository
 import com.android.systemui.volume.panel.component.anc.domain.interactor.AncSliceInteractor
 
 var Kosmos.sliceViewManager: SliceViewManager by Kosmos.Fixture { mock {} }
 val Kosmos.ancSliceRepository by Kosmos.Fixture { FakeAncSliceRepository() }
 val Kosmos.ancSliceInteractor by
-    Kosmos.Fixture { AncSliceInteractor(ancSliceRepository, testScope.backgroundScope) }
+    Kosmos.Fixture {
+        AncSliceInteractor(audioOutputInteractor, ancSliceRepository, testScope.backgroundScope)
+    }
