@@ -1180,7 +1180,7 @@
     <string name="not_selected" msgid="410652016565864475">"não selecionado"</string>
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 de {max} estrelas}one{# de {max} estrelas}many{# de {max} estrelas}other{# de {max} estrelas}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"em andamento"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Complete a ação usando"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Concluir a ação usando"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Concluir a ação usando %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Concluir ação"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Abrir com"</string>
