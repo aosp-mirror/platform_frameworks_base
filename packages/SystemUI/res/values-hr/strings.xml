@@ -269,7 +269,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Spremljeno"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"prekini vezu"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiviraj"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Automatski ponovo uključi sutra"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Automatski uključi ponovno sutra"</string>
     <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"Značajke kao što su brzo dijeljenje, Pronađi moj uređaj i lokacija uređaja upotrebljavaju Bluetooth"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> baterije"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
@@ -589,8 +589,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibriranje"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Kontrole glasnoće – %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Telefon će zvoniti za pozive i obavijesti (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <string name="media_output_label_title" msgid="872824698593182505">"Reproducira se – <xliff:g id="LABEL">%s</xliff:g>"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk će se reproducirati"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> se reproducira na"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk će se reproducirati na"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Ugađanje korisničkog sučelja sustava"</string>
     <string name="status_bar" msgid="4357390266055077437">"Traka statusa"</string>
     <string name="demo_mode" msgid="263484519766901593">"Demo način korisničkog sučelja sustava"</string>

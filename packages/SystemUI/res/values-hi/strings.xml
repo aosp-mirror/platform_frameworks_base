@@ -589,7 +589,7 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"वाइब्रेशन की सुविधा चालू करें"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s की आवाज़ कम या ज़्यादा करने की सुविधा"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"कॉल और सूचनाएं आने पर घंटी बजेगी (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> को चलाया जा रहा है"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> इस पर चल रहा है"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ऑडियो इस पर चलेगा"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"सिस्टम यूज़र इंटरफ़ेस (यूआई) ट्यूनर"</string>
     <string name="status_bar" msgid="4357390266055077437">"स्टेटस बार"</string>
