@@ -4778,7 +4778,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.uptimeMillis();
-            bindApplicationTimeNanos = SystemClock.elapsedRealtimeNanos();
+            bindApplicationTimeNanos = SystemClock.uptimeNanos();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (mPlatformCompat != null) {
@@ -4848,7 +4848,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             app.setBindApplicationTime(bindApplicationTimeMillis);
             mProcessList.getAppStartInfoTracker()
-                    .reportBindApplicationTimeNanos(app, bindApplicationTimeNanos);
+                    .addTimestampToStart(app, bindApplicationTimeNanos,
+                            ApplicationStartInfo.START_TIMESTAMP_BIND_APPLICATION);
 
             // Make app active after binding application or client may be running requests (e.g
             // starting activities) before it is ready.
@@ -14314,7 +14315,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // activity manager to announce its creation.
     public boolean bindBackupAgent(String packageName, int backupMode, int targetUserId,
             @BackupDestination int backupDestination) {
-        long startTimeNs = SystemClock.elapsedRealtimeNanos();
+        long startTimeNs = SystemClock.uptimeNanos();
         if (DEBUG_BACKUP) {
             Slog.v(TAG, "bindBackupAgent: app=" + packageName + " mode=" + backupMode
                     + " targetUserId=" + targetUserId + " callingUid = " + Binder.getCallingUid()
@@ -19413,7 +19414,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // If the process is known as top app, set a hint so when the process is
                     // started, the top priority can be applied immediately to avoid cpu being
                     // preempted by other processes before attaching the process of top app.
-                    final long startTimeNs = SystemClock.elapsedRealtimeNanos();
                     HostingRecord hostingRecord =
                             new HostingRecord(hostingType, hostingName, isTop);
                     ProcessRecord rec = getProcessRecordLocked(processName, info.uid);
