@@ -35,6 +35,7 @@ import kotlin.math.max
 class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
     lateinit var screenshotPreview: ImageView
+    lateinit var blurredScreenshotPreview: ImageView
     private lateinit var screenshotStatic: ViewGroup
     var onTouchInterceptListener: ((MotionEvent) -> Boolean)? = null
 
@@ -48,6 +49,7 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
         // Get focus so that the key events go to the layout.
         isFocusableInTouchMode = true
         screenshotPreview = requireViewById(R.id.screenshot_preview)
+        blurredScreenshotPreview = requireViewById(R.id.screenshot_preview_blur)
         screenshotStatic = requireViewById(R.id.screenshot_static)
         actionsContainerBackground = requireViewById(R.id.actions_container_background)
         dismissButton = requireViewById(R.id.screenshot_dismiss_button)
