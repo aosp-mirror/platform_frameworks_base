@@ -66,7 +66,9 @@ fun VolumeSlider(
 
                 // provide a not animated value to the a11y because it fails to announce the
                 // settled value when it changes rapidly.
-                progressBarRangeInfo = ProgressBarRangeInfo(state.value, state.valueRange)
+                if (state.isEnabled) {
+                    progressBarRangeInfo = ProgressBarRangeInfo(state.value, state.valueRange)
+                }
                 setProgress { targetValue ->
                     val targetDirection =
                         when {
