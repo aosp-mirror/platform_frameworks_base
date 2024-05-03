@@ -1790,6 +1790,7 @@ public final class DisplayPowerControllerTest {
         verify(mHolder.animator).animateTo(eq(brightness),
                 /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
                 /* ignoreAnimationLimits= */ anyBoolean());
+        verify(mHolder.brightnessSetting).setBrightness(brightness);
     }
 
     @Test
