@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -92,6 +93,24 @@ object DeviceEntryIconViewBinder {
                 launch("$TAG#viewModel.isLongPressEnabled") {
                     viewModel.isLongPressEnabled.collect { isEnabled ->
                         longPressHandlingView.setLongPressHandlingEnabled(isEnabled)
+                    }
+                }
+                launch("$TAG#viewModel.isUdfpsSupported") {
+                    viewModel.isUdfpsSupported.collect { udfpsSupported ->
+                        longPressHandlingView.longPressDuration =
+                            if (udfpsSupported) {
+                                {
+                                    view.resources
+                                        .getInteger(R.integer.config_udfpsDeviceEntryIconLongPress)
+                                        .toLong()
+                                }
+                            } else {
+                                {
+                                    view.resources
+                                        .getInteger(R.integer.config_lockIconLongPress)
+                                        .toLong()
+                                }
+                            }
                     }
                 }
                 launch("$TAG#viewModel.accessibilityDelegateHint") {
