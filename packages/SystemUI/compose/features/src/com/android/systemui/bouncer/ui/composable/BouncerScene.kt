@@ -28,6 +28,7 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -38,6 +39,10 @@ object Bouncer {
     object Elements {
         val Background = ElementKey("BouncerBackground")
         val Content = ElementKey("BouncerContent")
+    }
+
+    object TestTags {
+        const val Root = "bouncer_root"
     }
 }
 
@@ -78,7 +83,9 @@ private fun SceneScope.BouncerScene(
         BouncerContent(
             viewModel,
             dialogFactory,
-            Modifier.element(Bouncer.Elements.Content).fillMaxSize()
+            Modifier.sysuiResTag(Bouncer.TestTags.Root)
+                .element(Bouncer.Elements.Content)
+                .fillMaxSize()
         )
     }
 }
