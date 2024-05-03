@@ -114,6 +114,7 @@ import com.android.server.power.PowerManagerService.WakeLock;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
+import com.android.server.power.feature.PowerManagerFlags;
 import com.android.server.testutils.OffsettableClock;
 
 import com.google.testing.junit.testparameterinjector.TestParameter;
@@ -275,7 +276,7 @@ public class PowerManagerServiceTest {
             Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                     SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
                     FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
-                    Executor executor) {
+                    Executor executor, PowerManagerFlags powerManagerFlags) {
                 return mNotifierMock;
             }
 

@@ -988,10 +988,10 @@ public final class PowerManagerService extends SystemService
         Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                 SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
                 FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
-                Executor backgroundExecutor) {
+                Executor backgroundExecutor, PowerManagerFlags powerManagerFlags) {
             return new Notifier(
                     looper, context, batteryStats, suspendBlocker, policy, faceDownDetector,
-                    screenUndimDetector, backgroundExecutor);
+                    screenUndimDetector, backgroundExecutor, powerManagerFlags, /*injector=*/ null);
         }
 
         SuspendBlocker createSuspendBlocker(PowerManagerService service, String name) {
@@ -1373,7 +1373,7 @@ public final class PowerManagerService extends SystemService
             mNotifier = mInjector.createNotifier(Looper.getMainLooper(), mContext, mBatteryStats,
                     mInjector.createSuspendBlocker(this, "PowerManagerService.Broadcasts"),
                     mPolicy, mFaceDownDetector, mScreenUndimDetector,
-                    BackgroundThread.getExecutor());
+                    BackgroundThread.getExecutor(), mFeatureFlags);
 
             mPowerGroups.append(Display.DEFAULT_DISPLAY_GROUP,
                     new PowerGroup(WAKEFULNESS_AWAKE, mPowerGroupWakefulnessChangeListener,
