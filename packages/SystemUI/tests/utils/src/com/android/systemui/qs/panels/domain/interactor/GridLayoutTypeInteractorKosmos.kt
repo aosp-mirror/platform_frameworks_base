@@ -18,6 +18,12 @@ package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.data.repository.gridLayoutTypeRepository
+import com.android.systemui.qs.panels.shared.model.GridLayoutType
+import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
+import com.android.systemui.qs.panels.ui.compose.GridLayout
 
 val Kosmos.gridLayoutTypeInteractor by
     Kosmos.Fixture { GridLayoutTypeInteractor(gridLayoutTypeRepository) }
+
+val Kosmos.gridLayoutMap: Map<GridLayoutType, GridLayout> by
+    Kosmos.Fixture { mapOf(Pair(InfiniteGridLayoutType, infiniteGridLayout)) }

@@ -17,34 +17,39 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.panels.domain.interactor.GridLayoutTypeInteractor
-import com.android.systemui.qs.panels.domain.interactor.IconTilesInteractor
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class TileGridViewModel
 @Inject
 constructor(
     gridLayoutTypeInteractor: GridLayoutTypeInteractor,
-    gridLayoutMap: Map<Class<out GridLayoutType>, @JvmSuppressWildcards GridLayout>,
+    gridLayoutMap: Map<GridLayoutType, @JvmSuppressWildcards GridLayout>,
     tilesInteractor: CurrentTilesInteractor,
-    iconTilesInteractor: IconTilesInteractor,
+    defaultGridLayout: InfiniteGridLayout,
+    @Application private val applicationScope: CoroutineScope
 ) {
-    val gridLayout: Flow<GridLayout> =
-        gridLayoutTypeInteractor.layout.map {
-            gridLayoutMap[it::class.java] ?: InfiniteGridLayout()
-        }
+    val gridLayout: StateFlow<GridLayout> =
+        gridLayoutTypeInteractor.layout
+            .map { gridLayoutMap[it] ?: defaultGridLayout }
+            .stateIn(applicationScope, SharingStarted.Eagerly, defaultGridLayout)
     val tileViewModels: Flow<List<TileViewModel>> =
-        combine(tilesInteractor.currentTiles, iconTilesInteractor.iconTilesSpecs) {
-            tiles,
-            iconTilesSpecs ->
-            tiles.map { TileViewModel(it.tile, iconTilesSpecs.contains(it.spec)) }
+        tilesInteractor.currentTiles.mapLatest { tiles ->
+            tiles.map { TileViewModel(it.tile, it.spec) }
         }
 }

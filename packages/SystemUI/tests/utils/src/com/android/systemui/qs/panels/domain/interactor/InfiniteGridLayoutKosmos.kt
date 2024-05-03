@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.shared.model
+package com.android.systemui.qs.panels.domain.interactor
 
-import dagger.MapKey
-import kotlin.reflect.KClass
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 
-/**
- * Dagger map key to associate a [GridLayoutType] with its
- * [com.android.systemui.qs.panels.ui.compose.GridLayout].
- */
-@Retention(AnnotationRetention.RUNTIME)
-@MapKey
-annotation class GridLayoutTypeKey(val value: KClass<out GridLayoutType>)
+val Kosmos.infiniteGridLayout by Kosmos.Fixture { InfiniteGridLayout(iconTilesInteractor) }
