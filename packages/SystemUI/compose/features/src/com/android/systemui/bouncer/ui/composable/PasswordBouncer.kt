@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.PlatformIconButton
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.common.ui.compose.SelectedUserAwareInputConnection
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.res.R
 
 /** UI for the input part of a password-requiring version of the bouncer. */
@@ -105,6 +106,7 @@ internal fun PasswordBouncer(
                 ),
             modifier =
                 modifier
+                    .sysuiResTag("bouncer_text_entry")
                     .focusRequester(focusRequester)
                     .onFocusChanged { viewModel.onTextFieldFocusChanged(it.isFocused) }
                     .drawBehind {
