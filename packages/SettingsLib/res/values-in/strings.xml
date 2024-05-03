@@ -348,9 +348,9 @@
     <string name="debug_drawing_category" msgid="5066171112313666619">"Gambar"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Render yang dipercepat hardware"</string>
     <string name="media_category" msgid="8122076702526144053">"Media"</string>
-    <string name="debug_monitoring_category" msgid="1597387133765424994">"Memantau"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"Pemantauan"</string>
     <string name="strict_mode" msgid="889864762140862437">"Mode ketat diaktifkan"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Buat layar berkedip saat aplikasi berjalan lama di thread utama"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Buat layar berkedip saat aplikasi berlama-lama menjalankan operasi di thread utama"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Lokasi kursor"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay layar menampilkan data sentuhan saat ini"</string>
     <string name="show_touches" msgid="8437666942161289025">"Tampilkan ketukan"</string>
