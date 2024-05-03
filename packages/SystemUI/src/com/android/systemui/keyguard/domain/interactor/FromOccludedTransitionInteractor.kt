@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.restartDreamOnUnocclude
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -90,12 +91,15 @@ constructor(
                     .sample(
                         communalInteractor.isIdleOnCommunal,
                         communalInteractor.showCommunalFromOccluded,
+                        communalInteractor.dreamFromOccluded
                     )
-                    .collect { (_, isIdleOnCommunal, showCommunalFromOccluded) ->
+                    .collect { (_, isIdleOnCommunal, showCommunalFromOccluded, dreamFromOccluded) ->
                         // Occlusion signals come from the framework, and should interrupt any
                         // existing transition
                         val to =
-                            if (isIdleOnCommunal || showCommunalFromOccluded) {
+                            if (restartDreamOnUnocclude() && dreamFromOccluded) {
+                                KeyguardState.DREAMING
+                            } else if (isIdleOnCommunal || showCommunalFromOccluded) {
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN
@@ -110,15 +114,19 @@ constructor(
                         keyguardInteractor.isKeyguardShowing,
                         communalInteractor.isIdleOnCommunal,
                         communalInteractor.showCommunalFromOccluded,
+                        communalInteractor.dreamFromOccluded,
                     )
-                    .filterRelevantKeyguardStateAnd { (isOccluded, isShowing, _, _) ->
+                    .filterRelevantKeyguardStateAnd { (isOccluded, isShowing, _, _, _) ->
                         !isOccluded && isShowing
                     }
-                    .collect { (_, _, isIdleOnCommunal, showCommunalFromOccluded) ->
+                    .collect { (_, _, isIdleOnCommunal, showCommunalFromOccluded, dreamFromOccluded)
+                        ->
                         // Occlusion signals come from the framework, and should interrupt any
                         // existing transition
                         val to =
-                            if (isIdleOnCommunal || showCommunalFromOccluded) {
+                            if (restartDreamOnUnocclude() && dreamFromOccluded) {
+                                KeyguardState.DREAMING
+                            } else if (isIdleOnCommunal || showCommunalFromOccluded) {
                                 KeyguardState.GLANCEABLE_HUB
                             } else {
                                 KeyguardState.LOCKSCREEN

@@ -16,12 +16,16 @@
 
 package com.android.systemui.communal
 
+import android.platform.test.annotations.EnableFlags
 import android.service.dream.dreamManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.communalInteractor
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -62,6 +66,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
                     powerInteractor = kosmos.powerInteractor,
                     keyguardInteractor = kosmos.keyguardInteractor,
                     keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
+                    communalInteractor = kosmos.communalInteractor,
                     dreamManager = dreamManager,
                     bgScope = kosmos.applicationCoroutineScope,
                 )
@@ -79,6 +84,32 @@ class CommunalDreamStartableTest : SysuiTestCase() {
             verify(dreamManager, never()).startDream()
 
             transition(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB)
+
+            verify(dreamManager).startDream()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_RESTART_DREAM_ON_UNOCCLUDE)
+    fun restartDreamingWhenTransitioningFromDreamingToOccludedToDreaming() =
+        testScope.runTest {
+            keyguardRepository.setDreaming(false)
+            powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn = */ true)).thenReturn(true)
+            runCurrent()
+
+            verify(dreamManager, never()).startDream()
+
+            kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
+            kosmos.fakeKeyguardRepository.setDreaming(true)
+            runCurrent()
+
+            transition(from = KeyguardState.DREAMING, to = KeyguardState.OCCLUDED)
+            kosmos.fakeKeyguardRepository.setKeyguardOccluded(false)
+            kosmos.fakeKeyguardRepository.setDreaming(false)
+            runCurrent()
+
+            transition(from = KeyguardState.OCCLUDED, to = KeyguardState.DREAMING)
+            runCurrent()
 
             verify(dreamManager).startDream()
         }
