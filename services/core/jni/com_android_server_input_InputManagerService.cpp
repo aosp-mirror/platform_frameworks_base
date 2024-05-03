@@ -761,8 +761,7 @@ std::shared_ptr<PointerControllerInterface> NativeInputManager::createPointerCon
     std::scoped_lock _l(mLock);
     ensureSpriteControllerLocked();
     std::shared_ptr<PointerController> pc =
-            PointerController::create(this, mLooper, *mLocked.spriteController, /*enabled=*/true,
-                                      type);
+            PointerController::create(this, mLooper, *mLocked.spriteController, type);
     mLocked.pointerControllers.emplace_back(pc);
     return pc;
 }
