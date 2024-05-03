@@ -96,6 +96,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -522,7 +523,25 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mTaskOrganizer.reparentChildSurfaceToTask(taskId, overlay, t);
             t.setLayer(overlay, Integer.MAX_VALUE);
             t.apply();
+            // This serves as a last resort in case the Shell Transition is not handled properly.
+            // We want to make sure the overlay passed from Launcher gets removed eventually.
+            mayRemoveContentOverlay(overlay);
         }
+    }
+
+    private void mayRemoveContentOverlay(SurfaceControl overlay) {
+        final WeakReference<SurfaceControl> overlayRef = new WeakReference<>(overlay);
+        final long timeoutDuration = (mEnterAnimationDuration
+                + CONTENT_OVERLAY_FADE_OUT_DELAY_MS
+                + EXTRA_CONTENT_OVERLAY_FADE_OUT_DELAY_MS) * 2L;
+        mMainExecutor.executeDelayed(() -> {
+            final SurfaceControl overlayLeash = overlayRef.get();
+            if (overlayLeash != null && overlayLeash.isValid() && overlayLeash == mPipOverlay) {
+                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "Cleanup the overlay(%s) as a last resort.", overlayLeash);
+                removeContentOverlay(overlayLeash, null /* callback */);
+            }
+        }, timeoutDuration);
     }
 
     /**
