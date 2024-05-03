@@ -817,7 +817,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloquear a tela"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Controla como e quando a tela é bloqueada."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Apagar todos os dados"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apaga os dados do tablet sem aviso redefinindo a configuração original."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Redefine o dispositivo Android TV para a configuração original e apaga os dados sem aviso."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Apaga os dados sem aviso, redefinindo o sistema de infoentretenimento para a configuração original."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados sem aviso redefinindo o smartphone para a configuração original."</string>
