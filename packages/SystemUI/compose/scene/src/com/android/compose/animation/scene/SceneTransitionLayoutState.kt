@@ -117,6 +117,9 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
         coroutineScope: CoroutineScope,
         transitionKey: TransitionKey? = null,
     ): TransitionState.Transition?
+
+    /** Immediately snap to the given [scene]. */
+    fun snapToScene(scene: SceneKey)
 }
 
 /**
@@ -734,6 +737,17 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
     override fun CoroutineScope.onChangeScene(scene: SceneKey) {
         setTargetScene(scene, coroutineScope = this)
+    }
+
+    override fun snapToScene(scene: SceneKey) {
+        // Force finish all transitions.
+        while (currentTransitions.isNotEmpty()) {
+            val transition = transitionStates[0] as TransitionState.Transition
+            finishTransition(transition, transition.currentScene)
+        }
+
+        check(transitionStates.size == 1)
+        transitionStates[0] = TransitionState.Idle(scene)
     }
 }
 
