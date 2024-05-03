@@ -103,7 +103,7 @@ constructor(
         }
         screenshotPreview = view.screenshotPreview
         thumbnailObserver.setViews(
-            view.screenshotPreview,
+            view.blurredScreenshotPreview,
             view.requireViewById(R.id.screenshot_preview_border)
         )
     }
