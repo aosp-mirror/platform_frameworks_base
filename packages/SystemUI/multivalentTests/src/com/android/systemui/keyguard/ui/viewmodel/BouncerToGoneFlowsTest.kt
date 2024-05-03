@@ -87,6 +87,7 @@ class BouncerToGoneFlowsTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun scrimAlpha_runDimissFromKeyguard_shadeExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.scrimAlpha(500.milliseconds, PRIMARY_BOUNCER))
@@ -137,6 +138,7 @@ class BouncerToGoneFlowsTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun scrimBehindAlpha_leaveShadeOpen() =
         testScope.runTest {
             val values by collectValues(underTest.scrimAlpha(500.milliseconds, PRIMARY_BOUNCER))
@@ -161,6 +163,7 @@ class BouncerToGoneFlowsTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun showAllNotifications_isTrue_whenLeaveShadeOpen() =
         testScope.runTest {
             val showAllNotifications by
@@ -177,6 +180,7 @@ class BouncerToGoneFlowsTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(339465026)
     fun showAllNotifications_isFalse_whenLeaveShadeIsNotOpen() =
         testScope.runTest {
             val showAllNotifications by
@@ -193,6 +197,7 @@ class BouncerToGoneFlowsTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @BrokenWithSceneContainer(330311871)
     fun scrimBehindAlpha_doNotLeaveShadeOpen() =
         testScope.runTest {
             val values by collectValues(underTest.scrimAlpha(500.milliseconds, PRIMARY_BOUNCER))
