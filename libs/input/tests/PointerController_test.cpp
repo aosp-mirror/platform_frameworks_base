@@ -64,11 +64,9 @@ public:
     virtual PointerIconStyle getDefaultPointerIconId() override;
     virtual PointerIconStyle getDefaultStylusIconId() override;
     virtual PointerIconStyle getCustomPointerIconId() override;
-    virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position) override;
 
     bool allResourcesAreLoaded();
     bool noResourcesAreLoaded();
-    std::optional<int32_t> getLastReportedPointerDisplayId() { return latestPointerDisplayId; }
 
 private:
     void loadPointerIconForType(SpriteIcon* icon, int32_t cursorType);
@@ -76,7 +74,6 @@ private:
     bool pointerIconLoaded{false};
     bool pointerResourcesLoaded{false};
     bool additionalMouseResourcesLoaded{false};
-    std::optional<int32_t /*displayId*/> latestPointerDisplayId;
 };
 
 void MockPointerControllerPolicyInterface::loadPointerIcon(SpriteIcon* icon, int32_t) {
@@ -144,12 +141,6 @@ void MockPointerControllerPolicyInterface::loadPointerIconForType(SpriteIcon* ic
     std::pair<float, float> hotSpot = getHotSpotCoordinatesForType(type);
     icon->hotSpotX = hotSpot.first;
     icon->hotSpotY = hotSpot.second;
-}
-
-void MockPointerControllerPolicyInterface::onPointerDisplayIdChanged(int32_t displayId,
-                                                                     const FloatPoint& /*position*/
-) {
-    latestPointerDisplayId = displayId;
 }
 
 class TestPointerController : public PointerController {
@@ -346,30 +337,6 @@ TEST_F(PointerControllerTest, doesNotGetResourcesBeforeSettingViewport) {
     EXPECT_TRUE(mPolicy->noResourcesAreLoaded());
 
     ensureDisplayViewportIsSet();
-}
-
-TEST_F(PointerControllerTest, notifiesPolicyWhenPointerDisplayChanges) {
-    EXPECT_FALSE(mPolicy->getLastReportedPointerDisplayId())
-            << "A pointer display change does not occur when PointerController is created.";
-
-    ensureDisplayViewportIsSet(ADISPLAY_ID_DEFAULT);
-
-    const auto lastReportedPointerDisplayId = mPolicy->getLastReportedPointerDisplayId();
-    ASSERT_TRUE(lastReportedPointerDisplayId)
-            << "The policy is notified of a pointer display change when the viewport is first set.";
-    EXPECT_EQ(ADISPLAY_ID_DEFAULT, *lastReportedPointerDisplayId)
-            << "Incorrect pointer display notified.";
-
-    ensureDisplayViewportIsSet(42);
-
-    EXPECT_EQ(42, *mPolicy->getLastReportedPointerDisplayId())
-            << "The policy is notified when the pointer display changes.";
-
-    // Release the PointerController.
-    mPointerController = nullptr;
-
-    EXPECT_EQ(ADISPLAY_ID_NONE, *mPolicy->getLastReportedPointerDisplayId())
-            << "The pointer display changes to invalid when PointerController is destroyed.";
 }
 
 TEST_F(PointerControllerTest, updatesSkipScreenshotFlagForTouchSpots) {

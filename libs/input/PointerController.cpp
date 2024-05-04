@@ -142,7 +142,6 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 PointerController::~PointerController() {
     mDisplayInfoListener->onPointerControllerDestroyed();
     mUnregisterWindowInfosListener(mDisplayInfoListener);
-    mContext.getPolicy()->onPointerDisplayIdChanged(ADISPLAY_ID_NONE, FloatPoint{0, 0});
 }
 
 std::mutex& PointerController::getLock() const {
@@ -313,12 +312,6 @@ void PointerController::reloadPointerResources() {
 }
 
 void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
-    struct PointerDisplayChangeArgs {
-        int32_t displayId;
-        FloatPoint cursorPosition;
-    };
-    std::optional<PointerDisplayChangeArgs> pointerDisplayChanged;
-
     { // acquire lock
         std::scoped_lock lock(getLock());
 
@@ -330,15 +323,8 @@ void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
         mCursorController.setDisplayViewport(viewport, getAdditionalMouseResources);
         if (viewport.displayId != mLocked.pointerDisplayId) {
             mLocked.pointerDisplayId = viewport.displayId;
-            pointerDisplayChanged = {viewport.displayId, mCursorController.getPosition()};
         }
     } // release lock
-
-    if (pointerDisplayChanged) {
-        // Notify the policy without holding the pointer controller lock.
-        mContext.getPolicy()->onPointerDisplayIdChanged(pointerDisplayChanged->displayId,
-                                                        pointerDisplayChanged->cursorPosition);
-    }
 }
 
 void PointerController::updatePointerIcon(PointerIconStyle iconId) {
