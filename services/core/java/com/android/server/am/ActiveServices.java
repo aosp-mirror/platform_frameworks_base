@@ -3930,7 +3930,9 @@ public final class ActiveServices {
 
             Slog.e(TAG_SERVICE, "FGS ANR'ed: " + sr);
             traceInstant("FGS ANR: ", sr);
-            mAm.appNotResponding(sr.app, tr);
+            if (sr.app != null) {
+                mAm.appNotResponding(sr.app, tr);
+            }
 
             // TODO: Can we close the ANR dialog here, if it's still shown? Currently, the ANR
             // dialog really doesn't remember the "cause" (especially if there have been multiple
