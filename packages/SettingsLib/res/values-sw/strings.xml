@@ -347,7 +347,7 @@
     <string name="debug_input_category" msgid="7349460906970849771">"Ingizo"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Uchoraji"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Utekelezaji wa maunzi ulioharakishwa"</string>
-    <string name="media_category" msgid="8122076702526144053">"Vyombo vya Habari"</string>
+    <string name="media_category" msgid="8122076702526144053">"Maudhui"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Ufuatiliaji"</string>
     <string name="strict_mode" msgid="889864762140862437">"Hali makinifu imewashwa"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"Fanya skrini imemeteke programu zinapoendeleza shughuli ndefu kwenye skrini kuu"</string>

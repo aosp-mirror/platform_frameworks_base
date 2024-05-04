@@ -367,7 +367,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"ಬಣ್ಣದ ಸ್ಥಳ ಸಿಮ್ಯುಲೇಟ್‌"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ಕುರುಹುಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ಆಡಿಯೋ ರೂಟಿಂಗ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ಆಡಿಯೋ ಸಲಕರಣೆಗಳಿಗೆ ಸ್ವಯಂ ರೂಟಿಂಗ್ ನಿಷ್ಕ್ರಿಯ."</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ಆಡಿಯೋ ಸಲಕರಣೆಗಳಿಗೆ ಸ್ವಯಂಚಾಲಿತ ರೂಟಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ."</string>
     <string name="debug_layout" msgid="1659216803043339741">"ಲೇಔಟ್ ಪರಿಮಿತಿಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ಲೇಔಟ್‌ ಡೈರೆಕ್ಷನ್ ಫೋರ್ಸ್ ಮಾಡುವಿಕೆ"</string>
@@ -378,7 +378,7 @@
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ಫೋರ್ಸ್ ಮಾಡಿ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ಅಪ್ಲಿಕೇಶನ್‌ಗಳಲ್ಲಿ 4x MSAA ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ಆಯತಾಕಾರವಲ್ಲದ ಕ್ಲಿಪ್ ಕಾರ್ಯಾಚರಣೆ ಡೀಬಗ್"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"ಪ್ರೊಫೈಲ್ HWUI ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"ಪ್ರೊಫೈಲ್ HWUI ರೆಂಡರಿಂಗ್"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ಡೀಬಗ್ ಲೇಯರ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ಡೀಬಗ್ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ GPU ಡೀಬಗ್ ಲೇಯರ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡುವುದನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ವರ್‌ಬೋಸ್ ವೆಂಡರ್ ಲಾಗಿಂಗ್‌ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>

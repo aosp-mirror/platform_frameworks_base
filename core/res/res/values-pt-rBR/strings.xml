@@ -817,7 +817,7 @@
     <string name="policylab_forceLock" msgid="7360335502968476434">"Bloquear a tela"</string>
     <string name="policydesc_forceLock" msgid="1008844760853899693">"Controla como e quando a tela é bloqueada."</string>
     <string name="policylab_wipeData" msgid="1359485247727537311">"Apagar todos os dados"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="7245372676261947507">"Apaga os dados do tablet sem aviso redefinindo a configuração original."</string>
     <string name="policydesc_wipeData" product="tv" msgid="513862488950801261">"Redefine o dispositivo Android TV para a configuração original e apaga os dados sem aviso."</string>
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Apaga os dados sem aviso, redefinindo o sistema de infoentretenimento para a configuração original."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados sem aviso redefinindo o smartphone para a configuração original."</string>
@@ -1180,7 +1180,7 @@
     <string name="not_selected" msgid="410652016565864475">"não selecionado"</string>
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 de {max} estrelas}one{# de {max} estrelas}many{# de {max} estrelas}other{# de {max} estrelas}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"em andamento"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Complete a ação usando"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Concluir a ação usando"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Concluir a ação usando %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Concluir ação"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Abrir com"</string>
