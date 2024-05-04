@@ -103,7 +103,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(scene = Scenes.Gone)
+                    ObservableTransitionState.Idle(currentScene = Scenes.Gone)
                 )
             sceneInteractor.setTransitionState(transitionState)
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
@@ -118,6 +118,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Gone,
                     toScene = Scenes.Shade,
+                    currentScene = flowOf(Scenes.Shade),
                     progress = transitionProgress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -140,7 +141,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(scene = Scenes.Lockscreen)
+                    ObservableTransitionState.Idle(currentScene = Scenes.Lockscreen)
                 )
             sceneInteractor.setTransitionState(transitionState)
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
@@ -154,7 +155,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(scene = Scenes.Shade)
+                    ObservableTransitionState.Idle(currentScene = Scenes.Shade)
                 )
             sceneInteractor.setTransitionState(transitionState)
             val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
@@ -172,6 +173,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Shade,
                     toScene = Scenes.QuickSettings,
+                    currentScene = flowOf(Scenes.QuickSettings),
                     progress = transitionProgress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

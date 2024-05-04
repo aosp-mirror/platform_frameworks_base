@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.shared.model
+package com.android.server.inputmethod.multisessiontest;
 
-import dagger.MapKey
-import kotlin.reflect.KClass
+final class TestRequestConstants {
+    private TestRequestConstants() {
+    }
 
-/**
- * Dagger map key to associate a [GridLayoutType] with its
- * [com.android.systemui.qs.panels.ui.compose.GridLayout].
- */
-@Retention(AnnotationRetention.RUNTIME)
-@MapKey
-annotation class GridLayoutTypeKey(val value: KClass<out GridLayoutType>)
+    public static final String KEY_REQUEST_CODE = "key_request_code";
+    public static final String KEY_RESULT_CODE = "key_result_code";
+
+    public static final int REQUEST_IME_STATUS = 1;
+    public static final int REPLY_IME_SHOWN = 2;
+    public static final int REPLY_IME_HIDDEN = 3;
+}

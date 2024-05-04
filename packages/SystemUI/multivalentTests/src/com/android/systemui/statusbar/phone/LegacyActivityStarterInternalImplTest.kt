@@ -259,7 +259,7 @@ class LegacyActivityStarterInternalImplTest : SysuiTestCase() {
         underTest.dismissKeyguardThenExecute({ true }, {}, false)
 
         verify(biometricUnlockController)
-            .startWakeAndUnlock(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING)
+            .startWakeAndUnlock(BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING, null)
     }
 
     @Test

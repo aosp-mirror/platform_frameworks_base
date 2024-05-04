@@ -99,7 +99,7 @@ public class PerfettoProtoLogImpl implements IProtoLog {
     private final Map<LogLevel, Integer> mDefaultLogLevelCounts = new ArrayMap<>();
     private final Map<IProtoLogGroup, Map<LogLevel, Integer>> mLogLevelCounts = new ArrayMap<>();
 
-    private final ExecutorService mBackgroundLoggingService = Executors.newCachedThreadPool();
+    private final ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
     public PerfettoProtoLogImpl(String viewerConfigFilePath,
             TreeMap<String, IProtoLogGroup> logGroups, Runnable cacheUpdater) {

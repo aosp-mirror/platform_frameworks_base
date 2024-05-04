@@ -15,8 +15,19 @@
  */
 package com.android.systemui.keyguard.shared.model
 
+/**
+ * Model [BiometricUnlockMode] with [BiometricUnlockSource].
+ *
+ * @param source can be null as a starting state or if the unlock isn't coming from a biometric (the
+ *   latter should be deprecated in the future, b/338578036)
+ */
+data class BiometricUnlockModel(
+    val mode: BiometricUnlockMode,
+    val source: BiometricUnlockSource?,
+)
+
 /** Model device wakefulness states. */
-enum class BiometricUnlockModel {
+enum class BiometricUnlockMode {
     /** Mode in which we don't need to wake up the device when we authenticate. */
     NONE,
     /**
@@ -60,12 +71,12 @@ enum class BiometricUnlockModel {
                 DISMISS_BOUNCER
             )
 
-        fun isWakeAndUnlock(model: BiometricUnlockModel): Boolean {
-            return wakeAndUnlockModes.contains(model)
+        fun isWakeAndUnlock(mode: BiometricUnlockMode): Boolean {
+            return wakeAndUnlockModes.contains(mode)
         }
 
-        fun dismissesKeyguard(model: BiometricUnlockModel): Boolean {
-            return dismissesKeyguardModes.contains(model)
+        fun dismissesKeyguard(mode: BiometricUnlockMode): Boolean {
+            return dismissesKeyguardModes.contains(mode)
         }
     }
 }

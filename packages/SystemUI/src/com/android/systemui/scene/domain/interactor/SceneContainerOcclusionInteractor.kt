@@ -108,7 +108,7 @@ constructor(
     private val ObservableTransitionState.canBeOccluded: Boolean
         get() =
             when (this) {
-                is ObservableTransitionState.Idle -> scene.canBeOccluded
+                is ObservableTransitionState.Idle -> currentScene.canBeOccluded
                 is ObservableTransitionState.Transition ->
                     fromScene.canBeOccluded && toScene.canBeOccluded
             }

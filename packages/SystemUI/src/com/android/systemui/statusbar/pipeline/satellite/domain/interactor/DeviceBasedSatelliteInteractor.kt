@@ -84,14 +84,15 @@ constructor(
         if (Flags.oemEnabledSatelliteFlag()) {
                 iconsInteractor.icons.aggregateOver(
                     selector = { intr ->
-                        combine(intr.isInService, intr.isEmergencyOnly) {
+                        combine(intr.isInService, intr.isEmergencyOnly, intr.isNonTerrestrial) {
                             isInService,
-                            isEmergencyOnly ->
-                            !isInService && !isEmergencyOnly
+                            isEmergencyOnly,
+                            isNtn ->
+                            !isInService && !(isEmergencyOnly || isNtn)
                         }
                     }
-                ) { isOosAndIsNotEmergencyOnly ->
-                    isOosAndIsNotEmergencyOnly.all { it }
+                ) { isOosAndNotEmergencyOnlyOrSatellite ->
+                    isOosAndNotEmergencyOnlyOrSatellite.all { it }
                 }
             } else {
                 flowOf(false)

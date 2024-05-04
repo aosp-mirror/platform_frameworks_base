@@ -16,16 +16,27 @@
 
 package com.android.server.inputmethod.multisessiontest;
 
-import static com.google.common.truth.Truth.assertThat;
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
+import static com.android.compatibility.common.util.concurrentuser.ConcurrentUserActivityUtils.getResponderUserId;
+import static com.android.compatibility.common.util.concurrentuser.ConcurrentUserActivityUtils.launchActivityAsUserSync;
+import static com.android.compatibility.common.util.concurrentuser.ConcurrentUserActivityUtils.sendBundleAndWaitForReply;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.KEY_REQUEST_CODE;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.KEY_RESULT_CODE;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.REPLY_IME_HIDDEN;
+import static com.android.server.inputmethod.multisessiontest.TestRequestConstants.REQUEST_IME_STATUS;
 
-import androidx.test.platform.app.InstrumentationRegistry;
+import static com.google.common.truth.Truth.assertWithMessage;
+
+import android.content.ComponentName;
+import android.os.Bundle;
+
+import androidx.test.core.app.ActivityScenario;
 
 import com.android.bedstead.harrier.BedsteadJUnit4;
 import com.android.bedstead.harrier.DeviceState;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -39,19 +50,56 @@ public final class ConcurrentMultiUserTest {
     @Rule
     public static final DeviceState sDeviceState = new DeviceState();
 
+    private static final ComponentName TEST_ACTIVITY = new ComponentName(
+            getInstrumentation().getTargetContext().getPackageName(),
+            MainActivity.class.getName());
+
+    private ActivityScenario<MainActivity> mActivityScenario;
+    private MainActivity mActivity;
+    private int mPeerUserId;
+
     @Before
-    public void doBeforeEachTest() {
-        // No op
+    public void setUp() {
+        // Launch passenger activity.
+        mPeerUserId = getResponderUserId();
+        launchActivityAsUserSync(TEST_ACTIVITY, mPeerUserId);
+
+        // Launch driver activity.
+        mActivityScenario = ActivityScenario.launch(MainActivity.class);
+        mActivityScenario.onActivity(activity -> mActivity = activity);
+    }
+
+    @After
+    public void tearDown() {
+        if (mActivityScenario != null) {
+            mActivityScenario.close();
+        }
     }
 
     @Test
-    public void behaviorBeingTested_expectedResult() {
-        // Sample test
-        Context context =
-                InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertThat(context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE)).isTrue();
-        assertThat(context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_INPUT_METHODS)).isTrue();
+    public void driverShowImeNotAffectPassenger() {
+        assertDriverImeHidden();
+        assertPassengerImeHidden();
+
+        showDriverImeAndAssert();
+        assertPassengerImeHidden();
+    }
+
+    private void assertDriverImeHidden() {
+        assertWithMessage("Driver IME should be hidden")
+                .that(mActivity.isMyImeVisible()).isFalse();
+    }
+
+    private void assertPassengerImeHidden() {
+        final Bundle bundleToSend = new Bundle();
+        bundleToSend.putInt(KEY_REQUEST_CODE, REQUEST_IME_STATUS);
+        Bundle receivedBundle = sendBundleAndWaitForReply(TEST_ACTIVITY.getPackageName(),
+                mPeerUserId, bundleToSend);
+        assertWithMessage("Passenger IME should be hidden")
+                .that(receivedBundle.getInt(KEY_RESULT_CODE)).isEqualTo(REPLY_IME_HIDDEN);
+    }
+
+    private void showDriverImeAndAssert() {
+        mActivity.showMyImeAndWait();
     }
 }

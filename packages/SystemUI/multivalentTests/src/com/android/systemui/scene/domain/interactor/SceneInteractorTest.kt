@@ -155,6 +155,7 @@ class SceneInteractorTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Lockscreen,
                     toScene = Scenes.Shade,
+                    currentScene = flowOf(Scenes.Shade),
                     progress = progress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -195,6 +196,7 @@ class SceneInteractorTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = underTest.currentScene.value,
                     toScene = Scenes.Shade,
+                    currentScene = flowOf(Scenes.Shade),
                     progress = progress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -235,6 +237,7 @@ class SceneInteractorTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Shade,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = flowOf(0.5f),
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(true),
@@ -256,6 +259,7 @@ class SceneInteractorTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Shade,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = flowOf(0.5f),
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(true),
@@ -271,6 +275,7 @@ class SceneInteractorTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Shade,
                     toScene = Scenes.Lockscreen,
+                    currentScene = flowOf(Scenes.Lockscreen),
                     progress = flowOf(0.6f),
                     isInitiatedByUserInput = true,
                     isUserInputOngoing = flowOf(false),
@@ -288,6 +293,7 @@ class SceneInteractorTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Shade,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = flowOf(0.5f),
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(true),
@@ -299,7 +305,7 @@ class SceneInteractorTest : SysuiTestCase() {
 
             assertThat(isTransitionUserInputOngoing).isTrue()
 
-            transitionState.value = ObservableTransitionState.Idle(scene = Scenes.Lockscreen)
+            transitionState.value = ObservableTransitionState.Idle(currentScene = Scenes.Lockscreen)
 
             assertThat(isTransitionUserInputOngoing).isFalse()
         }

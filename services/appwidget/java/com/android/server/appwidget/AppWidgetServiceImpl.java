@@ -2292,9 +2292,30 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         args.arg4 = requestId;
         args.argi1 = widget.appWidgetId;
 
+        if (updateViews != null && updateViews.isLegacyListRemoteViews()) {
+            mCallbackHandler.obtainMessage(
+                    CallbackHandler.MSG_NOTIFY_UPDATE_APP_WIDGET_DEFERRED,
+                    args).sendToTarget();
+            return;
+        }
+
         mCallbackHandler.obtainMessage(
                 CallbackHandler.MSG_NOTIFY_UPDATE_APP_WIDGET,
                 args).sendToTarget();
+    }
+
+    private void handleNotifyUpdateAppWidgetDeferred(Host host, IAppWidgetHost callbacks,
+            int appWidgetId, long requestId) {
+        try {
+            Slog.d(TAG, "Trying to notify widget update deferred for id: " + appWidgetId);
+            callbacks.updateAppWidgetDeferred(appWidgetId);
+            host.lastWidgetUpdateSequenceNo = requestId;
+        } catch (RemoteException re) {
+            synchronized (mLock) {
+                Slog.e(TAG, "Widget host dead: " + host.id, re);
+                host.callbacks = null;
+            }
+        }
     }
 
     private void handleNotifyUpdateAppWidget(Host host, IAppWidgetHost callbacks,
@@ -4277,6 +4298,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         public static final int MSG_NOTIFY_PROVIDERS_CHANGED = 3;
         public static final int MSG_NOTIFY_VIEW_DATA_CHANGED = 4;
         public static final int MSG_NOTIFY_APP_WIDGET_REMOVED = 5;
+        public static final int MSG_NOTIFY_UPDATE_APP_WIDGET_DEFERRED = 6;
 
         public CallbackHandler(Looper looper) {
             super(looper, null, false);
@@ -4339,6 +4361,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
                     handleNotifyAppWidgetViewDataChanged(host, callbacks, appWidgetId, viewId,
                             requestId);
+                } break;
+
+                case MSG_NOTIFY_UPDATE_APP_WIDGET_DEFERRED: {
+                    SomeArgs args = (SomeArgs) message.obj;
+                    Host host = (Host) args.arg1;
+                    IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
+                    long requestId = (Long) args.arg4;
+                    final int appWidgetId = args.argi1;
+                    args.recycle();
+
+                    handleNotifyUpdateAppWidgetDeferred(host, callbacks, appWidgetId, requestId);
                 } break;
             }
         }

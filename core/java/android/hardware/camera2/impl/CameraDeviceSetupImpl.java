@@ -134,7 +134,8 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
             try {
                 CameraMetadataNative metadata = cameraService.getSessionCharacteristics(
                         mCameraId, mTargetSdkVersion,
-                        CameraManager.shouldOverrideToPortrait(mContext), sessionConfig,
+                        CameraManager.getRotationOverride(mContext),
+                        sessionConfig,
                         mContext.getDeviceId(),
                         mCameraManager.getDevicePolicyFromContext(mContext));
 

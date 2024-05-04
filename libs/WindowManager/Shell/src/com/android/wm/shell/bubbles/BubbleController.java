@@ -1162,12 +1162,29 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     /**
-     * Update expanded state when a single bubble is dragged in Launcher.
+     * A bubble is being dragged in Launcher.
      * Will be called only when bubble bar is expanded.
-     * @param bubbleKey key of the bubble to collapse/expand
-     * @param isBeingDragged whether the bubble is being dragged
+     *
+     * @param bubbleKey key of the bubble being dragged
      */
-    public void onBubbleDrag(String bubbleKey, boolean isBeingDragged) {
+    public void startBubbleDrag(String bubbleKey) {
+        onBubbleDrag(bubbleKey, true /* isBeingDragged */);
+    }
+
+    /**
+     * A bubble is no longer being dragged in Launcher. As was released in given location.
+     * Will be called only when bubble bar is expanded.
+     *
+     * @param bubbleKey key of the bubble being dragged
+     * @param location  location where bubble was released
+     */
+    public void stopBubbleDrag(String bubbleKey, BubbleBarLocation location) {
+        mBubblePositioner.setBubbleBarLocation(location);
+        onBubbleDrag(bubbleKey, false /* isBeingDragged */);
+    }
+
+    private void onBubbleDrag(String bubbleKey, boolean isBeingDragged) {
+        // TODO(b/330585402): collapse stack if any bubble is dragged
         if (mBubbleData.getSelectedBubble() != null
                 && mBubbleData.getSelectedBubble().getKey().equals(bubbleKey)) {
             // Should collapse/expand only if equals to selected bubble.
@@ -2329,8 +2346,13 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void onBubbleDrag(String bubbleKey, boolean isBeingDragged) {
-            mMainExecutor.execute(() -> mController.onBubbleDrag(bubbleKey, isBeingDragged));
+        public void startBubbleDrag(String bubbleKey) {
+            mMainExecutor.execute(() -> mController.startBubbleDrag(bubbleKey));
+        }
+
+        @Override
+        public void stopBubbleDrag(String bubbleKey, BubbleBarLocation location) {
+            mMainExecutor.execute(() -> mController.stopBubbleDrag(bubbleKey, location));
         }
 
         @Override

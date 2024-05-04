@@ -24,6 +24,7 @@ import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.traces.component.ComponentNameMatcher
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
@@ -89,6 +90,11 @@ class ShowImeOnUnlockScreenTest(flicker: LegacyFlickerTest) : BaseTest(flicker) 
     @Test
     @Ignore("Not applicable to this CUJ. Display turns off during transition")
     override fun taskBarWindowIsAlwaysVisible() {}
+
+    @FlakyTest(bugId = 338178020)
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

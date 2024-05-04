@@ -18,7 +18,9 @@ package com.android.server.display.brightness;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.PowerManager;
 import android.util.IndentingPrintWriter;
@@ -31,6 +33,8 @@ import com.android.server.display.AutomaticBrightnessController;
 import com.android.server.display.BrightnessMappingStrategy;
 import com.android.server.display.BrightnessSetting;
 import com.android.server.display.DisplayBrightnessState;
+import com.android.server.display.DisplayDeviceConfig;
+import com.android.server.display.brightness.strategy.AutoBrightnessFallbackStrategy;
 import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy2;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.feature.DisplayManagerFlags;
@@ -103,7 +107,8 @@ public final class DisplayBrightnessController {
     // The controller for the automatic brightness level.
     // TODO(b/265415257): Move to the automatic brightness strategy
     @Nullable
-    private AutomaticBrightnessController mAutomaticBrightnessController;
+    @VisibleForTesting
+    AutomaticBrightnessController mAutomaticBrightnessController;
 
     /**
      * The constructor of DisplayBrightnessController.
@@ -332,14 +337,16 @@ public final class DisplayBrightnessController {
     }
 
     /**
-     * Set the {@link AutomaticBrightnessController} which is needed to perform nit-to-float-scale
-     * conversion.
-     * @param automaticBrightnessController The ABC
+     * Sets up the auto brightness and the relevant state for the associated display
      */
-    public void setAutomaticBrightnessController(
-            AutomaticBrightnessController automaticBrightnessController) {
-        mAutomaticBrightnessController = automaticBrightnessController;
-        loadNitBasedBrightnessSetting();
+    public void setUpAutoBrightness(AutomaticBrightnessController automaticBrightnessController,
+            SensorManager sensorManager,
+            DisplayDeviceConfig displayDeviceConfig, Handler handler,
+            BrightnessMappingStrategy brightnessMappingStrategy, boolean isEnabled,
+            int leadDisplayId) {
+        setAutomaticBrightnessController(automaticBrightnessController);
+        setUpAutoBrightnessFallbackStrategy(sensorManager, displayDeviceConfig, handler,
+                brightnessMappingStrategy, isEnabled, leadDisplayId);
     }
 
     /**
@@ -403,6 +410,17 @@ public final class DisplayBrightnessController {
     public void stop() {
         if (mBrightnessSetting != null) {
             mBrightnessSetting.unregisterListener(mBrightnessSettingListener);
+        }
+        AutoBrightnessFallbackStrategy autoBrightnessFallbackStrategy =
+                getAutoBrightnessFallbackStrategy();
+        if (autoBrightnessFallbackStrategy != null) {
+            autoBrightnessFallbackStrategy.stop();
+        }
+    }
+
+    private AutoBrightnessFallbackStrategy getAutoBrightnessFallbackStrategy() {
+        synchronized (mLock) {
+            return mDisplayBrightnessStrategySelector.getAutoBrightnessFallbackStrategy();
         }
     }
 
@@ -480,6 +498,33 @@ public final class DisplayBrightnessController {
     DisplayBrightnessStrategy getCurrentDisplayBrightnessStrategy() {
         synchronized (mLock) {
             return mDisplayBrightnessStrategy;
+        }
+    }
+
+    /**
+     * Set the {@link AutomaticBrightnessController} which is needed to perform nit-to-float-scale
+     * conversion.
+     * @param automaticBrightnessController The ABC
+     */
+    @VisibleForTesting
+    void setAutomaticBrightnessController(
+            AutomaticBrightnessController automaticBrightnessController) {
+        mAutomaticBrightnessController = automaticBrightnessController;
+        getAutomaticBrightnessStrategy()
+                .setAutomaticBrightnessController(automaticBrightnessController);
+        loadNitBasedBrightnessSetting();
+    }
+
+    private void setUpAutoBrightnessFallbackStrategy(SensorManager sensorManager,
+            DisplayDeviceConfig displayDeviceConfig, Handler handler,
+            BrightnessMappingStrategy brightnessMappingStrategy, boolean isEnabled,
+            int leadDisplayId) {
+        AutoBrightnessFallbackStrategy autoBrightnessFallbackStrategy =
+                getAutoBrightnessFallbackStrategy();
+        if (autoBrightnessFallbackStrategy != null) {
+            autoBrightnessFallbackStrategy.setupAutoBrightnessFallbackSensor(
+                    sensorManager, displayDeviceConfig, handler, brightnessMappingStrategy,
+                    isEnabled, leadDisplayId);
         }
     }
 

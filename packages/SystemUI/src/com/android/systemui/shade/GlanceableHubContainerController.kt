@@ -229,7 +229,9 @@ constructor(
         // the gesture area doesn't overlap with widgets.
         // TODO(b/323035776): adjust gesture areaa for portrait mode
         containerView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
+            // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and not
+            // occluded.
+            lifecycleRegistry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 val exclusionRect =
                     Rect(
                         0,
@@ -242,12 +244,19 @@ constructor(
             }
         }
 
+        // Listen to bouncer visibility directly as these flows become true as soon as any portion
+        // of the bouncers are visible when the transition starts. The keyguard transition state
+        // only changes once transitions are fully finished, which would mean touches during a
+        // transition to the bouncer would be incorrectly intercepted by the hub.
         collectFlow(
             containerView,
-            keyguardTransitionInteractor.isFinishedInStateWhere(KeyguardState::isBouncerState),
+            or(
+                keyguardInteractor.primaryBouncerShowing,
+                keyguardInteractor.alternateBouncerShowing
+            ),
             {
                 anyBouncerShowing = it
-                updateLifecycleState()
+                updateTouchHandlingState()
             }
         )
         collectFlow(
@@ -255,7 +264,7 @@ constructor(
             communalInteractor.isCommunalShowing,
             {
                 hubShowing = it
-                updateLifecycleState()
+                updateTouchHandlingState()
             }
         )
         collectFlow(
@@ -263,7 +272,7 @@ constructor(
             and(shadeInteractor.isAnyFullyExpanded, not(shadeInteractor.isUserInteracting)),
             {
                 shadeShowing = it
-                updateLifecycleState()
+                updateTouchHandlingState()
             }
         )
         collectFlow(containerView, keyguardInteractor.isDreaming, { isDreaming = it })
@@ -276,13 +285,22 @@ constructor(
     /**
      * Updates the lifecycle stored by the [lifecycleRegistry] to control when the [touchMonitor]
      * should listen for and intercept top and bottom swipes.
+     *
+     * Also clears gesture exclusion zones when the hub is occluded or gone.
      */
-    private fun updateLifecycleState() {
+    private fun updateTouchHandlingState() {
         val shouldInterceptGestures = hubShowing && !(shadeShowing || anyBouncerShowing)
         if (shouldInterceptGestures) {
             lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         } else {
+            // Hub is either occluded or no longer showing, turn off touch handling.
             lifecycleRegistry.currentState = Lifecycle.State.STARTED
+
+            // Clear exclusion rects if the hub is not showing or is covered, so we don't interfere
+            // with back gestures when the bouncer or shade. We do this here instead of with
+            // repeatOnLifecycle as repeatOnLifecycle does not run when going from RESUMED back to
+            // STARTED, only when going from CREATED to STARTED.
+            communalContainerView!!.systemGestureExclusionRects = emptyList()
         }
     }
 

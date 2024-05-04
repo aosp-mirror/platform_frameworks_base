@@ -69,6 +69,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = MutableStateFlow(.3f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -98,6 +99,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -122,6 +124,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.QuickSettings,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = MutableStateFlow(.3f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -220,6 +223,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = key,
+                        currentScene = flowOf(key),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -258,6 +262,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = key,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -292,6 +297,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Gone,
                         toScene = Scenes.QuickSettings,
+                        currentScene = flowOf(Scenes.QuickSettings),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -315,6 +321,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Shade,
                         toScene = Scenes.QuickSettings,
+                        currentScene = flowOf(Scenes.QuickSettings),
                         progress = MutableStateFlow(.1f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -341,6 +348,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = Scenes.Shade,
+                        currentScene = flowOf(Scenes.Shade),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -396,6 +404,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = key,
+                        currentScene = flowOf(key),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -434,6 +443,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = key,
+                        currentScene = flowOf(key),
                         progress = progress,
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),
@@ -472,6 +482,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = key,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -510,6 +521,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = key,
                         toScene = Scenes.Lockscreen,
+                        currentScene = flowOf(Scenes.Lockscreen),
                         progress = progress,
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),
@@ -547,6 +559,7 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = Scenes.Lockscreen,
                         toScene = Scenes.QuickSettings,
+                        currentScene = flowOf(Scenes.QuickSettings),
                         progress = MutableStateFlow(0f),
                         isInitiatedByUserInput = true,
                         isUserInputOngoing = flowOf(false),

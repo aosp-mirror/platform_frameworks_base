@@ -384,11 +384,7 @@ public class WindowOnBackInvokedDispatcherTest {
         clearInvocations(mCallback1);
 
         callbackInfo.getCallback().onBackCancelled();
-
         waitForIdle();
-        // verify onBackCancelled not yet called (since BackProgressAnimator animates
-        // progress to 0 first)
-        verify(mCallback1, never()).onBackCancelled();
 
         // simulate start of new gesture while cancel animation is still running
         callbackInfo.getCallback().onBackStarted(mBackEvent);

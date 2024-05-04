@@ -24,7 +24,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
@@ -99,7 +99,7 @@ constructor(
                         canDismissLockScreen,
                         primaryBouncerShowing) ->
                     startTransitionTo(
-                        if (isWakeAndUnlock(biometricUnlockState)) {
+                        if (isWakeAndUnlock(biometricUnlockState.mode)) {
                             KeyguardState.GONE
                         } else if (canDismissLockScreen) {
                             KeyguardState.GONE
@@ -142,7 +142,7 @@ constructor(
                     if (
                         !maybeStartTransitionToOccludedOrInsecureCamera() &&
                             // Handled by dismissFromDozing().
-                            !isWakeAndUnlock(biometricUnlockState)
+                            !isWakeAndUnlock(biometricUnlockState.mode)
                     ) {
                         startTransitionTo(
                             if (canDismissLockscreen) {

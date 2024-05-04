@@ -480,9 +480,11 @@ public class LineBreaker {
         }
     }
 
-    private static final NativeAllocationRegistry sRegistry =
-            NativeAllocationRegistry.createMalloced(
-            LineBreaker.class.getClassLoader(), nGetReleaseFunc());
+    private static class NoImagePreloadHolder {
+        private static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                        LineBreaker.class.getClassLoader(), nGetReleaseFunc());
+    }
 
     private final long mNativePtr;
 
@@ -494,7 +496,7 @@ public class LineBreaker {
             @Nullable int[] indents, boolean useBoundsForWidth) {
         mNativePtr = nInit(breakStrategy, hyphenationFrequency,
                 justify == JUSTIFICATION_MODE_INTER_WORD, indents, useBoundsForWidth);
-        sRegistry.registerNativeAllocation(this, mNativePtr);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativePtr);
     }
 
     /**

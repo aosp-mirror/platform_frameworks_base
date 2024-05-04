@@ -68,6 +68,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
 
 /**
@@ -199,6 +200,10 @@ public class RotationButtonController {
         return mContext;
     }
 
+    /**
+     * We should pass single threaded executor (rather than {@link ThreadPoolExecutor}) as we will
+     * make binder calls on that executor and ordering is vital.
+     */
     public void setBgExecutor(Executor bgExecutor) {
         mBgExecutor = bgExecutor;
     }
@@ -230,24 +235,21 @@ public class RotationButtonController {
         mListenersRegistered = true;
 
         mBgExecutor.execute(() -> {
+            if (registerRotationWatcher) {
+                try {
+                    WindowManagerGlobal.getWindowManagerService()
+                            .watchRotation(mRotationWatcher, DEFAULT_DISPLAY);
+                    mRotationWatcherRegistered = true;
+                } catch (IllegalArgumentException e) {
+                    Log.w(TAG, "RegisterListeners for the display failed", e);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RegisterListeners caught a RemoteException", e);
+                }
+            }
             final Intent intent = mContext.registerReceiver(mDockedReceiver,
                     new IntentFilter(Intent.ACTION_DOCK_EVENT));
             mContext.getMainExecutor().execute(() -> updateDockedState(intent));
         });
-
-        if (registerRotationWatcher) {
-            try {
-                WindowManagerGlobal.getWindowManagerService()
-                        .watchRotation(mRotationWatcher, DEFAULT_DISPLAY);
-                mRotationWatcherRegistered = true;
-            } catch (IllegalArgumentException e) {
-                mListenersRegistered = false;
-                Log.w(TAG, "RegisterListeners for the display failed", e);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RegisterListeners caught a RemoteException", e);
-                return;
-            }
-        }
 
         TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
     }
@@ -265,17 +267,16 @@ public class RotationButtonController {
             } catch (IllegalArgumentException e) {
                 Log.e(TAG, "Docked receiver already unregistered", e);
             }
-        });
 
-        if (mRotationWatcherRegistered) {
-            try {
-                WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(
-                        mRotationWatcher);
-            } catch (RemoteException e) {
-                Log.e(TAG, "UnregisterListeners caught a RemoteException", e);
-                return;
+            if (mRotationWatcherRegistered) {
+                try {
+                    WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(
+                            mRotationWatcher);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "UnregisterListeners caught a RemoteException", e);
+                }
             }
-        }
+        });
 
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
     }

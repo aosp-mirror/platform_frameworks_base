@@ -18,7 +18,7 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
+import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -46,10 +46,9 @@ constructor(
 ) {
     val deviceEntryFromBiometricSource: Flow<BiometricUnlockSource> =
         keyguardInteractor.biometricUnlockState
-            .filter { BiometricUnlockModel.dismissesKeyguard(it) }
-            .sample(
-                keyguardInteractor.biometricUnlockSource.filterNotNull(),
-            )
+            .filter { BiometricUnlockMode.dismissesKeyguard(it.mode) }
+            .map { it.source }
+            .filterNotNull()
 
     private val attemptEnterDeviceFromDeviceEntryIcon: MutableSharedFlow<Unit> = MutableSharedFlow()
     val deviceEntryFromDeviceEntryIcon: Flow<Unit> =

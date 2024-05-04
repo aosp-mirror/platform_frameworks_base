@@ -33,7 +33,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
-import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
@@ -90,6 +89,7 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractorProvider: Provider<SceneInteractor>,
     private val fromGoneTransitionInteractor: Provider<FromGoneTransitionInteractor>,
+    private val fromLockscreenTransitionInteractor: Provider<FromLockscreenTransitionInteractor>,
     sharedNotificationContainerInteractor: Provider<SharedNotificationContainerInteractor>,
     @Application applicationScope: CoroutineScope,
 ) {
@@ -234,13 +234,7 @@ constructor(
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
 
-    /** Source of the most recent biometric unlock, such as fingerprint or face. */
-    val biometricUnlockSource: Flow<BiometricUnlockSource?> = repository.biometricUnlockSource
-
-    /**
-     * Observable for [BiometricUnlockModel] when biometrics like face or any fingerprint (rear,
-     * side, under display) is used to unlock the device.
-     */
+    /** Observable for [BiometricUnlockModel] when biometrics are used to unlock the device. */
     val biometricUnlockState: Flow<BiometricUnlockModel> = repository.biometricUnlockState
 
     /** Keyguard is present and is not occluded. */
@@ -307,19 +301,27 @@ constructor(
         configurationInteractor
             .dimensionPixelSize(R.dimen.keyguard_translate_distance_on_swipe_up)
             .flatMapLatest { translationDistance ->
-                combine(
+                combineTransform(
                     shadeRepository.legacyShadeExpansion.onStart { emit(0f) },
                     keyguardTransitionInteractor.transitionValue(GONE).onStart { emit(0f) },
                 ) { legacyShadeExpansion, goneValue ->
-                    if (goneValue == 1f || legacyShadeExpansion == 0f) {
+                    if (goneValue == 1f || (goneValue == 0f && legacyShadeExpansion == 0f)) {
                         // Reset the translation value
-                        0f
-                    } else {
-                        // On swipe up, translate the keyguard to reveal the bouncer
-                        MathUtils.lerp(
-                            translationDistance,
-                            0,
-                            Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(legacyShadeExpansion)
+                        emit(0f)
+                    } else if (legacyShadeExpansion > 0f && legacyShadeExpansion < 1f) {
+                        // On swipe up, translate the keyguard to reveal the bouncer, OR a GONE
+                        // transition is running, which means this is a swipe to dismiss. Values of
+                        // 0f and 1f need to be ignored in the legacy shade expansion. These can
+                        // flip arbitrarily as the legacy shade is reset, and would cause the
+                        // translation value to jump around unexpectedly.
+                        emit(
+                            MathUtils.lerp(
+                                translationDistance,
+                                0,
+                                Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(
+                                    legacyShadeExpansion
+                                ),
+                            )
                         )
                     }
                 }
@@ -415,6 +417,11 @@ constructor(
     /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
     fun showKeyguard() {
         fromGoneTransitionInteractor.get().showKeyguard()
+    }
+
+    /** Temporary shim, until [KeyguardWmStateRefactor] is enabled */
+    fun dismissKeyguard() {
+        fromLockscreenTransitionInteractor.get().dismissKeyguard()
     }
 
     companion object {

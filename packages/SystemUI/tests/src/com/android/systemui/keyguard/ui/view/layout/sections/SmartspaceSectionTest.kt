@@ -64,6 +64,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     private val clockShouldBeCentered = MutableStateFlow(false)
     private val hasCustomWeatherDataDisplay = MutableStateFlow(false)
+    private val isWeatherVisibleFlow = MutableStateFlow(false)
 
     @Before
     fun setup() {
@@ -89,7 +90,7 @@ class SmartspaceSectionTest : SysuiTestCase() {
             .thenReturn(hasCustomWeatherDataDisplay)
         whenever(keyguardClockViewModel.clockShouldBeCentered).thenReturn(clockShouldBeCentered)
         whenever(keyguardSmartspaceViewModel.isSmartspaceEnabled).thenReturn(true)
-
+        whenever(keyguardSmartspaceViewModel.isWeatherVisible).thenReturn(isWeatherVisibleFlow)
         constraintSet = ConstraintSet()
     }
 
@@ -124,7 +125,6 @@ class SmartspaceSectionTest : SysuiTestCase() {
     @Test
     fun testConstraintsWhenNotHasCustomWeatherDataDisplay() {
         whenever(keyguardSmartspaceViewModel.isDateWeatherDecoupled).thenReturn(true)
-        hasCustomWeatherDataDisplay.value = false
         underTest.addViews(constraintLayout)
         underTest.applyConstraints(constraintSet)
         assertWeatherSmartspaceConstrains(constraintSet)
@@ -149,13 +149,12 @@ class SmartspaceSectionTest : SysuiTestCase() {
 
     @Test
     fun testNormalDateWeatherVisibility() {
-        hasCustomWeatherDataDisplay.value = false
-        whenever(keyguardSmartspaceViewModel.isWeatherEnabled).thenReturn(true)
+        isWeatherVisibleFlow.value = true
         underTest.addViews(constraintLayout)
         underTest.applyConstraints(constraintSet)
         assertThat(constraintSet.getVisibility(weatherView.id)).isEqualTo(VISIBLE)
 
-        whenever(keyguardSmartspaceViewModel.isWeatherEnabled).thenReturn(false)
+        isWeatherVisibleFlow.value = false
         underTest.applyConstraints(constraintSet)
         assertThat(constraintSet.getVisibility(weatherView.id)).isEqualTo(GONE)
         assertThat(constraintSet.getVisibility(dateView.id)).isEqualTo(VISIBLE)

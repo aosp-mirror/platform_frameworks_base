@@ -35,6 +35,7 @@ import kotlin.math.max
 class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
     lateinit var screenshotPreview: ImageView
+    lateinit var blurredScreenshotPreview: ImageView
     private lateinit var screenshotStatic: ViewGroup
     var onTouchInterceptListener: ((MotionEvent) -> Boolean)? = null
 
@@ -48,6 +49,7 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
         // Get focus so that the key events go to the layout.
         isFocusableInTouchMode = true
         screenshotPreview = requireViewById(R.id.screenshot_preview)
+        blurredScreenshotPreview = requireViewById(R.id.screenshot_preview_blur)
         screenshotStatic = requireViewById(R.id.screenshot_static)
         actionsContainerBackground = requireViewById(R.id.actions_container_background)
         dismissButton = requireViewById(R.id.screenshot_dismiss_button)
@@ -75,15 +77,14 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
     fun updateInsets(insets: WindowInsets) {
         val orientation = mContext.resources.configuration.orientation
         val inPortrait = orientation == Configuration.ORIENTATION_PORTRAIT
-        val p = screenshotStatic.layoutParams as LayoutParams
         val cutout = insets.displayCutout
         val navBarInsets = insets.getInsets(WindowInsets.Type.navigationBars())
         if (cutout == null) {
-            p.setMargins(0, 0, 0, navBarInsets.bottom)
+            screenshotStatic.setPadding(0, 0, 0, navBarInsets.bottom)
         } else {
             val waterfall = cutout.waterfallInsets
             if (inPortrait) {
-                p.setMargins(
+                screenshotStatic.setPadding(
                     waterfall.left,
                     max(cutout.safeInsetTop.toDouble(), waterfall.top.toDouble()).toInt(),
                     waterfall.right,
@@ -94,7 +95,7 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
                         .toInt()
                 )
             } else {
-                p.setMargins(
+                screenshotStatic.setPadding(
                     max(cutout.safeInsetLeft.toDouble(), waterfall.left.toDouble()).toInt(),
                     waterfall.top,
                     max(cutout.safeInsetRight.toDouble(), waterfall.right.toDouble()).toInt(),
@@ -102,8 +103,6 @@ class ScreenshotShelfView(context: Context, attrs: AttributeSet? = null) :
                 )
             }
         }
-        screenshotStatic.layoutParams = p
-        screenshotStatic.requestLayout()
     }
 
     private fun getSwipeRegion(): Region {

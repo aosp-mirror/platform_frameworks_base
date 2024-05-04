@@ -70,8 +70,7 @@ fun View.repeatWhenAttached(
     // dispatcher to use. We don't want it to run on the Dispatchers.Default thread pool as
     // default behavior. Instead, we want it to run on the view's UI thread since the user will
     // presumably want to call view methods that require being called from said UI thread.
-    val lifecycleCoroutineContext =
-        Dispatchers.Main + createCoroutineTracingContext() + coroutineContext
+    val lifecycleCoroutineContext = MAIN_DISPATCHER_SINGLETON + coroutineContext
     val traceName =
         if (Compile.IS_DEBUG && coroutineTracing()) {
             inferTraceSectionName()
@@ -205,17 +204,28 @@ private fun inferTraceSectionName(): String {
             StackWalker.getInstance().walk { stream ->
                 stream.filter(::isFrameInteresting).limit(5).findFirst()
             }
-        if (interestingFrame.isPresent) {
+        return if (interestingFrame.isPresent) {
             val f = interestingFrame.get()
-            return "${f.className}#${f.methodName}:${f.lineNumber} [$DEFAULT_TRACE_NAME]"
+            "${f.className}#${f.methodName}:${f.lineNumber} [$DEFAULT_TRACE_NAME]"
         } else {
-            return DEFAULT_TRACE_NAME
+            DEFAULT_TRACE_NAME
         }
     } finally {
         Trace.traceEnd(Trace.TRACE_TAG_APP)
     }
 }
 
+/**
+ * Even though there is only has one usage of `Dispatchers.Main` in this file, we cache it in a
+ * top-level property so that we do not unnecessarily create new `CoroutineContext` objects for
+ * tracing on each call to [repeatWhenAttached]. It is okay to reuse a single instance of the
+ * tracing context because it is copied for its children.
+ *
+ * Also, ideally, we would use the injected `@Main CoroutineDispatcher`, but [repeatWhenAttached] is
+ * an extension function, and plumbing dagger-injected instances for static usage has little
+ * benefit.
+ */
+private val MAIN_DISPATCHER_SINGLETON = Dispatchers.Main + createCoroutineTracingContext()
 private const val DEFAULT_TRACE_NAME = "repeatWhenAttached"
 private const val CURRENT_CLASS_NAME = "com.android.systemui.lifecycle.RepeatWhenAttachedKt"
 private const val JAVA_ADAPTER_CLASS_NAME = "com.android.systemui.util.kotlin.JavaAdapterKt"

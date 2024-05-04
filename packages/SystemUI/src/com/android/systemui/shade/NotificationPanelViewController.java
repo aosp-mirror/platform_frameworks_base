@@ -25,6 +25,7 @@ import static com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.Flags.predictiveBackAnimateShade;
+import static com.android.systemui.Flags.shadeCollapseActivityLaunchFix;
 import static com.android.systemui.Flags.smartspaceRelocateToBottom;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
@@ -4102,7 +4103,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public boolean canBeCollapsed() {
-        return !isFullyCollapsed() && !isTracking() && !isClosing();
+        return !isFullyCollapsed() && !isTracking() && !isClosing()
+                // Don't try to collapse if on keyguard, as the expansion fraction is 1 in this
+                // case.
+                && !(shadeCollapseActivityLaunchFix() && mExpandedFraction == 1f
+                && mBarState == KEYGUARD);
     }
 
     public void instantCollapse() {

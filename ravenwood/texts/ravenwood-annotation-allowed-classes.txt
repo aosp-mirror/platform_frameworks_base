@@ -236,7 +236,11 @@ android.text.TextUtils$SimpleStringSplitter
 
 android.accounts.Account
 
+android.graphics.Bitmap$Config
 android.graphics.Insets
+android.graphics.Interpolator
+android.graphics.Matrix
+android.graphics.Path
 android.graphics.Point
 android.graphics.PointF
 android.graphics.Rect

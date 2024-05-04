@@ -39,11 +39,13 @@ interface IBubbles {
 
     oneway void collapseBubbles() = 6;
 
-    oneway void onBubbleDrag(in String key, in boolean isBeingDragged) = 7;
+    oneway void startBubbleDrag(in String key) = 7;
 
     oneway void showUserEducation(in int positionX, in int positionY) = 8;
 
     oneway void setBubbleBarLocation(in BubbleBarLocation location) = 9;
 
     oneway void setBubbleBarBounds(in Rect bubbleBarBounds) = 10;
+
+    oneway void stopBubbleDrag(in String key, in BubbleBarLocation location) = 11;
 }

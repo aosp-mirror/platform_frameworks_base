@@ -1030,7 +1030,7 @@ public class AutomaticBrightnessControllerTest {
     }
 
     @Test
-    public void testBrightnessBasedOnLastObservedLux() throws Exception {
+    public void testBrightnessBasedOnLastUsedLux() throws Exception {
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
         verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
@@ -1054,7 +1054,7 @@ public class AutomaticBrightnessControllerTest {
                 /* userChanged= */ false, DisplayPowerRequest.POLICY_BRIGHT, Display.STATE_ON,
                 /* shouldResetShortTermModel= */ true);
         assertEquals(normalizedBrightness,
-                mController.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                mController.getAutomaticScreenBrightnessBasedOnLastUsedLux(
                         /* brightnessEvent= */ null), EPSILON);
     }
 
@@ -1090,7 +1090,7 @@ public class AutomaticBrightnessControllerTest {
                 mController.getAutomaticScreenBrightness(
                         /* brightnessEvent= */ null), EPSILON);
         assertEquals(normalizedBrightness * DOZE_SCALE_FACTOR,
-                mController.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                mController.getAutomaticScreenBrightnessBasedOnLastUsedLux(
                         /* brightnessEvent= */ null), EPSILON);
     }
 
@@ -1128,7 +1128,7 @@ public class AutomaticBrightnessControllerTest {
         assertEquals(normalizedBrightness,
                 mController.getAutomaticScreenBrightness(/* brightnessEvent= */ null), EPSILON);
         assertEquals(normalizedBrightness,
-                mController.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                mController.getAutomaticScreenBrightnessBasedOnLastUsedLux(
                         /* brightnessEvent= */ null), EPSILON);
     }
 
@@ -1163,7 +1163,7 @@ public class AutomaticBrightnessControllerTest {
         assertEquals(normalizedBrightness,
                 mController.getAutomaticScreenBrightness(/* brightnessEvent= */ null), EPSILON);
         assertEquals(normalizedBrightness,
-                mController.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                mController.getAutomaticScreenBrightnessBasedOnLastUsedLux(
                         /* brightnessEvent= */ null), EPSILON);
     }
 }

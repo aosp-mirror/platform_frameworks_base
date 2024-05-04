@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tileimpl
 
 import android.content.Context
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
@@ -472,6 +473,31 @@ class QSTileViewImplTest : SysuiTestCase() {
         // THEN the view binder does not bind the view and no effect is initialized
         assertThat(tileView.isLongPressEffectBound).isFalse()
         assertThat(tileView.isLongPressEffectInitialized).isFalse()
+    }
+
+    @Test
+    fun onPrepareForLaunch_paddingForLaunchAnimationIsConfigured() {
+        val startingWidth = 100
+        val startingHeight = 50
+        val deltaWidth = (QSTileViewImpl.LONG_PRESS_EFFECT_WIDTH_SCALE - 1f) * startingWidth
+        val deltaHeight = (QSTileViewImpl.LONG_PRESS_EFFECT_HEIGHT_SCALE - 1f) * startingHeight
+
+        // GIVEN that long-press effect properties are initialized
+        tileView.initializeLongPressProperties(startingHeight, startingWidth)
+
+        // WHEN the tile is preparing for the launch animation
+        tileView.prepareForLaunch()
+
+        // THE animation padding corresponds to the tile's growth due to the effect
+        val padding = tileView.getPaddingForLaunchAnimation()
+        assertThat(padding).isEqualTo(
+            Rect(
+                -deltaWidth.toInt() / 2,
+                -deltaHeight.toInt() / 2,
+                deltaWidth.toInt() / 2,
+                deltaHeight.toInt() / 2,
+            )
+        )
     }
 
     class FakeTileView(

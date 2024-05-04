@@ -17,9 +17,10 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.qs.panels.domain.interactor.gridLayoutMap
 import com.android.systemui.qs.panels.domain.interactor.gridLayoutTypeInteractor
 import com.android.systemui.qs.panels.domain.interactor.iconTilesInteractor
-import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 
@@ -27,8 +28,9 @@ val Kosmos.tileGridViewModel by
     Kosmos.Fixture {
         TileGridViewModel(
             gridLayoutTypeInteractor,
-            mapOf(Pair(InfiniteGridLayoutType::class.java, InfiniteGridLayout())),
+            gridLayoutMap,
             currentTilesInteractor,
-            iconTilesInteractor
+            InfiniteGridLayout(iconTilesInteractor),
+            applicationCoroutineScope,
         )
     }

@@ -124,8 +124,7 @@ final class HdmiControlShellCommand extends ShellCommand {
                 return historySize(pw);
         }
 
-        getErrPrintWriter().println("Unhandled command: " + cmd);
-        return 1;
+        return handleDefaultCommands(cmd);
     }
 
     private int deviceSelect(PrintWriter pw) throws RemoteException {

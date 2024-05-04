@@ -851,6 +851,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mHandler.postAtTime(() -> {
             boolean changed = false;
+
+            if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {
+                changed = true;
+                mIsEnabled = isEnabled;
+                mIsInTransition = isInTransition;
+            }
+
             if (mDisplayDevice != device) {
                 changed = true;
                 mDisplayDevice = device;
@@ -874,11 +881,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         config.getTempSensor(),
                         mThermalBrightnessThrottlingDataId,
                         mUniqueDisplayId);
-            }
-            if (mIsEnabled != isEnabled || mIsInTransition != isInTransition) {
-                changed = true;
-                mIsEnabled = isEnabled;
-                mIsInTransition = isInTransition;
             }
 
             mIsDisplayInternal = isDisplayInternal;
@@ -1113,29 +1115,29 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     mBrightnessThrottler, mDisplayDeviceConfig.getAmbientHorizonShort(),
                     mDisplayDeviceConfig.getAmbientHorizonLong(), userLux, userNits,
                     mBrightnessClamperController);
-            mDisplayBrightnessController.setAutomaticBrightnessController(
-                    mAutomaticBrightnessController);
-
-            mAutomaticBrightnessStrategy
-                    .setAutomaticBrightnessController(mAutomaticBrightnessController);
+            mDisplayBrightnessController.setUpAutoBrightness(
+                    mAutomaticBrightnessController, mSensorManager, mDisplayDeviceConfig, mHandler,
+                    defaultModeBrightnessMapper, mIsEnabled, mLeadDisplayId);
             mBrightnessEventRingBuffer =
                     new RingBuffer<>(BrightnessEvent.class, RINGBUFFER_MAX);
-
-            if (mScreenOffBrightnessSensorController != null) {
-                mScreenOffBrightnessSensorController.stop();
-                mScreenOffBrightnessSensorController = null;
-            }
-            loadScreenOffBrightnessSensor();
-            int[] sensorValueToLux = mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux();
-            if (mScreenOffBrightnessSensor != null && sensorValueToLux != null) {
-                mScreenOffBrightnessSensorController =
-                        mInjector.getScreenOffBrightnessSensorController(
-                                mSensorManager,
-                                mScreenOffBrightnessSensor,
-                                mHandler,
-                                SystemClock::uptimeMillis,
-                                sensorValueToLux,
-                                defaultModeBrightnessMapper);
+            if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
+                if (mScreenOffBrightnessSensorController != null) {
+                    mScreenOffBrightnessSensorController.stop();
+                    mScreenOffBrightnessSensorController = null;
+                }
+                loadScreenOffBrightnessSensor();
+                int[] sensorValueToLux =
+                        mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux();
+                if (mScreenOffBrightnessSensor != null && sensorValueToLux != null) {
+                    mScreenOffBrightnessSensorController =
+                            mInjector.getScreenOffBrightnessSensorController(
+                                    mSensorManager,
+                                    mScreenOffBrightnessSensor,
+                                    mHandler,
+                                    SystemClock::uptimeMillis,
+                                    sensorValueToLux,
+                                    defaultModeBrightnessMapper);
+                }
             }
         } else {
             mUseSoftwareAutoBrightnessConfig = false;
@@ -1255,7 +1257,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mPowerState = null;
         }
 
-        if (mScreenOffBrightnessSensorController != null) {
+        if (!mFlags.isRefactorDisplayPowerControllerEnabled()
+                && mScreenOffBrightnessSensorController != null) {
             mScreenOffBrightnessSensorController.stop();
         }
 
@@ -1351,15 +1354,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (displayBrightnessState.getBrightnessEvent() != null) {
             mTempBrightnessEvent.copyFrom(displayBrightnessState.getBrightnessEvent());
         }
-        // Set up the ScreenOff controller used when coming out of SCREEN_OFF and the ALS sensor
-        // doesn't yet have a valid lux value to use with auto-brightness.
-        if (mScreenOffBrightnessSensorController != null) {
-            mScreenOffBrightnessSensorController
-                    .setLightSensorEnabled(displayBrightnessState.getShouldUseAutoBrightness()
-                    && mIsEnabled && (state == Display.STATE_OFF
-                    || (state == Display.STATE_DOZE
-                    && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()))
-                    && mLeadDisplayId == Layout.NO_LEAD_DISPLAY);
+        if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
+            // Set up the ScreenOff controller used when coming out of SCREEN_OFF and the ALS sensor
+            // doesn't yet have a valid lux value to use with auto-brightness.
+            if (mScreenOffBrightnessSensorController != null) {
+                mScreenOffBrightnessSensorController
+                        .setLightSensorEnabled(displayBrightnessState.getShouldUseAutoBrightness()
+                        && mIsEnabled && (state == Display.STATE_OFF
+                        || (state == Display.STATE_DOZE
+                        && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()))
+                        && mLeadDisplayId == Layout.NO_LEAD_DISPLAY);
+            }
         }
 
         // Take note if the short term model was already active before applying the current
@@ -1392,15 +1397,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         boolean updateScreenBrightnessSetting =
                 displayBrightnessState.shouldUpdateScreenBrightnessSetting();
         float currentBrightnessSetting = mDisplayBrightnessController.getCurrentBrightness();
-        // Apply auto-brightness.
-        // All the conditions inside this if block will be moved to AutomaticBrightnessStrategy
-        if (mFlags.isRefactorDisplayPowerControllerEnabled()
-                && displayBrightnessState.getBrightnessReason().getReason()
-                        == BrightnessReason.REASON_AUTOMATIC) {
-            if (mScreenOffBrightnessSensorController != null) {
-                mScreenOffBrightnessSensorController.setLightSensorEnabled(false);
-            }
-        }
 
         if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
             // AutomaticBrightnessStrategy has higher priority than OffloadBrightnessStrategy
@@ -1452,7 +1448,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && mAutomaticBrightnessStrategy.shouldUseAutoBrightness()) {
                 // Use the auto-brightness curve and the last observed lux
                 rawBrightnessState = mAutomaticBrightnessController
-                        .getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                        .getAutomaticScreenBrightnessBasedOnLastUsedLux(
                                 mTempBrightnessEvent);
             } else {
                 rawBrightnessState = getDozeBrightnessForOffload();
@@ -1473,19 +1469,23 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
         }
 
-        // The ALS is not available yet - use the screen off sensor to determine the initial
-        // brightness
-        if (Float.isNaN(brightnessState) && mAutomaticBrightnessStrategy.isAutoBrightnessEnabled()
-                && mScreenOffBrightnessSensorController != null) {
-            rawBrightnessState =
-                    mScreenOffBrightnessSensorController.getAutomaticScreenBrightness();
-            brightnessState = rawBrightnessState;
-            if (BrightnessUtils.isValidBrightnessValue(brightnessState)) {
-                brightnessState = clampScreenBrightness(brightnessState);
-                updateScreenBrightnessSetting = mDisplayBrightnessController.getCurrentBrightness()
-                        != brightnessState;
-                mBrightnessReasonTemp.setReason(
-                        BrightnessReason.REASON_SCREEN_OFF_BRIGHTNESS_SENSOR);
+        if (!mFlags.isRefactorDisplayPowerControllerEnabled()) {
+            // The ALS is not available yet - use the screen off sensor to determine the initial
+            // brightness
+            if (Float.isNaN(brightnessState)
+                    && mAutomaticBrightnessStrategy.isAutoBrightnessEnabled()
+                    && mScreenOffBrightnessSensorController != null) {
+                rawBrightnessState =
+                        mScreenOffBrightnessSensorController.getAutomaticScreenBrightness();
+                brightnessState = rawBrightnessState;
+                if (BrightnessUtils.isValidBrightnessValue(brightnessState)) {
+                    brightnessState = clampScreenBrightness(brightnessState);
+                    updateScreenBrightnessSetting =
+                            mDisplayBrightnessController.getCurrentBrightness()
+                                    != brightnessState;
+                    mBrightnessReasonTemp.setReason(
+                            BrightnessReason.REASON_SCREEN_OFF_BRIGHTNESS_SENSOR);
+                }
             }
         }
 
