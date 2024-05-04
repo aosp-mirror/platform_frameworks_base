@@ -690,10 +690,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         private long mTimeLimitExceededAt = Long.MIN_VALUE;
         @UptimeMillisLong
         private long mTotalRuntime = 0;
+        private int mNumParallelServices = 0;
 
-        TimeLimitedFgsInfo(@UptimeMillisLong long startTime) {
-            mFirstFgsStartUptime = startTime;
-            mFirstFgsStartRealtime = SystemClock.elapsedRealtime();
+        public void noteFgsFgsStart(@UptimeMillisLong long startTime) {
+            mNumParallelServices++;
+            if (mNumParallelServices == 1) {
+                mFirstFgsStartUptime = startTime;
+                mFirstFgsStartRealtime = SystemClock.elapsedRealtime();
+            }
             mLastFgsStartTime = startTime;
         }
 
@@ -707,17 +711,23 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             return mFirstFgsStartRealtime;
         }
 
-        public void setLastFgsStartTime(@UptimeMillisLong long startTime) {
-            mLastFgsStartTime = startTime;
-        }
-
         @UptimeMillisLong
         public long getLastFgsStartTime() {
             return mLastFgsStartTime;
         }
 
-        public void updateTotalRuntime() {
-            mTotalRuntime += SystemClock.uptimeMillis() - mLastFgsStartTime;
+        public void decNumParallelServices() {
+            if (mNumParallelServices > 0) {
+                mNumParallelServices--;
+            }
+            if (mNumParallelServices == 0) {
+                mLastFgsStartTime = 0;
+            }
+        }
+
+        public void updateTotalRuntime(@UptimeMillisLong long nowUptime) {
+            mTotalRuntime += nowUptime - mLastFgsStartTime;
+            mLastFgsStartTime = nowUptime;
         }
 
         @UptimeMillisLong
@@ -735,6 +745,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
 
         public void reset() {
+            mNumParallelServices = 0;
             mFirstFgsStartUptime = 0;
             mFirstFgsStartRealtime = 0;
             mLastFgsStartTime = 0;
@@ -1872,8 +1883,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     /**
      * Called when a time-limited FGS starts.
      */
-    public TimeLimitedFgsInfo createTimeLimitedFgsInfo(@UptimeMillisLong long nowUptime) {
-        return new TimeLimitedFgsInfo(nowUptime);
+    public TimeLimitedFgsInfo createTimeLimitedFgsInfo() {
+        return new TimeLimitedFgsInfo();
     }
 
     /**
