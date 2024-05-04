@@ -122,6 +122,14 @@ constructor(
             }
             .dumpWhileCollecting("shadeScrimShape")
 
+    /**
+     * Max alpha to apply directly to the view based on the compose placeholder.
+     *
+     * TODO(b/338590620): Migrate alphas from [SharedNotificationContainerViewModel] into this flow
+     */
+    val maxAlpha: Flow<Float> =
+        stackAppearanceInteractor.alphaForBrightnessMirror.dumpValue("maxAlpha")
+
     /** The y-coordinate in px of top of the contents of the notification stack. */
     val stackTop: Flow<Float> = stackAppearanceInteractor.stackTop.dumpValue("stackTop")
     /** The y-coordinate in px of bottom of the contents of the notification stack. */

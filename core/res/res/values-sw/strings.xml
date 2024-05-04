@@ -153,31 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> baada ya sekunde <xliff:g id="TIME_DELAY">{2}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Haijasambazwa"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Haijatumiwa mwingine"</string>
-    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
-    <skip />
-    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
-    <skip />
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"Usalama wa mtandao wa simu"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"Usimbaji fiche, arifa za mitandao ambayo haijasimbwa kwa njia fiche"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"Kitambulisho cha kifaa kimefikiwa"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"Saa <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, mtandao wa karibu nawe ulirekodi kitambulisho cha kipekee cha kifaa chako (IMSI au IMEI) ulipokuwa ukitumia SIM yako ya <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"Saa <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>, mtandao wa karibu nawe ulirekodi kitambulisho cha kipekee cha kifaa chako (IMSI au IMEI) ulipokuwa ukitumia SIM yako ya <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g>.\n\nHii inamaanisha kuwa data ya mahali ulipo, shughuli au utambulisho wako imewekwa kwenye kumbukumbu. Hii ni desturi ya kawaida, lakini inaweza kuwa tatizo kwa watu wanaozingatia masuala ya faragha kwa undani."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"Imeunganishwa kwenye mtandao uliosimbwa kwa njia fiche wa <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"Sasa muunganisho wa SIM wa <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ni salama zaidi"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"Imeunganishwa kwenye mtandao ambao haujasimbwa kwa njia fiche"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"Kwa sasa maudhui ya simu, ujumbe na data yako katika hatari ya kuvamiwa unapotumia SIM yako ya <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"Kwa sasa maudhui ya simu, ujumbe na data yako katika hatari ya kuvamiwa unapotumia SIM yako ya <xliff:g id="NETWORK_NAME">%1$s</xliff:g>.\n\nMuunganisho wako ukisimbwa kwa njia fiche tena, utapata arifa nyingine."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"Mipangilio ya usalama wa mtandao wa simu"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"Pata maelezo zaidi"</string>
-    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
-    <skip />
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"Nimeelewa"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Msimbo wa kipengele umekamilika."</string>
     <string name="fcError" msgid="5325116502080221346">"Tatizo la muunganisho au msimbo batili wa kipengele."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"Sawa"</string>
@@ -2156,6 +2144,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Arifa ya maelezo ya Hali ya Kawaida"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Kiokoa Betri kimewashwa"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Inapunguza matumizi ya betri ili kuongeza muda wa matumizi ya betri"</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Kiokoa betri"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Kiokoa Betri kimezimwa"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Simu ina chaji ya kutosha. Vipengele havizuiliwi tena."</string>
@@ -2230,10 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Ungependa kutumia programu ya kazini?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Shirika lako linakuruhusu upige simu ukitumia programu za kazini pekee"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Shirika lako linakuruhusu utume ujumbe ukitumia programu za kazini pekee"</string>
-    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
-    <skip />
-    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
-    <skip />
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"Unaweza kupiga simu pekee kwa kutumia programu yako binafsi ya Simu. Simu unazopiga kwa kutumia programu binafsi ya Simu zitawekwa kwenye rekodi yako binafsi ya simu zilizopigwa."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"Unaweza kutuma ujumbe wa SMS pekee kwa kutumia programu yako binafsi ya Messages."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Tumia kivinjari cha binafsi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Tumia kivinjari cha kazini"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"Piga simu"</string>
@@ -2413,8 +2403,15 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Wa 3 wa Kazini"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Jaribio"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Unaoshirikiwa"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
+    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
     <skip />
+    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
+    <skip />
+    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
+    <skip />
+    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
+    <skip />
+    <string name="redacted_notification_message" msgid="1520587845842228816">"Maudhui nyeti kwenye arifa yamefichwa"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Maudhui ya programu yamefichwa ili yasionekane kwenye skrini ya pamoja kwa sababu za kiusalama"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Imeunganishwa kiotomatiki na satelaiti"</string>

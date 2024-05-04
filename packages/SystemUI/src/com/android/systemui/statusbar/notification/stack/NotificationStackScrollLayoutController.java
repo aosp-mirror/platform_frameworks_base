@@ -356,6 +356,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private float mMaxAlphaForKeyguard = 1.0f;
     private String mMaxAlphaForKeyguardSource = "constructor";
     private float mMaxAlphaForUnhide = 1.0f;
+    private float mMaxAlphaFromView = 1.0f;
 
     /**
      * Maximum alpha when to and from or sitting idle on the glanceable hub. Will be 1.0f when the
@@ -1317,9 +1318,14 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         updateAlpha();
     }
 
+    void setMaxAlphaFromView(float alpha) {
+        mMaxAlphaFromView = alpha;
+        updateAlpha();
+    }
+
     private void updateAlpha() {
         if (mView != null) {
-            mView.setAlpha(Math.min(mMaxAlphaForKeyguard,
+            mView.setAlpha(Math.min(Math.min(mMaxAlphaFromView, mMaxAlphaForKeyguard),
                     Math.min(mMaxAlphaForUnhide, mMaxAlphaForGlanceableHub)));
         }
     }
@@ -1789,6 +1795,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("mMaxAlphaFromView=" + mMaxAlphaFromView);
         pw.println("mMaxAlphaForUnhide=" + mMaxAlphaForUnhide);
         pw.println("mMaxAlphaForGlanceableHub=" + mMaxAlphaForGlanceableHub);
         pw.println("mMaxAlphaForKeyguard=" + mMaxAlphaForKeyguard);

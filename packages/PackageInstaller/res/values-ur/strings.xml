@@ -78,7 +78,7 @@
     <string name="uninstalling" msgid="8709566347688966845">"اَن انسٹال ہو رہا ہے…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ان انسٹال ہو رہا ہے…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"اَن انسٹال مکمل ہو گیا۔"</string>
-    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> اَن انسٹال ہو گیا"</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"‫<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> اَن انسٹال ہو گیا"</string>
     <string name="uninstall_done_clone_app" msgid="5578308154544195413">"‫<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کا کلون حذف کر دیا گیا ہے"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"اَن انسٹال ناکام ہو گیا۔"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کو ان انسٹال کرنا ناکام ہو گیا۔"</string>
@@ -122,7 +122,7 @@
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"اس ایپ کو بحال کرنے کے لیے اگلے مراحل کی پیروی کریں"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> غیر فعال ہے"</string>
     <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"اس ایپ کو بحال کرنے کے لیے، ترتیبات میں <xliff:g id="INSTALLERNAME">%1$s</xliff:g> کو فعال کریں"</string>
-    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> اَن انسٹال ہو گیا ہے"</string>
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"‫<xliff:g id="INSTALLERNAME">%1$s</xliff:g> اَن انسٹال ہو گیا ہے"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"اس ایپ کو بحال کرنے کے لیے، آپ کو <xliff:g id="INSTALLERNAME">%1$s</xliff:g> انسٹال کرنا ہوگا"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"جاری رکھیں"</string>
     <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"اسٹوریج صاف کریں"</string>

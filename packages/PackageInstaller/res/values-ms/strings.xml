@@ -63,7 +63,7 @@
     <string name="archive_application_text_all_users" msgid="3151229641681672580">"Arkibkan apl ini untuk semua pengguna? Data peribadi anda akan disimpan"</string>
     <string name="archive_application_text_current_user_work_profile" msgid="1450487362134779752">"Arkibkan apl ini dalam profil kerja anda? Data peribadi anda akan disimpan"</string>
     <string name="archive_application_text_user" msgid="2586558895535581451">"Arkibkan apl ini untuk <xliff:g id="USERNAME">%1$s</xliff:g>? Data peribadi anda akan disimpan"</string>
-    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Adakah anda mahu mengarkibkan apl ini daripada ruang peribadi anda? Data peribadi anda akan disimpan"</string>
+    <string name="archive_application_text_current_user_private_profile" msgid="1958423158655599132">"Adakah anda mahu mengarkibkan apl ini daripada ruang persendirian anda? Data peribadi anda akan disimpan"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Adakah anda mahu menyahpasang apl ini untuk "<b>"semua"</b>" pengguna? Aplikasi dan datanya akan dialih keluar daripada "<b>"semua"</b>" pengguna pada peranti."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Adakah anda ingin menyahpasang apl ini untuk pengguna <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Adakah anda mahu menyahpasang apl ini daripada profil kerja anda?"</string>
@@ -72,7 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Simpan <xliff:g id="SIZE">%1$s</xliff:g> data apl."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Adakah anda mahu memadamkan apl ini?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Adakah anda mahu menyahpasang apl ini? Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> juga akan dipadamkan."</string>
-    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Adakah anda mahu menyahpasang apl ini daripada ruang peribadi anda?"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"Adakah anda mahu menyahpasang apl ini daripada ruang persendirian anda?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Penyahpasangan yang sedang berjalan"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Penyahpasangan yang gagal"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Menyahpasang…"</string>

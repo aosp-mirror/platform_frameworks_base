@@ -721,4 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"ບໍ່ມີເພດ"</string>
     <string name="feminine" msgid="1529155595310784757">"ເພດຍິງ"</string>
     <string name="masculine" msgid="4653978041013996303">"ເພດຊາຍ"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"ການອັບເດດລະບົບ"</string>
 </resources>

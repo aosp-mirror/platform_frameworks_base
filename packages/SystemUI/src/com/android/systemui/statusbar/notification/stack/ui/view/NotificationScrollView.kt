@@ -31,6 +31,9 @@ interface NotificationScrollView {
      */
     fun asView(): View
 
+    /** Max alpha for this view */
+    fun setMaxAlpha(alpha: Float)
+
     /** Set the clipping bounds used when drawing */
     fun setScrimClippingShape(shape: ShadeScrimShape?)
 

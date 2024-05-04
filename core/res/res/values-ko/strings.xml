@@ -153,31 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g><xliff:g id="TIME_DELAY">{2}</xliff:g>초 후"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
-    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
-    <skip />
-    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
-    <skip />
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"모바일 네트워크 보안"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"암호화, 암호화되지 않은 네트워크에 대한 알림"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"기기 ID 액세스됨"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>에 <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM을 사용하는 동안 근처 네트워크에서 기기의 고유 ID(IMSI 또는 IMEI)를 기록했습니다."</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g>에 <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM을 사용하는 동안 근처 네트워크에서 기기의 고유 ID(IMSI 또는 IMEI)를 기록했습니다.\n\n즉, 사용자의 위치, 활동 또는 ID가 기록되었습니다. 이는 일반적인 관행이지만 개인 정보 보호에 대해 우려하는 사용자에게는 문제가 될 수도 있습니다."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"암호화된 네트워크 <xliff:g id="NETWORK_NAME">%1$s</xliff:g>에 연결됨"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"이제 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM 연결의 보안이 강화되었습니다."</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"암호화되지 않은 네트워크에 연결됨"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"현재 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM을 사용하는 동안 통화, 메시지, 데이터의 보안이 취약합니다."</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"현재 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM을 사용하는 동안 통화, 메시지, 데이터의 보안이 취약합니다.\n\n연결이 다시 암호화되면 또 다른 알림을 받게 됩니다"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"모바일 네트워크 보안 설정"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"자세히 알아보기"</string>
-    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
-    <skip />
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"확인"</string>
     <string name="fcComplete" msgid="1080909484660507044">"기능 코드가 완료되었습니다."</string>
     <string name="fcError" msgid="5325116502080221346">"연결에 문제가 있거나 기능 코드가 잘못되었습니다."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"확인"</string>
@@ -371,8 +359,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"스크린샷 촬영"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"디스플레이 스크린샷을 촬영할 수 있습니다."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"미리보기, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"닫기"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"상태 표시줄에 위치"</string>
@@ -2157,6 +2144,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"절전 모드 사용 설정됨"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"배터리 사용량을 줄여서 배터리 수명을 늘립니다."</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"절전 모드"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"절전 모드가 사용 중지되었습니다"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"휴대전화의 배터리가 충분하므로 기능이 더 이상 제한되지 않습니다"</string>
@@ -2231,10 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"직장 앱으로 전환할까요?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"귀하의 조직에서 직장 앱을 사용한 통화만 허용합니다."</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"귀하의 조직에서 직장 앱을 사용한 메시지 전송만 허용합니다."</string>
-    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
-    <skip />
-    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
-    <skip />
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"개인 전화 앱에서만 전화를 걸 수 있습니다. 개인 전화로 통화한 내역은 개인 통화 기록에 추가됩니다."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"개인 메시지 앱에서만 SMS 메시지를 보낼 수 있습니다."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"개인 브라우저 사용"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"직장 브라우저 사용"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"통화"</string>
@@ -2414,8 +2403,15 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"직장 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"테스트"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"공동"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
+    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
     <skip />
+    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
+    <skip />
+    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
+    <skip />
+    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
+    <skip />
+    <string name="redacted_notification_message" msgid="1520587845842228816">"민감한 알림 콘텐츠 숨김"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"보안을 위해 화면 공유에서 앱 콘텐츠가 숨겨집니다."</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"위성에 자동 연결됨"</string>

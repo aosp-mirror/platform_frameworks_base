@@ -96,10 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"සම්බන්ධිතයි (දුරකථනය හෝ මාධ්‍ය නැත), බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"ක්‍රියාත්මකයි. බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"ක්‍රියාත්මකයි. බැටරිය ව: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ද: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"ක්‍රියාත්මකයි. ව: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> බැටරිය."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"ක්‍රියාත්මකයි. ද: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> බැටරිය."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"බැටරිය ව: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ද: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
@@ -107,12 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"දකුණ: බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ක්‍රියාකාරී"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"සුරැකිණි"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"සක්‍රිය (වම පමණි)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"සක්‍රිය (දකුණ පමණි)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"සක්‍රිය (වම සහ දකුණ)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ක්‍රියාත්මකයි (මාධ්‍ය පමණයි). බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ක්‍රියාත්මකයි (මාධ්‍ය පමණයි), බැටරිය ව: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ද: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"සම්බන්‍ධයි (ශ්‍රව්‍ය බෙදා ගැනීමට සහය දක්වයි). බැටරිය <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -726,4 +721,6 @@
     <string name="neuter" msgid="2075249330106127310">"නපුංසක"</string>
     <string name="feminine" msgid="1529155595310784757">"ස්ත්‍රී"</string>
     <string name="masculine" msgid="4653978041013996303">"පුරුෂ"</string>
+    <!-- no translation found for system_update_settings_list_item_title (6618098383615432484) -->
+    <skip />
 </resources>

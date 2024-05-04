@@ -78,6 +78,7 @@ constructor(
                 .collect { view.setScrimClippingShape(it) }
         }
 
+        launch { viewModel.maxAlpha.collect { view.setMaxAlpha(it) } }
         launch { viewModel.stackTop.collect { view.setStackTop(it) } }
         launch { viewModel.stackBottom.collect { view.setStackBottom(it) } }
         launch { viewModel.scrolledToTop.collect { view.setScrolledToTop(it) } }

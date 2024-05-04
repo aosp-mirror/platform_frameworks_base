@@ -72,7 +72,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ਐਪ ਡਾਟਾ ਰੱਖੋ।"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦੇ ਕਲੋਨ ਨੂੰ ਵੀ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
-    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੇ ਨਿੱਜੀ ਸਪੇਸ ਤੋਂ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੀ ਪ੍ਰਾਈਵੇਟ ਸਪੇਸ ਤੋਂ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ਚੱਲ ਰਹੀਆਂ ਅਣਸਥਾਪਨਾਵਾਂ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ਅਸਫਲ ਅਣਸਥਾਪਨਾਵਾਂ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ਅਣਸਥਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
