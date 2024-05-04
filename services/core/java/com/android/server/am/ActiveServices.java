@@ -507,6 +507,18 @@ public final class ActiveServices {
      */
     final SparseArray<SparseArray<TimeLimitedFgsInfo>> mTimeLimitedFgsInfo = new SparseArray<>();
 
+    /**
+     * Foreground services of certain types will now have a time limit. If the foreground service
+     * of the offending type is not stopped within the allocated time limit, it will receive a
+     * callback via {@link Service#onTimeout(int, int)} and it must then be stopped within a few
+     * seconds. If an app fails to do so, it will be declared an ANR.
+     *
+     * @see Service#onTimeout(int, int) onTimeout callback for additional details
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long FGS_INTRODUCE_TIME_LIMITS = 317799821L;
+
     // allowlisted packageName.
     ArraySet<String> mAllowListWhileInUsePermissionInFgs = new ArraySet<>();
 
@@ -2396,8 +2408,11 @@ public final class ActiveServices {
                                 // "if (r.mAllowStartForeground == REASON_DENIED...)" block below.
                             }
                         }
-                    } else if (getTimeLimitedFgsType(foregroundServiceType)
-                                    != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
+                    } else if (CompatChanges.isChangeEnabled(
+                                    FGS_INTRODUCE_TIME_LIMITS, r.appInfo.uid)
+                                && android.app.Flags.introduceNewServiceOntimeoutCallback()
+                                && getTimeLimitedFgsType(foregroundServiceType)
+                                        != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
                         // Calling startForeground on a FGS type which has a time limit will only be
                         // allowed if the app is in a state where it can normally start another FGS
                         // and it hasn't hit the time limit for that type in the past 24hrs.
@@ -2686,7 +2701,10 @@ public final class ActiveServices {
                     mAm.notifyPackageUse(r.serviceInfo.packageName,
                             PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
 
-                    maybeUpdateFgsTrackingLocked(r, previousFgsType);
+                    if (CompatChanges.isChangeEnabled(FGS_INTRODUCE_TIME_LIMITS, r.appInfo.uid)
+                            && android.app.Flags.introduceNewServiceOntimeoutCallback()) {
+                        maybeUpdateFgsTrackingLocked(r, previousFgsType);
+                    }
                 } else {
                     if (DEBUG_FOREGROUND_SERVICE) {
                         Slog.d(TAG, "Suppressing startForeground() for FAS " + r);
@@ -3907,10 +3925,8 @@ public final class ActiveServices {
                 Slog.w(TAG_SERVICE, "Exception from scheduleTimeoutServiceForType: " + e);
             }
 
-            if (android.app.Flags.introduceNewServiceOntimeoutCallback()) {
-                // ANR the service after giving the service some time to clean up.
-                mFGSAnrTimer.start(sr, mAm.mConstants.mFgsAnrExtraWaitDuration);
-            }
+            // ANR the service after giving the service some time to clean up.
+            mFGSAnrTimer.start(sr, mAm.mConstants.mFgsAnrExtraWaitDuration);
         }
     }
 
