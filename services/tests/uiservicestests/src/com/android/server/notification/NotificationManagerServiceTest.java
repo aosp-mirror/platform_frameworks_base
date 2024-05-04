@@ -341,7 +341,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -503,7 +502,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     MultiRateLimiter mToastRateLimiter;
     BroadcastReceiver mPackageIntentReceiver;
-    BroadcastReceiver mUserSwitchIntentReceiver;
+    BroadcastReceiver mUserIntentReceiver;
     BroadcastReceiver mNotificationTimeoutReceiver;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     TestableNotificationManagerService.StrongAuthTrackerFake mStrongAuthTracker;
@@ -802,11 +801,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     && filter.hasAction(Intent.ACTION_PACKAGES_SUSPENDED)) {
                 mPackageIntentReceiver = broadcastReceivers.get(i);
             }
-            if (filter.hasAction(Intent.ACTION_USER_SWITCHED)) {
+            if (filter.hasAction(Intent.ACTION_USER_SWITCHED)
+                    || filter.hasAction(Intent.ACTION_PROFILE_UNAVAILABLE)
+                    || filter.hasAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
                 // There may be multiple receivers, get the NMS one
                 if (broadcastReceivers.get(i).toString().contains(
                         NotificationManagerService.class.getName())) {
-                    mUserSwitchIntentReceiver = broadcastReceivers.get(i);
+                    mUserIntentReceiver = broadcastReceivers.get(i);
                 }
             }
             if (filter.hasAction(ACTION_NOTIFICATION_TIMEOUT)
@@ -815,7 +816,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             }
         }
         assertNotNull("package intent receiver should exist", mPackageIntentReceiver);
-        assertNotNull("User-switch receiver should exist", mUserSwitchIntentReceiver);
+        assertNotNull("User receiver should exist", mUserIntentReceiver);
         if (!Flags.allNotifsNeedTtl()) {
             assertNotNull("Notification timeout receiver should exist",
                     mNotificationTimeoutReceiver);
@@ -976,7 +977,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private void simulateProfileAvailabilityActions(String intentAction) {
         final Intent intent = new Intent(intentAction);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, TEST_PROFILE_USERHANDLE);
-        mUserSwitchIntentReceiver.onReceive(mContext, intent);
+        mUserIntentReceiver.onReceive(mContext, intent);
     }
 
     private ArrayMap<Boolean, ArrayList<ComponentName>> generateResetComponentValues() {
@@ -14482,13 +14483,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_USE_SSM_USER_SWITCH_SIGNAL)
     public void onUserSwitched_updatesZenModeAndChannelsBypassingDnd() {
+        mService.mZenModeHelper = mock(ZenModeHelper.class);
+        mService.setPreferencesHelper(mPreferencesHelper);
+
+        UserInfo prevUser = new UserInfo();
+        prevUser.id = 10;
+        UserInfo newUser = new UserInfo();
+        newUser.id = 20;
+
+        mService.onUserSwitching(new TargetUser(prevUser), new TargetUser(newUser));
+
+        InOrder inOrder = inOrder(mPreferencesHelper, mService.mZenModeHelper);
+        inOrder.verify(mService.mZenModeHelper).onUserSwitched(eq(20));
+        inOrder.verify(mPreferencesHelper).syncChannelsBypassingDnd();
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_USE_SSM_USER_SWITCH_SIGNAL)
+    public void onUserSwitched_broadcast_updatesZenModeAndChannelsBypassingDnd() {
         Intent intent = new Intent(Intent.ACTION_USER_SWITCHED);
         intent.putExtra(Intent.EXTRA_USER_HANDLE, 20);
         mService.mZenModeHelper = mock(ZenModeHelper.class);
         mService.setPreferencesHelper(mPreferencesHelper);
 
-        mUserSwitchIntentReceiver.onReceive(mContext, intent);
+        mUserIntentReceiver.onReceive(mContext, intent);
 
         InOrder inOrder = inOrder(mPreferencesHelper, mService.mZenModeHelper);
         inOrder.verify(mService.mZenModeHelper).onUserSwitched(eq(20));
