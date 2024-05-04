@@ -375,8 +375,8 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Дэлгэц нийлүүлэхэд GPU-г байнга ашиглах"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Өнгөний орчныг дууриах"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL тэмдэглэлийг идэвхжүүлэх"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB аудио чиглүүлэхийг идэвхгүйжүүлэх"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB аудио нэмэлт хэрэгсэл рүү автоматаар чиглүүлэхийг идэвхгүйжүүлэх"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB аудио чиглүүлэхийг идэвхгүй болгох"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB аудио нэмэлт хэрэгсэл рүү автоматаар чиглүүлэхийг идэвхгүй болгох"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Байршлын хүрээг харуулах"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Клипийн зах, хязгаар зэргийг харуулах"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL байрлалын чиглэлийг хүчээр тогтоох"</string>

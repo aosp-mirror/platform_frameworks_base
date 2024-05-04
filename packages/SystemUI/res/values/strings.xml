@@ -1639,6 +1639,9 @@
     <!-- Accessibility label for available satellite connection [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_satellite_available">Satellite, connection available</string>
 
+    <!-- Text displayed indicating that the user is connected to a satellite signal. -->
+    <string name="satellite_connected_carrier_text">Satellite SOS</string>
+
     <!-- Accessibility label for managed profile icon (not shown on screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_managed_profile">Work profile</string>
 
@@ -2241,11 +2244,6 @@
     <!-- Tuner string -->
     <!-- Tuner string -->
     <!-- Tuner string -->
-
-    <!-- Message shown during shutdown when Find My Device with Dead Battery Finder is active  [CHAR LIMIT=300] -->
-    <string name="finder_active">You can locate this phone with Find My Device even when powered off</string>
-    <!-- Shutdown Progress Dialog. This is shown if the user chooses to power off the phone. [CHAR LIMIT=60] -->
-    <string name="shutdown_progress">Shutting down\u2026</string>
 
     <!-- Text help link for care instructions for overheating devices [CHAR LIMIT=40] -->
     <string name="thermal_shutdown_dialog_help_text">See care steps</string>

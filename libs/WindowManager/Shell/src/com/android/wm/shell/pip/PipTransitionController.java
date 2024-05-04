@@ -266,9 +266,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /** Whether a particular package is same as current pip package. */
-    public boolean isInPipPackage(String packageName) {
+    public boolean isPackageActiveInPip(String packageName) {
         final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
-        return packageName != null && inPipTask != null
+        return packageName != null && inPipTask != null && mPipOrganizer.isInPip()
                 && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
     }
 

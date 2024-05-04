@@ -44,6 +44,8 @@ import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerPr
 import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxyImpl
 import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.DeviceBasedSatelliteRepositoryImpl
+import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModel
+import com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel.DeviceBasedSatelliteViewModelImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder
@@ -89,6 +91,11 @@ abstract class StatusBarPipelineModule {
     abstract fun deviceBasedSatelliteRepository(
         impl: DeviceBasedSatelliteRepositoryImpl
     ): DeviceBasedSatelliteRepository
+
+    @Binds
+    abstract fun deviceBasedSatelliteViewModel(
+        impl: DeviceBasedSatelliteViewModelImpl
+    ): DeviceBasedSatelliteViewModel
 
     @Binds abstract fun wifiRepository(impl: WifiRepositorySwitcher): WifiRepository
 

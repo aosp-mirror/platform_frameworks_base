@@ -55,8 +55,10 @@ object ScreenshotShelfViewBinder {
         view.onTouchInterceptListener = { swipeGestureListener.onMotionEvent(it) }
 
         val previewView: ImageView = view.requireViewById(R.id.screenshot_preview)
+        val previewViewBlur: ImageView = view.requireViewById(R.id.screenshot_preview_blur)
         val previewBorder = view.requireViewById<View>(R.id.screenshot_preview_border)
         previewView.clipToOutline = true
+        previewViewBlur.clipToOutline = true
         val actionsContainer: LinearLayout = view.requireViewById(R.id.screenshot_actions)
         val dismissButton = view.requireViewById<View>(R.id.screenshot_dismiss_button)
         dismissButton.visibility = if (viewModel.showDismissButton) View.VISIBLE else View.GONE
@@ -72,6 +74,7 @@ object ScreenshotShelfViewBinder {
                         viewModel.preview.collect { bitmap ->
                             if (bitmap != null) {
                                 setScreenshotBitmap(previewView, bitmap)
+                                setScreenshotBitmap(previewViewBlur, bitmap)
                                 previewView.visibility = View.VISIBLE
                                 previewBorder.visibility = View.VISIBLE
                             } else {

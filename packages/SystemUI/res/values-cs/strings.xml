@@ -589,8 +589,8 @@
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrovat"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Ovládací prvky hlasitosti %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Volání a oznámení budou vyzvánět (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
-    <string name="media_output_label_title" msgid="872824698593182505">"Přehrávání <xliff:g id="LABEL">%s</xliff:g> na"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk se přehraje přes"</string>
+    <string name="media_output_label_title" msgid="872824698593182505">"Přehrávání <xliff:g id="LABEL">%s</xliff:g> přes"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Zvuk se bude přehrávat přes"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Nástroj na ladění uživatelského rozhraní systému"</string>
     <string name="status_bar" msgid="4357390266055077437">"Stavový řádek"</string>
     <string name="demo_mode" msgid="263484519766901593">"Ukázkový režim uživatelského rozhraní systému"</string>
