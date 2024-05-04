@@ -89,6 +89,12 @@ public class ProcFileReader implements Closeable {
         mTail -= count;
         if (mTail == 0) {
             fillBuf();
+
+            if (mTail > 0 && mBuffer[0] == ' ') {
+                // After filling the buffer, it contains more consecutive
+                // delimiters that need to be skipped.
+                consumeBuf(0);
+            }
         }
     }
 
