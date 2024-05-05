@@ -467,7 +467,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Seus apps pessoais estão conectados à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. As atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o provedor de VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir configurações de VPN"</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerenciado pelo seu familiar responsável, que pode ver e gerenciar informações como os apps que você usa, sua localização e seu tempo de uso."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerenciado pelo seu familiar responsável, que pode ver e gerenciar informações como os apps que você usa, sua localização e seu tempo de tela."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Desbloqueado pelo TrustAgent"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>

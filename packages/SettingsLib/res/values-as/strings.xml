@@ -350,7 +350,7 @@
     <string name="media_category" msgid="8122076702526144053">"মিডিয়া"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"নিৰীক্ষণ কৰি থকা হৈছে"</string>
     <string name="strict_mode" msgid="889864762140862437">"কঠোৰ ম’ড সক্ষম কৰা হৈছে"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"যেতিয়া এপ্সমূহে মুখ্য থ্ৰেডত দীঘলীয়া কাৰ্যকলাপ চলাই, তেতিয়া স্ক্ৰীন ফ্লাশ্ব কৰক"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"যেতিয়া এপ্‌সমূহে মুখ্য থ্ৰেডত দীঘলীয়া কাৰ্যকলাপ চলায়, তেতিয়া স্ক্ৰীন ফ্লাশ্ব কৰক"</string>
     <string name="pointer_location" msgid="7516929526199520173">"পইণ্টাৰৰ অৱস্থান"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"চলিত স্পৰ্শ-বিষয়ক তথ্যসহ স্ক্ৰীন অভাৰলে’"</string>
     <string name="show_touches" msgid="8437666942161289025">"টেপসমূহ দেখুৱাওক"</string>
@@ -389,7 +389,7 @@
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"গৌণ প্ৰদৰ্শনৰ নকল বনাওক"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"এপ্‌সমূহ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"কাৰ্যকলাপসমূহ নাৰাখিব"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ব্যৱহাৰকাৰী ওলোৱাৰ লগে লগে সকলো কাৰ্যকলাপ মচক"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ব্যৱহাৰকাৰী ওলোৱাৰ লগে লগে আটাইবোৰ কাৰ্যকলাপ মচক"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"নেপথ্যত চলা প্ৰক্ৰিয়াৰ সীমা"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"নেপথ্য এএনআৰবোৰ দেখুৱাওক"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"নেপথ্য এপসমূহৰ বাবে এপে সঁহাৰি দিয়া নাই ডায়ল\'গ প্ৰদৰ্শন কৰক"</string>
