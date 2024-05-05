@@ -1206,7 +1206,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s मार्फत छविलाई कैंद गर्नुहोस्"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"छविलाई कैंद गर्नुहोस्"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"यस कार्यको लागि पूर्वनिर्धारितबाट प्रयोग गर्नुहोस्।"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"फरक एप प्रयोग गर्नुहोस्"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"अर्को एप प्रयोग गर्नुहोस्"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"प्रणाली सेटिङहरूमा पूर्वनिर्धारितलाई हटाउनुहोस् &gt; एपहरू &gt; डाउनलोड।"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"एउटा कार्यको चयन गर्नुहोस्"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USB उपकरणको लागि एउटा एप छान्नुहोस्"</string>

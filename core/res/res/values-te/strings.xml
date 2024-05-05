@@ -1180,7 +1180,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}కి ఒక స్టార్}other{{max}కి # స్టార్‌లు}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"ప్రోగ్రెస్‌లో ఉంది"</string>
     <string name="whichApplication" msgid="5432266899591255759">"దీన్ని ఉపయోగించి చర్యను పూర్తి చేయండి"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$sను ఉపయోగించి చర్యను పూర్తి చేయి"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$sను ఉపయోగించి చర్యను పూర్తి చేయండి"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"చర్యను పూర్తి చేయి"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"దీనితో తెరువు"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$sతో తెరువు"</string>
