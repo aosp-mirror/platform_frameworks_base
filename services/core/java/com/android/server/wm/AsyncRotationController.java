@@ -288,6 +288,17 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             final SurfaceControl.Transaction t = windowToken.getSyncTransaction();
             clearTransform(t, op.mLeash);
         }
+        // The insets position may be frozen by shouldFreezeInsetsPosition(), so refresh the
+        // position to the latest state when it is ready to show in new rotation.
+        if (mTransitionOp == OP_APP_SWITCH) {
+            for (int i = windowToken.getChildCount() - 1; i >= 0; i--) {
+                final WindowState w = windowToken.getChildAt(i);
+                final InsetsSourceProvider insetsProvider = w.getControllableInsetProvider();
+                if (insetsProvider != null) {
+                    insetsProvider.updateInsetsControlPosition(w);
+                }
+            }
+        }
     }
 
     private static void clearTransform(SurfaceControl.Transaction t, SurfaceControl sc) {
