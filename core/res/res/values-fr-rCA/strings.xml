@@ -882,7 +882,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Personnaliser"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Domicile"</string>
-    <string name="phoneTypeMobile" msgid="1178852541462086735">"Mobile"</string>
+    <string name="phoneTypeMobile" msgid="1178852541462086735">"Cellulaire"</string>
     <string name="phoneTypeWork" msgid="6604967163358864607">"Travail"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Téléc. travail"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Téléc. domicile"</string>
@@ -1207,7 +1207,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"Enregistrer l\'image avec %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Enregistrer l\'image"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"Utiliser cette application par défaut pour cette action"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"Utiliser une application différente"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"Utiliser une appli différente"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Pour supprimer les valeurs par défaut, accédez à Paramètres système &gt; Applications &gt; Téléchargements."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"Sélectionnez une action"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Sélectionnez une application pour le périphérique de stockage USB"</string>

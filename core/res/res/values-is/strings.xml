@@ -976,8 +976,8 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Það er ekkert SIM-kort í spjaldtölvunni."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Það er ekkert SIM-kort í Android TV-tækinu."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Það er ekkert SIM-kort í símanum."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Bæta við SIM-korti."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM-kort vantar eða er ekki læsilegt. Bæta við SIM-korti."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Bæta SIM-korti við."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM-kort vantar eða er ekki læsilegt. Bæta SIM-korti við."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Ónothæft SIM-kort."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM-kortið þitt var gert varanlega óvirkt.\n Hafðu samband við símafyrirtækið þitt til að fá nýtt SIM-kort."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Fyrra lag"</string>

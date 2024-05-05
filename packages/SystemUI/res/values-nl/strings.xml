@@ -501,14 +501,14 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App losgemaakt"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Bellen"</string>
     <string name="stream_system" msgid="7663148785370565134">"Systeem"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Bellen"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Beltoon"</string>
     <string name="stream_music" msgid="2188224742361847580">"Media"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Wekker"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Melding"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Frequentie voor tweevoudige multitoon"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Toe­gankelijk­heid"</string>
-    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Bellen"</string>
+    <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Beltoon"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Trillen"</string>
     <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Geluid staat uit"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tik om dempen op te heffen."</string>
@@ -974,7 +974,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> apparaten geselecteerd"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(verbinding verbroken)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Kan niet schakelen. Tik om het opnieuw te proberen."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Een apparaat koppelen"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Apparaat koppelen"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Als je deze sessie wilt casten, open je de app."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Onbekende app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Casten stoppen"</string>

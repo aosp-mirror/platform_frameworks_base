@@ -23,7 +23,7 @@
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"သင့်ပင်နံပါတ် ထည့်ပါ"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"ပင်နံပါတ်ထည့်ပါ"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"သင့်လော့ခ်ဖွင့်ပုံစံ ထည့်ပါ"</string>
-    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ပုံစံဆွဲပါ"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ပုံဖော်ပါ"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"သင့်စကားဝှက် ထည့်ပါ"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"စကားဝှက် ထည့်ပါ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ကတ် မမှန်ကန်ပါ။"</string>
