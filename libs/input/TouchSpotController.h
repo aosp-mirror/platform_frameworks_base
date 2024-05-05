@@ -29,7 +29,7 @@ namespace android {
  */
 class TouchSpotController {
 public:
-    TouchSpotController(int32_t displayId, PointerControllerContext& context);
+    TouchSpotController(ui::LogicalDisplayId displayId, PointerControllerContext& context);
     ~TouchSpotController();
     void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
                   BitSet32 spotIdBits, bool skipScreenshot);
@@ -59,7 +59,7 @@ private:
                 y(0.0f),
                 mLastIcon(nullptr) {}
 
-        void updateSprite(const SpriteIcon* icon, float x, float y, int32_t displayId,
+        void updateSprite(const SpriteIcon* icon, float x, float y, ui::LogicalDisplayId displayId,
                           bool skipScreenshot);
         void dump(std::string& out, const char* prefix = "") const;
 
@@ -67,7 +67,7 @@ private:
         const SpriteIcon* mLastIcon;
     };
 
-    int32_t mDisplayId;
+    ui::LogicalDisplayId mDisplayId;
 
     mutable std::mutex mLock;
 

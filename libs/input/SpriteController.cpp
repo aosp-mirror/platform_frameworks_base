@@ -19,9 +19,9 @@
 
 #include "SpriteController.h"
 
-#include <log/log.h>
-#include <utils/String8.h>
+#include <android-base/logging.h>
 #include <gui/Surface.h>
+#include <utils/String8.h>
 
 namespace android {
 
@@ -340,13 +340,14 @@ void SpriteController::ensureSurfaceComposerClient() {
     }
 }
 
-sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height, int32_t displayId,
+sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height,
+                                                   ui::LogicalDisplayId displayId,
                                                    bool hideOnMirrored) {
     ensureSurfaceComposerClient();
 
     const sp<SurfaceControl> parent = mParentSurfaceProvider(displayId);
     if (parent == nullptr) {
-        ALOGE("Failed to get the parent surface for pointers on display %d", displayId);
+        LOG(ERROR) << "Failed to get the parent surface for pointers on display " << displayId;
     }
 
     int32_t createFlags = ISurfaceComposerClient::eHidden | ISurfaceComposerClient::eCursorWindow;
@@ -475,7 +476,7 @@ void SpriteController::SpriteImpl::setTransformationMatrix(
     }
 }
 
-void SpriteController::SpriteImpl::setDisplayId(int32_t displayId) {
+void SpriteController::SpriteImpl::setDisplayId(ui::LogicalDisplayId displayId) {
     AutoMutex _l(mController.mLock);
 
     if (mLocked.state.displayId != displayId) {

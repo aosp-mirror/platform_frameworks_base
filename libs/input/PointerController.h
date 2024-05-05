@@ -55,18 +55,18 @@ public:
     void move(float deltaX, float deltaY) override;
     void setPosition(float x, float y) override;
     FloatPoint getPosition() const override;
-    int32_t getDisplayId() const override;
+    ui::LogicalDisplayId getDisplayId() const override;
     void fade(Transition transition) override;
     void unfade(Transition transition) override;
     void setDisplayViewport(const DisplayViewport& viewport) override;
 
     void setPresentation(Presentation presentation) override;
     void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
-                  BitSet32 spotIdBits, int32_t displayId) override;
+                  BitSet32 spotIdBits, ui::LogicalDisplayId displayId) override;
     void clearSpots() override;
     void updatePointerIcon(PointerIconStyle iconId) override;
     void setCustomPointerIcon(const SpriteIcon& icon) override;
-    void setSkipScreenshot(int32_t displayId, bool skip) override;
+    void setSkipScreenshot(ui::LogicalDisplayId displayId, bool skip) override;
 
     virtual void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
@@ -109,11 +109,11 @@ private:
 
     struct Locked {
         Presentation presentation;
-        int32_t pointerDisplayId = ADISPLAY_ID_NONE;
+        ui::LogicalDisplayId pointerDisplayId = ui::ADISPLAY_ID_NONE;
 
         std::vector<gui::DisplayInfo> mDisplayInfos;
-        std::unordered_map<int32_t /* displayId */, TouchSpotController> spotControllers;
-        std::unordered_set<int32_t /* displayId */> displaysToSkipScreenshot;
+        std::unordered_map<ui::LogicalDisplayId, TouchSpotController> spotControllers;
+        std::unordered_set<ui::LogicalDisplayId> displaysToSkipScreenshot;
     } mLocked GUARDED_BY(getLock());
 
     class DisplayInfoListener : public gui::WindowInfosListener {
@@ -132,7 +132,8 @@ private:
     sp<DisplayInfoListener> mDisplayInfoListener;
     const WindowListenerUnregisterConsumer mUnregisterWindowInfosListener;
 
-    const ui::Transform& getTransformForDisplayLocked(int displayId) const REQUIRES(getLock());
+    const ui::Transform& getTransformForDisplayLocked(ui::LogicalDisplayId displayId) const
+            REQUIRES(getLock());
 
     void clearSpotsLocked() REQUIRES(getLock());
 };
@@ -148,7 +149,7 @@ public:
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, int32_t) override {
+    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, ui::LogicalDisplayId) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     void clearSpots() override {
@@ -176,7 +177,7 @@ public:
     FloatPoint getPosition() const override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    int32_t getDisplayId() const override {
+    ui::LogicalDisplayId getDisplayId() const override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     void fade(Transition) override {
@@ -212,7 +213,7 @@ public:
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
-    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, int32_t) override {
+    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, ui::LogicalDisplayId) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
     void clearSpots() override {

@@ -142,7 +142,7 @@ std::optional<FloatRect> PointerController::getBounds() const {
 }
 
 void PointerController::move(float deltaX, float deltaY) {
-    const int32_t displayId = mCursorController.getDisplayId();
+    const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
     vec2 transformed;
     {
         std::scoped_lock lock(getLock());
@@ -153,7 +153,7 @@ void PointerController::move(float deltaX, float deltaY) {
 }
 
 void PointerController::setPosition(float x, float y) {
-    const int32_t displayId = mCursorController.getDisplayId();
+    const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
     vec2 transformed;
     {
         std::scoped_lock lock(getLock());
@@ -164,7 +164,7 @@ void PointerController::setPosition(float x, float y) {
 }
 
 FloatPoint PointerController::getPosition() const {
-    const int32_t displayId = mCursorController.getDisplayId();
+    const ui::LogicalDisplayId displayId = mCursorController.getDisplayId();
     const auto p = mCursorController.getPosition();
     {
         std::scoped_lock lock(getLock());
@@ -173,7 +173,7 @@ FloatPoint PointerController::getPosition() const {
     }
 }
 
-int32_t PointerController::getDisplayId() const {
+ui::LogicalDisplayId PointerController::getDisplayId() const {
     return mCursorController.getDisplayId();
 }
 
@@ -202,7 +202,7 @@ void PointerController::setPresentation(Presentation presentation) {
 }
 
 void PointerController::setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
-                                 BitSet32 spotIdBits, int32_t displayId) {
+                                 BitSet32 spotIdBits, ui::LogicalDisplayId displayId) {
     std::scoped_lock lock(getLock());
     std::array<PointerCoords, MAX_POINTERS> outSpotCoords{};
     const ui::Transform& transform = getTransformForDisplayLocked(displayId);
@@ -286,7 +286,7 @@ void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
     mCursorController.setCustomPointerIcon(icon);
 }
 
-void PointerController::setSkipScreenshot(int32_t displayId, bool skip) {
+void PointerController::setSkipScreenshot(ui::LogicalDisplayId displayId, bool skip) {
     std::scoped_lock lock(getLock());
     if (skip) {
         mLocked.displaysToSkipScreenshot.insert(displayId);
@@ -300,14 +300,14 @@ void PointerController::doInactivityTimeout() {
 }
 
 void PointerController::onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports) {
-    std::unordered_set<int32_t> displayIdSet;
+    std::unordered_set<ui::LogicalDisplayId> displayIdSet;
     for (const DisplayViewport& viewport : viewports) {
         displayIdSet.insert(viewport.displayId);
     }
 
     std::scoped_lock lock(getLock());
     for (auto it = mLocked.spotControllers.begin(); it != mLocked.spotControllers.end();) {
-        int32_t displayId = it->first;
+        ui::LogicalDisplayId displayId = it->first;
         if (!displayIdSet.count(displayId)) {
             /*
              * Ensures that an in-progress animation won't dereference
@@ -326,7 +326,8 @@ void PointerController::onDisplayInfosChangedLocked(
     mLocked.mDisplayInfos = displayInfo;
 }
 
-const ui::Transform& PointerController::getTransformForDisplayLocked(int displayId) const {
+const ui::Transform& PointerController::getTransformForDisplayLocked(
+        ui::LogicalDisplayId displayId) const {
     const auto& di = mLocked.mDisplayInfos;
     auto it = std::find_if(di.begin(), di.end(), [displayId](const gui::DisplayInfo& info) {
         return info.displayId == displayId;
@@ -339,7 +340,8 @@ std::string PointerController::dump() {
     std::scoped_lock lock(getLock());
     dump += StringPrintf(INDENT2 "Presentation: %s\n",
                          ftl::enum_string(mLocked.presentation).c_str());
-    dump += StringPrintf(INDENT2 "Pointer Display ID: %" PRIu32 "\n", mLocked.pointerDisplayId);
+    dump += StringPrintf(INDENT2 "Pointer Display ID: %s\n",
+                         mLocked.pointerDisplayId.toString().c_str());
     dump += StringPrintf(INDENT2 "Viewports:\n");
     for (const auto& info : mLocked.mDisplayInfos) {
         info.dump(dump, INDENT3);

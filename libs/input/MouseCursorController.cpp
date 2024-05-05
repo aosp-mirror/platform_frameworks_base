@@ -117,7 +117,7 @@ FloatPoint MouseCursorController::getPosition() const {
     return {mLocked.pointerX, mLocked.pointerY};
 }
 
-int32_t MouseCursorController::getDisplayId() const {
+ui::LogicalDisplayId MouseCursorController::getDisplayId() const {
     std::scoped_lock lock(mLock);
     return mLocked.viewport.displayId;
 }
@@ -467,10 +467,10 @@ void MouseCursorController::startAnimationLocked() REQUIRES(mLock) {
 
     std::function<bool(nsecs_t)> func = std::bind(&MouseCursorController::doAnimations, this, _1);
     /*
-     * Using -1 for displayId here to avoid removing the callback
+     * Using ui::ADISPLAY_ID_NONE for displayId here to avoid removing the callback
      * if a TouchSpotController with the same display is removed.
      */
-    mContext.addAnimationCallback(-1, func);
+    mContext.addAnimationCallback(ui::ADISPLAY_ID_NONE, func);
 }
 
 } // namespace android
