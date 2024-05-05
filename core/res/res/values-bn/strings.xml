@@ -1180,7 +1180,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max}টির মধ্যে একটি স্টার}one{#টির মধ্যে {max}টি স্টার}other{#টির মধ্যে {max}টি স্টার}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"কাজ চলছে"</string>
     <string name="whichApplication" msgid="5432266899591255759">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ব্যবহার করে কাজটি করুন"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"এর মাধ্যমে খুলুন"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s দিয়ে খুলুন"</string>
@@ -1206,7 +1206,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s দিয়ে ছবি তুলুন"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"ছবি তুলুন"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"এই ক্রিয়াটির জন্য এটিকে ডিফল্টরুপে ব্যবহার করুন৷"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"আলাদা কোনো অ্যাপ্লিকেশান ব্যবহার করুন"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"আলাদা কোনও অ্যাপ ব্যবহার করুন"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"সিস্টেম সেটিংস &gt; অ্যাপ্স &gt; ডাউনলোড করাগুলি এ গিয়ে ডিফল্ট সরিয়ে দিন৷"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"একটি ক্রিয়া বেছে নিন"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USB ডিভাইসটির জন্য একটি অ্যাপ্লিকেশান বেছে নিন"</string>

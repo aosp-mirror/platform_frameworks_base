@@ -1926,7 +1926,7 @@
     <string name="call_notification_answer_video_action" msgid="2086030940195382249">"Видео"</string>
     <string name="call_notification_decline_action" msgid="3700345945214000726">"Четке кагуу"</string>
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Чалууну бүтүрүү"</string>
-    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Кирүүчү чалуу"</string>
+    <string name="call_notification_incoming_text" msgid="6143109825406638201">"Чалып жатат"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Учурдагы чалуу"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Кирүүчү чалууну иргөө"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Категорияларга бөлүнгөн эмес"</string>
