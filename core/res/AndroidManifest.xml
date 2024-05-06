@@ -178,6 +178,7 @@
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REPLY" />
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL" />
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST" />
+    <protected-broadcast android:name="android.bluetooth.device.action.KEY_MISSING" />
     <protected-broadcast android:name="android.bluetooth.device.action.SDP_RECORD" />
     <protected-broadcast android:name="android.bluetooth.device.action.BATTERY_LEVEL_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.REMOTE_ISSUE_OCCURRED" />
