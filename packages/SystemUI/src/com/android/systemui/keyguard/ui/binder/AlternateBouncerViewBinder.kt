@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.graphics.PixelFormat
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -95,11 +96,11 @@ constructor(
         applicationScope.launch("$TAG#alternateBouncerWindowViewModel") {
             alternateBouncerWindowViewModel.get().alternateBouncerWindowRequired.collect {
                 addAlternateBouncerWindowView ->
+                Log.d(TAG, "alternateBouncerWindowRequired=$addAlternateBouncerWindowView")
                 if (addAlternateBouncerWindowView) {
                     addViewToWindowManager()
-                    val scrim =
+                    val scrim: ScrimView =
                         alternateBouncerView!!.requireViewById(R.id.alternate_bouncer_scrim)
-                            as ScrimView
                     scrim.viewAlpha = 0f
                     bind(alternateBouncerView!!, alternateBouncerDependencies.get())
                 } else {
