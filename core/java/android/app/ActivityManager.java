@@ -6257,6 +6257,29 @@ public class ActivityManager {
      * {@link #RESTRICTION_LEVEL_ADAPTIVE} is a normal state, where there is default lifecycle
      * management applied to the app. Also, {@link #RESTRICTION_LEVEL_EXEMPTED} is used when the
      * app is being put in a power-save allowlist.
+     * <p>
+     * Example arguments when user force-stops an app from Settings:
+     * <pre>
+     * noteAppRestrictionEnabled(
+     *     "com.example.app",
+     *     appUid,
+     *     RESTRICTION_LEVEL_FORCE_STOPPED,
+     *     true,
+     *     RESTRICTION_REASON_USER,
+     *     "settings",
+     *     0);
+     * </pre>
+     * Example arguments when app is put in restricted standby bucket for exceeding X hours of jobs:
+     * <pre>
+     * noteAppRestrictionEnabled(
+     *     "com.example.app",
+     *     appUid,
+     *     RESTRICTION_LEVEL_RESTRICTED_BUCKET,
+     *     true,
+     *     RESTRICTION_REASON_SYSTEM_HEALTH,
+     *     "job_duration",
+     *     X * 3600 * 1000L);
+     * </pre>
      *
      * @param packageName the package name of the app
      * @param uid the uid of the app
@@ -6264,11 +6287,20 @@ public class ActivityManager {
      * @param enabled whether the state is being applied or removed
      * @param reason the reason for the restriction state change, from {@code RestrictionReason}
      * @param subReason a string sub reason limited to 16 characters that specifies additional
-     *                  information about the reason for restriction.
+     *                  information about the reason for restriction. This string must only contain
+     *                  reasons related to excessive system resource usage or in some cases,
+     *                  source of the restriction. This string must not contain any details that
+     *                  identify user behavior beyond their actions to restrict/unrestrict/launch
+     *                  apps in some way.
+     *                  Examples of system resource usage: wakelock, wakeups, mobile_data,
+     *                  binder_calls, memory, excessive_threads, excessive_cpu, gps_scans, etc.
+     *                  Examples of user actions: settings, notification, command_line, launch, etc.
+     *
      * @param threshold for reasons that are due to exceeding some threshold, the threshold value
      *                  must be specified. The unit of the threshold depends on the reason and/or
      *                  subReason. For time, use milliseconds. For memory, use KB. For count, use
-     *                  the actual count or normalized as per-hour. For power, use milliwatts. Etc.
+     *                  the actual count or if rate limited, normalized per-hour. For power,
+     *                  use milliwatts. For CPU, use mcycles.
      *
      * @hide
      */

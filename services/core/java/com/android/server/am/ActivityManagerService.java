@@ -20269,7 +20269,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int userId = UserHandle.getCallingUserId();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            if (uid == -1) {
+            if (uid == INVALID_UID) {
                 uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
             }
             mAppRestrictionController.noteAppRestrictionEnabled(packageName, uid, restrictionType,

@@ -2387,8 +2387,8 @@ public final class AppRestrictionController {
 
         // Limit the length of the free-form subReason string
         if (subReason != null && subReason.length() > RESTRICTION_SUBREASON_MAX_LENGTH) {
+            Slog.e(TAG, "subReason is too long, truncating " + subReason);
             subReason = subReason.substring(0, RESTRICTION_SUBREASON_MAX_LENGTH);
-            Slog.e(TAG, "Subreason is too long, truncating: " + subReason);
         }
 
         // Log the restriction reason
