@@ -37,6 +37,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -62,6 +63,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HwBinder;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -89,6 +91,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.usb.flags.Flags;
 import com.android.server.usb.hal.gadget.UsbGadgetHal;
 import com.android.server.usb.hal.gadget.UsbGadgetHalInstance;
 import com.android.server.utils.EventLogger;
@@ -586,6 +589,22 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
          */
         protected static final String USB_PERSISTENT_CONFIG_PROPERTY = "persist.sys.usb.config";
 
+        protected static final String MTP_PACKAGE_NAME = "com.android.mtp";
+        protected static final String MTP_SERVICE_CLASS_NAME = "com.android.mtp.MtpService";
+
+        private boolean mIsMtpServiceBound = false;
+
+        /**
+         * {@link ServiceConnection} for {@link MtpService}.
+         */
+        private ServiceConnection mMtpServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder service) {}
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {}
+        };
+
         UsbHandler(Looper looper, Context context, UsbDeviceManager deviceManager,
                 UsbAlsaManager alsaManager, UsbPermissionManager permissionManager) {
             super(looper);
@@ -915,6 +934,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         private void updateUsbFunctions() {
             updateMidiFunction();
+            updateMtpFunction();
         }
 
         private void updateMidiFunction() {
@@ -939,6 +959,67 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             }
             mUsbAlsaManager.setPeripheralMidiState(
                     mMidiEnabled && mConfigured, mMidiCard, mMidiDevice);
+        }
+
+        /**
+         * Bind to MtpService when MTP or PTP is enabled. This is done to prevent activity manager
+         * from freezing the corresponding process.
+         */
+        private void updateMtpFunction() {
+            if (!Flags.enableBindToMtpService()) {
+                return;
+            }
+
+            boolean mtpEnabled = ((mCurrentFunctions & UsbManager.FUNCTION_MTP) != 0);
+            boolean ptpEnabled = ((mCurrentFunctions & UsbManager.FUNCTION_PTP) != 0);
+
+            if (DEBUG) {
+                Slog.d(TAG, "updateMtpFunction "
+                        + ", mtpEnabled: " + mtpEnabled
+                        + ", ptpEnabled: " + ptpEnabled
+                        + ", mIsMtpServiceBound: " + mIsMtpServiceBound
+                );
+            }
+
+            if (mConfigured && (mtpEnabled || ptpEnabled)) {
+                bindToMtpService();
+            } else if (mIsMtpServiceBound) {
+                unbindMtpService();
+            }
+        }
+
+        private void bindToMtpService() {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(MTP_PACKAGE_NAME, MTP_SERVICE_CLASS_NAME));
+
+            if (DEBUG) Slog.d(TAG, "Binding to MtpService");
+
+            try {
+                mIsMtpServiceBound = mContext.bindServiceAsUser(
+                    intent,
+                    mMtpServiceConnection,
+                    Context.BIND_AUTO_CREATE,
+                    UserHandle.CURRENT
+                );
+            } catch (SecurityException exception) {
+                Slog.e(TAG, "Unable to bind to MtpService due to SecurityException", exception);
+            }
+
+            // Unbinding from the service if binding was not successful to release the connection.
+            // https://developer.android.com/reference/android/content/Context#bindService(android.content.Intent,%20android.content.ServiceConnection,%20int)
+            if (!mIsMtpServiceBound) {
+                unbindMtpService();
+                Slog.e(TAG, "Binding to MtpService failed");
+            }
+
+            if (DEBUG && mIsMtpServiceBound) Slog.d(TAG, "Successfully bound to MtpService");
+        }
+
+        private void unbindMtpService() {
+            if (DEBUG) Slog.d(TAG, "Unbinding from MtpService");
+
+            mContext.unbindService(mMtpServiceConnection);
+            mIsMtpServiceBound = false;
         }
 
         private void setScreenUnlockedFunctions(int operationId) {
