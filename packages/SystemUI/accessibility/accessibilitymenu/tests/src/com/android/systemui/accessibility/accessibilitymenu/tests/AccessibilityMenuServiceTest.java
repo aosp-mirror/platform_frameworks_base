@@ -31,7 +31,6 @@ import static com.android.systemui.accessibility.accessibilitymenu.Accessibility
 import static com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService.PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
@@ -90,6 +89,7 @@ public class AccessibilityMenuServiceTest {
     private static Instrumentation sInstrumentation;
     private static UiAutomation sUiAutomation;
     private static UiDevice sUiDevice;
+    private static String sLockSettings;
     private static final AtomicInteger sLastGlobalAction = new AtomicInteger(NO_GLOBAL_ACTION);
     private static final AtomicBoolean sOpenBlocked = new AtomicBoolean(false);
 
@@ -108,6 +108,11 @@ public class AccessibilityMenuServiceTest {
         sUiAutomation.adoptShellPermissionIdentity(
                 UiAutomation.ALL_PERMISSIONS.toArray(new String[0]));
         sUiDevice = UiDevice.getInstance(sInstrumentation);
+        sLockSettings = sUiDevice.executeShellCommand("locksettings get-disabled");
+        Log.i(TAG, "locksettings get-disabled returns " + sLockSettings);
+        // Some test in the test class requires the device to be in lock screen
+        // ensure we have locksettings enabled before running the tests
+        sUiDevice.executeShellCommand("locksettings set-disabled false");
 
         final Context context = sInstrumentation.getTargetContext();
         sAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -157,9 +162,10 @@ public class AccessibilityMenuServiceTest {
     }
 
     @AfterClass
-    public static void classTeardown() {
+    public static void classTeardown() throws IOException {
         Settings.Secure.putString(sInstrumentation.getTargetContext().getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, "");
+        sUiDevice.executeShellCommand("locksettings set-disabled " + sLockSettings);
     }
 
     @Before
@@ -184,17 +190,17 @@ public class AccessibilityMenuServiceTest {
         return root != null && root.getPackageName().toString().equals(PACKAGE_NAME);
     }
 
-    private static void wakeUpScreen() throws IOException {
+    private static void wakeUpScreen() {
         sUiDevice.pressKeyCode(KeyEvent.KEYCODE_WAKEUP);
         WaitUtils.waitForValueToSettle("Screen On", AccessibilityMenuServiceTest::isScreenOn);
-        assertWithMessage("Screen is on").that(isScreenOn()).isTrue();
+        WaitUtils.ensureThat("Screen is on", AccessibilityMenuServiceTest::isScreenOn);
     }
 
-    private static void closeScreen() throws Throwable {
+    private static void closeScreen() {
         // go/adb-cheats#lock-screen
         sUiDevice.pressKeyCode(KeyEvent.KEYCODE_SLEEP);
         WaitUtils.waitForValueToSettle("Screen Off", AccessibilityMenuServiceTest::isScreenOff);
-        assertWithMessage("Screen is off").that(isScreenOff()).isTrue();
+        WaitUtils.ensureThat("Screen is off", AccessibilityMenuServiceTest::isScreenOff);
         WaitUtils.ensureThat(
                 "Screen is locked", () -> sKeyguardManager.isKeyguardLocked());
     }
