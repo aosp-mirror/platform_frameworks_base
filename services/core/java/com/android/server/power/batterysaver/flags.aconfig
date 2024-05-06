@@ -3,7 +3,7 @@ container: "system"
 
 flag {
   name: "update_auto_turn_on_notification_string_and_action"
-  namespace: "battery_saver"
+  namespace: "power_optimization"
   description: "Improve the string and hightligh settings item for battery saver auto-turn-on notification"
   bug: "336960905"
   metadata {
