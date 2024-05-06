@@ -29,8 +29,10 @@ import com.android.systemui.qs.panels.domain.interactor.NoopGridConsistencyInter
 import com.android.systemui.qs.panels.shared.model.GridConsistencyLog
 import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
+import com.android.systemui.qs.panels.shared.model.StretchedGridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
+import com.android.systemui.qs.panels.ui.compose.StretchedGridLayout
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -63,10 +65,25 @@ interface PanelsModule {
         }
 
         @Provides
+        @IntoSet
+        fun provideStretchedGridLayout(
+            gridLayout: StretchedGridLayout
+        ): Pair<GridLayoutType, GridLayout> {
+            return Pair(StretchedGridLayoutType, gridLayout)
+        }
+
+        @Provides
         fun provideGridLayoutMap(
             entries: Set<@JvmSuppressWildcards Pair<GridLayoutType, GridLayout>>
         ): Map<GridLayoutType, GridLayout> {
             return entries.toMap()
+        }
+
+        @Provides
+        fun provideGridLayoutTypes(
+            entries: Set<@JvmSuppressWildcards Pair<GridLayoutType, GridLayout>>
+        ): Set<GridLayoutType> {
+            return entries.map { it.first }.toSet()
         }
 
         @Provides
@@ -75,6 +92,14 @@ interface PanelsModule {
             consistencyInteractor: InfiniteGridConsistencyInteractor
         ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
             return Pair(InfiniteGridLayoutType, consistencyInteractor)
+        }
+
+        @Provides
+        @IntoSet
+        fun provideStretchedGridConsistencyInteractor(
+            consistencyInteractor: NoopGridConsistencyInteractor
+        ): Pair<GridLayoutType, GridTypeConsistencyInteractor> {
+            return Pair(StretchedGridLayoutType, consistencyInteractor)
         }
 
         @Provides
