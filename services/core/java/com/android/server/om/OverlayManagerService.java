@@ -89,6 +89,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.pm.KnownPackages;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.pkg.PackageState;
 
@@ -289,6 +290,9 @@ public final class OverlayManagerService extends SystemService {
             getContext().registerReceiverAsUser(new UserReceiver(), UserHandle.ALL,
                     userFilter, null, null);
 
+            UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+            umi.addUserLifecycleListener(new UserLifecycleListener());
+
             restoreSettings();
 
             // Wipe all shell overlays on boot, to recover from a potentially broken device
@@ -339,6 +343,7 @@ public final class OverlayManagerService extends SystemService {
         if (newUserId == mPrevStartedUserId) {
             return;
         }
+        Slog.i(TAG, "Updating overlays for starting user " + newUserId);
         try {
             traceBegin(TRACE_TAG_RRO, "OMS#onStartUser " + newUserId);
             // ensure overlays in the settings are up-to-date, and propagate
@@ -515,14 +520,46 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
+    /**
+     * Indicates that the given user is of great importance so that when it is created, we quickly
+     * update its overlays by using a Listener mechanism rather than a Broadcast mechanism. This
+     * is especially important for {@link UserManager#isHeadlessSystemUserMode() HSUM}'s MainUser,
+     * which is created and switched-to immediately on first boot.
+     */
+    private static boolean isHighPriorityUserCreation(UserInfo user) {
+        // TODO: Consider extending this to all created users (guarded behind a flag in that case).
+        return user != null && user.isMain();
+    }
+
+    private final class UserLifecycleListener implements UserManagerInternal.UserLifecycleListener {
+        @Override
+        public void onUserCreated(UserInfo user, Object token) {
+            if (isHighPriorityUserCreation(user)) {
+                final int userId = user.id;
+                try {
+                    Slog.i(TAG, "Updating overlays for onUserCreated " + userId);
+                    traceBegin(TRACE_TAG_RRO, "OMS#onUserCreated " + userId);
+                    synchronized (mLock) {
+                        updatePackageManagerLocked(mImpl.updateOverlaysForUser(userId));
+                    }
+                } finally {
+                    traceEnd(TRACE_TAG_RRO);
+                }
+            }
+        }
+    }
+
     private final class UserReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(@NonNull final Context context, @NonNull final Intent intent) {
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
             switch (intent.getAction()) {
                 case ACTION_USER_ADDED:
-                    if (userId != UserHandle.USER_NULL) {
+                    UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+                    UserInfo userInfo = umi.getUserInfo(userId);
+                    if (userId != UserHandle.USER_NULL && !isHighPriorityUserCreation(userInfo)) {
                         try {
+                            Slog.i(TAG, "Updating overlays for added user " + userId);
                             traceBegin(TRACE_TAG_RRO, "OMS ACTION_USER_ADDED");
                             synchronized (mLock) {
                                 updatePackageManagerLocked(mImpl.updateOverlaysForUser(userId));
