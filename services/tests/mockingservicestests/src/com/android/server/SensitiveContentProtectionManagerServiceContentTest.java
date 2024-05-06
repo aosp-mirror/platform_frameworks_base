@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.pm.PackageManagerInternal;
 import android.media.projection.MediaProjectionInfo;
@@ -108,7 +107,7 @@ public class SensitiveContentProtectionManagerServiceContentTest {
         mMediaPorjectionCallback.onStart(exemptedRecorderPackage);
         mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
                 mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -135,7 +134,7 @@ public class SensitiveContentProtectionManagerServiceContentTest {
         // when screen sharing is not active, no app window should be blocked.
         mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
                 mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -158,8 +157,7 @@ public class SensitiveContentProtectionManagerServiceContentTest {
         mMediaPorjectionCallback.onStart(mMediaProjectionInfo);
         mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
                 mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
-        verify(mWindowManager, never())
-                .addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -168,7 +166,7 @@ public class SensitiveContentProtectionManagerServiceContentTest {
         mMediaProjectionCallbackCaptor.getValue().onStart(mMediaProjectionInfo);
         mSensitiveContentProtectionManagerService.setSensitiveContentProtection(
                 mPackageInfo.getWindowToken(), mPackageInfo.getPkg(), mPackageInfo.getUid(), true);
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     private void mockDisabledViaDeveloperOption() {

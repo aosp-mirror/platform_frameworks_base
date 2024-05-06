@@ -53,6 +53,7 @@ import static android.service.dreams.Flags.dreamHandlesConfirmKeys;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.flags.Flags.sensitiveContentAppProtection;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -147,6 +148,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerInternal.OnWindowRemovedListener;
 import static com.android.server.wm.WindowManagerServiceDumpProto.BACK_NAVIGATION;
 import static com.android.server.wm.WindowManagerServiceDumpProto.DISPLAY_FROZEN;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_APP;
@@ -489,6 +491,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final RemoteCallbackList<IKeyguardLockedStateListener> mKeyguardLockedStateListeners =
             new RemoteCallbackList<>();
+
+    private final List<OnWindowRemovedListener> mOnWindowRemovedListeners = new ArrayList<>();
+
     private boolean mDispatchedKeyguardLockedState = false;
 
     // VR Vr2d Display Id.
@@ -2073,7 +2078,11 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void postWindowRemoveCleanupLocked(WindowState win) {
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "postWindowRemoveCleanupLocked: %s", win);
-        mWindowMap.remove(win.mClient.asBinder());
+        final IBinder client = win.mClient.asBinder();
+        mWindowMap.remove(client);
+        if (sensitiveContentAppProtection()) {
+            notifyWindowRemovedListeners(client);
+        }
 
         final DisplayContent dc = win.getDisplayContent();
         dc.getDisplayRotation().markForSeamlessRotation(win, false /* seamlesslyRotated */);
@@ -5333,6 +5342,23 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             mWindowChangeListeners.remove(listener);
         }
+    }
+
+    private void notifyWindowRemovedListeners(IBinder client) {
+        OnWindowRemovedListener[] windowRemovedListeners;
+        synchronized (mGlobalLock) {
+            if (mOnWindowRemovedListeners.isEmpty()) {
+                return;
+            }
+            windowRemovedListeners = new OnWindowRemovedListener[mOnWindowRemovedListeners.size()];
+            mOnWindowRemovedListeners.toArray(windowRemovedListeners);
+        }
+        mH.post(() -> {
+            int size = windowRemovedListeners.length;
+            for (int i = 0; i < size; i++) {
+                windowRemovedListeners[i].onWindowRemoved(client);
+            }
+        });
     }
 
     private void notifyWindowsChanged() {
@@ -8864,6 +8890,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (sensitiveContentImprovements()) {
                     mCaptureBlockedToastShownUids.clear();
                 }
+            }
+        }
+
+        @Override
+        public void registerOnWindowRemovedListener(OnWindowRemovedListener listener) {
+            synchronized (mGlobalLock) {
+                mOnWindowRemovedListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void unregisterOnWindowRemovedListener(OnWindowRemovedListener listener) {
+            synchronized (mGlobalLock) {
+                mOnWindowRemovedListeners.remove(listener);
             }
         }
 

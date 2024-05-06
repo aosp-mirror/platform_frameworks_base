@@ -30,7 +30,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManagerInternal;
@@ -102,6 +101,8 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
     @Captor
     ArgumentCaptor<MediaProjectionManager.Callback> mMediaProjectionCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<ArraySet<PackageInfo>> mPackageInfoCaptor;
 
     @Mock
     private MediaProjectionManager mProjectionManager;
@@ -309,7 +310,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mMediaProjectionCallbackCaptor.getValue().onStart(mediaProjectionInfo);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -469,7 +470,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mMediaProjectionCallbackCaptor.getValue().onStart(createMediaProjectionInfo());
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -480,7 +481,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -495,7 +496,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -519,7 +520,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -530,7 +531,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -541,7 +542,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -557,7 +558,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -574,7 +575,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
 
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -586,7 +587,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mMediaProjectionCallbackCaptor.getValue().onStart(createMediaProjectionInfo());
         mSensitiveContentProtectionManagerService.mNotificationListener.onListenerConnected();
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -598,7 +599,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationRankingUpdate(mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verifyNoBlockOrClearInteractionWithWindowManager();
     }
 
     @Test
@@ -614,7 +615,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationRankingUpdate(mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verifyNoBlockOrClearInteractionWithWindowManager();
     }
 
     @Test
@@ -640,7 +641,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationRankingUpdate(mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -652,7 +653,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationRankingUpdate(mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -666,7 +667,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationRankingUpdate(null);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -684,7 +685,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationRankingUpdate(mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -702,7 +703,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationRankingUpdate(mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -715,7 +716,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationRankingUpdate(mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -727,7 +728,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationPosted(mNotification1, mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verifyNoBlockOrClearInteractionWithWindowManager();
     }
 
     @Test
@@ -743,7 +744,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationPosted(mNotification1, mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verifyNoBlockOrClearInteractionWithWindowManager();
     }
 
     @Test
@@ -773,7 +774,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationPosted(mNotification2, mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -787,7 +788,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationPosted(null, mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -801,7 +802,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationPosted(mNotification1, null);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -816,7 +817,7 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationPosted(mNotification1, mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     @Test
@@ -829,7 +830,14 @@ public class SensitiveContentProtectionManagerServiceNotificationTest {
         mSensitiveContentProtectionManagerService.mNotificationListener
                 .onNotificationPosted(mNotification1, mRankingMap);
 
-        verifyZeroInteractions(mWindowManager);
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
+    }
+
+    private void verifyNoBlockOrClearInteractionWithWindowManager() {
+        verify(mWindowManager, never()).addBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
+        verify(mWindowManager, never()).clearBlockedApps();
+        verify(mWindowManager, never())
+                .removeBlockScreenCaptureForApps(mPackageInfoCaptor.capture());
     }
 
     private void mockDisabledViaDevelopOption() {
