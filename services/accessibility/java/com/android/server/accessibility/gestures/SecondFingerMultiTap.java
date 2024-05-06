@@ -72,14 +72,14 @@ class SecondFingerMultiTap extends GestureMatcher {
         mSecondFingerPointerId = event.getPointerId(index);
         cancelAfterTapTimeout(event, rawEvent, policyFlags);
         if (Float.isNaN(mBaseX) && Float.isNaN(mBaseY)) {
-            mBaseX = event.getX();
-            mBaseY = event.getY();
+            mBaseX = event.getX(index);
+            mBaseY = event.getY(index);
         }
         if (!isSecondFingerInsideSlop(rawEvent, mDoubleTapSlop)) {
             cancelGesture(event, rawEvent, policyFlags);
         }
-        mBaseX = event.getX();
-        mBaseY = event.getY();
+        mBaseX = event.getX(index);
+        mBaseY = event.getY(index);
     }
 
     @Override
