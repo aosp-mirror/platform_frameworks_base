@@ -465,10 +465,13 @@ public class PackageInstallerActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         while (!mActiveUnknownSourcesListeners.isEmpty()) {
             unregister(mActiveUnknownSourcesListeners.get(0));
         }
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
+        super.onDestroy();
     }
 
     private void bindUi() {
