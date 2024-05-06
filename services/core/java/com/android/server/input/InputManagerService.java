@@ -282,33 +282,9 @@ public class InputManagerService extends IInputManager.Stub
     // WARNING: Do not call other services outside of input while holding this lock.
     private final Object mAdditionalDisplayInputPropertiesLock = new Object();
 
-    // Forces the PointerController to target a specific display id.
-    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private int mOverriddenPointerDisplayId = Display.INVALID_DISPLAY;
-
-    // PointerController is the source of truth of the pointer display. This is the value of the
-    // latest pointer display id reported by PointerController.
-    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private int mAcknowledgedPointerDisplayId = Display.INVALID_DISPLAY;
-    // This is the latest display id that IMS has requested PointerController to use. If there are
-    // no devices that can control the pointer, PointerController may end up disregarding this
-    // value.
-    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private int mRequestedPointerDisplayId = Display.INVALID_DISPLAY;
     @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private final SparseArray<AdditionalDisplayInputProperties> mAdditionalDisplayInputProperties =
             new SparseArray<>();
-    // This contains the per-display properties that are currently applied by native code. It should
-    // be kept in sync with the properties for mRequestedPointerDisplayId.
-    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private final AdditionalDisplayInputProperties mCurrentDisplayProperties =
-            new AdditionalDisplayInputProperties();
-    // TODO(b/293587049): Pointer Icon Refactor: There can be more than one pointer icon
-    // visible at once. Update this to support multi-pointer use cases.
-    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private int mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
-    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private PointerIcon mPointerIcon;
 
     // Holds all the registered gesture monitors that are implemented as spy windows. The spy
     // windows are mapped by their InputChannel tokens.
@@ -617,14 +593,9 @@ public class InputManagerService extends IInputManager.Stub
         }
         mNative.setDisplayViewports(vArray);
 
-        // Attempt to update the pointer display when viewports change when there is no override.
+        // Attempt to update the default pointer display when the viewports change.
         // Take care to not make calls to window manager while holding internal locks.
-        final int pointerDisplayId = mWindowManagerCallbacks.getPointerDisplayId();
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            if (mOverriddenPointerDisplayId == Display.INVALID_DISPLAY) {
-                updatePointerDisplayIdLocked(pointerDisplayId);
-            }
-        }
+        mNative.setPointerDisplayId(mWindowManagerCallbacks.getPointerDisplayId());
     }
 
     /**
@@ -1353,82 +1324,9 @@ public class InputManagerService extends IInputManager.Stub
                 properties -> properties.pointerIconVisible = visible);
     }
 
-    /**
-     * Update the display on which the mouse pointer is shown.
-     *
-     * @return true if the pointer displayId changed, false otherwise.
-     */
-    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private boolean updatePointerDisplayIdLocked(int pointerDisplayId) {
-        if (mRequestedPointerDisplayId == pointerDisplayId) {
-            return false;
-        }
-        mRequestedPointerDisplayId = pointerDisplayId;
-        mNative.setPointerDisplayId(pointerDisplayId);
-        applyAdditionalDisplayInputProperties();
-        return true;
-    }
-
     private void handlePointerDisplayIdChanged(PointerDisplayIdChangedArgs args) {
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            mAcknowledgedPointerDisplayId = args.mPointerDisplayId;
-            // Notify waiting threads that the display of the mouse pointer has changed.
-            mAdditionalDisplayInputPropertiesLock.notifyAll();
-        }
         mWindowManagerCallbacks.notifyPointerDisplayIdChanged(
                 args.mPointerDisplayId, args.mXPosition, args.mYPosition);
-    }
-
-    private boolean setVirtualMousePointerDisplayIdBlocking(int overrideDisplayId) {
-        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
-            throw new IllegalStateException(
-                    "This must not be used when PointerChoreographer is enabled");
-        }
-        final boolean isRemovingOverride = overrideDisplayId == Display.INVALID_DISPLAY;
-
-        // Take care to not make calls to window manager while holding internal locks.
-        final int resolvedDisplayId = isRemovingOverride
-                ? mWindowManagerCallbacks.getPointerDisplayId()
-                : overrideDisplayId;
-
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            mOverriddenPointerDisplayId = overrideDisplayId;
-
-            if (!updatePointerDisplayIdLocked(resolvedDisplayId)
-                    && mAcknowledgedPointerDisplayId == resolvedDisplayId) {
-                // The requested pointer display is already set.
-                return true;
-            }
-            if (isRemovingOverride && mAcknowledgedPointerDisplayId == Display.INVALID_DISPLAY) {
-                // The pointer display override is being removed, but the current pointer display
-                // is already invalid. This can happen when the PointerController is destroyed as a
-                // result of the removal of all input devices that can control the pointer.
-                return true;
-            }
-            try {
-                // The pointer display changed, so wait until the change has propagated.
-                mAdditionalDisplayInputPropertiesLock.wait(5_000 /*mills*/);
-            } catch (InterruptedException ignored) {
-            }
-            // This request succeeds in two cases:
-            // - This request was to remove the override, in which case the new pointer display
-            //   could be anything that WM has set.
-            // - We are setting a new override, in which case the request only succeeds if the
-            //   reported new displayId is the one we requested. This check ensures that if two
-            //   competing overrides are requested in succession, the caller can be notified if one
-            //   of them fails.
-            return  isRemovingOverride || mAcknowledgedPointerDisplayId == overrideDisplayId;
-        }
-    }
-
-    private int getVirtualMousePointerDisplayId() {
-        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
-            throw new IllegalStateException(
-                    "This must not be used when PointerChoreographer is enabled");
-        }
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            return mOverriddenPointerDisplayId;
-        }
     }
 
     private void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible) {
@@ -1715,31 +1613,13 @@ public class InputManagerService extends IInputManager.Stub
     // Binder call
     @Override
     public void setPointerIconType(int iconType) {
-        if (iconType == PointerIcon.TYPE_CUSTOM) {
-            throw new IllegalArgumentException("Use setCustomPointerIcon to set custom pointers");
-        }
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            mPointerIcon = null;
-            mPointerIconType = iconType;
-
-            if (!mCurrentDisplayProperties.pointerIconVisible) return;
-
-            mNative.setPointerIconType(mPointerIconType);
-        }
+        // TODO(b/311416205): Remove.
     }
 
     // Binder call
     @Override
     public void setCustomPointerIcon(PointerIcon icon) {
-        Objects.requireNonNull(icon);
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            mPointerIconType = PointerIcon.TYPE_CUSTOM;
-            mPointerIcon = icon;
-
-            if (!mCurrentDisplayProperties.pointerIconVisible) return;
-
-            mNative.setCustomPointerIcon(mPointerIcon);
-        }
+        // TODO(b/311416205): Remove.
     }
 
     // Binder call
@@ -1747,12 +1627,7 @@ public class InputManagerService extends IInputManager.Stub
     public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
             IBinder inputToken) {
         Objects.requireNonNull(icon);
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            mPointerIconType = icon.getType();
-            mPointerIcon = mPointerIconType == PointerIcon.TYPE_CUSTOM ? icon : null;
-
-            return mNative.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
-        }
+        return mNative.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
     }
 
     /**
@@ -2281,28 +2156,24 @@ public class InputManagerService extends IInputManager.Stub
 
     private void dumpDisplayInputPropertiesValues(IndentingPrintWriter pw) {
         synchronized (mAdditionalDisplayInputPropertiesLock) {
-            if (mAdditionalDisplayInputProperties.size() != 0) {
-                pw.println("mAdditionalDisplayInputProperties:");
-                pw.increaseIndent();
+            pw.println("mAdditionalDisplayInputProperties:");
+            pw.increaseIndent();
+            try {
+                if (mAdditionalDisplayInputProperties.size() == 0) {
+                    pw.println("<none>");
+                    return;
+                }
                 for (int i = 0; i < mAdditionalDisplayInputProperties.size(); i++) {
-                    pw.println("displayId: "
-                            + mAdditionalDisplayInputProperties.keyAt(i));
+                    pw.println("displayId: " + mAdditionalDisplayInputProperties.keyAt(i));
                     final AdditionalDisplayInputProperties properties =
                             mAdditionalDisplayInputProperties.valueAt(i);
                     pw.println("mousePointerAccelerationEnabled: "
                             + properties.mousePointerAccelerationEnabled);
                     pw.println("pointerIconVisible: " + properties.pointerIconVisible);
                 }
+            } finally {
                 pw.decreaseIndent();
             }
-            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
-                pw.println("mOverriddenPointerDisplayId: " + mOverriddenPointerDisplayId);
-            }
-
-            pw.println("mAcknowledgedPointerDisplayId=" + mAcknowledgedPointerDisplayId);
-            pw.println("mRequestedPointerDisplayId=" + mRequestedPointerDisplayId);
-            pw.println("mPointerIconType=" + PointerIcon.typeToString(mPointerIconType));
-            pw.println("mPointerIcon=" + mPointerIcon);
         }
     }
     private boolean checkCallingPermission(String permission, String func) {
@@ -3268,13 +3139,12 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public boolean setVirtualMousePointerDisplayId(int pointerDisplayId) {
-            return InputManagerService.this
-                    .setVirtualMousePointerDisplayIdBlocking(pointerDisplayId);
+            return false;
         }
 
         @Override
         public int getVirtualMousePointerDisplayId() {
-            return InputManagerService.this.getVirtualMousePointerDisplayId();
+            return Display.INVALID_DISPLAY;
         }
 
         @Override
@@ -3413,44 +3283,6 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
-    private void applyAdditionalDisplayInputProperties() {
-        synchronized (mAdditionalDisplayInputPropertiesLock) {
-            AdditionalDisplayInputProperties properties =
-                    mAdditionalDisplayInputProperties.get(mRequestedPointerDisplayId);
-            if (properties == null) properties = DEFAULT_ADDITIONAL_DISPLAY_INPUT_PROPERTIES;
-            applyAdditionalDisplayInputPropertiesLocked(properties);
-        }
-    }
-
-    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
-    private void applyAdditionalDisplayInputPropertiesLocked(
-            AdditionalDisplayInputProperties properties) {
-        // Handle changes to each of the individual properties.
-        // TODO(b/293587049): This approach for updating pointer display properties is only for when
-        //  PointerChoreographer is disabled. Remove this logic when PointerChoreographer is
-        //  permanently enabled.
-
-        if (properties.pointerIconVisible != mCurrentDisplayProperties.pointerIconVisible) {
-            mCurrentDisplayProperties.pointerIconVisible = properties.pointerIconVisible;
-            if (properties.pointerIconVisible) {
-                if (mPointerIconType == PointerIcon.TYPE_CUSTOM) {
-                    Objects.requireNonNull(mPointerIcon);
-                    mNative.setCustomPointerIcon(mPointerIcon);
-                } else {
-                    mNative.setPointerIconType(mPointerIconType);
-                }
-            } else {
-                mNative.setPointerIconType(PointerIcon.TYPE_NULL);
-            }
-        }
-
-        if (properties.mousePointerAccelerationEnabled
-                != mCurrentDisplayProperties.mousePointerAccelerationEnabled) {
-            mCurrentDisplayProperties.mousePointerAccelerationEnabled =
-                    properties.mousePointerAccelerationEnabled;
-        }
-    }
-
     private void updateAdditionalDisplayInputProperties(int displayId,
             Consumer<AdditionalDisplayInputProperties> updater) {
         synchronized (mAdditionalDisplayInputPropertiesLock) {
@@ -3473,13 +3305,6 @@ public class InputManagerService extends IInputManager.Stub
             if (properties.allDefaults()) {
                 mAdditionalDisplayInputProperties.remove(displayId);
             }
-            if (displayId != mRequestedPointerDisplayId) {
-                Log.i(TAG, "Not applying additional properties for display " + displayId
-                        + " because the pointer is currently targeting display "
-                        + mRequestedPointerDisplayId + ".");
-                return;
-            }
-            applyAdditionalDisplayInputPropertiesLocked(properties);
         }
     }
 
