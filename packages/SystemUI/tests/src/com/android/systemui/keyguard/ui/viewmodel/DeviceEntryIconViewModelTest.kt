@@ -26,7 +26,7 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.keyguardRepository
+import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel.Companion.UNLOCKED_DELAY_MS
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
@@ -108,6 +108,46 @@ class DeviceEntryIconViewModelTest : SysuiTestCase() {
 
             deviceEntryIconTransitionAlpha(.5f)
             assertThat(isVisible).isTrue()
+        }
+
+    @Test
+    fun iconType_fingerprint() =
+        testScope.runTest {
+            val iconType by collectLastValue(underTest.iconType)
+            keyguardRepository.setKeyguardDismissible(false)
+            fingerprintPropertyRepository.supportsUdfps()
+            fingerprintAuthRepository.setIsRunning(true)
+            assertThat(iconType).isEqualTo(DeviceEntryIconView.IconType.FINGERPRINT)
+        }
+
+    @Test
+    fun iconType_locked() =
+        testScope.runTest {
+            val iconType by collectLastValue(underTest.iconType)
+            keyguardRepository.setKeyguardDismissible(false)
+            fingerprintAuthRepository.setIsRunning(false)
+            assertThat(iconType).isEqualTo(DeviceEntryIconView.IconType.LOCK)
+        }
+
+    @Test
+    fun iconType_unlocked() =
+        testScope.runTest {
+            val iconType by collectLastValue(underTest.iconType)
+            keyguardRepository.setKeyguardDismissible(true)
+            advanceTimeBy(UNLOCKED_DELAY_MS * 2) // wait for unlocked delay
+            fingerprintAuthRepository.setIsRunning(false)
+            assertThat(iconType).isEqualTo(DeviceEntryIconView.IconType.UNLOCK)
+        }
+
+    @Test
+    fun iconType_none() =
+        testScope.runTest {
+            val iconType by collectLastValue(underTest.iconType)
+            keyguardRepository.setKeyguardDismissible(true)
+            advanceTimeBy(UNLOCKED_DELAY_MS * 2) // wait for unlocked delay
+            fingerprintPropertyRepository.supportsUdfps()
+            fingerprintAuthRepository.setIsRunning(true)
+            assertThat(iconType).isEqualTo(DeviceEntryIconView.IconType.NONE)
         }
 
     private fun deviceEntryIconTransitionAlpha(alpha: Float) {
