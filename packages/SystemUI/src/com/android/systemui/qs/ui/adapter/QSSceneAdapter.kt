@@ -49,19 +49,42 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 // TODO(307945185) Split View concerns into a ViewBinder
 /** Adapter to use between Scene system and [QSImpl] */
 interface QSSceneAdapter {
-    /** Whether [QSImpl] is currently customizing */
+
+    /**
+     * Whether we are currently customizing or entering the customizer.
+     *
+     * @see CustomizerState.isCustomizing
+     */
     val isCustomizing: StateFlow<Boolean>
+
+    /**
+     * Whether the customizer is showing. This includes animating into and out of it.
+     *
+     * @see CustomizerState.isShowing
+     */
+    val isCustomizerShowing: StateFlow<Boolean>
+
+    /**
+     * The duration of the current animation in/out of customizer. If not in an animating state,
+     * this duration is 0 (to match show/hide immediately).
+     *
+     * @see CustomizerState.Animating.animationDuration
+     */
+    val customizerAnimationDuration: StateFlow<Int>
 
     /**
      * A view with the QS content ([QSContainerImpl]), managed by an instance of [QSImpl] tracked by
@@ -181,8 +204,35 @@ constructor(
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
     private val state = MutableStateFlow<QSSceneAdapter.State>(QSSceneAdapter.State.CLOSED)
-    private val _isCustomizing: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val isCustomizing = _isCustomizing.asStateFlow()
+    private val _customizingState: MutableStateFlow<CustomizerState> =
+        MutableStateFlow(CustomizerState.Hidden)
+    val customizerState = _customizingState.asStateFlow()
+
+    override val isCustomizing: StateFlow<Boolean> =
+        customizerState
+            .map { it.isCustomizing }
+            .stateIn(
+                applicationScope,
+                SharingStarted.WhileSubscribed(),
+                customizerState.value.isCustomizing,
+            )
+    override val isCustomizerShowing: StateFlow<Boolean> =
+        customizerState
+            .map { it.isShowing }
+            .stateIn(
+                applicationScope,
+                SharingStarted.WhileSubscribed(),
+                customizerState.value.isShowing
+            )
+    override val customizerAnimationDuration: StateFlow<Int> =
+        customizerState
+            .map { (it as? CustomizerState.Animating)?.animationDuration?.toInt() ?: 0 }
+            .stateIn(
+                applicationScope,
+                SharingStarted.WhileSubscribed(),
+                (customizerState.value as? CustomizerState.Animating)?.animationDuration?.toInt()
+                    ?: 0,
+            )
 
     private val _qsImpl: MutableStateFlow<QSImpl?> = MutableStateFlow(null)
     val qsImpl = _qsImpl.asStateFlow()
@@ -209,9 +259,9 @@ constructor(
         dumpManager.registerDumpable(this)
         applicationScope.launch {
             launch {
-                state.sample(_isCustomizing, ::Pair).collect { (state, customizing) ->
+                state.sample(_customizingState, ::Pair).collect { (state, customizing) ->
                     qsImpl.value?.apply {
-                        if (state != QSSceneAdapter.State.QS && customizing) {
+                        if (state != QSSceneAdapter.State.QS && customizing.isShowing) {
                             this@apply.closeCustomizerImmediately()
                         }
                         applyState(state)
@@ -243,14 +293,38 @@ constructor(
         }
     }
 
-    override fun setCustomizerAnimating(animating: Boolean) {}
+    override fun setCustomizerAnimating(animating: Boolean) {
+        if (_customizingState.value is CustomizerState.Animating && !animating) {
+            _customizingState.update {
+                if (it is CustomizerState.AnimatingIntoCustomizer) {
+                    CustomizerState.Showing
+                } else {
+                    CustomizerState.Hidden
+                }
+            }
+        }
+    }
 
     override fun setCustomizerShowing(showing: Boolean) {
-        _isCustomizing.value = showing
+        setCustomizerShowing(showing, 0L)
     }
 
     override fun setCustomizerShowing(showing: Boolean, animationDuration: Long) {
-        setCustomizerShowing(showing)
+        _customizingState.update { _ ->
+            if (showing) {
+                if (animationDuration > 0) {
+                    CustomizerState.AnimatingIntoCustomizer(animationDuration)
+                } else {
+                    CustomizerState.Showing
+                }
+            } else {
+                if (animationDuration > 0) {
+                    CustomizerState.AnimatingOutOfCustomizer(animationDuration)
+                } else {
+                    CustomizerState.Hidden
+                }
+            }
+        }
     }
 
     override fun setDetailShowing(showing: Boolean) {}
@@ -302,9 +376,50 @@ constructor(
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.apply {
             println("Last state: ${state.value}")
-            println("Customizing: ${isCustomizing.value}")
+            println("CustomizerState: ${_customizingState.value}")
             println("QQS height: $qqsHeight")
             println("QS height: $qsHeight")
         }
     }
+}
+
+/** Current state of the customizer */
+sealed interface CustomizerState {
+
+    /**
+     * This indicates that some part of the customizer is showing. It could be animating in or out.
+     */
+    val isShowing: Boolean
+        get() = true
+
+    /**
+     * This indicates that we are currently customizing or animating into it. In particular, when
+     * animating out, this is false.
+     *
+     * @see QSCustomizer.isCustomizing
+     */
+    val isCustomizing: Boolean
+        get() = false
+
+    sealed interface Animating : CustomizerState {
+        val animationDuration: Long
+    }
+
+    /** Customizer is completely hidden, and not animating */
+    data object Hidden : CustomizerState {
+        override val isShowing = false
+    }
+
+    /** Customizer is completely showing, and not animating */
+    data object Showing : CustomizerState {
+        override val isCustomizing = true
+    }
+
+    /** Animating from [Hidden] into [Showing]. */
+    data class AnimatingIntoCustomizer(override val animationDuration: Long) : Animating {
+        override val isCustomizing = true
+    }
+
+    /** Animating from [Showing] into [Hidden]. */
+    data class AnimatingOutOfCustomizer(override val animationDuration: Long) : Animating
 }

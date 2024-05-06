@@ -21,7 +21,6 @@ import android.view.View
 import com.android.systemui.settings.brightness.MirrorController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 
@@ -30,8 +29,16 @@ class FakeQSSceneAdapter(
     override val qqsHeight: Int = 0,
     override val qsHeight: Int = 0,
 ) : QSSceneAdapter {
+    private val _customizerState = MutableStateFlow<CustomizerState>(CustomizerState.Hidden)
+
+    private val _customizerShowing = MutableStateFlow(false)
+    override val isCustomizerShowing = _customizerShowing.asStateFlow()
+
     private val _customizing = MutableStateFlow(false)
-    override val isCustomizing: StateFlow<Boolean> = _customizing.asStateFlow()
+    override val isCustomizing = _customizing.asStateFlow()
+
+    private val _animationDuration = MutableStateFlow(0)
+    override val customizerAnimationDuration = _animationDuration.asStateFlow()
 
     private val _view = MutableStateFlow<View?>(null)
     override val qsView: Flow<View> = _view.filterNotNull()
@@ -58,7 +65,7 @@ class FakeQSSceneAdapter(
     }
 
     fun setCustomizing(value: Boolean) {
-        _customizing.value = value
+        updateCustomizerFlows(if (value) CustomizerState.Showing else CustomizerState.Hidden)
     }
 
     override suspend fun applyBottomNavBarPadding(padding: Int) {
@@ -66,10 +73,18 @@ class FakeQSSceneAdapter(
     }
 
     override fun requestCloseCustomizer() {
-        _customizing.value = false
+        updateCustomizerFlows(CustomizerState.Hidden)
     }
 
     override fun setBrightnessMirrorController(mirrorController: MirrorController?) {
         brightnessMirrorController = mirrorController
+    }
+
+    private fun updateCustomizerFlows(customizerState: CustomizerState) {
+        _customizerState.value = customizerState
+        _customizing.value = customizerState.isCustomizing
+        _customizerShowing.value = customizerState.isShowing
+        _animationDuration.value =
+            (customizerState as? CustomizerState.Animating)?.animationDuration?.toInt() ?: 0
     }
 }

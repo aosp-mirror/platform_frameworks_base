@@ -162,7 +162,8 @@ private fun QuickSettingsContent(
     modifier: Modifier = Modifier,
 ) {
     val qsView by qsSceneAdapter.qsView.collectAsState(null)
-    val isCustomizing by qsSceneAdapter.isCustomizing.collectAsState()
+    val isCustomizing by
+        qsSceneAdapter.isCustomizerShowing.collectAsState(qsSceneAdapter.isCustomizerShowing.value)
     QuickSettingsTheme {
         val context = LocalContext.current
 
