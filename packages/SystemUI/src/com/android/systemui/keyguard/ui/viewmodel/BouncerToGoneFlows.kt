@@ -102,37 +102,40 @@ constructor(
                 to = GONE,
             )
 
-        return shadeInteractor.isAnyExpanded.flatMapLatest { isAnyExpanded ->
-            transitionAnimation
-                .sharedFlow(
-                    duration = duration,
-                    interpolator = EMPHASIZED_ACCELERATE,
-                    onStart = {
-                        leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
-                        willRunDismissFromKeyguard = willRunAnimationOnKeyguard()
-                        isShadeExpanded = isAnyExpanded
-                    },
-                    onStep = { 1f - it },
-                )
-                .map {
-                    if (willRunDismissFromKeyguard) {
-                        if (isShadeExpanded) {
+        return shadeInteractor.anyExpansion
+            .map { it > 0f }
+            .distinctUntilChanged()
+            .flatMapLatest { isAnyExpanded ->
+                transitionAnimation
+                    .sharedFlow(
+                        duration = duration,
+                        interpolator = EMPHASIZED_ACCELERATE,
+                        onStart = {
+                            leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
+                            willRunDismissFromKeyguard = willRunAnimationOnKeyguard()
+                            isShadeExpanded = isAnyExpanded
+                        },
+                        onStep = { 1f - it },
+                    )
+                    .map {
+                        if (willRunDismissFromKeyguard) {
+                            if (isShadeExpanded) {
+                                ScrimAlpha(
+                                    behindAlpha = it,
+                                    notificationsAlpha = it,
+                                )
+                            } else {
+                                ScrimAlpha()
+                            }
+                        } else if (leaveShadeOpen) {
                             ScrimAlpha(
-                                behindAlpha = it,
-                                notificationsAlpha = it,
+                                behindAlpha = 1f,
+                                notificationsAlpha = 1f,
                             )
                         } else {
-                            ScrimAlpha()
+                            ScrimAlpha(behindAlpha = it)
                         }
-                    } else if (leaveShadeOpen) {
-                        ScrimAlpha(
-                            behindAlpha = 1f,
-                            notificationsAlpha = 1f,
-                        )
-                    } else {
-                        ScrimAlpha(behindAlpha = it)
                     }
-                }
-        }
+            }
     }
 }
