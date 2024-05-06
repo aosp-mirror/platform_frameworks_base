@@ -39,6 +39,13 @@ flag {
 }
 
 flag {
+  name: "check_autogroup_before_post"
+  namespace: "systemui"
+  description: "Does a check to see if notification should be autogrouped before posting, and if so groups before post."
+  bug: "330214226"
+}
+
+flag {
   name: "visit_risky_uris"
   namespace: "systemui"
   description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"

@@ -311,6 +311,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import com.google.android.collect.Lists;
 import com.google.common.collect.ImmutableList;
+
 import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
@@ -331,8 +332,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -347,6 +346,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -5542,7 +5544,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testAddAutogroup_requestsSort() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
-        mService.addAutogroupKeyLocked(r.getKey());
+        mService.addAutogroupKeyLocked(r.getKey(), true);
 
         verify(mRankingHandler, times(1)).requestSort();
     }
@@ -5562,8 +5564,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         r.setOverrideGroupKey("TEST");
         mService.addNotification(r);
-        mService.addAutogroupKeyLocked(r.getKey());
+        mService.addAutogroupKeyLocked(r.getKey(), true);
 
+        verify(mRankingHandler, never()).requestSort();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST)
+    public void testAutogroupSuppressSort_noSort() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+        mService.addAutogroupKeyLocked(r.getKey(), false);
+
+        verify(mRankingHandler, never()).requestSort();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST)
+    public void testAutogroupOnPost_skipManualSort() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
         verify(mRankingHandler, never()).requestSort();
     }
 
