@@ -464,6 +464,9 @@
     <!-- The height of the maximize menu in desktop mode. -->
     <dimen name="desktop_mode_maximize_menu_height">114dp</dimen>
 
+    <!-- The padding of the maximize menu in desktop mode. -->
+    <dimen name="desktop_mode_menu_padding">16dp</dimen>
+
     <!-- The height of the buttons in the maximize menu. -->
     <dimen name="desktop_mode_maximize_menu_button_height">52dp</dimen>
 
