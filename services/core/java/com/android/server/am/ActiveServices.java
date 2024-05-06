@@ -2415,7 +2415,9 @@ public final class ActiveServices {
                                         != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
                         // Calling startForeground on a FGS type which has a time limit will only be
                         // allowed if the app is in a state where it can normally start another FGS
-                        // and it hasn't hit the time limit for that type in the past 24hrs.
+                        // and it hasn't hit its time limit in the past 24hrs, or it has been in the
+                        // foreground after it hit its time limit, or it is currently in the
+                        // TOP (or better) proc state.
 
                         // See if the app could start an FGS or not.
                         r.clearFgsAllowStart();
@@ -2441,11 +2443,13 @@ public final class ActiveServices {
                                             SystemClock.elapsedRealtime() - (24 * 60 * 60 * 1000));
                                 final long lastTimeOutAt = fgsTypeInfo.getTimeLimitExceededAt();
                                 if (fgsTypeInfo.getFirstFgsStartRealtime() < before24Hr
+                                        || r.app.mState.getCurProcState() <= PROCESS_STATE_TOP
                                         || (lastTimeOutAt != Long.MIN_VALUE
                                             && r.app.mState.getLastTopTime() > lastTimeOutAt)) {
                                     // Reset the time limit info for this fgs type if it has been
-                                    // more than 24hrs since the first fgs start or if the app was
-                                    // in the TOP state after time limit was exhausted.
+                                    // more than 24hrs since the first fgs start or if the app is
+                                    // currently in the TOP state or was in the TOP state after
+                                    // the time limit was exhausted previously.
                                     fgsTypeInfo.reset();
                                 } else if (lastTimeOutAt > 0) {
                                     // Time limit was exhausted within the past 24 hours and the app
