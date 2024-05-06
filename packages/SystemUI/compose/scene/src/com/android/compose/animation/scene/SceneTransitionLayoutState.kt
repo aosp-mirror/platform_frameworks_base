@@ -227,6 +227,9 @@ sealed interface TransitionState {
          */
         abstract val progress: Float
 
+        /** The current velocity of [progress], in progress units. */
+        abstract val progressVelocity: Float
+
         /** Whether the transition was triggered by user input rather than being programmatic. */
         abstract val isInitiatedByUserInput: Boolean
 

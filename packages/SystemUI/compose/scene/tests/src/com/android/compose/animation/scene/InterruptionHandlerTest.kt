@@ -25,6 +25,7 @@ import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -140,6 +141,60 @@ class InterruptionHandlerTest {
                 Triple(SceneA, SceneC, SceneC),
             )
             .inOrder()
+    }
+
+    @Test
+    fun animateToFromScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(SceneA, transitions {})
+
+        // Fake a transition from A to B that has a non 0 velocity.
+        val progressVelocity = 1f
+        val aToB =
+            transition(
+                from = SceneA,
+                to = SceneB,
+                current = { SceneB },
+                // Progress must be > visibility threshold otherwise we will directly snap to A.
+                progress = { 0.5f },
+                progressVelocity = { progressVelocity },
+                onFinish = { launch {} },
+            )
+        state.startTransition(aToB, transitionKey = null)
+
+        // Animate back to A. The previous transition is reversed, i.e. it has the same (from, to)
+        // pair, and its velocity is used when animating the progress back to 0.
+        val bToA = checkNotNull(state.setTargetScene(SceneA, coroutineScope = this))
+        testScheduler.runCurrent()
+        assertThat(bToA.fromScene).isEqualTo(SceneA)
+        assertThat(bToA.toScene).isEqualTo(SceneB)
+        assertThat(bToA.currentScene).isEqualTo(SceneA)
+        assertThat(bToA.progressVelocity).isEqualTo(progressVelocity)
+    }
+
+    @Test
+    fun animateToToScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutStateImpl(SceneA, transitions {})
+
+        // Fake a transition from A to B with current scene = A that has a non 0 velocity.
+        val progressVelocity = -1f
+        val aToB =
+            transition(
+                from = SceneA,
+                to = SceneB,
+                current = { SceneA },
+                progressVelocity = { progressVelocity },
+                onFinish = { launch {} },
+            )
+        state.startTransition(aToB, transitionKey = null)
+
+        // Animate to B. The previous transition is reversed, i.e. it has the same (from, to) pair,
+        // and its velocity is used when animating the progress to 1.
+        val bToA = checkNotNull(state.setTargetScene(SceneB, coroutineScope = this))
+        testScheduler.runCurrent()
+        assertThat(bToA.fromScene).isEqualTo(SceneA)
+        assertThat(bToA.toScene).isEqualTo(SceneB)
+        assertThat(bToA.currentScene).isEqualTo(SceneB)
+        assertThat(bToA.progressVelocity).isEqualTo(progressVelocity)
     }
 
     companion object {

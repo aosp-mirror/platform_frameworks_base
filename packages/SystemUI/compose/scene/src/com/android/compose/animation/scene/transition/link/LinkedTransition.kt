@@ -45,5 +45,8 @@ internal class LinkedTransition(
     override val progress: Float
         get() = originalTransition.progress
 
+    override val progressVelocity: Float
+        get() = originalTransition.progressVelocity
+
     override fun finish(): Job = originalTransition.finish()
 }

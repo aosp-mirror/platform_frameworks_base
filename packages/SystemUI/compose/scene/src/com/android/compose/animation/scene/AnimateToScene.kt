@@ -71,13 +71,13 @@ internal fun CoroutineScope.animateToScene(
                 } else {
                     // The transition is in progress: start the canned animation at the same
                     // progress as it was in.
-                    // TODO(b/290184746): Also take the current velocity into account.
                     animate(
                         layoutState,
                         target,
                         transitionKey,
                         isInitiatedByUserInput,
-                        startProgress = progress,
+                        initialProgress = progress,
+                        initialVelocity = transitionState.progressVelocity,
                     )
                 }
             } else if (transitionState.fromScene == target) {
@@ -92,13 +92,13 @@ internal fun CoroutineScope.animateToScene(
                     layoutState.finishTransition(transitionState, target)
                     null
                 } else {
-                    // TODO(b/290184746): Also take the current velocity into account.
                     animate(
                         layoutState,
                         target,
                         transitionKey,
                         isInitiatedByUserInput,
-                        startProgress = progress,
+                        initialProgress = progress,
+                        initialVelocity = transitionState.progressVelocity,
                         reversed = true,
                     )
                 }
@@ -148,7 +148,8 @@ private fun CoroutineScope.animate(
     targetScene: SceneKey,
     transitionKey: TransitionKey?,
     isInitiatedByUserInput: Boolean,
-    startProgress: Float = 0f,
+    initialProgress: Float = 0f,
+    initialVelocity: Float = 0f,
     reversed: Boolean = false,
     fromScene: SceneKey = layoutState.transitionState.currentScene,
     chain: Boolean = true,
@@ -184,13 +185,13 @@ private fun CoroutineScope.animate(
     val visibilityThreshold =
         (animationSpec as? SpringSpec)?.visibilityThreshold ?: ProgressVisibilityThreshold
     val animatable =
-        Animatable(startProgress, visibilityThreshold = visibilityThreshold).also {
+        Animatable(initialProgress, visibilityThreshold = visibilityThreshold).also {
             transition.animatable = it
         }
 
     // Animate the progress to its target value.
     transition.job =
-        launch { animatable.animateTo(targetProgress, animationSpec) }
+        launch { animatable.animateTo(targetProgress, animationSpec, initialVelocity) }
             .apply {
                 invokeOnCompletion {
                     // Settle the state to Idle(target). Note that this will do nothing if this
@@ -224,6 +225,9 @@ private class OneOffTransition(
 
     override val progress: Float
         get() = animatable.value
+
+    override val progressVelocity: Float
+        get() = animatable.velocity
 
     override fun finish(): Job = job
 }
