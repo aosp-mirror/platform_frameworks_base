@@ -18,10 +18,10 @@ package com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor
 
 import android.content.Context
 import android.util.Log
-import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -68,14 +68,16 @@ constructor(
                         is ScreenRecordTileModel.Recording ->
                             withContext(backgroundContext) { recordingController.stopRecording() }
                         is ScreenRecordTileModel.DoingNothing ->
-                            withContext(mainContext) { showPrompt(action.view, user.identifier) }
+                            withContext(mainContext) {
+                                showPrompt(action.expandable, user.identifier)
+                            }
                     }
                 }
                 is QSTileUserAction.LongClick -> {} // no-op
             }
         }
 
-    private fun showPrompt(view: View?, userId: Int) {
+    private fun showPrompt(expandable: Expandable?, userId: Int) {
         // Create the recording dialog that will collapse the shade only if we start the recording.
         val onStartRecordingClicked = Runnable {
             // We dismiss the shade. Since starting the recording will also dismiss the dialog, we
@@ -99,21 +101,29 @@ constructor(
             return
         }
 
-        // We animate from the touched view only if we are not on the keyguard, given that if we
+        // We animate from the touched expandable only if we are not on the keyguard, given that if
+        // we
         // are we will dismiss it which will also collapse the shade.
-        val shouldAnimateFromView = view != null && !keyguardInteractor.isKeyguardShowing()
+        val shouldAnimateFromExpandable =
+            expandable != null && !keyguardInteractor.isKeyguardShowing()
         val dismissAction =
             ActivityStarter.OnDismissAction {
-                if (shouldAnimateFromView) {
-                    dialogTransitionAnimator.showFromView(
-                        dialog,
-                        view!!,
-                        DialogCuj(
-                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                            INTERACTION_JANK_TAG
-                        ),
-                        animateBackgroundBoundsChange = true
-                    )
+                if (shouldAnimateFromExpandable) {
+                    val controller =
+                        expandable?.dialogTransitionController(
+                            DialogCuj(
+                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                INTERACTION_JANK_TAG
+                            )
+                        )
+                    controller?.let {
+                        dialogTransitionAnimator.show(
+                            dialog,
+                            controller,
+                            animateBackgroundBoundsChange = true,
+                        )
+                    }
+                        ?: dialog.show()
                 } else {
                     dialog.show()
                 }

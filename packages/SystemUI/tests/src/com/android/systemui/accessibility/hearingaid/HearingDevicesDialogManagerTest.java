@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothDevice;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -34,6 +33,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import org.junit.Before;
@@ -56,8 +56,9 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
-    private final View mView = new View(mContext);
     private final List<CachedBluetoothDevice> mCachedDevices = new ArrayList<>();
+    @Mock
+    private Expandable mExpandable;
     @Mock
     private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
@@ -97,7 +98,7 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
     public void showDialog_bluetoothDisable_showPairNewDeviceTrue() {
         when(mLocalBluetoothAdapter.isEnabled()).thenReturn(false);
 
-        mManager.showDialog(mView);
+        mManager.showDialog(mExpandable);
 
         verify(mDialogFactory).create(eq(true));
     }
@@ -109,7 +110,7 @@ public class HearingDevicesDialogManagerTest extends SysuiTestCase {
         when(mCachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         mCachedDevices.add(mCachedDevice);
 
-        mManager.showDialog(mView);
+        mManager.showDialog(mExpandable);
 
         verify(mDialogFactory).create(eq(false));
     }

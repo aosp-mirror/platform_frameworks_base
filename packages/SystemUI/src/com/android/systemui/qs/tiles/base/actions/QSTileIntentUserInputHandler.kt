@@ -20,9 +20,9 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.UserHandle
-import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import javax.inject.Inject
@@ -33,11 +33,11 @@ import javax.inject.Inject
  */
 interface QSTileIntentUserInputHandler {
 
-    fun handle(view: View?, intent: Intent)
+    fun handle(expandable: Expandable?, intent: Intent)
 
     /** @param requestLaunchingDefaultActivity used in case !pendingIndent.isActivity */
     fun handle(
-        view: View?,
+        expandable: Expandable?,
         pendingIntent: PendingIntent,
         requestLaunchingDefaultActivity: Boolean = false
     )
@@ -52,31 +52,25 @@ constructor(
     private val userHandle: UserHandle,
 ) : QSTileIntentUserInputHandler {
 
-    override fun handle(view: View?, intent: Intent) {
+    override fun handle(expandable: Expandable?, intent: Intent) {
         val animationController: ActivityTransitionAnimator.Controller? =
-            view?.let {
-                ActivityTransitionAnimator.Controller.fromView(
-                    it,
-                    InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
-                )
-            }
+            expandable?.activityTransitionController(
+                InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE
+            )
         activityStarter.postStartActivityDismissingKeyguard(intent, 0, animationController)
     }
 
     // TODO(b/249804373): make sure to allow showing activities over the lockscreen. See b/292112939
     override fun handle(
-        view: View?,
+        expandable: Expandable?,
         pendingIntent: PendingIntent,
         requestLaunchingDefaultActivity: Boolean
     ) {
         if (pendingIntent.isActivity) {
             val animationController: ActivityTransitionAnimator.Controller? =
-                view?.let {
-                    ActivityTransitionAnimator.Controller.fromView(
-                        it,
-                        InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE,
-                    )
-                }
+                expandable?.activityTransitionController(
+                    InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_QS_TILE
+                )
             activityStarter.postStartActivityDismissingKeyguard(pendingIntent, animationController)
         } else if (requestLaunchingDefaultActivity) {
             val intent =
@@ -97,7 +91,7 @@ constructor(
                 ?.let { resolved ->
                     intent.setPackage(null)
                     intent.setComponent(resolved.activityInfo.componentName)
-                    handle(view, intent)
+                    handle(expandable, intent)
                 }
         }
     }

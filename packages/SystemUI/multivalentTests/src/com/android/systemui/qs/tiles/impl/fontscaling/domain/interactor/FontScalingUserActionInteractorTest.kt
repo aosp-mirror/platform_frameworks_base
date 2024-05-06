@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.fontscaling.domain.interactor
 
+import android.content.Context
 import android.provider.Settings
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -23,6 +24,8 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
+import com.android.systemui.animation.LaunchableView
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
@@ -36,7 +39,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth
 import kotlinx.coroutines.test.runTest
@@ -63,6 +65,8 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
     @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
     @Mock private lateinit var dialog: SystemUIDialog
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var expandable: Expandable
+    @Mock private lateinit var controller: DialogTransitionAnimator.Controller
 
     @Captor private lateinit var argumentCaptor: ArgumentCaptor<Runnable>
 
@@ -73,6 +77,9 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
         dialog = mock<SystemUIDialog>()
         fontScalingDialogDelegate =
             mock<FontScalingDialogDelegate> { whenever(createDialog()).thenReturn(dialog) }
+        controller = mock<DialogTransitionAnimator.Controller>()
+        expandable =
+            mock<Expandable> { whenever(dialogTransitionController(any())).thenReturn(controller) }
         argumentCaptor = ArgumentCaptor.forClass(Runnable::class.java)
 
         underTest =
@@ -90,9 +97,8 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
     fun clickTile_screenUnlocked_showDialogAnimationFromView() =
         kosmos.testScope.runTest {
             keyguardStateController.isShowing = false
-            val testView = View(context)
 
-            underTest.handleInput(click(FontScalingTileModel, view = testView))
+            underTest.handleInput(click(FontScalingTileModel, expandable = expandable))
 
             verify(activityStarter)
                 .executeRunnableDismissingKeyguard(
@@ -103,17 +109,15 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
                     eq(false)
                 )
             argumentCaptor.value.run()
-            verify(mDialogTransitionAnimator)
-                .showFromView(any(), eq(testView), nullable(), anyBoolean())
+            verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
         }
 
     @Test
     fun clickTile_onLockScreen_neverShowDialogAnimationFromView_butShowsDialog() =
         kosmos.testScope.runTest {
             keyguardStateController.isShowing = true
-            val testView = View(context)
 
-            underTest.handleInput(click(FontScalingTileModel, view = testView))
+            underTest.handleInput(click(FontScalingTileModel, expandable = expandable))
 
             verify(activityStarter)
                 .executeRunnableDismissingKeyguard(
@@ -124,8 +128,7 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
                     eq(false)
                 )
             argumentCaptor.value.run()
-            verify(mDialogTransitionAnimator, never())
-                .showFromView(any(), eq(testView), nullable(), anyBoolean())
+            verify(mDialogTransitionAnimator, never()).show(any(), any(), anyBoolean())
             verify(dialog).show()
         }
 
@@ -140,4 +143,8 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
             val expectedIntentAction = Settings.ACTION_TEXT_READING_SETTINGS
             Truth.assertThat(actualIntentAction).isEqualTo(expectedIntentAction)
         }
+
+    private class FontScalingTileTestView(context: Context) : View(context), LaunchableView {
+        override fun setShouldBlockVisibilityChanges(block: Boolean) {}
+    }
 }

@@ -38,6 +38,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.hearingaid.HearingDevicesDialogManager;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -135,10 +136,10 @@ public class HearingDevicesTileTest extends SysuiTestCase {
 
     @Test
     public void handleClick_dialogShown() {
-        View view = new View(mContext);
-        mTile.handleClick(view);
+        Expandable expandable = Expandable.fromView(new View(mContext));
+        mTile.handleClick(expandable);
         mTestableLooper.processAllMessages();
 
-        verify(mHearingDevicesDialogManager).showDialog(view);
+        verify(mHearingDevicesDialogManager).showDialog(expandable);
     }
 }

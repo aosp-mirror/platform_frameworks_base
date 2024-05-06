@@ -44,7 +44,7 @@ constructor(
                 is QSTileUserAction.LongClick -> {
                     if (data is WorkModeTileModel.HasActiveProfile) {
                         qsTileIntentUserActionHandler.handle(
-                            action.view,
+                            action.expandable,
                             Intent(Settings.ACTION_MANAGED_PROFILE_SETTINGS)
                         )
                     }
