@@ -55,6 +55,7 @@ import static android.app.AppOpsManager.SAMPLING_STRATEGY_RARELY_USED;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM_OPS;
 import static android.app.AppOpsManager.SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE;
+import static android.app.AppOpsManager.UID_STATE_NONEXISTENT;
 import static android.app.AppOpsManager.WATCH_FOREGROUND_CHANGES;
 import static android.app.AppOpsManager._NUM_OP;
 import static android.app.AppOpsManager.extractFlagsFromKey;
@@ -70,7 +71,6 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
-import static android.permission.flags.Flags.runtimePermissionAppopsMappingEnabled;
 
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
@@ -130,6 +130,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.StorageManagerInternal;
 import android.permission.PermissionManager;
+import android.permission.flags.Flags;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -140,6 +141,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -153,7 +155,6 @@ import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsStartedCallback;
 import com.android.internal.app.MessageSamplingConfig;
-import com.android.internal.camera.flags.Flags;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.Clock;
 import com.android.internal.pm.pkg.component.ParsedAttribution;
@@ -1418,6 +1419,9 @@ public class AppOpsService extends IAppOpsService.Stub {
     // The callback method from AppOpsUidStateTracker
     private void onUidStateChanged(int uid, int state, boolean foregroundModeMayChange) {
         synchronized (this) {
+            if (state == UID_STATE_NONEXISTENT) {
+                onUidProcessDeathLocked(uid);
+            }
             UidState uidState = getUidStateLocked(uid, false);
 
             boolean hasForegroundWatchers = false;
@@ -1505,6 +1509,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
 
+            if (state == UID_STATE_NONEXISTENT) {
+                // For UID_STATE_NONEXISTENT, we don't call onUidStateChanged for AttributedOps
+                return;
+            }
+
             if (uidState != null) {
                 int numPkgs = uidState.pkgOps.size();
                 for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
@@ -1523,6 +1532,81 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 attributedOp.onUidStateChanged(state);
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    @GuardedBy("this")
+    private void onUidProcessDeathLocked(int uid) {
+        if (!mUidStates.contains(uid) || !Flags.finishRunningOpsForKilledPackages()) {
+            return;
+        }
+        final SparseLongArray chainsToFinish = new SparseLongArray();
+        doForAllAttributedOpsInUidLocked(uid, (attributedOp) -> {
+            attributedOp.doForAllInProgressStartOpEvents((event) -> {
+                int chainId = event.getAttributionChainId();
+                if (chainId != ATTRIBUTION_CHAIN_ID_NONE) {
+                    long currentEarliestStartTime =
+                            chainsToFinish.get(chainId, Long.MAX_VALUE);
+                    if (event.getStartTime() < currentEarliestStartTime) {
+                        // Store the earliest chain link we're finishing, so that we can go back
+                        // and finish any links in the chain that started after this one
+                        chainsToFinish.put(chainId, event.getStartTime());
+                    }
+                }
+                attributedOp.finished(event.getClientId());
+            });
+        });
+        finishChainsLocked(chainsToFinish);
+    }
+
+    @GuardedBy("this")
+    private void finishChainsLocked(SparseLongArray chainsToFinish) {
+        doForAllAttributedOpsLocked((attributedOp) -> {
+            attributedOp.doForAllInProgressStartOpEvents((event) -> {
+                int chainId = event.getAttributionChainId();
+                // If this event is part of a chain, and this event started after the event in the
+                // chain we already finished, then finish this event, too
+                long earliestEventStart = chainsToFinish.get(chainId, Long.MAX_VALUE);
+                if (chainId != ATTRIBUTION_CHAIN_ID_NONE
+                        && event.getStartTime() >= earliestEventStart) {
+                    attributedOp.finished(event.getClientId());
+                }
+            });
+        });
+    }
+
+    @GuardedBy("this")
+    private void doForAllAttributedOpsLocked(Consumer<AttributedOp> action) {
+        int numUids = mUidStates.size();
+        for (int uidNum = 0; uidNum < numUids; uidNum++) {
+            int uid = mUidStates.keyAt(uidNum);
+            doForAllAttributedOpsInUidLocked(uid, action);
+        }
+    }
+
+    @GuardedBy("this")
+    private void doForAllAttributedOpsInUidLocked(int uid, Consumer<AttributedOp> action) {
+        UidState uidState = mUidStates.get(uid);
+        if (uidState == null) {
+            return;
+        }
+
+        int numPkgs = uidState.pkgOps.size();
+        for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
+            Ops ops = uidState.pkgOps.valueAt(pkgNum);
+            int numOps = ops.size();
+            for (int opNum = 0; opNum < numOps; opNum++) {
+                Op op = ops.valueAt(opNum);
+                int numDevices = op.mDeviceAttributedOps.size();
+                for (int deviceNum = 0; deviceNum < numDevices; deviceNum++) {
+                    ArrayMap<String, AttributedOp> attrOps =
+                            op.mDeviceAttributedOps.valueAt(deviceNum);
+                    int numAttributions = attrOps.size();
+                    for (int attrNum = 0; attrNum < numAttributions; attrNum++) {
+                        action.accept(attrOps.valueAt(attrNum));
                     }
                 }
             }
@@ -2699,7 +2783,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      * have information on them.
      */
     private static boolean isOpAllowedForUid(int uid) {
-        return runtimePermissionAppopsMappingEnabled()
+        return Flags.runtimePermissionAppopsMappingEnabled()
                 && (uid == Process.ROOT_UID || uid == Process.SYSTEM_UID);
     }
 
@@ -4752,8 +4836,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         if ((code == OP_CAMERA) && isAutomotive()) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                if ((Flags.cameraPrivacyAllowlist())
-                        && (mSensorPrivacyManager.isCameraPrivacyEnabled(packageName))) {
+                if (com.android.internal.camera.flags.Flags.cameraPrivacyAllowlist()
+                        && mSensorPrivacyManager.isCameraPrivacyEnabled(packageName)) {
                     return true;
                 }
             } finally {

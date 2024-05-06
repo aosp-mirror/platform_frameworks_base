@@ -34,7 +34,9 @@ import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_TAKE_AUDIO_FOCUS;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
+import static android.app.AppOpsManager.UID_STATE_NONEXISTENT;
 import static android.app.AppOpsManager.UID_STATE_TOP;
+import static android.permission.flags.Flags.finishRunningOpsForKilledPackages;
 
 import static com.android.server.appop.AppOpsUidStateTracker.processStateToUidState;
 
@@ -343,13 +345,14 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
         int capability = mCapability.get(uid, PROCESS_CAPABILITY_NONE);
         boolean appWidgetVisible = mAppWidgetVisible.get(uid, false);
 
+        boolean foregroundChange = uidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
+                != pendingUidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
+                || capability != pendingCapability
+                || appWidgetVisible != pendingAppWidgetVisible;
+
         if (uidState != pendingUidState
                 || capability != pendingCapability
                 || appWidgetVisible != pendingAppWidgetVisible) {
-            boolean foregroundChange = uidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
-                    != pendingUidState <= UID_STATE_MAX_LAST_NON_RESTRICTED
-                    || capability != pendingCapability
-                    || appWidgetVisible != pendingAppWidgetVisible;
 
             if (foregroundChange) {
                 // To save on memory usage, log only interesting changes.
@@ -372,6 +375,16 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
             mCapability.delete(uid);
             mAppWidgetVisible.delete(uid);
             mPendingGone.delete(uid);
+            if (finishRunningOpsForKilledPackages()) {
+                for (int i = 0; i < mUidStateChangedCallbacks.size(); i++) {
+                    UidStateChangedCallback cb = mUidStateChangedCallbacks.keyAt(i);
+                    Executor executor = mUidStateChangedCallbacks.valueAt(i);
+
+                    executor.execute(PooledLambda.obtainRunnable(
+                            UidStateChangedCallback::onUidStateChanged, cb, uid,
+                            UID_STATE_NONEXISTENT, foregroundChange));
+                }
+            }
         } else {
             mUidStates.put(uid, pendingUidState);
             mCapability.put(uid, pendingCapability);
