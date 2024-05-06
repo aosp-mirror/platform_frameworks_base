@@ -3138,16 +3138,6 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public boolean setVirtualMousePointerDisplayId(int pointerDisplayId) {
-            return false;
-        }
-
-        @Override
-        public int getVirtualMousePointerDisplayId() {
-            return Display.INVALID_DISPLAY;
-        }
-
-        @Override
         public PointF getCursorPosition(int displayId) {
             final float[] p = mNative.getMouseCursorPosition(displayId);
             if (p == null || p.length != 2) {
