@@ -76,6 +76,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
+import android.os.IDeviceIdleController;
 import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.ServiceManager;
@@ -734,5 +735,12 @@ public class FrameworkServicesModule {
     @Singleton
     static Optional<SatelliteManager> provideSatelliteManager(Context context) {
         return Optional.ofNullable(context.getSystemService(SatelliteManager.class));
+    }
+
+    @Provides
+    @Singleton
+    static IDeviceIdleController provideDeviceIdleController() {
+        return IDeviceIdleController.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
     }
 }

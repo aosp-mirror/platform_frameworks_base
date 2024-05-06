@@ -15,6 +15,7 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.os.PowerExemptionManager.REASON_TILE_ONCLICK;
 import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -52,6 +53,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IDeviceIdleController;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
@@ -83,6 +85,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
             mock(BroadcastDispatcher.class);
     private final IQSTileService.Stub mMockTileService = mock(IQSTileService.Stub.class);
     private final ActivityManager mActivityManager = mock(ActivityManager.class);
+    private final IDeviceIdleController mDeviceIdleController = mock(IDeviceIdleController.class);
 
     private ComponentName mTileServiceComponentName;
     private Intent mTileServiceIntent;
@@ -126,6 +129,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
     }
 
@@ -386,6 +390,20 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testClickCallsDeviceIdleManager() throws Exception {
+        mStateManager.onTileAdded();
+        mStateManager.onStartListening();
+        mStateManager.onClick(null);
+        mStateManager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        verify(mMockTileService).onClick(null);
+        verify(mDeviceIdleController).addPowerSaveTempWhitelistApp(
+                mTileServiceComponentName.getPackageName(), 15000,
+                mUser.getIdentifier(), REASON_TILE_ONCLICK, "tile onclick");
+    }
+
+    @Test
     public void testFalseBindCallsUnbind() {
         Context falseContext = mock(Context.class);
         when(falseContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(false);
@@ -396,6 +414,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -418,6 +437,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -440,6 +460,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
@@ -464,6 +485,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
                 mTileServiceIntent,
                 mUser,
                 mActivityManager,
+                mDeviceIdleController,
                 mExecutor);
 
         manager.executeSetBindService(true);
