@@ -132,8 +132,12 @@ object DeviceEntryIconViewBinder {
                             view.getIconState(viewModel.type, viewModel.useAodVariant),
                             /* merge */ false
                         )
-                        fgIconView.contentDescription =
-                            fgIconView.resources.getString(viewModel.type.contentDescriptionResId)
+                        if (viewModel.type.contentDescriptionResId != -1) {
+                            fgIconView.contentDescription =
+                                fgIconView.resources.getString(
+                                    viewModel.type.contentDescriptionResId
+                                )
+                        }
                         fgIconView.imageTintList = ColorStateList.valueOf(viewModel.tint)
                         fgIconView.setPadding(
                             viewModel.padding,
