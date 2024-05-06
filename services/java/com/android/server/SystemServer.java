@@ -1618,7 +1618,8 @@ public final class SystemServer implements Dumpable {
             wm = WindowManagerService.main(context, inputManager, !mFirstBoot,
                     new PhoneWindowManager(), mActivityManagerService.mActivityTaskManager);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
-                    DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
+                    DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_HIGH
+                            | DUMP_FLAG_PROTO);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
                     /* allowIsolated= */ false, DUMP_FLAG_PRIORITY_CRITICAL);
             t.traceEnd();
