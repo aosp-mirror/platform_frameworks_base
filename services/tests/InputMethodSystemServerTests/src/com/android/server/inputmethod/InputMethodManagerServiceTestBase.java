@@ -222,7 +222,7 @@ public class InputMethodManagerServiceTestBase {
                         Process.THREAD_PRIORITY_FOREGROUND, /* allowIo */
                         false);
         mInputMethodManagerService = new InputMethodManagerService(mContext, mServiceThread,
-                mMockInputMethodBindingController);
+                unusedUserId -> mMockInputMethodBindingController);
         spyOn(mInputMethodManagerService);
 
         // Start a InputMethodManagerService.Lifecycle to publish and manage the lifecycle of

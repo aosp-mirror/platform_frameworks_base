@@ -21,6 +21,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -63,6 +64,7 @@ final class InputMethodBindingController {
     /** Time in milliseconds that the IME service has to bind before it is reconnected. */
     static final long TIME_TO_RECONNECT = 3 * 1000;
 
+    @UserIdInt final int mUserId;
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
@@ -107,12 +109,15 @@ final class InputMethodBindingController {
                     | Context.BIND_INCLUDE_CAPABILITIES
                     | Context.BIND_SHOWING_UI;
 
-    InputMethodBindingController(@NonNull InputMethodManagerService service) {
-        this(service, IME_CONNECTION_BIND_FLAGS, null /* latchForTesting */);
+    InputMethodBindingController(@UserIdInt int userId,
+            @NonNull InputMethodManagerService service) {
+        this(userId, service, IME_CONNECTION_BIND_FLAGS, null /* latchForTesting */);
     }
 
-    InputMethodBindingController(@NonNull InputMethodManagerService service,
-            int imeConnectionBindFlags, CountDownLatch latchForTesting) {
+    InputMethodBindingController(@UserIdInt int userId,
+            @NonNull InputMethodManagerService service, int imeConnectionBindFlags,
+            CountDownLatch latchForTesting) {
+        mUserId = userId;
         mService = service;
         mContext = mService.mContext;
         mPackageManagerInternal = mService.mPackageManagerInternal;
@@ -301,7 +306,8 @@ final class InputMethodBindingController {
                     }
                     if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
                     final InputMethodInfo info =
-                            mService.queryInputMethodForCurrentUserLocked(mSelectedMethodId);
+                            InputMethodSettingsRepository.get(mUserId).getMethodMap().get(
+                                    mSelectedMethodId);
                     boolean supportsStylusHwChanged =
                             mSupportsStylusHw != info.supportsStylusHandwriting();
                     mSupportsStylusHw = info.supportsStylusHandwriting();
@@ -339,7 +345,7 @@ final class InputMethodBindingController {
         private void updateCurrentMethodUid() {
             final String curMethodPackage = mCurIntent.getComponent().getPackageName();
             final int curMethodUid = mPackageManagerInternal.getPackageUid(
-                    curMethodPackage, 0 /* flags */, mService.getCurrentImeUserIdLocked());
+                    curMethodPackage, 0 /* flags */, mUserId);
             if (curMethodUid < 0) {
                 Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
                 mCurMethodUid = Process.INVALID_UID;
@@ -425,7 +431,8 @@ final class InputMethodBindingController {
             return InputBindResult.NO_IME;
         }
 
-        InputMethodInfo info = mService.queryInputMethodForCurrentUserLocked(mSelectedMethodId);
+        InputMethodInfo info = InputMethodSettingsRepository.get(mUserId).getMethodMap().get(
+                mSelectedMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mSelectedMethodId);
         }
@@ -497,8 +504,7 @@ final class InputMethodBindingController {
             Slog.e(TAG, "--- bind failed: service = " + mCurIntent + ", conn = " + conn);
             return false;
         }
-        return mContext.bindServiceAsUser(mCurIntent, conn, flags,
-                new UserHandle(mService.getCurrentImeUserIdLocked()));
+        return mContext.bindServiceAsUser(mCurIntent, conn, flags, new UserHandle(mUserId));
     }
 
     @GuardedBy("ImfLock.class")
