@@ -59,6 +59,7 @@ import com.android.settingslib.spa.framework.compose.hideKeyboardAction
 import com.android.settingslib.spa.framework.compose.horizontalValues
 import com.android.settingslib.spa.framework.theme.SettingsOpacity
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.settingsBackground
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 
@@ -90,6 +91,7 @@ fun SearchScaffold(
                 onSearchQueryChange = { viewModel.searchQuery = it },
             )
         },
+        containerColor = MaterialTheme.colorScheme.settingsBackground,
     ) { paddingValues ->
         Box(
             Modifier
