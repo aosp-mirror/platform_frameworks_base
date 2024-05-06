@@ -744,6 +744,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void showBouncer(boolean scrimmed) {
         if (DeviceEntryUdfpsRefactor.isEnabled()) {
             if (mAlternateBouncerInteractor.canShowAlternateBouncerForFingerprint()) {
+                Log.d(TAG, "showBouncer:alternateBouncer.forceShow()");
                 mAlternateBouncerInteractor.forceShow();
                 updateAlternateBouncerShowing(mAlternateBouncerInteractor.isVisibleState());
             } else {
@@ -869,6 +870,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     }
 
                     if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                        Log.d(TAG, "dismissWithAction:alternateBouncer.forceShow()");
                         mAlternateBouncerInteractor.forceShow();
                         updateAlternateBouncerShowing(mAlternateBouncerInteractor.isVisibleState());
                     } else {
