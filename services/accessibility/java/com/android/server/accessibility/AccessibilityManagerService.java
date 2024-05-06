@@ -1028,37 +1028,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             "context=" + context + ";intent=" + intent);
                 }
 
-                String action = intent.getAction();
-                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                    switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-                } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
-                    unlockUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-                } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                    removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-                } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
-                    final String which = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
-                    if (Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(which)) {
-                        synchronized (mLock) {
-                            restoreEnabledAccessibilityServicesLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
-                                    intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
-                                            0));
-                        }
-                    } else if (ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED.equals(which)) {
-                        synchronized (mLock) {
-                            restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
-                                    intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
-                                            0));
-                        }
-                    } else if (Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS.equals(which)) {
-                        synchronized (mLock) {
-                            restoreAccessibilityButtonTargetsLocked(
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
-                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
-                        }
-                    }
+                if (com.android.server.accessibility.Flags.managerAvoidReceiverTimeout()) {
+                    BackgroundThread.getHandler().post(() -> processBroadcast(intent));
+                } else {
+                    processBroadcast(intent);
                 }
             }
         }, UserHandle.ALL, intentFilter, null, null);
@@ -1981,6 +1954,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mA11yWindowManager.onTouchInteractionEnd();
     }
 
+    private void processBroadcast(Intent intent) {
+        String action = intent.getAction();
+        if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+            switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+        } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+            unlockUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+        } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+            removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+        } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
+            restoreSetting(intent);
+        }
+    }
+
     @VisibleForTesting
     void switchUser(int userId) {
         mMagnificationController.updateUserIdIfNeeded(userId);
@@ -2077,6 +2063,38 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mUserStates.remove(userId);
         }
         getMagnificationController().onUserRemoved(userId);
+    }
+
+    private void restoreSetting(Intent intent) {
+        final String which = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
+        if (Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(which)) {
+            synchronized (mLock) {
+                restoreEnabledAccessibilityServicesLocked(
+                        intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
+                        intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
+                        intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
+                                0));
+            }
+        } else if (ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED.equals(which)) {
+            synchronized (mLock) {
+                restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
+                        intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
+                        intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
+                                0));
+            }
+        } else if (Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS.equals(which)) {
+            synchronized (mLock) {
+                restoreAccessibilityButtonTargetsLocked(
+                        intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
+                        intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
+            }
+        } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(which)) {
+            if (!android.view.accessibility.Flags.a11yQsShortcut()) {
+                return;
+            }
+            restoreAccessibilityQsTargets(
+                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
+        }
     }
 
     // Called only during settings restore; currently supports only the owner user
