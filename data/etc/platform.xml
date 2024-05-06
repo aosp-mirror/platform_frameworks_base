@@ -322,11 +322,11 @@
     <library name="android.hidl.manager-V1.0-java"
             file="/system/framework/android.hidl.manager-V1.0-java.jar" />
 
-    <!-- These are the standard packages that are white-listed to always have internet
+    <!-- These are the standard packages that are allowed to always have internet
          access while in power save mode, even if they aren't in the foreground. -->
     <allow-in-power-save package="com.android.providers.downloads" />
 
-    <!-- These are the standard packages that are white-listed to always have internet
+    <!-- These are the standard packages that are allowed to always have internet
          access while in data mode, even if they aren't in the foreground. -->
     <allow-in-data-usage-save package="com.android.providers.downloads" />
 
@@ -338,7 +338,7 @@
     <!-- Emergency app needs to run in the background to reliably provide safety features -->
     <allow-in-power-save package="com.android.emergency" />
 
-    <!-- Whitelist system providers -->
+    <!-- Allow system providers -->
     <!-- Calendar provider needs alarms while in idle -->
     <allow-in-power-save package="com.android.providers.calendar" />
     <allow-in-power-save-except-idle package="com.android.providers.contacts" />
