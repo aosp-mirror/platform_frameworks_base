@@ -77,6 +77,7 @@ import java.util.function.Supplier;
  * Contains logic that deals with showing a rotate suggestion button with animation.
  */
 public class RotationButtonController {
+    public static final boolean DEBUG_ROTATION = false;
 
     private static final String TAG = "RotationButtonController";
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
