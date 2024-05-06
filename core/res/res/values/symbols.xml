@@ -1367,6 +1367,7 @@
   <java-symbol type="drawable" name="platlogo" />
   <java-symbol type="drawable" name="stat_notify_sync_error" />
   <java-symbol type="drawable" name="stat_notify_wifi_in_range" />
+  <java-symbol type="drawable" name="ic_thread_network" />
   <java-symbol type="drawable" name="ic_wifi_signal_0" />
   <java-symbol type="drawable" name="ic_wifi_signal_1" />
   <java-symbol type="drawable" name="ic_wifi_signal_2" />
