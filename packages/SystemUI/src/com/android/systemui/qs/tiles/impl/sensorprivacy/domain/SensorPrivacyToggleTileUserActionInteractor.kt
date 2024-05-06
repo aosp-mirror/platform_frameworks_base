@@ -80,7 +80,7 @@ constructor(
                                 }
                             )
                     }
-                    qsTileIntentUserActionHandler.handle(action.view, longClickIntent)
+                    qsTileIntentUserActionHandler.handle(action.expandable, longClickIntent)
                 }
             }
         }

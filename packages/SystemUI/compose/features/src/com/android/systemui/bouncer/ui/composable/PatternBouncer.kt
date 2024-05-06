@@ -52,6 +52,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.internal.R
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
+import com.android.systemui.compose.modifiers.sysuiResTag
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -234,6 +235,7 @@ internal fun PatternBouncer(
 
     Canvas(
         modifier
+            .sysuiResTag("bouncer_pattern_root")
             // Because the width also includes spacing to the left and right of the leftmost and
             // rightmost dots in the grid and because UX mocks specify the width without that
             // spacing, the actual width needs to be defined slightly bigger than the UX mock width.

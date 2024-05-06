@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.Flags.keyboardShortcutHelperRewrite;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,21 +27,22 @@ import com.android.systemui.shared.recents.utilities.Utilities;
 
 import javax.inject.Inject;
 
-/**
- * Receiver for the Keyboard Shortcuts Helper.
- */
+/** Receiver for the Keyboard Shortcuts Helper. */
 public class KeyboardShortcutsReceiver extends BroadcastReceiver {
 
-    private boolean mIsShortcutListSearchEnabled;
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
     public KeyboardShortcutsReceiver(FeatureFlags featureFlags) {
-        mIsShortcutListSearchEnabled = featureFlags.isEnabled(Flags.SHORTCUT_LIST_SEARCH_LAYOUT);
+        mFeatureFlags = featureFlags;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(context)) {
+        if (keyboardShortcutHelperRewrite()) {
+            return;
+        }
+        if (isTabletLayoutFlagEnabled() && Utilities.isLargeScreen(context)) {
             if (Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
                 KeyboardShortcutListSearch.show(context, -1 /* deviceId unknown */);
             } else if (Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS.equals(intent.getAction())) {
@@ -52,5 +55,9 @@ public class KeyboardShortcutsReceiver extends BroadcastReceiver {
                 KeyboardShortcuts.dismiss();
             }
         }
+    }
+
+    private boolean isTabletLayoutFlagEnabled() {
+        return mFeatureFlags.isEnabled(Flags.SHORTCUT_LIST_SEARCH_LAYOUT);
     }
 }

@@ -32,6 +32,7 @@ import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInsta
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.VibratorHelper
@@ -194,7 +195,11 @@ constructor(
     }
 
     override fun expandToNotifications() {
-        sceneInteractor.changeScene(Scenes.Shade, "ShadeController.animateExpandShade")
+        val shadeMode = shadeInteractor.shadeMode.value
+        sceneInteractor.changeScene(
+            if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
+            "ShadeController.animateExpandShade"
+        )
     }
 
     override fun expandToQs() {

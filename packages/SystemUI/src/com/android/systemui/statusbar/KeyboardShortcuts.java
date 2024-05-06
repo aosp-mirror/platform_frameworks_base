@@ -79,7 +79,7 @@ import java.util.List;
 public final class KeyboardShortcuts {
     private static final String TAG = KeyboardShortcuts.class.getSimpleName();
     private static final Object sLock = new Object();
-    @VisibleForTesting static KeyboardShortcuts sInstance;
+    @VisibleForTesting public static KeyboardShortcuts sInstance;
     private WindowManager mWindowManager;
 
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
@@ -93,7 +93,7 @@ public final class KeyboardShortcuts {
     };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    @VisibleForTesting Context mContext;
+    @VisibleForTesting public Context mContext;
     private final IPackageManager mPackageManager;
     private final OnClickListener mDialogCloseListener = new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int id) {
@@ -373,7 +373,7 @@ public final class KeyboardShortcuts {
     }
 
     @VisibleForTesting
-    void showKeyboardShortcuts(int deviceId) {
+    public void showKeyboardShortcuts(int deviceId) {
         retrieveKeyCharacterMap(deviceId);
         mReceivedAppShortcutGroups = null;
         mReceivedImeShortcutGroups = null;
@@ -407,7 +407,8 @@ public final class KeyboardShortcuts {
         showKeyboardShortcutsDialog(shortcutGroups);
     }
 
-    private void dismissKeyboardShortcuts() {
+    @VisibleForTesting
+    public void dismissKeyboardShortcuts() {
         if (mKeyboardShortcutsDialog != null) {
             mKeyboardShortcutsDialog.dismiss();
             mKeyboardShortcutsDialog = null;

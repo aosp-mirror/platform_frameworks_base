@@ -177,10 +177,6 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
-import dagger.Lazy;
-
-import kotlinx.coroutines.CoroutineDispatcher;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -189,6 +185,9 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+
+import dagger.Lazy;
+import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -1234,7 +1233,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                             mUnoccludeAnimator.cancel();
                         }
 
-                        if (isDream || mShowCommunalByDefault) {
+                        if (isDream || mShowCommunalWhenUnoccluding) {
                             initAlphaForAnimationTargets(wallpapers);
                             if (isDream) {
                                 mDreamViewModel.get().startTransitionFromDream();
@@ -1372,7 +1371,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final Lazy<DreamViewModel> mDreamViewModel;
     private final Lazy<CommunalTransitionViewModel> mCommunalTransitionViewModel;
     private RemoteAnimationTarget mRemoteAnimationTarget;
-    private boolean mShowCommunalByDefault = false;
+    private boolean mShowCommunalWhenUnoccluding = false;
 
     private final Lazy<WindowManagerLockscreenVisibilityManager> mWmLockscreenVisibilityManager;
 
@@ -1630,8 +1629,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     getRemoteSurfaceAlphaApplier());
             mJavaAdapter.alwaysCollectFlow(dreamViewModel.getTransitionEnded(),
                     getFinishedCallbackConsumer());
-            mJavaAdapter.alwaysCollectFlow(communalViewModel.getShowByDefault(),
-                    (showByDefault) -> mShowCommunalByDefault = showByDefault);
+            mJavaAdapter.alwaysCollectFlow(communalViewModel.getShowCommunalFromOccluded(),
+                    (showCommunalFromOccluded) -> {
+                        mShowCommunalWhenUnoccluding = showCommunalFromOccluded;
+                    });
             mJavaAdapter.alwaysCollectFlow(communalViewModel.getTransitionFromOccludedEnded(),
                     getFinishedCallbackConsumer());
         }

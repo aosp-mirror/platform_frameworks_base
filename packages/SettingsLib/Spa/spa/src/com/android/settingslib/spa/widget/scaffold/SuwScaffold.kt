@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.settingsBackground
 import com.android.settingslib.spa.framework.theme.toMediumWeight
 
 data class BottomAppBarButton(
@@ -54,7 +55,7 @@ fun SuwScaffold(
     content: @Composable () -> Unit,
 ) {
     ActivityTitle(title)
-    Scaffold { innerPadding ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.settingsBackground) { innerPadding ->
         BoxWithConstraints(
             Modifier
                 .padding(innerPadding)

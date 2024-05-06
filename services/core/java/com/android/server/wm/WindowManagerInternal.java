@@ -306,6 +306,18 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+     * An interface to be notified on window removal.
+     */
+    public interface OnWindowRemovedListener {
+        /**
+         * Called when a window is removed.
+         *
+         * @param token the client token
+         */
+        void onWindowRemoved(IBinder token);
+    }
+
+    /**
      * An interface to be notified when keyguard exit animation should start.
      */
     public interface KeyguardExitAnimationStartListener {
@@ -1074,6 +1086,20 @@ public abstract class WindowManagerInternal {
      * * {@link #addBlockScreenCaptureForApps(ArraySet)}
      */
     public abstract void clearBlockedApps();
+
+    /**
+     * Register a listener to receive a callback on window removal.
+     *
+     * @param listener the listener to be registered.
+     */
+    public abstract void registerOnWindowRemovedListener(OnWindowRemovedListener listener);
+
+    /**
+     * Removes the listener.
+     *
+     * @param listener the listener to be removed.
+     */
+    public abstract void unregisterOnWindowRemovedListener(OnWindowRemovedListener listener);
 
     /**
      * Moves the current focus to the adjacent activity if it has the latest created window.

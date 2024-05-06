@@ -17,6 +17,11 @@
 package com.android.systemui.qs.footer.ui.compose
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.LocalIndication
@@ -87,10 +92,24 @@ import kotlinx.coroutines.launch
 fun SceneScope.FooterActionsWithAnimatedVisibility(
     viewModel: FooterActionsViewModel,
     isCustomizing: Boolean,
+    customizingAnimationDuration: Int,
     lifecycleOwner: LifecycleOwner,
     modifier: Modifier = Modifier,
 ) {
-    AnimatedVisibility(visible = !isCustomizing, modifier = modifier.fillMaxWidth()) {
+    AnimatedVisibility(
+        visible = !isCustomizing,
+        enter =
+            expandVertically(
+                animationSpec = tween(customizingAnimationDuration),
+                initialHeight = { 0 },
+            ) + fadeIn(tween(customizingAnimationDuration)),
+        exit =
+            shrinkVertically(
+                animationSpec = tween(customizingAnimationDuration),
+                targetHeight = { 0 },
+            ) + fadeOut(tween(customizingAnimationDuration)),
+        modifier = modifier.fillMaxWidth()
+    ) {
         QuickSettingsTheme {
             // This view has its own horizontal padding
             // TODO(b/321716470) This should use a lifecycle tied to the scene.

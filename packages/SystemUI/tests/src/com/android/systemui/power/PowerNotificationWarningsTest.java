@@ -44,7 +44,6 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -53,6 +52,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
@@ -88,7 +88,9 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     @Mock
     private UserTracker mUserTracker;
     @Mock
-    private View mView;
+    private Expandable mExpandable;
+    @Mock
+    private DialogTransitionAnimator.Controller mController;
     @Mock
     private SystemUIDialog.Factory mSystemUIDialogFactory;
     @Mock
@@ -234,32 +236,31 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
 
     @Test
     public void testDialogStartedFromLauncher_viewVisible() {
-        when(mBatteryController.getLastPowerSaverStartView())
-                .thenReturn(new WeakReference<>(mView));
-        when(mView.isAggregatedVisible()).thenReturn(true);
+        when(mBatteryController.getLastPowerSaverStartExpandable())
+                .thenReturn(new WeakReference<>(mExpandable));
+        when(mExpandable.dialogTransitionController(any())).thenReturn(mController);
 
         Intent intent = new Intent(BatterySaverUtils.ACTION_SHOW_START_SAVER_CONFIRMATION);
         intent.putExtras(new Bundle());
 
         mReceiver.onReceive(mContext, intent);
 
-        verify(mDialogTransitionAnimator).showFromView(any(), eq(mView), any());
+        verify(mDialogTransitionAnimator).show(any(), eq(mController));
 
         mPowerNotificationWarnings.getSaverConfirmationDialog().dismiss();
     }
 
     @Test
     public void testDialogStartedNotFromLauncher_viewNotVisible() {
-        when(mBatteryController.getLastPowerSaverStartView())
-                .thenReturn(new WeakReference<>(mView));
-        when(mView.isAggregatedVisible()).thenReturn(false);
+        when(mBatteryController.getLastPowerSaverStartExpandable())
+                .thenReturn(new WeakReference<>(mExpandable));
 
         Intent intent = new Intent(BatterySaverUtils.ACTION_SHOW_START_SAVER_CONFIRMATION);
         intent.putExtras(new Bundle());
 
         mReceiver.onReceive(mContext, intent);
 
-        verify(mDialogTransitionAnimator, never()).showFromView(any(), any());
+        verify(mDialogTransitionAnimator, never()).show(any(), any());
 
         verify(mPowerNotificationWarnings.getSaverConfirmationDialog()).show();
         mPowerNotificationWarnings.getSaverConfirmationDialog().dismiss();
@@ -267,7 +268,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
 
     @Test
     public void testDialogShownNotFromLauncher() {
-        when(mBatteryController.getLastPowerSaverStartView()).thenReturn(null);
+        when(mBatteryController.getLastPowerSaverStartExpandable()).thenReturn(null);
 
         Intent intent = new Intent(BatterySaverUtils.ACTION_SHOW_START_SAVER_CONFIRMATION);
         intent.putExtras(new Bundle());

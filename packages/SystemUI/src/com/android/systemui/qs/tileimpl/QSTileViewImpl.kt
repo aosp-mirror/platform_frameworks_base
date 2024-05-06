@@ -53,6 +53,7 @@ import com.android.settingslib.Utils
 import com.android.systemui.Flags
 import com.android.systemui.Flags.quickSettingsVisualHapticsLongpress
 import com.android.systemui.FontSizeUtils
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.haptics.qs.QSLongPressEffect
@@ -364,10 +365,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
     }
 
     override fun init(tile: QSTile) {
+        val expandable = Expandable.fromView(this)
         init(
-                { v: View? -> tile.click(this) },
-                { view: View? ->
-                    tile.longClick(this)
+                { _: View? -> tile.click(expandable) },
+                { _: View? ->
+                    tile.longClick(expandable)
                     true
                 }
         )

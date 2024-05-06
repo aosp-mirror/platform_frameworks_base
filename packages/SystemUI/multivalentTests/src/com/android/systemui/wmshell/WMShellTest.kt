@@ -24,16 +24,17 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.keyguardUpdateMonitor
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.ui.viewmodel.communalTransitionViewModel
 import com.android.systemui.communal.util.fakeCommunalColors
 import com.android.systemui.concurrency.fakeExecutor
-import com.android.systemui.dock.DockManager
-import com.android.systemui.dock.fakeDockManager
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.wakefulnessLifecycle
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.model.SysUiState
@@ -63,7 +64,6 @@ import com.android.wm.shell.sysui.ShellInterface
 import java.util.Optional
 import java.util.concurrent.Executor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -186,28 +186,17 @@ class WMShellTest : SysuiTestCase() {
             verify(mRecentTasks).setTransitionBackgroundColor(null)
             verify(mRecentTasks, never()).setTransitionBackgroundColor(black)
 
-            setDocked(true)
-            // Make communal available
-            kosmos.fakeKeyguardRepository.setIsEncryptedOrLockdown(false)
-            kosmos.fakeUserRepository.setSelectedUserInfo(MAIN_USER_INFO)
-            kosmos.fakeKeyguardRepository.setKeyguardShowing(true)
-
+            // Transition to occluded from the glanceable hub.
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+            kosmos.setCommunalAvailable(true)
             runCurrent()
 
             verify(mRecentTasks).setTransitionBackgroundColor(black)
         }
-
-    private fun TestScope.setDocked(docked: Boolean) {
-        kosmos.fakeDockManager.setIsDocked(docked)
-        val event =
-            if (docked) {
-                DockManager.STATE_DOCKED
-            } else {
-                DockManager.STATE_NONE
-            }
-        kosmos.fakeDockManager.setDockEvent(event)
-        runCurrent()
-    }
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

@@ -57,6 +57,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.activityStarter
@@ -1088,6 +1090,78 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(widgetContent).hasSize(3)
             assertThat(widgetContent!![0].providerInfo.profile?.identifier)
                 .isEqualTo(USER_INFO_WORK.id)
+        }
+
+    @Test
+    fun showCommunalFromOccluded_enteredOccludedFromHub() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isTrue()
+        }
+
+    @Test
+    fun showCommunalFromOccluded_enteredOccludedFromLockscreen() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isFalse()
+        }
+
+    @Test
+    fun showCommunalFromOccluded_communalBecomesUnavailableWhileOccluded() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+            runCurrent()
+            kosmos.setCommunalAvailable(false)
+
+            assertThat(showCommunalFromOccluded).isFalse()
+        }
+
+    @Test
+    fun showCommunalFromOccluded_showBouncerWhileOccluded() =
+        testScope.runTest {
+            kosmos.setCommunalAvailable(true)
+            val showCommunalFromOccluded by collectLastValue(underTest.showCommunalFromOccluded)
+            assertThat(showCommunalFromOccluded).isFalse()
+
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.GLANCEABLE_HUB,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+            runCurrent()
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.OCCLUDED,
+                to = KeyguardState.PRIMARY_BOUNCER,
+                testScope
+            )
+
+            assertThat(showCommunalFromOccluded).isTrue()
         }
 
     private fun smartspaceTimer(id: String, timestamp: Long = 0L): SmartspaceTarget {

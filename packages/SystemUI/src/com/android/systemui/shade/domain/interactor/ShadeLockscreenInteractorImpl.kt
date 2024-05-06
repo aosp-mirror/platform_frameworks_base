@@ -21,6 +21,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -95,8 +96,9 @@ constructor(
     }
 
     private fun changeToShadeScene() {
+        val shadeMode = shadeInteractor.shadeMode.value
         sceneInteractor.changeScene(
-            Scenes.Shade,
+            if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade,
             "ShadeLockscreenInteractorImpl.expandToNotifications",
         )
     }

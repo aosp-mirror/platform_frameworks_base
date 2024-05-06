@@ -40,9 +40,12 @@ constructor(
                             data.alarmClockInfo.showIntent != null
                     ) {
                         val pendingIndent = data.alarmClockInfo.showIntent
-                        inputHandler.handle(action.view, pendingIndent, true)
+                        inputHandler.handle(action.expandable, pendingIndent, true)
                     } else {
-                        inputHandler.handle(action.view, Intent(AlarmClock.ACTION_SHOW_ALARMS))
+                        inputHandler.handle(
+                            action.expandable,
+                            Intent(AlarmClock.ACTION_SHOW_ALARMS)
+                        )
                     }
                 }
                 is QSTileUserAction.LongClick -> {}

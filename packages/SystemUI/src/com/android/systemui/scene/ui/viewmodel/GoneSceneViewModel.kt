@@ -51,7 +51,7 @@ constructor(
 
     private fun destinationScenes(shadeMode: ShadeMode): Map<UserAction, UserActionResult> {
         return buildMap {
-            if (shadeMode == ShadeMode.Single) {
+            if (shadeMode is ShadeMode.Single) {
                 this[
                     Swipe(
                         pointerCount = 2,
@@ -60,7 +60,10 @@ constructor(
                     )] = UserActionResult(Scenes.QuickSettings)
             }
 
-            this[Swipe(direction = SwipeDirection.Down)] = UserActionResult(Scenes.Shade)
+            this[Swipe(direction = SwipeDirection.Down)] =
+                UserActionResult(
+                    if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade
+                )
         }
     }
 }

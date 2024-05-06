@@ -28,10 +28,13 @@ import com.android.systemui.activity.EmptyTestActivity
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.motion.MotionTestRule
 import platform.test.motion.RecordedMotion
-import platform.test.motion.Sampling.Companion.evenlySampled
+import platform.test.motion.view.AnimationSampling.Companion.evenlySampled
 import platform.test.motion.view.DrawableFeatureCaptures
-import platform.test.motion.view.ViewMotionTestRule
+import platform.test.motion.view.ViewRecordingSpec.Companion.captureWithoutScreenshot
+import platform.test.motion.view.ViewToolkit
+import platform.test.motion.view.record
 import platform.test.screenshot.DeviceEmulationRule
 import platform.test.screenshot.DeviceEmulationSpec
 import platform.test.screenshot.DisplaySpec
@@ -64,7 +67,8 @@ class TransitionAnimatorTest : SysuiTestCase() {
 
     @get:Rule(order = 0) val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     @get:Rule(order = 1) val activityRule = ActivityScenarioRule(EmptyTestActivity::class.java)
-    @get:Rule(order = 2) val motionRule = ViewMotionTestRule(pathManager, { activityRule.scenario })
+    @get:Rule(order = 2)
+    val motionRule = MotionTestRule(ViewToolkit { activityRule.scenario }, pathManager)
 
     @Test
     fun backgroundAnimation_whenLaunching() {
@@ -151,15 +155,14 @@ class TransitionAnimatorTest : SysuiTestCase() {
         backgroundLayer: GradientDrawable,
         animator: AnimatorSet
     ): RecordedMotion {
-        return motionRule.checkThat(animator).record(
-            backgroundLayer,
-            evenlySampled(20),
-            visualCapture = null
-        ) {
-            capture(DrawableFeatureCaptures.bounds, "bounds")
-            capture(DrawableFeatureCaptures.cornerRadii, "corner_radii")
-            capture(DrawableFeatureCaptures.alpha, "alpha")
-        }
+        return motionRule.record(
+            animator,
+            backgroundLayer.captureWithoutScreenshot(evenlySampled(20)) {
+                feature(DrawableFeatureCaptures.bounds, "bounds")
+                feature(DrawableFeatureCaptures.cornerRadii, "corner_radii")
+                feature(DrawableFeatureCaptures.alpha, "alpha")
+            }
+        )
     }
 }
 

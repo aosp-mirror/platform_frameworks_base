@@ -323,6 +323,9 @@ constructor(
         alternateBouncerUIAvailable
             .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
             .launchIn(applicationScope)
+        alternateBouncerVisible
+            .logDiffsForTable(buffer, "", "AlternateBouncerVisible", false)
+            .launchIn(applicationScope)
         lastShownSecurityMode
             .map { it.name }
             .logDiffsForTable(buffer, "", "lastShownSecurityMode", null)

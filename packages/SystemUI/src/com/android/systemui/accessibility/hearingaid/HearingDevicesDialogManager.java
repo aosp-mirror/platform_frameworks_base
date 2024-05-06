@@ -18,7 +18,6 @@ package com.android.systemui.accessibility.hearingaid;
 
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.Nullable;
 
@@ -26,6 +25,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
@@ -58,9 +58,9 @@ public class HearingDevicesDialogManager {
     /**
      * Shows the dialog.
      *
-     * @param view The view from which the dialog is shown.
+     * @param expandable {@link Expandable} from which the dialog is shown.
      */
-    public void showDialog(View view) {
+    public void showDialog(Expandable expandable) {
         if (mDialog != null) {
             if (DEBUG) {
                 Log.d(TAG, "HearingDevicesDialog already showing. Destroy it first.");
@@ -70,13 +70,17 @@ public class HearingDevicesDialogManager {
 
         mDialog = mDialogFactory.create(!isAnyBondedHearingDevice()).createDialog();
 
-        if (view != null) {
-            mDialogTransitionAnimator.showFromView(mDialog, view,
+        if (expandable != null) {
+            DialogTransitionAnimator.Controller controller = expandable.dialogTransitionController(
                     new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                            INTERACTION_JANK_TAG), /* animateBackgroundBoundsChange= */ true);
-        } else {
-            mDialog.show();
+                            INTERACTION_JANK_TAG));
+            if (controller != null) {
+                mDialogTransitionAnimator.show(mDialog,
+                        controller, /* animateBackgroundBoundsChange= */ true);
+                return;
+            }
         }
+        mDialog.show();
     }
 
     private void destroyDialog() {

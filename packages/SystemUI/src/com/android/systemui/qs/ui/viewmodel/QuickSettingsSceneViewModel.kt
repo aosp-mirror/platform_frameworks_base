@@ -79,13 +79,13 @@ constructor(
         combine(
                 deviceEntryInteractor.isUnlocked,
                 deviceEntryInteractor.canSwipeToEnter,
-                qsSceneAdapter.isCustomizing,
+                qsSceneAdapter.isCustomizerShowing,
                 backScene,
-            ) { isUnlocked, canSwipeToDismiss, isCustomizing, backScene ->
+            ) { isUnlocked, canSwipeToDismiss, isCustomizerShowing, backScene ->
                 destinationScenes(
                     isUnlocked,
                     canSwipeToDismiss,
-                    isCustomizing,
+                    isCustomizerShowing,
                     backScene,
                 )
             }
@@ -96,7 +96,7 @@ constructor(
                     destinationScenes(
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
                         canSwipeToDismiss = deviceEntryInteractor.canSwipeToEnter.value,
-                        isCustomizing = qsSceneAdapter.isCustomizing.value,
+                        isCustomizing = qsSceneAdapter.isCustomizerShowing.value,
                         backScene = backScene.value,
                     ),
             )

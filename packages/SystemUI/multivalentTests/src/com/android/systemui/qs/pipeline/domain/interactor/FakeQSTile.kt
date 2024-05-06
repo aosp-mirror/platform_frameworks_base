@@ -16,8 +16,8 @@
 
 package com.android.systemui.qs.pipeline.domain.interactor
 
-import android.view.View
 import com.android.internal.logging.InstanceId
+import com.android.systemui.animation.Expandable
 import com.android.systemui.plugins.qs.QSTile
 
 class FakeQSTile(
@@ -56,11 +56,11 @@ class FakeQSTile(
         callbacks.clear()
     }
 
-    override fun click(view: View?) {}
+    override fun click(expandable: Expandable?) {}
 
-    override fun secondaryClick(view: View?) {}
+    override fun secondaryClick(expandable: Expandable?) {}
 
-    override fun longClick(view: View?) {}
+    override fun longClick(expandable: Expandable?) {}
 
     override fun userSwitch(currentUser: Int) {
         user = currentUser

@@ -32,6 +32,7 @@ import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_AUDIO_SHARING
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_BLUETOOTH_DEVICE_DETAILS
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_PAIR_NEW_DEVICE
@@ -82,7 +83,7 @@ constructor(
      * @param view The view from which the dialog is shown.
      */
     @kotlinx.coroutines.ExperimentalCoroutinesApi
-    fun showDialog(view: View?) {
+    fun showDialog(expandable: Expandable?) {
         cancelJob()
 
         job =
@@ -93,17 +94,15 @@ constructor(
                 val dialog = dialogDelegate.createDialog()
                 val context = dialog.context
 
-                view?.let {
-                    dialogTransitionAnimator.showFromView(
-                        dialog,
-                        it,
-                        animateBackgroundBoundsChange = true,
-                        cuj =
-                            DialogCuj(
-                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                INTERACTION_JANK_TAG
-                            )
+                val controller =
+                    expandable?.dialogTransitionController(
+                        DialogCuj(
+                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                            INTERACTION_JANK_TAG
+                        )
                     )
+                controller?.let {
+                    dialogTransitionAnimator.show(dialog, it, animateBackgroundBoundsChange = true)
                 }
                     ?: dialog.show()
 
