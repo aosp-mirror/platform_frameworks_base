@@ -18,6 +18,7 @@ package com.android.systemui.common.data.repository
 
 import android.os.UserHandle
 import com.android.systemui.common.shared.model.PackageChangeModel
+import com.android.systemui.common.shared.model.PackageInstallSession
 import kotlinx.coroutines.flow.Flow
 
 interface PackageChangeRepository {
@@ -28,4 +29,7 @@ interface PackageChangeRepository {
      * [UserHandle.USER_ALL] may be used to listen to all users.
      */
     fun packageChanged(user: UserHandle): Flow<PackageChangeModel>
+
+    /** Emits a list of all known install sessions associated with the primary user. */
+    val packageInstallSessionsForPrimaryUser: Flow<List<PackageInstallSession>>
 }
