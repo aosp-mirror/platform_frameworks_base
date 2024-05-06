@@ -1612,18 +1612,6 @@ public class InputManagerService extends IInputManager.Stub
 
     // Binder call
     @Override
-    public void setPointerIconType(int iconType) {
-        // TODO(b/311416205): Remove.
-    }
-
-    // Binder call
-    @Override
-    public void setCustomPointerIcon(PointerIcon icon) {
-        // TODO(b/311416205): Remove.
-    }
-
-    // Binder call
-    @Override
     public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
             IBinder inputToken) {
         Objects.requireNonNull(icon);

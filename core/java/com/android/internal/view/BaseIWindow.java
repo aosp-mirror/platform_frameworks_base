@@ -18,7 +18,6 @@ package com.android.internal.view;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.hardware.input.InputManagerGlobal;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -29,7 +28,6 @@ import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.PointerIcon;
 import android.view.ScrollCaptureResponse;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.inputmethod.ImeTracker;
@@ -129,8 +127,6 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void updatePointerIcon(float x, float y) {
-        InputManagerGlobal.getInstance()
-                .setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
     }
 
     @Override

@@ -21,13 +21,11 @@ import static android.view.View.DRAG_FLAG_GLOBAL;
 import static android.view.View.DRAG_FLAG_GLOBAL_SAME_APPLICATION;
 import static android.view.View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG;
 
-import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.content.ClipData;
 import android.content.Context;
 import android.hardware.input.InputManagerGlobal;
@@ -266,16 +264,12 @@ class DragDropController {
 
                 final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
                 mDragState.broadcastDragStartedLocked(touchX, touchY);
-                if (enablePointerChoreographer()) {
-                    if ((touchSource & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
-                        InputManagerGlobal.getInstance().setPointerIcon(
-                                PointerIcon.getSystemIcon(
-                                        mService.mContext, PointerIcon.TYPE_GRABBING),
-                                mDragState.mDisplayContent.getDisplayId(), touchDeviceId,
-                                touchPointerId, mDragState.getInputToken());
-                    }
-                } else {
-                    mDragState.overridePointerIconLocked(touchSource);
+                if ((touchSource & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
+                    InputManagerGlobal.getInstance().setPointerIcon(
+                            PointerIcon.getSystemIcon(
+                                    mService.mContext, PointerIcon.TYPE_GRABBING),
+                            mDragState.mDisplayContent.getDisplayId(), touchDeviceId,
+                            touchPointerId, mDragState.getInputToken());
                 }
                 // remember the thumb offsets for later
                 mDragState.mThumbOffsetX = thumbCenterX;

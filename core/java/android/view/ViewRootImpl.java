@@ -74,7 +74,6 @@ import static android.view.ViewRootImplProto.WIDTH;
 import static android.view.ViewRootImplProto.WINDOW_ATTRIBUTES;
 import static android.view.ViewRootImplProto.WIN_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -96,6 +95,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_V
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OVERRIDE_LAYOUT_IN_DISPLAY_CUTOUT_MODE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -122,7 +122,6 @@ import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
-import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.window.flags.Flags.activityWindowInfoFlag;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
@@ -7928,46 +7927,20 @@ public final class ViewRootImpl implements ViewParent,
         if (event.isStylusPointer() && mIsStylusPointerIconEnabled) {
             pointerIcon = mHandwritingInitiator.onResolvePointerIcon(mContext, event);
         }
-
         if (pointerIcon == null) {
             pointerIcon = mView.onResolvePointerIcon(event, pointerIndex);
         }
-
-        if (enablePointerChoreographer()) {
-            if (pointerIcon == null) {
-                pointerIcon = PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED);
-            }
-            if (Objects.equals(mResolvedPointerIcon, pointerIcon)) {
-                return true;
-            }
-            mResolvedPointerIcon = pointerIcon;
-
-            InputManagerGlobal.getInstance()
-                    .setPointerIcon(pointerIcon, event.getDisplayId(),
-                            event.getDeviceId(), event.getPointerId(0), getInputToken());
+        if (pointerIcon == null) {
+            pointerIcon = PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED);
+        }
+        if (Objects.equals(mResolvedPointerIcon, pointerIcon)) {
             return true;
         }
+        mResolvedPointerIcon = pointerIcon;
 
-        final int pointerType = (pointerIcon != null) ?
-                pointerIcon.getType() : PointerIcon.TYPE_NOT_SPECIFIED;
-
-        if (mPointerIconType == null || mPointerIconType != pointerType) {
-            mPointerIconType = pointerType;
-            mCustomPointerIcon = null;
-            if (mPointerIconType != PointerIcon.TYPE_CUSTOM) {
-                InputManagerGlobal
-                        .getInstance()
-                        .setPointerIconType(pointerType);
-                return true;
-            }
-        }
-        if (mPointerIconType == PointerIcon.TYPE_CUSTOM &&
-                !pointerIcon.equals(mCustomPointerIcon)) {
-            mCustomPointerIcon = pointerIcon;
-            InputManagerGlobal
-                    .getInstance()
-                    .setCustomPointerIcon(mCustomPointerIcon);
-        }
+        InputManagerGlobal.getInstance()
+                .setPointerIcon(pointerIcon, event.getDisplayId(),
+                        event.getDeviceId(), event.getPointerId(0), getInputToken());
         return true;
     }
 

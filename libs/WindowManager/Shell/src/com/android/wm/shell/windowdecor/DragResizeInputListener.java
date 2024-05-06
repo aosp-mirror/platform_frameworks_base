@@ -24,7 +24,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERL
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 
-import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
@@ -499,12 +498,8 @@ class DragResizeInputListener implements AutoCloseable {
             // where views in the task can receive input events because we can't set touch regions
             // of input sinks to have rounded corners.
             if (mLastCursorType != cursorType || cursorType != PointerIcon.TYPE_DEFAULT) {
-                if (enablePointerChoreographer()) {
-                    mInputManager.setPointerIcon(PointerIcon.getSystemIcon(mContext, cursorType),
-                            displayId, deviceId, pointerId, mInputChannel.getToken());
-                } else {
-                    mInputManager.setPointerIconType(cursorType);
-                }
+                mInputManager.setPointerIcon(PointerIcon.getSystemIcon(mContext, cursorType),
+                        displayId, deviceId, pointerId, mInputChannel.getToken());
                 mLastCursorType = cursorType;
             }
         }
