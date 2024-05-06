@@ -34,6 +34,7 @@ import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SAVE_EVENT_RE
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.IntDef;
+import android.os.SystemClock;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -45,7 +46,7 @@ import java.util.Optional;
 /**
  * Helper class to log Autofill Save event stats.
  */
-public final class SaveEventLogger {
+public class SaveEventLogger {
   private static final String TAG = "SaveEventLogger";
 
   /**
@@ -112,19 +113,21 @@ public final class SaveEventLogger {
   public static final int NO_SAVE_REASON_WITH_DONT_SAVE_ON_FINISH_FLAG =
       AUTOFILL_SAVE_EVENT_REPORTED__SAVE_UI_NOT_SHOWN_REASON__NO_SAVE_REASON_WITH_DONT_SAVE_ON_FINISH_FLAG;
 
+  public static final long UNINITIATED_TIMESTAMP = Long.MIN_VALUE;
+
   private final int mSessionId;
   private Optional<SaveEventInternal> mEventInternal;
+  private long mSessionStartTimestamp;
 
-  private SaveEventLogger(int sessionId) {
-    mSessionId = sessionId;
-    mEventInternal = Optional.of(new SaveEventInternal());
+  private SaveEventLogger(int sessionId, long sessionStartTimestamp) {
+      mSessionId = sessionId;
+      mEventInternal = Optional.of(new SaveEventInternal());
+      mSessionStartTimestamp = sessionStartTimestamp;
   }
 
-  /**
-   * A factory constructor to create FillRequestEventLogger.
-   */
-  public static SaveEventLogger forSessionId(int sessionId) {
-    return new SaveEventLogger(sessionId);
+  /** A factory constructor to create FillRequestEventLogger. */
+  public static SaveEventLogger forSessionId(int sessionId, long sessionStartTimestamp) {
+        return new SaveEventLogger(sessionId, sessionStartTimestamp);
   }
 
   /**
@@ -224,6 +227,15 @@ public final class SaveEventLogger {
     });
   }
 
+  /* Returns timestamp (relative to mSessionStartTimestamp) or  UNINITIATED_TIMESTAMP if mSessionStartTimestamp is not set */
+  private long getCurrentTimestamp() {
+    long timestamp = UNINITIATED_TIMESTAMP;
+    if (mSessionStartTimestamp != UNINITIATED_TIMESTAMP) {
+      timestamp = SystemClock.elapsedRealtime() - mSessionStartTimestamp;
+    }
+    return timestamp;
+  }
+
   /**
    * Set latency_save_ui_display_millis as long as mEventInternal presents.
    */
@@ -231,6 +243,11 @@ public final class SaveEventLogger {
     mEventInternal.ifPresent(event -> {
       event.mLatencySaveUiDisplayMillis = timestamp;
     });
+  }
+
+  /** Set latency_save_ui_display_millis as long as mEventInternal presents. */
+  public void maybeSetLatencySaveUiDisplayMillis() {
+    maybeSetLatencySaveUiDisplayMillis(getCurrentTimestamp());
   }
 
   /**
@@ -242,6 +259,11 @@ public final class SaveEventLogger {
     });
   }
 
+  /** Set latency_save_request_millis as long as mEventInternal presents. */
+  public void maybeSetLatencySaveRequestMillis() {
+    maybeSetLatencySaveRequestMillis(getCurrentTimestamp());
+  }
+
   /**
    * Set latency_save_finish_millis as long as mEventInternal presents.
    */
@@ -249,6 +271,11 @@ public final class SaveEventLogger {
     mEventInternal.ifPresent(event -> {
       event.mLatencySaveFinishMillis = timestamp;
     });
+  }
+
+  /** Set latency_save_finish_millis as long as mEventInternal presents. */
+  public void maybeSetLatencySaveFinishMillis() {
+    maybeSetLatencySaveFinishMillis(getCurrentTimestamp());
   }
 
   /**
