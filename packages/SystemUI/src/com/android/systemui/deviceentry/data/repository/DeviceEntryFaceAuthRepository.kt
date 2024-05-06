@@ -46,7 +46,6 @@ import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthR
 import com.android.systemui.keyguard.data.repository.FaceAuthTableLog
 import com.android.systemui.keyguard.data.repository.FaceDetectTableLog
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
-import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -64,6 +63,7 @@ import com.android.systemui.user.data.repository.UserRepository
 import com.google.errorprone.annotations.CompileTimeConstant
 import java.io.PrintWriter
 import java.util.Arrays
+import java.util.concurrent.Executor
 import java.util.stream.Collectors
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -150,12 +150,12 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    @Background private val backgroundExecutor: Executor,
     private val sessionTracker: SessionTracker,
     private val uiEventsLogger: UiEventLogger,
     private val faceAuthLogger: FaceAuthenticationLogger,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
-    trustRepository: TrustRepository,
     private val keyguardRepository: KeyguardRepository,
     private val powerInteractor: PowerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
@@ -235,7 +235,10 @@ constructor(
         }
 
     init {
-        faceManager?.addLockoutResetCallback(faceLockoutResetCallback)
+        backgroundExecutor.execute {
+            faceManager?.addLockoutResetCallback(faceLockoutResetCallback)
+            faceAuthLogger.addLockoutResetCallbackDone()
+        }
         faceAcquiredInfoIgnoreList =
             Arrays.stream(
                     context.resources.getIntArray(
