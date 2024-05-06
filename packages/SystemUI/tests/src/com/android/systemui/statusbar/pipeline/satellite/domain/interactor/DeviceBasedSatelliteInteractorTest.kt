@@ -250,7 +250,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_twoConnectionsOos_yes() =
+    fun areAllConnectionsOutOfService_twoConnectionsOos_nonNtn_yes() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
@@ -258,11 +258,13 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
             val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
             val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
 
-            // WHEN all of the connections are OOS
+            // WHEN all of the connections are OOS and none are NTN
             i1.isInService.value = false
             i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = false
             i2.isInService.value = false
             i2.isEmergencyOnly.value = false
+            i2.isNonTerrestrial.value = false
 
             // THEN the value is propagated to this interactor
             assertThat(latest).isTrue()
@@ -270,7 +272,31 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_oneConnectionOos_yes() =
+    fun areAllConnectionsOutOfService_twoConnectionsOos_oneNtn_no() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
+
+            // GIVEN, 2 connections
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+            val i2 = iconsInteractor.getMobileConnectionInteractorForSubId(2)
+
+            // WHEN all of the connections are OOS and one is NTN
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = false
+            i2.isInService.value = false
+            i2.isEmergencyOnly.value = false
+
+            // sub2 is non terrestrial, consider it connected for the sake of the iconography
+            i2.isNonTerrestrial.value = true
+
+            // THEN the value is propagated to this interactor
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun areAllConnectionsOutOfService_oneConnectionOos_nonNtn_yes() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
@@ -280,6 +306,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
             // WHEN all of the connections are OOS
             i1.isInService.value = false
             i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = false
 
             // THEN the value is propagated to this interactor
             assertThat(latest).isTrue()
@@ -287,7 +314,25 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_oneConnectionInService_no() =
+    fun areAllConnectionsOutOfService_oneConnectionOos_ntn_yes() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
+
+            // GIVEN, 1 connection
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+
+            // WHEN all of the connections are OOS
+            i1.isInService.value = false
+            i1.isEmergencyOnly.value = false
+            i1.isNonTerrestrial.value = true
+
+            // THEN the value is propagated to this interactor
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun areAllConnectionsOutOfService_oneConnectionInService_nonNtn_no() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
@@ -296,6 +341,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
             // WHEN all of the connections are NOT OOS
             i1.isInService.value = true
+            i1.isNonTerrestrial.value = false
 
             // THEN the value is propagated to this interactor
             assertThat(latest).isFalse()
@@ -303,7 +349,24 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_twoConnectionsOneInService_no() =
+    fun areAllConnectionsOutOfService_oneConnectionInService_ntn_no() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
+
+            // GIVEN, 1 connection
+            val i1 = iconsInteractor.getMobileConnectionInteractorForSubId(1)
+
+            // WHEN all of the connections are NOT OOS
+            i1.isInService.value = true
+            i1.isNonTerrestrial.value = true
+
+            // THEN the value is propagated to this interactor
+            assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    fun areAllConnectionsOutOfService_twoConnectionsOneInService_nonNtn_no() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 
@@ -313,7 +376,9 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
             // WHEN at least 1 connection is NOT OOS.
             i1.isInService.value = false
+            i1.isNonTerrestrial.value = false
             i2.isInService.value = true
+            i2.isNonTerrestrial.value = false
 
             // THEN the value is propagated to this interactor
             assertThat(latest).isFalse()
@@ -321,7 +386,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    fun areAllConnectionsOutOfService_twoConnectionsInService_no() =
+    fun areAllConnectionsOutOfService_twoConnectionsInService_nonNtn_no() =
         testScope.runTest {
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
 

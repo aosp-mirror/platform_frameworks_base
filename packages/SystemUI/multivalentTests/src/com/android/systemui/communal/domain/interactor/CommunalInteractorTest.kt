@@ -586,6 +586,7 @@ class CommunalInteractorTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = currentScene,
                         toScene = targetScene,
+                        currentScene = flowOf(targetScene),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -630,6 +631,7 @@ class CommunalInteractorTest : SysuiTestCase() {
                     ObservableTransitionState.Transition(
                         fromScene = currentScene,
                         toScene = targetScene,
+                        currentScene = flowOf(targetScene),
                         progress = progress,
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
@@ -748,6 +750,7 @@ class CommunalInteractorTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = CommunalScenes.Communal,
                     toScene = CommunalScenes.Blank,
+                    currentScene = flowOf(CommunalScenes.Blank),
                     progress = flowOf(0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -776,6 +779,7 @@ class CommunalInteractorTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = CommunalScenes.Blank,
                     toScene = CommunalScenes.Communal,
+                    currentScene = flowOf(CommunalScenes.Communal),
                     progress = flowOf(0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -795,6 +799,7 @@ class CommunalInteractorTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = CommunalScenes.Communal,
                     toScene = CommunalScenes.Blank,
+                    currentScene = flowOf(CommunalScenes.Blank),
                     progress = flowOf(1.0f),
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

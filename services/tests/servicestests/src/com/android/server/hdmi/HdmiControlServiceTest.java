@@ -408,6 +408,60 @@ public class HdmiControlServiceTest {
     }
 
     @Test
+    public void setRcProfileRootMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    @Test
+    public void setRcProfileSetupMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    @Test
+    public void setRcProfileContentMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    @Test
+    public void setRcProfileTopMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    @Test
+    public void setRcProfileMediaSensitiveMenu_reportFeatureBroadcast() {
+        setRcProfileSourceDeviceTestHelper(
+                HdmiControlManager
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+                HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED);
+    }
+
+    /** Helper method to test if feature discovery message sent given RCProfile change */
+    private void setRcProfileSourceDeviceTestHelper(final String setting, final int val) {
+        mNativeWrapper.clearResultMessages();
+
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0);
+        mHdmiControlServiceSpy.getHdmiCecConfig().setIntValue(setting, val);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportFeatures = ReportFeaturesMessage.build(Constants.ADDR_PLAYBACK_1,
+                HdmiControlManager.HDMI_CEC_VERSION_2_0,
+                Arrays.asList(DEVICE_PLAYBACK, DEVICE_AUDIO_SYSTEM),
+                mPlaybackDeviceSpy.getRcProfile(), mPlaybackDeviceSpy.getRcFeatures(),
+                mPlaybackDeviceSpy.getDeviceFeatures());
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportFeatures);
+    }
+
+    @Test
     public void disableAndReenableCec_volumeControlReturnsToOriginalValue_enabled() {
         int volumeControlEnabled = HdmiControlManager.VOLUME_CONTROL_ENABLED;
         mHdmiControlServiceSpy.setHdmiCecVolumeControlEnabledInternal(volumeControlEnabled);

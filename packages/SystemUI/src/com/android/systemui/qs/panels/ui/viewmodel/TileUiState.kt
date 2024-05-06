@@ -24,15 +24,13 @@ data class TileUiState(
     val secondaryLabel: CharSequence,
     val colors: TileColorAttributes,
     val icon: Supplier<QSTile.Icon>,
-    val iconOnly: Boolean,
 )
 
-fun QSTile.State.toUiState(iconOnly: Boolean): TileUiState {
+fun QSTile.State.toUiState(): TileUiState {
     return TileUiState(
         label ?: "",
         secondaryLabel ?: "",
         colors(),
         icon?.let { Supplier { icon } } ?: iconSupplier,
-        iconOnly,
     )
 }

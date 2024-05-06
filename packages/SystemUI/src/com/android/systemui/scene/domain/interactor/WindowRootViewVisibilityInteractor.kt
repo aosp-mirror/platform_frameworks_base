@@ -76,7 +76,8 @@ constructor(
                 .map { state ->
                     when (state) {
                         is ObservableTransitionState.Idle ->
-                            state.scene == Scenes.Shade || state.scene == Scenes.Lockscreen
+                            state.currentScene == Scenes.Shade ||
+                                state.currentScene == Scenes.Lockscreen
                         is ObservableTransitionState.Transition ->
                             state.toScene == Scenes.Shade ||
                                 state.toScene == Scenes.Lockscreen ||

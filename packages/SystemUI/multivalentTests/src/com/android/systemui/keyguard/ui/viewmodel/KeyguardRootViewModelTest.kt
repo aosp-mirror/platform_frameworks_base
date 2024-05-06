@@ -23,6 +23,7 @@ import android.platform.test.flag.junit.FlagsParameterization
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.communalRepository
@@ -56,7 +57,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
-import com.android.systemui.Flags as AConfigFlags
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
@@ -95,7 +95,6 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization?) : SysuiTestCase()
             mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
             mSetFlagsRule.disableFlags(
                 AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
-                AConfigFlags.FLAG_REFACTOR_KEYGUARD_DISMISS_INTENT,
             )
         }
     }

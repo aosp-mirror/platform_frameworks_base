@@ -420,7 +420,7 @@
     <dimen name="freeform_decor_caption_height">42dp</dimen>
 
     <!-- Height of desktop mode caption for freeform tasks. -->
-    <dimen name="desktop_mode_freeform_decor_caption_height">42dp</dimen>
+    <dimen name="desktop_mode_freeform_decor_caption_height">40dp</dimen>
 
     <!-- Height of desktop mode caption for fullscreen tasks. -->
     <dimen name="desktop_mode_fullscreen_decor_caption_height">36dp</dimen>

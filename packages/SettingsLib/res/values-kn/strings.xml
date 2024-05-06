@@ -96,10 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"ಸಂಪರ್ಕಗೊಂಡಿದೆ (ಫೋನ್ ಅಥವಾ ಮಾಧ್ಯಮವಿಲ್ಲ), ಬ್ಯಾಟರಿ ಚಾರ್ಜ್‌ ಮಟ್ಟ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"ಸಕ್ರಿಯವಾಗಿದೆ. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"ಸಕ್ರಿಯವಾಗಿದೆ. ಎಡ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ಬಲ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"ಸಕ್ರಿಯವಾಗಿದೆ. ಎಡ: ಬ್ಯಾಟರಿ ಮಟ್ಟ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"ಸಕ್ರಿಯವಾಗಿದೆ. ಬಲ: ಬ್ಯಾಟರಿ ಮಟ್ಟ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಇದೆ"</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"ಎಡ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ಬಲ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
@@ -107,12 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"ಬಲ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"ಸಕ್ರಿಯ"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ಸಕ್ರಿಯವಾಗಿದೆ (ಎಡಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ಸಕ್ರಿಯವಾಗಿದೆ (ಬಲಕಿವಿಯ ಸಾಧನ ಮಾತ್ರ)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ಸಕ್ರಿಯವಾಗಿವೆ (ಎಡ ಮತ್ತು ಬಲಕಿವಿಯ ಸಾಧನಗಳು)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ಸಕ್ರಿಯವಾಗಿದೆ (ಮೀಡಿಯಾ ಮಾತ್ರ). ಎಡ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ಬಲ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"ಕನೆಕ್ಟ್‌ ಆಗಿದೆ (ಆಡಿಯೋ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ಬ್ಯಾಟರಿ ಮಟ್ಟ."</string>
@@ -395,7 +390,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"ಬಣ್ಣದ ಸ್ಥಳ ಸಿಮ್ಯುಲೇಟ್‌"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ಕುರುಹುಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ಆಡಿಯೋ ರೂಟಿಂಗ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ಆಡಿಯೋ ಸಲಕರಣೆಗಳಿಗೆ ಸ್ವಯಂ ರೂಟಿಂಗ್ ನಿಷ್ಕ್ರಿಯ."</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ಆಡಿಯೋ ಸಲಕರಣೆಗಳಿಗೆ ಸ್ವಯಂಚಾಲಿತ ರೂಟಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ."</string>
     <string name="debug_layout" msgid="1659216803043339741">"ಲೇಔಟ್ ಪರಿಮಿತಿಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ಕ್ಲಿಪ್‌ನ ಗಡಿಗಳು, ಅಂಚುಗಳು, ಇತ್ಯಾದಿ ತೋರಿಸು."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL ಲೇಔಟ್‌ ಡೈರೆಕ್ಷನ್ ಫೋರ್ಸ್ ಮಾಡುವಿಕೆ"</string>
@@ -406,7 +401,7 @@
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ಫೋರ್ಸ್ ಮಾಡಿ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ಅಪ್ಲಿಕೇಶನ್‌ಗಳಲ್ಲಿ 4x MSAA ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"ಆಯತಾಕಾರವಲ್ಲದ ಕ್ಲಿಪ್ ಕಾರ್ಯಾಚರಣೆ ಡೀಬಗ್"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"ಪ್ರೊಫೈಲ್ HWUI ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"ಪ್ರೊಫೈಲ್ HWUI ರೆಂಡರಿಂಗ್"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ಡೀಬಗ್ ಲೇಯರ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ಡೀಬಗ್ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ GPU ಡೀಬಗ್ ಲೇಯರ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡುವುದನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ವರ್‌ಬೋಸ್ ವೆಂಡರ್ ಲಾಗಿಂಗ್‌ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
@@ -726,4 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"ನಪುಂಸಕ"</string>
     <string name="feminine" msgid="1529155595310784757">"ಮಹಿಳೆಯರಿಗಾಗಿ"</string>
     <string name="masculine" msgid="4653978041013996303">"ಪುರುಷರಿಗಾಗಿ"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"ಸಿಸ್ಟಂ ಅಪ್‌ಡೇಟ್‌ಗಳು"</string>
 </resources>

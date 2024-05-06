@@ -395,6 +395,51 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testGetRecentTasks_proto2Enabled_ignoresMinimizedFreeformTasks() {
+        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
+                DesktopModeStatus.class).startMocking();
+        when(DesktopModeStatus.isEnabled()).thenReturn(true);
+
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+        ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
+        ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
+        ActivityManager.RecentTaskInfo t5 = makeTaskInfo(5);
+        setRawList(t1, t2, t3, t4, t5);
+
+        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(5)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isMinimizedTask(3)).thenReturn(true);
+
+        ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
+                MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+
+        // 2 freeform tasks should be grouped into one, 1 task should be skipped, 3 total recents
+        // entries
+        assertEquals(3, recentTasks.size());
+        GroupedRecentTaskInfo freeformGroup = recentTasks.get(0);
+        GroupedRecentTaskInfo singleGroup1 = recentTasks.get(1);
+        GroupedRecentTaskInfo singleGroup2 = recentTasks.get(2);
+
+        // Check that groups have expected types
+        assertEquals(GroupedRecentTaskInfo.TYPE_FREEFORM, freeformGroup.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup1.getType());
+        assertEquals(GroupedRecentTaskInfo.TYPE_SINGLE, singleGroup2.getType());
+
+        // Check freeform group entries
+        assertEquals(2, freeformGroup.getTaskInfoList().size());
+        assertEquals(t1, freeformGroup.getTaskInfoList().get(0));
+        assertEquals(t5, freeformGroup.getTaskInfoList().get(1));
+
+        // Check single entries
+        assertEquals(t2, singleGroup1.getTaskInfo1());
+        assertEquals(t4, singleGroup2.getTaskInfo1());
+
+        mockitoSession.finishMocking();
+    }
+
+    @Test
     public void testRemovedTaskRemovesSplit() {
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);

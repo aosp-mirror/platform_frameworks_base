@@ -343,7 +343,7 @@ public class AutomaticBrightnessStrategy2Test {
                 AutomaticBrightnessController.class);
         when(automaticBrightnessController.getAutomaticScreenBrightness(any(BrightnessEvent.class)))
                 .thenReturn(automaticScreenBrightness);
-        when(automaticBrightnessController.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+        when(automaticBrightnessController.getAutomaticScreenBrightnessBasedOnLastUsedLux(
                 any(BrightnessEvent.class)))
                 .thenReturn(automaticScreenBrightness);
         mAutomaticBrightnessStrategy.setAutomaticBrightnessController(
@@ -352,7 +352,7 @@ public class AutomaticBrightnessStrategy2Test {
                 mAutomaticBrightnessStrategy.getAutomaticScreenBrightness(
                         new BrightnessEvent(DISPLAY_ID)), 0.0f);
         assertEquals(automaticScreenBrightness,
-                mAutomaticBrightnessStrategy.getAutomaticScreenBrightnessBasedOnLastObservedLux(
+                mAutomaticBrightnessStrategy.getAutomaticScreenBrightnessBasedOnLastUsedLux(
                         new BrightnessEvent(DISPLAY_ID)), 0.0f);
     }
 

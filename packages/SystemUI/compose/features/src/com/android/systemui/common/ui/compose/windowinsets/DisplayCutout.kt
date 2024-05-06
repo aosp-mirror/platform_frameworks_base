@@ -16,6 +16,7 @@
 
 package com.android.systemui.common.ui.compose.windowinsets
 
+import android.view.DisplayCutout as ViewDisplayCutout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
@@ -27,6 +28,11 @@ data class DisplayCutout(
     val right: Dp = 0.dp,
     val bottom: Dp = 0.dp,
     val location: CutoutLocation = CutoutLocation.NONE,
+    /**
+     * The original `DisplayCutout` for the `View` world; only use this when feeding it back to a
+     * `View`.
+     */
+    val viewDisplayCutoutKeyguardStatusBarView: ViewDisplayCutout? = null,
 ) {
     fun width() = abs(right.value - left.value).dp
 }

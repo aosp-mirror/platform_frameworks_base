@@ -3214,6 +3214,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mHideAnimationRun = false;
         adjustStatusBarLocked();
         sendUserPresentBroadcast();
+
+        if (!KeyguardWmStateRefactor.isEnabled()) {
+            mKeyguardInteractor.dismissKeyguard();
+        }
     }
 
     private Configuration.Builder createInteractionJankMonitorConf(int cuj) {

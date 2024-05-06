@@ -18,20 +18,31 @@ package com.android.systemui.qs.panels.dagger
 
 import com.android.systemui.qs.panels.data.repository.IconTilesRepository
 import com.android.systemui.qs.panels.data.repository.IconTilesRepositoryImpl
-import com.android.systemui.qs.panels.shared.model.GridLayoutTypeKey
+import com.android.systemui.qs.panels.shared.model.GridLayoutType
 import com.android.systemui.qs.panels.shared.model.InfiniteGridLayoutType
 import com.android.systemui.qs.panels.ui.compose.GridLayout
 import com.android.systemui.qs.panels.ui.compose.InfiniteGridLayout
 import dagger.Binds
 import dagger.Module
-import dagger.multibindings.IntoMap
+import dagger.Provides
+import dagger.multibindings.IntoSet
 
 @Module
 interface PanelsModule {
     @Binds fun bindIconTilesRepository(impl: IconTilesRepositoryImpl): IconTilesRepository
 
-    @Binds
-    @IntoMap
-    @GridLayoutTypeKey(InfiniteGridLayoutType::class)
-    fun bindGridLayout(impl: InfiniteGridLayout): GridLayout
+    companion object {
+        @Provides
+        @IntoSet
+        fun provideGridLayout(gridLayout: InfiniteGridLayout): Pair<GridLayoutType, GridLayout> {
+            return Pair(InfiniteGridLayoutType, gridLayout)
+        }
+
+        @Provides
+        fun provideGridLayoutMap(
+            entries: Set<@JvmSuppressWildcards Pair<GridLayoutType, GridLayout>>
+        ): Map<GridLayoutType, GridLayout> {
+            return entries.toMap()
+        }
+    }
 }

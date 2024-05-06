@@ -162,7 +162,7 @@ constructor(
                                 sceneInteractor.transitionState.mapNotNull { state ->
                                     when (state) {
                                         is ObservableTransitionState.Idle -> {
-                                            if (state.scene != Scenes.Gone) {
+                                            if (state.currentScene != Scenes.Gone) {
                                                 true to "scene is not Gone"
                                             } else {
                                                 false to "scene is Gone"
@@ -272,7 +272,7 @@ constructor(
                 .mapNotNull { deviceUnlockStatus ->
                     val renderedScenes =
                         when (val transitionState = sceneInteractor.transitionState.value) {
-                            is ObservableTransitionState.Idle -> setOf(transitionState.scene)
+                            is ObservableTransitionState.Idle -> setOf(transitionState.currentScene)
                             is ObservableTransitionState.Transition ->
                                 setOf(
                                     transitionState.fromScene,
@@ -399,7 +399,7 @@ constructor(
             combine(
                     sceneInteractor.transitionState
                         .mapNotNull { it as? ObservableTransitionState.Idle }
-                        .map { it.scene }
+                        .map { it.currentScene }
                         .distinctUntilChanged(),
                     occlusionInteractor.invisibleDueToOcclusion,
                 ) { sceneKey, invisibleDueToOcclusion ->
@@ -424,7 +424,7 @@ constructor(
         applicationScope.launch {
             sceneInteractor.transitionState
                 .mapNotNull { transitionState ->
-                    (transitionState as? ObservableTransitionState.Idle)?.scene
+                    (transitionState as? ObservableTransitionState.Idle)?.currentScene
                 }
                 .distinctUntilChanged()
                 .collect { sceneKey ->
@@ -524,7 +524,7 @@ constructor(
                     if (isDeviceLocked) {
                         sceneInteractor.transitionState
                             .mapNotNull { it as? ObservableTransitionState.Idle }
-                            .map { it.scene }
+                            .map { it.currentScene }
                             .distinctUntilChanged()
                             .map { sceneKey ->
                                 when (sceneKey) {

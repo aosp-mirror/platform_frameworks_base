@@ -96,10 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Pripojené k zariadeniu <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (bez telefónu a médií), úroveň batérie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Aktívne. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Aktívne. Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batérie."</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Aktívne. Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Aktívne. P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batéria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Batéria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batérie."</string>
@@ -107,12 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Pravá strana: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktívne"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Uložené"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktívne (iba ľavé)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktívne (iba pravé)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktívne (ľavé aj pravé)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktívne (iba médiá). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktívne (iba médiá). Ľ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batérie, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batérie."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Pripojené (podporuje zdieľanie zvuku). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batérie."</string>
@@ -726,4 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"Stredný rod"</string>
     <string name="feminine" msgid="1529155595310784757">"Ženský rod"</string>
     <string name="masculine" msgid="4653978041013996303">"Mužský rod"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Aktualizácie systému"</string>
 </resources>

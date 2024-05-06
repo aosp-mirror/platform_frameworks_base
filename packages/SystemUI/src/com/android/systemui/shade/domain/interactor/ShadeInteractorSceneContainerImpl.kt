@@ -90,7 +90,7 @@ constructor(
         sceneInteractor.transitionState
             .map { state ->
                 when (state) {
-                    is ObservableTransitionState.Idle -> state.scene == Scenes.QuickSettings
+                    is ObservableTransitionState.Idle -> state.currentScene == Scenes.QuickSettings
                     is ObservableTransitionState.Transition -> false
                 }
             }
@@ -122,7 +122,7 @@ constructor(
             .flatMapLatest { state ->
                 when (state) {
                     is ObservableTransitionState.Idle ->
-                        if (state.scene == sceneKey) {
+                        if (state.currentScene == sceneKey) {
                             flowOf(1f)
                         } else {
                             flowOf(0f)

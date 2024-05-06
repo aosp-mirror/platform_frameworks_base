@@ -18,4 +18,4 @@ package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.keyguardSmartspaceRepository by Kosmos.Fixture { KeyguardSmartspaceRepository() }
+val Kosmos.keyguardSmartspaceRepository by Kosmos.Fixture { FakeKeyguardSmartspaceRepository() }

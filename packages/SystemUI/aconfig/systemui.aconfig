@@ -26,13 +26,6 @@ flag {
 }
 
 flag {
-   name: "refactor_keyguard_dismiss_intent"
-   namespace: "systemui"
-   description: "Update how keyguard dismiss intents are stored."
-   bug: "275069969"
-}
-
-flag {
 
     name: "notification_heads_up_cycling"
     namespace: "systemui"
@@ -369,13 +362,6 @@ flag {
     namespace: "systemui"
     description: "Use the new compose bouncer in SystemUI"
     bug: "310005730"
-}
-
-flag {
-   name: "media_in_scene_container"
-   namespace: "systemui"
-   description: "Enable media in the scene container framework"
-   bug: "296122467"
 }
 
 flag {
@@ -817,6 +803,16 @@ flag {
 }
 
 flag {
+    name: "shade_collapse_activity_launch_fix"
+    namespace: "systemui"
+    description: "Avoid collapsing the shade on activity launch if it is already collapsed, as this causes a flicker."
+    bug: "331591373"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "slice_broadcast_relay_in_background"
     namespace: "systemui"
     description: "Move handling of slice broadcast relay broadcasts to background threads"
@@ -848,6 +844,16 @@ flag {
   namespace: "systemui"
   description: "listen to display changes and cache window metrics"
   bug: "330906135"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "communal_bouncer_do_not_modify_plugin_open"
+  namespace: "systemui"
+  description: "do not modify notification shade when handling bouncer expansion."
+  bug: "338252661"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

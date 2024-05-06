@@ -58,7 +58,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         }
     private val testScope = kosmos.testScope
     private val placeholderViewModel by lazy { kosmos.notificationsPlaceholderViewModel }
-    private val appearanceViewModel by lazy { kosmos.notificationScrollViewModel }
+    private val scrollViewModel by lazy { kosmos.notificationScrollViewModel }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
 
@@ -67,7 +67,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val radius = MutableStateFlow(32)
             val leftOffset = MutableStateFlow(0)
-            val shape by collectLastValue(appearanceViewModel.shadeScrimShape(radius, leftOffset))
+            val shape by collectLastValue(scrollViewModel.shadeScrimShape(radius, leftOffset))
 
             placeholderViewModel.onScrimBoundsChanged(
                 ShadeScrimBounds(left = 0f, top = 200f, right = 100f, bottom = 550f)
@@ -99,16 +99,29 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         }
 
     @Test
+    fun brightnessMirrorAlpha_updatesViewModel() =
+        testScope.runTest {
+            val maxAlpha by collectLastValue(scrollViewModel.maxAlpha)
+            assertThat(maxAlpha).isEqualTo(1f)
+            placeholderViewModel.setAlphaForBrightnessMirror(0.33f)
+            assertThat(maxAlpha).isEqualTo(0.33f)
+            placeholderViewModel.setAlphaForBrightnessMirror(0f)
+            assertThat(maxAlpha).isEqualTo(0f)
+            placeholderViewModel.setAlphaForBrightnessMirror(1f)
+            assertThat(maxAlpha).isEqualTo(1f)
+        }
+
+    @Test
     fun shadeExpansion_goneToShade() =
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(scene = Scenes.Gone)
+                    ObservableTransitionState.Idle(currentScene = Scenes.Gone)
                 )
             sceneInteractor.setTransitionState(transitionState)
-            val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
+            val expandFraction by collectLastValue(scrollViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(0f)
-            val isScrollable by collectLastValue(appearanceViewModel.isScrollable)
+            val isScrollable by collectLastValue(scrollViewModel.isScrollable)
             assertThat(isScrollable).isFalse()
 
             fakeSceneDataSource.pause()
@@ -118,6 +131,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Gone,
                     toScene = Scenes.Shade,
+                    currentScene = flowOf(Scenes.Shade),
                     progress = transitionProgress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),
@@ -140,12 +154,12 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(scene = Scenes.Lockscreen)
+                    ObservableTransitionState.Idle(currentScene = Scenes.Lockscreen)
                 )
             sceneInteractor.setTransitionState(transitionState)
-            val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
+            val expandFraction by collectLastValue(scrollViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(1f)
-            val isScrollable by collectLastValue(appearanceViewModel.isScrollable)
+            val isScrollable by collectLastValue(scrollViewModel.isScrollable)
             assertThat(isScrollable).isFalse()
         }
 
@@ -154,14 +168,14 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
-                    ObservableTransitionState.Idle(scene = Scenes.Shade)
+                    ObservableTransitionState.Idle(currentScene = Scenes.Shade)
                 )
             sceneInteractor.setTransitionState(transitionState)
-            val expandFraction by collectLastValue(appearanceViewModel.expandFraction)
+            val expandFraction by collectLastValue(scrollViewModel.expandFraction)
             assertThat(expandFraction).isEqualTo(1f)
 
             fakeSceneDataSource.changeScene(toScene = Scenes.Shade)
-            val isScrollable by collectLastValue(appearanceViewModel.isScrollable)
+            val isScrollable by collectLastValue(scrollViewModel.isScrollable)
             assertThat(isScrollable).isTrue()
 
             fakeSceneDataSource.pause()
@@ -172,6 +186,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                 ObservableTransitionState.Transition(
                     fromScene = Scenes.Shade,
                     toScene = Scenes.QuickSettings,
+                    currentScene = flowOf(Scenes.QuickSettings),
                     progress = transitionProgress,
                     isInitiatedByUserInput = false,
                     isUserInputOngoing = flowOf(false),

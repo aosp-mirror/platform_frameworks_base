@@ -45,6 +45,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.TransitionState
 import com.android.compose.animation.scene.animateSceneFloatAsState
+import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
@@ -150,20 +152,30 @@ private fun SceneScope.QuickSettingsScene(
             label = "alphaAnimationBrightnessMirrorContentHiding",
         )
 
+    viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
+    DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
+
     BrightnessMirror(
         viewModel = viewModel.brightnessMirrorViewModel,
         qsSceneAdapter = viewModel.qsSceneAdapter
     )
 
+    val shouldPunchHoleBehindScrim =
+        layoutState.isTransitioningBetween(Scenes.Gone, Scenes.QuickSettings) ||
+            layoutState.isTransitioningBetween(Scenes.Lockscreen, Scenes.QuickSettings)
+
     // TODO(b/280887232): implement the real UI.
     Box(
         modifier =
-            modifier.fillMaxSize().graphicsLayer {
-                // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this
-                // scene (and not the one under it) during a scene transition.
-                compositingStrategy = CompositingStrategy.Offscreen
-                alpha = contentAlpha
-            }
+            modifier
+                .fillMaxSize()
+                .graphicsLayer { alpha = contentAlpha }
+                .thenIf(shouldPunchHoleBehindScrim) {
+                    // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears
+                    // this
+                    // scene (and not the one under it) during a scene transition.
+                    Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                }
     ) {
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
         val screenHeight = LocalRawScreenHeight.current
@@ -313,6 +325,7 @@ private fun SceneScope.QuickSettingsScene(
         NotificationScrollingStack(
             viewModel = notificationsPlaceholderViewModel,
             maxScrimTop = { screenHeight },
+            shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
             modifier =
                 Modifier.fillMaxWidth().offset { IntOffset(x = 0, y = screenHeight.roundToInt()) },
         )

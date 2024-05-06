@@ -40,6 +40,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -204,9 +205,19 @@ private fun SceneScope.SingleShade(
         )
     val isClickable by viewModel.isClickable.collectAsState()
 
-    // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this scene
-    // (and not the one under it) during a scene transition.
-    Box(modifier = modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
+    val shouldPunchHoleBehindScrim =
+        layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
+            layoutState.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade)
+
+    Box(
+        modifier =
+            modifier.thenIf(shouldPunchHoleBehindScrim) {
+                // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this
+                // scene
+                // (and not the one under it) during a scene transition.
+                Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            }
+    ) {
         Box(
             modifier =
                 Modifier.fillMaxSize()
@@ -257,6 +268,7 @@ private fun SceneScope.SingleShade(
                         NotificationScrollingStack(
                             viewModel = viewModel.notifications,
                             maxScrimTop = { maxNotifScrimTop.value },
+                            shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
                         )
                     },
                 )
@@ -329,6 +341,9 @@ private fun SceneScope.SplitShade(
             targetValue = if (brightnessMirrorShowing) 0f else 1f,
             label = "alphaAnimationBrightnessMirrorContentHiding",
         )
+
+    viewModel.notifications.setAlphaForBrightnessMirror(contentAlpha)
+    DisposableEffect(Unit) { onDispose { viewModel.notifications.setAlphaForBrightnessMirror(1f) } }
 
     val brightnessMirrorShowingModifier = Modifier.graphicsLayer { alpha = contentAlpha }
 
@@ -428,6 +443,7 @@ private fun SceneScope.SplitShade(
                 NotificationScrollingStack(
                     viewModel = viewModel.notifications,
                     maxScrimTop = { 0f },
+                    shouldPunchHoleBehindScrim = false,
                     modifier =
                         Modifier.weight(1f)
                             .fillMaxHeight()

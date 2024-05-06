@@ -1146,9 +1146,15 @@ public class NotificationStackScrollLayout
         }
     }
 
+    @NonNull
     @Override
     public View asView() {
         return this;
+    }
+
+    @Override
+    public void setMaxAlpha(float alpha) {
+        mController.setMaxAlphaFromView(alpha);
     }
 
     @Override

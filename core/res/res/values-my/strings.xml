@@ -153,31 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> နောက် <xliff:g id="TIME_DELAY">{2}</xliff:g> စက္ကန့်"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
-    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
-    <skip />
-    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
-    <skip />
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"မိုဘိုင်းကွန်ရက် လုံခြုံရေး"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"အသွင်ဝှက်ခြင်း၊ အသွင်ဝှက်မထားသော ကွန်ရက်များအတွက် အကြောင်းကြားချက်များ"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"စက် ID သုံးထားသည်"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> တွင် သင့် <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် အနီးရှိ ကွန်ရက်သည် စက်ပစ္စည်း၏ သီးသန့် ID (IMSI (သို့) IMEI) ကို မှတ်တမ်းတင်ထားသည်"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> တွင် သင့် <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် အနီးရှိ ကွန်ရက်သည် စက်ပစ္စည်း၏ သီးသန့် ID (IMSI (သို့) IMEI) ကို မှတ်တမ်းတင်ထားသည်။\n\nဆိုလိုသည်မှာ သင့်တည်နေရာ၊ လုပ်ဆောင်ချက် (သို့) အထောက်အထားကို မှတ်တမ်းတင်ထားသည်။ ၎င်းသည် သာမန်လုပ်ဆောင်မှုဖြစ်သော်လည်း ကိုယ်ရေးအချက်အလက်လုံခြုံမှုနှင့်ပတ်သက်၍ စိုးရိမ်သောသူများအတွက် ပြဿနာတစ်ခု ဖြစ်နိုင်သည်။"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"အသွင်ဝှက်ထားသော ကွန်ရက် <xliff:g id="NETWORK_NAME">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည်"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ဆင်းမ်ကတ် ချိတ်ဆက်မှုသည် ယခု ပိုမိုလုံခြုံပါပြီ"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"အသွင်ဝှက်မထားသော ကွန်ရက်သို့ ချိတ်ဆက်ထားသည်"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"သင့် <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် ဖုန်းခေါ်ဆိုမှု၊ မက်ဆေ့ဂျ်နှင့် ဒေတာများသည် လက်ရှိတွင် ပိုမိုထိခိုက်လွယ်သည်"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"သင့် <xliff:g id="NETWORK_NAME">%1$s</xliff:g> ဆင်းမ်ကတ်ကို သုံးနေစဉ် ဖုန်းခေါ်ဆိုမှု၊ မက်ဆေ့ဂျ်နှင့် ဒေတာများသည် လက်ရှိတွင် ပိုမိုထိခိုက်လွယ်သည်။\n\nသင့်ချိတ်ဆက်မှုကို ထပ်မံအသွင်ဝှက်လိုက်သောအခါ အကြောင်းကြားချက်နောက်တစ်ခု ရရှိပါမည်။"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"မိုဘိုင်းကွန်ရက် လုံခြုံရေး ဆက်တင်များ"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"ပိုမိုလေ့လာရန်"</string>
-    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
-    <skip />
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"နားလည်ပြီ"</string>
     <string name="fcComplete" msgid="1080909484660507044">"ပုံစံကုတ်ပြီးဆုံးသည်"</string>
     <string name="fcError" msgid="5325116502080221346">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် တရားမဝင်သောပုံစံကုတ်"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
@@ -371,8 +359,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ဖန်သားပြင်ဓာတ်ပုံ ရိုက်ရန်"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ဖန်သားပြင်ပြသမှုကို ဓာတ်ပုံရိုက်နိုင်ပါသည်။"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> အစမ်းကြည့်ခြင်း"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"ပယ်ရန်"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"အခြေအနေပြဘားအား အလုပ်မလုပ်ခိုင်းရန်သို့မဟုတ် မွမ်းမံရန်"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"အက်ပ်အား အခြေအနေပြ ဘားကို ပိတ်ခွင့် သို့မဟတ် စနစ် အိုင်ကွန်များကို ထည့်ခြင်း ဖယ်ရှားခြင်း ပြုလုပ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"အခြေအနေပြ ဘားဖြစ်ပါစေ"</string>
@@ -2157,6 +2144,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ဘက်ထရီ အားထိန်း ဖွင့်ထားသည်"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် ဘက်ထရီ အသုံးပြုမှု လျှော့ချခြင်း"</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ဘက်ထရီ အားထိန်း"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ဘက်ထရီ အားထိန်းကို ပိတ်ထားသည်"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ဖုန်းတွင် ဘက်ထရီအား အလုံအလောက် ရှိသည်။ လုပ်ဆောင်ချက်များကို ကန့်သတ်မထားတော့ပါ။"</string>
@@ -2231,10 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"အလုပ်သုံးအက်ပ်သို့ ပြောင်းမလား။"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"သင့်အဖွဲ့အစည်းသည် သင့်အား အလုပ်သုံးအက်ပ်များမှသာ ဖုန်းဆက်ခွင့်ပြုသည်"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"သင့်အဖွဲ့အစည်းသည် သင့်အား အလုပ်သုံးအက်ပ်များမှသာ မက်ဆေ့ဂျ်ပို့ခွင့်ပြုသည်"</string>
-    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
-    <skip />
-    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
-    <skip />
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"သင့်ကိုယ်ပိုင် ‘ဖုန်းအက်ပ်’ မှသာ ဖုန်းခေါ်ဆိုနိုင်သည်။ ကိုယ်ပိုင် ‘ဖုန်း’ ဖြင့် ပြုလုပ်သော ခေါ်ဆိုမှုများကို သင်၏ကိုယ်ပိုင် ခေါ်ဆိုမှုမှတ်တမ်းသို့ ထည့်ပါမည်။"</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"သင့်ကိုယ်ပိုင် Messages အက်ပ်မှသာ SMS မက်ဆေ့ဂျ်များကို ပို့နိုင်သည်။"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ကိုယ်ပိုင်ဘရောင်ဇာ သုံးရန်"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"အလုပ်သုံးဘရောင်ဇာ သုံးရန်"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"ဖုန်းဆက်ရန်"</string>
@@ -2414,8 +2403,11 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"အလုပ် ၃"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"စမ်းသပ်မှု"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"အများသုံး"</string>
-    <!-- no translation found for redacted_notification_message (1520587845842228816) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"အလုပ်ပရိုဖိုင်"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"သီးသန့်နေရာ"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ပုံတူပွားရန်"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"အများသုံး"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"သတိထားရမည့် အကြောင်းကြားချက်ပါ အချက်အလက်ကို ဖျောက်ထားသည်"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"အက်ပ်အကြောင်းအရာသည် လုံခြုံရေးအတွက် မျက်နှာပြင် မျှဝေခြင်းမှ ဖျောက်ထားသည်"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ဂြိုဟ်တုနှင့် အလိုအလျောက် ချိတ်ဆက်ထားသည်"</string>

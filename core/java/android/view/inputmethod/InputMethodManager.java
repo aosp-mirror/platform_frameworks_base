@@ -1671,7 +1671,6 @@ public final class InputMethodManager {
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
-    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public boolean isStylusHandwritingAvailableAsUser(@NonNull UserHandle user) {
         final Context fallbackContext = ActivityThread.currentApplication();
@@ -1816,7 +1815,6 @@ public final class InputMethodManager {
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
-    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public List<InputMethodInfo> getEnabledInputMethodListAsUser(@NonNull UserHandle user) {
         return IInputMethodManagerGlobalInvoker.getEnabledInputMethodList(user.getIdentifier());
@@ -1858,7 +1856,6 @@ public final class InputMethodManager {
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     @TestApi
-    @FlaggedApi(Flags.FLAG_IMM_USERHANDLE_HOSTSIDETESTS)
     @SuppressLint("UserHandle")
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
             @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes,

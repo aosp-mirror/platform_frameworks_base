@@ -279,11 +279,11 @@ public class AutomaticBrightnessStrategy2 {
      * @param brightnessEvent Event object to populate with details about why the specific
      *                        brightness was chosen.
      */
-    public float getAutomaticScreenBrightnessBasedOnLastObservedLux(
+    public float getAutomaticScreenBrightnessBasedOnLastUsedLux(
             BrightnessEvent brightnessEvent) {
         float brightness = (mAutomaticBrightnessController != null)
                 ? mAutomaticBrightnessController
-                .getAutomaticScreenBrightnessBasedOnLastObservedLux(brightnessEvent)
+                .getAutomaticScreenBrightnessBasedOnLastUsedLux(brightnessEvent)
                 : PowerManager.BRIGHTNESS_INVALID_FLOAT;
         adjustAutomaticBrightnessStateIfValid(brightness);
         return brightness;

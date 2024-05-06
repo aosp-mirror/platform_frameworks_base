@@ -96,10 +96,8 @@
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"Ühendatud (telefoni ega meediat pole), aku <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"Aktiivne. Aku <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"Aktiivne. Aku: V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered_left (2895644748625343977) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_battery_level_untethered_right (7407517998880370179) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"Aktiivne. Vasak: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> akutoidet."</string>
+    <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"Aktiivne. Parem: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> akutoidet."</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> akut"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Akutase: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"Aku: V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
@@ -107,12 +105,9 @@
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"Parem: aku <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktiivne"</string>
     <string name="bluetooth_saved_device" msgid="4895871321722311428">"Salvestatud"</string>
-    <!-- no translation found for bluetooth_hearing_aid_left_active (8330226430756799572) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_right_active (2244728507170385397) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_left_and_right_active (4294571497939983181) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktiivne (ainult vasak)"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktiivne (ainult parem)"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktiivne (vasak ja parem)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiivne (ainult meedia). Aku <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiivne (ainult meedia). Aku: V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, P: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Ühendatud (toetab heli jagamist). Aku <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -726,4 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"Kesksugu"</string>
     <string name="feminine" msgid="1529155595310784757">"Naissugu"</string>
     <string name="masculine" msgid="4653978041013996303">"Meessugu"</string>
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Süsteemivärskendused"</string>
 </resources>

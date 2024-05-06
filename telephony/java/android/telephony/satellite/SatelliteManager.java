@@ -91,6 +91,11 @@ public final class SatelliteManager {
             ISatelliteSupportedStateCallback> sSatelliteSupportedStateCallbackMap =
             new ConcurrentHashMap<>();
 
+    private static final ConcurrentHashMap<SatelliteCommunicationAllowedStateCallback,
+            ISatelliteCommunicationAllowedStateCallback>
+            sSatelliteCommunicationAllowedStateCallbackMap =
+            new ConcurrentHashMap<>();
+
     private final int mSubId;
 
     /**
@@ -2393,7 +2398,89 @@ public final class SatelliteManager {
         }
     }
 
-    @Nullable private static ITelephony getITelephony() {
+    /**
+     * Registers for the satellite communication allowed state changed.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle satellite communication allowed state changed event.
+     * @return The {@link SatelliteResult} result of the operation.
+     * @throws SecurityException     if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteResult
+    public int registerForCommunicationAllowedStateChanged(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteCommunicationAllowedStateCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ISatelliteCommunicationAllowedStateCallback internalCallback =
+                        new ISatelliteCommunicationAllowedStateCallback.Stub() {
+                            @Override
+                            public void onSatelliteCommunicationAllowedStateChanged(
+                                    boolean isAllowed) {
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatelliteCommunicationAllowedStateChanged(
+                                                isAllowed)));
+                            }
+                        };
+                sSatelliteCommunicationAllowedStateCallbackMap.put(callback, internalCallback);
+                return telephony.registerForCommunicationAllowedStateChanged(
+                        mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForCommunicationAllowedStateChanged() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return SATELLITE_RESULT_REQUEST_FAILED;
+    }
+
+    /**
+     * Unregisters for the satellite communication allowed state changed.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback that was passed to
+     *                 {@link #registerForCommunicationAllowedStateChanged(Executor,
+     *                 SatelliteCommunicationAllowedStateCallback)}
+     * @throws SecurityException     if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public void unregisterForCommunicationAllowedStateChanged(
+            @NonNull SatelliteCommunicationAllowedStateCallback callback) {
+        Objects.requireNonNull(callback);
+        ISatelliteCommunicationAllowedStateCallback internalCallback =
+                sSatelliteCommunicationAllowedStateCallbackMap.remove(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                if (internalCallback != null) {
+                    telephony.unregisterForCommunicationAllowedStateChanged(mSubId,
+                            internalCallback);
+                } else {
+                    loge("unregisterForCommunicationAllowedStateChanged: No internal callback.");
+                }
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForCommunicationAllowedStateChanged() RemoteException: " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    @Nullable
+    private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
                 .getTelephonyServiceManager()
                 .getTelephonyServiceRegisterer()

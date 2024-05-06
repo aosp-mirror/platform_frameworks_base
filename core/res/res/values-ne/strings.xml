@@ -153,31 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> पछि <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकेन्ड"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि बढाइएको छैन"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि बढाइएको छैन"</string>
-    <!-- no translation found for scCellularNetworkSecurityTitle (7752521808690294384) -->
-    <skip />
-    <!-- no translation found for scCellularNetworkSecuritySummary (7042036754550545005) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueTitle (2898888825129970328) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummaryNotification (3699930821270580416) -->
-    <skip />
-    <!-- no translation found for scIdentifierDisclosureIssueSummary (7283387338827749276) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedTitle (234717016411824969) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueEncryptedSummary (8577510708842150475) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedTitle (3978071464929453915) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummaryNotification (7386936934128110388) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueNonEncryptedSummary (5093428974513703253) -->
-    <skip />
-    <!-- no translation found for scNullCipherIssueActionSettings (5888857706424639946) -->
-    <skip />
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"मोबाइल नेटवर्कको सुरक्षा"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"इन्क्रिप्सन, इन्क्रिप्ट नगरिएका नेटवर्कसम्बन्धी सूचना"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"डिभाइसको ID एक्सेस गरियो"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"तपाईंले आफ्नो <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM प्रयोग गर्दै गर्दा तपाईंको डिभाइसको नजिकै रहेको एउटा नेटवर्कले <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> बजे तपाईंको डिभाइसको अद्वितीय ID रेकर्ड गरेको छ"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"तपाईंले आफ्नो <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> SIM प्रयोग गर्दै गर्दा तपाईंको डिभाइसको नजिकै रहेको एउटा नेटवर्कले <xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> बजे तपाईंको डिभाइसको अद्वितीय ID रेकर्ड गरेको छ।\n\nयसको अर्थ तपाईंको लोकेसन, गतिविधि वा पहिचान लग गरिएको छ। यसो गर्नु सामान्य हो तर आफ्नो गोपनीयताका बारेमा चिन्ता लिने मान्छेहरूका लागि यो समस्याको विषय हुन सक्छ।"</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"इन्क्रिप्ट गरिएको नेटवर्क <xliff:g id="NETWORK_NAME">%1$s</xliff:g> मा कनेक्ट गरियो"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM को कनेक्सन अब सुरक्षित छ"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"इन्क्रिप्ट नगरिएको नेटवर्कमा कनेक्ट गरियो"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"हाल तपाईंले <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM प्रयोग गर्दै गर्दा कल, म्यासेज र डेटा एक्सेस गरिने जोखिम बढी छ"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"हाल तपाईंले <xliff:g id="NETWORK_NAME">%1$s</xliff:g> SIM प्रयोग गर्दै गर्दा कल, म्यासेज र डेटा एक्सेस गरिने जोखिम बढी छ।\n\nतपाईंको कनेक्सन फेरि इन्क्रिप्ट गरिएपछि तपाईं अर्को सूचना प्राप्त गर्नु हुने छ।"</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"मोबाइल नेटवर्कको सुरक्षासम्बन्धी सेटिङ"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"थप जान्नुहोस्"</string>
-    <!-- no translation found for scNullCipherIssueActionGotIt (8747796640866585787) -->
-    <skip />
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"बुझेँ"</string>
     <string name="fcComplete" msgid="1080909484660507044">"विशेषता कोड पुरा भयो।"</string>
     <string name="fcError" msgid="5325116502080221346">"जडान समस्या वा अमान्य सुविधा कोड।"</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ठिक छ"</string>
@@ -371,8 +359,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रिनसट लिनुहोस्"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिस्प्लेको स्क्रिनसट लिन सकिन्छ।"</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"प्रिभ्यू, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for dream_accessibility_action_click (7392398629967797805) -->
-    <skip />
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"हटाउनुहोस्"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्थिति पट्टिलाई अक्षम वा संशोधित गर्नुहोस्"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"स्थिति पट्टि असक्षम पार्न वा प्रणाली आइकनहरू थप्न र हटाउन एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"स्टाटस बार हुन दिनुहोस्"</string>
@@ -1250,7 +1237,7 @@
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s मार्फत छविलाई कैंद गर्नुहोस्"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"छविलाई कैंद गर्नुहोस्"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"यस कार्यको लागि पूर्वनिर्धारितबाट प्रयोग गर्नुहोस्।"</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"फरक एप प्रयोग गर्नुहोस्"</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"अर्को एप प्रयोग गर्नुहोस्"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"प्रणाली सेटिङहरूमा पूर्वनिर्धारितलाई हटाउनुहोस् &gt; एपहरू &gt; डाउनलोड।"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"एउटा कार्यको चयन गर्नुहोस्"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"USB उपकरणको लागि एउटा एप छान्नुहोस्"</string>
@@ -2157,6 +2144,10 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ब्याट्री सेभर अन गरिएको छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ब्याट्रीको आयु बढाउन ब्याट्रीको खपत कम गरिँदै छ"</string>
+    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ब्याट्री सेभर"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ब्याट्री सेभर अफ गरियो"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"फोनमा पर्याप्त चार्ज छ। सुविधाहरूलाई अब उप्रान्त प्रतिबन्ध लगाइँदैन।"</string>
@@ -2231,10 +2222,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"कामसम्बन्धी एप प्रयोग गर्ने हो?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र कल गर्ने अनुमति दिएको छ"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"तपाईंको सङ्गठनले तपाईंलाई कामसम्बन्धी एपहरूमार्फत मात्र म्यासेज पठाउने अनुमति दिएको छ"</string>
-    <!-- no translation found for miniresolver_private_space_phone_information (4469511223312488570) -->
-    <skip />
-    <!-- no translation found for miniresolver_private_space_messages_information (111285656327622118) -->
-    <skip />
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"तपाईं आफ्नो व्यक्तिगत फोन एपबाट मात्र फोन कल गर्न सक्नुहुन्छ। व्यक्तिगत फोन एपमार्फत गरिएका कलहरू तपाईंको व्यक्तिगत कल हिस्ट्रीमा राखिने छन्।"</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"तपाईं आफ्नो व्यक्तिगत Messages एपबाट मात्र SMS म्यासेजहरू पठाउन सक्नुहुन्छ।"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"व्यक्तिगत ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"कल गर्नुहोस्"</string>
@@ -2414,6 +2403,10 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"कार्य प्रोफाइल ३"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"परीक्षण"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"सामुदायिक"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"कार्य प्रोफाइल"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"निजी स्पेस"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"क्लोन"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"सामुदायिक"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"संवेदनशील सूचनासम्बन्धी सामग्री लुकाइएको छ"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"स्क्रिन सेयर गर्दा सुरक्षाका लागि एपमा भएको सामग्री लुकाइएको छ"</string>

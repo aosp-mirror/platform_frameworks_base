@@ -166,6 +166,7 @@ class PanelExpansionInteractorImplTest : SysuiTestCase() {
             ObservableTransitionState.Transition(
                 fromScene = checkNotNull(currentScene),
                 toScene = toScene,
+                currentScene = flowOf(checkNotNull(currentScene)),
                 progress = progressFlow,
                 isInitiatedByUserInput = true,
                 isUserInputOngoing = flowOf(true),

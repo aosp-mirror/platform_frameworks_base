@@ -867,6 +867,60 @@ public class HdmiControlService extends SystemService {
                         }
                     }
                 }, mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(true);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager
+                        .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        reportFeatures(false);
+                    }
+                },
+                mServiceThreadExecutor);
 
         if (isTvDevice()) {
             mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
@@ -964,6 +1018,21 @@ public class HdmiControlService extends SystemService {
                 for (HdmiCecLocalDevice localDevice : getAllCecLocalDevices()) {
                     localDevice.startQueuedActions();
                 }
+            }
+        }
+    }
+
+    /** Helper method for sending feature discovery command */
+    private void reportFeatures(boolean isTvDeviceSetting) {
+        // check if tv device is enabled for tv device specific RC profile setting
+        if (isTvDeviceSetting) {
+            if (isTvDeviceEnabled()) {
+                tv().reportFeatures();
+            }
+        } else { // check for source device setting
+            HdmiCecLocalDeviceSource source = isAudioSystemDevice() ? audioSystem() : playback();
+            if (source != null) {
+                source.reportFeatures();
             }
         }
     }
@@ -3699,7 +3768,6 @@ public class HdmiControlService extends SystemService {
         return mWakeUpMessageReceived;
     }
 
-    @VisibleForTesting
     protected boolean isStandbyMessageReceived() {
         return mStandbyMessageReceived;
     }

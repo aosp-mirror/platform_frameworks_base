@@ -55,6 +55,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.BiometricUnlockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.BiometricUnlockSource;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -337,7 +338,9 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
         // WHEN we want to unlock collapse
         mBiometricUnlockController.startWakeAndUnlock(
-                BiometricUnlockController.MODE_UNLOCK_COLLAPSING);
+                BiometricUnlockController.MODE_UNLOCK_COLLAPSING,
+                BiometricUnlockSource.FINGERPRINT_SENSOR
+        );
 
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(
                 /* strongAuth */ eq(false));
@@ -501,7 +504,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                         TransitionState.STARTED
                 )
         );
-        verify(mBiometricUnlockInteractor, never()).setBiometricUnlockState(anyInt());
+        verify(mBiometricUnlockInteractor, never()).setBiometricUnlockState(anyInt(), any());
 
         mBiometricUnlockController.consumeTransitionStepOnStartedKeyguardState(
                 new TransitionStep(
@@ -511,7 +514,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                         TransitionState.STARTED
                 )
         );
-        verify(mBiometricUnlockInteractor).setBiometricUnlockState(eq(MODE_NONE));
+        verify(mBiometricUnlockInteractor).setBiometricUnlockState(eq(MODE_NONE), eq(null));
     }
 
     @Test

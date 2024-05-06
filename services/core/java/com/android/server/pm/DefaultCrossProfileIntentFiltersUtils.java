@@ -734,11 +734,11 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addCategory(Intent.CATEGORY_BROWSABLE)
                     .build();
 
-    /** SMS and MMS can be handled by the private profile or by the parent user. */
+    /** SMS and MMS are always handled in the main user. */
     private static final DefaultCrossProfileIntentFilter SMS_MMS_PRIVATE_PROFILE =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
-                    ONLY_IF_NO_MATCH_FOUND,
+                    SKIP_CURRENT_PROFILE,
                     /* letsPersonalDataIntoProfile= */ false)
                     .addAction(Intent.ACTION_VIEW)
                     .addAction(Intent.ACTION_SENDTO)

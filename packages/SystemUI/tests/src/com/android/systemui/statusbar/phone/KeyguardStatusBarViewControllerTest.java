@@ -178,6 +178,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 keyguardTransitionInteractor,
                 () -> mKosmos.getSceneInteractor(),
                 () -> mKosmos.getFromGoneTransitionInteractor(),
+                () -> mKosmos.getFromLockscreenTransitionInteractor(),
                 () -> mKosmos.getSharedNotificationContainerInteractor(),
                 mTestScope);
         mViewModel =

@@ -26,6 +26,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -41,8 +42,8 @@ constructor(
     /** Whether the smartspace section is available in the build. */
     val isSmartspaceEnabled: Boolean = smartspaceController.isEnabled()
     /** Whether the weather area is available in the build. */
-    // TODO(b/317891876): this should be a Flow as the value can change over time.
-    val isWeatherEnabled: Boolean = smartspaceController.isWeatherEnabled()
+    private val isWeatherEnabled: StateFlow<Boolean> = smartspaceInteractor.isWeatherEnabled
+
     /** Whether the data and weather areas are decoupled in the build. */
     val isDateWeatherDecoupled: Boolean = smartspaceController.isDateWeatherDecoupled()
 
@@ -58,8 +59,10 @@ constructor(
 
     /** Whether the weather area should be visible. */
     val isWeatherVisible: StateFlow<Boolean> =
-        keyguardClockViewModel.hasCustomWeatherDataDisplay
-            .map { clockIncludesCustomWeatherDisplay ->
+        combine(
+                isWeatherEnabled,
+                keyguardClockViewModel.hasCustomWeatherDataDisplay,
+            ) { isWeatherEnabled, clockIncludesCustomWeatherDisplay ->
                 isWeatherVisible(
                     clockIncludesCustomWeatherDisplay = clockIncludesCustomWeatherDisplay,
                     isWeatherEnabled = isWeatherEnabled,
@@ -72,7 +75,7 @@ constructor(
                     isWeatherVisible(
                         clockIncludesCustomWeatherDisplay =
                             keyguardClockViewModel.hasCustomWeatherDataDisplay.value,
-                        isWeatherEnabled = isWeatherEnabled,
+                        isWeatherEnabled = smartspaceInteractor.isWeatherEnabled.value,
                     )
             )
 

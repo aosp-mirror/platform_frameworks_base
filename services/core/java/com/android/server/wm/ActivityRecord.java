@@ -7846,10 +7846,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
+        final boolean isDecorSurfaceBoosted =
+                getTask() != null && getTask().isDecorSurfaceBoosted();
         final boolean show = (isVisible()
                 // Ensure that the activity content is hidden when the decor surface is boosted to
                 // prevent UI redressing attack.
-                && !getTask().isDecorSurfaceBoosted())
+                && !isDecorSurfaceBoosted)
                 || isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS
                         | ANIMATION_TYPE_PREDICT_BACK);
 

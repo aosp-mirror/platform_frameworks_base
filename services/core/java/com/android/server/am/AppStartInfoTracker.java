@@ -74,6 +74,7 @@ import java.util.function.BiFunction;
 /** A class to manage all the {@link android.app.ApplicationStartInfo} records. */
 public final class AppStartInfoTracker {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppStartInfoTracker" : TAG_AM;
+    private static final boolean DEBUG = false;
 
     /** Interval of persisting the app start info to persistent storage. */
     private static final long APP_START_INFO_PERSIST_INTERVAL = TimeUnit.MINUTES.toMillis(30);
@@ -504,6 +505,10 @@ public final class AppStartInfoTracker {
             AppStartInfoContainer container = mData.get(packageName, uid);
             if (container == null) {
                 // Record was not created, discard new data.
+                if (DEBUG) {
+                    Slog.d(TAG, "No container found for package=" + packageName + " and uid=" + uid
+                            + ". Discarding timestamp key=" + key + " val=" + timeNs);
+                }
                 return;
             }
             container.addTimestampToStartLocked(key, timeNs);
@@ -1121,12 +1126,26 @@ public final class AppStartInfoTracker {
 
         @GuardedBy("mLock")
         void addTimestampToStartLocked(int key, long timestampNs) {
-            int index = mInfos.size() - 1;
-            int startupState = mInfos.get(index).getStartupState();
-            if (startupState == ApplicationStartInfo.STARTUP_STATE_STARTED
-                    || key == ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN) {
-                mInfos.get(index).addStartupTimestamp(key, timestampNs);
+            // Records are sorted newest to oldest, grab record at index 0.
+            int startupState = mInfos.get(0).getStartupState();
+
+            // If startup state is error then don't accept any further timestamps.
+            if (startupState == ApplicationStartInfo.STARTUP_STATE_ERROR) {
+                if (DEBUG) Slog.d(TAG, "Startup state is error, not accepting new timestamps.");
+                return;
             }
+
+            // If startup state is first frame drawn then only accept fully drawn timestamp.
+            if (startupState == ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN
+                    && key != ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Startup state is first frame drawn and timestamp is not fully "
+                            + "drawn, not accepting new timestamps.");
+                }
+                return;
+            }
+
+            mInfos.get(0).addStartupTimestamp(key, timestampNs);
         }
 
         @GuardedBy("mLock")

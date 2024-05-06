@@ -196,7 +196,7 @@ public class ViewFrameRateTest {
     @RequiresFlagsEnabled({FLAG_VIEW_VELOCITY_API,
             FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY,
             FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY})
-    public void highVelocity140() throws Throwable {
+    public void highVelocity120() throws Throwable {
         mActivityRule.runOnUiThread(() -> {
             ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -208,7 +208,7 @@ public class ViewFrameRateTest {
             mMovingView.setFrameContentVelocity(1_000_000_000f);
             mMovingView.invalidate();
             runAfterDraw(() -> {
-                assertEquals(140f, mViewRoot.getLastPreferredFrameRate(), 0f);
+                assertEquals(120f, mViewRoot.getLastPreferredFrameRate(), 0f);
             });
         });
         waitForAfterDraw();
@@ -559,6 +559,26 @@ public class ViewFrameRateTest {
                 mMovingView.getParent().onDescendantInvalidated(mMovingView, mMovingView);
             });
             instrumentation.waitForIdleSync();
+        }
+
+        assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+    })
+    public void frameRateResetWithInvalidations() throws Throwable {
+        mMovingView.setRequestedFrameRate(120f);
+        waitForFrameRateCategoryToSettle();
+        mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_NORMAL);
+
+        for (int i = 0; i < 120; i++) {
+            mActivityRule.runOnUiThread(() -> {
+                mMovingView.invalidate();
+                runAfterDraw(() -> {});
+            });
+            waitForAfterDraw();
         }
 
         assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);

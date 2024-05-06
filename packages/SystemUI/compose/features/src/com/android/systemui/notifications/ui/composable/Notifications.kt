@@ -65,7 +65,6 @@ import androidx.compose.ui.util.lerp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
-import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.modifiers.height
 import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
@@ -157,6 +156,7 @@ fun SceneScope.ConstrainedNotificationStack(
 fun SceneScope.NotificationScrollingStack(
     viewModel: NotificationsPlaceholderViewModel,
     maxScrimTop: () -> Float,
+    shouldPunchHoleBehindScrim: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -233,7 +233,8 @@ fun SceneScope.NotificationScrollingStack(
                     // in step with the transition so that it is 0 when it completes.
                     if (
                         scrimOffset.value < 0 &&
-                            layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Gone)
+                            layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Gone) ||
+                            layoutState.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)
                     ) {
                         IntOffset(x = 0, y = (scrimOffset.value * expansionFraction).roundToInt())
                     } else {
@@ -246,7 +247,7 @@ fun SceneScope.NotificationScrollingStack(
                                 scrimCornerRadius,
                                 screenCornerRadius,
                                 { expansionFraction },
-                                layoutState.isNotificationScrimTransitioning(),
+                                shouldPunchHoleBehindScrim,
                             )
                             .let { scrimRounding.value.toRoundedCornerShape(it) }
                     clip = true
@@ -270,18 +271,20 @@ fun SceneScope.NotificationScrollingStack(
     ) {
         // Creates a cutout in the background scrim in the shape of the notifications scrim.
         // Only visible when notif scrim alpha < 1, during shade expansion.
-        Spacer(
-            modifier =
-                Modifier.fillMaxSize().drawBehind {
-                    drawRect(Color.Black, blendMode = BlendMode.DstOut)
-                }
-        )
+        if (shouldPunchHoleBehindScrim) {
+            Spacer(
+                modifier =
+                    Modifier.fillMaxSize().drawBehind {
+                        drawRect(Color.Black, blendMode = BlendMode.DstOut)
+                    }
+            )
+        }
         Box(
             modifier =
                 Modifier.fillMaxSize()
                     .graphicsLayer {
                         alpha =
-                            if (layoutState.isNotificationScrimTransitioning()) {
+                            if (shouldPunchHoleBehindScrim) {
                                 (expansionFraction / EXPANSION_FOR_MAX_SCRIM_ALPHA).coerceAtMost(1f)
                             } else 1f
                     }
@@ -427,13 +430,6 @@ private fun ShadeScrimRounding.toRoundedCornerShape(radius: Dp): RoundedCornerSh
         bottomStart = bottomRadius,
         bottomEnd = bottomRadius,
     )
-}
-
-private fun SceneTransitionLayoutState.isNotificationScrimTransitioning(): Boolean {
-    return isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
-        isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade) ||
-        isTransitioningBetween(Scenes.Gone, Scenes.QuickSettings) ||
-        isTransitioningBetween(Scenes.Lockscreen, Scenes.QuickSettings)
 }
 
 private const val TAG = "FlexiNotifs"

@@ -59,7 +59,7 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Arama kayıtları"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Yakındaki cihazlar"</string>
-    <string name="permission_media_routing_control" msgid="5498639511586715253">"Medya çıkışını değiştirin"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Medya çıkışını değiştir"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotoğraflar ve medya"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Bildirimler"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Uygulamalar"</string>
