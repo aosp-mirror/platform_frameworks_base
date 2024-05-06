@@ -31,7 +31,7 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.core.MessageInitializer
 import com.android.systemui.log.core.MessagePrinter
 import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
-import com.android.systemui.statusbar.pipeline.satellite.data.DeviceBasedSatelliteRepository
+import com.android.systemui.statusbar.pipeline.satellite.data.RealDeviceBasedSatelliteRepository
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Companion.whenSupported
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.NotSupported
 import com.android.systemui.statusbar.pipeline.satellite.data.prod.SatelliteSupport.Supported
@@ -50,12 +50,14 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -134,7 +136,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     @OemSatelliteInputLog private val logBuffer: LogBuffer,
     private val systemClock: SystemClock,
-) : DeviceBasedSatelliteRepository {
+) : RealDeviceBasedSatelliteRepository {
 
     private val satelliteManager: SatelliteManager?
 
@@ -200,10 +202,12 @@ constructor(
     }
 
     override val connectionState =
-        satelliteSupport.whenSupported(
-            supported = ::connectionStateFlow,
-            orElse = flowOf(SatelliteConnectionState.Off)
-        )
+        satelliteSupport
+            .whenSupported(
+                supported = ::connectionStateFlow,
+                orElse = flowOf(SatelliteConnectionState.Off)
+            )
+            .stateIn(scope, SharingStarted.Eagerly, SatelliteConnectionState.Off)
 
     // By using the SupportedSatelliteManager here, we expect registration never to fail
     private fun connectionStateFlow(sm: SupportedSatelliteManager): Flow<SatelliteConnectionState> =
@@ -227,7 +231,9 @@ constructor(
             .flowOn(bgDispatcher)
 
     override val signalStrength =
-        satelliteSupport.whenSupported(supported = ::signalStrengthFlow, orElse = flowOf(0))
+        satelliteSupport
+            .whenSupported(supported = ::signalStrengthFlow, orElse = flowOf(0))
+            .stateIn(scope, SharingStarted.Eagerly, 0)
 
     // By using the SupportedSatelliteManager here, we expect registration never to fail
     private fun signalStrengthFlow(sm: SupportedSatelliteManager) =
