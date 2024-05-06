@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
+import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.runMonotonicClockTest
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
@@ -165,10 +166,10 @@ class InterruptionHandlerTest {
         // pair, and its velocity is used when animating the progress back to 0.
         val bToA = checkNotNull(state.setTargetScene(SceneA, coroutineScope = this))
         testScheduler.runCurrent()
-        assertThat(bToA.fromScene).isEqualTo(SceneA)
-        assertThat(bToA.toScene).isEqualTo(SceneB)
-        assertThat(bToA.currentScene).isEqualTo(SceneA)
-        assertThat(bToA.progressVelocity).isEqualTo(progressVelocity)
+        assertThat(bToA).hasFromScene(SceneA)
+        assertThat(bToA).hasToScene(SceneB)
+        assertThat(bToA).hasCurrentScene(SceneA)
+        assertThat(bToA).hasProgressVelocity(progressVelocity)
     }
 
     @Test
@@ -191,10 +192,10 @@ class InterruptionHandlerTest {
         // and its velocity is used when animating the progress to 1.
         val bToA = checkNotNull(state.setTargetScene(SceneB, coroutineScope = this))
         testScheduler.runCurrent()
-        assertThat(bToA.fromScene).isEqualTo(SceneA)
-        assertThat(bToA.toScene).isEqualTo(SceneB)
-        assertThat(bToA.currentScene).isEqualTo(SceneB)
-        assertThat(bToA.progressVelocity).isEqualTo(progressVelocity)
+        assertThat(bToA).hasFromScene(SceneA)
+        assertThat(bToA).hasToScene(SceneB)
+        assertThat(bToA).hasCurrentScene(SceneB)
+        assertThat(bToA).hasProgressVelocity(progressVelocity)
     }
 
     companion object {
