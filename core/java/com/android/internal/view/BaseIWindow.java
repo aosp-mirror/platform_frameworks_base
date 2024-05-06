@@ -126,10 +126,6 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void updatePointerIcon(float x, float y) {
-    }
-
-    @Override
     public void dispatchWallpaperCommand(String action, int x, int y,
             int z, Bundle extras, boolean sync) {
         if (sync) {

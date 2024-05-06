@@ -203,7 +203,6 @@ import android.hardware.configstore.V1_0.OptionalBool;
 import android.hardware.configstore.V1_1.ISurfaceFlingerConfigs;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.input.InputManager;
 import android.hardware.input.InputSettings;
 import android.net.Uri;
 import android.os.Binder;
@@ -289,8 +288,6 @@ import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
-import android.view.MotionEvent;
-import android.view.PointerIcon;
 import android.view.RemoteAnimationAdapter;
 import android.view.ScrollCaptureResponse;
 import android.view.Surface;
@@ -5716,7 +5713,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_HIDE_TIMEOUT = 52;
-        public static final int RESTORE_POINTER_ICON = 55;
         public static final int SET_HAS_OVERLAY_UI = 58;
         public static final int ANIMATION_FAILSAFE = 60;
         public static final int RECOMPUTE_FOCUS = 61;
@@ -5946,12 +5942,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         window.hidePermanentlyLw();
                         window.setDisplayLayoutNeeded();
                         mWindowPlacerLocked.performSurfacePlacement();
-                    }
-                    break;
-                }
-                case RESTORE_POINTER_ICON: {
-                    synchronized (mGlobalLock) {
-                        restorePointerIconLocked((DisplayContent)msg.obj, msg.arg1, msg.arg2);
                     }
                     break;
                 }
@@ -7572,144 +7562,6 @@ public class WindowManagerService extends IWindowManager.Stub
             outInsets.set(dc.getDisplayPolicy().getDecorInsetsInfo(
                     di.rotation, di.logicalWidth, di.logicalHeight).mConfigInsets);
         }
-    }
-
-    // The mouse position tracker will be obsolete after the Pointer Icon Refactor.
-    // TODO(b/293587049): Remove after the refactoring is fully rolled out.
-    @Nullable
-    final MousePositionTracker mMousePositionTracker =
-            com.android.input.flags.Flags.enablePointerChoreographer() ? null
-                    : new MousePositionTracker();
-
-    private static class MousePositionTracker implements PointerEventListener {
-        private boolean mLatestEventWasMouse;
-        private float mLatestMouseX;
-        private float mLatestMouseY;
-
-        /**
-         * The display that the pointer (mouse cursor) is currently shown on. This is updated
-         * directly by InputManagerService when the pointer display changes.
-         */
-        private int mPointerDisplayId = INVALID_DISPLAY;
-
-        /**
-         * Update the mouse cursor position as a result of a mouse movement.
-         * @return true if the position was successfully updated, false otherwise.
-         */
-        boolean updatePosition(int displayId, float x, float y) {
-            synchronized (this) {
-                mLatestEventWasMouse = true;
-
-                if (displayId != mPointerDisplayId) {
-                    // The display of the position update does not match the display on which the
-                    // mouse pointer is shown, so do not update the position.
-                    return false;
-                }
-                mLatestMouseX = x;
-                mLatestMouseY = y;
-                return true;
-            }
-        }
-
-        void setPointerDisplayId(int displayId) {
-            synchronized (this) {
-                mPointerDisplayId = displayId;
-            }
-        }
-
-        @Override
-        public void onPointerEvent(MotionEvent motionEvent) {
-            if (motionEvent.isFromSource(InputDevice.SOURCE_MOUSE)) {
-                updatePosition(motionEvent.getDisplayId(), motionEvent.getRawX(),
-                        motionEvent.getRawY());
-            } else {
-                synchronized (this) {
-                    mLatestEventWasMouse = false;
-                }
-            }
-        }
-    };
-
-    void updatePointerIcon(IWindow client) {
-        if (mMousePositionTracker == null) {
-            return;
-        }
-        int pointerDisplayId;
-        float mouseX, mouseY;
-
-        synchronized(mMousePositionTracker) {
-            if (!mMousePositionTracker.mLatestEventWasMouse) {
-                return;
-            }
-            mouseX = mMousePositionTracker.mLatestMouseX;
-            mouseY = mMousePositionTracker.mLatestMouseY;
-            pointerDisplayId = mMousePositionTracker.mPointerDisplayId;
-        }
-
-        synchronized (mGlobalLock) {
-            if (mDragDropController.dragDropActiveLocked()) {
-                // Drag cursor overrides the app cursor.
-                return;
-            }
-            WindowState callingWin = windowForClientLocked(null, client, false);
-            if (callingWin == null) {
-                ProtoLog.w(WM_ERROR, "Bad requesting window %s", client);
-                return;
-            }
-            final DisplayContent displayContent = callingWin.getDisplayContent();
-            if (displayContent == null) {
-                return;
-            }
-            if (pointerDisplayId != displayContent.getDisplayId()) {
-                // Do not let the pointer icon be updated by a window on a different display.
-                return;
-            }
-            WindowState windowUnderPointer =
-                    displayContent.getTouchableWinAtPointLocked(mouseX, mouseY);
-            if (windowUnderPointer != callingWin) {
-                return;
-            }
-            try {
-                windowUnderPointer.mClient.updatePointerIcon(
-                        windowUnderPointer.translateToWindowX(mouseX),
-                        windowUnderPointer.translateToWindowY(mouseY));
-            } catch (RemoteException e) {
-                ProtoLog.w(WM_ERROR, "unable to update pointer icon");
-            }
-        }
-    }
-
-    void restorePointerIconLocked(DisplayContent displayContent, float latestX, float latestY) {
-        if (mMousePositionTracker == null) {
-            return;
-        }
-        // Mouse position tracker has not been getting updates while dragging, update it now.
-        if (!mMousePositionTracker.updatePosition(
-                displayContent.getDisplayId(), latestX, latestY)) {
-            // The mouse position could not be updated, so ignore this request.
-            return;
-        }
-
-        WindowState windowUnderPointer =
-                displayContent.getTouchableWinAtPointLocked(latestX, latestY);
-        if (windowUnderPointer != null) {
-            try {
-                windowUnderPointer.mClient.updatePointerIcon(
-                        windowUnderPointer.translateToWindowX(latestX),
-                        windowUnderPointer.translateToWindowY(latestY));
-            } catch (RemoteException e) {
-                ProtoLog.w(WM_ERROR, "unable to restore pointer icon");
-            }
-        } else {
-            mContext.getSystemService(InputManager.class)
-                    .setPointerIconType(PointerIcon.TYPE_DEFAULT);
-        }
-    }
-    void setMousePointerDisplayId(int displayId) {
-        if (mMousePositionTracker == null) {
-            return;
-        }
-        mMousePositionTracker.setPointerDisplayId(displayId);
     }
 
     /**

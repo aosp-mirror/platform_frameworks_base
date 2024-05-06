@@ -740,16 +740,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void updatePointerIcon(IWindow window) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            mService.updatePointerIcon(window);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    @Override
     public void updateTapExcludeRegion(IWindow window, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {

@@ -290,22 +290,6 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         }
     }
 
-    @Override
-    public void notifyPointerDisplayIdChanged(int displayId, float x, float y) {
-        synchronized (mService.mGlobalLock) {
-            mService.setMousePointerDisplayId(displayId);
-            if (displayId == Display.INVALID_DISPLAY) return;
-
-            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-            if (dc == null) {
-                Slog.wtf(TAG, "The mouse pointer was moved to display " + displayId
-                        + " that does not have a valid DisplayContent.");
-                return;
-            }
-            mService.restorePointerIconLocked(dc, x, y);
-        }
-    }
-
     /** Waits until the built-in input devices have been configured. */
     public boolean waitForInputDevicesReady(long timeoutMillis) {
         synchronized (mInputDevicesReadyMonitor) {

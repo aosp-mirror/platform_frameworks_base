@@ -603,10 +603,6 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void updatePointerIcon(android.view.IWindow window) {
-    }
-
-    @Override
     public void updateTapExcludeRegion(android.view.IWindow window,
             android.graphics.Region region) {
     }

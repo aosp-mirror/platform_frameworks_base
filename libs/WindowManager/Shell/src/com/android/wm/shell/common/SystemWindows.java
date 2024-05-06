@@ -389,9 +389,6 @@ public class SystemWindows {
         public void dispatchDragEvent(DragEvent event) {}
 
         @Override
-        public void updatePointerIcon(float x, float y) {}
-
-        @Override
         public void dispatchWindowShown() {}
 
         @Override

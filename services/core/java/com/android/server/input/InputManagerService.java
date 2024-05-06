@@ -156,7 +156,6 @@ public class InputManagerService extends IInputManager.Stub
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_RELOAD_DEVICE_ALIASES = 2;
     private static final int MSG_DELIVER_TABLET_MODE_CHANGED = 3;
-    private static final int MSG_POINTER_DISPLAY_ID_CHANGED = 4;
 
     private static final int DEFAULT_VIBRATION_MAGNITUDE = 192;
     private static final AdditionalDisplayInputProperties
@@ -1322,11 +1321,6 @@ public class InputManagerService extends IInputManager.Stub
     private void setPointerIconVisible(boolean visible, int displayId) {
         updateAdditionalDisplayInputProperties(displayId,
                 properties -> properties.pointerIconVisible = visible);
-    }
-
-    private void handlePointerDisplayIdChanged(PointerDisplayIdChangedArgs args) {
-        mWindowManagerCallbacks.notifyPointerDisplayIdChanged(
-                args.mPointerDisplayId, args.mXPosition, args.mYPosition);
     }
 
     private void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible) {
@@ -2691,9 +2685,7 @@ public class InputManagerService extends IInputManager.Stub
     @SuppressWarnings("unused")
     @VisibleForTesting
     void onPointerDisplayIdChanged(int pointerDisplayId, float xPosition, float yPosition) {
-        mHandler.obtainMessage(MSG_POINTER_DISPLAY_ID_CHANGED,
-                new PointerDisplayIdChangedArgs(pointerDisplayId, xPosition,
-                        yPosition)).sendToTarget();
+        // TODO(b/311416205): Remove.
     }
 
     @Override
@@ -2848,14 +2840,6 @@ public class InputManagerService extends IInputManager.Stub
          */
         @Nullable
         SurfaceControl createSurfaceForGestureMonitor(String name, int displayId);
-
-        /**
-         * Notify WindowManagerService when the display of the mouse pointer changes.
-         * @param displayId The display on which the mouse pointer is shown.
-         * @param x The x coordinate of the mouse pointer.
-         * @param y The y coordinate of the mouse pointer.
-         */
-        void notifyPointerDisplayIdChanged(int displayId, float x, float y);
     }
 
     /**
@@ -2898,9 +2882,6 @@ public class InputManagerService extends IInputManager.Stub
                     long whenNanos = (args.argi1 & 0xFFFFFFFFL) | ((long) args.argi2 << 32);
                     boolean inTabletMode = (boolean) args.arg1;
                     deliverTabletModeChanged(whenNanos, inTabletMode);
-                    break;
-                case MSG_POINTER_DISPLAY_ID_CHANGED:
-                    handlePointerDisplayIdChanged((PointerDisplayIdChangedArgs) msg.obj);
                     break;
             }
         }
