@@ -16,6 +16,7 @@
 package com.android.systemui.shade.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -219,7 +220,7 @@ class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     override val legacyQsFullscreen: StateFlow<Boolean> = _legacyQsFullscreen.asStateFlow()
 
-    val _shadeMode = MutableStateFlow<ShadeMode>(ShadeMode.Single)
+    val _shadeMode = MutableStateFlow(if (DualShade.isEnabled) ShadeMode.Dual else ShadeMode.Single)
     override val shadeMode: StateFlow<ShadeMode> = _shadeMode.asStateFlow()
 
     override fun setShadeMode(shadeMode: ShadeMode) {

@@ -88,12 +88,11 @@ constructor(
         isCommunalAvailable: Boolean,
         shadeMode: ShadeMode,
     ): Map<UserAction, UserActionResult> {
+        val shadeSceneKey =
+            if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade
+
         val quickSettingsIfSingleShade =
-            if (shadeMode is ShadeMode.Single) {
-                Scenes.QuickSettings
-            } else {
-                Scenes.Shade
-            }
+            if (shadeMode is ShadeMode.Single) Scenes.QuickSettings else shadeSceneKey
 
         return mapOf(
                 Swipe.Left to UserActionResult(Scenes.Communal).takeIf { isCommunalAvailable },
@@ -104,8 +103,8 @@ constructor(
                 swipeDownFromTop(pointerCount = 2) to quickSettingsIfSingleShade,
 
                 // Swiping down, not from the edge, always navigates to the shade scene.
-                swipeDown(pointerCount = 1) to Scenes.Shade,
-                swipeDown(pointerCount = 2) to Scenes.Shade,
+                swipeDown(pointerCount = 1) to shadeSceneKey,
+                swipeDown(pointerCount = 2) to shadeSceneKey,
             )
             .filterValues { it != null }
             .mapValues { checkNotNull(it.value) }

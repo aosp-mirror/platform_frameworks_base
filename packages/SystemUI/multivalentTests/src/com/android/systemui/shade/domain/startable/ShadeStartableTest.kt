@@ -16,6 +16,8 @@
 
 package com.android.systemui.shade.domain.startable
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -37,6 +39,7 @@ import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
@@ -49,7 +52,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -67,7 +69,7 @@ class ShadeStartableTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val fakeConfigurationRepository by lazy { kosmos.fakeConfigurationRepository }
     private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
 
-    private lateinit var underTest: ShadeStartable
+    private val underTest: ShadeStartable = kosmos.shadeStartable
 
     companion object {
         @JvmStatic
@@ -81,13 +83,9 @@ class ShadeStartableTest(flags: FlagsParameterization?) : SysuiTestCase() {
         mSetFlagsRule.setFlagsParameterization(flags!!)
     }
 
-    @Before
-    fun setup() {
-        underTest = kosmos.shadeStartable
-    }
-
     @Test
-    fun hydrateShadeMode() =
+    @DisableFlags(DualShade.FLAG_NAME)
+    fun hydrateShadeMode_dualShadeDisabled() =
         testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             val shadeMode by collectLastValue(shadeInteractor.shadeMode)
@@ -102,6 +100,25 @@ class ShadeStartableTest(flags: FlagsParameterization?) : SysuiTestCase() {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             fakeConfigurationRepository.onAnyConfigurationChange()
             assertThat(shadeMode).isEqualTo(ShadeMode.Single)
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun hydrateShadeMode_dualShadeEnabled() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            val shadeMode by collectLastValue(shadeInteractor.shadeMode)
+
+            underTest.start()
+            assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
+
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            fakeConfigurationRepository.onAnyConfigurationChange()
+            assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
+
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            fakeConfigurationRepository.onAnyConfigurationChange()
+            assertThat(shadeMode).isEqualTo(ShadeMode.Dual)
         }
 
     @Test

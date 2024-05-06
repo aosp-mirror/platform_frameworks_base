@@ -22,6 +22,7 @@ import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInte
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.shared.flag.DualShade
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -40,6 +41,7 @@ import dagger.multibindings.IntoMap
             LockscreenSceneModule::class,
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
+            NotificationsShadeSceneModule::class,
         ],
 )
 interface SceneContainerFrameworkModule {
@@ -61,27 +63,31 @@ interface SceneContainerFrameworkModule {
         @Provides
         fun containerConfig(): SceneContainerConfig {
             return SceneContainerConfig(
-                // Note that this list is in z-order. The first one is the bottom-most and the
-                // last one is top-most.
+                // Note that this list is in z-order. The first one is the bottom-most and the last
+                // one is top-most.
                 sceneKeys =
-                    listOf(
+                    listOfNotNull(
                         Scenes.Gone,
                         Scenes.Communal,
                         Scenes.Lockscreen,
                         Scenes.Bouncer,
                         Scenes.QuickSettings,
-                        Scenes.Shade,
+                        Scenes.NotificationsShade.takeIf { DualShade.isEnabled },
+                        Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
                 initialSceneKey = Scenes.Lockscreen,
                 navigationDistances =
                     mapOf(
-                        Scenes.Gone to 0,
-                        Scenes.Lockscreen to 0,
-                        Scenes.Communal to 1,
-                        Scenes.Shade to 2,
-                        Scenes.QuickSettings to 3,
-                        Scenes.Bouncer to 4,
-                    ),
+                            Scenes.Gone to 0,
+                            Scenes.Lockscreen to 0,
+                            Scenes.Communal to 1,
+                            Scenes.NotificationsShade to 2.takeIf { DualShade.isEnabled },
+                            Scenes.Shade to 2.takeUnless { DualShade.isEnabled },
+                            Scenes.QuickSettings to 3,
+                            Scenes.Bouncer to 4,
+                        )
+                        .filterValues { it != null }
+                        .mapValues { checkNotNull(it.value) }
             )
         }
     }
