@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -36,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.compose.horizontalValues
 import com.android.settingslib.spa.framework.compose.verticalValues
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.settingsBackground
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 
@@ -54,6 +56,7 @@ fun SettingsScaffold(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { SettingsTopAppBar(title, scrollBehavior, actions) },
+        containerColor = MaterialTheme.colorScheme.settingsBackground,
     ) { paddingValues ->
         Box(Modifier.padding(paddingValues.horizontalValues())) {
             content(paddingValues.verticalValues())

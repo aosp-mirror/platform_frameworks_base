@@ -31,23 +31,22 @@ class SettingsColorsTest {
     @Test
     fun testDynamicTheme() {
         // The dynamic color could be different in different device, just check basic restrictions:
-        // 1. text color is different with background color
+        // 1. text color is different with surface color
         // 2. primary / spinner color is different with its on-item color
         val ls = dynamicLightColorScheme(context)
-        assertThat(ls.categoryTitle).isNotEqualTo(ls.background)
-        assertThat(ls.secondaryText).isNotEqualTo(ls.background)
+        assertThat(ls.categoryTitle).isNotEqualTo(ls.surface)
+        assertThat(ls.secondaryText).isNotEqualTo(ls.surface)
         assertThat(ls.primaryContainer).isNotEqualTo(ls.onPrimaryContainer)
 
         val ds = dynamicDarkColorScheme(context)
-        assertThat(ds.categoryTitle).isNotEqualTo(ds.background)
-        assertThat(ds.secondaryText).isNotEqualTo(ds.background)
+        assertThat(ds.categoryTitle).isNotEqualTo(ds.surface)
+        assertThat(ds.secondaryText).isNotEqualTo(ds.surface)
         assertThat(ds.primaryContainer).isNotEqualTo(ds.onPrimaryContainer)
     }
 
     @Test
     fun testStaticTheme() {
         val ls = lightColorScheme()
-        assertThat(ls.background).isEqualTo(Color(red = 244, green = 239, blue = 244))
         assertThat(ls.categoryTitle).isEqualTo(Color(red = 103, green = 80, blue = 164))
         assertThat(ls.surface).isEqualTo(Color(red = 255, green = 251, blue = 254))
         assertThat(ls.surfaceHeader).isEqualTo(Color(red = 230, green = 225, blue = 229))
@@ -56,7 +55,6 @@ class SettingsColorsTest {
         assertThat(ls.onPrimaryContainer).isEqualTo(Color(red = 28, green = 27, blue = 31))
 
         val ds = darkColorScheme()
-        assertThat(ds.background).isEqualTo(Color(red = 28, green = 27, blue = 31))
         assertThat(ds.categoryTitle).isEqualTo(Color(red = 234, green = 221, blue = 255))
         assertThat(ds.surface).isEqualTo(Color(red = 49, green = 48, blue = 51))
         assertThat(ds.surfaceHeader).isEqualTo(Color(red = 72, green = 70, blue = 73))

@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 data class SettingsColorScheme(
-    val background: Color = Color.Unspecified,
     val categoryTitle: Color = Color.Unspecified,
     val surface: Color = Color.Unspecified,
     val surfaceHeader: Color = Color.Unspecified,
@@ -65,7 +64,6 @@ internal fun settingsColorScheme(isDarkTheme: Boolean): SettingsColorScheme {
 internal fun dynamicLightColorScheme(context: Context): SettingsColorScheme {
     val tonalPalette = dynamicTonalPalette(context)
     return SettingsColorScheme(
-        background = tonalPalette.neutral95,
         categoryTitle = tonalPalette.primary40,
         surface = tonalPalette.neutral99,
         surfaceHeader = tonalPalette.neutral90,
@@ -88,7 +86,6 @@ internal fun dynamicLightColorScheme(context: Context): SettingsColorScheme {
 internal fun dynamicDarkColorScheme(context: Context): SettingsColorScheme {
     val tonalPalette = dynamicTonalPalette(context)
     return SettingsColorScheme(
-        background = tonalPalette.neutral10,
         categoryTitle = tonalPalette.primary90,
         surface = tonalPalette.neutral20,
         surfaceHeader = tonalPalette.neutral30,
@@ -102,7 +99,6 @@ internal fun dynamicDarkColorScheme(context: Context): SettingsColorScheme {
 internal fun darkColorScheme(): SettingsColorScheme {
     val tonalPalette = tonalPalette()
     return SettingsColorScheme(
-        background = tonalPalette.neutral10,
         categoryTitle = tonalPalette.primary90,
         surface = tonalPalette.neutral20,
         surfaceHeader = tonalPalette.neutral30,
@@ -116,7 +112,6 @@ internal fun darkColorScheme(): SettingsColorScheme {
 internal fun lightColorScheme(): SettingsColorScheme {
     val tonalPalette = tonalPalette()
     return SettingsColorScheme(
-        background = tonalPalette.neutral95,
         categoryTitle = tonalPalette.primary40,
         surface = tonalPalette.neutral99,
         surfaceHeader = tonalPalette.neutral90,
