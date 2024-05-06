@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.IntOffset
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.modifiers.thenIf
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.largeClockScene
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.smallClockScene
@@ -79,7 +80,7 @@ constructor(
             }
 
         SceneTransitionLayout(
-            modifier = modifier,
+            modifier = modifier.sysuiResTag("keyguard_clock_container"),
             currentScene = currentScene,
             onChangeScene = {},
             transitions = ClockTransition.defaultClockTransitions,
