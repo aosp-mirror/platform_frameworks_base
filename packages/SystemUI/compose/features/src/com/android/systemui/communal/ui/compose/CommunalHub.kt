@@ -469,6 +469,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                         size = size,
                         selected = selected && !isDragging,
                         widgetConfigurator = widgetConfigurator,
+                        index = index,
+                        contentListState = contentListState
                     )
                 }
             } else {
@@ -478,6 +480,8 @@ private fun BoxScope.CommunalHubLazyGrid(
                     viewModel = viewModel,
                     size = size,
                     selected = false,
+                    index = index,
+                    contentListState = contentListState
                 )
             }
         }
@@ -782,10 +786,21 @@ private fun CommunalContent(
     selected: Boolean,
     modifier: Modifier = Modifier,
     widgetConfigurator: WidgetConfigurator? = null,
+    index: Int,
+    contentListState: ContentListState,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
-            WidgetContent(viewModel, model, size, selected, widgetConfigurator, modifier)
+            WidgetContent(
+                viewModel,
+                model,
+                size,
+                selected,
+                widgetConfigurator,
+                modifier,
+                index,
+                contentListState
+            )
         is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(modifier)
         is CommunalContentModel.WidgetContent.DisabledWidget ->
             DisabledWidgetPlaceholder(model, viewModel, modifier)
@@ -883,6 +898,8 @@ private fun WidgetContent(
     selected: Boolean,
     widgetConfigurator: WidgetConfigurator?,
     modifier: Modifier = Modifier,
+    index: Int,
+    contentListState: ContentListState,
 ) {
     val context = LocalContext.current
     val isFocusable by viewModel.isFocusable.collectAsState(initial = false)
@@ -891,6 +908,11 @@ private fun WidgetContent(
             model.providerInfo.loadLabel(context.packageManager).toString().trim()
         }
     val clickActionLabel = stringResource(R.string.accessibility_action_label_select_widget)
+    val removeWidgetActionLabel = stringResource(R.string.accessibility_action_label_remove_widget)
+    val placeWidgetActionLabel = stringResource(R.string.accessibility_action_label_place_widget)
+    val selectedKey by viewModel.selectedKey.collectAsState()
+    val selectedIndex =
+        selectedKey?.let { key -> contentListState.list.indexOfFirst { it.key == key } }
     Box(
         modifier =
             modifier
@@ -907,6 +929,36 @@ private fun WidgetContent(
                     Modifier.semantics {
                         contentDescription = accessibilityLabel
                         onClick(label = clickActionLabel, action = null)
+                            val deleteAction =
+                                CustomAccessibilityAction(removeWidgetActionLabel) {
+                                    contentListState.onRemove(index)
+                                    contentListState.onSaveList()
+                                    true
+                                }
+                            val selectWidgetAction =
+                                CustomAccessibilityAction(clickActionLabel) {
+                                    val currentWidgetKey =
+                                        index?.let {
+                                            keyAtIndexIfEditable(contentListState.list, index)
+                                        }
+                                    viewModel.setSelectedKey(currentWidgetKey)
+                                    true
+                                }
+
+                            val actions = mutableListOf(deleteAction, selectWidgetAction)
+
+                            if (selectedIndex != null && selectedIndex != index) {
+                                actions.add(
+                                    CustomAccessibilityAction(placeWidgetActionLabel) {
+                                        contentListState.onMove(selectedIndex!!, index)
+                                        contentListState.onSaveList()
+                                        viewModel.setSelectedKey(null)
+                                        true
+                                    }
+                                )
+                            }
+
+                            customActions = actions
                     }
                 }
     ) {
