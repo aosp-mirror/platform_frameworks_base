@@ -602,7 +602,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
     // Original data: [{'inputPort1': '1'}, {'inputPort2': '2'}]
     // Received data: ['inputPort1', '1', 'inputPort2', '2']
     // So we unpack accordingly here.
-    outConfig->portAssociations.clear();
+    outConfig->inputPortToDisplayPortAssociations.clear();
     jobjectArray portAssociations = jobjectArray(env->CallObjectMethod(mServiceObj,
             gServiceClassInfo.getInputPortAssociations));
     if (!checkAndClearExceptionFromCallback(env, "getInputPortAssociations") && portAssociations) {
@@ -619,16 +619,16 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
                     displayPortStr.c_str());
                 continue;
             }
-            outConfig->portAssociations.insert({inputPort, displayPort});
+            outConfig->inputPortToDisplayPortAssociations.insert({inputPort, displayPort});
         }
         env->DeleteLocalRef(portAssociations);
     }
 
-    outConfig->uniqueIdAssociationsByPort = readMapFromInterleavedJavaArray<
+    outConfig->inputPortToDisplayUniqueIdAssociations = readMapFromInterleavedJavaArray<
             std::string>(gServiceClassInfo.getInputUniqueIdAssociationsByPort,
                          "getInputUniqueIdAssociationsByPort");
 
-    outConfig->uniqueIdAssociationsByDescriptor = readMapFromInterleavedJavaArray<
+    outConfig->inputDeviceDescriptorToDisplayUniqueIdAssociations = readMapFromInterleavedJavaArray<
             std::string>(gServiceClassInfo.getInputUniqueIdAssociationsByDescriptor,
                          "getInputUniqueIdAssociationsByDescriptor");
 
