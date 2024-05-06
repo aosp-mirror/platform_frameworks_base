@@ -1024,6 +1024,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                     intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
                                     intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
                         }
+                    } else if (Settings.Secure.ACCESSIBILITY_QS_TARGETS.equals(which)) {
+                        if (!android.view.accessibility.Flags.a11yQsShortcut()) {
+                            return;
+                        }
+                        restoreAccessibilityQsTargets(
+                                intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
                     }
                 }
             }
