@@ -176,11 +176,14 @@ public class PackageInstallerActivity extends Activity {
     }
 
     private CharSequence getExistingUpdateOwnerLabel() {
+        return getApplicationLabel(getExistingUpdateOwner());
+    }
+
+    private String getExistingUpdateOwner() {
         try {
             final String packageName = mPkgInfo.packageName;
             final InstallSourceInfo sourceInfo = mPm.getInstallSourceInfo(packageName);
-            final String existingUpdateOwner = sourceInfo.getUpdateOwnerPackageName();
-            return getApplicationLabel(existingUpdateOwner);
+            return sourceInfo.getUpdateOwnerPackageName();
         } catch (NameNotFoundException e) {
             return null;
         }
@@ -299,6 +302,18 @@ public class PackageInstallerActivity extends Activity {
     }
 
     private void initiateInstall() {
+        final String existingUpdateOwner = getExistingUpdateOwner();
+        if (mSessionId == SessionInfo.INVALID_ID &&
+            !TextUtils.isEmpty(existingUpdateOwner) &&
+            !TextUtils.equals(existingUpdateOwner, mOriginatingPackage)) {
+            // Since update ownership is being changed, the system will request another
+            // user confirmation shortly. Thus, we don't need to ask the user to confirm
+            // installation here.
+            startInstall();
+            return;
+        }
+
+        // Proceed with user confirmation as we are not changing the update-owner in this install.
         String pkgName = mPkgInfo.packageName;
         // Check if there is already a package on the device with this name
         // but it has been renamed to something else.
