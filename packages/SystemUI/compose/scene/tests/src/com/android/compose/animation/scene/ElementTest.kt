@@ -1049,23 +1049,29 @@ class ElementTest {
             Box(modifier.element(TestElements.Foo).size(fooSize))
         }
 
+        lateinit var layoutImpl: SceneTransitionLayoutImpl
         rule.setContent {
-            SceneTransitionLayout(state, Modifier.size(layoutSize)) {
+            SceneTransitionLayoutForTesting(
+                state,
+                Modifier.size(layoutSize),
+                onLayoutImpl = { layoutImpl = it },
+            ) {
                 // In scene A, Foo is aligned at the TopStart.
                 scene(SceneA) {
                     Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.TopStart)) }
+                }
+
+                // In scene C, Foo is aligned at the BottomEnd, so it moves vertically when coming
+                // from B. We put it before (below) scene B so that we can check that interruptions
+                // values and deltas are properly cleared once all transitions are done.
+                scene(SceneC) {
+                    Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.BottomEnd)) }
                 }
 
                 // In scene B, Foo is aligned at the TopEnd, so it moves horizontally when coming
                 // from A.
                 scene(SceneB) {
                     Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.TopEnd)) }
-                }
-
-                // In scene C, Foo is aligned at the BottomEnd, so it moves vertically when coming
-                // from B.
-                scene(SceneC) {
-                    Box(Modifier.fillMaxSize()) { Foo(Modifier.align(Alignment.BottomEnd)) }
                 }
             }
         }
@@ -1115,7 +1121,7 @@ class ElementTest {
         // Interruption progress is at 100% and bToC is at 0%, so Foo should be at the same offset
         // as right before the interruption.
         rule
-            .onNode(isElement(TestElements.Foo, SceneC))
+            .onNode(isElement(TestElements.Foo, SceneB))
             .assertPositionInRootIsEqualTo(offsetInAToB.x, offsetInAToB.y)
 
         // Move the transition forward at 30% and set the interruption progress to 50%.
@@ -1130,7 +1136,7 @@ class ElementTest {
                 )
         rule.waitForIdle()
         rule
-            .onNode(isElement(TestElements.Foo, SceneC))
+            .onNode(isElement(TestElements.Foo, SceneB))
             .assertPositionInRootIsEqualTo(
                 offsetInBToCWithInterruption.x,
                 offsetInBToCWithInterruption.y,
@@ -1140,7 +1146,24 @@ class ElementTest {
         bToCProgress = 1f
         interruptionProgress = 0f
         rule
-            .onNode(isElement(TestElements.Foo, SceneC))
+            .onNode(isElement(TestElements.Foo, SceneB))
             .assertPositionInRootIsEqualTo(offsetInC.x, offsetInC.y)
+
+        // Manually finish the transition.
+        state.finishTransition(aToB, SceneB)
+        state.finishTransition(bToC, SceneC)
+        rule.waitForIdle()
+        assertThat(state.currentTransition).isNull()
+
+        // The interruption values should be unspecified and deltas should be set to zero.
+        val foo = layoutImpl.elements.getValue(TestElements.Foo)
+        assertThat(foo.sceneStates.keys).containsExactly(SceneC)
+        val stateInC = foo.sceneStates.getValue(SceneC)
+        assertThat(stateInC.offsetBeforeInterruption).isEqualTo(Offset.Unspecified)
+        assertThat(stateInC.scaleBeforeInterruption).isEqualTo(Scale.Unspecified)
+        assertThat(stateInC.alphaBeforeInterruption).isEqualTo(Element.AlphaUnspecified)
+        assertThat(stateInC.offsetInterruptionDelta).isEqualTo(Offset.Zero)
+        assertThat(stateInC.scaleInterruptionDelta).isEqualTo(Scale.Zero)
+        assertThat(stateInC.alphaInterruptionDelta).isEqualTo(0f)
     }
 }

@@ -579,6 +579,18 @@ private class SwipeTransition(
             return offset / distance
         }
 
+    override val progressVelocity: Float
+        get() {
+            val animatable = offsetAnimation?.animatable ?: return 0f
+            val distance = distance()
+            if (distance == DistanceUnspecified) {
+                return 0f
+            }
+
+            val velocityInDistanceUnit = animatable.velocity
+            return velocityInDistanceUnit / distance.absoluteValue
+        }
+
     override val isInitiatedByUserInput = true
 
     override var bouncingScene: SceneKey? = null
