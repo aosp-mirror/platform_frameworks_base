@@ -59,7 +59,10 @@ class ConfigurationControllerImpl @Inject constructor(
     }
 
     override fun notifyThemeChanged() {
-        val listeners = ArrayList(listeners)
+        // Avoid concurrent modification exception
+        val listeners = synchronized(this.listeners) {
+           ArrayList(this.listeners)
+        }
 
         listeners.filterForEach({ this.listeners.contains(it) }) {
             it.onThemeChanged()
@@ -68,8 +71,9 @@ class ConfigurationControllerImpl @Inject constructor(
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         // Avoid concurrent modification exception
-        val listeners = ArrayList(listeners)
-
+        val listeners = synchronized(this.listeners) {
+           ArrayList(this.listeners)
+        }
         listeners.filterForEach({ this.listeners.contains(it) }) {
             it.onConfigChanged(newConfig)
         }
@@ -148,12 +152,16 @@ class ConfigurationControllerImpl @Inject constructor(
     }
 
     override fun addCallback(listener: ConfigurationListener) {
-        listeners.add(listener)
+        synchronized(listeners) {
+            listeners.add(listener)
+        }
         listener.onDensityOrFontScaleChanged()
     }
 
     override fun removeCallback(listener: ConfigurationListener) {
-        listeners.remove(listener)
+        synchronized(listeners) {
+            listeners.remove(listener)
+        }
     }
 
     override fun isLayoutRtl(): Boolean {
