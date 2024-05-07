@@ -3176,6 +3176,11 @@ class Task extends TaskFragment {
                 mTaskId, snapshot);
     }
 
+    void onSnapshotInvalidated() {
+        mAtmService.getTaskChangeNotificationController().notifyTaskSnapshotInvalidated(mTaskId);
+    }
+
+
     TaskDescription getTaskDescription() {
         return mTaskDescription;
     }

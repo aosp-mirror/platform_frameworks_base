@@ -21,6 +21,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_CONTENT_IMPROVEMENTS;
+import static android.permission.flags.Flags.FLAG_SENSITIVE_CONTENT_RECENTS_SCREENSHOT_BUGFIX;
 import static android.permission.flags.Flags.FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_OWN_FOCUS;
@@ -1017,6 +1019,35 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         wmInternal.addBlockScreenCaptureForApps(blockedPackages2);
 
         verify(mWm, times(2)).refreshScreenCaptureDisabled();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(
+            {FLAG_SENSITIVE_NOTIFICATION_APP_PROTECTION, FLAG_SENSITIVE_CONTENT_IMPROVEMENTS,
+                    FLAG_SENSITIVE_CONTENT_RECENTS_SCREENSHOT_BUGFIX})
+    public void addBlockScreenCaptureForApps_appNotInForeground_invalidateSnapshot() {
+        spyOn(mWm.mTaskSnapshotController);
+
+        // createAppWindow uses package name of "test" and uid of "0"
+        String testPackage = "test";
+        int ownerId1 = 0;
+
+        final Task task = createTask(mDisplayContent);
+        final WindowState win = createAppWindow(task, ACTIVITY_TYPE_STANDARD, "appWindow");
+        mWm.mWindowMap.put(win.mClient.asBinder(), win);
+        final ActivityRecord activity = win.mActivityRecord;
+        activity.setVisibleRequested(false);
+        activity.setVisible(false);
+        win.setHasSurface(false);
+
+        PackageInfo blockedPackage = new PackageInfo(testPackage, ownerId1);
+        ArraySet<PackageInfo> blockedPackages = new ArraySet();
+        blockedPackages.add(blockedPackage);
+
+        WindowManagerInternal wmInternal = LocalServices.getService(WindowManagerInternal.class);
+        wmInternal.addBlockScreenCaptureForApps(blockedPackages);
+
+        verify(mWm.mTaskSnapshotController).removeAndDeleteSnapshot(anyInt(), eq(ownerId1));
     }
 
     @Test
