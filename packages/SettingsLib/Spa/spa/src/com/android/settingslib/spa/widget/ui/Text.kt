@@ -47,7 +47,6 @@ fun SettingsTitle(
         modifier = Modifier
             .padding(vertical = SettingsDimension.paddingTiny)
             .contentDescription(contentDescription),
-        color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.titleMedium.withWeight(useMediumWeight),
     )
 }
