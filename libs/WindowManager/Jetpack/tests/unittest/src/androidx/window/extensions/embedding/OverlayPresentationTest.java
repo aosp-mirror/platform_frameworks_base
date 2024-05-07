@@ -477,7 +477,7 @@ public class OverlayPresentationTest {
         final TaskContainer.TaskProperties taskProperties = taskContainer.getTaskProperties();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(
                 new Configuration(taskProperties.getConfiguration()), taskProperties.getDisplayId(),
-                false /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
+                true /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
 
         mSplitController.onTaskFragmentParentInfoChanged(mTransaction, TASK_ID, parentInfo);
 
