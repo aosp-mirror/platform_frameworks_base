@@ -16,7 +16,6 @@
 package com.android.systemui.biometrics
 
 import android.Manifest
-import android.annotation.IntDef
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
 import android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX
@@ -39,14 +38,9 @@ import android.view.WindowMetrics
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
 import com.android.internal.widget.LockPatternUtils
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
+import com.android.systemui.biometrics.shared.model.PromptKind
 
 object Utils {
-    const val CREDENTIAL_PIN = 1
-    const val CREDENTIAL_PATTERN = 2
-    const val CREDENTIAL_PASSWORD = 3
-
     /** Base set of layout flags for fingerprint overlay widgets. */
     const val FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS =
         (WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
@@ -91,17 +85,16 @@ object Utils {
         (promptInfo.authenticators and Authenticators.BIOMETRIC_WEAK) != 0
 
     @JvmStatic
-    @CredentialType
-    fun getCredentialType(utils: LockPatternUtils, userId: Int): Int =
+    fun getCredentialType(utils: LockPatternUtils, userId: Int): PromptKind =
         when (utils.getKeyguardStoredPasswordQuality(userId)) {
-            PASSWORD_QUALITY_SOMETHING -> CREDENTIAL_PATTERN
+            PASSWORD_QUALITY_SOMETHING -> PromptKind.Pattern
             PASSWORD_QUALITY_NUMERIC,
-            PASSWORD_QUALITY_NUMERIC_COMPLEX -> CREDENTIAL_PIN
+            PASSWORD_QUALITY_NUMERIC_COMPLEX -> PromptKind.Pin
             PASSWORD_QUALITY_ALPHABETIC,
             PASSWORD_QUALITY_ALPHANUMERIC,
             PASSWORD_QUALITY_COMPLEX,
-            PASSWORD_QUALITY_MANAGED -> CREDENTIAL_PASSWORD
-            else -> CREDENTIAL_PASSWORD
+            PASSWORD_QUALITY_MANAGED -> PromptKind.Password
+            else -> PromptKind.Password
         }
 
     @JvmStatic
@@ -129,8 +122,4 @@ object Utils {
         return windowMetrics?.windowInsets?.getInsets(WindowInsets.Type.navigationBars())
             ?: Insets.NONE
     }
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD)
-    annotation class CredentialType
 }

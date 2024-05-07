@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,20 @@
 
 package com.android.systemui.biometrics.shared.model
 
-import com.android.systemui.biometrics.Utils
-
-// TODO(b/251476085): this should eventually replace Utils.CredentialType
-/** Credential options for biometric prompt. Shadows [Utils.CredentialType]. */
 sealed interface PromptKind {
+    object None : PromptKind
+
     data class Biometric(
         val activeModalities: BiometricModalities = BiometricModalities(),
+        // TODO(b/330908557): Use this value to decide whether to show two pane layout, instead of
+        // simply depending on rotations.
+        val showTwoPane: Boolean = false
     ) : PromptKind
 
     object Pin : PromptKind
     object Pattern : PromptKind
     object Password : PromptKind
+
+    fun isBiometric() = this is Biometric
+    fun isCredential() = (this is Pin) or (this is Pattern) or (this is Password)
 }

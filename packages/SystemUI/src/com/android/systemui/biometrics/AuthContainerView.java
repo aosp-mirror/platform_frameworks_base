@@ -76,6 +76,7 @@ import com.android.systemui.biometrics.AuthController.ScaleFactorProvider;
 import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
 import com.android.systemui.biometrics.shared.model.BiometricModalities;
+import com.android.systemui.biometrics.shared.model.PromptKind;
 import com.android.systemui.biometrics.ui.BiometricPromptLayout;
 import com.android.systemui.biometrics.ui.CredentialView;
 import com.android.systemui.biometrics.ui.binder.BiometricViewBinder;
@@ -500,24 +501,18 @@ public class AuthContainerView extends LinearLayout
     private void addCredentialView(boolean animatePanel, boolean animateContents) {
         final LayoutInflater factory = LayoutInflater.from(mContext);
 
-        @Utils.CredentialType final int credentialType = Utils.getCredentialType(
-                mLockPatternUtils, mEffectiveUserId);
-
-        switch (credentialType) {
-            case Utils.CREDENTIAL_PATTERN:
-                mCredentialView = factory.inflate(
-                        R.layout.auth_credential_pattern_view, null, false);
-                break;
-            case Utils.CREDENTIAL_PIN:
-                mCredentialView = factory.inflate(R.layout.auth_credential_pin_view, null, false);
-                break;
-            case Utils.CREDENTIAL_PASSWORD:
-                mCredentialView = factory.inflate(
-                        R.layout.auth_credential_password_view, null, false);
-                break;
-            default:
-                throw new IllegalStateException("Unknown credential type: " + credentialType);
+        PromptKind credentialType = Utils.getCredentialType(mLockPatternUtils, mEffectiveUserId);
+        final int layoutResourceId;
+        if (credentialType instanceof PromptKind.Pattern) {
+            layoutResourceId = R.layout.auth_credential_pattern_view;
+        } else if (credentialType instanceof PromptKind.Pin) {
+            layoutResourceId = R.layout.auth_credential_pin_view;
+        } else if (credentialType instanceof PromptKind.Password) {
+            layoutResourceId = R.layout.auth_credential_password_view;
+        } else {
+            throw new IllegalStateException("Unknown credential type: " + credentialType);
         }
+        mCredentialView = factory.inflate(layoutResourceId, null, false);
 
         // The background is used for detecting taps / cancelling authentication. Since the
         // credential view is full-screen and should not be canceled from background taps,
