@@ -16,7 +16,9 @@
 
 package com.android.systemui.volume.panel.component.anc.ui.viewmodel
 
+import android.content.Intent
 import androidx.slice.Slice
+import androidx.slice.SliceItem
 import com.android.systemui.volume.panel.component.anc.domain.AncAvailabilityCriteria
 import com.android.systemui.volume.panel.component.anc.domain.interactor.AncSliceInteractor
 import com.android.systemui.volume.panel.component.anc.domain.model.AncSlices
@@ -58,6 +60,31 @@ constructor(
             .filterIsInstance<AncSlices.Ready>()
             .map { it.buttonSlice }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+
+    fun isClickable(slice: Slice?): Boolean {
+        slice ?: return false
+        val slices = ArrayDeque<SliceItem>()
+        slices.addAll(slice.items)
+        while (slices.isNotEmpty()) {
+            val item: SliceItem = slices.removeFirst()
+            when (item.format) {
+                android.app.slice.SliceItem.FORMAT_ACTION -> {
+                    val itemActionIntent: Intent? = item.action?.intent
+                    if (itemActionIntent?.hasExtra(EXTRA_ANC_ENABLED) == true) {
+                        return itemActionIntent.getBooleanExtra(EXTRA_ANC_ENABLED, true)
+                    }
+                }
+                android.app.slice.SliceItem.FORMAT_SLICE -> {
+                    item.slice?.items?.let(slices::addAll)
+                }
+            }
+        }
+        return true
+    }
+
+    private companion object {
+        const val EXTRA_ANC_ENABLED = "EXTRA_ANC_ENABLED"
+    }
 
     /** Call this to update [popupSlice] width in a reaction to container size change. */
     fun onPopupSliceWidthChanged(width: Int) {

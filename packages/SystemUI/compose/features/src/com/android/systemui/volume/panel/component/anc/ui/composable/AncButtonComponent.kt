@@ -54,6 +54,13 @@ constructor(
     override fun VolumePanelComposeScope.Content(modifier: Modifier) {
         val slice by viewModel.buttonSlice.collectAsState()
         val label = stringResource(R.string.volume_panel_noise_control_title)
+        val isClickable = viewModel.isClickable(slice)
+        val onClick =
+            if (isClickable) {
+                { ancPopup.show(null) }
+            } else {
+                null
+            }
         Column(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -69,8 +76,9 @@ constructor(
                         }
                         .clip(RoundedCornerShape(28.dp)),
                 slice = slice,
+                isEnabled = onClick != null,
                 onWidthChanged = viewModel::onButtonSliceWidthChanged,
-                onClick = { ancPopup.show(null) }
+                onClick = onClick,
             )
             Text(
                 modifier = Modifier.clearAndSetSemantics {},
