@@ -1984,9 +1984,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface ContentSensitivity {}
 
     /**
-     * Automatically determine whether a view displays sensitive content. For example, available
-     * autofill hints (or some other signal) can be used to determine if this view
-     * displays sensitive content.
+     * Content sensitivity is determined by the framework. The framework uses a heuristic to
+     * determine if this view displays sensitive content.
+     * Autofill hints i.e. {@link #getAutofillHints()}  are used in the heuristic
+     * to determine if this view should be considered as a sensitive view.
+     * <p>
+     * {@link #AUTOFILL_HINT_USERNAME},
+     * {@link #AUTOFILL_HINT_PASSWORD},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_NUMBER},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DAY},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH},
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_YEAR}
+     * are considered sensitive hints by the framework, and the list may include more hints
+     * in the future.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @see #getContentSensitivity()
      */
@@ -1995,6 +2011,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * The view displays sensitive content.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @see #getContentSensitivity()
      */
@@ -10548,8 +10568,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Sets content sensitivity mode to determine whether this view displays sensitive content
-     * (e.g. username, password etc.). The system may improve user privacy i.e. hide content
+     * (e.g. username, password etc.). The system will improve user privacy i.e. hide content
      * drawn by a sensitive view from screen sharing and recording.
+     *
+     * <p> The window hosting a sensitive view will be marked as secure during an active media
+     * projection session. This would be equivalent to applying
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SECURE} to the window.
      *
      * @param mode {@link #CONTENT_SENSITIVITY_AUTO}, {@link #CONTENT_SENSITIVITY_NOT_SENSITIVE}
      *                                            or {@link #CONTENT_SENSITIVITY_SENSITIVE}
@@ -10574,8 +10598,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setContentSensitivity(int)}.
      */
     @FlaggedApi(FLAG_SENSITIVE_CONTENT_APP_PROTECTION_API)
-    public @ContentSensitivity
-    final int getContentSensitivity() {
+    public @ContentSensitivity final int getContentSensitivity() {
         return (mPrivateFlags4 & PFLAG4_CONTENT_SENSITIVITY_MASK)
                 >> PFLAG4_CONTENT_SENSITIVITY_SHIFT;
     }
