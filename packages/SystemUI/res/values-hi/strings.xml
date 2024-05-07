@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"बाएं किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"दाएं किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"वर्क प्रोफ़ाइल में मौजूद <xliff:g id="APP">%1$s</xliff:g> में सेव किया गया है"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"स्क्रीनशॉट को <xliff:g id="APP">%1$s</xliff:g> की निजी प्रोफ़ाइल में सेव किया गया"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> को इस स्क्रीनशॉट का पता चला है."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> और खुले हुए अन्य ऐप्लिकेशन को इस स्क्रीनशॉट का पता चला है."</string>
@@ -276,7 +275,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेव किया गया"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"डिसकनेक्ट करें"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"चालू करें"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"कल फिर से अपने-आप चालू हो जाएगा"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"कल फिर से अपने-आप चालू हो जाए"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"क्विक शेयर और Find My Device जैसी सुविधाएं, ब्लूटूथ का इस्तेमाल करती हैं"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"ब्लूटूथ कल सुबह चालू होगा"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"ऑडियो शेयर करने की सुविधा"</string>
@@ -461,7 +460,10 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"लॉक स्क्रीन पर विजेट बंद करें"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"विजेट अपनी पसंद के मुताबिक बनाएं"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"लॉक स्क्रीन पर विजेट"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"विजेट चुनें"</string>
+    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"उपयोगकर्ता बदलें"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेन्यू"</string>
@@ -660,8 +662,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"सैटलाइट कनेक्शन खराब है"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"सैटलाइट कनेक्शन अच्छा है"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"सैटलाइट कनेक्शन उपलब्ध है"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"सैटलाइट एसओएस"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"वर्क प्रोफ़ाइल"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"कुछ के लिए मज़ेदार लेकिन सबके लिए नहीं"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"सिस्टम यूज़र इंटरफ़ेस (यूआई) ट्यूनर, आपको Android यूज़र इंटरफ़ेस में सुधार लाने और उसे अपनी पसंद के हिसाब से बदलने के कुछ और तरीके देता है. प्रयोग के तौर पर इस्तेमाल हो रहीं ये सुविधाएं आगे चल कर रिलीज़ की जा सकती हैं, रोकी जा सकती हैं या दिखाई देना बंद हो सकती हैं. सावधानी से आगे बढ़ें."</string>
@@ -866,8 +867,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"टाइल जोड़ें"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"टाइल को <xliff:g id="POSITION">%1$d</xliff:g> पोज़िशन पर ले जाएं"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"टाइल को <xliff:g id="POSITION">%1$d</xliff:g> पोज़िशन पर जोड़ें"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"मौजूदा जगह अमान्य है."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"टाइल की पोज़िशन <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"टाइल जोड़ी गई"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"टाइल हटाई गई"</string>

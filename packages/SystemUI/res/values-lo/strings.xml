@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ຂອບເຂດທາງຊ້າຍ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ຂອບເຂດທາງຂວາ <xliff:g id="PERCENT">%1$d</xliff:g> ເປີເຊັນ"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ບັນທຶກໃນ <xliff:g id="APP">%1$s</xliff:g> ໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກແລ້ວ"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"ບັນທຶກໄວ້ໃນ <xliff:g id="APP">%1$s</xliff:g> ໃນໂປຣໄຟລ໌ສ່ວນຕົວແລ້ວ"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ໄຟລ໌"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ກວດພົບຮູບໜ້າຈໍນີ້."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ແລະ ແອັບອື່ນໆທີ່ເປີດຢູ່ກວດພົບຮູບໜ້າຈໍນີ້."</string>
@@ -461,7 +460,10 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"ປິດວິດເຈັດຢູ່ໜ້າຈໍລັອກ"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"ປັບແຕ່ງວິດເຈັດ"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ວິດເຈັດຢູ່ໜ້າຈໍລັອກ"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"ເລືອກວິດເຈັດ"</string>
+    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ສະຫຼັບຜູ້ໃຊ້"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ເມນູແບບດຶງລົງ"</string>
@@ -631,8 +633,7 @@
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"ເຊົາປິດສຽງ %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"ກຳລັງຫຼິ້ນ <xliff:g id="LABEL">%s</xliff:g> ໃນ"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ສຽງຈະຫຼິ້ນຕໍ່ໄປ"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"ກຳລັງໂທ"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"ແຖບສະຖານະ"</string>
     <string name="demo_mode" msgid="263484519766901593">"ໂໝດເດໂມສ່ວນຕິດຕໍ່ຜູ້ໃຊ້ລະບົບ"</string>
@@ -660,8 +661,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"ດາວທຽມ, ການເຊື່ອມຕໍ່ບໍ່ດີ"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ດາວທຽມ, ການເຊື່ອມຕໍ່ດີ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ດາວທຽມ, ການເຊື່ອມຕໍ່ທີ່ພ້ອມນຳໃຊ້"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS ດາວທຽມ"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ມ່ວນຊື່ນສຳລັບບາງຄົນ ແຕ່ບໍ່ແມ່ນສຳລັບທຸກຄົນ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner ໃຫ້ທ່ານມີວິທີພິເສດຕື່ມອີກໃນການປັບປ່ຽນ ແລະຕົບແຕ່ງສ່ວນຕໍ່ປະສານຜູ້ໃຊ້ຂອງ Android. ຄຸນສົມບັດທົດລອງໃຊ້ເຫຼົ່ານີ້ອາດຈະປ່ຽນແປງ, ຢຸດເຊົາ ຫຼືຫາຍໄປໃນການວາງຈຳໜ່າຍໃນອະນາຄົດ. ຈົ່ງດຳເນີນຕໍ່ດ້ວຍຄວາມລະມັດລະວັງ."</string>
@@ -866,8 +866,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ເພີ່ມແຜ່ນ"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"ຍ້າຍໄປ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"ເພີ່ມໃສ່ຕຳແໜ່ງ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"ຕຳແໜ່ງບໍ່ຖືກຕ້ອງ."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"ຕຳແໜ່ງ <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ເພີ່ມແຜ່ນແລ້ວ"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ລຶບແຜ່ນແລ້ວ"</string>
