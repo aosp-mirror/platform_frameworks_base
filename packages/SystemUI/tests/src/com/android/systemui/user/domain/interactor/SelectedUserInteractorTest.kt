@@ -7,7 +7,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,7 +23,7 @@ class SelectedUserInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         userRepository.setUserInfos(USER_INFOS)
-        underTest = SelectedUserInteractor(TestCoroutineScope(), userRepository)
+        underTest = SelectedUserInteractor(userRepository)
     }
 
     @Test
