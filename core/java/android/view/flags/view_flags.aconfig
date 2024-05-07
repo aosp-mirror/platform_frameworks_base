@@ -54,7 +54,7 @@ flag {
   is_fixed_read_only: true
   metadata {
       purpose: PURPOSE_BUGFIX
-    }
+  }
 }
 
 flag {
