@@ -7155,6 +7155,7 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             pw.println("  Boot user: " + mBootUser);
         }
+        pw.println("Can add private profile: "+ canAddPrivateProfile(currentUserId));
 
         pw.println();
         pw.println("Number of listeners for");
