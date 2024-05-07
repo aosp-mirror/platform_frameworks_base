@@ -858,6 +858,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * {@link InsetsStateController#notifyInsetsChanged}.
      */
     boolean isReadyToDispatchInsetsState() {
+        if (mStartingData != null) {
+            // Starting window doesn't consider insets.
+            return false;
+        }
         final boolean visible = shouldCheckTokenVisibleRequested()
                 ? isVisibleRequested() : isVisible();
         return visible && mFrozenInsetsState == null;
