@@ -19967,6 +19967,26 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             addStartInfoTimestampInternal(key, timestampNs, userId, uid);
         }
+
+        @Override
+        public void killApplicationSync(String pkgName, int appId, int userId,
+                String reason, int exitInfoReason) {
+            if (pkgName == null) {
+                return;
+            }
+            // Make sure the uid is valid.
+            if (appId < 0) {
+                Slog.w(TAG, "Invalid appid specified for pkg : " + pkgName);
+                return;
+            }
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.forceStopPackageLocked(pkgName, appId,
+                        /* callerWillRestart= */ false, /*purgeCache= */ false,
+                        /* doit= */ true, /* evenPersistent= */ false,
+                        /* uninstalling= */ false, /* packageStateStopped= */ false,
+                        userId, reason, exitInfoReason);
+            }
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {

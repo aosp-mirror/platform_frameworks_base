@@ -53,6 +53,7 @@ import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
@@ -3129,6 +3130,20 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    void killApplicationSync(String pkgName, @AppIdInt int appId,
+            @UserIdInt int userId, String reason, int exitInfoReason) {
+        ActivityManagerInternal mAmi = LocalServices.getService(ActivityManagerInternal.class);
+        if (mAmi != null) {
+            if (Thread.holdsLock(mLock)) {
+                // holds PM's lock, go back killApplication to avoid it run into watchdog reset.
+                Slog.e(TAG, "Holds PM's locker, unable kill application synchronized");
+                killApplication(pkgName, appId, userId, reason, exitInfoReason);
+            } else {
+                mAmi.killApplicationSync(pkgName, appId, userId, reason, exitInfoReason);
+            }
         }
     }
 
