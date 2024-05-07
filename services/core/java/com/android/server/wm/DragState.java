@@ -243,8 +243,8 @@ class DragState {
                         dragSurface = mSurfaceControl;
                     }
                 }
-                DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, dragSurface, null,
+                DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED, x, y,
+                        mThumbOffsetX, mThumbOffsetY, mFlags, null, null, null, dragSurface, null,
                         mDragResult);
                 try {
                     if (DEBUG_DRAG) Slog.d(TAG_WM, "Sending DRAG_ENDED to " + ws);
@@ -308,7 +308,7 @@ class DragState {
      * as a part of the dispatched event.
      */
     private DragEvent createDropEvent(float x, float y, @Nullable WindowState touchedWin,
-            boolean includeDragSurface) {
+            boolean includePrivateInfo) {
         if (touchedWin != null) {
             final int targetUserId = UserHandle.getUserId(touchedWin.getOwningUid());
             final DragAndDropPermissionsHandler dragAndDropPermissions;
@@ -329,11 +329,16 @@ class DragState {
                     mData.fixUris(mSourceUserId);
                 }
             }
+            final boolean targetInterceptsGlobalDrag = targetInterceptsGlobalDrag(touchedWin);
             return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mData,
-                    targetInterceptsGlobalDrag(touchedWin), dragAndDropPermissions);
+                    /* includeDragSurface= */ targetInterceptsGlobalDrag,
+                    /* includeDragFlags= */ targetInterceptsGlobalDrag,
+                    dragAndDropPermissions);
         } else {
             return obtainDragEvent(DragEvent.ACTION_DROP, x, y, mData,
-                    includeDragSurface /* includeDragSurface */, null /* dragAndDropPermissions */);
+                    /* includeDragSurface= */ includePrivateInfo,
+                    /* includeDragFlags= */ includePrivateInfo,
+                    null /* dragAndDropPermissions */);
         }
     }
 
@@ -535,7 +540,7 @@ class DragState {
             ClipData data = interceptsGlobalDrag ? mData.copyForTransferWithActivityInfo() : null;
             DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED,
                     newWin.translateToWindowX(touchX), newWin.translateToWindowY(touchY),
-                    data, false /* includeDragSurface */,
+                    data, false /* includeDragSurface */, true /* includeDragFlags */,
                     null /* dragAndDropPermission */);
             try {
                 newWin.mClient.dispatchDragEvent(event);
@@ -706,8 +711,10 @@ class DragState {
     }
 
     private DragEvent obtainDragEvent(int action, float x, float y, ClipData data,
-            boolean includeDragSurface, IDragAndDropPermissions dragAndDropPermissions) {
+            boolean includeDragSurface, boolean includeDragFlags,
+            IDragAndDropPermissions dragAndDropPermissions) {
         return DragEvent.obtain(action, x, y, mThumbOffsetX, mThumbOffsetY,
+                includeDragFlags ? mFlags : 0,
                 null  /* localState */, mDataDescription, data,
                 includeDragSurface ? mSurfaceControl : null,
                 dragAndDropPermissions, false /* result */);

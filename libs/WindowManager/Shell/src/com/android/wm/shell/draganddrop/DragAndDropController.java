@@ -316,7 +316,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                 }
                 // TODO(b/290391688): Also update the session data with task stack changes
                 pd.dragSession = new DragSession(ActivityTaskManager.getInstance(),
-                        mDisplayController.getDisplayLayout(displayId), event.getClipData());
+                        mDisplayController.getDisplayLayout(displayId), event.getClipData(),
+                        event.getDragFlags());
                 pd.dragSession.update();
                 pd.activeDragCount++;
                 pd.dragLayout.prepare(pd.dragSession, mLogger.logStart(pd.dragSession));
