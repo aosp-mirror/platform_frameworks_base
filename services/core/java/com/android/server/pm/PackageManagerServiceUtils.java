@@ -1667,15 +1667,6 @@ public class PackageManagerServiceUtils {
         if (appMetadataFile.exists()) {
             return true;
         }
-        if (isSystem) {
-            try {
-                makeDirRecursive(new File(appMetadataFilePath).getParentFile(), 0700);
-            } catch (Exception e) {
-                Slog.e(TAG, "Failed to create app metadata dir for package "
-                        + pkg.getPackageName() + ": " + e.getMessage());
-                return false;
-            }
-        }
         Map<String, Property> properties = pkg.getProperties();
         if (!properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL_PATH)) {
             return false;
@@ -1683,6 +1674,15 @@ public class PackageManagerServiceUtils {
         Property fileInAPkPathProperty = properties.get(PROPERTY_ANDROID_SAFETY_LABEL_PATH);
         if (!fileInAPkPathProperty.isString()) {
             return false;
+        }
+        if (isSystem && !appMetadataFile.getParentFile().exists()) {
+            try {
+                makeDirRecursive(appMetadataFile.getParentFile(), 0700);
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to create app metadata dir for package "
+                        + pkg.getPackageName() + ": " + e.getMessage());
+                return false;
+            }
         }
         String fileInApkPath = fileInAPkPathProperty.getString();
         List<AndroidPackageSplit> splits = pkg.getSplits();
