@@ -128,4 +128,9 @@ public class TestIWindow extends IWindow.Stub {
     public void hideInsets(int types, boolean fromIme, @Nullable ImeTracker.Token statsToken)
             throws RemoteException {
     }
+
+    @Override
+    public void dumpWindow(ParcelFileDescriptor pfd) {
+
+    }
 }

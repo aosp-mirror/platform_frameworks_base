@@ -335,6 +335,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
@@ -545,13 +546,16 @@ public class WindowManagerService extends IWindowManager.Stub
             if (asProto) {
                 return;
             }
+
+            final long timeoutMs = 1000L;
             mAtmService.dumpActivity(fd, pw, /* name= */ "all", /* args= */ new String[]{},
                     /* opti= */ 0,
                     /* dumpAll= */ true,
                     /* dumpVisibleRootTasksOnly= */ true,
                     /* dumpFocusedRootTaskOnly= */ false, INVALID_DISPLAY, UserHandle.USER_ALL,
-                    /* timeout= */ 1000
+                    timeoutMs
             );
+            dumpVisibleWindowClients(fd, pw, timeoutMs);
         }
 
         @Override
@@ -10349,5 +10353,33 @@ public class WindowManagerService extends IWindowManager.Stub
             return SystemProperties.getBoolean(ENABLE_SHELL_TRANSITIONS, true);
         }
         return true;
+    }
+
+    /**
+     * Dump ViewRootImpl for visible non-activity windows.
+     */
+    private void dumpVisibleWindowClients(FileDescriptor fd, PrintWriter pw, long timeout) {
+        final ArrayList<WindowState> systemWindows = new ArrayList<>();
+        synchronized (mGlobalLock) {
+            mRoot.forAllWindows(w -> {
+                if (!w.isActivityWindow() && w.isVisibleNow()) {
+                    systemWindows.add(w);
+                }
+            }, false /* traverseTopToBottom */);
+        }
+
+        systemWindows.forEach(w -> {
+            pw.println("---------------------------------");
+            pw.println(w.toString());
+            pw.flush();
+            try (TransferPipe tp = new TransferPipe()) {
+                w.mClient.dumpWindow(tp.getWriteFd());
+                tp.go(fd, timeout);
+            } catch (IOException e) {
+                pw.println("Failure while dumping the window: " + e);
+            } catch (RemoteException e) {
+                pw.println("Got a RemoteException while dumping the window");
+            }
+        });
     }
 }

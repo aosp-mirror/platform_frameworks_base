@@ -128,4 +128,9 @@ oneway interface IWindow {
      * @param callbacks to receive responses
      */
     void requestScrollCapture(in IScrollCaptureResponseListener callbacks);
+
+    /**
+     * Dump the details of a window.
+     */
+    void dumpWindow(in ParcelFileDescriptor pfd);
 }

@@ -6070,6 +6070,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mPrepareSyncSeqId > 0;
     }
 
+    public boolean isActivityWindow() {
+        return mActivityRecord != null;
+    }
+
     void setSecureLocked(boolean isSecure) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, getName());
         if (secureWindowState()) {
