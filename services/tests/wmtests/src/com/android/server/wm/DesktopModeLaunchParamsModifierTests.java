@@ -79,19 +79,19 @@ public class DesktopModeLaunchParamsModifierTests extends WindowTestsBase {
 
     @Test
     @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    public void testReturnsContinueIfDesktopWindowingIsDisabled() {
+    public void testReturnsSkipIfDesktopWindowingIsDisabled() {
         setupDesktopModeLaunchParamsModifier();
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(null).calculate());
+        assertEquals(RESULT_SKIP, new CalculateRequestBuilder().setTask(null).calculate());
     }
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
-    public void testReturnsContinueIfDesktopWindowingIsEnabledOnUnsupportedDevice() {
+    public void testReturnsSkipIfDesktopWindowingIsEnabledOnUnsupportedDevice() {
         setupDesktopModeLaunchParamsModifier(/*isDesktopModeSupported=*/ false,
                 /*enforceDeviceRestrictions=*/ true);
 
-        assertEquals(RESULT_CONTINUE, new CalculateRequestBuilder().setTask(null).calculate());
+        assertEquals(RESULT_SKIP, new CalculateRequestBuilder().setTask(null).calculate());
     }
 
     @Test
