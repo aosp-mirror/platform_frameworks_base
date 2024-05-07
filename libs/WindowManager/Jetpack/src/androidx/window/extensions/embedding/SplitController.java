@@ -850,6 +850,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             Log.e(TAG, "onTaskFragmentParentInfoChanged on empty Task id=" + taskId);
             return;
         }
+
+        if (!parentInfo.isVisible()) {
+            // Only making the TaskContainer invisible and drops the other info, and perform the
+            // update when the next time the Task becomes visible.
+            taskContainer.setIsVisible(false);
+            return;
+        }
+
         // Checks if container should be updated before apply new parentInfo.
         final boolean shouldUpdateContainer = taskContainer.shouldUpdateContainer(parentInfo);
         taskContainer.updateTaskFragmentParentInfo(parentInfo);
