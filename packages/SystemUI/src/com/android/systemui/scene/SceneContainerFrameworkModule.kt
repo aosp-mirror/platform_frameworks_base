@@ -41,6 +41,7 @@ import dagger.multibindings.IntoMap
             LockscreenSceneModule::class,
             QuickSettingsSceneModule::class,
             ShadeSceneModule::class,
+            QuickSettingsShadeSceneModule::class,
             NotificationsShadeSceneModule::class,
         ],
 )
@@ -71,7 +72,8 @@ interface SceneContainerFrameworkModule {
                         Scenes.Communal,
                         Scenes.Lockscreen,
                         Scenes.Bouncer,
-                        Scenes.QuickSettings,
+                        Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
+                        Scenes.QuickSettingsShade.takeIf { DualShade.isEnabled },
                         Scenes.NotificationsShade.takeIf { DualShade.isEnabled },
                         Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
@@ -83,7 +85,8 @@ interface SceneContainerFrameworkModule {
                             Scenes.Communal to 1,
                             Scenes.NotificationsShade to 2.takeIf { DualShade.isEnabled },
                             Scenes.Shade to 2.takeUnless { DualShade.isEnabled },
-                            Scenes.QuickSettings to 3,
+                            Scenes.QuickSettingsShade to 3.takeIf { DualShade.isEnabled },
+                            Scenes.QuickSettings to 3.takeUnless { DualShade.isEnabled },
                             Scenes.Bouncer to 4,
                         )
                         .filterValues { it != null }
