@@ -17,8 +17,6 @@
 package com.android.systemui.user.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.user.data.repository.userRepository
 
-val Kosmos.selectedUserInteractor by
-    Kosmos.Fixture { SelectedUserInteractor(applicationCoroutineScope, userRepository) }
+val Kosmos.selectedUserInteractor by Kosmos.Fixture { SelectedUserInteractor(userRepository) }

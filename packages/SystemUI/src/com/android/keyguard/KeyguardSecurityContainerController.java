@@ -35,14 +35,12 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
-import android.app.admin.flags.Flags;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.metrics.LogMaker;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
@@ -99,15 +97,12 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import dagger.Lazy;
 
 import kotlinx.coroutines.Job;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -140,7 +135,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final BouncerMessageInteractor mBouncerMessageInteractor;
     private int mTranslationY;
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
-    private final DevicePolicyManager mDevicePolicyManager;
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
     // the audio service will bring up the volume dialog.
@@ -467,7 +461,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             SelectedUserInteractor selectedUserInteractor,
             DeviceProvisionedController deviceProvisionedController,
             FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
-            DevicePolicyManager devicePolicyManager,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             Lazy<PrimaryBouncerInteractor> primaryBouncerInteractor,
             Provider<DeviceEntryInteractor> deviceEntryInteractor
@@ -503,7 +496,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mDeviceProvisionedController = deviceProvisionedController;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
-        mDevicePolicyManager = devicePolicyManager;
     }
 
     @Override
@@ -1114,36 +1106,35 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
         if (DEBUG) Log.d(TAG, "reportFailedPatternAttempt: #" + failedAttempts);
 
+        final DevicePolicyManager dpm = mLockPatternUtils.getDevicePolicyManager();
         final int failedAttemptsBeforeWipe =
-                mDevicePolicyManager.getMaximumFailedPasswordsForWipe(null, userId);
+                dpm.getMaximumFailedPasswordsForWipe(null, userId);
 
         final int remainingBeforeWipe = failedAttemptsBeforeWipe > 0
                 ? (failedAttemptsBeforeWipe - failedAttempts)
                 : Integer.MAX_VALUE; // because DPM returns 0 if no restriction
         if (remainingBeforeWipe < LockPatternUtils.FAILED_ATTEMPTS_BEFORE_WIPE_GRACE) {
-            // The user has installed a DevicePolicyManager that requests a
-            // user/profile to be wiped N attempts. Once we get below the grace period,
-            // we post this dialog every time as a clear warning until the deletion
-            // fires. Check which profile has the strictest policy for failed password
-            // attempts.
-            final int expiringUser =
-                    mDevicePolicyManager.getProfileWithMinimumFailedPasswordsForWipe(userId);
-            ListenableFuture<Integer> getMainUserIdFuture =
-                    mSelectedUserInteractor.getMainUserIdAsync();
-            getMainUserIdFuture.addListener(() -> {
-                Looper.prepare();
-                Integer mainUser;
-                try {
-                    mainUser = getMainUserIdFuture.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    // Nothing we can, keep using the system user as the primary
-                    // user.
-                    mainUser = null;
+            // The user has installed a DevicePolicyManager that requests a user/profile to be wiped
+            // N attempts. Once we get below the grace period, we post this dialog every time as a
+            // clear warning until the deletion fires.
+            // Check which profile has the strictest policy for failed password attempts
+            final int expiringUser = dpm.getProfileWithMinimumFailedPasswordsForWipe(userId);
+            int userType = USER_TYPE_PRIMARY;
+            if (expiringUser == userId) {
+                // TODO: http://b/23522538
+                if (expiringUser != UserHandle.USER_SYSTEM) {
+                    userType = USER_TYPE_SECONDARY_USER;
                 }
-                showMessageForFailedUnlockAttempt(
-                        userId, expiringUser, mainUser, remainingBeforeWipe, failedAttempts);
-                Looper.loop();
-            }, ThreadUtils.getBackgroundExecutor());
+            } else if (expiringUser != UserHandle.USER_NULL) {
+                userType = USER_TYPE_WORK_PROFILE;
+            } // If USER_NULL, which shouldn't happen, leave it as USER_TYPE_PRIMARY
+            if (remainingBeforeWipe > 0) {
+                mView.showAlmostAtWipeDialog(failedAttempts, remainingBeforeWipe, userType);
+            } else {
+                // Too many attempts. The device will be wiped shortly.
+                Slog.i(TAG, "Too many unlock attempts; user " + expiringUser + " will be wiped!");
+                mView.showWipeDialog(failedAttempts, userType);
+            }
         }
         mLockPatternUtils.reportFailedPasswordAttempt(userId);
         if (timeoutMs > 0) {
@@ -1152,35 +1143,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 mView.showTimeoutDialog(userId, timeoutMs, mLockPatternUtils,
                         mSecurityModel.getSecurityMode(userId));
             }
-        }
-    }
-
-    @VisibleForTesting
-    void showMessageForFailedUnlockAttempt(int userId, int expiringUserId, Integer mainUserId,
-            int remainingBeforeWipe, int failedAttempts) {
-        int userType = USER_TYPE_PRIMARY;
-        if (expiringUserId == userId) {
-            int primaryUser = UserHandle.USER_SYSTEM;
-            if (Flags.headlessSingleUserFixes()) {
-                if (mainUserId != null) {
-                    primaryUser = mainUserId;
-                }
-            }
-            // TODO: http://b/23522538
-            if (expiringUserId != primaryUser) {
-                userType = USER_TYPE_SECONDARY_USER;
-            }
-        } else if (expiringUserId != UserHandle.USER_NULL) {
-            userType = USER_TYPE_WORK_PROFILE;
-        } // If USER_NULL, which shouldn't happen, leave it as USER_TYPE_PRIMARY
-        if (remainingBeforeWipe > 0) {
-            mView.showAlmostAtWipeDialog(failedAttempts, remainingBeforeWipe,
-                    userType);
-        } else {
-            // Too many attempts. The device will be wiped shortly.
-            Slog.i(TAG, "Too many unlock attempts; user " + expiringUserId
-                    + " will be wiped!");
-            mView.showWipeDialog(failedAttempts, userType);
         }
     }
 

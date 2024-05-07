@@ -18,7 +18,6 @@
 package com.android.systemui.user.data.repository
 
 import android.annotation.SuppressLint
-import android.annotation.UserIdInt
 import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
@@ -108,22 +107,6 @@ interface UserRepository {
     fun isSimpleUserSwitcher(): Boolean
 
     fun isUserSwitcherEnabled(): Boolean
-
-    /**
-     * Returns the user ID of the "main user" of the device. This user may have access to certain
-     * features which are limited to at most one user. There will never be more than one main user
-     * on a device.
-     *
-     * <p>Currently, on most form factors the first human user on the device will be the main user;
-     * in the future, the concept may be transferable, so a different user (or even no user at all)
-     * may be designated the main user instead. On other form factors there might not be a main
-     * user.
-     *
-     * <p> When the device doesn't have a main user, this will return {@code null}.
-     *
-     * @see [UserManager.getMainUser]
-     */
-    @UserIdInt suspend fun getMainUserId(): Int?
 }
 
 @SysUISingleton
@@ -254,10 +237,6 @@ constructor(
 
     override fun isUserSwitcherEnabled(): Boolean {
         return _userSwitcherSettings.value.isUserSwitcherEnabled
-    }
-
-    override suspend fun getMainUserId(): Int? {
-        return withContext(backgroundDispatcher) { manager.mainUser?.identifier }
     }
 
     private suspend fun getSettings(): UserSwitcherSettingsModel {

@@ -37,7 +37,7 @@ import kotlinx.coroutines.yield
 class FakeUserRepository @Inject constructor() : UserRepository {
     companion object {
         // User id to represent a non system (human) user id. We presume this is the main user.
-        const val MAIN_USER_ID = 10
+        private const val MAIN_USER_ID = 10
 
         private const val DEFAULT_SELECTED_USER = 0
         private val DEFAULT_SELECTED_USER_INFO =
@@ -83,10 +83,6 @@ class FakeUserRepository @Inject constructor() : UserRepository {
     override var secondaryUserId: Int = UserHandle.USER_NULL
 
     override var isRefreshUsersPaused: Boolean = false
-
-    override suspend fun getMainUserId(): Int? {
-        return MAIN_USER_ID
-    }
 
     var refreshUsersCallCount: Int = 0
         private set
