@@ -887,6 +887,46 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun removeGuestUser_shouldNotShowExitGuestDialog() {
+        createUserInteractor()
+        testScope.runTest {
+            val (userInfo, guestUserInfo) = createUserInfos(count = 2, includeGuest = true)
+            userRepository.setUserInfos(listOf(userInfo, guestUserInfo))
+            userRepository.setSelectedUserInfo(guestUserInfo)
+
+            whenever(manager.markGuestForDeletion(guestUserInfo.id)).thenReturn(true)
+            underTest.removeGuestUser(guestUserInfo.id, userInfo.id)
+            runCurrent()
+
+            verify(manager).markGuestForDeletion(guestUserInfo.id)
+            verify(activityManager).switchUser(userInfo.id)
+            assertThat(collectLastValue(underTest.dialogShowRequests)()).isNull()
+        }
+    }
+
+    @Test
+    fun resetGuestUser_shouldNotShowExitGuestDialog() {
+        createUserInteractor()
+        testScope.runTest {
+            val (userInfo, guestUserInfo) = createUserInfos(count = 2, includeGuest = true)
+            val otherGuestUserInfo = createUserInfos(count = 1, includeGuest = true)[0]
+            userRepository.setUserInfos(listOf(userInfo, guestUserInfo))
+            userRepository.setSelectedUserInfo(guestUserInfo)
+
+            whenever(manager.markGuestForDeletion(guestUserInfo.id)).thenReturn(true)
+            whenever(manager.createGuest(any())).thenReturn(otherGuestUserInfo)
+            underTest.removeGuestUser(guestUserInfo.id, UserHandle.USER_NULL)
+            runCurrent()
+
+            verify(manager).markGuestForDeletion(guestUserInfo.id)
+            verify(manager).createGuest(any())
+            verify(activityManager).switchUser(otherGuestUserInfo.id)
+            assertThat(collectLastValue(underTest.dialogShowRequests)())
+                .isEqualTo(ShowDialogRequestModel.ShowUserCreationDialog(isGuest = true))
+        }
+    }
+
+    @Test
     fun showUserSwitcher_fullScreenDisabled_showsDialogSwitcher() {
         createUserInteractor()
         testScope.runTest {
