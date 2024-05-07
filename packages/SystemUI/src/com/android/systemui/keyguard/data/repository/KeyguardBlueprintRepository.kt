@@ -65,23 +65,43 @@ constructor(
      * @param blueprintId
      * @return whether the transition has succeeded.
      */
+    fun applyBlueprint(index: Int): Boolean {
+        ArrayList(blueprintIdMap.values)[index]?.let {
+            applyBlueprint(it)
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Emits the blueprint value to the collectors.
+     *
+     * @param blueprintId
+     * @return whether the transition has succeeded.
+     */
     fun applyBlueprint(blueprintId: String?): Boolean {
         val blueprint = blueprintIdMap[blueprintId]
-        if (blueprint == null) {
+        return if (blueprint != null) {
+            applyBlueprint(blueprint)
+            true
+        } else {
             Log.e(
                 TAG,
                 "Could not find blueprint with id: $blueprintId. " +
                     "Perhaps it was not added to KeyguardBlueprintModule?"
             )
-            return false
+            false
         }
+    }
 
+    /** Emits the blueprint value to the collectors. */
+    fun applyBlueprint(blueprint: KeyguardBlueprint?) {
         if (blueprint == this.blueprint.value) {
-            return true
+            refreshBlueprint()
+            return
         }
 
-        this.blueprint.value = blueprint
-        return true
+        blueprint?.let { this.blueprint.value = it }
     }
 
     /**
