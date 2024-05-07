@@ -321,6 +321,12 @@ object BiometricViewSizeBinder {
 
                     lifecycleScope.launch {
                         viewModel.guidelineBounds.collect { bounds ->
+                            val bottomInset =
+                                windowManager.maximumWindowMetrics.windowInsets
+                                    .getInsets(WindowInsets.Type.navigationBars())
+                                    .bottom
+                            mediumConstraintSet.setGuidelineEnd(R.id.bottomGuideline, bottomInset)
+
                             if (bounds.left >= 0) {
                                 mediumConstraintSet.setGuidelineBegin(leftGuideline.id, bounds.left)
                                 smallConstraintSet.setGuidelineBegin(leftGuideline.id, bounds.left)
