@@ -310,11 +310,9 @@ constructor(
 
     fun isWeatherEnabled(): Boolean {
        execution.assertIsMainThread()
-       val defaultValue = context.getResources().getBoolean(
-               com.android.internal.R.bool.config_lockscreenWeatherEnabledByDefault)
        val showWeather = secureSettings.getIntForUser(
            LOCK_SCREEN_WEATHER_ENABLED,
-           if (defaultValue) 1 else 0,
+           1,
            userTracker.userId) == 1
        return showWeather
     }
