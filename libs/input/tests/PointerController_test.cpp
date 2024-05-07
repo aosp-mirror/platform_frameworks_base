@@ -372,6 +372,45 @@ TEST_F(PointerControllerTest, notifiesPolicyWhenPointerDisplayChanges) {
             << "The pointer display changes to invalid when PointerController is destroyed.";
 }
 
+TEST_F(PointerControllerTest, updatesSkipScreenshotFlagForTouchSpots) {
+    ensureDisplayViewportIsSet();
+
+    PointerCoords testSpotCoords;
+    testSpotCoords.clear();
+    testSpotCoords.setAxisValue(AMOTION_EVENT_AXIS_X, 1);
+    testSpotCoords.setAxisValue(AMOTION_EVENT_AXIS_Y, 1);
+    BitSet32 testIdBits;
+    testIdBits.markBit(0);
+    std::array<uint32_t, MAX_POINTER_ID + 1> testIdToIndex;
+
+    sp<MockSprite> testSpotSprite(new NiceMock<MockSprite>);
+
+    // By default sprite is not marked secure
+    EXPECT_CALL(*mSpriteController, createSprite).WillOnce(Return(testSpotSprite));
+    EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(false));
+
+    // Update spots to sync state with sprite
+    mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
+                                 ADISPLAY_ID_DEFAULT);
+    testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
+
+    // Marking the display to skip screenshot should update sprite as well
+    mPointerController->setSkipScreenshot(ADISPLAY_ID_DEFAULT, true);
+    EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(true));
+
+    // Update spots to sync state with sprite
+    mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
+                                 ADISPLAY_ID_DEFAULT);
+    testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
+
+    // Reset flag and verify again
+    mPointerController->setSkipScreenshot(ADISPLAY_ID_DEFAULT, false);
+    EXPECT_CALL(*testSpotSprite, setSkipScreenshot).With(testing::Args<0>(false));
+    mPointerController->setSpots(&testSpotCoords, testIdToIndex.cbegin(), testIdBits,
+                                 ADISPLAY_ID_DEFAULT);
+    testing::Mock::VerifyAndClearExpectations(testSpotSprite.get());
+}
+
 class PointerControllerWindowInfoListenerTest : public Test {};
 
 TEST_F(PointerControllerWindowInfoListenerTest,

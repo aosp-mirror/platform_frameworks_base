@@ -96,6 +96,10 @@ public:
 
     /* Sets the id of the display where the sprite should be shown. */
     virtual void setDisplayId(int32_t displayId) = 0;
+
+    /* Sets the flag to hide sprite on mirrored displays.
+     * This will add ISurfaceComposerClient::eSkipScreenshot flag to the sprite. */
+    virtual void setSkipScreenshot(bool skip) = 0;
 };
 
 /*
@@ -152,6 +156,7 @@ private:
         DIRTY_DISPLAY_ID = 1 << 7,
         DIRTY_ICON_STYLE = 1 << 8,
         DIRTY_DRAW_DROP_SHADOW = 1 << 9,
+        DIRTY_SKIP_SCREENSHOT = 1 << 10,
     };
 
     /* Describes the state of a sprite.
@@ -182,6 +187,7 @@ private:
         int32_t surfaceHeight;
         bool surfaceDrawn;
         bool surfaceVisible;
+        bool skipScreenshot;
 
         inline bool wantSurfaceVisible() const {
             return visible && alpha > 0.0f && icon.isValid();
@@ -209,6 +215,7 @@ private:
         virtual void setAlpha(float alpha);
         virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix);
         virtual void setDisplayId(int32_t displayId);
+        virtual void setSkipScreenshot(bool skip);
 
         inline const SpriteState& getStateLocked() const {
             return mLocked.state;
@@ -272,7 +279,8 @@ private:
     void doDisposeSurfaces();
 
     void ensureSurfaceComposerClient();
-    sp<SurfaceControl> obtainSurface(int32_t width, int32_t height, int32_t displayId);
+    sp<SurfaceControl> obtainSurface(int32_t width, int32_t height, int32_t displayId,
+                                     bool hideOnMirrored);
 };
 
 } // namespace android

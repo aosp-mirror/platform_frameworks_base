@@ -32,7 +32,7 @@ public:
     TouchSpotController(int32_t displayId, PointerControllerContext& context);
     ~TouchSpotController();
     void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
-                  BitSet32 spotIdBits);
+                  BitSet32 spotIdBits, bool skipScreenshot);
     void clearSpots();
 
     void reloadSpotResources();
@@ -59,7 +59,8 @@ private:
                 y(0.0f),
                 mLastIcon(nullptr) {}
 
-        void updateSprite(const SpriteIcon* icon, float x, float y, int32_t displayId);
+        void updateSprite(const SpriteIcon* icon, float x, float y, int32_t displayId,
+                          bool skipScreenshot);
         void dump(std::string& out, const char* prefix = "") const;
 
     private:
