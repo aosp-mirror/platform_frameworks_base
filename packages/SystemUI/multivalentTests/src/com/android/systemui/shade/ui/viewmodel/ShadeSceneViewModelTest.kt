@@ -39,6 +39,7 @@ import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.GoneToSplitShade
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModel
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -156,6 +157,27 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
             assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.toScene)
                 .isEqualTo(Scenes.Gone)
+        }
+
+    @Test
+    fun upTransitionKey_splitShadeEnabled_isGoneToSplitShade() =
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            shadeRepository.setShadeMode(ShadeMode.Split)
+            runCurrent()
+
+            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.transitionKey)
+                .isEqualTo(GoneToSplitShade)
+        }
+
+    @Test
+    fun upTransitionKey_splitShadeDisabled_isNull() =
+        testScope.runTest {
+            val destinationScenes by collectLastValue(underTest.destinationScenes)
+            shadeRepository.setShadeMode(ShadeMode.Single)
+            runCurrent()
+
+            assertThat(destinationScenes?.get(Swipe(SwipeDirection.Up))?.transitionKey).isNull()
         }
 
     @Test

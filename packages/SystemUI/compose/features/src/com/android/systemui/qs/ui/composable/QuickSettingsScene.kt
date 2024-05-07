@@ -316,7 +316,6 @@ private fun SceneScope.QuickSettingsScene(
                                 createTintedIconManager = createTintedIconManager,
                                 createBatteryMeterViewController = createBatteryMeterViewController,
                                 statusBarIconController = statusBarIconController,
-                                modifier = Modifier.padding(horizontal = 16.dp),
                             )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
