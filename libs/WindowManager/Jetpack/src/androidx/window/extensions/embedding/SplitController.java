@@ -3137,11 +3137,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private static EmbeddedActivityWindowInfo translateActivityWindowInfo(
             @NonNull Activity activity, @NonNull ActivityWindowInfo activityWindowInfo) {
         final boolean isEmbedded = activityWindowInfo.isEmbedded();
-        final Rect activityBounds = new Rect(activity.getResources().getConfiguration()
-                .windowConfiguration.getBounds());
         final Rect taskBounds = new Rect(activityWindowInfo.getTaskBounds());
         final Rect activityStackBounds = new Rect(activityWindowInfo.getTaskFragmentBounds());
-        return new EmbeddedActivityWindowInfo(activity, isEmbedded, activityBounds, taskBounds,
+        return new EmbeddedActivityWindowInfo(activity, isEmbedded, taskBounds,
                 activityStackBounds);
     }
 
