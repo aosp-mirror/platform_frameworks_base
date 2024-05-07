@@ -74,6 +74,9 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.res.R
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.shared.system.SysUiStatsLog.SMARTSPACE_CARD_REPORTED
 import com.android.systemui.shared.system.SysUiStatsLog.SMART_SPACE_CARD_REPORTED__CARD_TYPE__UNKNOWN_CARD
@@ -143,6 +146,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val mediaCarouselViewModel: MediaCarouselViewModel,
     private val mediaViewControllerFactory: Provider<MediaViewController>,
+    private val sceneInteractor: SceneInteractor,
 ) : Dumpable {
     /** The current width of the carousel */
     var currentCarouselWidth: Int = 0
@@ -641,9 +645,13 @@ constructor(
     @VisibleForTesting
     internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor
-                .transition(Edge.create(to = GONE))
-                .filter { it.transitionState == TransitionState.FINISHED }
+            if (SceneContainerFlag.isEnabled) {
+                    sceneInteractor.transitionState.filter { it.isIdle(Scenes.Gone) }
+                } else {
+                    keyguardTransitionInteractor.transition(Edge.create(to = GONE)).filter {
+                        it.transitionState == TransitionState.FINISHED
+                    }
+                }
                 .collect {
                     showMediaCarousel()
                     updateHostVisibility()

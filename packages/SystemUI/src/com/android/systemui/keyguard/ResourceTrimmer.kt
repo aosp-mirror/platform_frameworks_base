@@ -33,12 +33,16 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.utils.GlobalWindowManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -60,6 +64,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val featureFlags: FeatureFlags,
+    private val sceneInteractor: SceneInteractor,
 ) : CoreStartable, WakefulnessLifecycle.Observer {
 
     override fun start() {
@@ -85,9 +90,15 @@ constructor(
 
         applicationScope.launch(bgDispatcher) {
             // We drop 1 to avoid triggering on initial collect().
-            keyguardTransitionInteractor.transition(Edge.create(to = GONE)).collect { transition ->
-                if (transition.transitionState == TransitionState.FINISHED) {
-                    onKeyguardGone()
+            if (SceneContainerFlag.isEnabled) {
+                sceneInteractor.transitionState
+                    .filter { it.isIdle(Scenes.Gone) }
+                    .collect { onKeyguardGone() }
+            } else {
+                keyguardTransitionInteractor.transition(Edge.create(to = GONE)).collect {
+                    if (it.transitionState == TransitionState.FINISHED) {
+                        onKeyguardGone()
+                    }
                 }
             }
         }
