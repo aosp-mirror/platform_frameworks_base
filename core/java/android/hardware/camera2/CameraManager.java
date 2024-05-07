@@ -838,7 +838,10 @@ public final class CameraManager {
         return new CameraExtensionCharacteristics(mContext, cameraId, characteristicsMap);
     }
 
-    private Map<String, CameraCharacteristics> getPhysicalIdToCharsMap(
+    /**
+     * @hide
+     */
+    public Map<String, CameraCharacteristics> getPhysicalIdToCharsMap(
             CameraCharacteristics chars) throws CameraAccessException {
         HashMap<String, CameraCharacteristics> physicalIdsToChars =
                 new HashMap<String, CameraCharacteristics>();
@@ -974,8 +977,6 @@ public final class CameraManager {
             final int oomScoreOffset, int rotationOverride) throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
-        Map<String, CameraCharacteristics> physicalIdsToChars =
-                getPhysicalIdToCharsMap(characteristics);
         synchronized (mLock) {
             ICameraDeviceUser cameraUser = null;
             CameraDevice.CameraDeviceSetup cameraDeviceSetup = null;
@@ -990,7 +991,7 @@ public final class CameraManager {
                         callback,
                         executor,
                         characteristics,
-                        physicalIdsToChars,
+                        this,
                         mContext.getApplicationInfo().targetSdkVersion,
                         mContext, cameraDeviceSetup);
             ICameraDeviceCallbacks callbacks = deviceImpl.getCallbacks();
