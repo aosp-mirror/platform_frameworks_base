@@ -16,6 +16,38 @@ filegroup {
     visibility: ["//visibility:public"],
 }
 
+filegroup {
+    name: "ravenwood-services-policies",
+    srcs: [
+        "texts/ravenwood-services-policies.txt",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+filegroup {
+    name: "ravenwood-framework-policies",
+    srcs: [
+        "texts/ravenwood-framework-policies.txt",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+filegroup {
+    name: "ravenwood-standard-options",
+    srcs: [
+        "texts/ravenwood-standard-options.txt",
+    ],
+    visibility: ["//visibility:public"],
+}
+
+filegroup {
+    name: "ravenwood-annotation-allowed-classes",
+    srcs: [
+        "texts/ravenwood-annotation-allowed-classes.txt",
+    ],
+    visibility: ["//visibility:public"],
+}
+
 java_library {
     name: "ravenwood-annotations-lib",
     srcs: [":ravenwood-annotations"],
