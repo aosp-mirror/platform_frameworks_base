@@ -19,11 +19,12 @@ package com.android.wm.shell.freeform;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 
@@ -72,8 +73,10 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     public void setup() {
         mMockitoSession = mockitoSession().initMocks(this)
                 .strictness(Strictness.LENIENT).mockStatic(DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(true);
+        doReturn(true).when(() -> DesktopModeStatus.canEnterDesktopMode(any()));
+
         mFreeformTaskListener = new FreeformTaskListener(
+                mContext,
                 mShellInit,
                 mTaskOrganizer,
                 Optional.of(mDesktopModeTaskRepository),

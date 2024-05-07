@@ -276,7 +276,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             public void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {
                 if (visible && stage != STAGE_TYPE_UNDEFINED) {
                     DesktopModeWindowDecoration decor = mWindowDecorByTaskId.get(taskId);
-                    if (decor != null && DesktopModeStatus.isEnabled()) {
+                    if (decor != null && DesktopModeStatus.canEnterDesktopMode(mContext)) {
                         mDesktopTasksController.moveToSplit(decor.mTaskInfo);
                     }
                 }
@@ -594,7 +594,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         public boolean handleMotionEvent(@Nullable View v, MotionEvent e) {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final RunningTaskInfo taskInfo = decoration.mTaskInfo;
-            if (DesktopModeStatus.isEnabled()
+            if (DesktopModeStatus.canEnterDesktopMode(mContext)
                     && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
                 return false;
             }
@@ -771,7 +771,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
      */
     private void handleReceivedMotionEvent(MotionEvent ev, InputMonitor inputMonitor) {
         final DesktopModeWindowDecoration relevantDecor = getRelevantWindowDecor(ev);
-        if (DesktopModeStatus.isEnabled()) {
+        if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             if (!mInImmersiveMode && (relevantDecor == null
                     || relevantDecor.mTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM
                     || mTransitionDragActive)) {
@@ -780,7 +780,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
         handleEventOutsideCaption(ev, relevantDecor);
         // Prevent status bar from reacting to a caption drag.
-        if (DesktopModeStatus.isEnabled()) {
+        if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             if (mTransitionDragActive) {
                 inputMonitor.pilferPointers();
             }
@@ -838,7 +838,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mDragToDesktopAnimationStartBounds.set(
                         relevantDecor.mTaskInfo.configuration.windowConfiguration.getBounds());
                 boolean dragFromStatusBarAllowed = false;
-                if (DesktopModeStatus.isEnabled()) {
+                if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
                     // In proto2 any full screen or multi-window task can be dragged to
                     // freeform.
                     final int windowingMode = relevantDecor.mTaskInfo.getWindowingMode();
@@ -1013,12 +1013,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && isSingleTopActivityTranslucent(taskInfo)) {
             return false;
         }
-        return DesktopModeStatus.isEnabled()
+        return DesktopModeStatus.canEnterDesktopMode(mContext)
                 && !DesktopWallpaperActivity.isWallpaperTask(taskInfo)
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
-                && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop()
-                && DesktopModeStatus.canEnterDesktopMode(mContext);
+                && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop();
     }
 
     private void createWindowDecoration(
@@ -1087,7 +1086,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + "DesktopModeWindowDecorViewModel");
-        pw.println(innerPrefix + "DesktopModeStatus=" + DesktopModeStatus.isEnabled());
+        pw.println(innerPrefix + "DesktopModeStatus="
+                + DesktopModeStatus.canEnterDesktopMode(mContext));
         pw.println(innerPrefix + "mTransitionDragActive=" + mTransitionDragActive);
         pw.println(innerPrefix + "mEventReceiversByDisplay=" + mEventReceiversByDisplay);
         pw.println(innerPrefix + "mWindowDecorByTaskId=" + mWindowDecorByTaskId);

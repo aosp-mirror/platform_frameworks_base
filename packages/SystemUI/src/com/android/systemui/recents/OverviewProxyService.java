@@ -699,7 +699,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             public void moveFocusedTaskToStageSplit(int displayId, boolean leftOrTop) {
                 if (mOverviewProxy != null) {
                     try {
-                        if (DesktopModeStatus.isEnabled() && (sysUiState.getFlags()
+                        if (DesktopModeStatus.canEnterDesktopMode(mContext)
+                                && (sysUiState.getFlags()
                                 & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0) {
                             return;
                         }

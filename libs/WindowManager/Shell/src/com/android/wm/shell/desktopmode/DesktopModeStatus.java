@@ -93,8 +93,10 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_max_task_limit", DEFAULT_MAX_TASK_LIMIT);
 
     /**
-     * Return {@code true} if desktop windowing is enabled
+     * Return {@code true} if desktop windowing is enabled. Only to be used for testing. Callers
+     * should use {@link #canEnterDesktopMode(Context)} to query the state of desktop windowing.
      */
+    @VisibleForTesting
     public static boolean isEnabled() {
         return Flags.enableDesktopWindowingMode();
     }
@@ -155,9 +157,9 @@ public class DesktopModeStatus {
     }
 
     /**
-     * Return {@code true} if desktop mode can be entered on the current device.
+     * Return {@code true} if desktop mode is enabled and can be entered on the current device.
      */
     public static boolean canEnterDesktopMode(@NonNull Context context) {
-        return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
+        return (!enforceDeviceRestrictions() || isDesktopModeSupported(context)) && isEnabled();
     }
 }
