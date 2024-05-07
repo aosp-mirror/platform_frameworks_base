@@ -26,10 +26,10 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.notifications.ui.viewmodel.NotificationsShadeSceneViewModel
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.composable.OverlayShade
-import com.android.systemui.shade.ui.viewmodel.NotificationsShadeSceneViewModel
 import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow

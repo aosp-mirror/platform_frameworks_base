@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.ui.viewmodel
+package com.android.systemui.notifications.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.SceneKey
@@ -23,6 +23,7 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted

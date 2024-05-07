@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.ui.viewmodel
+package com.android.systemui.notifications.ui.viewmodel
 
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticati
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ui.viewmodel.notificationsShadeSceneViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
