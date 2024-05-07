@@ -1493,10 +1493,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mCredentialAutofillService = getCredentialAutofillService(context);
 
-        ComponentName primaryServiceComponentName, secondaryServiceComponentName;
+        ComponentName primaryServiceComponentName, secondaryServiceComponentName = null;
         if (isPrimaryCredential) {
             primaryServiceComponentName = mCredentialAutofillService;
-            secondaryServiceComponentName = serviceComponentName;
+            if (serviceComponentName != null
+                    && !serviceComponentName.equals(mCredentialAutofillService)) {
+                // if service component name is credential autofill service, no need to initialize
+                // secondary provider. This happens if the user sets non-autofill provider as
+                // password provider.
+                secondaryServiceComponentName = serviceComponentName;
+            }
         } else {
             primaryServiceComponentName = serviceComponentName;
             secondaryServiceComponentName = mCredentialAutofillService;
