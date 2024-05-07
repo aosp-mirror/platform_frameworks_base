@@ -38,6 +38,8 @@ import android.window.OnBackAnimationCallback;
 
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 
+import java.io.PrintWriter;
+
 /**
  * Controller for IME predictive back animation
  *
@@ -269,6 +271,26 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     private boolean isHideAnimationInProgress() {
         return mPostCommitAnimator != null && mTriggerBack;
+    }
+
+    /**
+     * Dump information about this ImeBackAnimationController
+     *
+     * @param prefix the prefix that will be prepended to each line of the produced output
+     * @param writer the writer that will receive the resulting text
+     */
+    public void dump(String prefix, PrintWriter writer) {
+        final String innerPrefix = prefix + "    ";
+        writer.println(prefix + "ImeBackAnimationController:");
+        writer.println(innerPrefix + "mLastProgress=" + mLastProgress);
+        writer.println(innerPrefix + "mTriggerBack=" + mTriggerBack);
+        writer.println(innerPrefix + "mIsPreCommitAnimationInProgress="
+                + mIsPreCommitAnimationInProgress);
+        writer.println(innerPrefix + "mStartRootScrollY=" + mStartRootScrollY);
+        writer.println(innerPrefix + "isBackAnimationAllowed=" + isBackAnimationAllowed());
+        writer.println(innerPrefix + "isAdjustPan=" + isAdjustPan());
+        writer.println(innerPrefix + "isHideAnimationInProgress="
+                + isHideAnimationInProgress());
     }
 
 }

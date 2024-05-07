@@ -9579,6 +9579,8 @@ public final class ViewRootImpl implements ViewParent,
 
         mOnBackInvokedDispatcher.dump(prefix, writer);
 
+        mImeBackAnimationController.dump(prefix, writer);
+
         writer.println(prefix + "View Hierarchy:");
         dumpViewHierarchy(innerPrefix, writer, mView);
     }
