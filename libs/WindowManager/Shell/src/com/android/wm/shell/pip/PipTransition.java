@@ -643,6 +643,7 @@ public class PipTransition extends PipTransitionController {
                     .setContainerLayer()
                     .setHidden(false)
                     .setParent(root.getLeash())
+                    .setCallsite("PipTransition.startExitAnimation")
                     .build();
             startTransaction.reparent(activitySurface, pipLeash);
             // Put the activity at local position with offset in case it is letterboxed.

@@ -280,6 +280,7 @@ public class TransitionAnimationHelper {
                 .setParent(rootLeash)
                 .setColorLayer()
                 .setOpaque(true)
+                .setCallsite("TransitionAnimationHelper.addBackgroundToTransition")
                 .build();
         startTransaction
                 .setLayer(animationBackgroundSurface, Integer.MIN_VALUE)
