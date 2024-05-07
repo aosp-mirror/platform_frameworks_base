@@ -18,7 +18,6 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.admin.PolicyKey;
 import android.app.admin.PolicyValue;
 import android.app.admin.StringSetPolicyValue;
 import android.util.Log;
@@ -35,8 +34,7 @@ final class StringSetPolicySerializer extends PolicySerializer<Set<String>> {
     private static final String ATTR_VALUES = "strings";
     private static final String ATTR_VALUES_SEPARATOR = ";";
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
-            @NonNull Set<String> value) throws IOException {
+    void saveToXml(TypedXmlSerializer serializer, @NonNull Set<String> value) throws IOException {
         Objects.requireNonNull(value);
         serializer.attribute(
                 /* namespace= */ null, ATTR_VALUES, String.join(ATTR_VALUES_SEPARATOR, value));
