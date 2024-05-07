@@ -5,7 +5,6 @@ import com.android.compose.animation.scene.transitions
 import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
@@ -39,20 +38,6 @@ val SceneContainerTransitions = transitions {
     from(
         Scenes.Gone,
         to = Scenes.Shade,
-        key = CollapseShadeInstantly,
-    ) {
-        goneToShadeTransition(durationScale = 0.0)
-    }
-    from(
-        Scenes.Gone,
-        to = Scenes.QuickSettings,
-        key = CollapseShadeInstantly,
-    ) {
-        goneToQuickSettingsTransition(durationScale = 0.0)
-    }
-    from(
-        Scenes.Gone,
-        to = Scenes.Shade,
         key = SlightlyFasterShadeCollapse,
     ) {
         goneToShadeTransition(durationScale = 0.9)
@@ -61,13 +46,6 @@ val SceneContainerTransitions = transitions {
     from(Scenes.Lockscreen, to = Scenes.Bouncer) { lockscreenToBouncerTransition() }
     from(Scenes.Lockscreen, to = Scenes.Communal) { lockscreenToCommunalTransition() }
     from(Scenes.Lockscreen, to = Scenes.Shade) { lockscreenToShadeTransition() }
-    from(
-        Scenes.Lockscreen,
-        to = Scenes.Shade,
-        key = CollapseShadeInstantly,
-    ) {
-        lockscreenToShadeTransition(durationScale = 0.0)
-    }
     from(
         Scenes.Lockscreen,
         to = Scenes.Shade,
