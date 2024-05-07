@@ -61,6 +61,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -654,7 +655,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
             var notificationCount = 10
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> notificationCount }
             val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
-
+            advanceTimeBy(50L)
             showLockscreen()
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
@@ -668,12 +669,14 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
             // Also updates when directly requested (as it would from NotificationStackScrollLayout)
             notificationCount = 25
             sharedNotificationContainerInteractor.notificationStackChanged()
+            advanceTimeBy(50L)
             assertThat(maxNotifications).isEqualTo(25)
 
             // Also ensure another collection starts with the same value. As an example, folding
             // then unfolding will restart the coroutine and it must get the last value immediately.
             val newMaxNotifications by
                 collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            advanceTimeBy(50L)
             assertThat(newMaxNotifications).isEqualTo(25)
         }
 
@@ -683,7 +686,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
             var notificationCount = 10
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> notificationCount }
             val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
-
+            advanceTimeBy(50L)
             showLockscreen()
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
@@ -718,6 +721,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
         testScope.runTest {
             val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> 10 }
             val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
+            advanceTimeBy(50L)
 
             // Show lockscreen with shade expanded
             showLockscreenWithShadeExpanded()
