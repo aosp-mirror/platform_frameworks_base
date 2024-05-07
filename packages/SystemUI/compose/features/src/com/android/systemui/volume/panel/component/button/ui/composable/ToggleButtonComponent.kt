@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.component.button.ui.composable
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -91,7 +92,8 @@ class ToggleButtonComponent(
                         },
                     onClick = { onCheckedChange(!viewModel.isActive) },
                     shape = RoundedCornerShape(28.dp),
-                    colors = colors
+                    colors = colors,
+                    contentPadding = PaddingValues(0.dp)
                 ) {
                     Icon(modifier = Modifier.size(24.dp), icon = viewModel.icon)
                 }
