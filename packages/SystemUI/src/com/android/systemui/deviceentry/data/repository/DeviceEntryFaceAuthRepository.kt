@@ -517,9 +517,12 @@ constructor(
 
     private fun onFaceAuthRequestCompleted() {
         cancelNotReceivedHandlerJob?.cancel()
-        cancellationInProgress.value = false
         _isAuthRunning.value = false
         authCancellationSignal = null
+        // Updates to "cancellationInProgress" may re-trigger face auth
+        // (see processPendingAuthRequests()), so we must update this after setting _isAuthRunning
+        // to false.
+        cancellationInProgress.value = false
     }
 
     private val detectionCallback =

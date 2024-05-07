@@ -1070,6 +1070,25 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             faceAuthenticateIsCalled()
         }
 
+    @Test
+    fun retryFaceAuthAfterCancel() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+            val isAuthRunning by collectLastValue(underTest.isAuthRunning)
+
+            underTest.requestAuthenticate(FaceAuthUiEvent.FACE_AUTH_CAMERA_AVAILABLE_CHANGED)
+            underTest.cancel()
+            clearInvocations(faceManager)
+            underTest.requestAuthenticate(FaceAuthUiEvent.FACE_AUTH_CAMERA_AVAILABLE_CHANGED)
+
+            advanceTimeBy(DeviceEntryFaceAuthRepositoryImpl.DEFAULT_CANCEL_SIGNAL_TIMEOUT)
+            runCurrent()
+
+            assertThat(isAuthRunning).isEqualTo(true)
+            faceAuthenticateIsCalled()
+        }
+
     private suspend fun TestScope.testGatingCheckForFaceAuth(
         gatingCheckModifier: suspend () -> Unit
     ) {
