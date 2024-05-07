@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelit, sambungan yang lemah"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, sambungan yang baik"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, sambungan tersedia"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS via Satelit"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil kerja"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Menarik untuk sesetengah orang tetapi bukan untuk semua"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Penala UI Sistem memberi anda cara tambahan untuk mengolah dan menyesuaikan antara muka Android. Ciri eksperimen ini boleh berubah, rosak atau hilang dalam keluaran masa hadapan. Teruskan dengan berhati-hati."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu kuasa"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Halaman <xliff:g id="ID_1">%1$d</xliff:g> daripada <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Kunci skrin"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Anda boleh mengesan telefon ini dengan Find My Device walaupun apabila telefon ini dimatikan kuasa"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Mematikan…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Lihat langkah penjagaan"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Lihat langkah penjagaan"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Cabut palam peranti anda"</string>

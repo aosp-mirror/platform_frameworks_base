@@ -563,9 +563,9 @@
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ne, hvala"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplikacija je prikvačena"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplikacija je otkvačena"</string>
-    <string name="stream_voice_call" msgid="7468348170702375660">"Nazovi"</string>
+    <string name="stream_voice_call" msgid="7468348170702375660">"Poziv"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sustav"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Zvoni"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Zvonjenje"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mediji"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarm"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Obavijest"</string>
@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelit, slaba veza"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, dobra veza"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, veza je dostupna"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS putem satelita"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Poslovni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Ugađanje korisničkog sučelja sustava pruža vam dodatne načine za prilagodbu korisničkog sučelja Androida. Te se eksperimentalne značajke mogu promijeniti, prekinuti ili nestati u budućim izdanjima. Nastavite uz oprez."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Izbornik tipke za uključivanje/isključivanje"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključani zaslon"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Telefon možete pronaći pomoću usluge Pronađi moj uređaj čak i kada je isključen"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Isključivanje…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Pročitajte upute za održavanje"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pročitajte upute za održavanje"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Iskopčajte uređaj"</string>

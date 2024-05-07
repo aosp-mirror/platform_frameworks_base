@@ -269,7 +269,7 @@
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"သိမ်းထားသည်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ချိတ်ဆက်မှုဖြုတ်ရန်"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"စသုံးရန်"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"မနက်ဖြန် အလိုအလျောက် ထပ်ဖွင့်ရန်"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"မနက်ဖြန် အလိုအလျောက် ပြန်ဖွင့်ရန်"</string>
     <string name="turn_on_bluetooth_auto_info" msgid="8831410009251539988">"‘အမြန် မျှဝေပါ’၊ Find My Device နှင့် စက်ပစ္စည်းတည်နေရာကဲ့သို့ တူးလ်များသည် ဘလူးတုသ်သုံးသည်"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ဘက်ထရီ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"အသံ"</string>
@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"ဂြိုဟ်တု၊ ချိတ်ဆက်မှု မကောင်းပါ"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"ဂြိုဟ်တု၊ ချိတ်ဆက်မှု ကောင်းသည်"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ဂြိုဟ်တု၊ ချိတ်ဆက်မှု ရနိုင်သည်"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"အလုပ် ပရိုဖိုင်"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"အချို့သူများ အတွက် ပျော်စရာ ဖြစ်ပေမဲ့ အားလုံး အတွက် မဟုတ်ပါ"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"စနစ် UI Tuner က သင့်အတွက် Android အသုံးပြုသူ အင်တာဖေ့စ်ကို ပြောင်းရန်နှင့် စိတ်ကြိုက်ပြုလုပ်ရန် နည်းလမ်း အပိုများကို သင့်အတွက် စီစဉ်ပေးသည်။ အနာဂတ်ဗားရှင်းများတွင် ဤစမ်းသပ်အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ပျက်စီး သို့မဟုတ် ပျောက်ကွယ်သွားနိုင်သည်။ သတိဖြင့် ရှေ့ဆက်ပါ။"</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ပါဝါမီနူး"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်မျက်နှာပြင်"</string>
-    <string name="finder_active" msgid="7907846989716941952">"ပါဝါပိတ်ထားသော်လည်း Find My Device ဖြင့် ဤဖုန်းကို ရှာနိုင်သည်"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"စက်ပိတ်နေသည်…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"သင့်စက်ကို ပလတ်ဖြုတ်ပါ"</string>

@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"위성, 연결 상태 나쁨"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"위성, 연결 상태 양호"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"위성, 연결 가능"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"위성 긴급 SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"직장 프로필"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"마음에 들지 않을 수도 있음"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"시스템 UI 튜너를 사용하면 Android 사용자 인터페이스를 변경 및 맞춤설정할 수 있습니다. 이러한 실험실 기능은 향후 출시 버전에서는 변경되거나 다운되거나 사라질 수 있습니다. 신중하게 진행하시기 바랍니다."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"전원 메뉴"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>페이지 중 <xliff:g id="ID_1">%1$d</xliff:g>페이지"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"잠금 화면"</string>
-    <string name="finder_active" msgid="7907846989716941952">"전원이 꺼져 있을 때도 내 기기 찾기로 이 휴대전화를 찾을 수 있습니다."</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"종료 중…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"해결 방법 확인하기"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"해결 방법 확인하기"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"기기 분리하기"</string>

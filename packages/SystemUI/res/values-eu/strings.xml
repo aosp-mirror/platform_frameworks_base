@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelitea, konexio ahula"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelitea, konexio ona"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelitea, konexioa erabilgarri"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satelite bidezko SOS komunikazioa"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Laneko profila"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistemaren erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
@@ -732,8 +733,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Egin atzera"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Joan orri nagusira"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Ikusi azkenaldiko aplikazioak"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Ikusi azken aplikazioak banan-banan (aurrerantz)"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Ikusi azken aplikazioak banan-banan (atzerantz)"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Ikusi azkenaldiko aplikazioak banan-banan (aurrerantz)"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Ikusi azkenaldiko aplikazioak banan-banan (atzerantz)"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ireki aplikazioen zerrenda"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ireki ezarpenak"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Ireki Laguntzailea"</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Itzaltzeko menua"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g> orria"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Pantaila blokeatua"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Itzalita badago ere aurki dezakezu telefonoa Bilatu nire gailua erabilita"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Itzaltzen…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ikusi zaintzeko urratsak"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ikusi zaintzeko urratsak"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Deskonektatu gailua"</string>

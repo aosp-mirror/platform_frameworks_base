@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Isathelayithi, uxhumano olungalungile"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Isethelayithi, uxhumano oluhle"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Isethelayithi, uxhumano luyatholakala"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Isethelayithi yokuxhumana ngezimo eziphuthumayo"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Iphrofayela yomsebenzi"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Kuyajabulisa kwabanye kodwa hhayi bonke"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Isishuni se-UI sesistimu sikunika izindlela ezingeziwe zokuhlobisa nokwenza ngezifiso isixhumanisi sokubona se-Android. Lezi zici zesilingo zingashintsha, zephuke, noma zinyamalale ekukhishweni kwangakusasa. Qhubeka ngokuqaphela."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Imenyu yamandla"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Ikhasi <xliff:g id="ID_1">%1$d</xliff:g> kwangu-<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Khiya isikrini"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Ungabeka le foni ngokuthi Thola Ifoni Yami ngisho noma ivaliwe"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Iyacisha…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Bona izinyathelo zokunakekelwa"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Bona izinyathelo zokunakekelwa"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Khipha idivayisi yakho"</string>

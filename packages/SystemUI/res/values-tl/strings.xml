@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satellite, mahina ang koneksyon"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellite, malakas ang koneksyon"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellite, may koneksyon"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profile sa trabaho"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Masaya para sa ilan ngunit hindi para sa lahat"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Nagbibigay sa iyo ang Tuner ng System UI ng mga karagdagang paraan upang baguhin at i-customize ang user interface ng Android. Ang mga pang-eksperimentong feature na ito ay maaaring magbago, masira o mawala sa mga pagpapalabas sa hinaharap. Magpatuloy nang may pag-iingat."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Power menu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> ng <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lock screen"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Puwede mong hanapin ang teleponong ito gamit ang Hanapin ang Aking Device kahit kapag naka-off ito"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Nagsa-shut down…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Bunutin sa saksakan ang device"</string>
