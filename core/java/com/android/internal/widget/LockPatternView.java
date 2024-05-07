@@ -886,9 +886,16 @@ public class LockPatternView extends View {
             cellState.activationAnimator.cancel();
         }
         AnimatorSet animatorSet = new AnimatorSet();
+
+        // When running the line end animation (see doc for createLineEndAnimation), if cell is in:
+        // - activate state - use finger position at the time of hit detection
+        // - deactivate state - use current position where the end was last during initial animation
+        // Note that deactivate state will only come if mKeepDotActivated is themed true.
+        final float startX = activate == CELL_ACTIVATE ? mInProgressX : cellState.lineEndX;
+        final float startY = activate == CELL_ACTIVATE ? mInProgressY : cellState.lineEndY;
         AnimatorSet.Builder animatorSetBuilder = animatorSet
                 .play(createLineDisappearingAnimation())
-                .with(createLineEndAnimation(cellState, mInProgressX, mInProgressY,
+                .with(createLineEndAnimation(cellState, startX, startY,
                         getCenterXForColumn(cell.column), getCenterYForRow(cell.row)));
         if (mDotSize != mDotSizeActivated) {
             animatorSetBuilder.with(createDotRadiusAnimation(cellState));
