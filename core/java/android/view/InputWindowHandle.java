@@ -67,7 +67,7 @@ public final class InputWindowHandle {
             InputConfig.SPY,
             InputConfig.INTERCEPTS_STYLUS,
             InputConfig.CLONE,
-            InputConfig.SENSITIVE_FOR_TRACING,
+            InputConfig.SENSITIVE_FOR_PRIVACY,
     })
     public @interface InputConfigFlags {}
 

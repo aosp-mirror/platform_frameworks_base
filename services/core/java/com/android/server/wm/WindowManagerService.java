@@ -69,7 +69,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -9311,11 +9311,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        // You can only use INPUT_FEATURE_SENSITIVE_FOR_TRACING on a trusted overlay.
-        if ((inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_TRACING) != 0 && !isTrustedOverlay) {
-            Slog.w(TAG, "Removing INPUT_FEATURE_SENSITIVE_FOR_TRACING from '" + windowName
+        // You can only use INPUT_FEATURE_SENSITIVE_FOR_PRIVACY on a trusted overlay.
+        if ((inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_PRIVACY) != 0 && !isTrustedOverlay) {
+            Slog.w(TAG, "Removing INPUT_FEATURE_SENSITIVE_FOR_PRIVACY from '" + windowName
                     + "' because it isn't a trusted overlay");
-            return inputFeatures & ~INPUT_FEATURE_SENSITIVE_FOR_TRACING;
+            return inputFeatures & ~INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
         }
         return inputFeatures;
     }

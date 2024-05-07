@@ -58,8 +58,8 @@ class InputConfigAdapter {
                     LayoutParams.INPUT_FEATURE_SPY,
                     InputConfig.SPY, false /* inverted */),
             new FlagMapping(
-                    LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING,
-                    InputConfig.SENSITIVE_FOR_TRACING, false /* inverted */));
+                    LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY,
+                    InputConfig.SENSITIVE_FOR_PRIVACY, false /* inverted */));
 
     @InputConfigFlags
     private static final int INPUT_FEATURE_TO_CONFIG_MASK =
