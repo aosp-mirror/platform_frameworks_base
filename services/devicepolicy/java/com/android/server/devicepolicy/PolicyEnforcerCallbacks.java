@@ -375,6 +375,7 @@ final class PolicyEnforcerCallbacks {
     private static void suspendPersonalAppsInPackageManager(Context context, int userId) {
         final String[] appsToSuspend = PersonalAppsSuspensionHelper.forUser(context, userId)
                 .getPersonalAppsForSuspension();
+        Slogf.i(LOG_TAG, "Suspending personal apps: %s", String.join(",", appsToSuspend));
         final String[] failedApps = LocalServices.getService(PackageManagerInternal.class)
                 .setPackagesSuspendedByAdmin(userId, appsToSuspend, true);
         if (!ArrayUtils.isEmpty(failedApps)) {
