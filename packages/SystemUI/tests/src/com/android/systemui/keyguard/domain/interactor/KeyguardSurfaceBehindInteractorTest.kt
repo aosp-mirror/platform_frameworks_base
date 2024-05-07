@@ -274,4 +274,27 @@ class KeyguardSurfaceBehindInteractorTest : SysuiTestCase() {
             runCurrent()
             assertThat(isAnimatingSurface).isFalse()
         }
+
+    @Test
+    fun notificationLaunchFalse_isAnimatingSurfaceFalse() =
+        testScope.runTest {
+            val isAnimatingSurface by collectLastValue(underTest.isAnimatingSurface)
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.STARTED,
+                )
+            )
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    transitionState = TransitionState.FINISHED,
+                )
+            )
+            kosmos.notificationLaunchAnimationInteractor.setIsLaunchAnimationRunning(false)
+            runCurrent()
+            assertThat(isAnimatingSurface).isFalse()
+        }
 }
