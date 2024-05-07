@@ -43,4 +43,10 @@ class NotificationViewHeightRepository @Inject constructor() {
      * necessary to scroll up to keep expanding the notification.
      */
     val syntheticScroll = MutableStateFlow(0f)
+
+    /**
+     * Whether the current touch gesture is overscroll. If true, it means the NSSL has already
+     * consumed part of the gesture.
+     */
+    val isCurrentGestureOverscroll = MutableStateFlow(false)
 }

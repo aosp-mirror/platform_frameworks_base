@@ -18,6 +18,7 @@
 package com.android.systemui.notifications.ui.composable
 
 import android.util.Log
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
@@ -39,8 +40,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +78,7 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.Notificati
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 object Notifications {
     object Elements {
@@ -159,11 +161,13 @@ fun SceneScope.NotificationScrollingStack(
     shouldPunchHoleBehindScrim: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
     val screenCornerRadius = LocalScreenCornerRadius.current
     val scrimCornerRadius = dimensionResource(R.dimen.notification_scrim_corner_radius)
     val scrollState = rememberScrollState()
     val syntheticScroll = viewModel.syntheticScroll.collectAsState(0f)
+    val isCurrentGestureOverscroll = viewModel.isCurrentGestureOverscroll.collectAsState(false)
     val expansionFraction by viewModel.expandFraction.collectAsState(0f)
 
     val navBarHeight =
@@ -180,7 +184,7 @@ fun SceneScope.NotificationScrollingStack(
     // When fully expanded (scrimOffset = minScrimOffset), its top bound is at minScrimStartY,
     // which is equal to the height of the Shade Header. Thus, when the scrim is fully expanded, the
     // entire height of the scrim is visible on screen.
-    val scrimOffset = remember { mutableStateOf(0f) }
+    val scrimOffset = remember { Animatable(0f) }
 
     // set the bounds to null when the scrim disappears
     DisposableEffect(Unit) { onDispose { viewModel.onScrimBoundsChanged(null) } }
@@ -204,7 +208,7 @@ fun SceneScope.NotificationScrollingStack(
     // expanded, reset scrim offset.
     LaunchedEffect(stackHeight, scrimOffset) {
         snapshotFlow { stackHeight.value < minVisibleScrimHeight() && scrimOffset.value < 0f }
-            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.value = 0f }
+            .collect { shouldCollapse -> if (shouldCollapse) scrimOffset.snapTo(0f) }
     }
 
     // if we receive scroll delta from NSSL, offset the scrim and placeholder accordingly.
@@ -214,7 +218,7 @@ fun SceneScope.NotificationScrollingStack(
                 val minOffset = minScrimOffset()
                 if (scrimOffset.value > minOffset) {
                     val remainingDelta = (minOffset - (scrimOffset.value - delta)).coerceAtLeast(0f)
-                    scrimOffset.value = (scrimOffset.value - delta).coerceAtLeast(minOffset)
+                    scrimOffset.snapTo((scrimOffset.value - delta).coerceAtLeast(minOffset))
                     if (remainingDelta > 0f) {
                         scrollState.scrollBy(remainingDelta)
                     }
@@ -296,20 +300,30 @@ fun SceneScope.NotificationScrollingStack(
                 modifier =
                     Modifier.verticalNestedScrollToScene(
                             topBehavior = NestedScrollBehavior.EdgeWithPreview,
+                            isExternalOverscrollGesture = { isCurrentGestureOverscroll.value }
                         )
                         .nestedScroll(
                             remember(
                                 scrimOffset,
                                 maxScrimTop,
                                 minScrimTop,
+                                isCurrentGestureOverscroll,
                             ) {
                                 NotificationScrimNestedScrollConnection(
                                     scrimOffset = { scrimOffset.value },
-                                    onScrimOffsetChanged = { scrimOffset.value = it },
+                                    snapScrimOffset = { value ->
+                                        coroutineScope.launch { scrimOffset.snapTo(value) }
+                                    },
+                                    animateScrimOffset = { value ->
+                                        coroutineScope.launch { scrimOffset.animateTo(value) }
+                                    },
                                     minScrimOffset = minScrimOffset,
                                     maxScrimOffset = 0f,
                                     contentHeight = { stackHeight.value },
                                     minVisibleScrimHeight = minVisibleScrimHeight,
+                                    isCurrentGestureOverscroll = {
+                                        isCurrentGestureOverscroll.value
+                                    },
                                 )
                             }
                         )

@@ -141,23 +141,27 @@ internal class SceneScopeImpl(
     override fun Modifier.horizontalNestedScrollToScene(
         leftBehavior: NestedScrollBehavior,
         rightBehavior: NestedScrollBehavior,
+        isExternalOverscrollGesture: () -> Boolean,
     ): Modifier =
         nestedScrollToScene(
             layoutImpl = layoutImpl,
             orientation = Orientation.Horizontal,
             topOrLeftBehavior = leftBehavior,
             bottomOrRightBehavior = rightBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
 
     override fun Modifier.verticalNestedScrollToScene(
         topBehavior: NestedScrollBehavior,
-        bottomBehavior: NestedScrollBehavior
+        bottomBehavior: NestedScrollBehavior,
+        isExternalOverscrollGesture: () -> Boolean,
     ): Modifier =
         nestedScrollToScene(
             layoutImpl = layoutImpl,
             orientation = Orientation.Vertical,
             topOrLeftBehavior = topBehavior,
             bottomOrRightBehavior = bottomBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
 
     override fun Modifier.noResizeDuringTransitions(): Modifier {

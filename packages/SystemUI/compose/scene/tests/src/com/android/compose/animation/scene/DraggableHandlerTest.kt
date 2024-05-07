@@ -102,12 +102,16 @@ class DraggableHandlerTest {
         val draggableHandler = layoutImpl.draggableHandler(Orientation.Vertical)
         val horizontalDraggableHandler = layoutImpl.draggableHandler(Orientation.Horizontal)
 
-        fun nestedScrollConnection(nestedScrollBehavior: NestedScrollBehavior) =
+        fun nestedScrollConnection(
+            nestedScrollBehavior: NestedScrollBehavior,
+            isExternalOverscrollGesture: Boolean = false
+        ) =
             NestedScrollHandlerImpl(
                     layoutImpl = layoutImpl,
                     orientation = draggableHandler.orientation,
                     topOrLeftBehavior = nestedScrollBehavior,
                     bottomOrRightBehavior = nestedScrollBehavior,
+                    isExternalOverscrollGesture = { isExternalOverscrollGesture }
                 )
                 .connection
 
@@ -773,6 +777,26 @@ class DraggableHandlerTest {
         // wait for the stop animation
         advanceUntilIdle()
         assertIdle(currentScene = SceneC)
+    }
+
+    @Test
+    fun flingAfterScrollStartedByExternalOverscrollGesture() = runGestureTest {
+        val nestedScroll =
+            nestedScrollConnection(
+                nestedScrollBehavior = EdgeWithPreview,
+                isExternalOverscrollGesture = true
+            )
+
+        // scroll not consumed in child
+        nestedScroll.scroll(
+            available = downOffset(fractionOfScreen = 0.1f),
+        )
+
+        // scroll offsetY10 is all available for parents
+        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
+        assertTransition(SceneA)
+
+        nestedScroll.preFling(available = Velocity(0f, velocityThreshold))
     }
 
     @Test

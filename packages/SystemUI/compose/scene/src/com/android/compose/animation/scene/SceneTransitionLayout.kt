@@ -250,6 +250,7 @@ interface BaseSceneScope : ElementStateScope {
     fun Modifier.horizontalNestedScrollToScene(
         leftBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
         rightBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        isExternalOverscrollGesture: () -> Boolean = { false },
     ): Modifier
 
     /**
@@ -262,6 +263,7 @@ interface BaseSceneScope : ElementStateScope {
     fun Modifier.verticalNestedScrollToScene(
         topBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
         bottomBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        isExternalOverscrollGesture: () -> Boolean = { false },
     ): Modifier
 
     /**
