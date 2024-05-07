@@ -74,7 +74,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
-import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.settingsBackground
 import kotlin.math.abs
 import kotlin.math.max
@@ -142,7 +141,7 @@ private fun Title(title: String, maxLines: Int = Int.MAX_VALUE) {
 @Composable
 private fun topAppBarColors() = TopAppBarColors(
     containerColor = MaterialTheme.colorScheme.settingsBackground,
-    scrolledContainerColor = SettingsTheme.colorScheme.surfaceHeader,
+    scrolledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
     titleContentColor = MaterialTheme.colorScheme.onSurface,
     actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
