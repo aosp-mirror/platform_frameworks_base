@@ -443,7 +443,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
   manifest_action.Action(AutoGenerateIsSplitRequired);
   manifest_action.Action(VerifyManifest);
   manifest_action.Action(FixCoreAppAttribute);
-  manifest_action.Action([&](xml::Element* el) -> bool {
+  manifest_action.Action([this, diag](xml::Element* el) -> bool {
     EnsureNamespaceIsDeclared("android", xml::kSchemaAndroid, &el->namespace_decls);
 
     if (options_.version_name_default) {
@@ -506,7 +506,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
   manifest_action["eat-comment"];
 
   // Uses-sdk actions.
-  manifest_action["uses-sdk"].Action([&](xml::Element* el) -> bool {
+  manifest_action["uses-sdk"].Action([this](xml::Element* el) -> bool {
     if (options_.min_sdk_version_default &&
         el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion") == nullptr) {
       // There was no minSdkVersion defined and we have a default to assign.
@@ -528,7 +528,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
 
   // Instrumentation actions.
   manifest_action["instrumentation"].Action(RequiredNameIsJavaClassName);
-  manifest_action["instrumentation"].Action([&](xml::Element* el) -> bool {
+  manifest_action["instrumentation"].Action([this](xml::Element* el) -> bool {
     if (!options_.rename_instrumentation_target_package) {
       return true;
     }
@@ -544,7 +544,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
   manifest_action["attribution"];
   manifest_action["attribution"]["inherit-from"];
   manifest_action["original-package"];
-  manifest_action["overlay"].Action([&](xml::Element* el) -> bool {
+  manifest_action["overlay"].Action([this](xml::Element* el) -> bool {
     if (options_.rename_overlay_target_package) {
       if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "targetPackage")) {
         attr->value = options_.rename_overlay_target_package.value();
@@ -625,7 +625,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
   uses_package_action["additional-certificate"];
 
   if (options_.debug_mode) {
-    application_action.Action([&](xml::Element* el) -> bool {
+    application_action.Action([](xml::Element* el) -> bool {
       xml::Attribute *attr = el->FindOrCreateAttribute(xml::kSchemaAndroid, "debuggable");
       attr->value = "true";
       return true;
