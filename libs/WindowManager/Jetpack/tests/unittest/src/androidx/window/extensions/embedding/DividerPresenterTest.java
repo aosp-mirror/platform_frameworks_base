@@ -35,8 +35,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Activity;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Binder;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
@@ -44,6 +47,8 @@ import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
+import android.view.View;
+import android.view.Window;
 import android.window.TaskFragmentOperation;
 import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
@@ -152,7 +157,10 @@ public class DividerPresenterTest {
                 true /* isVerticalSplit */,
                 false /* isReversedLayout */,
                 Display.DEFAULT_DISPLAY,
-                false /* isDraggableExpandType */);
+                false /* isDraggableExpandType */,
+                Color.valueOf(Color.BLACK), /* primaryVeilColor */
+                Color.valueOf(Color.GRAY) /* secondaryVeilColor */
+        );
 
         mDividerPresenter = new DividerPresenter(
                 MOCK_TASK_ID, mDragEventCallback, mock(Executor.class));
@@ -602,6 +610,38 @@ public class DividerPresenterTest {
                         1000 /* maxPosition */,
                         false /* isDraggingToFullscreenAllowed */),
                 0.0001 /* delta */);
+    }
+
+    @Test
+    public void testGetContainerBackgroundColor() {
+        final Color defaultColor = Color.valueOf(Color.RED);
+        final Color activityBackgroundColor = Color.valueOf(Color.BLUE);
+        final TaskFragmentContainer container = mock(TaskFragmentContainer.class);
+        final Activity activity = mock(Activity.class);
+        final Window window = mock(Window.class);
+        final View decorView = mock(View.class);
+        final ColorDrawable backgroundDrawable =
+                new ColorDrawable(activityBackgroundColor.toArgb());
+        when(activity.getWindow()).thenReturn(window);
+        when(window.getDecorView()).thenReturn(decorView);
+        when(decorView.getBackground()).thenReturn(backgroundDrawable);
+
+        // When the top non-finishing activity returns null, the default color should be returned.
+        when(container.getTopNonFinishingActivity()).thenReturn(null);
+        assertEquals(defaultColor,
+                DividerPresenter.getContainerBackgroundColor(container, defaultColor));
+
+        // When the top non-finishing activity is not resumed, the default color should be returned.
+        when(container.getTopNonFinishingActivity()).thenReturn(activity);
+        when(activity.isResumed()).thenReturn(false);
+        assertEquals(defaultColor,
+                DividerPresenter.getContainerBackgroundColor(container, defaultColor));
+
+        // When the top non-finishing activity is resumed, its background color should be returned.
+        when(container.getTopNonFinishingActivity()).thenReturn(activity);
+        when(activity.isResumed()).thenReturn(true);
+        assertEquals(activityBackgroundColor,
+                DividerPresenter.getContainerBackgroundColor(container, defaultColor));
     }
 
     private TaskFragmentContainer createMockTaskFragmentContainer(
