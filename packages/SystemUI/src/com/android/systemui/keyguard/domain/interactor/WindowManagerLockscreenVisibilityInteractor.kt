@@ -21,6 +21,7 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -132,7 +133,10 @@ constructor(
                 .distinctUntilChanged()
         } else {
             combine(
-                    transitionInteractor.isInTransitionToState(KeyguardState.GONE),
+                    transitionInteractor.isInTransition(
+                        edge = Edge.create(to = Scenes.Gone),
+                        edgeWithoutSceneContainer = Edge.create(to = KeyguardState.GONE)
+                    ),
                     transitionInteractor.finishedKeyguardState,
                     surfaceBehindInteractor.isAnimatingSurface,
                     notificationLaunchAnimationInteractor.isLaunchAnimationRunning,

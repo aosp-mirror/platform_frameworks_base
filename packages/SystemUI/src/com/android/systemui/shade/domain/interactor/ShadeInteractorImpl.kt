@@ -21,6 +21,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.DozeStateModel
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
@@ -85,7 +86,7 @@ constructor(
     override val isShadeTouchable: Flow<Boolean> =
         combine(
             powerInteractor.isAsleep,
-            keyguardTransitionInteractor.isInTransitionToState(KeyguardState.AOD),
+            keyguardTransitionInteractor.isInTransition(Edge.create(to = KeyguardState.AOD)),
             keyguardRepository.dozeTransitionModel.map { it.to == DozeStateModel.DOZE_PULSING },
         ) { isAsleep, goingToSleep, isPulsing ->
             when {

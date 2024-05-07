@@ -180,7 +180,7 @@ constructor(
                 val fromScene =
                     when (edge) {
                         is Edge.StateToState -> edge.from?.mapToSceneContainerScene()
-                        is Edge.StateToScene -> edge.from.mapToSceneContainerScene()
+                        is Edge.StateToScene -> edge.from?.mapToSceneContainerScene()
                         is Edge.SceneToState -> edge.from
                     }
 
@@ -188,7 +188,7 @@ constructor(
                     when (edge) {
                         is Edge.StateToState -> edge.to?.mapToSceneContainerScene()
                         is Edge.StateToScene -> edge.to
-                        is Edge.SceneToState -> edge.to.mapToSceneContainerScene()
+                        is Edge.SceneToState -> edge.to?.mapToSceneContainerScene()
                     }
 
                 fun SceneKey?.isLockscreenOrNull() = this == Scenes.Lockscreen || this == null
@@ -450,16 +450,6 @@ constructor(
         }
     }
 
-    /** Whether we're in a transition to the given [KeyguardState], but haven't yet completed it. */
-    fun isInTransitionToState(
-        state: KeyguardState,
-    ): Flow<Boolean> {
-        return transition(Edge.create(from = null, to = state))
-            .mapLatest { it.transitionState.isTransitioning() }
-            .onStart { emit(false) }
-            .distinctUntilChanged()
-    }
-
     /**
      * Whether we're in a transition to and from the given [KeyguardState]s, but haven't yet
      * completed it.
@@ -469,23 +459,23 @@ constructor(
      */
     fun isInTransition(edge: Edge, edgeWithoutSceneContainer: Edge? = null): Flow<Boolean> {
         return if (SceneContainerFlag.isEnabled) {
-                transition(edge)
+                if (edge.isSceneWildcardEdge()) {
+                    sceneInteractor.get().transitionState.map {
+                        when (edge) {
+                            is Edge.StateToState ->
+                                throw IllegalStateException("Should not be reachable.")
+                            is Edge.SceneToState -> it.isTransitioning(from = edge.from)
+                            is Edge.StateToScene -> it.isTransitioning(to = edge.to)
+                        }
+                    }
+                } else {
+                    transition(edge).mapLatest { it.transitionState.isTransitioning() }
+                }
             } else {
-                transition(edgeWithoutSceneContainer ?: edge)
+                transition(edgeWithoutSceneContainer ?: edge).mapLatest {
+                    it.transitionState.isTransitioning()
+                }
             }
-            .mapLatest { it.transitionState.isTransitioning() }
-            .onStart { emit(false) }
-            .distinctUntilChanged()
-    }
-
-    /**
-     * Whether we're in a transition out of the given [KeyguardState], but haven't yet completed it.
-     */
-    fun isInTransitionFromState(
-        state: KeyguardState,
-    ): Flow<Boolean> {
-        return transition(Edge.create(from = state, to = null))
-            .mapLatest { it.transitionState.isTransitioning() }
             .onStart { emit(false) }
             .distinctUntilChanged()
     }
@@ -494,7 +484,7 @@ constructor(
      * Whether we're in a transition to a [KeyguardState] that matches the given predicate, but
      * haven't yet completed it.
      *
-     * If you only care about a single state, instead use the optimized [isInTransitionToState].
+     * If you only care about a single state, instead use the optimized [isInTransition].
      */
     fun isInTransitionToStateWhere(
         stateMatcher: (KeyguardState) -> Boolean,
@@ -506,7 +496,7 @@ constructor(
      * Whether we're in a transition out of a [KeyguardState] that matches the given predicate, but
      * haven't yet completed it.
      *
-     * If you only care about a single state, instead use the optimized [isInTransitionFromState].
+     * If you only care about a single state, instead use the optimized [isInTransition].
      */
     fun isInTransitionFromStateWhere(
         stateMatcher: (KeyguardState) -> Boolean,
