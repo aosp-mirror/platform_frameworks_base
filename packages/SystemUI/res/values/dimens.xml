@@ -430,6 +430,7 @@
     <dimen name="overlay_button_corner_radius">16dp</dimen>
     <!-- Margin between successive chips -->
     <dimen name="overlay_action_chip_margin_start">8dp</dimen>
+    <dimen name="shelf_action_chip_margin_start">12dp</dimen>
     <dimen name="overlay_action_chip_padding_vertical">12dp</dimen>
     <dimen name="overlay_action_chip_icon_size">24sp</dimen>
     <!-- Padding on each side of the icon for icon-only chips -->
