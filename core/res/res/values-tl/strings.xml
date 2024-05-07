@@ -2144,10 +2144,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Na-on ang Pantipid ng Baterya"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Binabawasan ang paggamit sa baterya para mapatagal ang baterya"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Naka-on ang Pantipid ng Baterya"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Naka-on ang Pantipid ng Baterya para mapahaba ang tagal ng baterya"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Pantipid ng Baterya"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Na-off ang Pantipid ng Baterya"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"May sapat na charge ang telepono. Hindi na pinaghihigpitan ang mga feature."</string>

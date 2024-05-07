@@ -2145,10 +2145,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificació d\'informació del mode de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Estalvi de bateria s\'ha activat"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"S\'està reduint l\'ús de la bateria per allargar-ne la durada"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"La funció Estalvi de bateria està activada"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"S\'ha activat la funció Estalvi de bateria per allargar la durada de la bateria"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Estalvi de bateria"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"L\'estalvi de bateria s\'ha desactivat"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"El telèfon té prou bateria. Les funcions ja no estan restringides."</string>
