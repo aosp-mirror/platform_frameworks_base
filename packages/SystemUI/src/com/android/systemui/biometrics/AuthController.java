@@ -69,7 +69,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
-import com.android.systemui.biometrics.domain.interactor.PromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
@@ -139,7 +138,6 @@ public class AuthController implements
     private Job mBiometricContextListenerJob = null;
 
     // TODO: these should be migrated out once ready
-    @NonNull private final Provider<PromptCredentialInteractor> mPromptCredentialInteractor;
     @NonNull private final Provider<PromptSelectorInteractor> mPromptSelectorInteractor;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
     @NonNull private final Provider<PromptViewModel> mPromptViewModelProvider;
@@ -735,7 +733,6 @@ public class AuthController implements
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull Lazy<UdfpsLogger> udfpsLogger,
             @NonNull Lazy<LogContextInteractor> logContextInteractor,
-            @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractorProvider,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull Provider<PromptViewModel> promptViewModelProvider,
@@ -768,7 +765,6 @@ public class AuthController implements
 
         mLogContextInteractor = logContextInteractor;
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
-        mPromptCredentialInteractor = promptCredentialInteractorProvider;
         mPromptViewModelProvider = promptViewModelProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
 
@@ -1316,8 +1312,8 @@ public class AuthController implements
         config.mScaleProvider = this::getScaleFactor;
         return new AuthContainerView(config, mApplicationCoroutineScope, mFpProps, mFaceProps,
                 wakefulnessLifecycle, panelInteractionDetector, userManager, lockPatternUtils,
-                mInteractionJankMonitor, mPromptCredentialInteractor, mPromptSelectorInteractor,
-                viewModel, mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
+                mInteractionJankMonitor, mPromptSelectorInteractor, viewModel,
+                mCredentialViewModelProvider, bgExecutor, mVibratorHelper);
     }
 
     @Override

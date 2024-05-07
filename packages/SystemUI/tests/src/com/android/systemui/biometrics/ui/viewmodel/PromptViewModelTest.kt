@@ -169,8 +169,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             )
         biometricStatusRepository = FakeBiometricStatusRepository()
         biometricStatusInteractor =
-            BiometricStatusInteractorImpl(activityTaskManager, biometricStatusRepository,
-                fingerprintRepository)
+            BiometricStatusInteractorImpl(
+                activityTaskManager,
+                biometricStatusRepository,
+                fingerprintRepository
+            )
         selector =
             PromptSelectorInteractorImpl(fingerprintRepository, promptRepository, lockPatternUtils)
         selector.resetPrompt()
@@ -183,7 +186,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         promptContentViewWithMoreOptionsButton =
             PromptContentViewWithMoreOptionsButton.Builder()
                 .setDescription("test")
-                .setMoreOptionsButtonListener(fakeExecutor, { _, _ -> })
+                .setMoreOptionsButtonListener(fakeExecutor) { _, _ -> }
                 .build()
 
         viewModel =
@@ -1630,12 +1633,13 @@ private fun PromptSelectorInteractor.initializePrompt(
             isConfirmationRequested = requireConfirmation
         }
 
-    useBiometricsForAuthentication(
+    setPrompt(
         info,
         USER_ID,
-        CHALLENGE,
         BiometricModalities(fingerprintProperties = fingerprint, faceProperties = face),
+        CHALLENGE,
         packageName,
+        false /*onUseDeviceCredential*/
     )
 }
 

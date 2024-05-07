@@ -55,6 +55,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import kotlin.math.abs
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Helper for [BiometricViewBinder] to handle resize transitions. */
@@ -169,14 +170,14 @@ object BiometricViewSizeBinder {
             val flipConstraintSet = ConstraintSet()
 
             view.doOnLayout {
-                fun setVisibilities(size: PromptSize) {
+                fun setVisibilities(hideSensorIcon: Boolean, size: PromptSize) {
                     viewsToHideWhenSmall.forEach { it.showContentOrHide(forceHide = size.isSmall) }
                     largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
                     largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                     largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
                     largeConstraintSet.setVisibility(R.id.scrollView, View.GONE)
 
-                    if (viewModel.showBpWithoutIconForCredential.value) {
+                    if (hideSensorIcon) {
                         smallConstraintSet.setVisibility(iconHolderView.id, View.GONE)
                         smallConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                         smallConstraintSet.setVisibility(R.id.indicator, View.GONE)
@@ -362,12 +363,16 @@ object BiometricViewSizeBinder {
                             }
                         }
                     }
+                    lifecycleScope.launch {
+                        combine(viewModel.hideSensorIcon, viewModel.size, ::Pair).collect {
+                            (hideSensorIcon, size) ->
+                            setVisibilities(hideSensorIcon, size)
+                        }
+                    }
 
                     lifecycleScope.launch {
                         combine(viewModel.position, viewModel.size, ::Pair).collect {
                             (position, size) ->
-                            setVisibilities(size)
-
                             if (position.isLeft) {
                                 if (size.isSmall) {
                                     flipConstraintSet.clone(smallConstraintSet)
@@ -481,7 +486,7 @@ object BiometricViewSizeBinder {
                                 v.showContentOrHide(forceHide = size.isSmall)
                             }
 
-                            if (viewModel.showBpWithoutIconForCredential.value) {
+                            if (viewModel.hideSensorIcon.first()) {
                                 iconHolderView.visibility = View.GONE
                             }
 
@@ -492,10 +497,6 @@ object BiometricViewSizeBinder {
                                 viewsToFadeInOnSizeChange.forEach { it.alpha = 0f }
                             }
 
-                            // TODO(b/302735104): Fix wrong height due to the delay of
-                            // PromptContentView. addOnLayoutChangeListener() will cause crash
-                            // when showing credential view, since |PromptIconViewModel| won't
-                            // release the flow.
                             // propagate size changes to legacy panel controller and animate
                             // transitions
                             view.doOnLayout {
