@@ -83,7 +83,7 @@ fun SettingsCardContent(
     Card(
         shape = CornerExtraSmall,
         colors = CardDefaults.cardColors(
-            containerColor = containerColor.takeOrElse { SettingsTheme.colorScheme.surface },
+            containerColor = containerColor.takeOrElse { MaterialTheme.colorScheme.surface },
         ),
         modifier = Modifier
             .fillMaxWidth()

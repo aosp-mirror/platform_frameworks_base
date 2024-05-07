@@ -112,7 +112,7 @@ public final class PermissionManager {
     public static final int PERMISSION_GRANTED = 0;
 
     /**
-     * The permission is denied. Applicable only to runtime and app op permissions.
+     * The permission is denied. Applicable only to runtime permissions.
      * <p>
      * The app isn't expecting the permission to be denied so that a "no-op" action should be taken,
      * such as returning an empty result.

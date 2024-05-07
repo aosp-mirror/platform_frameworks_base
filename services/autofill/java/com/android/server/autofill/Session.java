@@ -1493,10 +1493,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mCredentialAutofillService = getCredentialAutofillService(context);
 
-        ComponentName primaryServiceComponentName, secondaryServiceComponentName;
+        ComponentName primaryServiceComponentName, secondaryServiceComponentName = null;
         if (isPrimaryCredential) {
             primaryServiceComponentName = mCredentialAutofillService;
-            secondaryServiceComponentName = serviceComponentName;
+            if (serviceComponentName != null
+                    && !serviceComponentName.equals(mCredentialAutofillService)) {
+                // if service component name is credential autofill service, no need to initialize
+                // secondary provider. This happens if the user sets non-autofill provider as
+                // password provider.
+                secondaryServiceComponentName = serviceComponentName;
+            }
         } else {
             primaryServiceComponentName = serviceComponentName;
             secondaryServiceComponentName = mCredentialAutofillService;
@@ -1531,7 +1537,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mFillResponseEventLogger = FillResponseEventLogger.forSessionId(sessionId);
         mSessionCommittedEventLogger = SessionCommittedEventLogger.forSessionId(sessionId);
         mSessionCommittedEventLogger.maybeSetComponentPackageUid(uid);
-        mSaveEventLogger = SaveEventLogger.forSessionId(sessionId);
+        mSaveEventLogger = SaveEventLogger.forSessionId(sessionId, mLatencyBaseTime);
         mIsPrimaryCredential = isPrimaryCredential;
         mIgnoreViewStateResetToEmpty = AutofillFeatureFlags.shouldIgnoreViewStateResetToEmpty();
 
@@ -3931,13 +3937,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
                             Event.NO_SAVE_UI_REASON_NONE);
                 }
-                final long saveUiDisplayStartTimestamp = SystemClock.elapsedRealtime();
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
                         mComponentName, this, mContext,  mPendingSaveUi, isUpdate, mCompatMode,
                         response.getShowSaveDialogIcon(), mSaveEventLogger);
-                mSaveEventLogger.maybeSetLatencySaveUiDisplayMillis(
-                    SystemClock.elapsedRealtime()- saveUiDisplayStartTimestamp);
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);

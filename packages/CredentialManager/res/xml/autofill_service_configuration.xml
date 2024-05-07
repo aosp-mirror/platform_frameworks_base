@@ -5,6 +5,6 @@
    Note: This file is ignored for devices older that API 31
    See https://developer.android.com/about/versions/12/backup-restore
 -->
-<autofill-service-configuration
+<autofill-service
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:supportsInlineSuggestions="true"/>

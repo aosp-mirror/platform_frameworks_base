@@ -19,10 +19,12 @@ package com.android.systemui.volume.panel.component.mediaoutput.domain.interacto
 import android.content.pm.PackageManager
 import android.media.VolumeProvider
 import android.media.session.MediaController
+import android.os.Handler
 import android.util.Log
 import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
 import com.android.settingslib.volume.data.repository.MediaControllerRepository
+import com.android.settingslib.volume.data.repository.stateChanges
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaDeviceSessions
@@ -36,14 +38,15 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
@@ -58,21 +61,31 @@ constructor(
     @VolumePanelScope private val coroutineScope: CoroutineScope,
     @Background private val backgroundCoroutineContext: CoroutineContext,
     mediaControllerRepository: MediaControllerRepository,
+    @Background private val backgroundHandler: Handler,
 ) {
 
     private val activeMediaControllers: Flow<MediaControllers> =
         mediaControllerRepository.activeSessions
+            .flatMapLatest { activeSessions ->
+                activeSessions
+                    .map { activeSession -> activeSession.stateChanges() }
+                    .merge()
+                    .map { activeSessions }
+                    .onStart { emit(activeSessions) }
+            }
             .map { getMediaControllers(it) }
-            .shareIn(coroutineScope, SharingStarted.Eagerly, replay = 1)
+            .stateIn(coroutineScope, SharingStarted.Eagerly, MediaControllers(null, null))
 
     /** [MediaDeviceSessions] that contains currently active sessions. */
     val activeMediaDeviceSessions: Flow<MediaDeviceSessions> =
-        activeMediaControllers.map {
-            MediaDeviceSessions(
-                local = it.local?.mediaDeviceSession(),
-                remote = it.remote?.mediaDeviceSession()
-            )
-        }
+        activeMediaControllers
+            .map {
+                MediaDeviceSessions(
+                    local = it.local?.mediaDeviceSession(),
+                    remote = it.remote?.mediaDeviceSession()
+                )
+            }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, MediaDeviceSessions(null, null))
 
     /** Returns the default [MediaDeviceSession] from [activeMediaDeviceSessions] */
     val defaultActiveMediaSession: StateFlow<Result<MediaDeviceSession?>> =
@@ -89,13 +102,17 @@ constructor(
             .flowOn(backgroundCoroutineContext)
             .stateIn(coroutineScope, SharingStarted.Eagerly, Result.Loading())
 
-    private val localMediaRepository: SharedFlow<LocalMediaRepository> =
+    private val localMediaRepository: Flow<LocalMediaRepository> =
         defaultActiveMediaSession
             .filterData()
             .map { it?.packageName }
             .distinctUntilChanged()
             .map { localMediaRepositoryFactory.create(it) }
-            .shareIn(coroutineScope, SharingStarted.Eagerly, replay = 1)
+            .stateIn(
+                coroutineScope,
+                SharingStarted.Eagerly,
+                localMediaRepositoryFactory.create(null)
+            )
 
     /** Currently connected [MediaDevice]. */
     val currentConnectedDevice: Flow<MediaDevice?> =
@@ -134,19 +151,31 @@ constructor(
                     }
                     if (!remoteMediaSessions.contains(controller.packageName)) {
                         remoteMediaSessions.add(controller.packageName)
-                        if (remoteController == null) {
-                            remoteController = controller
-                        }
+                        remoteController = chooseController(remoteController, controller)
                     }
                 }
                 MediaController.PlaybackInfo.PLAYBACK_TYPE_LOCAL -> {
                     if (controller.packageName in remoteMediaSessions) continue
-                    if (localController != null) continue
-                    localController = controller
+                    localController = chooseController(localController, controller)
                 }
             }
         }
         return MediaControllers(local = localController, remote = remoteController)
+    }
+
+    private fun chooseController(
+        currentController: MediaController?,
+        newController: MediaController,
+    ): MediaController {
+        if (currentController == null) {
+            return newController
+        }
+        val isNewControllerActive = newController.playbackState?.isActive == true
+        val isCurrentControllerActive = currentController.playbackState?.isActive == true
+        if (isNewControllerActive && !isCurrentControllerActive) {
+            return newController
+        }
+        return currentController
     }
 
     private suspend fun MediaController.mediaDeviceSession(): MediaDeviceSession? {
@@ -158,6 +187,14 @@ constructor(
                     playbackInfo?.volumeControl != VolumeProvider.VOLUME_CONTROL_FIXED,
             appLabel = getApplicationLabel(packageName) ?: return null
         )
+    }
+
+    private fun MediaController?.stateChanges(): Flow<MediaController?> {
+        if (this == null) {
+            return flowOf(null)
+        }
+
+        return stateChanges(backgroundHandler).map { this }.onStart { emit(this@stateChanges) }
     }
 
     private data class MediaControllers(

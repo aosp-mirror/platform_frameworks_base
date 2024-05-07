@@ -1985,11 +1985,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             CryptoTestHelper.runAndLogSelfTest();
         }
 
-        public String[] getPersonalAppsForSuspension(@UserIdInt int userId) {
-            return PersonalAppsSuspensionHelper.forUser(mContext, userId)
-                    .getPersonalAppsForSuspension();
-        }
-
         public long systemCurrentTimeMillis() {
             return System.currentTimeMillis();
         }
@@ -21610,9 +21605,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
             }
 
-            if (Flags.headlessSingleUserFixes() && mInjector.userManagerIsHeadlessSystemUserMode()
-                    && isSingleUserMode && !mInjector.isChangeEnabled(
-                    PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(), caller.getUserId())) {
+            if (Flags.headlessSingleMinTargetSdk()
+                    && mInjector.userManagerIsHeadlessSystemUserMode()
+                    && isSingleUserMode
+                    && !mInjector.isChangeEnabled(
+                            PROVISION_SINGLE_USER_MODE, deviceAdmin.getPackageName(),
+                    caller.getUserId())) {
                 throw new IllegalStateException("Device admin is not targeting Android V.");
             }
 

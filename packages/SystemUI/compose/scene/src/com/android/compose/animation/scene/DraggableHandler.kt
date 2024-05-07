@@ -579,6 +579,18 @@ private class SwipeTransition(
             return offset / distance
         }
 
+    override val progressVelocity: Float
+        get() {
+            val animatable = offsetAnimation?.animatable ?: return 0f
+            val distance = distance()
+            if (distance == DistanceUnspecified) {
+                return 0f
+            }
+
+            val velocityInDistanceUnit = animatable.velocity
+            return velocityInDistanceUnit / distance.absoluteValue
+        }
+
     override val isInitiatedByUserInput = true
 
     override var bouncingScene: SceneKey? = null
@@ -865,6 +877,7 @@ internal class NestedScrollHandlerImpl(
     private val orientation: Orientation,
     private val topOrLeftBehavior: NestedScrollBehavior,
     private val bottomOrRightBehavior: NestedScrollBehavior,
+    private val isExternalOverscrollGesture: () -> Boolean,
 ) {
     private val layoutState = layoutImpl.state
     private val draggableHandler = layoutImpl.draggableHandler(orientation)
@@ -920,7 +933,8 @@ internal class NestedScrollHandlerImpl(
         return PriorityNestedScrollConnection(
             orientation = orientation,
             canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
-                canChangeScene = offsetBeforeStart == 0f
+                canChangeScene =
+                    if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
 
                 val canInterceptSwipeTransition =
                     canChangeScene &&
@@ -950,7 +964,8 @@ internal class NestedScrollHandlerImpl(
                         else -> return@PriorityNestedScrollConnection false
                     }
 
-                val isZeroOffset = offsetBeforeStart == 0f
+                val isZeroOffset =
+                    if (isExternalOverscrollGesture()) false else offsetBeforeStart == 0f
 
                 val canStart =
                     when (behavior) {

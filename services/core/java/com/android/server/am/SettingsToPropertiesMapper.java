@@ -128,6 +128,7 @@ public class SettingsToPropertiesMapper {
         "aoc",
         "app_widgets",
         "arc_next",
+        "art_mainline",
         "avic",
         "biometrics",
         "biometrics_framework",

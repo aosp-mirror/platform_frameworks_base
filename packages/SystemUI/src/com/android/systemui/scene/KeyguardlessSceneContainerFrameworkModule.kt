@@ -63,7 +63,8 @@ interface KeyguardlessSceneContainerFrameworkModule {
                 sceneKeys =
                     listOfNotNull(
                         Scenes.Gone,
-                        Scenes.QuickSettings,
+                        Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
+                        Scenes.QuickSettingsShade.takeIf { DualShade.isEnabled },
                         Scenes.NotificationsShade.takeIf { DualShade.isEnabled },
                         Scenes.Shade.takeUnless { DualShade.isEnabled },
                     ),
@@ -73,7 +74,8 @@ interface KeyguardlessSceneContainerFrameworkModule {
                             Scenes.Gone to 0,
                             Scenes.NotificationsShade to 1.takeIf { DualShade.isEnabled },
                             Scenes.Shade to 1.takeUnless { DualShade.isEnabled },
-                            Scenes.QuickSettings to 2,
+                            Scenes.QuickSettingsShade to 2.takeIf { DualShade.isEnabled },
+                            Scenes.QuickSettings to 2.takeUnless { DualShade.isEnabled },
                         )
                         .filterValues { it != null }
                         .mapValues { checkNotNull(it.value) }

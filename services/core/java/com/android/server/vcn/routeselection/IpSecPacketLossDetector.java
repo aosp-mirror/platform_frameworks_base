@@ -115,6 +115,10 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
     // validation failure.
     private static final int IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_DEFAULT = 12;
 
+    /** Carriers can disable the detector by setting the threshold to -1 */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final int IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_DISABLE_DETECTOR = -1;
+
     private static final int POLL_IPSEC_STATE_INTERVAL_SECONDS_DEFAULT = 20;
 
     // By default, there's no maximum limit enforced
@@ -271,7 +275,10 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         // When multiple parallel inbound transforms are created, NetworkMetricMonitor will be
         // enabled on the last one as a sample
         mInboundTransform = inboundTransform;
-        start();
+
+        if (!Flags.allowDisableIpsecLossDetector() || canStart()) {
+            start();
+        }
     }
 
     @Override
@@ -283,6 +290,14 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
         if (Flags.handleSeqNumLeap()) {
             mPacketLossRatePercentThreshold = getPacketLossRatePercentThreshold(carrierConfig);
             mMaxSeqNumIncreasePerSecond = getMaxSeqNumIncreasePerSecond(carrierConfig);
+        }
+
+        if (Flags.allowDisableIpsecLossDetector() && canStart() != isStarted()) {
+            if (canStart()) {
+                start();
+            } else {
+                stop();
+            }
         }
     }
 
@@ -296,6 +311,12 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
     private void reschedulePolling() {
         mHandler.removeCallbacksAndEqualMessages(mCancellationToken);
         mHandler.postDelayed(new PollIpSecStateRunnable(), mCancellationToken, 0L);
+    }
+
+    private boolean canStart() {
+        return mInboundTransform != null
+                && mPacketLossRatePercentThreshold
+                        != IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_DISABLE_DETECTOR;
     }
 
     @Override

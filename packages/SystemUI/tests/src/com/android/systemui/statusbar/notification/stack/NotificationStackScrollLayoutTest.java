@@ -207,6 +207,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
         mStackScroller.setShelf(mNotificationShelf);
+        when(mStackScroller.getExpandHelper()).thenReturn(mExpandHelper);
 
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
@@ -1137,6 +1138,14 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // THEN headsUpAnimatingAway is false
         verify(headsUpAnimatingAwayListener).accept(false);
         assertFalse(mStackScroller.mHeadsUpAnimatingAway);
+    }
+
+    @Test
+    @EnableSceneContainer
+    public void finishExpanding_sceneContainerEnabled() {
+        mStackScroller.startOverscrollAfterExpanding();
+        verify(mStackScroller.getExpandHelper()).finishExpanding();
+        assertTrue(mStackScroller.getIsBeingDragged());
     }
 
     private MotionEvent captureTouchSentToSceneFramework() {

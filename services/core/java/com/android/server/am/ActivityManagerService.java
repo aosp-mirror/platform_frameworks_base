@@ -19953,6 +19953,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return !ActivityManagerService.this.mThemeOverlayReadyUsers.contains(userId);
             }
         }
+
+        @Override
+        public void addStartInfoTimestamp(int key, long timestampNs, int uid, int pid,
+                int userId) {
+            // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
+            if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
+                throw new IllegalArgumentException("Unsupported userId");
+            }
+
+            mUserController.handleIncomingUser(pid, uid, userId, true,
+                    ALLOW_NON_FULL, "addStartInfoTimestampSystem", null);
+
+            addStartInfoTimestampInternal(key, timestampNs, userId, uid);
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
@@ -20269,7 +20283,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int userId = UserHandle.getCallingUserId();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            if (uid == -1) {
+            if (uid == INVALID_UID) {
                 uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
             }
             mAppRestrictionController.noteAppRestrictionEnabled(packageName, uid, restrictionType,

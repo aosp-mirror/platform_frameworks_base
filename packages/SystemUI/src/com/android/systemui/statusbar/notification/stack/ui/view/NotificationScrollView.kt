@@ -51,6 +51,8 @@ interface NotificationScrollView {
 
     /** Set a consumer for synthetic scroll events */
     fun setSyntheticScrollConsumer(consumer: Consumer<Float>?)
+    /** Set a consumer for current gesture overscroll events */
+    fun setCurrentGestureOverscrollConsumer(consumer: Consumer<Boolean>?)
     /** Set a consumer for stack height changed events */
     fun setStackHeightConsumer(consumer: Consumer<Float>?)
     /** Set a consumer for heads up height changed events */

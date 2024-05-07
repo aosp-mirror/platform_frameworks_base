@@ -75,6 +75,7 @@ internal fun Modifier.nestedScrollToScene(
     orientation: Orientation,
     topOrLeftBehavior: NestedScrollBehavior,
     bottomOrRightBehavior: NestedScrollBehavior,
+    isExternalOverscrollGesture: () -> Boolean,
 ) =
     this then
         NestedScrollToSceneElement(
@@ -82,6 +83,7 @@ internal fun Modifier.nestedScrollToScene(
             orientation = orientation,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
 
 private data class NestedScrollToSceneElement(
@@ -89,6 +91,7 @@ private data class NestedScrollToSceneElement(
     private val orientation: Orientation,
     private val topOrLeftBehavior: NestedScrollBehavior,
     private val bottomOrRightBehavior: NestedScrollBehavior,
+    private val isExternalOverscrollGesture: () -> Boolean,
 ) : ModifierNodeElement<NestedScrollToSceneNode>() {
     override fun create() =
         NestedScrollToSceneNode(
@@ -96,6 +99,7 @@ private data class NestedScrollToSceneElement(
             orientation = orientation,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
 
     override fun update(node: NestedScrollToSceneNode) {
@@ -104,6 +108,7 @@ private data class NestedScrollToSceneElement(
             orientation = orientation,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
     }
 
@@ -121,6 +126,7 @@ private class NestedScrollToSceneNode(
     orientation: Orientation,
     topOrLeftBehavior: NestedScrollBehavior,
     bottomOrRightBehavior: NestedScrollBehavior,
+    isExternalOverscrollGesture: () -> Boolean,
 ) : DelegatingNode() {
     private var priorityNestedScrollConnection: PriorityNestedScrollConnection =
         scenePriorityNestedScrollConnection(
@@ -128,6 +134,7 @@ private class NestedScrollToSceneNode(
             orientation = orientation,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
 
     private var nestedScrollNode: DelegatableNode =
@@ -150,6 +157,7 @@ private class NestedScrollToSceneNode(
         orientation: Orientation,
         topOrLeftBehavior: NestedScrollBehavior,
         bottomOrRightBehavior: NestedScrollBehavior,
+        isExternalOverscrollGesture: () -> Boolean,
     ) {
         // Clean up the old nested scroll connection
         priorityNestedScrollConnection.reset()
@@ -162,6 +170,7 @@ private class NestedScrollToSceneNode(
                 orientation = orientation,
                 topOrLeftBehavior = topOrLeftBehavior,
                 bottomOrRightBehavior = bottomOrRightBehavior,
+                isExternalOverscrollGesture = isExternalOverscrollGesture,
             )
         nestedScrollNode =
             nestedScrollModifierNode(
@@ -177,11 +186,13 @@ private fun scenePriorityNestedScrollConnection(
     orientation: Orientation,
     topOrLeftBehavior: NestedScrollBehavior,
     bottomOrRightBehavior: NestedScrollBehavior,
+    isExternalOverscrollGesture: () -> Boolean,
 ) =
     NestedScrollHandlerImpl(
             layoutImpl = layoutImpl,
             orientation = orientation,
             topOrLeftBehavior = topOrLeftBehavior,
             bottomOrRightBehavior = bottomOrRightBehavior,
+            isExternalOverscrollGesture = isExternalOverscrollGesture,
         )
         .connection

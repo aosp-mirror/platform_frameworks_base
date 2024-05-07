@@ -44,8 +44,15 @@ public final class PollingFrame implements Parcelable{
     /**
      * @hide
      */
-    @IntDef(prefix = { "POLLING_LOOP_TYPE_"}, value = { POLLING_LOOP_TYPE_A, POLLING_LOOP_TYPE_B,
-            POLLING_LOOP_TYPE_F, POLLING_LOOP_TYPE_OFF, POLLING_LOOP_TYPE_ON })
+    @IntDef(prefix = { "POLLING_LOOP_TYPE_"},
+        value = {
+            POLLING_LOOP_TYPE_A,
+            POLLING_LOOP_TYPE_B,
+            POLLING_LOOP_TYPE_F,
+            POLLING_LOOP_TYPE_OFF,
+            POLLING_LOOP_TYPE_ON,
+            POLLING_LOOP_TYPE_UNKNOWN
+        })
     @Retention(RetentionPolicy.SOURCE)
     @FlaggedApi(android.nfc.Flags.FLAG_NFC_READ_POLLING_LOOP)
     public @interface PollingFrameType {}

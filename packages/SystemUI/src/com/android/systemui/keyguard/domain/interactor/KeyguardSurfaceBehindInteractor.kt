@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Distance over which the surface behind the keyguard is animated in during a Y-translation
@@ -102,8 +103,11 @@ constructor(
      */
     private val isNotificationLaunchAnimationRunningOnKeyguard =
         notificationLaunchInteractor.isLaunchAnimationRunning
-            .sample(transitionInteractor.finishedKeyguardState)
-            .map { it != KeyguardState.GONE }
+            .sample(transitionInteractor.finishedKeyguardState, ::Pair)
+            .map { (animationRunning, finishedState) ->
+                animationRunning && finishedState != KeyguardState.GONE
+            }
+            .onStart { emit(false) }
 
     /**
      * Whether we're animating the surface, or a notification launch animation is running (which

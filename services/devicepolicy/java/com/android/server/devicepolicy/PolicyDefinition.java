@@ -684,7 +684,7 @@ final class PolicyDefinition<V> {
 
     void savePolicyValueToXml(TypedXmlSerializer serializer, V value)
             throws IOException {
-        mPolicySerializer.saveToXml(mPolicyKey, serializer, value);
+        mPolicySerializer.saveToXml(serializer, value);
     }
 
     @Nullable

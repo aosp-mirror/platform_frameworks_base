@@ -40,6 +40,12 @@ interface SceneTransitionsBuilder {
     var defaultSwipeSpec: SpringSpec<Float>
 
     /**
+     * The [InterruptionHandler] used when transitions are interrupted. Defaults to
+     * [DefaultInterruptionHandler].
+     */
+    var interruptionHandler: InterruptionHandler
+
+    /**
      * Define the default animation to be played when transitioning [to] the specified scene, from
      * any scene. For the animation specification to apply only when transitioning between two
      * specific scenes, use [from] instead.

@@ -51,6 +51,11 @@ class ScrollViewFields {
      */
     var syntheticScrollConsumer: Consumer<Float>? = null
     /**
+     * When a gesture is consumed internally by NSSL but needs to be handled by other elements (such
+     * as the notif scrim) as overscroll, we can notify the placeholder through here.
+     */
+    var currentGestureOverscrollConsumer: Consumer<Boolean>? = null
+    /**
      * Any time the stack height is recalculated, it should be updated here to be used by the
      * placeholder
      */
@@ -64,6 +69,9 @@ class ScrollViewFields {
     /** send the [syntheticScroll] to the [syntheticScrollConsumer], if present. */
     fun sendSyntheticScroll(syntheticScroll: Float) =
         syntheticScrollConsumer?.accept(syntheticScroll)
+    /** send [isCurrentGestureOverscroll] to the [currentGestureOverscrollConsumer], if present. */
+    fun sendCurrentGestureOverscroll(isCurrentGestureOverscroll: Boolean) =
+        currentGestureOverscrollConsumer?.accept(isCurrentGestureOverscroll)
     /** send the [stackHeight] to the [stackHeightConsumer], if present. */
     fun sendStackHeight(stackHeight: Float) = stackHeightConsumer?.accept(stackHeight)
     /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */

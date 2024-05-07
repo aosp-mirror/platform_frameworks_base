@@ -34,7 +34,7 @@ class LongPressHandlingViewInteractionHandler(
     /** Callback reporting the a single tap gesture was detected at the given coordinates. */
     private val onSingleTapDetected: () -> Unit,
     /** Time for the touch to be considered a long-press in ms */
-    private val longPressDuration: () -> Long,
+    var longPressDuration: () -> Long,
 ) {
     sealed class MotionEventModel {
         object Other : MotionEventModel()

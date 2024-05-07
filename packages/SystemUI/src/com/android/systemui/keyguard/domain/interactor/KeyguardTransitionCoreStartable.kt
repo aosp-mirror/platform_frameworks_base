@@ -27,6 +27,7 @@ class KeyguardTransitionCoreStartable
 constructor(
     private val interactors: Set<TransitionInteractor>,
     private val auditLogger: KeyguardTransitionAuditLogger,
+    private val bootInteractor: KeyguardTransitionBootInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -51,6 +52,7 @@ constructor(
             it.start()
         }
         auditLogger.start()
+        bootInteractor.start()
     }
 
     companion object {

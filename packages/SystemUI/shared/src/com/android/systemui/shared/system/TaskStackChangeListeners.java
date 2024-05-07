@@ -141,6 +141,7 @@ public class TaskStackChangeListeners {
         private static final int ON_TASK_DESCRIPTION_CHANGED = 21;
         private static final int ON_ACTIVITY_ROTATION = 22;
         private static final int ON_LOCK_TASK_MODE_CHANGED = 23;
+        private static final int ON_TASK_SNAPSHOT_INVALIDATED = 24;
 
         /**
          * List of {@link TaskStackChangeListener} registered from {@link #addListener}.
@@ -269,6 +270,12 @@ public class TaskStackChangeListeners {
         @Override
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
             mHandler.obtainMessage(ON_TASK_SNAPSHOT_CHANGED, taskId, 0, snapshot).sendToTarget();
+        }
+
+        @Override
+        public void onTaskSnapshotInvalidated(int taskId) {
+            mHandler.obtainMessage(ON_TASK_SNAPSHOT_INVALIDATED, taskId, 0 /* unused */)
+                    .sendToTarget();
         }
 
         @Override
@@ -494,6 +501,15 @@ public class TaskStackChangeListeners {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onLockTaskModeChanged(msg.arg1);
                         }
+                        break;
+                    }
+                    case ON_TASK_SNAPSHOT_INVALIDATED: {
+                        Trace.beginSection("onTaskSnapshotInvalidated");
+                        final ThumbnailData thumbnail = new ThumbnailData();
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onTaskSnapshotChanged(msg.arg1, thumbnail);
+                        }
+                        Trace.endSection();
                         break;
                     }
                 }

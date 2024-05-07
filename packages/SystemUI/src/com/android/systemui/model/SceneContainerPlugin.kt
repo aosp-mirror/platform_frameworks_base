@@ -85,7 +85,10 @@ constructor(
                     {
                         it.scene == Scenes.NotificationsShade || it.scene == Scenes.Shade
                     },
-                SYSUI_STATE_QUICK_SETTINGS_EXPANDED to { it.scene == Scenes.QuickSettings },
+                SYSUI_STATE_QUICK_SETTINGS_EXPANDED to
+                    {
+                        it.scene == Scenes.QuickSettingsShade || it.scene == Scenes.QuickSettings
+                    },
                 SYSUI_STATE_BOUNCER_SHOWING to { it.scene == Scenes.Bouncer },
                 SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to
                     {

@@ -572,12 +572,8 @@ public final class AppHibernationService extends SystemService {
                         packageName, uid, ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED,
                         true, ActivityManager.RESTRICTION_REASON_DORMANT, null,
                         /* TODO: fetch actual timeout - 90 days */ 90 * 24 * 60 * 60_000L);
-            } else {
-                mIActivityManager.noteAppRestrictionEnabled(
-                        packageName, uid, ActivityManager.RESTRICTION_LEVEL_FORCE_STOPPED,
-                        false, ActivityManager.RESTRICTION_REASON_USAGE, null,
-                        0L);
             }
+            // No need to log the unhibernate case as an unstop is logged already in ActivityMS
         } catch (RemoteException e) {
             Slog.e(TAG, "Couldn't set restriction state change");
         }

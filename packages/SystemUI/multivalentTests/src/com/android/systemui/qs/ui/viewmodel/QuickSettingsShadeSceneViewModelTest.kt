@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.ui.viewmodel
+package com.android.systemui.qs.ui.viewmodel
 
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticati
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ui.viewmodel.quickSettingsShadeSceneViewModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,14 +47,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
-class NotificationsShadeSceneViewModelTest : SysuiTestCase() {
+class QuickSettingsShadeSceneViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor = kosmos.sceneInteractor
     private val deviceUnlockedInteractor = kosmos.deviceUnlockedInteractor
 
-    private val underTest = kosmos.notificationsShadeSceneViewModel
+    private val underTest = kosmos.quickSettingsShadeSceneViewModel
 
     @Test
     fun upTransitionSceneKey_deviceLocked_lockscreen() =

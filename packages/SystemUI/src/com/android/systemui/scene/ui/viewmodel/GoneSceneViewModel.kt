@@ -60,6 +60,16 @@ constructor(
                     )] = UserActionResult(Scenes.QuickSettings)
             }
 
+            // TODO(b/338577208): Remove this once we add Dual Shade invocation zones.
+            if (shadeMode is ShadeMode.Dual) {
+                this[
+                    Swipe(
+                        pointerCount = 2,
+                        fromSource = Edge.Top,
+                        direction = SwipeDirection.Down,
+                    )] = UserActionResult(Scenes.QuickSettingsShade)
+            }
+
             this[Swipe(direction = SwipeDirection.Down)] =
                 UserActionResult(
                     if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade

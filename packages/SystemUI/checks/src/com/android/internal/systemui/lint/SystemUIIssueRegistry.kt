@@ -40,6 +40,7 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 RegisterReceiverViaContextDetector.ISSUE,
                 SoftwareBitmapDetector.ISSUE,
                 NonInjectedServiceDetector.ISSUE,
+                SingletonAndroidComponentDetector.ISSUE,
                 StaticSettingsProviderDetector.ISSUE,
                 DemotingTestWithoutBugDetector.ISSUE,
                 TestFunctionNameViolationDetector.ISSUE,

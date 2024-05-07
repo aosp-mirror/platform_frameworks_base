@@ -1570,8 +1570,6 @@ public class SplitControllerTest {
         mSetFlagRule.enableFlags(Flags.FLAG_ACTIVITY_WINDOW_INFO_FLAG);
 
         final boolean isEmbedded = true;
-        final Rect activityBounds = mActivity.getResources().getConfiguration().windowConfiguration
-                .getBounds();
         final Rect taskBounds = new Rect(0, 0, 1000, 2000);
         final Rect activityStackBounds = new Rect(0, 0, 500, 2000);
         doReturn(isEmbedded).when(mActivityWindowInfo).isEmbedded();
@@ -1579,7 +1577,7 @@ public class SplitControllerTest {
         doReturn(activityStackBounds).when(mActivityWindowInfo).getTaskFragmentBounds();
 
         final EmbeddedActivityWindowInfo expected = new EmbeddedActivityWindowInfo(mActivity,
-                isEmbedded, activityBounds, taskBounds, activityStackBounds);
+                isEmbedded, taskBounds, activityStackBounds);
         assertEquals(expected, mSplitController.getEmbeddedActivityWindowInfo(mActivity));
     }
 

@@ -1270,4 +1270,16 @@ public abstract class ActivityManagerInternal {
      * @hide
      */
     public abstract boolean shouldDelayHomeLaunch(int userId);
+
+    /**
+     * Add a startup timestamp to the most recent start of the specified process.
+     *
+     * @param key The {@link ApplicationStartInfo} start timestamp key of the timestamp to add.
+     * @param timestampNs The clock monotonic timestamp to add in nanoseconds.
+     * @param uid The UID of the process to add this timestamp to.
+     * @param pid The process id of the process to add this timestamp to.
+     * @param userId The userId in the multi-user environment.
+     */
+    public abstract void addStartInfoTimestamp(int key, long timestampNs, int uid, int pid,
+            int userId);
 }

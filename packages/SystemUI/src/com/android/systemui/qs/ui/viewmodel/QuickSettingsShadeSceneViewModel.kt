@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade.ui.viewmodel
+package com.android.systemui.qs.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.SceneKey
@@ -23,6 +23,7 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,9 +31,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-/** Models UI state and handles user input for the Notifications Shade scene. */
+/** Models UI state and handles user input for the Quick Settings Shade scene. */
 @SysUISingleton
-class NotificationsShadeSceneViewModel
+class QuickSettingsShadeSceneViewModel
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,

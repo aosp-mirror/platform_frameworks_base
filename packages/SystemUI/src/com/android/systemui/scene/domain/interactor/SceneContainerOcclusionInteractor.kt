@@ -127,6 +127,7 @@ constructor(
                 Scenes.Lockscreen -> true
                 Scenes.NotificationsShade -> false
                 Scenes.QuickSettings -> false
+                Scenes.QuickSettingsShade -> false
                 Scenes.Shade -> false
                 else -> error("SceneKey \"$this\" doesn't have a mapping for canBeOccluded!")
             }

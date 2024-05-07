@@ -18,6 +18,7 @@ package com.android.server.inputmethod;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -38,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntFunction;
 
 // This test is designed to run on both device and host (Ravenwood) side.
 public final class UserDataRepositoryTest {
@@ -51,19 +53,34 @@ public final class UserDataRepositoryTest {
     @Mock
     private UserManagerInternal mMockUserManagerInternal;
 
+    @Mock
+    private InputMethodManagerService mMockInputMethodManagerService;
+
     private Handler mHandler;
+
+    private IntFunction<InputMethodBindingController> mBindingControllerFactory;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mHandler = new Handler(Looper.getMainLooper());
+        mBindingControllerFactory = new IntFunction<InputMethodBindingController>() {
+
+            @Override
+            public InputMethodBindingController apply(int userId) {
+                return new InputMethodBindingController(userId, mMockInputMethodManagerService);
+            }
+        };
     }
 
     @Test
     public void testUserDataRepository_addsNewUserInfoOnUserCreatedEvent() {
         // Create UserDataRepository and capture the user lifecycle listener
         final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal);
+        final var bindingControllerFactorySpy = spy(mBindingControllerFactory);
+        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
+                bindingControllerFactorySpy);
+
         verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
         final var listener = captor.getValue();
 
@@ -77,14 +94,20 @@ public final class UserDataRepositoryTest {
         // Assert UserDataRepository contains the expected UserData
         final var allUserData = collectUserData(repository);
         assertThat(allUserData).hasSize(1);
-        assertThat(allUserData.get(0).mUserId).isEqualTo(userInfo.id);
+        assertThat(allUserData.get(0).mUserId).isEqualTo(ANY_USER_ID);
+
+        // Assert UserDataRepository called the InputMethodBindingController creator function.
+        verify(bindingControllerFactorySpy).apply(ANY_USER_ID);
+        assertThat(allUserData.get(0).mBindingController.mUserId).isEqualTo(ANY_USER_ID);
     }
 
     @Test
     public void testUserDataRepository_removesUserInfoOnUserRemovedEvent() {
         // Create UserDataRepository and capture the user lifecycle listener
         final var captor = ArgumentCaptor.forClass(UserManagerInternal.UserLifecycleListener.class);
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal);
+        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
+                userId -> new InputMethodBindingController(userId, mMockInputMethodManagerService));
+
         verify(mMockUserManagerInternal, times(1)).addUserLifecycleListener(captor.capture());
         final var listener = captor.getValue();
 
@@ -104,7 +127,8 @@ public final class UserDataRepositoryTest {
 
     @Test
     public void testGetOrCreate() {
-        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal);
+        final var repository = new UserDataRepository(mHandler, mMockUserManagerInternal,
+                mBindingControllerFactory);
 
         synchronized (ImfLock.class) {
             final var userData = repository.getOrCreate(ANY_USER_ID);
@@ -114,6 +138,9 @@ public final class UserDataRepositoryTest {
         final var allUserData = collectUserData(repository);
         assertThat(allUserData).hasSize(1);
         assertThat(allUserData.get(0).mUserId).isEqualTo(ANY_USER_ID);
+
+        // Assert UserDataRepository called the InputMethodBindingController creator function.
+        assertThat(allUserData.get(0).mBindingController.mUserId).isEqualTo(ANY_USER_ID);
     }
 
     private List<UserDataRepository.UserData> collectUserData(UserDataRepository repository) {

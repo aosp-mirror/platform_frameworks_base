@@ -1592,7 +1592,8 @@ public final class AutofillManager {
                 // request comes in but PCC Detection hasn't been triggered. There is no benefit to
                 // trigger PCC Detection separately in those cases.
                 if (!isActiveLocked()) {
-                    final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+                    final boolean clientAdded =
+                            tryAddServiceClientIfNeededLocked(isCredmanRequested);
                     if (clientAdded) {
                         startSessionLocked(/* id= */ AutofillId.NO_AUTOFILL_ID, /* bounds= */ null,
                             /* value= */ null, /* flags= */ FLAG_PCC_DETECTION);
@@ -1850,7 +1851,8 @@ public final class AutofillManager {
             Rect bounds, AutofillValue value, int flags) {
         if (shouldIgnoreViewEnteredLocked(id, flags)) return null;
 
-        final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+        boolean credmanRequested = isCredmanRequested(view);
+        final boolean clientAdded = tryAddServiceClientIfNeededLocked(credmanRequested);
         if (!clientAdded) {
             if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): no service client");
             return null;
@@ -2645,6 +2647,11 @@ public final class AutofillManager {
      */
     @GuardedBy("mLock")
     private boolean tryAddServiceClientIfNeededLocked() {
+        return tryAddServiceClientIfNeededLocked(/*credmanRequested=*/ false);
+    }
+
+    @GuardedBy("mLock")
+    private boolean tryAddServiceClientIfNeededLocked(boolean credmanRequested) {
         final AutofillClient client = getClient();
         if (client == null) {
             return false;
@@ -2659,7 +2666,7 @@ public final class AutofillManager {
                 final int userId = mContext.getUserId();
                 final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
                 mService.addClient(mServiceClient, client.autofillClientGetComponentName(),
-                        userId, receiver);
+                        userId, receiver, credmanRequested);
                 int flags = 0;
                 try {
                     flags = receiver.getIntResult();

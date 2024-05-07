@@ -44,6 +44,7 @@ import static android.os.Process.myUid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.permission.flags.Flags.sensitiveContentImprovements;
 import static android.permission.flags.Flags.sensitiveContentMetricsBugfix;
+import static android.permission.flags.Flags.sensitiveContentRecentsScreenshotBugfix;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
@@ -68,7 +69,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_TRACING;
+import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
@@ -536,6 +537,21 @@ public class WindowManagerService extends IWindowManager.Stub
         public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
                 boolean asProto) {
             doDump(fd, pw, new String[] {"-a"}, asProto);
+        }
+
+        @Override
+        public void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args,
+                boolean asProto) {
+            if (asProto) {
+                return;
+            }
+            mAtmService.dumpActivity(fd, pw, /* name= */ "all", /* args= */ new String[]{},
+                    /* opti= */ 0,
+                    /* dumpAll= */ true,
+                    /* dumpVisibleRootTasksOnly= */ true,
+                    /* dumpFocusedRootTaskOnly= */ false, INVALID_DISPLAY, UserHandle.USER_ALL,
+                    /* timeout= */ 1000
+            );
         }
 
         @Override
@@ -8853,11 +8869,25 @@ public class WindowManagerService extends IWindowManager.Stub
                         mRoot.forAllWindows((w) -> {
                             if (w.isVisible()) {
                                 WindowManagerService.this.showToastIfBlockingScreenCapture(w);
+                            } else if (sensitiveContentRecentsScreenshotBugfix()
+                                    && shouldInvalidateSnapshot(w)) {
+                                final Task task = w.getTask();
+                                // preventing from showing up in starting window.
+                                mTaskSnapshotController.removeAndDeleteSnapshot(
+                                        task.mTaskId, task.mUserId);
+                                // Refresh TaskThumbnailCache
+                                task.onSnapshotInvalidated();
                             }
                         }, /* traverseTopToBottom= */ true);
                     }
                 }
             }
+        }
+
+        private boolean shouldInvalidateSnapshot(WindowState w) {
+            return w.getTask() != null
+                    && mSensitiveContentPackages.shouldBlockScreenCaptureForApp(
+                    w.getOwningPackage(), w.getOwningUid(), w.getWindowToken());
         }
 
         @Override
@@ -9281,11 +9311,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        // You can only use INPUT_FEATURE_SENSITIVE_FOR_TRACING on a trusted overlay.
-        if ((inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_TRACING) != 0 && !isTrustedOverlay) {
-            Slog.w(TAG, "Removing INPUT_FEATURE_SENSITIVE_FOR_TRACING from '" + windowName
+        // You can only use INPUT_FEATURE_SENSITIVE_FOR_PRIVACY on a trusted overlay.
+        if ((inputFeatures & INPUT_FEATURE_SENSITIVE_FOR_PRIVACY) != 0 && !isTrustedOverlay) {
+            Slog.w(TAG, "Removing INPUT_FEATURE_SENSITIVE_FOR_PRIVACY from '" + windowName
                     + "' because it isn't a trusted overlay");
-            return inputFeatures & ~INPUT_FEATURE_SENSITIVE_FOR_TRACING;
+            return inputFeatures & ~INPUT_FEATURE_SENSITIVE_FOR_PRIVACY;
         }
         return inputFeatures;
     }

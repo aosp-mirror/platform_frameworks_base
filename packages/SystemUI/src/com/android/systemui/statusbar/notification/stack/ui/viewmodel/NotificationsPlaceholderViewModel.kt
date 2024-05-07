@@ -111,6 +111,13 @@ constructor(
     val syntheticScroll: Flow<Float> =
         interactor.syntheticScroll.dumpWhileCollecting("syntheticScroll")
 
+    /**
+     * Whether the current touch gesture is overscroll. If true, it means the NSSL has already
+     * consumed part of the gesture.
+     */
+    val isCurrentGestureOverscroll: Flow<Boolean> =
+        interactor.isCurrentGestureOverscroll.dumpWhileCollecting("isCurrentGestureOverScroll")
+
     /** Sets whether the notification stack is scrolled to the top. */
     fun setScrolledToTop(scrolledToTop: Boolean) {
         interactor.setScrolledToTop(scrolledToTop)

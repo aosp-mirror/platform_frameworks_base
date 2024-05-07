@@ -18,9 +18,15 @@ package com.android.systemui.volume.panel.component.mediaoutput.data.repository
 
 import com.android.settingslib.volume.data.repository.LocalMediaRepository
 
-class FakeLocalMediaRepositoryFactory(
-    val provider: (packageName: String?) -> LocalMediaRepository
-) : LocalMediaRepositoryFactory {
+class FakeLocalMediaRepositoryFactory(private val defaultProvider: () -> LocalMediaRepository) :
+    LocalMediaRepositoryFactory {
 
-    override fun create(packageName: String?): LocalMediaRepository = provider(packageName)
+    private val repositories = mutableMapOf<String, LocalMediaRepository>()
+
+    fun setLocalMediaRepository(packageName: String, localMediaRepository: LocalMediaRepository) {
+        repositories[packageName] = localMediaRepository
+    }
+
+    override fun create(packageName: String?): LocalMediaRepository =
+        repositories[packageName] ?: defaultProvider()
 }

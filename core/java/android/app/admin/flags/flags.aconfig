@@ -303,3 +303,24 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "headless_single_user_compatibility_fix"
+    namespace: "enterprise"
+    description: "Fix for compatibility issue introduced from using single_user mode on pre-Android V builds"
+    bug: "338050276"
+    is_exported: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "headless_single_min_target_sdk"
+    namespace: "enterprise"
+    description: "Only allow DPCs targeting Android V to provision into single user mode"
+    bug: "338588825"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
