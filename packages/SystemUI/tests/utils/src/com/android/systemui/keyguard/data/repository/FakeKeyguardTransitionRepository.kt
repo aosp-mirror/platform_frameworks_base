@@ -40,12 +40,21 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 
-/** Fake implementation of [KeyguardTransitionRepository] */
+/**
+ * Fake implementation of [KeyguardTransitionRepository].
+ *
+ * By default, will be seeded with a transition from OFF -> LOCKSCREEN, which is the most common
+ * case. If the lockscreen is disabled, or we're in setup wizard, the repository will initialize
+ * with OFF -> GONE. Construct with initInLockscreen = false if your test requires this behavior.
+ */
 @SysUISingleton
-class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitionRepository {
+class FakeKeyguardTransitionRepository(
+    private val initInLockscreen: Boolean = true,
+) : KeyguardTransitionRepository {
     private val _transitions =
         MutableSharedFlow<TransitionStep>(replay = 3, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val transitions: SharedFlow<TransitionStep> = _transitions
+    @Inject constructor() : this(initInLockscreen = true)
 
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
         MutableStateFlow(
@@ -59,8 +68,21 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
     override var currentTransitionInfoInternal = _currentTransitionInfo.asStateFlow()
 
     init {
-        // Seed the fake repository with the same initial steps the actual repository uses.
-        KeyguardTransitionRepositoryImpl.initialTransitionSteps.forEach { _transitions.tryEmit(it) }
+        // Seed with a FINISHED transition in OFF, same as the real repository.
+        _transitions.tryEmit(
+            TransitionStep(
+                KeyguardState.OFF,
+                KeyguardState.OFF,
+                1f,
+                TransitionState.FINISHED,
+            )
+        )
+
+        if (initInLockscreen) {
+            tryEmitInitialStepsFromOff(KeyguardState.LOCKSCREEN)
+        } else {
+            tryEmitInitialStepsFromOff(KeyguardState.OFF)
+        }
     }
 
     /**
@@ -221,6 +243,32 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
     override suspend fun startTransition(info: TransitionInfo): UUID? {
         _currentTransitionInfo.value = info
         return if (info.animator == null) UUID.randomUUID() else null
+    }
+
+    override suspend fun emitInitialStepsFromOff(to: KeyguardState) {
+        tryEmitInitialStepsFromOff(to)
+    }
+
+    private fun tryEmitInitialStepsFromOff(to: KeyguardState) {
+        _transitions.tryEmit(
+            TransitionStep(
+                KeyguardState.OFF,
+                to,
+                0f,
+                TransitionState.STARTED,
+                ownerName = "KeyguardTransitionRepository(boot)",
+            )
+        )
+
+        _transitions.tryEmit(
+            TransitionStep(
+                KeyguardState.OFF,
+                to,
+                1f,
+                TransitionState.FINISHED,
+                ownerName = "KeyguardTransitionRepository(boot)",
+            ),
+        )
     }
 
     override fun updateTransition(

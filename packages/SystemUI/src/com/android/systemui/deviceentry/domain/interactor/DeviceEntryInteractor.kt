@@ -240,6 +240,15 @@ constructor(
     }
 
     /**
+     * Whether the lockscreen is enabled for the current user. This is `true` whenever the user has
+     * chosen any secure authentication method and even if they set the lockscreen to be dismissed
+     * when the user swipes on it.
+     */
+    suspend fun isLockscreenEnabled(): Boolean {
+        return repository.isLockscreenEnabled()
+    }
+
+    /**
      * Whether lockscreen bypass is enabled. When enabled, the lockscreen will be automatically
      * dismissed once the authentication challenge is completed. For example, completing a biometric
      * authentication challenge via face unlock or fingerprint sensor can automatically bypass the

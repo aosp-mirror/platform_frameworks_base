@@ -235,7 +235,13 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 .isEqualTo(
                     listOf(
                         // The initial transition will also get sent when collect started
-                        TransitionStep(OFF, LOCKSCREEN, 0f, STARTED),
+                        TransitionStep(
+                            OFF,
+                            LOCKSCREEN,
+                            0f,
+                            STARTED,
+                            ownerName = "KeyguardTransitionRepository(boot)"
+                        ),
                         steps[0],
                         steps[3],
                         steps[6]
