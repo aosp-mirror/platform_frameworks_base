@@ -29,6 +29,7 @@ import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.flags.Flags.FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
@@ -200,6 +201,18 @@ class CommunalSettingsRepositoryImplTest : SysuiTestCase() {
             val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
             assertThat(setting?.categories)
                 .isEqualTo(AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
+        }
+
+    @EnableFlags(FLAG_COMMUNAL_HUB, FLAG_ALLOW_ALL_WIDGETS_ON_LOCKSCREEN_BY_DEFAULT)
+    @Test
+    fun hubShowsAllWidgetsByDefaultWhenFlagEnabled() =
+        testScope.runTest {
+            val setting by collectLastValue(underTest.getWidgetCategories(PRIMARY_USER))
+            assertThat(setting?.categories)
+                .isEqualTo(
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD +
+                        AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
+                )
         }
 
     private fun setKeyguardFeaturesDisabled(user: UserInfo, disabledFlags: Int) {
