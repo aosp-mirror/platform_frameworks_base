@@ -1,4 +1,5 @@
 package: "android.database.sqlite"
+container: "system"
 
 flag {
      name: "sqlite_apis_35"

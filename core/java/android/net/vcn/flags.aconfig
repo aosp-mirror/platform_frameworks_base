@@ -1,4 +1,5 @@
 package: "android.net.vcn"
+container: "system"
 
 flag {
     name: "safe_mode_config"
@@ -41,6 +42,16 @@ flag{
     namespace: "vcn"
     description: "Do not report bad network when there is a suspected sequence number leap"
     bug: "332598276"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag{
+    name: "allow_disable_ipsec_loss_detector"
+    namespace: "vcn"
+    description: "Allow disabling IPsec packet loss detector"
+    bug: "336638836"
     metadata {
       purpose: PURPOSE_BUGFIX
     }

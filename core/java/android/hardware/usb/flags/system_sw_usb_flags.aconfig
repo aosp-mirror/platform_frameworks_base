@@ -1,4 +1,5 @@
 package: "android.hardware.usb.flags"
+container: "system"
 
 flag {
     name: "enable_usb_data_compliance_warning"

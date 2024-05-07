@@ -1,4 +1,5 @@
 package: "com.android.systemui"
+container: "system"
 
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 

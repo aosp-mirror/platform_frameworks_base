@@ -1,6 +1,7 @@
 aconfig_declarations {
     name: "display_flags",
     package: "com.android.server.display.feature.flags",
+    container: "system",
     srcs: [
         "*.aconfig",
     ],

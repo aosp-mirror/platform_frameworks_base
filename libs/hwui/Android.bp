@@ -31,6 +31,7 @@ license {
 aconfig_declarations {
     name: "hwui_flags",
     package: "com.android.graphics.hwui.flags",
+    container: "system",
     srcs: [
         "aconfig/hwui_flags.aconfig",
     ],

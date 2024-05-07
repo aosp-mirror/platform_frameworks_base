@@ -1,4 +1,5 @@
 package: "android.webkit"
+container: "system"
 
 flag {
     name: "update_service_v2"

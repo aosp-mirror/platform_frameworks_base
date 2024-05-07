@@ -432,10 +432,10 @@ import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
-import android.security.KeyStore;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.telecom.TelecomManager;
@@ -6248,7 +6248,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     KeyChain.bindAsUser(mContext, caller.getUserHandle());
             try {
                 IKeyChainService keyChain = keyChainConnection.getService();
-                if (!keyChain.installKeyPair(privKey, cert, chain, alias, KeyStore.UID_SELF)) {
+                if (!keyChain.installKeyPair(privKey, cert, chain, alias, KeyProperties.UID_SELF)) {
                     logInstallKeyPairFailure(caller, isCredentialManagementApp);
                     return false;
                 }
@@ -6588,7 +6588,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         // As the caller will be granted access to the key, ensure no UID was specified, as
         // it will not have the desired effect.
-        if (keySpec.getUid() != KeyStore.UID_SELF) {
+        if (keySpec.getUid() != KeyProperties.UID_SELF) {
             Slogf.e(LOG_TAG, "Only the caller can be granted access to the generated keypair.");
             logGenerateKeyPairFailure(caller, isCredentialManagementApp);
             return false;

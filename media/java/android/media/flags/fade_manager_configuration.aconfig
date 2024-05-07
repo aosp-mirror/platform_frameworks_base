@@ -1,4 +1,5 @@
 package: "com.android.media.flags"
+container: "system"
 
 flag {
     namespace: "media_solutions"
