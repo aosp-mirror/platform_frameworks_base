@@ -249,7 +249,7 @@
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Redémarrer en mode sans échec"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Voulez-vous redémarrer en mode sans échec? Cette opération aura pour effet de désactiver toutes les applications tierces que vous avez installées. Elles seront réactivées au prochain redémarrage."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"Récents"</string>
-    <string name="no_recent_tasks" msgid="9063946524312275906">"Aucune application récente"</string>
+    <string name="no_recent_tasks" msgid="9063946524312275906">"Aucune appli récente"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Options de la tablette"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Options d\'Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Options du téléphone"</string>
