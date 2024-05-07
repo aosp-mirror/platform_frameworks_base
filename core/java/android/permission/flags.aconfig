@@ -1,4 +1,5 @@
 package: "android.permission.flags"
+container: "system"
 
 flag {
   name: "device_aware_permission_apis_enabled"

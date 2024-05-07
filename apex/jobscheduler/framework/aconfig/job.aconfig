@@ -1,4 +1,5 @@
 package: "android.app.job"
+container: "system"
 
 flag {
     name: "enforce_minimum_time_windows"
