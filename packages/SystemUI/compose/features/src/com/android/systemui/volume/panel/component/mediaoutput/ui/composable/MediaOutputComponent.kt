@@ -86,7 +86,10 @@ constructor(
             modifier =
                 Modifier.fillMaxWidth().height(80.dp).semantics {
                     liveRegion = LiveRegionMode.Polite
-                    this.onClick(label = clickLabel) { false }
+                    this.onClick(label = clickLabel) {
+                        viewModel.onBarClick(null)
+                        true
+                    }
                 },
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(28.dp),

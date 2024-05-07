@@ -33,15 +33,15 @@ constructor(
     private val mediaOutputDialogManager: MediaOutputDialogManager,
 ) {
 
-    fun onBarClick(sessionWithPlaybackState: SessionWithPlaybackState?, expandable: Expandable) {
+    fun onBarClick(sessionWithPlaybackState: SessionWithPlaybackState?, expandable: Expandable?) {
         if (sessionWithPlaybackState?.isPlaybackActive == true) {
             mediaOutputDialogManager.createAndShowWithController(
                 sessionWithPlaybackState.session.packageName,
                 false,
-                expandable.dialogController()
+                expandable?.dialogController()
             )
         } else {
-            mediaOutputDialogManager.createAndShowForSystemRouting(expandable.dialogController())
+            mediaOutputDialogManager.createAndShowForSystemRouting(expandable?.dialogController())
         }
     }
 
