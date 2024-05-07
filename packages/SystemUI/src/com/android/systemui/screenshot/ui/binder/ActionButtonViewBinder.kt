@@ -21,6 +21,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.systemui.res.R
+import com.android.systemui.screenshot.ui.TransitioningIconDrawable
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
 
 object ActionButtonViewBinder {
@@ -28,7 +29,13 @@ object ActionButtonViewBinder {
     fun bind(view: View, viewModel: ActionButtonViewModel) {
         val iconView = view.requireViewById<ImageView>(R.id.overlay_action_chip_icon)
         val textView = view.requireViewById<TextView>(R.id.overlay_action_chip_text)
-        iconView.setImageDrawable(viewModel.appearance.icon)
+        if (iconView.drawable == null) {
+            iconView.setImageDrawable(TransitioningIconDrawable())
+        }
+        val drawable = iconView.drawable as? TransitioningIconDrawable
+        // Note we never re-bind a view to a different ActionButtonViewModel, different view
+        // models would remove/create separate views.
+        drawable?.setIcon(viewModel.appearance.icon)
         textView.text = viewModel.appearance.label
         setMargins(iconView, textView, viewModel.appearance.label?.isNotEmpty() ?: false)
         if (viewModel.onClicked != null) {

@@ -16,6 +16,6 @@
 
 <shape xmlns:android = "http://schemas.android.com/apk/res/android">
     <size
-        android:width = "@dimen/overlay_action_chip_margin_start"
+        android:width = "@dimen/shelf_action_chip_margin_start"
         android:height = "0dp"/>
 </shape>
