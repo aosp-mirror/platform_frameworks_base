@@ -87,6 +87,14 @@ constructor(
         )
     }
 
+    fun snapToScene(
+        toScene: SceneKey,
+    ) {
+        dataSource.snapToScene(
+            toScene = toScene,
+        )
+    }
+
     /** Sets whether the container is visible. */
     fun setVisible(isVisible: Boolean) {
         _isVisible.value = isVisible

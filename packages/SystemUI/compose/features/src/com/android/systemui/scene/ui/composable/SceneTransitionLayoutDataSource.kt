@@ -62,4 +62,10 @@ class SceneTransitionLayoutDataSource(
             coroutineScope = coroutineScope,
         )
     }
+
+    override fun snapToScene(toScene: SceneKey) {
+        state.snapToScene(
+            scene = toScene,
+        )
+    }
 }

@@ -70,6 +70,9 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
 
             underTest.changeScene(Scenes.Shade)
             assertThat(currentScene).isEqualTo(Scenes.Shade)
+
+            underTest.snapToScene(Scenes.QuickSettings)
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
         }
 
     @Test(expected = IllegalStateException::class)
@@ -77,6 +80,13 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
         kosmos.sceneKeys = listOf(Scenes.QuickSettings, Scenes.Lockscreen)
         val underTest = kosmos.sceneContainerRepository
         underTest.changeScene(Scenes.Shade)
+    }
+
+    @Test(expected = IllegalStateException::class)
+    fun snapToScene_noSuchSceneInContainer_throws() {
+        kosmos.sceneKeys = listOf(Scenes.QuickSettings, Scenes.Lockscreen)
+        val underTest = kosmos.sceneContainerRepository
+        underTest.snapToScene(Scenes.Shade)
     }
 
     @Test

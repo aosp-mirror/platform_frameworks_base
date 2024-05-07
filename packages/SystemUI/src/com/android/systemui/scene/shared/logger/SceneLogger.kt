@@ -47,6 +47,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         from: SceneKey,
         to: SceneKey,
         reason: String,
+        isInstant: Boolean,
     ) {
         logBuffer.log(
             tag = TAG,
@@ -55,8 +56,17 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
                 str1 = from.toString()
                 str2 = to.toString()
                 str3 = reason
+                bool1 = isInstant
             },
-            messagePrinter = { "Scene change requested: $str1 → $str2, reason: $str3" },
+            messagePrinter = {
+                buildString {
+                    append("Scene change requested: $str1 → $str2")
+                    if (isInstant) {
+                        append(" (instant)")
+                    }
+                    append(", reason: $str3")
+                }
+            },
         )
     }
 
