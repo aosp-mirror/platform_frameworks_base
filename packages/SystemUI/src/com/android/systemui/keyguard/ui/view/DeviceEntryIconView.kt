@@ -40,10 +40,7 @@ constructor(
     attrs: AttributeSet?,
     defStyleAttrs: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttrs) {
-    val longPressHandlingView: LongPressHandlingView =
-        LongPressHandlingView(context, attrs) {
-            context.resources.getInteger(R.integer.config_lockIconLongPress).toLong()
-        }
+    val longPressHandlingView: LongPressHandlingView = LongPressHandlingView(context, attrs)
     val iconView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_fg }
     val bgView: ImageView = ImageView(context, attrs).apply { id = R.id.device_entry_icon_bg }
     val aodFpDrawable: LottieDrawable = LottieDrawable()
