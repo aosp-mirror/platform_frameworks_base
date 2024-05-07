@@ -78,7 +78,7 @@ import java.util.function.Consumer;
 
 /**
  * Records and handles layout of splits. Helps to calculate proper bounds when configuration or
- * divide position changes.
+ * divider position changes.
  */
 public final class SplitLayout implements DisplayInsetsController.OnInsetsChangedListener {
     private static final String TAG = "SplitLayout";
@@ -278,7 +278,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return mSplitWindowManager == null ? null : mSplitWindowManager.getSurfaceControl();
     }
 
-    int getDividePosition() {
+    int getDividerPosition() {
         return mDividerPosition;
     }
 
@@ -489,20 +489,20 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public void setDividerAtBorder(boolean start) {
         final int pos = start ? mDividerSnapAlgorithm.getDismissStartTarget().position
                 : mDividerSnapAlgorithm.getDismissEndTarget().position;
-        setDividePosition(pos, false /* applyLayoutChange */);
+        setDividerPosition(pos, false /* applyLayoutChange */);
     }
 
     /**
      * Updates bounds with the passing position. Usually used to update recording bounds while
      * performing animation or dragging divider bar to resize the splits.
      */
-    void updateDivideBounds(int position) {
+    void updateDividerBounds(int position) {
         updateBounds(position);
         mSplitLayoutHandler.onLayoutSizeChanging(this, mSurfaceEffectPolicy.mParallaxOffset.x,
                 mSurfaceEffectPolicy.mParallaxOffset.y);
     }
 
-    void setDividePosition(int position, boolean applyLayoutChange) {
+    void setDividerPosition(int position, boolean applyLayoutChange) {
         mDividerPosition = position;
         updateBounds(mDividerPosition);
         if (applyLayoutChange) {
@@ -511,14 +511,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /**
-     * Updates divide position and split bounds base on the ratio within root bounds. Falls back
+     * Updates divider position and split bounds base on the ratio within root bounds. Falls back
      * to middle position if the provided SnapTarget is not supported.
      */
     public void setDivideRatio(@PersistentSnapPosition int snapPosition) {
         final DividerSnapAlgorithm.SnapTarget snapTarget = mDividerSnapAlgorithm.findSnapTarget(
                 snapPosition);
 
-        setDividePosition(snapTarget != null
+        setDividerPosition(snapTarget != null
                 ? snapTarget.position
                 : mDividerSnapAlgorithm.getMiddleTarget().position,
                 false /* applyLayoutChange */);
@@ -546,24 +546,24 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /**
-     * Sets new divide position and updates bounds correspondingly. Notifies listener if the new
+     * Sets new divider position and updates bounds correspondingly. Notifies listener if the new
      * target indicates dismissing split.
      */
     public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
         switch (snapTarget.snapPosition) {
             case SNAP_TO_START_AND_DISMISS:
-                flingDividePosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
+                flingDividerPosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
                         () -> mSplitLayoutHandler.onSnappedToDismiss(false /* bottomOrRight */,
                                 EXIT_REASON_DRAG_DIVIDER));
                 break;
             case SNAP_TO_END_AND_DISMISS:
-                flingDividePosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
+                flingDividerPosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
                         () -> mSplitLayoutHandler.onSnappedToDismiss(true /* bottomOrRight */,
                                 EXIT_REASON_DRAG_DIVIDER));
                 break;
             default:
-                flingDividePosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
-                        () -> setDividePosition(snapTarget.position, true /* applyLayoutChange */));
+                flingDividerPosition(currentPosition, snapTarget.position, FLING_RESIZE_DURATION,
+                        () -> setDividerPosition(snapTarget.position, true /* applyLayoutChange */));
                 break;
         }
     }
@@ -615,19 +615,19 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     public void flingDividerToDismiss(boolean toEnd, int reason) {
         final int target = toEnd ? mDividerSnapAlgorithm.getDismissEndTarget().position
                 : mDividerSnapAlgorithm.getDismissStartTarget().position;
-        flingDividePosition(getDividePosition(), target, FLING_EXIT_DURATION,
+        flingDividerPosition(getDividerPosition(), target, FLING_EXIT_DURATION,
                 () -> mSplitLayoutHandler.onSnappedToDismiss(toEnd, reason));
     }
 
     /** Fling divider from current position to center position. */
     public void flingDividerToCenter() {
         final int pos = mDividerSnapAlgorithm.getMiddleTarget().position;
-        flingDividePosition(getDividePosition(), pos, FLING_ENTER_DURATION,
-                () -> setDividePosition(pos, true /* applyLayoutChange */));
+        flingDividerPosition(getDividerPosition(), pos, FLING_ENTER_DURATION,
+                () -> setDividerPosition(pos, true /* applyLayoutChange */));
     }
 
     @VisibleForTesting
-    void flingDividePosition(int from, int to, int duration,
+    void flingDividerPosition(int from, int to, int duration,
             @Nullable Runnable flingFinishedCallback) {
         if (from == to) {
             if (flingFinishedCallback != null) {
@@ -647,7 +647,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 .setDuration(duration);
         mDividerFlingAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mDividerFlingAnimator.addUpdateListener(
-                animation -> updateDivideBounds((int) animation.getAnimatedValue()));
+                animation -> updateDividerBounds((int) animation.getAnimatedValue()));
         mDividerFlingAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
