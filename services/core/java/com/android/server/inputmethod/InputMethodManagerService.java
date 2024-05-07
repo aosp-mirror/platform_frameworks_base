@@ -307,14 +307,17 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @MultiUserUnawareField
     private final InputMethodMenuController mMenuController;
     @MultiUserUnawareField
-    @NonNull private final AutofillSuggestionsController mAutofillController;
+    @NonNull
+    private final AutofillSuggestionsController mAutofillController;
 
     @GuardedBy("ImfLock.class")
     @MultiUserUnawareField
-    @NonNull private final ImeVisibilityStateComputer mVisibilityStateComputer;
+    @NonNull
+    private final ImeVisibilityStateComputer mVisibilityStateComputer;
 
     @GuardedBy("ImfLock.class")
-    @NonNull private final DefaultImeVisibilityApplier mVisibilityApplier;
+    @NonNull
+    private final DefaultImeVisibilityApplier mVisibilityApplier;
 
     /**
      * Cache the result of {@code LocalServices.getService(AudioManagerInternal.class)}.
@@ -363,7 +366,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @MultiUserUnawareField
     private int mDeviceIdToShowIme = DEVICE_ID_DEFAULT;
 
-    @Nullable private StatusBarManagerInternal mStatusBarManagerInternal;
+    @Nullable
+    private StatusBarManagerInternal mStatusBarManagerInternal;
     private boolean mShowOngoingImeSwitcherForPhones;
     @GuardedBy("ImfLock.class")
     @MultiUserUnawareField
@@ -538,7 +542,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * The {@link IRemoteAccessibilityInputConnection} last provided by the current client.
      */
     @MultiUserUnawareField
-    @Nullable IRemoteAccessibilityInputConnection mCurRemoteAccessibilityInputConnection;
+    @Nullable
+    IRemoteAccessibilityInputConnection mCurRemoteAccessibilityInputConnection;
 
     /**
      * The {@link EditorInfo} last provided by the current client.
@@ -804,7 +809,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mRegistered = true;
         }
 
-        @Override public void onChange(boolean selfChange, Uri uri) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
             final Uri showImeUri = Settings.Secure.getUriFor(
                     Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
             final Uri accessibilityRequestingNoImeUri = Settings.Secure.getUriFor(
@@ -897,10 +903,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
             for (int userId : mUserManagerInternal.getUserIds()) {
                 final InputMethodSettings settings = queryInputMethodServicesInternal(
-                                mContext,
-                                userId,
-                                AdditionalSubtypeMapRepository.get(userId),
-                                DirectBootAwareness.AUTO);
+                        mContext,
+                        userId,
+                        AdditionalSubtypeMapRepository.get(userId),
+                        DirectBootAwareness.AUTO);
                 InputMethodSettingsRepository.put(userId, settings);
             }
             postInputMethodSettingUpdatedLocked(true /* resetDefaultEnabledIme */);
@@ -1403,7 +1409,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mCurrentUserId = mActivityManagerInternal.getCurrentUserId();
             @SuppressWarnings("GuardedBy") final IntFunction<InputMethodBindingController>
                     bindingControllerFactory = userId -> new InputMethodBindingController(userId,
-                            InputMethodManagerService.this);
+                    InputMethodManagerService.this);
             mUserDataRepository = new UserDataRepository(mHandler, mUserManagerInternal,
                     bindingControllerForTesting != null ? bindingControllerForTesting
                             : bindingControllerFactory);
@@ -2416,7 +2422,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
     @FunctionalInterface
     interface ImeDisplayValidator {
-        @DisplayImePolicy int getDisplayImePolicy(int displayId);
+        @DisplayImePolicy
+        int getDisplayImePolicy(int displayId);
     }
 
     /**
@@ -2711,7 +2718,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                             : null;
                     if (mStatusBarManagerInternal != null) {
                         mStatusBarManagerInternal.setIcon(mSlotIme, packageName, iconId, 0,
-                                contentDescription  != null
+                                contentDescription != null
                                         ? contentDescription.toString() : null);
                         mStatusBarManagerInternal.setIconVisibility(mSlotIme, true);
                     }
@@ -4705,7 +4712,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         SparseArray<IAccessibilityInputMethodSession> disabledSessions = new SparseArray<>();
         for (int i = 0; i < mEnabledAccessibilitySessions.size(); i++) {
             if (!accessibilitySessions.contains(mEnabledAccessibilitySessions.keyAt(i))) {
-                AccessibilitySessionState sessionState  = mEnabledAccessibilitySessions.valueAt(i);
+                AccessibilitySessionState sessionState = mEnabledAccessibilitySessions.valueAt(i);
                 if (sessionState != null) {
                     disabledSessions.append(mEnabledAccessibilitySessions.keyAt(i),
                             sessionState.mSession);
@@ -5440,7 +5447,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         }
         if (!settings.getMethodMap().containsKey(imeId)
                 || !settings.getEnabledInputMethodList().contains(
-                        settings.getMethodMap().get(imeId))) {
+                settings.getMethodMap().get(imeId))) {
             return false; // IME is not found or not enabled.
         }
         settings.putSelectedInputMethod(imeId);
@@ -6583,6 +6590,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         private final InputMethodManagerService mImms;
         @NonNull
         private final IBinder mToken;
+
         InputMethodPrivilegedOperationsImpl(InputMethodManagerService imms,
                 @NonNull IBinder token) {
             mImms = imms;
@@ -6611,8 +6619,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void createInputContentUriToken(Uri contentUri, String packageName,
                 AndroidFuture future /* T=IBinder */) {
-            @SuppressWarnings("unchecked")
-            final AndroidFuture<IBinder> typedFuture = future;
+            @SuppressWarnings("unchecked") final AndroidFuture<IBinder> typedFuture = future;
             try {
                 typedFuture.complete(mImms.createInputContentUriToken(
                         mToken, contentUri, packageName).asBinder());
@@ -6630,8 +6637,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @BinderThread
         @Override
         public void setInputMethod(String id, AndroidFuture future /* T=Void */) {
-            @SuppressWarnings("unchecked")
-            final AndroidFuture<Void> typedFuture = future;
+            @SuppressWarnings("unchecked") final AndroidFuture<Void> typedFuture = future;
             try {
                 mImms.setInputMethod(mToken, id);
                 typedFuture.complete(null);
@@ -6644,8 +6650,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void setInputMethodAndSubtype(String id, InputMethodSubtype subtype,
                 AndroidFuture future /* T=Void */) {
-            @SuppressWarnings("unchecked")
-            final AndroidFuture<Void> typedFuture = future;
+            @SuppressWarnings("unchecked") final AndroidFuture<Void> typedFuture = future;
             try {
                 mImms.setInputMethodAndSubtype(mToken, id, subtype);
                 typedFuture.complete(null);
@@ -6659,8 +6664,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void hideMySoftInput(@NonNull ImeTracker.Token statsToken,
                 @InputMethodManager.HideFlags int flags, @SoftInputShowHideReason int reason,
                 AndroidFuture future /* T=Void */) {
-            @SuppressWarnings("unchecked")
-            final AndroidFuture<Void> typedFuture = future;
+            @SuppressWarnings("unchecked") final AndroidFuture<Void> typedFuture = future;
             try {
                 mImms.hideMySoftInput(mToken, statsToken, flags, reason);
                 typedFuture.complete(null);
@@ -6674,8 +6678,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void showMySoftInput(@NonNull ImeTracker.Token statsToken,
                 @InputMethodManager.ShowFlags int flags, @SoftInputShowHideReason int reason,
                 AndroidFuture future /* T=Void */) {
-            @SuppressWarnings("unchecked")
-            final AndroidFuture<Void> typedFuture = future;
+            @SuppressWarnings("unchecked") final AndroidFuture<Void> typedFuture = future;
             try {
                 mImms.showMySoftInput(mToken, statsToken, flags, reason);
                 typedFuture.complete(null);
@@ -6693,8 +6696,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @BinderThread
         @Override
         public void switchToPreviousInputMethod(AndroidFuture future /* T=Boolean */) {
-            @SuppressWarnings("unchecked")
-            final AndroidFuture<Boolean> typedFuture = future;
+            @SuppressWarnings("unchecked") final AndroidFuture<Boolean> typedFuture = future;
             try {
                 typedFuture.complete(mImms.switchToPreviousInputMethod(mToken));
             } catch (Throwable e) {
@@ -6706,8 +6708,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @Override
         public void switchToNextInputMethod(boolean onlyCurrentIme,
                 AndroidFuture future /* T=Boolean */) {
-            @SuppressWarnings("unchecked")
-            final AndroidFuture<Boolean> typedFuture = future;
+            @SuppressWarnings("unchecked") final AndroidFuture<Boolean> typedFuture = future;
             try {
                 typedFuture.complete(mImms.switchToNextInputMethod(mToken, onlyCurrentIme));
             } catch (Throwable e) {
@@ -6718,8 +6719,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         @BinderThread
         @Override
         public void shouldOfferSwitchingToNextInputMethod(AndroidFuture future /* T=Boolean */) {
-            @SuppressWarnings("unchecked")
-            final AndroidFuture<Boolean> typedFuture = future;
+            @SuppressWarnings("unchecked") final AndroidFuture<Boolean> typedFuture = future;
             try {
                 typedFuture.complete(mImms.shouldOfferSwitchingToNextInputMethod(mToken));
             } catch (Throwable e) {
