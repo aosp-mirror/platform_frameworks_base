@@ -362,6 +362,7 @@ android_library {
         "device_state_flags_lib",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
+        "kotlinx_coroutines_guava",
         "//frameworks/libs/systemui:iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
@@ -382,6 +383,7 @@ android_library {
         "androidx.compose.material_material-icons-extended",
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
+        "device_policy_aconfig_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -541,6 +543,7 @@ android_library {
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
         "TraceurCommon",
+        "kotlinx_coroutines_guava",
     ],
 }
 
@@ -622,6 +625,7 @@ android_app {
         "//frameworks/libs/systemui:compilelib",
         "SystemUI-tests-base",
         "androidx.compose.runtime_runtime",
+        "SystemUI-core",
     ],
     libs: [
         "keepanno-annotations",
