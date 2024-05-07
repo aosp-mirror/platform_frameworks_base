@@ -46,3 +46,13 @@ flag{
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag{
+    name: "allow_disable_ipsec_loss_detector"
+    namespace: "vcn"
+    description: "Allow disabling IPsec packet loss detector"
+    bug: "336638836"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
