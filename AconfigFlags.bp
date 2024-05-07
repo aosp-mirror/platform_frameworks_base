@@ -1043,9 +1043,17 @@ aconfig_declarations {
     name: "device_policy_aconfig_flags",
     package: "android.app.admin.flags",
     container: "system",
+    exportable: true,
     srcs: [
         "core/java/android/app/admin/flags/flags.aconfig",
     ],
+}
+
+java_aconfig_library {
+    name: "device_policy_exported_aconfig_flags_lib",
+    aconfig_declarations: "device_policy_aconfig_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    mode: "exported",
 }
 
 java_aconfig_library {
