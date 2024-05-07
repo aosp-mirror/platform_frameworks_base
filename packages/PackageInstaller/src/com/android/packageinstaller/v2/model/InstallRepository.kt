@@ -861,7 +861,12 @@ class InstallRepository(private val context: Context) {
             }
             _installResult.setValue(InstallSuccess(appSnippet, shouldReturnResult, resultIntent))
         } else {
-            _installResult.setValue(InstallFailed(appSnippet, statusCode, legacyStatus, message))
+            if (statusCode != PackageInstaller.STATUS_FAILURE_ABORTED) {
+                _installResult.setValue(InstallFailed(appSnippet, statusCode, legacyStatus, message))
+            } else {
+                _installResult.setValue(InstallAborted(ABORT_REASON_INTERNAL_ERROR))
+            }
+
         }
     }
 
