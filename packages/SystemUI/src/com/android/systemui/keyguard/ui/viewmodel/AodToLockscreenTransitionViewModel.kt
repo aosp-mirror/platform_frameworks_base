@@ -19,9 +19,10 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.util.MathUtils
 import com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
@@ -39,7 +40,6 @@ import kotlinx.coroutines.flow.Flow
 class AodToLockscreenTransitionViewModel
 @Inject
 constructor(
-    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     shadeInteractor: ShadeInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
@@ -47,8 +47,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.AOD,
-            to = KeyguardState.LOCKSCREEN,
+            edge = Edge.create(from = AOD, to = LOCKSCREEN),
         )
 
     private var isShadeExpanded = false

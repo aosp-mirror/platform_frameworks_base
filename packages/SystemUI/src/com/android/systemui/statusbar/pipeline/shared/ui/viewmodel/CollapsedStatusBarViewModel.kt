@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
@@ -81,12 +82,12 @@ constructor(
 ) : CollapsedStatusBarViewModel {
     override val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean> =
         keyguardTransitionInteractor
-            .isInTransition(LOCKSCREEN, OCCLUDED)
+            .isInTransition(Edge.create(from = LOCKSCREEN, to = OCCLUDED))
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val transitionFromLockscreenToDreamStartedEvent: Flow<Unit> =
         keyguardTransitionInteractor
-            .transition(LOCKSCREEN, DREAMING)
+            .transition(Edge.create(from = LOCKSCREEN, to = DREAMING))
             .filter { it.transitionState == TransitionState.STARTED }
             .map {}
 

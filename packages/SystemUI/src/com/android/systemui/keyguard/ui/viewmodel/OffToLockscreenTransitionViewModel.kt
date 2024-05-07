@@ -17,7 +17,9 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
@@ -34,8 +36,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = 250.milliseconds,
-            from = KeyguardState.OFF,
-            to = KeyguardState.LOCKSCREEN,
+            edge = Edge.create(from = OFF, to = LOCKSCREEN),
         )
 
     val shortcutsAlpha: Flow<Float> =

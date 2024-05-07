@@ -48,6 +48,7 @@ import com.android.systemui.keyguard.data.repository.FaceDetectTableLog
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.SysUiFaceAuthenticateOptions
@@ -302,7 +303,7 @@ constructor(
 
     private fun listenForSchedulingWatchdog() {
         keyguardTransitionInteractor
-            .transition(to = KeyguardState.GONE)
+            .transition(Edge.create(to = KeyguardState.GONE))
             .filter { it.transitionState == TransitionState.FINISHED }
             .onEach {
                 // We deliberately want to run this in background because scheduleWatchdog does

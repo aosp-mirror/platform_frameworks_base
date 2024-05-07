@@ -547,6 +547,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         }).when(mView).setOnTouchListener(any(NotificationPanelViewController.TouchHandler.class));
 
         // Dreaming->Lockscreen
+        when(mKeyguardTransitionInteractor.transition(any()))
+                .thenReturn(emptyFlow());
         when(mKeyguardTransitionInteractor.transition(any(), any()))
                 .thenReturn(emptyFlow());
         when(mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha())

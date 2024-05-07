@@ -18,8 +18,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor.Companion.TO_OCCLUDED_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
@@ -40,8 +41,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_OCCLUDED_DURATION,
-            from = ALTERNATE_BOUNCER,
-            to = KeyguardState.OCCLUDED,
+            edge = Edge.create(from = ALTERNATE_BOUNCER, to = OCCLUDED),
         )
 
     override val deviceEntryParentViewAlpha: Flow<Float> =

@@ -19,9 +19,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_DOZING_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -42,11 +45,14 @@ constructor(
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_DOZING_DURATION,
-            from = KeyguardState.PRIMARY_BOUNCER,
-            to = KeyguardState.DOZING,
-        )
+        animationFlow
+            .setup(
+                duration = TO_DOZING_DURATION,
+                edge = Edge.create(from = Scenes.Bouncer, to = DOZING),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = PRIMARY_BOUNCER, to = DOZING),
+            )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

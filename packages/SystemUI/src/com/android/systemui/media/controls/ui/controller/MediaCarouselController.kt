@@ -46,6 +46,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -190,6 +191,7 @@ constructor(
     @VisibleForTesting
     lateinit var settingsButton: View
         private set
+
     private val mediaContent: ViewGroup
     @VisibleForTesting var pageIndicator: PageIndicator
     private var needsReordering: Boolean = false
@@ -640,7 +642,7 @@ constructor(
     internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                .transition(to = GONE)
+                .transition(Edge.create(to = GONE))
                 .filter { it.transitionState == TransitionState.FINISHED }
                 .collect {
                     showMediaCarousel()
@@ -653,7 +655,7 @@ constructor(
     internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                .transition(to = LOCKSCREEN)
+                .transition(Edge.create(to = LOCKSCREEN))
                 .filter { it.transitionState == TransitionState.FINISHED }
                 .collect {
                     if (!allowMediaPlayerOnLockScreen) {
@@ -1598,6 +1600,7 @@ internal object MediaPlayerData {
     // Whether should prioritize Smartspace card.
     internal var shouldPrioritizeSs: Boolean = false
         private set
+
     internal var smartspaceMediaData: SmartspaceMediaData? = null
         private set
 

@@ -19,10 +19,13 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -40,11 +43,14 @@ constructor(
     configurationInteractor: ConfigurationInteractor,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_GLANCEABLE_HUB_DURATION,
-            from = KeyguardState.DREAMING,
-            to = KeyguardState.GLANCEABLE_HUB,
-        )
+        animationFlow
+            .setup(
+                duration = TO_GLANCEABLE_HUB_DURATION,
+                edge = Edge.create(from = DREAMING, to = Scenes.Communal),
+            )
+            .setupWithoutSceneContainer(
+                edge = Edge.create(from = DREAMING, to = GLANCEABLE_HUB),
+            )
 
     val dreamOverlayTranslationX: Flow<Float> =
         configurationInteractor

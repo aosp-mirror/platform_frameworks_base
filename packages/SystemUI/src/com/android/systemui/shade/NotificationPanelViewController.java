@@ -141,6 +141,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
 import com.android.systemui.keyguard.shared.ComposeLockscreen;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
@@ -170,6 +171,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.WakefulnessModel;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.data.repository.FlingInfo;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
@@ -1130,8 +1132,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 controller.setup(mNotificationContainerParent));
 
         // Dreaming->Lockscreen
-        collectFlow(mView, mKeyguardTransitionInteractor.transition(DREAMING, LOCKSCREEN),
-                mDreamingToLockscreenTransition, mMainDispatcher);
+        collectFlow(
+                mView,
+                mKeyguardTransitionInteractor.transition(
+                        Edge.Companion.create(DREAMING, LOCKSCREEN)),
+                mDreamingToLockscreenTransition,
+                mMainDispatcher);
         collectFlow(mView, mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha(),
                 setDreamLockscreenTransitionAlpha(mNotificationStackScrollLayoutController),
                 mMainDispatcher);
@@ -1141,7 +1147,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         // Gone -> Dreaming hosted in lockscreen
         collectFlow(mView, mKeyguardTransitionInteractor
-                        .transition(GONE, DREAMING_LOCKSCREEN_HOSTED),
+                        .transition(Edge.Companion.create(Scenes.Gone, DREAMING_LOCKSCREEN_HOSTED),
+                                Edge.Companion.create(GONE, DREAMING_LOCKSCREEN_HOSTED)),
                 mGoneToDreamingLockscreenHostedTransition, mMainDispatcher);
         collectFlow(mView, mGoneToDreamingLockscreenHostedTransitionViewModel.getLockscreenAlpha(),
                 setTransitionAlpha(mNotificationStackScrollLayoutController),
@@ -1149,16 +1156,17 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         // Lockscreen -> Dreaming hosted in lockscreen
         collectFlow(mView, mKeyguardTransitionInteractor
-                        .transition(LOCKSCREEN, DREAMING_LOCKSCREEN_HOSTED),
+                        .transition(Edge.Companion.create(LOCKSCREEN, DREAMING_LOCKSCREEN_HOSTED)),
                 mLockscreenToDreamingLockscreenHostedTransition, mMainDispatcher);
 
         // Dreaming hosted in lockscreen -> Lockscreen
         collectFlow(mView, mKeyguardTransitionInteractor
-                        .transition(DREAMING_LOCKSCREEN_HOSTED, LOCKSCREEN),
+                        .transition(Edge.Companion.create(DREAMING_LOCKSCREEN_HOSTED, LOCKSCREEN)),
                 mDreamingLockscreenHostedToLockscreenTransition, mMainDispatcher);
 
         // Occluded->Lockscreen
-        collectFlow(mView, mKeyguardTransitionInteractor.transition(OCCLUDED, LOCKSCREEN),
+        collectFlow(mView, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.create(OCCLUDED, LOCKSCREEN)),
                 mOccludedToLockscreenTransition, mMainDispatcher);
         if (!MigrateClocksToBlueprint.isEnabled()) {
             collectFlow(mView, mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha(),
@@ -1169,7 +1177,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
 
         // Lockscreen->Dreaming
-        collectFlow(mView, mKeyguardTransitionInteractor.transition(LOCKSCREEN, DREAMING),
+        collectFlow(mView, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.create(LOCKSCREEN, DREAMING)),
                 mLockscreenToDreamingTransition, mMainDispatcher);
         if (!MigrateClocksToBlueprint.isEnabled()) {
             collectFlow(mView, mLockscreenToDreamingTransitionViewModel.getLockscreenAlpha(),
@@ -1181,7 +1190,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
 
         // Gone->Dreaming
-        collectFlow(mView, mKeyguardTransitionInteractor.transition(GONE, DREAMING),
+        collectFlow(mView, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.create(Scenes.Gone, DREAMING),
+                        Edge.Companion.create(GONE, DREAMING)),
                 mGoneToDreamingTransition, mMainDispatcher);
         if (!MigrateClocksToBlueprint.isEnabled()) {
             collectFlow(mView, mGoneToDreamingTransitionViewModel.getLockscreenAlpha(),
@@ -1192,7 +1203,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
 
         // Lockscreen->Occluded
-        collectFlow(mView, mKeyguardTransitionInteractor.transition(LOCKSCREEN, OCCLUDED),
+        collectFlow(mView, mKeyguardTransitionInteractor.transition(
+                Edge.Companion.create(LOCKSCREEN, OCCLUDED)),
                 mLockscreenToOccludedTransition, mMainDispatcher);
         if (!MigrateClocksToBlueprint.isEnabled()) {
             collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha(),

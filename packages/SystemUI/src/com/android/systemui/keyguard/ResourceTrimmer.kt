@@ -29,6 +29,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -84,7 +85,7 @@ constructor(
 
         applicationScope.launch(bgDispatcher) {
             // We drop 1 to avoid triggering on initial collect().
-            keyguardTransitionInteractor.transition(to = GONE).collect { transition ->
+            keyguardTransitionInteractor.transition(Edge.create(to = GONE)).collect { transition ->
                 if (transition.transitionState == TransitionState.FINISHED) {
                     onKeyguardGone()
                 }

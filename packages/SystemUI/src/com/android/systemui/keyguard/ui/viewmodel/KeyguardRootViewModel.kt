@@ -30,6 +30,7 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
+import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -38,6 +39,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.ui.StateToValue
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
@@ -122,7 +124,11 @@ constructor(
             .filter { it == AOD || it == LOCKSCREEN }
             .map { VISIBLE }
 
-    val goneToAodTransition = keyguardTransitionInteractor.transition(from = GONE, to = AOD)
+    val goneToAodTransition =
+        keyguardTransitionInteractor.transition(
+            edge = Edge.create(Scenes.Gone, AOD),
+            edgeWithoutSceneContainer = Edge.create(GONE, AOD)
+        )
 
     private val goneToAodTransitionRunning: Flow<Boolean> =
         goneToAodTransition
@@ -144,7 +150,10 @@ constructor(
 
     private val alphaOnShadeExpansion: Flow<Float> =
         combineTransform(
-                keyguardTransitionInteractor.isInTransition(from = LOCKSCREEN, to = GONE),
+                keyguardTransitionInteractor.isInTransition(
+                    edge = Edge.create(from = LOCKSCREEN, to = Scenes.Gone),
+                    edgeWithoutSceneContainer = Edge.create(from = LOCKSCREEN, to = GONE),
+                ),
                 isOnLockscreen,
                 shadeInteractor.qsExpansion,
                 shadeInteractor.shadeExpansion,

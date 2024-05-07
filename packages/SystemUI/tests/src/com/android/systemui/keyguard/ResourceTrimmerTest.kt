@@ -19,6 +19,7 @@ import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.utils.GlobalWindowManager
@@ -74,7 +75,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
                 globalWindowManager,
                 testScope.backgroundScope,
                 kosmos.testDispatcher,
-                featureFlags
+                featureFlags,
             )
         resourceTrimmer.start()
     }

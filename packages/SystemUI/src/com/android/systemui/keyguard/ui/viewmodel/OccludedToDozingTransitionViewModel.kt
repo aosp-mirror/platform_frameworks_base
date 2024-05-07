@@ -18,7 +18,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -38,8 +40,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = FromOccludedTransitionInteractor.TO_DOZING_DURATION,
-            from = KeyguardState.OCCLUDED,
-            to = KeyguardState.DOZING,
+            edge = Edge.create(from = OCCLUDED, to = DOZING),
         )
 
     /** Lockscreen views alpha */
