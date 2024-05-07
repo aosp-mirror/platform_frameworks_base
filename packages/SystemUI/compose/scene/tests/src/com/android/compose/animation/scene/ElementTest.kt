@@ -20,7 +20,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -43,7 +42,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.approachLayout
@@ -64,6 +62,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
+import com.android.compose.animation.scene.subjects.assertThat
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -78,7 +77,6 @@ class ElementTest {
     @get:Rule val rule = createComposeRule()
 
     @Composable
-    @OptIn(ExperimentalComposeUiApi::class)
     private fun SceneScope.Element(
         key: ElementKey,
         size: Dp,
@@ -496,7 +494,6 @@ class ElementTest {
     }
 
     @Test
-    @OptIn(ExperimentalFoundationApi::class)
     fun elementModifierNodeIsRecycledInLazyLayouts() = runTest {
         val nPages = 2
         val pagerState = PagerState(currentPage = 0) { nPages }
@@ -654,8 +651,7 @@ class ElementTest {
             }
         }
 
-        assertThat(state.currentTransition).isNull()
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
+        assertThat(state.transitionState).isIdle()
 
         // Swipe by half of verticalSwipeDistance.
         rule.onRoot().performTouchInput {
@@ -691,9 +687,9 @@ class ElementTest {
 
         val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
-        val transition = state.currentTransition
+        val transition = assertThat(state.transitionState).isTransition()
         assertThat(transition).isNotNull()
-        assertThat(transition!!.progress).isEqualTo(0.5f)
+        assertThat(transition).hasProgress(0.5f)
         assertThat(animatedFloat).isEqualTo(50f)
 
         rule.onRoot().performTouchInput {
@@ -702,8 +698,8 @@ class ElementTest {
         }
 
         // Scroll 150% (Scene B overscroll by 50%)
-        assertThat(transition.progress).isEqualTo(1.5f)
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(transition).hasProgress(1.5f)
+        assertThat(transition).hasOverscrollSpec()
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 0.5f)
         // animatedFloat cannot overflow (canOverflow = false)
         assertThat(animatedFloat).isEqualTo(100f)
@@ -714,8 +710,8 @@ class ElementTest {
         }
 
         // Scroll 250% (Scene B overscroll by 150%)
-        assertThat(transition.progress).isEqualTo(2.5f)
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(transition).hasProgress(2.5f)
+        assertThat(transition).hasOverscrollSpec()
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 1.5f)
         assertThat(animatedFloat).isEqualTo(100f)
     }
@@ -766,8 +762,7 @@ class ElementTest {
             }
         }
 
-        assertThat(state.currentTransition).isNull()
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNull()
+        assertThat(state.transitionState).isIdle()
         val fooElement = rule.onNodeWithTag(TestElements.Foo.testTag, useUnmergedTree = true)
         fooElement.assertTopPositionInRootIsEqualTo(0.dp)
 
@@ -779,10 +774,9 @@ class ElementTest {
             moveBy(Offset(0f, touchSlop + layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
         }
 
-        val transition = state.currentTransition
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
-        assertThat(transition).isNotNull()
-        assertThat(transition!!.progress).isEqualTo(-0.5f)
+        val transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasOverscrollSpec()
+        assertThat(transition).hasProgress(-0.5f)
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 0.5f)
 
         rule.onRoot().performTouchInput {
@@ -791,8 +785,8 @@ class ElementTest {
         }
 
         // Scroll 150% (Scene B overscroll by 50%)
-        assertThat(transition.progress).isEqualTo(-1.5f)
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(transition).hasProgress(-1.5f)
+        assertThat(transition).hasOverscrollSpec()
         fooElement.assertTopPositionInRootIsEqualTo(overscrollTranslateY * 1.5f)
     }
 
@@ -825,13 +819,12 @@ class ElementTest {
             moveBy(Offset(0f, layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
         }
 
-        val transition = state.currentTransition
-        assertThat(transition).isNotNull()
+        val transition = assertThat(state.transitionState).isTransition()
         assertThat(animatedFloat).isEqualTo(100f)
 
         // Scroll 150% (100% scroll + 50% overscroll)
-        assertThat(transition!!.progress).isEqualTo(1.5f)
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(transition).hasProgress(1.5f)
+        assertThat(transition).hasOverscrollSpec()
         fooElement.assertTopPositionInRootIsEqualTo(layoutHeight * 0.5f)
         assertThat(animatedFloat).isEqualTo(100f)
 
@@ -841,8 +834,8 @@ class ElementTest {
         }
 
         // Scroll 250% (100% scroll + 150% overscroll)
-        assertThat(transition.progress).isEqualTo(2.5f)
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(transition).hasProgress(2.5f)
+        assertThat(transition).hasOverscrollSpec()
         fooElement.assertTopPositionInRootIsEqualTo(layoutHeight * 1.5f)
         assertThat(animatedFloat).isEqualTo(100f)
     }
@@ -882,13 +875,11 @@ class ElementTest {
             moveBy(Offset(0f, layoutHeight.toPx() * 0.5f), delayMillis = 1_000)
         }
 
-        val transition = state.currentTransition
-        assertThat(transition).isNotNull()
-        transition as TransitionState.HasOverscrollProperties
+        val transition = assertThat(state.transitionState).isTransition()
 
         // Scroll 150% (100% scroll + 50% overscroll)
-        assertThat(transition.progress).isEqualTo(1.5f)
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
+        assertThat(transition).hasProgress(1.5f)
+        assertThat(transition).hasOverscrollSpec()
         fooElement.assertTopPositionInRootIsEqualTo(layoutHeight * (transition.progress - 1f))
         assertThat(animatedFloat).isEqualTo(100f)
 
@@ -900,8 +891,8 @@ class ElementTest {
         rule.waitUntil(timeoutMillis = 10_000) { transition.progress < 1f }
 
         assertThat(transition.progress).isLessThan(1f)
-        assertThat(state.currentTransition?.currentOverscrollSpec).isNotNull()
-        assertThat(transition.bouncingScene).isEqualTo(transition.toScene)
+        assertThat(transition).hasOverscrollSpec()
+        assertThat(transition).hasBouncingScene(transition.toScene)
         assertThat(animatedFloat).isEqualTo(100f)
     }
 
@@ -980,13 +971,13 @@ class ElementTest {
 
         val transitions = state.currentTransitions
         assertThat(transitions).hasSize(2)
-        assertThat(transitions[0].fromScene).isEqualTo(SceneA)
-        assertThat(transitions[0].toScene).isEqualTo(SceneB)
-        assertThat(transitions[0].progress).isEqualTo(0f)
+        assertThat(transitions[0]).hasFromScene(SceneA)
+        assertThat(transitions[0]).hasToScene(SceneB)
+        assertThat(transitions[0]).hasProgress(0f)
 
-        assertThat(transitions[1].fromScene).isEqualTo(SceneB)
-        assertThat(transitions[1].toScene).isEqualTo(SceneC)
-        assertThat(transitions[1].progress).isEqualTo(0f)
+        assertThat(transitions[1]).hasFromScene(SceneB)
+        assertThat(transitions[1]).hasToScene(SceneC)
+        assertThat(transitions[1]).hasProgress(0f)
 
         // First frame: both are at x = 0dp. For the whole transition, Foo is at y = 0dp and Bar is
         // at y = layoutSize - elementSoze = 100dp.
@@ -1153,7 +1144,7 @@ class ElementTest {
         state.finishTransition(aToB, SceneB)
         state.finishTransition(bToC, SceneC)
         rule.waitForIdle()
-        assertThat(state.currentTransition).isNull()
+        assertThat(state.transitionState).isIdle()
 
         // The interruption values should be unspecified and deltas should be set to zero.
         val foo = layoutImpl.elements.getValue(TestElements.Foo)
