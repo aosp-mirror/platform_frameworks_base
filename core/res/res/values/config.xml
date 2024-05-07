@@ -6596,4 +6596,7 @@
     <!-- Enables or disables the "Share" action item shown in the context menu that appears upon
         long-pressing on selected text. Enabled by default. -->
     <bool name="config_textShareSupported">true</bool>
+
+    <!-- Whether the system uses auto-suspend mode. -->
+    <bool name="config_useAutoSuspend">true</bool>
 </resources>
