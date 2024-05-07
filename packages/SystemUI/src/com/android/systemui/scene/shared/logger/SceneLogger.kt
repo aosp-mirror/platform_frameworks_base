@@ -20,7 +20,6 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.SceneFrameworkLog
-import java.util.Stack
 import javax.inject.Inject
 
 class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: LogBuffer) {
@@ -116,7 +115,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logSceneBackStack(backStack: Stack<SceneKey>) {
+    fun logSceneBackStack(backStack: Iterable<SceneKey>) {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,
