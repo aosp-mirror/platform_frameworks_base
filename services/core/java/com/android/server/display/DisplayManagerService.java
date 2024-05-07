@@ -1745,6 +1745,7 @@ public final class DisplayManagerService extends SystemService {
                 if (projection != null) {
                     IBinder taskWindowContainerToken = projection.getLaunchCookie() == null ? null
                             : projection.getLaunchCookie().binder;
+                    int taskId = projection.getTaskId();
                     if (taskWindowContainerToken == null) {
                         // Record a particular display.
                         session = ContentRecordingSession.createDisplaySession(
@@ -1752,7 +1753,7 @@ public final class DisplayManagerService extends SystemService {
                     } else {
                         // Record a single task indicated by the launch cookie.
                         session = ContentRecordingSession.createTaskSession(
-                                taskWindowContainerToken);
+                                taskWindowContainerToken, taskId);
                     }
                 }
             } catch (RemoteException e) {

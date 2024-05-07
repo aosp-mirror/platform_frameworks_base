@@ -144,10 +144,9 @@ constructor(
         activityOptions.launchDisplayId = task.displayId
         activityOptions.setLaunchCookie(launchCookie)
 
-        val handleResult: () -> Unit = { resultHandler.returnSelectedApp(launchCookie)}
-
         val taskId = task.taskId
         val splitBounds = task.splitBounds
+        val handleResult: () -> Unit = { resultHandler.returnSelectedApp(launchCookie, taskId)}
 
         if (pssAppSelectorRecentsSplitScreen() &&
             task.isLaunchingInSplitScreen() &&

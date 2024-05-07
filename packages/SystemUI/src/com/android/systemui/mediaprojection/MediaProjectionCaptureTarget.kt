@@ -21,15 +21,17 @@ import android.os.Parcel
 import android.os.Parcelable
 
 /**
- * Class that represents an area that should be captured. Currently it has only a launch cookie that
- * represents a task but we potentially could add more identifiers e.g. for a pair of tasks.
+ * Class that represents an area that should be captured. Currently it has only a launch cookie and
+ * id that represents a task but we potentially could add more identifiers e.g. for a pair of tasks.
  */
-data class MediaProjectionCaptureTarget(val launchCookie: LaunchCookie?) : Parcelable {
+data class MediaProjectionCaptureTarget(val launchCookie: LaunchCookie?, val taskId: Int) :
+    Parcelable {
 
-    constructor(parcel: Parcel) : this(LaunchCookie.readFromParcel(parcel))
+    constructor(parcel: Parcel) : this(LaunchCookie.readFromParcel(parcel), parcel.readInt())
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         LaunchCookie.writeToParcel(launchCookie, dest)
+        dest.writeInt(taskId)
     }
 
     override fun describeContents(): Int = 0
