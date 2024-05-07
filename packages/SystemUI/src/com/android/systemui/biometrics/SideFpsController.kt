@@ -218,12 +218,12 @@ constructor(
     ) {
         SideFpsControllerRefactor.assertInLegacyMode()
         if (!displayStateInteractor.isInRearDisplayMode.value) {
-            requests.add(request)
             mainExecutor.execute {
                 if (overlayView == null) {
                     traceSection(
                         "SideFpsController#show(request=${request.name}, reason=$reason)"
                     ) {
+                        requests.add(request)
                         createOverlayForDisplay(reason)
                     }
                 } else {
