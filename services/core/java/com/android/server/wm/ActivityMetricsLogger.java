@@ -88,6 +88,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.ActivityOptions.SourceInfo;
+import android.app.ApplicationStartInfo;
 import android.app.CameraCompatTaskInfo.CameraCompatControlState;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.WindowingMode;
@@ -845,6 +846,16 @@ class ActivityMetricsLogger {
                 && !r.mTransitionController.isCollecting(r))) {
             done(false /* abort */, info, "notifyWindowsDrawn", timestampNs);
         }
+
+        if (android.app.Flags.appStartInfoTimestamps()) {
+            // Log here to match StatsD for time to first frame.
+            mLoggerHandler.post(
+                    () -> mSupervisor.mService.mWindowManager.mAmInternal.addStartInfoTimestamp(
+                            ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME,
+                            timestampNs, r.getUid(), r.getPid(),
+                            info.mLastLaunchedActivity.mUserId));
+        }
+
         return infoSnapshot;
     }
 
