@@ -27,8 +27,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.testutils.delay
-import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,9 +69,8 @@ class DisposableBroadcastReceiverAsUserTest {
                 DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {}
             }
         }
-        composeTestRule.delay()
 
-        assertThat(registeredBroadcastReceiver).isNotNull()
+        composeTestRule.waitUntil { registeredBroadcastReceiver != null }
     }
 
     @Test
@@ -91,9 +88,8 @@ class DisposableBroadcastReceiverAsUserTest {
         }
 
         registeredBroadcastReceiver!!.onReceive(context, Intent())
-        composeTestRule.delay()
 
-        assertThat(onReceiveIsCalled).isTrue()
+        composeTestRule.waitUntil { onReceiveIsCalled }
     }
 
     private companion object {
