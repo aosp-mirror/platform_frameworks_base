@@ -33,6 +33,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyFloat
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Spy
 import org.mockito.kotlin.any
@@ -102,6 +104,14 @@ class ResizeVeilTest : ShellTestCase() {
             .create("Resize veil icon of Task=" + taskInfo.taskId))
             .thenReturn(spyIconSurfaceBuilder)
         doReturn(mockIconSurface).whenever(spyIconSurfaceBuilder).build()
+
+        doReturn(mockTransaction).whenever(mockTransaction).setLayer(any(), anyInt())
+        doReturn(mockTransaction).whenever(mockTransaction).setAlpha(any(), anyFloat())
+        doReturn(mockTransaction).whenever(mockTransaction).show(any())
+        doReturn(mockTransaction).whenever(mockTransaction).hide(any())
+        doReturn(mockTransaction).whenever(mockTransaction)
+                .setPosition(any(), anyFloat(), anyFloat())
+        doReturn(mockTransaction).whenever(mockTransaction).setWindowCrop(any(), anyInt(), anyInt())
     }
 
     @Test
@@ -139,52 +149,48 @@ class ResizeVeilTest : ShellTestCase() {
     @Test
     fun showVeil() {
         val veil = createResizeVeil()
-        val tx = mock<SurfaceControl.Transaction>()
 
-        veil.showVeil(tx, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
 
-        verify(tx).show(mockResizeVeilSurface)
-        verify(tx).show(mockBackgroundSurface)
-        verify(tx).show(mockIconSurface)
-        verify(tx).apply()
+        verify(mockTransaction).show(mockResizeVeilSurface)
+        verify(mockTransaction).show(mockBackgroundSurface)
+        verify(mockTransaction).show(mockIconSurface)
+        verify(mockTransaction).apply()
     }
 
     @Test
     fun showVeil_displayUnavailable_doesNotShow() {
         val veil = createResizeVeil(withDisplayAvailable = false)
-        val tx = mock<SurfaceControl.Transaction>()
 
-        veil.showVeil(tx, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
 
-        verify(tx, never()).show(mockResizeVeilSurface)
-        verify(tx, never()).show(mockBackgroundSurface)
-        verify(tx, never()).show(mockIconSurface)
-        verify(tx).apply()
+        verify(mockTransaction, never()).show(mockResizeVeilSurface)
+        verify(mockTransaction, never()).show(mockBackgroundSurface)
+        verify(mockTransaction, never()).show(mockIconSurface)
+        verify(mockTransaction).apply()
     }
 
     @Test
     fun showVeil_alreadyVisible_doesNotShowAgain() {
         val veil = createResizeVeil()
-        val tx = mock<SurfaceControl.Transaction>()
 
-        veil.showVeil(tx, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
-        veil.showVeil(tx, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(mockTransaction, mock(), Rect(0, 0, 100, 100), false /* fadeIn */)
 
-        verify(tx, times(1)).show(mockResizeVeilSurface)
-        verify(tx, times(1)).show(mockBackgroundSurface)
-        verify(tx, times(1)).show(mockIconSurface)
-        verify(tx, times(2)).apply()
+        verify(mockTransaction, times(1)).show(mockResizeVeilSurface)
+        verify(mockTransaction, times(1)).show(mockBackgroundSurface)
+        verify(mockTransaction, times(1)).show(mockIconSurface)
+        verify(mockTransaction, times(2)).apply()
     }
 
     @Test
     fun showVeil_reparentsVeilToNewParent() {
         val veil = createResizeVeil(parent = mock())
-        val tx = mock<SurfaceControl.Transaction>()
 
         val newParent = mock<SurfaceControl>()
-        veil.showVeil(tx, newParent, Rect(0, 0, 100, 100), false /* fadeIn */)
+        veil.showVeil(mockTransaction, newParent, Rect(0, 0, 100, 100), false /* fadeIn */)
 
-        verify(tx).reparent(mockResizeVeilSurface, newParent)
+        verify(mockTransaction).reparent(mockResizeVeilSurface, newParent)
     }
 
     @Test
