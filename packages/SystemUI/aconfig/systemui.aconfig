@@ -800,6 +800,13 @@ flag {
 }
 
 flag {
+    name: "brightness_slider_focus_state"
+    namespace: "systemui"
+    description: "enables new focus outline for the brightness slider when focused on with physical keyboard"
+    bug: "329244723"
+}
+
+flag {
    name: "edgeback_gesture_handler_get_running_tasks_background"
     namespace: "systemui"
     description: "Decide whether to get the running tasks from activity manager in EdgebackGestureHandler"
