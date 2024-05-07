@@ -248,3 +248,11 @@ flag {
     bug: "316916801"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "package_restart_query_disabled_by_default"
+    namespace: "package_manager_service"
+    description: "Feature flag to register broadcast receiver only support package restart query."
+    bug: "300309050"
+    is_fixed_read_only: true
+}
