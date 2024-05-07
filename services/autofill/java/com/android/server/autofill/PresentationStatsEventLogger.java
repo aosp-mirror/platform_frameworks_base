@@ -564,6 +564,18 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    /** Sets focused_autofill_id using view id */
+    public void maybeSetFocusedId(AutofillId id) {
+        maybeSetFocusedId(id.getViewId());
+    }
+
+    /** Sets focused_autofill_id as long as mEventInternal is present */
+    public void maybeSetFocusedId(int id) {
+        mEventInternal.ifPresent(event -> {
+            event.mFocusedId = id;
+        });
+    }
+
     public void logAndEndEvent() {
         if (!mEventInternal.isPresent()) {
             Slog.w(TAG, "Shouldn't be logging AutofillPresentationEventReported again for same "
@@ -608,7 +620,8 @@ public final class PresentationStatsEventLogger {
                     + " mIsCredentialRequest=" + event.mIsCredentialRequest
                     + " mWebviewRequestedCredential=" + event.mWebviewRequestedCredential
                     + " mViewFillableTotalCount=" + event.mViewFillableTotalCount
-                    + " mViewFillFailureCount=" + event.mViewFillFailureCount);
+                    + " mViewFillFailureCount=" + event.mViewFillFailureCount
+                    + " mFocusedId=" + event.mFocusedId);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -651,7 +664,8 @@ public final class PresentationStatsEventLogger {
                 event.mIsCredentialRequest,
                 event.mWebviewRequestedCredential,
                 event.mViewFillableTotalCount,
-                event.mViewFillFailureCount);
+                event.mViewFillFailureCount,
+                event.mFocusedId);
         mEventInternal = Optional.empty();
     }
 
@@ -689,6 +703,7 @@ public final class PresentationStatsEventLogger {
         boolean mWebviewRequestedCredential = false;
         int mViewFillableTotalCount = -1;
         int mViewFillFailureCount = -1;
+        int mFocusedId = -1;
 
         PresentationStatsEventInternal() {}
     }
