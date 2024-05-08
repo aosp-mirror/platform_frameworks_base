@@ -81,6 +81,11 @@ class ShadeTestUtil constructor(val delegate: ShadeTestUtilDelegate) {
         delegate.assertFlagValid()
         delegate.setQsFullscreen(qsFullscreen)
     }
+
+    fun setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer: Boolean) {
+        delegate.assertFlagValid()
+        delegate.setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer)
+    }
 }
 
 /** Sets up shade state for tests for a specific value of the scene container flag. */
@@ -110,6 +115,8 @@ interface ShadeTestUtilDelegate {
     fun programmaticCollapseShade()
 
     fun setQsFullscreen(qsFullscreen: Boolean)
+
+    fun setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer: Boolean)
 }
 
 /** Sets up shade state for tests when the scene container flag is disabled. */
@@ -157,6 +164,10 @@ class ShadeTestUtilLegacyImpl(val testScope: TestScope, val shadeRepository: Fak
     override fun setQsFullscreen(qsFullscreen: Boolean) {
         shadeRepository.legacyQsFullscreen.value = true
     }
+
+    override fun setLegacyExpandedOrAwaitingInputTransfer(expanded: Boolean) {
+        shadeRepository.setLegacyExpandedOrAwaitingInputTransfer(expanded)
+    }
 }
 
 /** Sets up shade state for tests when the scene container flag is enabled. */
@@ -196,6 +207,12 @@ class ShadeTestUtilSceneImpl(val testScope: TestScope, val sceneInteractor: Scen
 
     override fun setQsFullscreen(qsFullscreen: Boolean) {
         setQsExpansion(1f)
+    }
+
+    override fun setLegacyExpandedOrAwaitingInputTransfer(
+        legacyExpandedOrAwaitingInputTransfer: Boolean
+    ) {
+        setShadeExpansion(.1f)
     }
 
     override fun setLockscreenShadeExpansion(lockscreenShadeExpansion: Float) {
