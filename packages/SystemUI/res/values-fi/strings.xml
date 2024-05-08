@@ -795,7 +795,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi on pois päältä"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ei ole käytössä"</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth on pois päältä"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Älä häiritse ‑tila on pois päältä"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Älä häiritse ‑tila on käytössä"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Automaattinen sääntö otti käyttöön Älä häiritse ‑tilan (<xliff:g id="ID_1">%s</xliff:g>)."</string>

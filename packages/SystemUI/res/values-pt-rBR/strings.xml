@@ -501,7 +501,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App liberado"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Ligar"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Tocar"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Toques"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mídia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarme"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificação"</string>
