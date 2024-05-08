@@ -128,6 +128,16 @@ flag {
 }
 
 flag {
+    name: "manager_avoid_receiver_timeout"
+    namespace: "accessibility"
+    description: "Register receivers on background handler so they have more time to complete"
+    bug: "333890389"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "pinch_zoom_zero_min_span"
     namespace: "accessibility"
     description: "Whether to set min span of ScaleGestureDetector to zero."
