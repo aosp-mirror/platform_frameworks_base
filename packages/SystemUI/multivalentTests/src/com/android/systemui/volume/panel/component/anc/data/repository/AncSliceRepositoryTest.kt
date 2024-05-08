@@ -61,6 +61,7 @@ class AncSliceRepositoryTest : SysuiTestCase() {
                 AncSliceRepositoryImpl(
                     localMediaRepositoryFactory,
                     testScope.testScheduler,
+                    testScope.testScheduler,
                     sliceViewManager,
                 )
         }
