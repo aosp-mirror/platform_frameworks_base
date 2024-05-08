@@ -19,6 +19,7 @@ package android.hardware.biometrics;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -56,6 +57,7 @@ public class PromptInfo implements Parcelable {
     private boolean mIsForLegacyFingerprintManager = false;
     private boolean mShowEmergencyCallButton = false;
     private boolean mUseParentProfileForDeviceCredential = false;
+    private ComponentName mComponentNameForConfirmDeviceCredentialActivity = null;
 
     public PromptInfo() {
 
@@ -87,6 +89,8 @@ public class PromptInfo implements Parcelable {
         mIsForLegacyFingerprintManager = in.readBoolean();
         mShowEmergencyCallButton = in.readBoolean();
         mUseParentProfileForDeviceCredential = in.readBoolean();
+        mComponentNameForConfirmDeviceCredentialActivity = in.readParcelable(
+                ComponentName.class.getClassLoader(), ComponentName.class);
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -132,10 +136,11 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mIsForLegacyFingerprintManager);
         dest.writeBoolean(mShowEmergencyCallButton);
         dest.writeBoolean(mUseParentProfileForDeviceCredential);
+        dest.writeParcelable(mComponentNameForConfirmDeviceCredentialActivity, 0);
     }
 
     // LINT.IfChange
-    public boolean containsTestConfigurations() {
+    public boolean requiresTestOrInternalPermission() {
         if (mIsForLegacyFingerprintManager
                 && mAllowedSensorIds.size() == 1
                 && !mAllowBackgroundAuthentication) {
@@ -148,11 +153,15 @@ public class PromptInfo implements Parcelable {
             return true;
         } else if (mIgnoreEnrollmentState) {
             return true;
+        } else if (mShowEmergencyCallButton) {
+            return true;
+        } else if (mComponentNameForConfirmDeviceCredentialActivity != null) {
+            return true;
         }
         return false;
     }
 
-    public boolean containsPrivateApiConfigurations() {
+    public boolean requiresInternalPermission() {
         if (mDisallowBiometricsIfPolicyExists) {
             return true;
         } else if (mUseDefaultTitle) {
@@ -177,7 +186,7 @@ public class PromptInfo implements Parcelable {
      * Currently, logo res, logo bitmap, logo description, PromptContentViewWithMoreOptions needs
      * this permission.
      */
-    public boolean containsAdvancedApiConfigurations() {
+    public boolean requiresAdvancedPermission() {
         if (mLogoRes != -1) {
             return true;
         } else if (mLogoBitmap != null) {
@@ -305,6 +314,12 @@ public class PromptInfo implements Parcelable {
         mShowEmergencyCallButton = showEmergencyCallButton;
     }
 
+    public void setComponentNameForConfirmDeviceCredentialActivity(
+            ComponentName componentNameForConfirmDeviceCredentialActivity) {
+        mComponentNameForConfirmDeviceCredentialActivity =
+                componentNameForConfirmDeviceCredentialActivity;
+    }
+
     public void setUseParentProfileForDeviceCredential(
             boolean useParentProfileForDeviceCredential) {
         mUseParentProfileForDeviceCredential = useParentProfileForDeviceCredential;
@@ -415,6 +430,10 @@ public class PromptInfo implements Parcelable {
 
     public boolean isShowEmergencyCallButton() {
         return mShowEmergencyCallButton;
+    }
+
+    public ComponentName getComponentNameForConfirmDeviceCredentialActivity() {
+        return mComponentNameForConfirmDeviceCredentialActivity;
     }
 
     private void checkOnlyOneLogoSet() {

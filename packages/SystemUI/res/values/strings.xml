@@ -384,6 +384,8 @@
 
     <!-- Content description for the app logo icon on biometric prompt. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_logo">App logo</string>
+    <!-- List of packages for which we want to show overridden logo. For example, an app overrides its launcher logo, if it's in this array, biometric dialog shows the overridden logo; otherwise biometric dialog still shows the default application info icon. [CHAR LIMIT=NONE] -->
+    <string-array name="biometric_dialog_package_names_for_logo_with_overrides" />
     <!-- Message shown when a biometric is authenticated, asking the user to confirm authentication [CHAR LIMIT=30] -->
     <string name="biometric_dialog_confirm">Confirm</string>
     <!-- Button name on BiometricPrompt shown when a biometric is detected but not authenticated. Tapping the button resumes authentication [CHAR LIMIT=30] -->

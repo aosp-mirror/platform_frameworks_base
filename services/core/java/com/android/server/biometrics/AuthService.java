@@ -298,7 +298,7 @@ public class AuthService extends SystemService {
                 return -1;
             }
 
-            if (promptInfo.containsTestConfigurations()) {
+            if (promptInfo.requiresTestOrInternalPermission()) {
                 if (getContext().checkCallingOrSelfPermission(TEST_BIOMETRIC)
                         != PackageManager.PERMISSION_GRANTED) {
                     checkInternalPermission();
@@ -306,10 +306,10 @@ public class AuthService extends SystemService {
             }
 
             // Only allow internal clients to enable non-public options.
-            if (promptInfo.containsPrivateApiConfigurations()) {
+            if (promptInfo.requiresInternalPermission()) {
                 checkInternalPermission();
             }
-            if (promptInfo.containsAdvancedApiConfigurations()) {
+            if (promptInfo.requiresAdvancedPermission()) {
                 checkBiometricAdvancedPermission();
             }
 
