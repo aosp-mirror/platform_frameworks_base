@@ -426,14 +426,6 @@ public final class AppStartInfoTracker {
         }
     }
 
-    void reportApplicationOnCreateTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_APPLICATION_ONCREATE);
-    }
-
     /**
      * Helper functions for monitoring shell command.
      * > adb shell am start-info-detailed-monitoring [package-name]
@@ -468,41 +460,14 @@ public final class AppStartInfoTracker {
         }
     }
 
-    /** Report a bind application timestamp to add to {@link ApplicationStartInfo}. */
-    public void reportBindApplicationTimeNanos(ProcessRecord app, long timeNs) {
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_BIND_APPLICATION);
-    }
-
-    void reportFirstFrameTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME);
-    }
-
-    void reportFullyDrawnTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN);
-    }
-
-    void reportFullyDrawnTimeNanos(String processName, int uid, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(processName, uid, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN);
-    }
-
-    private void addTimestampToStart(ProcessRecord app, long timeNs, int key) {
+    void addTimestampToStart(ProcessRecord app, long timeNs, int key) {
         addTimestampToStart(app.info.packageName, app.uid, timeNs, key);
     }
 
     void addTimestampToStart(String packageName, int uid, long timeNs, int key) {
+        if (!mEnabled) {
+            return;
+        }
         synchronized (mLock) {
             AppStartInfoContainer container = mData.get(packageName, uid);
             if (container == null) {
