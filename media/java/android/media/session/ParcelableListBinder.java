@@ -45,6 +45,7 @@ public class ParcelableListBinder<T extends Parcelable> extends Binder {
     private static final int END_OF_PARCEL = 0;
     private static final int ITEM_CONTINUED = 1;
 
+    private final Class<T> mListElementsClass;
     private final Consumer<List<T>> mConsumer;
 
     private final Object mLock = new Object();
@@ -61,9 +62,11 @@ public class ParcelableListBinder<T extends Parcelable> extends Binder {
     /**
      * Creates an instance.
      *
+     * @param listElementsClass the class of the list elements.
      * @param consumer a consumer that consumes the list received
      */
-    public ParcelableListBinder(@NonNull Consumer<List<T>> consumer) {
+    public ParcelableListBinder(Class<T> listElementsClass, @NonNull Consumer<List<T>> consumer) {
+        mListElementsClass = listElementsClass;
         mConsumer = consumer;
     }
 
@@ -83,7 +86,13 @@ public class ParcelableListBinder<T extends Parcelable> extends Binder {
                 mCount = data.readInt();
             }
             while (i < mCount && data.readInt() != END_OF_PARCEL) {
-                mList.add(data.readParcelable(null));
+                Object object = data.readParcelable(null);
+                if (mListElementsClass.isAssignableFrom(object.getClass())) {
+                    // Checking list items are of compaitible types to validate against malicious
+                    // apps calling it directly via reflection with non compilable items.
+                    // See b/317048338 for more details
+                    mList.add((T) object);
+                }
                 i++;
             }
             if (i >= mCount) {
