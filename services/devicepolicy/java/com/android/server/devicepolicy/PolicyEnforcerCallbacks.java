@@ -196,19 +196,27 @@ final class PolicyEnforcerCallbacks {
         Binder.withCleanCallingIdentity(() -> {
             PackageManagerInternal pmi =
                     LocalServices.getService(PackageManagerInternal.class);
+            AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+
             pmi.setOwnerProtectedPackages(userId,
                     packages == null ? null : packages.stream().toList());
             LocalServices.getService(UsageStatsManagerInternal.class)
                     .setAdminProtectedPackages(
                             packages == null ? null : new ArraySet<>(packages), userId);
 
-            if (Flags.disallowUserControlBgUsageFix()) {
-                if (packages == null) {
-                    return;
+            if (packages == null || packages.isEmpty()) {
+                return;
+            }
+
+            for (int user : resolveUsers(userId)) {
+                if (Flags.disallowUserControlBgUsageFix()) {
+                    setBgUsageAppOp(packages, pmi, user, appOpsManager);
                 }
-                final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-                resolveUsers(userId).forEach(
-                        user -> setBgUsageAppOp(packages, pmi, user, appOpsManager));
+                if (Flags.disallowUserControlStoppedStateFix()) {
+                    for (String packageName : packages) {
+                        pmi.setPackageStoppedState(packageName, false, user);
+                    }
+                }
             }
         });
         return true;

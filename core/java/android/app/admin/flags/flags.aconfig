@@ -217,6 +217,16 @@ flag {
 }
 
 flag {
+  name: "disallow_user_control_stopped_state_fix"
+  namespace: "enterprise"
+  description: "Ensure DPM.setUserControlDisabledPackages() clears FLAG_STOPPED for the app"
+  bug: "330688482"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "esim_management_ux_enabled"
   namespace: "enterprise"
   description: "Enable UX changes for esim management"
