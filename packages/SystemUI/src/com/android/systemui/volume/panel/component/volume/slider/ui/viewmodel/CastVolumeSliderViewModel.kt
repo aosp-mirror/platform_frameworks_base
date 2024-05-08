@@ -68,7 +68,7 @@ constructor(
             icon = Icon.Resource(R.drawable.ic_cast, null),
             label = context.getString(R.string.media_device_cast),
             isEnabled = true,
-            a11yStep = 1
+            a11yStep = 1,
         )
     }
 
@@ -85,6 +85,12 @@ constructor(
 
         override val isMutable: Boolean
             get() = false
+
+        override val a11yClickDescription: String?
+            get() = null
+
+        override val a11yStateDescription: String?
+            get() = null
     }
 
     @AssistedFactory
