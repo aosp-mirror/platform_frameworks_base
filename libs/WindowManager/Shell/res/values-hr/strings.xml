@@ -52,7 +52,7 @@
     <string name="accessibility_split_right" msgid="8441001008181296837">"Podijeli desno"</string>
     <string name="accessibility_split_top" msgid="2789329702027147146">"Podijeli gore"</string>
     <string name="accessibility_split_bottom" msgid="8694551025220868191">"Podijeli dolje"</string>
-    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Korištenje načina rada jednom rukom"</string>
+    <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Upotreba načina rada jednom rukom"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Za izlaz prijeđite prstom od dna zaslona prema gore ili dodirnite bio gdje iznad aplikacije"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Pokretanje načina rada jednom rukom"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Izlaz iz načina rada jednom rukom"</string>

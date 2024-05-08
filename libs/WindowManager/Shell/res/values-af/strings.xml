@@ -53,7 +53,7 @@
     <string name="accessibility_split_top" msgid="2789329702027147146">"Verdeel bo"</string>
     <string name="accessibility_split_bottom" msgid="8694551025220868191">"Verdeel onder"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Gebruik eenhandmodus"</string>
-    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Swiep van die onderkant van die skerm af op of tik enige plek bo die program om uit te gaan"</string>
+    <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Swiep van die onderkant van die skerm af op of tik enige plek bo die app om uit te gaan"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Begin eenhandmodus"</string>
     <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"Verlaat eenhandmodus"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"Instellings vir <xliff:g id="APP_NAME">%1$s</xliff:g>-borrels"</string>
