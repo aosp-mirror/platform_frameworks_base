@@ -36,6 +36,7 @@ import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
+import com.android.systemui.bouncer.dagger.BouncerLoggerModule;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
@@ -113,6 +114,7 @@ import java.util.concurrent.Executor;
             KeyguardDisplayModule.class,
             StartKeyguardTransitionModule.class,
             ResourceTrimmerModule.class,
+            BouncerLoggerModule.class,
         })
 public interface KeyguardModule {
     /**
