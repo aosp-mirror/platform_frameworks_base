@@ -371,7 +371,7 @@
     <string name="media_category" msgid="8122076702526144053">"ມີເດຍ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"ກຳລັງກວດສອບ"</string>
     <string name="strict_mode" msgid="889864762140862437">"ເປີດໃຊ້ໂໝດເຄັ່ງຄັດ"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"ກະພິບໜ້າຈໍເມື່ອມີແອັບ ເຮັດວຽກດົນເກີນໄປໃນເທຣດຫຼັກ"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"ກະພິບໜ້າຈໍເມື່ອມີແອັບເຮັດວຽກດົນເກີນໄປໃນເທຣດຫຼັກ"</string>
     <string name="pointer_location" msgid="7516929526199520173">"ຕຳແໜ່ງໂຕຊີ້"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"ການວາງຊ້ອນໜ້າຈໍກຳລັງສະແດງຂໍ້ມູນການສຳຜັດໃນປັດຈຸບັນ"</string>
     <string name="show_touches" msgid="8437666942161289025">"ສະແດງການແຕະ"</string>

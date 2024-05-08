@@ -285,7 +285,7 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Autoriser le déverrouillage du fichier d\'amorce"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Permettre le déverrouillage par le fabricant?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"AVERTISSEMENT : Les fonctionnalités de protection de l\'appareil ne fonctionneront pas sur cet appareil lorsque ce paramètre est activé."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Sélectionner l\'application de position fictive"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Sélectionner l\'appli de position fictive"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Aucune application de position fictive définie"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Application de position fictive : <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Réseautage"</string>
@@ -721,6 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"Neutre"</string>
     <string name="feminine" msgid="1529155595310784757">"Féminin"</string>
     <string name="masculine" msgid="4653978041013996303">"Masculin"</string>
-    <!-- no translation found for system_update_settings_list_item_title (6618098383615432484) -->
-    <skip />
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Mises à jour du système"</string>
 </resources>
