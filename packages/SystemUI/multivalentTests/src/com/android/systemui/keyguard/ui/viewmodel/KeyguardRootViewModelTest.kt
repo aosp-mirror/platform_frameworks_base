@@ -60,7 +60,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class KeyguardRootViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
@@ -75,7 +75,6 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization?) : SysuiTestCase()
 
     private val viewState = ViewStateAccessor()
 
-    // add to init block
     companion object {
         @JvmStatic
         @Parameters(name = "{0}")
@@ -85,7 +84,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization?) : SysuiTestCase()
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

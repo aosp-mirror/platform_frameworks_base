@@ -47,7 +47,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class LockscreenContentViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class LockscreenContentViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     private val kosmos: Kosmos = testKosmos()
 
@@ -62,7 +62,7 @@ class LockscreenContentViewModelTest(flags: FlagsParameterization?) : SysuiTestC
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

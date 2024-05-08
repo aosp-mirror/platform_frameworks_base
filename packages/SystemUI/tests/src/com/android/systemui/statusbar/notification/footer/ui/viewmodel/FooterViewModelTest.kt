@@ -55,7 +55,7 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
 @EnableFlags(FooterViewRefactor.FLAG_NAME)
-class FooterViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
@@ -79,7 +79,7 @@ class FooterViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

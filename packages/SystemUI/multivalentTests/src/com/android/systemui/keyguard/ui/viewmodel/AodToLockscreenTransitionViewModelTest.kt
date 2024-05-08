@@ -43,7 +43,7 @@ import platform.test.runner.parameterized.Parameters
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class AodToLockscreenTransitionViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class AodToLockscreenTransitionViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
     val repository = kosmos.fakeKeyguardTransitionRepository
@@ -60,7 +60,7 @@ class AodToLockscreenTransitionViewModelTest(flags: FlagsParameterization?) : Sy
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

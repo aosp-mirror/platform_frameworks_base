@@ -75,7 +75,7 @@ import platform.test.runner.parameterized.Parameters
 @RunWith(ParameterizedAndroidJunit4::class)
 // SharedNotificationContainerViewModel is only bound when FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT is on
 @EnableFlags(FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
-class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     companion object {
         @JvmStatic
@@ -89,7 +89,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization?) : 
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     val aodBurnInViewModel = mock(AodBurnInViewModel::class.java)

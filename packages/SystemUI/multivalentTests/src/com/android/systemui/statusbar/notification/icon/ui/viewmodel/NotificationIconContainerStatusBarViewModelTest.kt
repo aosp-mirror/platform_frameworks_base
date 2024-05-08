@@ -59,7 +59,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterization?) :
+class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterization) :
     SysuiTestCase() {
 
     companion object {
@@ -71,7 +71,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     private val kosmos = testKosmos()

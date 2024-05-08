@@ -46,7 +46,7 @@ import platform.test.runner.parameterized.Parameters
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameterization?) :
+class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameterization) :
     SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
@@ -67,7 +67,7 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

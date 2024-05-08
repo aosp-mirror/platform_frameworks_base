@@ -54,7 +54,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
@@ -76,7 +76,7 @@ class LockscreenToOccludedTransitionViewModelTest(flags: FlagsParameterization?)
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

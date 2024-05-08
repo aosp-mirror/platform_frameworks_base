@@ -53,7 +53,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class KeyguardClockViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class KeyguardClockViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
     val underTest = kosmos.keyguardClockViewModel
@@ -67,7 +67,7 @@ class KeyguardClockViewModelTest(flags: FlagsParameterization?) : SysuiTestCase(
     var faceConfig = ClockFaceConfig()
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before
