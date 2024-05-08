@@ -581,6 +581,16 @@ flag {
 }
 
 flag {
+   name: "contextual_tips_assistant_dismiss_fix"
+   namespace: "systemui"
+   description: "Improve assistant dismiss signal accuracy for contextual tips."
+   bug: "334759504"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "shaderlib_loading_effect_refactor"
    namespace: "systemui"
    description: "Extend shader library to provide the common loading effects."
