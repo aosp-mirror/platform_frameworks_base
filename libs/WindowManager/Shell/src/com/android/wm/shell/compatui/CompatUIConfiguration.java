@@ -194,6 +194,10 @@ public class CompatUIConfiguration implements DeviceConfig.OnPropertiesChangedLi
         return mHideSizeCompatRestartButtonTolerance;
     }
 
+    int getDefaultHideRestartButtonTolerance() {
+        return MAX_PERCENTAGE_VAL;
+    }
+
     boolean getHasSeenLetterboxEducation(int userId) {
         return mLetterboxEduSharedPreferences
                 .getBoolean(dontShowLetterboxEduKey(userId), /* default= */ false);
