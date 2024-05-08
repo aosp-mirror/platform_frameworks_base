@@ -1648,14 +1648,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         if (mController.useFullReadyTracking()) {
-            if (mReadyTracker.mMet.isEmpty()) {
-                Slog.e(TAG, "#" + mSyncId + ": No conditions provided");
-            } else {
-                for (int i = 0; i < mReadyTracker.mConditions.size(); ++i) {
-                    Slog.e(TAG, "#" + mSyncId + ": unmet condition at ready: "
-                            + mReadyTracker.mConditions.get(i));
-                }
-            }
             for (int i = 0; i < mReadyTracker.mMet.size(); ++i) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "#%d: Met condition: %s",
                         mSyncId, mReadyTracker.mMet.get(i));
@@ -3358,6 +3350,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         --mReadyTrackerOld.mDeferReadyDepth;
         // Apply ready in case it is waiting for the previous defer call.
         applyReady();
+    }
+
+    @Override
+    public void onReadyTimeout() {
+        if (!mController.useFullReadyTracking()) {
+            Slog.e(TAG, "#" + mSyncId + " readiness timeout, used=" + mReadyTrackerOld.mUsed
+                    + " deferReadyDepth=" + mReadyTrackerOld.mDeferReadyDepth
+                    + " group=" + mReadyTrackerOld.mReadyGroups);
+            return;
+        }
+        Slog.e(TAG, "#" + mSyncId + " met conditions: " + mReadyTracker.mMet);
+        Slog.e(TAG, "#" + mSyncId + " unmet conditions: " + mReadyTracker.mConditions);
     }
 
     /**
