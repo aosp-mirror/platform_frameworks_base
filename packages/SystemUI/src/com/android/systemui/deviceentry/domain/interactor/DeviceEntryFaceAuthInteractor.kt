@@ -16,6 +16,7 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.deviceentry.shared.model.FaceAuthenticationStatus
 import com.android.systemui.deviceentry.shared.model.FaceDetectionStatus
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
  * Interactor that exposes API to get the face authentication status and handle any events that can
  * cause face authentication to run for device entry.
  */
-interface DeviceEntryFaceAuthInteractor {
+interface DeviceEntryFaceAuthInteractor : CoreStartable {
 
     /** Current authentication status */
     val authenticationStatus: Flow<FaceAuthenticationStatus>
