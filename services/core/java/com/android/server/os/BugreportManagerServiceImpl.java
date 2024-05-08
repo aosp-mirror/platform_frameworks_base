@@ -46,6 +46,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.LocalLog;
+import android.util.MutableBoolean;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.Xml;
@@ -104,6 +105,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private final TelephonyManager mTelephonyManager;
     private final ArraySet<String> mBugreportAllowlistedPackages;
     private final BugreportFileManager mBugreportFileManager;
+    private static final FeatureFlags sFeatureFlags = new FeatureFlagsImpl();
 
 
     @GuardedBy("mLock")
@@ -429,9 +431,51 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         ensureUserCanTakeBugReport(bugreportMode);
 
         Slogf.i(TAG, "Starting bugreport for %s / %d", callingPackage, callingUid);
-        synchronized (mLock) {
-            startBugreportLocked(callingUid, callingPackage, bugreportFd, screenshotFd,
-                    bugreportMode, bugreportFlags, listener, isScreenshotRequested);
+        final MutableBoolean handoffLock = new MutableBoolean(false);
+        if (sFeatureFlags.asyncStartBugreport()) {
+            synchronized (handoffLock) {
+                new Thread(()-> {
+                    try {
+                        synchronized (mLock) {
+                            synchronized (handoffLock) {
+                                handoffLock.value = true;
+                                handoffLock.notifyAll();
+                            }
+                            startBugreportLocked(
+                                    callingUid,
+                                    callingPackage,
+                                    bugreportFd,
+                                    screenshotFd,
+                                    bugreportMode,
+                                    bugreportFlags,
+                                    listener,
+                                    isScreenshotRequested);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Cannot start a new bugreport due to an unknown error", e);
+                        reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
+                    }
+                }, "BugreportManagerServiceThread").start();
+                try {
+                    while (!handoffLock.value) { // handle the rare case of a spurious wakeup
+                        handoffLock.wait(DEFAULT_BUGREPORT_SERVICE_TIMEOUT_MILLIS);
+                    }
+                } catch (InterruptedException e) {
+                    Slog.e(TAG, "Unexpectedly interrupted waiting for startBugreportLocked", e);
+                }
+            }
+        } else {
+            synchronized (mLock) {
+                startBugreportLocked(
+                        callingUid,
+                        callingPackage,
+                        bugreportFd,
+                        screenshotFd,
+                        bugreportMode,
+                        bugreportFlags,
+                        listener,
+                        isScreenshotRequested);
+            }
         }
     }
 
