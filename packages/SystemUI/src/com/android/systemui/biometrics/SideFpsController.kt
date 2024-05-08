@@ -323,7 +323,7 @@ constructor(
         )
         lottie.addLottieOnCompositionLoadedListener {
             // Check that view is not stale, and that overlayView has not been hidden/removed
-            if (overlayView?.isAttachedToWindow == true && overlayView == view) {
+            if (overlayView != null && overlayView == view) {
                 updateOverlayParams(display, it.bounds)
             }
         }
