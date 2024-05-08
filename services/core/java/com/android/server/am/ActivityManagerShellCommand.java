@@ -4552,10 +4552,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           1: crop_windows");
             pw.println("           2: resizeable");
             pw.println("           3: resizeable_and_pipable");
-            pw.println("       resize <TASK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
-            pw.println("           Makes sure <TASK_ID> is in a stack with the specified bounds.");
-            pw.println("           Forces the task to be resizeable and creates a stack if no existing stack");
-            pw.println("           has the specified bounds.");
+            pw.println("       resize <TASK_ID> <LEFT> <TOP> <RIGHT> <BOTTOM>");
+            pw.println("           The task is resized only if it is in multi-window windowing");
+            pw.println("           mode or freeform windowing mode.");
             pw.println("  update-appinfo <USER_ID> <PACKAGE_NAME> [<PACKAGE_NAME>...]");
             pw.println("      Update the ApplicationInfo objects of the listed packages for <USER_ID>");
             pw.println("      without restarting any processes.");
