@@ -271,6 +271,15 @@ interface NativeInputManagerService {
 
     void setInputMethodConnectionIsActive(boolean isActive);
 
+    /**
+     * Get the device ID of the InputDevice that used most recently.
+     *
+     * @return the last used input device ID, or
+     *     {@link android.os.IInputConstants#INVALID_INPUT_DEVICE_ID} if no device has been used
+     *     since boot.
+     */
+    int getLastUsedInputDeviceId();
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -544,5 +553,8 @@ interface NativeInputManagerService {
 
         @Override
         public native void setInputMethodConnectionIsActive(boolean isActive);
+
+        @Override
+        public native int getLastUsedInputDeviceId();
     }
 }

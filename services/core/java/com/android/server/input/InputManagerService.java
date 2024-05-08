@@ -3204,6 +3204,11 @@ public class InputManagerService extends IInputManager.Stub
         public void setStylusButtonMotionEventsEnabled(boolean enabled) {
             mNative.setStylusButtonMotionEventsEnabled(enabled);
         }
+
+        @Override
+        public int getLastUsedInputDeviceId() {
+            return mNative.getLastUsedInputDeviceId();
+        }
     }
 
     @Override
