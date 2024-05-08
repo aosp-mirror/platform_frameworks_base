@@ -33,7 +33,7 @@ prebuilt_etc {
     name: "preloaded-classes",
     src: "preloaded-classes",
     filename: "preloaded-classes",
-    installable: false,
+    no_full_install: true,
 }
 
 filegroup {
