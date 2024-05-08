@@ -366,6 +366,10 @@ class Task extends TaskFragment {
      * user wants to return to it. */
     private WindowProcessController mRootProcess;
 
+    /** The TF host info are set once the task has ever added an organized task fragment. */
+    int mTaskFragmentHostUid;
+    String mTaskFragmentHostProcessName;
+
     /** Takes on same value as first root activity */
     boolean isPersistable = false;
     int maxRecents;
@@ -1474,6 +1478,11 @@ class Task extends TaskFragment {
         // passed from Task constructor.
         final TaskFragment childTaskFrag = child.asTaskFragment();
         if (childTaskFrag != null && childTaskFrag.asTask() == null) {
+            if (childTaskFrag.mTaskFragmentOrganizerProcessName != null
+                    && mTaskFragmentHostProcessName == null) {
+                mTaskFragmentHostUid = childTaskFrag.mTaskFragmentOrganizerUid;
+                mTaskFragmentHostProcessName = childTaskFrag.mTaskFragmentOrganizerProcessName;
+            }
             childTaskFrag.setMinDimensions(mMinWidth, mMinHeight);
 
             // The starting window should keep covering its task when a pure TaskFragment is added
