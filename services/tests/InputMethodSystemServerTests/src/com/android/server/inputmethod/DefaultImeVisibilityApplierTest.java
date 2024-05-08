@@ -36,8 +36,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
+import static java.util.Objects.requireNonNull;
 
 import android.os.Binder;
 import android.os.IBinder;
@@ -72,7 +73,10 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         super.setUp();
         mVisibilityApplier =
                 (DefaultImeVisibilityApplier) mInputMethodManagerService.getVisibilityApplier();
-        mInputMethodManagerService.setAttachedClientForTesting(mock(ClientState.class));
+        synchronized (ImfLock.class) {
+            mInputMethodManagerService.setAttachedClientForTesting(requireNonNull(
+                    mInputMethodManagerService.getClientStateLocked(mMockInputMethodClient)));
+        }
     }
 
     @Test
