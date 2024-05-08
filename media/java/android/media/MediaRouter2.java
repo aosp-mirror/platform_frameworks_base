@@ -2064,24 +2064,31 @@ public final class MediaRouter2 {
         }
 
         /**
-         * Transfers to a given route for the remote session. The given route must be included in
-         * {@link RoutingSessionInfo#getTransferableRoutes()}.
+         * Attempts a transfer to a {@link RoutingSessionInfo#getTransferableRoutes() transferable
+         * route}.
          *
+         * <p>Transferring to a transferable route does not require the app to transfer the playback
+         * state from one route to the other. The route provider completely manages the transfer. An
+         * example of provider-managed transfers are the switches between the system's routes, like
+         * the built-in speakers and a BT headset.
+         *
+         * @return True if the transfer is handled by this controller, or false if a new controller
+         *     should be created instead.
          * @see RoutingSessionInfo#getSelectedRoutes()
          * @see RoutingSessionInfo#getTransferableRoutes()
          * @see ControllerCallback#onControllerUpdated
          */
-        void transferToRoute(@NonNull MediaRoute2Info route) {
+        boolean tryTransferWithinProvider(@NonNull MediaRoute2Info route) {
             Objects.requireNonNull(route, "route must not be null");
             synchronized (mControllerLock) {
                 if (isReleased()) {
                     Log.w(TAG, "transferToRoute: Called on released controller. Ignoring.");
-                    return;
+                    return true;
                 }
 
                 if (!mSessionInfo.getTransferableRoutes().contains(route.getId())) {
                     Log.w(TAG, "Ignoring transferring to a non-transferable route=" + route);
-                    return;
+                    return false;
                 }
             }
 
@@ -2096,6 +2103,7 @@ public final class MediaRouter2 {
                     Log.e(TAG, "Unable to transfer to route for session.", ex);
                 }
             }
+            return true;
         }
 
         /**
@@ -3587,20 +3595,14 @@ public final class MediaRouter2 {
             }
 
             RoutingController controller = getCurrentController();
-            if (controller
-                    .getRoutingSessionInfo()
-                    .getTransferableRoutes()
-                    .contains(route.getId())) {
-                controller.transferToRoute(route);
-                return;
+            if (!controller.tryTransferWithinProvider(route)) {
+                requestCreateController(
+                        controller,
+                        route,
+                        MANAGER_REQUEST_ID_NONE,
+                        Process.myUserHandle(),
+                        mContext.getPackageName());
             }
-
-            requestCreateController(
-                    controller,
-                    route,
-                    MANAGER_REQUEST_ID_NONE,
-                    Process.myUserHandle(),
-                    mContext.getPackageName());
         }
 
         @Override
