@@ -31,7 +31,11 @@ class FakeQSTileIntentUserInputHandler : QSTileIntentUserInputHandler {
 
     private val mutableInputs = mutableListOf<Input>()
 
-    override fun handle(expandable: Expandable?, intent: Intent) {
+    override fun handle(
+        expandable: Expandable?,
+        intent: Intent,
+        handleDismissShadeShowOverLockScreenWhenLocked: Boolean
+    ) {
         mutableInputs.add(Input.Intent(expandable, intent))
     }
 
