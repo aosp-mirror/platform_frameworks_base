@@ -39,6 +39,7 @@ class CommunalAppWidgetHostStartable
 @Inject
 constructor(
     private val appWidgetHost: CommunalAppWidgetHost,
+    private val communalWidgetHost: CommunalWidgetHost,
     private val communalInteractor: CommunalInteractor,
     private val userTracker: UserTracker,
     @Background private val bgScope: CoroutineScope,
@@ -70,9 +71,11 @@ constructor(
         // Always ensure this is called on the main/ui thread.
         withContext(uiDispatcher) {
             if (active) {
+                communalWidgetHost.startObservingHost()
                 appWidgetHost.startListening()
             } else {
                 appWidgetHost.stopListening()
+                communalWidgetHost.stopObservingHost()
             }
         }
 

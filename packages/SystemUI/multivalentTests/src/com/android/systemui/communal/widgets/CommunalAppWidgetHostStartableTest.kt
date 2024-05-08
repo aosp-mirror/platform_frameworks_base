@@ -60,6 +60,7 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
     @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
+    @Mock private lateinit var communalWidgetHost: CommunalWidgetHost
 
     private lateinit var appWidgetIdToRemove: MutableSharedFlow<Int>
 
@@ -78,6 +79,7 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
         underTest =
             CommunalAppWidgetHostStartable(
                 appWidgetHost,
+                communalWidgetHost,
                 kosmos.communalInteractor,
                 kosmos.fakeUserTracker,
                 kosmos.applicationCoroutineScope,
@@ -139,6 +141,28 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
 
                 verify(appWidgetHost, never()).startListening()
                 verify(appWidgetHost, never()).stopListening()
+            }
+        }
+
+    @Test
+    fun observeHostWhenCommunalIsAvailable() =
+        with(kosmos) {
+            testScope.runTest {
+                setCommunalAvailable(true)
+                communalInteractor.setEditModeOpen(false)
+                verify(communalWidgetHost, never()).startObservingHost()
+                verify(communalWidgetHost, never()).stopObservingHost()
+
+                underTest.start()
+                runCurrent()
+
+                verify(communalWidgetHost).startObservingHost()
+                verify(communalWidgetHost, never()).stopObservingHost()
+
+                setCommunalAvailable(false)
+                runCurrent()
+
+                verify(communalWidgetHost).stopObservingHost()
             }
         }
 

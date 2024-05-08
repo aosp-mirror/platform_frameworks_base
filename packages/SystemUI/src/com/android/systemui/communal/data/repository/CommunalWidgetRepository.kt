@@ -17,10 +17,9 @@
 package com.android.systemui.communal.data.repository
 
 import android.app.backup.BackupManager
-import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
-import androidx.annotation.WorkerThread
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
 import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
@@ -36,15 +35,13 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
-import com.android.systemui.util.kotlin.getValue
-import java.util.Optional
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /** Encapsulates the state of widgets for communal mode. */
@@ -88,7 +85,6 @@ interface CommunalWidgetRepository {
 class CommunalWidgetRepositoryImpl
 @Inject
 constructor(
-    appWidgetManagerOptional: Optional<AppWidgetManager>,
     private val appWidgetHost: CommunalAppWidgetHost,
     @Background private val bgScope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
@@ -104,12 +100,13 @@ constructor(
 
     private val logger = Logger(logBuffer, TAG)
 
-    private val appWidgetManager by appWidgetManagerOptional
-
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
-        communalWidgetDao
-            .getWidgets()
-            .map { it.mapNotNull(::mapToContentModel) }
+        combine(
+                communalWidgetDao.getWidgets(),
+                communalWidgetHost.appWidgetProviders,
+            ) { entries, providers ->
+                entries.mapNotNull { entry -> mapToContentModel(entry, providers) }
+            }
             // As this reads from a database and triggers IPCs to AppWidgetManager,
             // it should be executed in the background.
             .flowOn(bgDispatcher)
@@ -245,6 +242,9 @@ constructor(
                 }
                 appWidgetHost.deleteAppWidgetId(widgetId)
             }
+
+            // Providers may have changed
+            communalWidgetHost.refreshProviders()
         }
     }
 
@@ -255,12 +255,12 @@ constructor(
         }
     }
 
-    @WorkerThread
     private fun mapToContentModel(
-        entry: Map.Entry<CommunalItemRank, CommunalWidgetItem>
+        entry: Map.Entry<CommunalItemRank, CommunalWidgetItem>,
+        providers: Map<Int, AppWidgetProviderInfo?>,
     ): CommunalWidgetContentModel? {
         val (_, widgetId) = entry.value
-        val providerInfo = appWidgetManager?.getAppWidgetInfo(widgetId) ?: return null
+        val providerInfo = providers[widgetId] ?: return null
         return CommunalWidgetContentModel(
             appWidgetId = widgetId,
             providerInfo = providerInfo,
