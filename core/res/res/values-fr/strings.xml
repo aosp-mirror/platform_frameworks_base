@@ -2145,10 +2145,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Économiseur de batterie activé"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Réduction de l\'utilisation de la batterie pour prolonger son autonomie"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Économiseur de batterie activé"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"L\'économiseur de batterie est activé pour prolonger l\'autonomie de la batterie"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Économiseur de batterie"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Économiseur de batterie désactivé"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Téléphone suffisamment chargé. Les fonctionnalités ne sont plus restreintes."</string>
@@ -2406,7 +2404,7 @@
     <string name="profile_label_communal" msgid="8743921499944800427">"Commun"</string>
     <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Profil professionnel"</string>
     <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espace privé"</string>
-    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Cloner"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clone"</string>
     <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Commun"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Le contenu sensible de la notification a été masqué"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>

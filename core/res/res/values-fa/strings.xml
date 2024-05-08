@@ -2144,10 +2144,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"اعلان اطلاعات حالت روال معمول"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"«بهینه‌سازی باتری» روشن شد"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"برای افزایش عمر باتری، مصرف باتری کاهش می‌یابد"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"«بهینه‌سازی باتری» روشن است"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"«بهینه‌سازی باتری» برای افزایش عمر باتری روشن شد"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"بهینه‌سازی باتری"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"«بهینه‌سازی باتری» خاموش شد"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"تلفن به‌اندازه کافی شارژ دارد. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
@@ -2397,20 +2395,16 @@
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"صفحه‌کلیدهای فیزیکی پیکربندی شدند"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"برای مشاهده صفحه‌کلیدها ضربه بزنید"</string>
     <string name="profile_label_private" msgid="6463418670715290696">"خصوصی"</string>
-    <string name="profile_label_clone" msgid="769106052210954285">"مشابه‌سازی"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"همسانه‌سازی"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"کار"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"کار ۲"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"کار ۳"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"آزمایش"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"عمومی"</string>
-    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
-    <skip />
-    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
-    <skip />
-    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
-    <skip />
-    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"نمایه کاری"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"فضای خصوصی"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"همسانه‌سازی"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"همگانی"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"محتوای اعلان حساس پنهان شده است"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"به‌دلایل امنیتی، محتوای برنامه از دید هم‌رسانی صفحه‌نمایش پنهان شد"</string>

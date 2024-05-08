@@ -2144,10 +2144,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"បានបើកមុខងារ​សន្សំ​ថ្ម"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ការកាត់បន្ថយការប្រើប្រាស់ថ្ម ដើម្បីបង្កើនកម្រិតថាមពលថ្ម"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"មុខងារ​សន្សំ​ថ្មត្រូវបានបើក"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"មុខងារ​សន្សំ​ថ្មត្រូវបានបើក ដើម្បីបង្កើនកម្រិតថាមពលថ្ម"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"មុខងារ​សន្សំ​ថ្ម​ត្រូវបានបិទ"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ទូរសព្ទ​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>
@@ -2403,14 +2401,10 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ការងារទី 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"ការធ្វើ​តេស្ត"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"ទូទៅ"</string>
-    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
-    <skip />
-    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
-    <skip />
-    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
-    <skip />
-    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"កម្រងព័ត៌មានការងារ"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"លំហ​ឯកជន"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ក្លូន"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"ទូទៅ"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"បានលាក់ខ្លឹមសារជូនដំណឹងដែលមានលក្ខណៈរសើប"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"បានលាក់ខ្លឹមសារកម្មវិធីពីការបង្ហាញ​អេក្រង់ដើម្បីសុវត្ថិភាព"</string>
