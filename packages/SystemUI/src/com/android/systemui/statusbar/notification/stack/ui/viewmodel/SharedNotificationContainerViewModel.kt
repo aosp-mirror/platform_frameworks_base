@@ -636,7 +636,7 @@ constructor(
                 showUnlimitedNotifications,
                 shadeInteractor.isUserInteracting,
                 availableHeight,
-                interactor.notificationStackChanged.onStart { emit(Unit) },
+                interactor.notificationStackChanged,
                 interactor.useExtraShelfSpace,
             ) { flows ->
                 val showLimitedNotifications = flows[0] as Boolean
