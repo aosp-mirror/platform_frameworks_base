@@ -28,18 +28,18 @@ import java.util.Set;
 /**
  * @hide
  */
-public final class StringSetPolicyValue extends PolicyValue<Set<String>> {
+public final class PackageSetPolicyValue extends PolicyValue<Set<String>> {
 
-    public StringSetPolicyValue(@NonNull Set<String> value) {
+    public PackageSetPolicyValue(@NonNull Set<String> value) {
         super(value);
         if (Flags.devicePolicySizeTrackingInternalBugFixEnabled()) {
-            for (String str : value) {
-                PolicySizeVerifier.enforceMaxStringLength(str, "policyValue");
+            for (String packageName : value) {
+                PolicySizeVerifier.enforceMaxPackageNameLength(packageName);
             }
         }
     }
 
-    public StringSetPolicyValue(Parcel source) {
+    public PackageSetPolicyValue(Parcel source) {
         this(readValues(source));
     }
 
@@ -56,7 +56,7 @@ public final class StringSetPolicyValue extends PolicyValue<Set<String>> {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StringSetPolicyValue other = (StringSetPolicyValue) o;
+        PackageSetPolicyValue other = (PackageSetPolicyValue) o;
         return Objects.equals(getValue(), other.getValue());
     }
 
@@ -67,7 +67,7 @@ public final class StringSetPolicyValue extends PolicyValue<Set<String>> {
 
     @Override
     public String toString() {
-        return "StringSetPolicyValue { " + getValue() + " }";
+        return "PackageNameSetPolicyValue { " + getValue() + " }";
     }
 
     @Override
@@ -84,16 +84,16 @@ public final class StringSetPolicyValue extends PolicyValue<Set<String>> {
     }
 
     @NonNull
-    public static final Creator<StringSetPolicyValue> CREATOR =
-            new Creator<StringSetPolicyValue>() {
+    public static final Creator<PackageSetPolicyValue> CREATOR =
+            new Creator<PackageSetPolicyValue>() {
                 @Override
-                public StringSetPolicyValue createFromParcel(Parcel source) {
-                    return new StringSetPolicyValue(source);
+                public PackageSetPolicyValue createFromParcel(Parcel source) {
+                    return new PackageSetPolicyValue(source);
                 }
 
                 @Override
-                public StringSetPolicyValue[] newArray(int size) {
-                    return new StringSetPolicyValue[size];
+                public PackageSetPolicyValue[] newArray(int size) {
+                    return new PackageSetPolicyValue[size];
                 }
             };
 }

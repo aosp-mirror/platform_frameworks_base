@@ -162,9 +162,9 @@ final class PolicyDefinition<V> {
             new PolicyDefinition<>(
                     new NoArgsPolicyKey(
                             DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY),
-                    new StringSetUnion(),
+                    new PackageSetUnion(),
                     PolicyEnforcerCallbacks::setUserControlDisabledPackages,
-                    new StringSetPolicySerializer());
+                    new PackageSetPolicySerializer());
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
     // actual policy with the correct arguments (i.e. packageName) when reading the policies from
@@ -328,7 +328,7 @@ final class PolicyDefinition<V> {
             new MostRecent<>(),
             POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
             (Set<String> value, Context context, Integer userId, PolicyKey policyKey) -> true,
-            new StringSetPolicySerializer());
+            new PackageSetPolicySerializer());
 
 
     static PolicyDefinition<Boolean> SCREEN_CAPTURE_DISABLED = new PolicyDefinition<>(
