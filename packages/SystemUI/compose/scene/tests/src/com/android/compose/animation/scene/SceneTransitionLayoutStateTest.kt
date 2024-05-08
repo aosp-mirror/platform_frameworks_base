@@ -635,4 +635,19 @@ class SceneTransitionLayoutStateTest {
             Log.setWtfHandler(originalHandler)
         }
     }
+
+    @Test
+    fun snapToScene() = runMonotonicClockTest {
+        val state = MutableSceneTransitionLayoutState(SceneA)
+
+        // Transition to B.
+        state.setTargetScene(SceneB, coroutineScope = this)
+        val transition = assertThat(state.transitionState).isTransition()
+        assertThat(transition).hasCurrentScene(SceneB)
+
+        // Snap to C.
+        state.snapToScene(SceneC)
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneC)
+    }
 }
