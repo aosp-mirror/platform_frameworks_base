@@ -721,6 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"Середній рід"</string>
     <string name="feminine" msgid="1529155595310784757">"Жіночий рід"</string>
     <string name="masculine" msgid="4653978041013996303">"Чоловічий рід"</string>
-    <!-- no translation found for system_update_settings_list_item_title (6618098383615432484) -->
-    <skip />
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"Оновлення системи"</string>
 </resources>
