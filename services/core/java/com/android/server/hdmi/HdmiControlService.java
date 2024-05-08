@@ -304,6 +304,10 @@ public class HdmiControlService extends SystemService {
     // Make sure HdmiCecConfig is instantiated and the XMLs are read.
     private HdmiCecConfig mHdmiCecConfig;
 
+    // Timeout value for start ARC action after an established eARC connection was terminated,
+    // e.g. because eARC was disabled in Settings.
+    private static final int EARC_TRIGGER_START_ARC_ACTION_DELAY = 500;
+
     /**
      * Interface to report send result.
      */
@@ -5041,7 +5045,12 @@ public class HdmiControlService extends SystemService {
             // AudioService here that the eARC connection is terminated.
             HdmiLogger.debug("eARC state change [new: HDMI_EARC_STATUS_ARC_PENDING(2)]");
             notifyEarcStatusToAudioService(false, new ArrayList<>());
-            startArcAction(true, null);
+            mHandler.postDelayed( new Runnable() {
+                @Override
+                public void run() {
+                    startArcAction(true, null);
+                }
+            }, EARC_TRIGGER_START_ARC_ACTION_DELAY);
             getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
                     oldEarcStatus, status, HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED);
         } else {
