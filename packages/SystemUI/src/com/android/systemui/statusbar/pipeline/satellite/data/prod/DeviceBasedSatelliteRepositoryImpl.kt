@@ -243,11 +243,17 @@ constructor(
                 try {
                     sm.registerForNtnSignalStrengthChanged(bgDispatcher.asExecutor(), cb)
                     registered = true
+                    logBuffer.i { "Registered for signal strength successfully" }
                 } catch (e: Exception) {
                     logBuffer.e("error registering for signal strength", e)
                 }
 
-                awaitClose { if (registered) sm.unregisterForNtnSignalStrengthChanged(cb) }
+                awaitClose {
+                    if (registered) {
+                        sm.unregisterForNtnSignalStrengthChanged(cb)
+                        logBuffer.i { "Unregistered for signal strength successfully" }
+                    }
+                }
             }
             .flowOn(bgDispatcher)
 
