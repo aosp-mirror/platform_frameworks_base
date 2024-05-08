@@ -71,3 +71,10 @@ flag {
     description: "Enables quick switch for desktop mode"
     bug: "338066529"
 }
+
+flag {
+    name: "enable_additional_windows_above_status_bar"
+    namespace: "lse_desktop_experience"
+    description: "Allows for additional windows tied to WindowDecoration to be layered between status bar and notification shade."
+    bug: "316186265"
+}
