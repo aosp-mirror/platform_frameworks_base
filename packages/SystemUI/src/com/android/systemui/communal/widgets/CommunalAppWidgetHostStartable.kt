@@ -23,7 +23,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.util.kotlin.BooleanFlowOperators.or
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -46,7 +46,7 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        or(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
+        anyOf(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
             // Only trigger updates on state changes, ignoring the initial false value.
             .pairwise(false)
             .filter { (previous, new) -> previous != new }
