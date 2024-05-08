@@ -6593,12 +6593,7 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews createCompactHeadsUpContentView() {
-            // TODO(b/336225281): re-evaluate custom view usage.
-            if (useExistingRemoteView(mN.headsUpContentView)) {
-                return fullyCustomViewRequiresDecoration(false /* fromStyle */)
-                        ? minimallyDecoratedHeadsUpContentView(mN.headsUpContentView)
-                        : mN.headsUpContentView;
-            } else if (mStyle != null) {
+            if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeCompactHeadsUpContentView();
                 if (styleView != null) {
                     return styleView;
