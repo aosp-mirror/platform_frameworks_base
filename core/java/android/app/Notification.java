@@ -6611,7 +6611,7 @@ public class Notification implements Parcelable
             // Notification text is shown as secondary header text
             // for the minimal hun when it is provided.
             // Time(when and chronometer) is not shown for the minimal hun.
-            p.headerTextSecondary(p.mText).text(null).hideTime(true);
+            p.headerTextSecondary(p.mText).text(null).hideTime(true).summaryText("");
 
             return applyStandardTemplate(
                     getCompactHeadsUpBaseLayoutResource(), p,
