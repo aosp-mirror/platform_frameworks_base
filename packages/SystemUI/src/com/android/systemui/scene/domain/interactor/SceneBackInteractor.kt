@@ -18,13 +18,21 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.scene.data.model.SceneStack
+import com.android.systemui.scene.data.model.asIterable
+import com.android.systemui.scene.data.model.peek
+import com.android.systemui.scene.data.model.pop
+import com.android.systemui.scene.data.model.push
+import com.android.systemui.scene.data.model.sceneStackOf
 import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.SceneContainerConfig
-import java.util.Stack
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 
 @SysUISingleton
 class SceneBackInteractor
@@ -33,7 +41,9 @@ constructor(
     private val logger: SceneLogger,
     private val sceneContainerConfig: SceneContainerConfig,
 ) {
-    private val _backScene = MutableStateFlow<SceneKey?>(null)
+    private val _backStack = MutableStateFlow(sceneStackOf())
+    val backStack: StateFlow<SceneStack> = _backStack.asStateFlow()
+
     /**
      * The scene to navigate to when the user triggers back navigation.
      *
@@ -44,30 +54,30 @@ constructor(
      * illegal state to have scene implementation map to itself in its destination scene flow. Thus,
      * scene implementations might wish to filter their own scene key out before using this.
      */
-    val backScene: StateFlow<SceneKey?> = _backScene.asStateFlow()
-
-    private val backStack = Stack<SceneKey>()
+    val backScene: Flow<SceneKey?> = backStack.map { it.peek() }
 
     fun onSceneChange(from: SceneKey, to: SceneKey) {
         check(from != to) { "from == to, from=${from.debugName}, to=${to.debugName}" }
         when (stackOperation(from, to)) {
             Clear -> {
-                backStack.clear()
+                _backStack.value = sceneStackOf()
             }
             Push -> {
-                backStack.push(from)
+                _backStack.update { s -> s.push(from) }
             }
             Pop -> {
-                check(backStack.isNotEmpty()) { "Cannot pop ${from.debugName} when stack is empty" }
-                val popped = backStack.pop()
-                check(to == popped) {
-                    "Expected to pop ${to.debugName} but instead popped ${popped.debugName}"
+                _backStack.update { s ->
+                    checkNotNull(s.pop()) { "Cannot pop ${from.debugName} when stack is empty" }
+                        .also {
+                            val popped = s.peek()
+                            check(popped == to) {
+                                "Expected to pop ${to.debugName} but instead popped ${popped?.debugName}"
+                            }
+                        }
                 }
             }
         }
-
-        logger.logSceneBackStack(backStack)
-        _backScene.value = peek()
+        logger.logSceneBackStack(backStack.value.asIterable())
     }
 
     private fun stackOperation(from: SceneKey, to: SceneKey): StackOperation {
@@ -89,14 +99,6 @@ constructor(
                     "No mapping when from=${from.debugName} (distance=$fromDistance)," +
                         " to=${to.debugName} (distance=$toDistance)!"
                 )
-        }
-    }
-
-    private fun peek(): SceneKey? {
-        return if (backStack.isNotEmpty()) {
-            backStack.peek()
-        } else {
-            null
         }
     }
 
