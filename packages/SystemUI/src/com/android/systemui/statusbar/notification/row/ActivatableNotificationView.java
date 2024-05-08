@@ -38,6 +38,7 @@ import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.settingslib.Utils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -743,6 +744,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             }
             mOnDetachResetRoundness.clear();
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return TouchLogger.logDispatchTouch(
+                getClass().getSimpleName(), ev, super.dispatchTouchEvent(ev));
     }
 
     /**
