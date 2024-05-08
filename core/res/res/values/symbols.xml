@@ -1801,6 +1801,7 @@
   <java-symbol type="dimen" name="taskbar_frame_height" />
   <java-symbol type="dimen" name="status_bar_height" />
   <java-symbol type="dimen" name="display_cutout_touchable_region_size" />
+  <java-symbol type="dimen" name="system_gestures_distance_threshold" />
   <java-symbol type="dimen" name="system_gestures_start_threshold" />
   <java-symbol type="dimen" name="quick_qs_offset_height" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
