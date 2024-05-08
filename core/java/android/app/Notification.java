@@ -115,6 +115,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
+import com.android.internal.util.NewlineNormalizer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -3187,7 +3188,7 @@ public class Notification implements Parcelable
             return charSequence;
         }
 
-        return charSequence.toString().replaceAll("[\r\n]+", "\n");
+        return NewlineNormalizer.normalizeNewlines(charSequence.toString());
     }
 
     private static CharSequence removeTextSizeSpans(CharSequence charSequence) {
