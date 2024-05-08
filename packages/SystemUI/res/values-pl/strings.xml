@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Przycięcie lewej krawędzi o <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Przycięcie prawej krawędzi o <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Zapisano w aplikacji <xliff:g id="APP">%1$s</xliff:g> w profilu służbowym"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"Zapisano w aplikacji <xliff:g id="APP">%1$s</xliff:g> w profilu prywatnym"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Pliki"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikacja <xliff:g id="APPNAME">%1$s</xliff:g> wykryła ten zrzut ekranu."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Aplikacja <xliff:g id="APPNAME">%1$s</xliff:g> i inne aplikacje wykryły ten zrzut ekranu."</string>
@@ -277,7 +276,7 @@
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"rozłącz"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktywuj"</string>
     <string name="turn_on_bluetooth_auto_tomorrow" msgid="414836329962473906">"Automatycznie włącz ponownie jutro"</string>
-    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Funkcje takie jak szybkie udostępnianie czy Znajdź moje urządzenie korzystają z Bluetootha"</string>
+    <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Bluetootha używają funkcje takie jak szybkie udostępnianie czy Znajdź moje urządzenie"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth włączy się jutro rano"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="4499275822759907822">"Udostępnianie dźwięku"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="8626191139359072540">"Udostępniam dźwięk"</string>
@@ -461,7 +460,10 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Zamknij widżety na ekranie blokady"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Dostosuj widżety"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Widżety na ekranie blokady"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"wybierz widżet"</string>
+    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Przełącz użytkownika"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu"</string>
@@ -660,8 +662,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelita – połączenie słabe"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelita – połączenie dobre"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelita – połączenie dostępne"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satelitarne połączenie alarmowe"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil służbowy"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dobra zabawa, ale nie dla każdego"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Kalibrator System UI udostępnia dodatkowe sposoby dostrajania i dostosowywania interfejsu Androida. Te eksperymentalne funkcje mogą się zmienić, popsuć lub zniknąć w przyszłych wersjach. Zachowaj ostrożność."</string>
@@ -866,8 +867,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Dodaj kartę"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Przenieś do pozycji <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Dodaj w pozycji <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Nieprawidłowa pozycja."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Pozycja <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Dodano kartę"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Usunięto kartę"</string>

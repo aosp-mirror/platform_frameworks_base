@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Kufiri i majtë <xliff:g id="PERCENT">%1$d</xliff:g> për qind"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Kufiri i djathtë <xliff:g id="PERCENT">%1$d</xliff:g> për qind"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Ruajtur në <xliff:g id="APP">%1$s</xliff:g> në profilin e punës"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"Ruajtur në <xliff:g id="APP">%1$s</xliff:g> në profilin privat"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Skedarë"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> zbuloi këtë pamje ekrani."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dhe aplikacionet e tjera të hapura zbuluan këtë pamje ekrani."</string>
@@ -461,7 +460,10 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Mbyll miniaplikacionet në ekranin e kyçjes"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Personalizo miniaplikacionet"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Miniaplikacionet në ekranin e kyçjes"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"zgjidh miniaplikacionin"</string>
+    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Ndërro përdorues"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menyja me tërheqje poshtë"</string>
@@ -660,8 +662,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Sateliti. Lidhje e dobët"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Sateliti. Lidhje e mirë"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Sateliti. Ofrohet lidhje"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS satelitor"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profili i punës"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Argëtim për disa, por jo për të gjithë!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit të jep mënyra shtesë për të tërhequr dhe personalizuar ndërfaqen Android të përdoruesit. Këto funksione eksperimentale mund të ndryshojnë, prishen ose zhduken në versionet e ardhshme. Vazhdo me kujdes."</string>
@@ -866,8 +867,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Shto pllakëzën"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Zhvendos te <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Shto te pozicioni <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Pozicion i pavlefshëm."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Pozicioni <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Pllakëza u shtua"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Pllakëza u hoq"</string>
