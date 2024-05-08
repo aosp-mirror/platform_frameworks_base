@@ -24,7 +24,7 @@
   <string name="string_cancel">Cancel</string>
   <!-- This is a label for a button that takes user to the next screen. [CHAR LIMIT=20] -->
   <string name="string_continue">Continue</string>
-  <!-- This is a label for a button that leads to a holistic view of all different options where the user can save their new app credential. [CHAR LIMIT=20] -->
+  <!-- This is a label for a button that leads to a holistic view of all different options where the user can save their new app credential. [CHAR LIMIT=30] -->
   <string name="string_more_options">Save another way</string>
   <!-- This is a label for a button that links to additional information about passkeys. [CHAR LIMIT=20] -->
   <string name="string_learn_more">Learn more</string>
