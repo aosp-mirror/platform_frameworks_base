@@ -679,11 +679,13 @@ public class Dialog implements DialogInterface, Window.Callback,
         if (keyCode == KeyEvent.KEYCODE_ESCAPE) {
             if (mCancelable) {
                 cancel();
-            } else {
+                event.startTracking();
+                return true;
+            } else if (mWindow.shouldCloseOnTouchOutside()) {
                 dismiss();
+                event.startTracking();
+                return true;
             }
-            event.startTracking();
-            return true;
         }
 
         return false;
