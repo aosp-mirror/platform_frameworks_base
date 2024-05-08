@@ -1102,6 +1102,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         if (onModeChangedListeners == null) {
                             continue;
                         }
+                        onModeChangedListeners = new ArraySet<>(onModeChangedListeners);
                     }
                     for (int i = 0; i < changedUids.length; i++) {
                         final int changedUid = changedUids[i];
@@ -6396,12 +6397,13 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void notifyWatchersOnDefaultDevice(int code, int uid) {
-        final ArraySet<OnOpModeChangedListener> modeChangedListenerSet;
+        ArraySet<OnOpModeChangedListener> modeChangedListenerSet;
         synchronized (this) {
             modeChangedListenerSet = mOpModeWatchers.get(code);
             if (modeChangedListenerSet == null) {
                 return;
             }
+            modeChangedListenerSet = new ArraySet<>(modeChangedListenerSet);
         }
         notifyOpChanged(modeChangedListenerSet,  code, uid, null, PERSISTENT_DEVICE_ID_DEFAULT);
     }
