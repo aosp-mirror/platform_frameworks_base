@@ -47,7 +47,11 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
             view.requireViewById(R.id.screenshot_dismiss_button)
         )
 
-    fun getEntranceAnimation(bounds: Rect, showFlash: Boolean): Animator {
+    fun getEntranceAnimation(
+        bounds: Rect,
+        showFlash: Boolean,
+        onRevealMilestone: () -> Unit
+    ): Animator {
         val entranceAnimation = AnimatorSet()
 
         val previewAnimator = getPreviewAnimator(bounds)
@@ -70,7 +74,19 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
             entranceAnimation.doOnStart { screenshotPreview.visibility = View.INVISIBLE }
         }
 
-        entranceAnimation.play(getActionsAnimator()).with(previewAnimator)
+        val actionsAnimator = getActionsAnimator()
+        entranceAnimation.play(actionsAnimator).with(previewAnimator)
+
+        // This isn't actually animating anything but is basically a timer for the first 200ms of
+        // the entrance animation. Using an animator here ensures that this is scaled if we change
+        // animator duration scales.
+        val revealMilestoneAnimator =
+            ValueAnimator.ofFloat(0f).apply {
+                duration = 0
+                startDelay = ACTION_REVEAL_DELAY_MS
+                doOnEnd { onRevealMilestone() }
+            }
+        entranceAnimation.play(revealMilestoneAnimator).with(actionsAnimator)
 
         val fadeInAnimator = ValueAnimator.ofFloat(0f, 1f)
         fadeInAnimator.addUpdateListener {
@@ -198,5 +214,6 @@ class ScreenshotAnimationController(private val view: ScreenshotShelfView) {
         private const val FLASH_OUT_DURATION_MS: Long = 217
         private const val PREVIEW_X_ANIMATION_DURATION_MS: Long = 234
         private const val PREVIEW_Y_ANIMATION_DURATION_MS: Long = 500
+        private const val ACTION_REVEAL_DELAY_MS: Long = 200
     }
 }

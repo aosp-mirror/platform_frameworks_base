@@ -34,20 +34,21 @@ class ScreenshotViewModelTest {
 
         assertThat(viewModel.actions.value).isEmpty()
 
-        viewModel.addAction(appearance, onclick)
+        viewModel.addAction(appearance, true, onclick)
 
         assertThat(viewModel.actions.value).hasSize(1)
 
         val added = viewModel.actions.value[0]
         assertThat(added.appearance).isEqualTo(appearance)
         assertThat(added.onClicked).isEqualTo(onclick)
+        assertThat(added.showDuringEntrance).isTrue()
     }
 
     @Test
     fun testRemoveAction() {
         val viewModel = ScreenshotViewModel(accessibilityManager)
-        val firstId = viewModel.addAction(ActionButtonAppearance(null, "", ""), {})
-        val secondId = viewModel.addAction(appearance, onclick)
+        val firstId = viewModel.addAction(ActionButtonAppearance(null, "", ""), false, {})
+        val secondId = viewModel.addAction(appearance, false, onclick)
 
         assertThat(viewModel.actions.value).hasSize(2)
         assertThat(firstId).isNotEqualTo(secondId)
@@ -58,13 +59,14 @@ class ScreenshotViewModelTest {
 
         val remaining = viewModel.actions.value[0]
         assertThat(remaining.appearance).isEqualTo(appearance)
+        assertThat(remaining.showDuringEntrance).isFalse()
         assertThat(remaining.onClicked).isEqualTo(onclick)
     }
 
     @Test
     fun testUpdateActionAppearance() {
         val viewModel = ScreenshotViewModel(accessibilityManager)
-        val id = viewModel.addAction(appearance, onclick)
+        val id = viewModel.addAction(appearance, false, onclick)
         val otherAppearance = ActionButtonAppearance(null, "Other", "Other")
 
         viewModel.updateActionAppearance(id, otherAppearance)

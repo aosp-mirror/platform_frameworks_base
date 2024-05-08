@@ -45,6 +45,7 @@ import com.android.systemui.screenshot.scroll.ScrollCaptureController
 import com.android.systemui.screenshot.ui.ScreenshotAnimationController
 import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.binder.ScreenshotShelfViewBinder
+import com.android.systemui.screenshot.ui.viewmodel.AnimationState
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -119,12 +120,19 @@ constructor(
     override fun updateOrientation(insets: WindowInsets) {}
 
     override fun createScreenshotDropInAnimation(screenRect: Rect, showFlash: Boolean): Animator {
-        val entrance = animationController.getEntranceAnimation(screenRect, showFlash)
-        entrance.doOnStart { thumbnailObserver.onEntranceStarted() }
+        val entrance =
+            animationController.getEntranceAnimation(screenRect, showFlash) {
+                viewModel.setAnimationState(AnimationState.ENTRANCE_REVEAL)
+            }
+        entrance.doOnStart {
+            thumbnailObserver.onEntranceStarted()
+            viewModel.setAnimationState(AnimationState.ENTRANCE_STARTED)
+        }
         entrance.doOnEnd {
             // reset the timeout when animation finishes
             callbacks?.onUserInteraction()
             thumbnailObserver.onEntranceComplete()
+            viewModel.setAnimationState(AnimationState.ENTRANCE_COMPLETE)
         }
         return entrance
     }
