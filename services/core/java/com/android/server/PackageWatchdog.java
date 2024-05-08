@@ -138,6 +138,11 @@ public class PackageWatchdog {
 
     static final long DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS = TimeUnit.MINUTES.toMillis(10);
 
+    // Time needed to apply mitigation
+    private static final String MITIGATION_WINDOW_MS =
+            "persist.device_config.configuration.mitigation_window_ms";
+    private static final long DEFAULT_MITIGATION_WINDOW_MS = TimeUnit.SECONDS.toMillis(5);
+
     // Threshold level at which or above user might experience significant disruption.
     private static final String MAJOR_USER_IMPACT_LEVEL_THRESHOLD =
             "persist.device_config.configuration.major_user_impact_level_threshold";
@@ -209,6 +214,9 @@ public class PackageWatchdog {
     // If true, sync explicit health check packages with the ExplicitHealthCheckController.
     @GuardedBy("mLock")
     private boolean mSyncRequired = false;
+
+    @GuardedBy("mLock")
+    private long mLastMitigation = -1000000;
 
     @FunctionalInterface
     @VisibleForTesting
@@ -400,6 +408,14 @@ public class PackageWatchdog {
             Slog.w(TAG, "Could not resolve a list of failing packages");
             return;
         }
+        synchronized (mLock) {
+            final long now = mSystemClock.uptimeMillis();
+            if (now >= mLastMitigation
+                    && (now - mLastMitigation) < getMitigationWindowMs()) {
+                Slog.i(TAG, "Skipping onPackageFailure mitigation");
+                return;
+            }
+        }
         mLongTaskHandler.post(() -> {
             synchronized (mLock) {
                 if (mAllObservers.isEmpty()) {
@@ -500,8 +516,15 @@ public class PackageWatchdog {
                               int currentObserverImpact,
                               int mitigationCount) {
         if (currentObserverImpact < getUserImpactLevelLimit()) {
+            synchronized (mLock) {
+                mLastMitigation = mSystemClock.uptimeMillis();
+            }
             currentObserverToNotify.execute(versionedPackage, failureReason, mitigationCount);
         }
+    }
+
+    private long getMitigationWindowMs() {
+        return SystemProperties.getLong(MITIGATION_WINDOW_MS, DEFAULT_MITIGATION_WINDOW_MS);
     }
 
 
