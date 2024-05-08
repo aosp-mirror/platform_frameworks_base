@@ -22,7 +22,11 @@
     <path
         android:fillColor="@android:color/white"
         android:pathData="M20,7v13H7L20,7 M22,2L2,22h20V2L22,2z" />
-    <path
-        android:fillColor="@android:color/white"
-        android:pathData="M 11 13 L 2 22 L 11 22 Z" />
+    <clip-path android:name="triangle" android:pathData="M20,7v13H7L20,7z">
+        <!-- 1 bar. move to higher ground. -->
+        <path
+            android:name="ic_signal_cellular_1_4_bar"
+            android:fillColor="@android:color/white"
+            android:pathData="M6,0 H11 V20 H6 z" />
+    </clip-path>
 </vector>
