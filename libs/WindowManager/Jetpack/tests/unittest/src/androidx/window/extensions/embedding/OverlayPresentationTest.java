@@ -30,6 +30,11 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSpli
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPlaceholderRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTfContainer;
+import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_BOTTOM;
+import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_LEFT;
+import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_RIGHT;
+import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSITION_TOP;
+import static androidx.window.extensions.embedding.SplitPresenter.getOverlayPosition;
 import static androidx.window.extensions.embedding.SplitPresenter.sanitizeBounds;
 import static androidx.window.extensions.embedding.WindowAttributes.DIM_AREA_ON_TASK;
 
@@ -666,8 +671,8 @@ public class OverlayPresentationTest {
                 attributes.getRelativeBounds());
         verify(mSplitPresenter).updateTaskFragmentWindowingModeIfRegistered(mTransaction, container,
                 WINDOWING_MODE_MULTI_WINDOW);
-        verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
-                TaskFragmentAnimationParams.DEFAULT);
+        verify(mSplitPresenter).updateAnimationParams(eq(mTransaction), eq(token),
+                any(TaskFragmentAnimationParams.class));
         verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, container, true);
         verify(mSplitPresenter, never()).setTaskFragmentPinned(any(),
                 any(TaskFragmentContainer.class), anyBoolean());
@@ -691,8 +696,8 @@ public class OverlayPresentationTest {
                 attributes.getRelativeBounds());
         verify(mSplitPresenter).updateTaskFragmentWindowingModeIfRegistered(mTransaction,
                 container, WINDOWING_MODE_MULTI_WINDOW);
-        verify(mSplitPresenter).updateAnimationParams(mTransaction, token,
-                TaskFragmentAnimationParams.DEFAULT);
+        verify(mSplitPresenter).updateAnimationParams(eq(mTransaction), eq(token),
+                any(TaskFragmentAnimationParams.class));
         verify(mSplitPresenter, never()).setTaskFragmentIsolatedNavigation(any(),
                 any(TaskFragmentContainer.class), anyBoolean());
         verify(mSplitPresenter).setTaskFragmentPinned(mTransaction, container, true);
@@ -868,6 +873,59 @@ public class OverlayPresentationTest {
                 fillTaskActivityToken, lastOverlayToken);
         verify(mTransaction).reparentActivityToTaskFragment(
                 eq(overlayContainer.getTaskFragmentToken()), eq(activityToken));
+    }
+
+    // TODO(b/243518738): Rewrite with TestParameter.
+    @Test
+    public void testGetOverlayPosition() {
+        assertWithMessage("It must be position left for left overlay.")
+                .that(getOverlayPosition(new Rect(
+                        TASK_BOUNDS.left,
+                        TASK_BOUNDS.top,
+                        TASK_BOUNDS.right / 2,
+                        TASK_BOUNDS.bottom), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_LEFT);
+        assertWithMessage("It must be position left for shrunk left overlay.")
+                .that(getOverlayPosition(new Rect(
+                        TASK_BOUNDS.left,
+                        TASK_BOUNDS.top + 20,
+                        TASK_BOUNDS.right / 2,
+                        TASK_BOUNDS.bottom - 20), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_LEFT);
+        assertWithMessage("It must be position left for top overlay.")
+                .that(getOverlayPosition(new Rect(
+                        TASK_BOUNDS.left,
+                        TASK_BOUNDS.top,
+                        TASK_BOUNDS.right,
+                        TASK_BOUNDS.bottom / 2), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_TOP);
+        assertWithMessage("It must be position left for shrunk top overlay.")
+                .that(getOverlayPosition(new Rect(
+                        TASK_BOUNDS.left + 20,
+                        TASK_BOUNDS.top,
+                        TASK_BOUNDS.right - 20,
+                        TASK_BOUNDS.bottom / 2), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_TOP);
+        assertWithMessage("It must be position left for right overlay.")
+                .that(getOverlayPosition(new Rect(
+                        TASK_BOUNDS.right / 2,
+                        TASK_BOUNDS.top,
+                        TASK_BOUNDS.right,
+                        TASK_BOUNDS.bottom), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_RIGHT);
+        assertWithMessage("It must be position left for shrunk right overlay.")
+                .that(getOverlayPosition(new Rect(
+                        TASK_BOUNDS.right / 2,
+                        TASK_BOUNDS.top + 20,
+                        TASK_BOUNDS.right,
+                        TASK_BOUNDS.bottom - 20), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_RIGHT);
+        assertWithMessage("It must be position left for bottom overlay.")
+                .that(getOverlayPosition(new Rect(
+                        TASK_BOUNDS.left,
+                        TASK_BOUNDS.bottom / 2,
+                        TASK_BOUNDS.right,
+                        TASK_BOUNDS.bottom), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_BOTTOM);
+        assertWithMessage("It must be position left for shrunk bottom overlay.")
+                .that(getOverlayPosition(new Rect(
+                        TASK_BOUNDS.left + 20,
+                        TASK_BOUNDS.bottom / 20,
+                        TASK_BOUNDS.right - 20,
+                        TASK_BOUNDS.bottom), TASK_BOUNDS)).isEqualTo(CONTAINER_POSITION_BOTTOM);
     }
 
     /**
