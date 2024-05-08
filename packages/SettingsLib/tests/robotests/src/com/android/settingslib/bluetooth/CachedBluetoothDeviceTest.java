@@ -1703,6 +1703,30 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
+    public void setName_memberDeviceNameIsSet() {
+        when(mDevice.getAlias()).thenReturn(DEVICE_NAME);
+        when(mSubDevice.getAlias()).thenReturn(DEVICE_NAME);
+
+        mCachedDevice.addMemberDevice(mSubCachedDevice);
+        mCachedDevice.setName(DEVICE_ALIAS);
+
+        verify(mDevice).setAlias(DEVICE_ALIAS);
+        verify(mSubDevice).setAlias(DEVICE_ALIAS);
+    }
+
+    @Test
+    public void setName_subDeviceNameIsSet() {
+        when(mDevice.getAlias()).thenReturn(DEVICE_NAME);
+        when(mSubDevice.getAlias()).thenReturn(DEVICE_NAME);
+
+        mCachedDevice.setSubDevice(mSubCachedDevice);
+        mCachedDevice.setName(DEVICE_ALIAS);
+
+        verify(mDevice).setAlias(DEVICE_ALIAS);
+        verify(mSubDevice).setAlias(DEVICE_ALIAS);
+    }
+
+    @Test
     public void getProfileConnectionState_nullProfile_returnDisconnected() {
         assertThat(mCachedDevice.getProfileConnectionState(null)).isEqualTo(
                 BluetoothProfile.STATE_DISCONNECTED);
