@@ -180,7 +180,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"تم ضبط بعض الإعدادات التلقائية"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"لم يتم ضبط إعدادات تلقائية"</string>
     <string name="tts_settings" msgid="8130616705989351312">"إعدادات تحويل النص إلى كلام"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"الصوت عند تحويل النص إلى كلام"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"الرد الصوتي"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"سرعة الكلام"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"سرعة قول الكلام"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"درجة الصوت"</string>
@@ -194,7 +194,7 @@
     <string name="tts_install_data_title" msgid="1829942496472751703">"تثبيت البيانات الصوتية"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"تثبيت البيانات الصوتية المطلوبة لتجميع الكلام"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"ربما يمكن لمحرك اصطناع الحديث جمع كل النص التي سيتم نطقه، بما في ذلك البيانات الشخصية مثل كلمات المرور وأرقام بطاقة الائتمان. يتم إحضار ذلك من المحرك <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. هل تريد تفعيل استخدام محرك اصطناع الحديث هذا؟"</string>
-    <string name="tts_engine_network_required" msgid="8722087649733906851">"تتطلب هذه اللغة اتصال شبكة سليمًا لتحويل النص إلى كلام."</string>
+    <string name="tts_engine_network_required" msgid="8722087649733906851">"تتطلب هذه اللغة اتصال شبكة سليمًا لاستخدام ميزة الرد الصوتي."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"هذا مثال لتركيب الكلام"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"حالة اللغة التلقائية"</string>
     <string name="tts_status_ok" msgid="8583076006537547379">"<xliff:g id="LOCALE">%1$s</xliff:g> متوافقة تمامًا"</string>

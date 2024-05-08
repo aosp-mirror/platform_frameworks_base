@@ -271,9 +271,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Onartu abiarazlea desblokeatzea"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM desblokeoa onartu nahi duzu?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ABISUA: ezarpen hau aktibatuta dagoen bitartean, gailua babesteko eginbideek ez dute gailu honetan funtzionatuko."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Hautatu kokapen faltsuen aplikazioa"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Hautatu asmatutako kokapenen aplikazioa"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ez da ezarri kokapen faltsuen aplikaziorik"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"Kokapen faltsuen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"Asmatutako kokapenen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Sareak"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Hari gabe bistaratzeko ziurtagiria"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Gaitu wifi-sareetan saioa hasteko modu xehatua"</string>
