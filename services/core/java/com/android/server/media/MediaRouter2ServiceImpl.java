@@ -1305,22 +1305,20 @@ class MediaRouter2ServiceImpl {
                         route.getId(),
                         requestId));
 
+        UserHandler userHandler = routerRecord.mUserRecord.mHandler;
         if (managerRequestId != MediaRoute2ProviderService.REQUEST_ID_NONE) {
-            ManagerRecord manager = routerRecord.mUserRecord.mHandler.findManagerWithId(
-                    toRequesterId(managerRequestId));
+            ManagerRecord manager = userHandler.findManagerWithId(toRequesterId(managerRequestId));
             if (manager == null || manager.mLastSessionCreationRequest == null) {
                 Slog.w(TAG, "requestCreateSessionWithRouter2Locked: "
                         + "Ignoring unknown request.");
-                routerRecord.mUserRecord.mHandler.notifySessionCreationFailedToRouter(
-                        routerRecord, requestId);
+                userHandler.notifySessionCreationFailedToRouter(routerRecord, requestId);
                 return;
             }
             if (!TextUtils.equals(manager.mLastSessionCreationRequest.mOldSession.getId(),
                     oldSession.getId())) {
                 Slog.w(TAG, "requestCreateSessionWithRouter2Locked: "
                         + "Ignoring unmatched routing session.");
-                routerRecord.mUserRecord.mHandler.notifySessionCreationFailedToRouter(
-                        routerRecord, requestId);
+                userHandler.notifySessionCreationFailedToRouter(routerRecord, requestId);
                 return;
             }
             if (!TextUtils.equals(manager.mLastSessionCreationRequest.mRoute.getId(),
@@ -1333,29 +1331,28 @@ class MediaRouter2ServiceImpl {
                 } else {
                     Slog.w(TAG, "requestCreateSessionWithRouter2Locked: "
                             + "Ignoring unmatched route.");
-                    routerRecord.mUserRecord.mHandler.notifySessionCreationFailedToRouter(
-                            routerRecord, requestId);
+                    userHandler.notifySessionCreationFailedToRouter(routerRecord, requestId);
                     return;
                 }
             }
             manager.mLastSessionCreationRequest = null;
         } else {
+            String defaultRouteId = userHandler.mSystemProvider.getDefaultRoute().getId();
             if (route.isSystemRoute()
                     && !routerRecord.hasSystemRoutingPermission()
-                    && !TextUtils.equals(route.getId(), MediaRoute2Info.ROUTE_ID_DEFAULT)) {
+                    && !TextUtils.equals(route.getId(), defaultRouteId)) {
                 Slog.w(TAG, "MODIFY_AUDIO_ROUTING permission is required to transfer to"
                         + route);
-                routerRecord.mUserRecord.mHandler.notifySessionCreationFailedToRouter(
-                        routerRecord, requestId);
+                userHandler.notifySessionCreationFailedToRouter(routerRecord, requestId);
                 return;
             }
         }
 
         long uniqueRequestId = toUniqueRequestId(routerRecord.mRouterId, requestId);
-        routerRecord.mUserRecord.mHandler.sendMessage(
+        userHandler.sendMessage(
                 obtainMessage(
                         UserHandler::requestCreateSessionWithRouter2OnHandler,
-                        routerRecord.mUserRecord.mHandler,
+                        userHandler,
                         uniqueRequestId,
                         managerRequestId,
                         transferInitiatorUserHandle,
@@ -1429,18 +1426,22 @@ class MediaRouter2ServiceImpl {
                         "transferToRouteWithRouter2 | router: %s(id: %d), route: %s",
                         routerRecord.mPackageName, routerRecord.mRouterId, route.getId()));
 
+        UserHandler userHandler = routerRecord.mUserRecord.mHandler;
+        String defaultRouteId = userHandler.mSystemProvider.getDefaultRoute().getId();
         if (route.isSystemRoute()
                 && !routerRecord.hasSystemRoutingPermission()
-                && !TextUtils.equals(route.getId(), MediaRoute2Info.ROUTE_ID_DEFAULT)) {
-            routerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::notifySessionCreationFailedToRouter,
-                            routerRecord.mUserRecord.mHandler,
-                            routerRecord, toOriginalRequestId(DUMMY_REQUEST_ID)));
+                && !TextUtils.equals(route.getId(), defaultRouteId)) {
+            userHandler.sendMessage(
+                    obtainMessage(
+                            UserHandler::notifySessionCreationFailedToRouter,
+                            userHandler,
+                            routerRecord,
+                            toOriginalRequestId(DUMMY_REQUEST_ID)));
         } else {
-            routerRecord.mUserRecord.mHandler.sendMessage(
+            userHandler.sendMessage(
                     obtainMessage(
                             UserHandler::transferToRouteOnHandler,
-                            routerRecord.mUserRecord.mHandler,
+                            userHandler,
                             DUMMY_REQUEST_ID,
                             transferInitiatorUserHandle,
                             routerRecord.mPackageName,
