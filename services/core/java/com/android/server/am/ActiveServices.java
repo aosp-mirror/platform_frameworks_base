@@ -507,6 +507,18 @@ public final class ActiveServices {
      */
     final SparseArray<SparseArray<TimeLimitedFgsInfo>> mTimeLimitedFgsInfo = new SparseArray<>();
 
+    /**
+     * Foreground services of certain types will now have a time limit. If the foreground service
+     * of the offending type is not stopped within the allocated time limit, it will receive a
+     * callback via {@link Service#onTimeout(int, int)} and it must then be stopped within a few
+     * seconds. If an app fails to do so, it will be declared an ANR.
+     *
+     * @see Service#onTimeout(int, int) onTimeout callback for additional details
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long FGS_INTRODUCE_TIME_LIMITS = 317799821L;
+
     // allowlisted packageName.
     ArraySet<String> mAllowListWhileInUsePermissionInFgs = new ArraySet<>();
 
@@ -2396,11 +2408,16 @@ public final class ActiveServices {
                                 // "if (r.mAllowStartForeground == REASON_DENIED...)" block below.
                             }
                         }
-                    } else if (getTimeLimitedFgsType(foregroundServiceType)
-                                    != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
+                    } else if (CompatChanges.isChangeEnabled(
+                                    FGS_INTRODUCE_TIME_LIMITS, r.appInfo.uid)
+                                && android.app.Flags.introduceNewServiceOntimeoutCallback()
+                                && getTimeLimitedFgsType(foregroundServiceType)
+                                        != ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE) {
                         // Calling startForeground on a FGS type which has a time limit will only be
                         // allowed if the app is in a state where it can normally start another FGS
-                        // and it hasn't hit the time limit for that type in the past 24hrs.
+                        // and it hasn't hit its time limit in the past 24hrs, or it has been in the
+                        // foreground after it hit its time limit, or it is currently in the
+                        // TOP (or better) proc state.
 
                         // See if the app could start an FGS or not.
                         r.clearFgsAllowStart();
@@ -2426,11 +2443,13 @@ public final class ActiveServices {
                                             SystemClock.elapsedRealtime() - (24 * 60 * 60 * 1000));
                                 final long lastTimeOutAt = fgsTypeInfo.getTimeLimitExceededAt();
                                 if (fgsTypeInfo.getFirstFgsStartRealtime() < before24Hr
+                                        || r.app.mState.getCurProcState() <= PROCESS_STATE_TOP
                                         || (lastTimeOutAt != Long.MIN_VALUE
                                             && r.app.mState.getLastTopTime() > lastTimeOutAt)) {
                                     // Reset the time limit info for this fgs type if it has been
-                                    // more than 24hrs since the first fgs start or if the app was
-                                    // in the TOP state after time limit was exhausted.
+                                    // more than 24hrs since the first fgs start or if the app is
+                                    // currently in the TOP state or was in the TOP state after
+                                    // the time limit was exhausted previously.
                                     fgsTypeInfo.reset();
                                 } else if (lastTimeOutAt > 0) {
                                     // Time limit was exhausted within the past 24 hours and the app
@@ -2686,7 +2705,10 @@ public final class ActiveServices {
                     mAm.notifyPackageUse(r.serviceInfo.packageName,
                             PackageManager.NOTIFY_PACKAGE_USE_FOREGROUND_SERVICE);
 
-                    maybeUpdateFgsTrackingLocked(r, previousFgsType);
+                    if (CompatChanges.isChangeEnabled(FGS_INTRODUCE_TIME_LIMITS, r.appInfo.uid)
+                            && android.app.Flags.introduceNewServiceOntimeoutCallback()) {
+                        maybeUpdateFgsTrackingLocked(r, previousFgsType);
+                    }
                 } else {
                     if (DEBUG_FOREGROUND_SERVICE) {
                         Slog.d(TAG, "Suppressing startForeground() for FAS " + r);
@@ -3907,10 +3929,8 @@ public final class ActiveServices {
                 Slog.w(TAG_SERVICE, "Exception from scheduleTimeoutServiceForType: " + e);
             }
 
-            if (android.app.Flags.introduceNewServiceOntimeoutCallback()) {
-                // ANR the service after giving the service some time to clean up.
-                mFGSAnrTimer.start(sr, mAm.mConstants.mFgsAnrExtraWaitDuration);
-            }
+            // ANR the service after giving the service some time to clean up.
+            mFGSAnrTimer.start(sr, mAm.mConstants.mFgsAnrExtraWaitDuration);
         }
     }
 

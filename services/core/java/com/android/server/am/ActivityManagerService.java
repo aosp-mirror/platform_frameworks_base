@@ -4342,6 +4342,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             mServices.bringDownDisabledPackageServicesLocked(
                     packageName, null, userId, false, true, true);
+            mServices.onUidRemovedLocked(uid);
 
             if (mBooted) {
                 mAtmInternal.resumeTopActivities(true);
@@ -4372,9 +4373,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, "Can't force stop all processes of all users, that is insane!");
         }
 
+        final int uid = getPackageManagerInternal().getPackageUid(packageName,
+                            MATCH_DEBUG_TRIAGED_MISSING | MATCH_ANY_USER, UserHandle.USER_SYSTEM);
         if (appId < 0 && packageName != null) {
-            appId = UserHandle.getAppId(getPackageManagerInternal().getPackageUid(packageName,
-                    MATCH_DEBUG_TRIAGED_MISSING | MATCH_ANY_USER, UserHandle.USER_SYSTEM));
+            appId = UserHandle.getAppId(uid);
         }
 
         boolean didSomething;
@@ -4418,6 +4420,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             didSomething = true;
         }
+        mServices.onUidRemovedLocked(uid);
 
         if (packageName == null) {
             // Remove all sticky broadcasts from this user.
