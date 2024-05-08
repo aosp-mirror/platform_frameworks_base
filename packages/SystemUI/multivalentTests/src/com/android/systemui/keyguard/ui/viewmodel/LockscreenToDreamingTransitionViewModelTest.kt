@@ -18,24 +18,25 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.shade.data.repository.shadeRepository
-import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.ShadeTestUtil
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
@@ -45,10 +46,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class LockscreenToDreamingTransitionViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
 
     private val kosmos =
         testKosmos().apply {
@@ -56,14 +59,27 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
         }
     private val testScope = kosmos.testScope
     private lateinit var repository: FakeKeyguardTransitionRepository
-    private lateinit var shadeRepository: ShadeRepository
+    private lateinit var shadeTestUtil: ShadeTestUtil
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var underTest: LockscreenToDreamingTransitionViewModel
+
+    // add to init block
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
     @Before
     fun setUp() {
         repository = kosmos.fakeKeyguardTransitionRepository
-        shadeRepository = kosmos.shadeRepository
+        shadeTestUtil = kosmos.shadeTestUtil
         keyguardRepository = kosmos.fakeKeyguardRepository
         underTest = kosmos.lockscreenToDreamingTransitionViewModel
     }
@@ -177,11 +193,11 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
 
     private fun shadeExpanded(expanded: Boolean) {
         if (expanded) {
-            shadeRepository.setQsExpansion(1f)
+            shadeTestUtil.setQsExpansion(1f)
         } else {
             keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-            shadeRepository.setQsExpansion(0f)
-            shadeRepository.setLockscreenShadeExpansion(0f)
+            shadeTestUtil.setQsExpansion(0f)
+            shadeTestUtil.setLockscreenShadeExpansion(0f)
         }
     }
 }
