@@ -565,7 +565,7 @@
     <string name="screen_pinning_exit" msgid="4553787518387346893">"App liberado"</string>
     <string name="stream_voice_call" msgid="7468348170702375660">"Ligar"</string>
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
-    <string name="stream_ring" msgid="7550670036738697526">"Tocar"</string>
+    <string name="stream_ring" msgid="7550670036738697526">"Toques"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mídia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarme"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificação"</string>
@@ -590,7 +590,7 @@
     <string name="volume_dialog_title" msgid="6502703403483577940">"Controles de volume %s"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Chamadas e notificações farão o smartphone tocar (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Tocando <xliff:g id="LABEL">%s</xliff:g> em"</string>
-    <string name="media_output_title_without_playing" msgid="3825663683169305013">"O áudio vai tocar em"</string>
+    <string name="media_output_title_without_playing" msgid="3825663683169305013">"Onde o áudio vai tocar?"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sintonizador System UI"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de status"</string>
     <string name="demo_mode" msgid="263484519766901593">"Modo de demonstração da interface do sistema"</string>
@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satélite, conexão ruim"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satélite, conexão boa"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satélite, conexão disponível"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS via satélite"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabalho"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversão para alguns, mas não para todos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"O sintonizador System UI fornece maneiras adicionais de ajustar e personalizar a interface do usuário do Android. Esses recursos experimentais podem mudar, falhar ou desaparecer nas versões futuras. Prossiga com cuidado."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu liga/desliga"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Página <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Tela de bloqueio"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Localize o smartphone com o Encontre Meu Dispositivo mesmo se ele estiver desligado"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Desligando…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver etapas de cuidado"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver etapas de cuidado"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Desconecte seu dispositivo"</string>

@@ -564,7 +564,7 @@
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Alto-falante da base"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este telefone"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Neste telefone"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Não é possível reproduzir neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Faça upgrade da conta para trocar"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Não é possível abrir os downloads aqui"</string>

@@ -261,7 +261,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не беспокоить"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Нет доступных сопряженных устройств"</string>
-    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Нажмите, чтобы подключить или отключить устройство"</string>
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Нажмите, чтобы подключить или отключить устройство."</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Подключить устройство"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Все"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Использовать"</string>
@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Спутниковая связь, плохое качество соединения"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Спутниковая связь, хорошее качество соединения"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Доступно соединение по спутниковой связи"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Спутниковый SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Рабочий профиль"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Внимание!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner позволяет настраивать интерфейс устройства Android по вашему вкусу. В будущем эта экспериментальная функция может измениться, перестать работать или исчезнуть."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню кнопки питания"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> из <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокированный экран"</string>
-    <string name="finder_active" msgid="7907846989716941952">"С помощью приложения \"Найти устройство\" вы можете узнать местоположение телефона, даже когда он выключен."</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Выключение…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Подробнее о действиях при перегреве…"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Подробнее о действиях при перегреве…"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Отключите устройство"</string>

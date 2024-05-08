@@ -357,7 +357,7 @@
     <string name="media_category" msgid="8122076702526144053">"Mультимeдиа"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Бақылау"</string>
     <string name="strict_mode" msgid="889864762140862437">"Қатаң режим қосылған"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Қолданбалар негізгі жолда ұзақ әрекеттерді орындағанда экранды жыпылықтату"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Қолданбалар ұзақ операцияларды орындағанда экранды жыпылықтату"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Меңзер орны"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Экран бетіне түртілген элемент дерегі көрсетіледі"</string>
     <string name="show_touches" msgid="8437666942161289025">"Түрту қимылын көрсету"</string>
@@ -376,7 +376,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Түстер кеңістігінің симуляциясы"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL трейстерін қосу"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB-мен аудио жіберуді өшіру"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Сыртқы USB аудио құрылғыларына автоматты жіберуді өшіру"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Сыртқы USB аудио құрылғыларына автоматты түрде жіберуді өшіру"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Жиектерді көрсету"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Қию шегін, шеттерді, т.б. көрсету"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Оңнан солға орналастыру"</string>
@@ -584,7 +584,7 @@
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Сымды аудио құрылғысы"</string>
     <string name="help_label" msgid="3528360748637781274">"Анықтама және пікір"</string>
     <string name="storage_category" msgid="2287342585424631813">"Жад"</string>
-    <string name="shared_data_title" msgid="1017034836800864953">"Бөліскен дерек"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Ортақ дерек"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Ортақ деректерді көру және өзгерту"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Бұл пайдаланушымен бөліскен дерек жоқ."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Ортақ деректер алу кезінде қате шықты. Қайталап көріңіз."</string>

@@ -28,7 +28,7 @@
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Անցաբառերի շնորհիվ դուք բարդ գաղտնաբառեր ստեղծելու կամ հիշելու անհրաժեշտություն չեք ունենա"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Անցաբառերը գաղտնագրված թվային բանալիներ են, որոնք ստեղծվում են մատնահետքի, դեմքով ապակողպման կամ էկրանի կողպման օգտագործմամբ"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Դուք կարող եք մուտք գործել այլ սարքերում, քանի որ մուտքի բանալիները պահվում են գաղտնաբառերի կառավարիչում"</string>
-    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Ավելին՝ անցաբառերի մասին"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Ավելին՝ մուտքի բանալիների մասին"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Գաղտնաբառեր չպահանջող տեխնոլոգիա"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Մուտքի բանալիները ձեզ թույլ են տալիս մուտք գործել առանց գաղտնաբառերի։ Ձեզ պարզապես հարկավոր է օգտագործել ձեր մատնահետքը, դիմաճանաչումը, PIN կոդը կամ նախշը՝ ձեր ինքնությունը հաստատելու և մուտքի բանալի ստեղծելու համար։"</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Բաց բանալու կրիպտոգրաֆիա"</string>
@@ -36,7 +36,7 @@
     <string name="improved_account_security_title" msgid="1069841917893513424">"Հաշվի բարելավված անվտանգություն"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Յուրաքանչյուր բանալի բացառապես կապված է հավելվածի կամ կայքի հետ, որի համար այն ստեղծվել է, ուստի դուք երբեք չեք կարող սխալմամբ մուտք գործել կեղծ հավելված կամ կայք։ Բացի այդ՝ սերվերներում պահվում են միայն բաց բանալիներ, ինչը զգալիորեն դժվարացնում է կոտրումը։"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Սահուն անցում"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"Թեև մենք առանց գաղտնաբառերի ապագայի ճանապարհին ենք, դրանք դեռ հասանելի կլինեն անցաբառերի հետ մեկտեղ։"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Թեև մենք առանց գաղտնաբառերի ապագայի ճանապարհին ենք, դրանք դեռ հասանելի կլինեն մուտքի բանալիների հետ մեկտեղ։"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Նշեք, թե որտեղ եք ուզում պահել ձեր <xliff:g id="CREATETYPES">%1$s</xliff:g>ը"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Ընտրեք գաղտնաբառերի կառավարիչ՝ ձեր տեղեկությունները պահելու և հաջորդ անգամ ավելի արագ մուտք գործելու համար"</string>
     <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Ստեղծե՞լ մուտքի բանալի՝ <xliff:g id="APPNAME">%1$s</xliff:g> հավելված մուտք գործելու համար"</string>
@@ -44,7 +44,7 @@
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Պահե՞լ «<xliff:g id="APPNAME">%1$s</xliff:g>» հավելվածի մուտքի տվյալները"</string>
     <string name="passkey" msgid="632353688396759522">"մուտքի բանալի"</string>
     <string name="password" msgid="6738570945182936667">"գաղտնաբառ"</string>
-    <string name="passkeys" msgid="5733880786866559847">"անցաբառեր"</string>
+    <string name="passkeys" msgid="5733880786866559847">"մուտքի բանալիներ"</string>
     <string name="passwords" msgid="5419394230391253816">"գաղտնաբառեր"</string>
     <string name="sign_ins" msgid="4710739369149469208">"մուտք"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"մուտքի տվյալներ"</string>

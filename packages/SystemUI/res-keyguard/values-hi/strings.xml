@@ -57,11 +57,11 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"गलत पिन"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"गलत पिन. दोबारा डालें."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"फ़िंगरप्रिंट से अनलॉक करें"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फ़िंगरप्रिंट गलत है"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"फ़िंगरप्रिंट की पहचान नहीं हो पाई"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"चेहरा नहीं पहचाना गया"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"फिर से कोशिश करें या पिन डालें"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"फिर से कोशिश करें या पासवर्ड डालें"</string>
-    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"फिर से कोशिश करें या पैटर्न ड्रा करें"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"फिर से कोशिश करें या पैटर्न ड्रॉ करें"</string>
     <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"कई बार कोशिश की जा चुकी है, इसलिए पिन डालें"</string>
     <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"कई बार कोशिश की जा चुकी है, इसलिए पासवर्ड डालें"</string>
     <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"कई बार कोशिश की जा चुकी है, इसलिए पैटर्न ड्रा करें"</string>
