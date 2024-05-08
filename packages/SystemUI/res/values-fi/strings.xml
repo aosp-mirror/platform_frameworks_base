@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelliitti, huono yhteys"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelliitti, hyvä yhteys"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelliitti, yhteys saatavilla"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Työprofiili"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Ei sovellu kaikkien käyttöön"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner antaa lisämahdollisuuksia Android-käyttöliittymän muokkaamiseen. Nämä kokeelliset ominaisuudet voivat muuttua, lakata toimimasta tai kadota milloin tahansa. Jatka omalla vastuullasi."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Virtavalikko"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Sivu <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lukitusnäyttö"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Voit löytää tämän puhelimen Paikanna laite ‑sovelluksella, vaikka se olisi sammutettuna"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Sammutetaan…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Katso huoltovaiheet"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Katso huoltovaiheet"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Irrota laite"</string>
@@ -875,7 +874,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi on pois päältä"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ei ole käytössä"</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth on pois päältä"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Älä häiritse ‑tila on pois päältä"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Älä häiritse ‑tila on käytössä"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Automaattinen sääntö otti käyttöön Älä häiritse ‑tilan (<xliff:g id="ID_1">%s</xliff:g>)."</string>

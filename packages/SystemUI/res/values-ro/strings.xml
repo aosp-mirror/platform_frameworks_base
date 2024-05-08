@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelit, conexiune slabă"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, conexiune bună"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, conexiune disponibilă"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS prin satelit"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil de serviciu"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Distractiv pentru unii, dar nu pentru toată lumea"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner oferă modalități suplimentare de a ajusta și a personaliza interfața de utilizare Android. Aceste funcții experimentale pot să se schimbe, să se blocheze sau să dispară din versiunile viitoare. Continuă cu prudență."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meniul de pornire"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> din <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ecran de blocare"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Poți localiza telefonul folosind aplicația Găsește-mi dispozitivul chiar dacă este închis"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Se închide…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Vezi pașii pentru îngrijire"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Vezi pașii pentru îngrijire"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Deconectează dispozitivul"</string>

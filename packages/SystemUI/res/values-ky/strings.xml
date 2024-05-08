@@ -618,6 +618,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Спутник, байланыш начар"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Спутник, байланыш жакшы"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Спутник, байланыш бар"</string>
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Спутник SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Жумуш профили"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Баарына эле жага бербейт"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner Android колдонуучу интерфейсин жөнгө салып жана ыңгайлаштыруунун кошумча ыкмаларын сунуштайт. Бул сынамык функциялар кийинки чыгарылыштарда өзгөрүлүп, бузулуп же жоголуп кетиши мүмкүн. Абайлап колдонуңуз."</string>
@@ -836,8 +837,6 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Кубат баскычынын менюсу"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ичинен <xliff:g id="ID_1">%1$d</xliff:g>-бет"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Кулпуланган экран"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Бул телефон өчүк болсо да, аны \"Түзмөгүм кайда?\" кызматы аркылуу таба аласыз"</string>
-    <string name="shutdown_progress" msgid="5464239146561542178">"Өчүрүлүүдө…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Тейлөө кадамдарын көрүңүз"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Тейлөө кадамдарын көрүңүз"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Түзмөктү сууруп коюңуз"</string>
