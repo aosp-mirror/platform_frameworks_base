@@ -64,3 +64,10 @@ flag {
     description: "Enables long-press action for nav handle when a bubble is expanded"
     bug: "324910035"
 }
+
+flag {
+    name: "enable_optional_bubble_overflow"
+    namespace: "multitasking"
+    description: "Hides the bubble overflow if there aren't any overflowed bubbles"
+    bug: "334175587"
+}
