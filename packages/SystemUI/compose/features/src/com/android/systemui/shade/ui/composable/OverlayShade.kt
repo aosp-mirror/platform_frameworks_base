@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -95,12 +94,7 @@ private fun SceneScope.Panel(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    Box(
-        modifier =
-            modifier
-                .width(OverlayShade.Dimensions.PanelWidth)
-                .clip(OverlayShade.Shapes.RoundedCornerPanel)
-    ) {
+    Box(modifier = modifier.clip(OverlayShade.Shapes.RoundedCornerPanel)) {
         Spacer(
             modifier =
                 Modifier.element(OverlayShade.Elements.PanelBackground)
@@ -133,8 +127,6 @@ object OverlayShade {
     object Dimensions {
         val ScrimContentPadding = 16.dp
         val PanelCornerRadius = 46.dp
-        // TODO(b/338033836): This width should not be fixed.
-        val PanelWidth = 390.dp
     }
 
     object Shapes {
