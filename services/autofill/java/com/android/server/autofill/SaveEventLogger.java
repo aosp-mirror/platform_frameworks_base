@@ -117,7 +117,7 @@ public class SaveEventLogger {
 
   private final int mSessionId;
   private Optional<SaveEventInternal> mEventInternal;
-  private long mSessionStartTimestamp;
+  private final long mSessionStartTimestamp;
 
   private SaveEventLogger(int sessionId, long sessionStartTimestamp) {
       mSessionId = sessionId;
@@ -227,13 +227,11 @@ public class SaveEventLogger {
     });
   }
 
-  /* Returns timestamp (relative to mSessionStartTimestamp) or  UNINITIATED_TIMESTAMP if mSessionStartTimestamp is not set */
-  private long getCurrentTimestamp() {
-    long timestamp = UNINITIATED_TIMESTAMP;
-    if (mSessionStartTimestamp != UNINITIATED_TIMESTAMP) {
-      timestamp = SystemClock.elapsedRealtime() - mSessionStartTimestamp;
-    }
-    return timestamp;
+  /**
+   * Returns timestamp (relative to mSessionStartTimestamp)
+   */
+  private long getElapsedTime() {
+    return SystemClock.elapsedRealtime() - mSessionStartTimestamp;
   }
 
   /**
@@ -247,7 +245,7 @@ public class SaveEventLogger {
 
   /** Set latency_save_ui_display_millis as long as mEventInternal presents. */
   public void maybeSetLatencySaveUiDisplayMillis() {
-    maybeSetLatencySaveUiDisplayMillis(getCurrentTimestamp());
+    maybeSetLatencySaveUiDisplayMillis(getElapsedTime());
   }
 
   /**
@@ -261,7 +259,7 @@ public class SaveEventLogger {
 
   /** Set latency_save_request_millis as long as mEventInternal presents. */
   public void maybeSetLatencySaveRequestMillis() {
-    maybeSetLatencySaveRequestMillis(getCurrentTimestamp());
+    maybeSetLatencySaveRequestMillis(getElapsedTime());
   }
 
   /**
@@ -275,7 +273,7 @@ public class SaveEventLogger {
 
   /** Set latency_save_finish_millis as long as mEventInternal presents. */
   public void maybeSetLatencySaveFinishMillis() {
-    maybeSetLatencySaveFinishMillis(getCurrentTimestamp());
+    maybeSetLatencySaveFinishMillis(getElapsedTime());
   }
 
   /**
@@ -285,6 +283,16 @@ public class SaveEventLogger {
     mEventInternal.ifPresent(event -> {
       event.mIsFrameworkCreatedSaveInfo = val;
     });
+  }
+
+  /**
+   * Set autofill_service_uid as long as mEventInternal presents.
+   */
+  public void maybeSetAutofillServiceUid(int uid) {
+        mEventInternal.ifPresent(
+                event -> {
+                    event.mServiceUid = uid;
+                });
   }
 
   /**
@@ -314,7 +322,8 @@ public class SaveEventLogger {
           + " mLatencySaveUiDisplayMillis=" + event.mLatencySaveUiDisplayMillis
           + " mLatencySaveRequestMillis=" + event.mLatencySaveRequestMillis
           + " mLatencySaveFinishMillis=" + event.mLatencySaveFinishMillis
-          + " mIsFrameworkCreatedSaveInfo=" + event.mIsFrameworkCreatedSaveInfo);
+          + " mIsFrameworkCreatedSaveInfo=" + event.mIsFrameworkCreatedSaveInfo
+          + " mServiceUid=" + event.mServiceUid);
     }
     FrameworkStatsLog.write(
         AUTOFILL_SAVE_EVENT_REPORTED,
@@ -333,7 +342,8 @@ public class SaveEventLogger {
         event.mLatencySaveUiDisplayMillis,
         event.mLatencySaveRequestMillis,
         event.mLatencySaveFinishMillis,
-        event.mIsFrameworkCreatedSaveInfo);
+        event.mIsFrameworkCreatedSaveInfo,
+        event.mServiceUid);
     mEventInternal = Optional.empty();
   }
 
@@ -349,11 +359,11 @@ public class SaveEventLogger {
     boolean mCancelButtonClicked = false;
     boolean mDialogDismissed = false;
     boolean mIsSaved = false;
-    long mLatencySaveUiDisplayMillis = 0;
-    long mLatencySaveRequestMillis = 0;
-    long mLatencySaveFinishMillis = 0;
+    long mLatencySaveUiDisplayMillis = UNINITIATED_TIMESTAMP;
+    long mLatencySaveRequestMillis = UNINITIATED_TIMESTAMP;
+    long mLatencySaveFinishMillis = UNINITIATED_TIMESTAMP;
     boolean mIsFrameworkCreatedSaveInfo = false;
-
+    int mServiceUid = -1;
     SaveEventInternal() {
     }
   }
