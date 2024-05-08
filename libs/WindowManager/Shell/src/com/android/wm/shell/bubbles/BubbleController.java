@@ -1169,6 +1169,15 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     public void startBubbleDrag(String bubbleKey) {
         onBubbleDrag(bubbleKey, true /* isBeingDragged */);
+        if (mBubbleStateListener != null) {
+            boolean overflow = BubbleOverflow.KEY.equals(bubbleKey);
+            Rect rect = new Rect();
+            mBubblePositioner.getBubbleBarExpandedViewBounds(mBubblePositioner.isBubbleBarOnLeft(),
+                    overflow, rect);
+            BubbleBarUpdate update = new BubbleBarUpdate();
+            update.expandedViewDropTargetSize = new Point(rect.width(), rect.height());
+            mBubbleStateListener.onBubbleStateChange(update);
+        }
     }
 
     /**
