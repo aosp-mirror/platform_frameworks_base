@@ -122,12 +122,14 @@ final class ResolveIntentHelper {
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "queryIntentActivities");
             final List<ResolveInfo> query = computer.queryIntentActivitiesInternal(intent,
-                    resolvedType, flags, privateResolveFlags, filterCallingUid, userId,
-                    resolveForStart, true /*allowDynamicSplits*/);
+                    resolvedType, flags, privateResolveFlags, filterCallingUid, callingPid,
+                    userId, resolveForStart, /*allowDynamicSplits*/ true);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
-            SaferIntentUtils.filterNonExportedComponents(mPlatformCompat, intent,
-                    resolvedType, query, filterCallingUid, callingPid);
+            var args = new SaferIntentUtils.IntentArgs(intent, resolvedType,
+                    false /* isReceiver */, resolveForStart, filterCallingUid, callingPid);
+            args.platformCompat = mPlatformCompat;
+            SaferIntentUtils.filterNonExportedComponents(args, query);
 
             final boolean queryMayBeFiltered =
                     UserHandle.getAppId(filterCallingUid) >= Process.FIRST_APPLICATION_UID
@@ -264,6 +266,7 @@ final class ResolveIntentHelper {
             throws RemoteException {
         Objects.requireNonNull(packageName);
         final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         computer.enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
                 false /* checkShell */, "get launch intent sender for package");
         final int packageUid = computer.getPackageUid(callingPackage, 0 /* flags */, userId);
@@ -279,17 +282,17 @@ final class ResolveIntentHelper {
         intentToResolve.setPackage(packageName);
         final ContentResolver contentResolver = mContext.getContentResolver();
         String resolvedType = intentToResolve.resolveTypeIfNeeded(contentResolver);
-        List<ResolveInfo> ris = computer.queryIntentActivitiesInternal(intentToResolve, resolvedType,
-                0 /* flags */, 0 /* privateResolveFlags */, callingUid, userId,
-                true /* resolveForStart */, false /* allowDynamicSplits */);
+        List<ResolveInfo> ris = computer.queryIntentActivitiesInternal(intentToResolve,
+                resolvedType, 0 /* flags */, 0 /* privateResolveFlags */, callingUid, callingPid,
+                userId,  /* resolveForStart */ true,  /* allowDynamicSplits */false);
         if (ris == null || ris.size() <= 0) {
             intentToResolve.removeCategory(Intent.CATEGORY_INFO);
             intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
             intentToResolve.setPackage(packageName);
             resolvedType = intentToResolve.resolveTypeIfNeeded(contentResolver);
             ris = computer.queryIntentActivitiesInternal(intentToResolve, resolvedType,
-                    0 /* flags */, 0 /* privateResolveFlags */, callingUid, userId,
-                    true /* resolveForStart */, false /* allowDynamicSplits */);
+                    0 /* flags */, 0 /* privateResolveFlags */, callingUid, callingPid,
+                    userId,  /* resolveForStart */ true,  /* allowDynamicSplits */false);
         }
 
         final Intent intent = new Intent(intentToResolve);
@@ -323,16 +326,17 @@ final class ResolveIntentHelper {
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
             int queryingUid) {
         return queryIntentReceiversInternal(computer, intent, resolvedType, flags, userId,
-                queryingUid, false);
+                queryingUid, Process.INVALID_PID, false);
     }
 
     /**
-     * @see PackageManagerInternal#queryIntentReceivers(Intent, String, long, int, int, boolean)
+     * @see PackageManagerInternal#queryIntentReceivers
      */
     @NonNull
-    public List<ResolveInfo> queryIntentReceiversInternal(Computer computer, Intent intent,
-            String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
-            int filterCallingUid, boolean forSend) {
+    public List<ResolveInfo> queryIntentReceiversInternal(
+            Computer computer, Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags, int userId,
+            int filterCallingUid, int callingPid, boolean forSend) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         // The identity used to filter the receiver components
         final int queryingUid = forSend ? Process.SYSTEM_UID : filterCallingUid;
@@ -354,6 +358,12 @@ final class ResolveIntentHelper {
         }
         final ComponentResolverApi componentResolver = computer.getComponentResolver();
         List<ResolveInfo> list = Collections.emptyList();
+
+        var args = new SaferIntentUtils.IntentArgs(intent, resolvedType,
+                true /* isReceiver */, forSend, filterCallingUid, callingPid);
+        args.platformCompat = mPlatformCompat;
+        args.snapshot = computer;
+
         if (comp != null) {
             final ActivityInfo ai = computer.getReceiverInfo(comp, flags, userId);
             if (ai != null) {
@@ -390,9 +400,7 @@ final class ResolveIntentHelper {
                     ri.activityInfo = ai;
                     list = new ArrayList<>(1);
                     list.add(ri);
-                    SaferIntentUtils.enforceIntentFilterMatching(
-                            mPlatformCompat, computer, list, true, intent,
-                            resolvedType, filterCallingUid);
+                    SaferIntentUtils.enforceIntentFilterMatching(args, list);
                 }
             }
         } else {
@@ -412,15 +420,13 @@ final class ResolveIntentHelper {
                     list = result;
                 }
             }
-            SaferIntentUtils.blockNullAction(
-                    mPlatformCompat, computer, list, true, intent, filterCallingUid);
+            SaferIntentUtils.blockNullAction(args, list);
         }
 
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            SaferIntentUtils.enforceIntentFilterMatching(
-                    mPlatformCompat, computer,
-                    list, true, originalIntent, resolvedType, filterCallingUid);
+            args.intent = originalIntent;
+            SaferIntentUtils.enforceIntentFilterMatching(args, list);
         }
 
         return computer.applyPostResolutionFilter(list, instantAppPkgName, false, queryingUid,
@@ -428,14 +434,16 @@ final class ResolveIntentHelper {
     }
 
 
-    public ResolveInfo resolveServiceInternal(@NonNull Computer computer, Intent intent,
+    public ResolveInfo resolveServiceInternal(
+            @NonNull Computer computer, Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId,
-            int callingUid) {
+            int callingUid, int callingPid, boolean resolveForStart) {
         if (!mUserManager.exists(userId)) return null;
         flags = computer.updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
                 false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
         List<ResolveInfo> query = computer.queryIntentServicesInternal(
-                intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
+                intent, resolvedType, flags, userId, callingUid, callingPid,
+                /*includeInstantApps*/ false, resolveForStart);
         if (query != null) {
             if (query.size() >= 1) {
                 // If there is more than one service with the same priority,

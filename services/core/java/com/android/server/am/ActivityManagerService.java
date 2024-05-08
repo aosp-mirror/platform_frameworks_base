@@ -5536,9 +5536,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         packageName, UserHandle.of(userId));
                         String resolvedType = resolvedTypes == null
                                 || i >= resolvedTypes.length ? null : resolvedTypes[i];
-                        ActivityManagerUtils.logUnsafeIntentEvent(
+                        SaferIntentUtils.reportUnsafeIntentEvent(
                                 UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED,
-                                owningUid, intent, resolvedType, isChangeEnabled);
+                                owningUid, Process.INVALID_PID,
+                                intent, resolvedType, isChangeEnabled);
                         if (isChangeEnabled) {
                             String msg = packageName + ": Targeting U+ (version "
                                     + Build.VERSION_CODES.UPSIDE_DOWN_CAKE + " and above) disallows"
@@ -5798,7 +5799,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         intent, matchFlags, uid, userId));
             case ActivityManager.INTENT_SENDER_BROADCAST:
                 return new ParceledListSlice<>(mPackageManagerInt.queryIntentReceivers(
-                        intent, resolvedType, matchFlags, uid, userId, false));
+                        intent, resolvedType, matchFlags, uid, Process.INVALID_PID, userId, false));
             default: // ActivityManager.INTENT_SENDER_ACTIVITY_RESULT
                 throw new IllegalStateException("Unsupported intent sender type: " + res.key.type);
         }
@@ -9506,14 +9507,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param callback The binder used to communicate the violations.
      */
     @Override
-    public void registerStrictModeCallback(IBinder callback) {
+    public synchronized void registerStrictModeCallback(IBinder callback) {
         int callingPid = Binder.getCallingPid();
         mStrictModeCallbacks.put(callingPid,
                 IUnsafeIntentStrictModeCallback.Stub.asInterface(callback));
         try {
-            callback.linkToDeath(new DeathRecipient() {
-                @Override
-                public void binderDied() {
+            callback.linkToDeath(() -> {
+                synchronized (ActivityManagerService.this) {
                     mStrictModeCallbacks.remove(callingPid);
                 }
             }, 0);
@@ -15028,8 +15028,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessList.sendPackageBroadcastLocked(cmd, packages, userId);
     }
 
-    private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
-            int callingUid, int[] users, int[] broadcastAllowList) {
+    private List<ResolveInfo> collectReceiverComponents(
+            Intent intent, String resolvedType, int callingUid, int callingPid,
+            int[] users, int[] broadcastAllowList) {
         // TODO: come back and remove this assumption to triage all broadcasts
         long pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING;
 
@@ -15044,7 +15045,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 continue;
             }
             List<ResolveInfo> newReceivers = mPackageManagerInt.queryIntentReceivers(
-                    intent, resolvedType, pmFlags, callingUid, user, true /* forSend */);
+                    intent, resolvedType, pmFlags, callingUid, callingPid, user, /* forSend */true);
             if (user != UserHandle.USER_SYSTEM && newReceivers != null) {
                 // If this is not the system user, we need to check for
                 // any receivers that should be filtered out.
@@ -15062,7 +15063,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final ResolveInfo ri = newReceivers.get(i);
                     final Resolution<ResolveInfo> resolution =
                             mComponentAliasResolver.resolveReceiver(intent, ri, resolvedType,
-                                    pmFlags, user, callingUid, true /* forSend */);
+                                    pmFlags, user, callingUid, callingPid);
                     if (resolution == null) {
                         // It was an alias, but the target was not found.
                         newReceivers.remove(i);
@@ -15904,6 +15905,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             users = new int[] {userId};
         }
 
+        var args = new SaferIntentUtils.IntentArgs(intent, resolvedType,
+                true /* isReceiver */, true /* resolveForStart */, callingUid, callingPid);
+        args.platformCompat = mPlatformCompat;
+
         // Figure out who all will receive this broadcast.
         final int cookie = BroadcastQueue.traceBegin("queryReceivers");
         List receivers = null;
@@ -15911,7 +15916,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Need to resolve the intent to interested receivers...
         if ((intent.getFlags() & Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
             receivers = collectReceiverComponents(
-                    intent, resolvedType, callingUid, users, broadcastAllowList);
+                    intent, resolvedType, callingUid, callingPid, users, broadcastAllowList);
         }
         if (intent.getComponent() == null) {
             final PackageDataSnapshot snapshot = getPackageManagerInternal().snapshot();
@@ -15936,9 +15941,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         resolvedType, false /*defaultOnly*/, userId);
             }
             if (registeredReceivers != null) {
-                SaferIntentUtils.blockNullAction(
-                        mPlatformCompat, snapshot, registeredReceivers,
-                        true, intent, callingUid);
+                SaferIntentUtils.blockNullAction(args, registeredReceivers);
             }
         }
         BroadcastQueue.traceEnd(cookie);
@@ -16042,8 +16045,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if ((receivers != null && receivers.size() > 0)
                 || resultTo != null) {
             BroadcastQueue queue = mBroadcastQueue;
-            SaferIntentUtils.filterNonExportedComponents(mPlatformCompat, intent,
-                    resolvedType, receivers, callingUid, callingPid);
+            SaferIntentUtils.filterNonExportedComponents(args, receivers);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp, callerPackage,
                     callerFeatureId, callingPid, callingUid, callerInstantApp, resolvedType,
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
@@ -19851,7 +19853,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void triggerUnsafeIntentStrictMode(int callingPid, Intent intent) {
+        public void triggerUnsafeIntentStrictMode(int callingPid, int type, Intent intent) {
             final IUnsafeIntentStrictModeCallback callback;
             final Intent i = intent.cloneFilter();
             synchronized (ActivityManagerService.this) {
@@ -19860,7 +19862,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (callback != null) {
                 BackgroundThread.getExecutor().execute(() -> {
                     try {
-                        callback.onImplicitIntentMatchedInternalComponent(i);
+                        callback.onUnsafeIntent(type, i);
                     } catch (RemoteException e) {
                         synchronized (ActivityManagerService.this) {
                             mStrictModeCallbacks.remove(callingPid);

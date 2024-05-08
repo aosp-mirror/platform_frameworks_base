@@ -1103,7 +1103,7 @@ public abstract class ActivityManagerInternal {
     /**
      * Trigger an unsafe intent usage strict mode violation.
      */
-    public abstract void triggerUnsafeIntentStrictMode(int callingPid, Intent intent);
+    public abstract void triggerUnsafeIntentStrictMode(int callingPid, int type, Intent intent);
 
     /**
      * Start a foreground service delegate.

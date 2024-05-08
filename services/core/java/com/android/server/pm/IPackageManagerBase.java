@@ -1095,7 +1095,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         return new ParceledListSlice<>(snapshot().queryIntentServicesInternal(
-                intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/));
+                intent, resolvedType, flags, userId, callingUid, Process.INVALID_PID,
+                /*includeInstantApps*/ false, /*resolveForStart*/ false));
     }
 
     @Override
@@ -1148,7 +1149,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         return mResolveIntentHelper.resolveServiceInternal(snapshot(), intent,
-                resolvedType, flags, userId, callingUid);
+                resolvedType, flags, userId, callingUid, Process.INVALID_PID,
+                /*resolveForStart*/ false);
     }
 
     @Override
