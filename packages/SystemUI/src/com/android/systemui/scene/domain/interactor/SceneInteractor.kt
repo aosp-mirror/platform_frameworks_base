@@ -162,19 +162,14 @@ constructor(
         loggingReason: String,
         transitionKey: TransitionKey? = null,
     ) {
-        if (!repository.allSceneKeys().contains(toScene)) {
-            return
-        }
-
-        check(
-            toScene != Scenes.Gone || deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked
-        ) {
-            "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
-                " change was: $loggingReason"
-        }
-
         val currentSceneKey = currentScene.value
-        if (currentSceneKey == toScene) {
+        if (
+            !validateSceneChange(
+                from = currentSceneKey,
+                to = toScene,
+                loggingReason = loggingReason,
+            )
+        ) {
             return
         }
 
@@ -182,9 +177,41 @@ constructor(
             from = currentSceneKey,
             to = toScene,
             reason = loggingReason,
+            isInstant = false,
         )
 
         repository.changeScene(toScene, transitionKey)
+    }
+
+    /**
+     * Requests a scene change to the given scene.
+     *
+     * The change is instantaneous and not animated; it will be observable in the next frame and
+     * there will be no transition animation.
+     */
+    fun snapToScene(
+        toScene: SceneKey,
+        loggingReason: String,
+    ) {
+        val currentSceneKey = currentScene.value
+        if (
+            !validateSceneChange(
+                from = currentSceneKey,
+                to = toScene,
+                loggingReason = loggingReason,
+            )
+        ) {
+            return
+        }
+
+        logger.logSceneChangeRequested(
+            from = currentSceneKey,
+            to = toScene,
+            reason = loggingReason,
+            isInstant = true,
+        )
+
+        repository.snapToScene(toScene)
     }
 
     /**
@@ -248,5 +275,33 @@ constructor(
         isRemoteUserInteractionOngoing: Boolean = repository.isRemoteUserInteractionOngoing.value,
     ): Boolean {
         return raw || isRemoteUserInteractionOngoing
+    }
+
+    /**
+     * Validates that the given scene change is allowed.
+     *
+     * Will throw a runtime exception for illegal states (for example, attempting to change to a
+     * scene that's not part of the current scene framework configuration).
+     *
+     * @param from The current scene being transitioned away from
+     * @param to The desired destination scene to transition to
+     * @param loggingReason The reason why the transition is requested, for logging purposes
+     * @return `true` if the scene change is valid; `false` if it shouldn't happen
+     */
+    private fun validateSceneChange(
+        from: SceneKey,
+        to: SceneKey,
+        loggingReason: String,
+    ): Boolean {
+        if (!repository.allSceneKeys().contains(to)) {
+            return false
+        }
+
+        check(to != Scenes.Gone || deviceUnlockedInteractor.deviceUnlockStatus.value.isUnlocked) {
+            "Cannot change to the Gone scene while the device is locked. Logging reason for scene" +
+                " change was: $loggingReason"
+        }
+
+        return from != to
     }
 }

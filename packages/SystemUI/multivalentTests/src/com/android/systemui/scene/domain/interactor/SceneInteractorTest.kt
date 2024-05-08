@@ -126,6 +126,71 @@ class SceneInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun snapToScene_toUnknownScene_doesNothing() =
+        testScope.runTest {
+            val sceneKeys =
+                listOf(
+                    Scenes.QuickSettings,
+                    Scenes.Shade,
+                    Scenes.Lockscreen,
+                    Scenes.Gone,
+                    Scenes.Communal,
+                )
+            val navigationDistances =
+                mapOf(
+                    Scenes.Gone to 0,
+                    Scenes.Lockscreen to 0,
+                    Scenes.Communal to 1,
+                    Scenes.Shade to 2,
+                    Scenes.QuickSettings to 3,
+                )
+            kosmos.sceneContainerConfig =
+                SceneContainerConfig(sceneKeys, Scenes.Lockscreen, navigationDistances)
+            underTest = kosmos.sceneInteractor
+            val currentScene by collectLastValue(underTest.currentScene)
+            val previousScene = currentScene
+            assertThat(previousScene).isNotEqualTo(Scenes.Bouncer)
+            underTest.snapToScene(Scenes.Bouncer, "reason")
+            assertThat(currentScene).isEqualTo(previousScene)
+        }
+
+    @Test
+    fun snapToScene() =
+        testScope.runTest {
+            underTest = kosmos.sceneInteractor
+
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            underTest.snapToScene(Scenes.Shade, "reason")
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+        }
+
+    @Test
+    fun snapToScene_toGoneWhenUnl_doesNotThrow() =
+        testScope.runTest {
+            underTest = kosmos.sceneInteractor
+
+            val currentScene by collectLastValue(underTest.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
+            runCurrent()
+
+            underTest.snapToScene(Scenes.Gone, "reason")
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+        }
+
+    @Test(expected = IllegalStateException::class)
+    fun snapToScene_toGoneWhenStillLocked_throws() =
+        testScope.runTest {
+            underTest = kosmos.sceneInteractor
+            underTest.snapToScene(Scenes.Gone, "reason")
+        }
+
+    @Test
     fun sceneChanged_inDataSource() =
         testScope.runTest {
             underTest = kosmos.sceneInteractor
