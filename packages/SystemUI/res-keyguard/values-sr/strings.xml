@@ -57,7 +57,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Погрешан PIN"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"Погрешан PIN. Пробајте поново."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Или откључајте отиском прста"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Отисак прста непрепознат"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Отисак прста није препознат"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Лице није препознато"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Пробајте поново или унесите PIN"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Пробајте поново или унесите лозинку"</string>
