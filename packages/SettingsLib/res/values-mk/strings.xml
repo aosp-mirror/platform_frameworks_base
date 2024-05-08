@@ -357,7 +357,7 @@
     <string name="media_category" msgid="8122076702526144053">"Аудиовизуелни содржини"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Следење"</string>
     <string name="strict_mode" msgid="889864762140862437">"Овозможен е строг режим"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Осветли екран при долги операции на главна нишка"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Трепкај со екранот при долги операции на главна нишка"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Локација на покажувач"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Прекривката на екран ги покажува тековните податоци на допир"</string>
     <string name="show_touches" msgid="8437666942161289025">"Прикажувај допири"</string>
