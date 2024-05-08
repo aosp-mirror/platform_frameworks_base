@@ -128,3 +128,10 @@ flag {
   description: "Adds an IPCDataCache for notification channel/group lookups"
   bug: "331677193"
 }
+
+flag {
+  name: "use_ssm_user_switch_signal"
+  namespace: "systemui"
+  description: "This flag controls which signal is used to handle a user switch system event"
+  bug: "337077643"
+}
