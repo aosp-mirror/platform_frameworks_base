@@ -17,12 +17,15 @@
 package com.android.systemui.shade
 
 import android.content.Context
+import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.flag.junit.FlagsParameterization
+import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.LegacyLockIconViewController
@@ -72,7 +75,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -80,12 +82,12 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.anyFloat
+import org.mockito.Mockito.atLeast
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
@@ -93,6 +95,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
+import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -152,6 +155,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization?) :
     private lateinit var underTest: NotificationShadeWindowViewController
 
     private lateinit var testScope: TestScope
+    private lateinit var testableLooper: TestableLooper
 
     private lateinit var featureFlagsClassic: FakeFeatureFlagsClassic
 
@@ -181,6 +185,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization?) :
         mSetFlagsRule.enableFlags(Flags.FLAG_REVAMPED_BOUNCER_MESSAGES)
 
         testScope = TestScope()
+        testableLooper = TestableLooper.get(this)
         falsingCollector = FalsingCollectorFake()
         fakeClock = FakeSystemClock()
         underTest =
@@ -407,6 +412,7 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization?) :
     }
 
     @Test
+    @DisableSceneContainer
     fun handleDispatchTouchEvent_glanceableHubIntercepts_returnsTrue() {
         whenever(mGlanceableHubContainerController.onTouchEvent(DOWN_EVENT)).thenReturn(true)
         underTest.setStatusBarViewController(phoneStatusBarViewController)
@@ -559,29 +565,42 @@ class NotificationShadeWindowViewControllerTest(flags: FlagsParameterization?) :
         }
 
     @Test
-    @Ignore("b/321332798")
+    @DisableSceneContainer
     fun setsUpCommunalHubLayout_whenFlagEnabled() {
         whenever(mGlanceableHubContainerController.communalAvailable())
-                .thenReturn(MutableStateFlow(true))
+            .thenReturn(MutableStateFlow(true))
 
-        val mockCommunalView = mock(View::class.java)
+        val communalView = View(context)
         whenever(mGlanceableHubContainerController.initView(any<Context>()))
-                .thenReturn(mockCommunalView)
+            .thenReturn(communalView)
 
         val mockCommunalPlaceholder = mock(View::class.java)
         val fakeViewIndex = 20
         whenever(view.findViewById<View>(R.id.communal_ui_stub)).thenReturn(mockCommunalPlaceholder)
         whenever(view.indexOfChild(mockCommunalPlaceholder)).thenReturn(fakeViewIndex)
         whenever(view.context).thenReturn(context)
+        whenever(view.viewTreeObserver).thenReturn(mock(ViewTreeObserver::class.java))
 
         underTest.setupCommunalHubLayout()
 
-        // Communal view added as a child of the container at the proper index, the stub is removed.
-        verify(view).removeView(mockCommunalPlaceholder)
-        verify(view).addView(eq(mockCommunalView), eq(fakeViewIndex))
+        // Simluate attaching the view so flow collection starts.
+        val onAttachStateChangeListenerArgumentCaptor = ArgumentCaptor.forClass(
+            View.OnAttachStateChangeListener::class.java
+        )
+        verify(view, atLeast(1)).addOnAttachStateChangeListener(
+            onAttachStateChangeListenerArgumentCaptor.capture()
+        )
+        for (listener in onAttachStateChangeListenerArgumentCaptor.allValues) {
+            listener.onViewAttachedToWindow(view)
+        }
+        testableLooper.processAllMessages()
+
+        // Communal view added as a child of the container at the proper index.
+        verify(view).addView(eq(communalView), eq(fakeViewIndex))
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_COMMUNAL_HUB)
     fun doesNotSetupCommunalHubLayout_whenFlagDisabled() {
         whenever(mGlanceableHubContainerController.communalAvailable())
                 .thenReturn(MutableStateFlow(false))
