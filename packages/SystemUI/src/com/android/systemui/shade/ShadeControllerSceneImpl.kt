@@ -28,7 +28,6 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.ShadeTouchLog
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -100,11 +99,9 @@ constructor(
     }
 
     override fun instantCollapseShade() {
-        // TODO(b/325602936) add support for instant transition
-        sceneInteractor.changeScene(
+        sceneInteractor.snapToScene(
             getCollapseDestinationScene(),
             "hide shade",
-            CollapseShadeInstantly,
         )
     }
 
