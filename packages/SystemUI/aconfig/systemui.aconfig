@@ -806,7 +806,7 @@ flag {
     name: "dream_input_session_pilfer_once"
     namespace: "systemui"
     description: "Pilfer at most once per input session"
-    bug: "324600132"
+    bug: "333596426"
     metadata {
       purpose: PURPOSE_BUGFIX
     }
