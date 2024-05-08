@@ -20,6 +20,9 @@ import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_BACKGROUND;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_ALLOW;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_ADMIN;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_METERED_DENY_USER;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
@@ -31,6 +34,9 @@ import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_BACKGROUND;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_ALLOW;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_METERED_DENY_USER;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_RESTRICTED;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
@@ -143,6 +149,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private final Object mQuotaLock = new Object();
     private final Object mRulesLock = new Object();
 
+    private final boolean mUseMeteredFirewallChains;
+
     /** Set of interfaces with active quotas. */
     @GuardedBy("mQuotaLock")
     private HashMap<String, Long> mActiveQuotas = Maps.newHashMap();
@@ -150,9 +158,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @GuardedBy("mQuotaLock")
     private HashMap<String, Long> mActiveAlerts = Maps.newHashMap();
     /** Set of UIDs denied on metered networks. */
+    // TODO: b/336693007 - Remove once NPMS has completely migrated to metered firewall chains.
     @GuardedBy("mRulesLock")
     private SparseBooleanArray mUidRejectOnMetered = new SparseBooleanArray();
     /** Set of UIDs allowed on metered networks. */
+    // TODO: b/336693007 - Remove once NPMS has completely migrated to metered firewall chains.
     @GuardedBy("mRulesLock")
     private SparseBooleanArray mUidAllowOnMetered = new SparseBooleanArray();
     /** Set of UIDs with cleartext penalties. */
@@ -196,10 +206,32 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @GuardedBy("mRulesLock")
     private final SparseIntArray mUidFirewallBackgroundRules = new SparseIntArray();
 
+    /**
+     * Contains the per-UID firewall rules that are used to allowlist the app from metered-network
+     * restrictions when data saver is enabled.
+     */
+    @GuardedBy("mRulesLock")
+    private final SparseIntArray mUidMeteredFirewallAllowRules = new SparseIntArray();
+
+    /**
+     * Contains the per-UID firewall rules that are used to deny app access to metered networks
+     * due to user action.
+     */
+    @GuardedBy("mRulesLock")
+    private final SparseIntArray mUidMeteredFirewallDenyUserRules = new SparseIntArray();
+
+    /**
+     * Contains the per-UID firewall rules that are used to deny app access to metered networks
+     * due to admin action.
+     */
+    @GuardedBy("mRulesLock")
+    private final SparseIntArray mUidMeteredFirewallDenyAdminRules = new SparseIntArray();
+
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mRulesLock")
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
 
+    // TODO: b/336693007 - Remove once NPMS has completely migrated to metered firewall chains.
     @GuardedBy("mQuotaLock")
     private volatile boolean mDataSaverMode;
 
@@ -216,6 +248,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mDeps = deps;
+
+        mUseMeteredFirewallChains = Flags.useMeteredFirewallChains();
+
+        if (mUseMeteredFirewallChains) {
+            // These firewalls are always on and currently ConnectivityService does not allow
+            // changing their enabled state.
+            mFirewallChainStates.put(FIREWALL_CHAIN_METERED_DENY_USER, true);
+            mFirewallChainStates.put(FIREWALL_CHAIN_METERED_DENY_ADMIN, true);
+        }
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
 
@@ -410,33 +451,39 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 }
             }
 
-            SparseBooleanArray uidRejectOnQuota = null;
-            SparseBooleanArray uidAcceptOnQuota = null;
-            synchronized (mRulesLock) {
-                size = mUidRejectOnMetered.size();
-                if (size > 0) {
-                    if (DBG) Slog.d(TAG, "Pushing " + size + " UIDs to metered denylist rules");
-                    uidRejectOnQuota = mUidRejectOnMetered;
-                    mUidRejectOnMetered = new SparseBooleanArray();
-                }
+            if (!mUseMeteredFirewallChains) {
+                SparseBooleanArray uidRejectOnQuota = null;
+                SparseBooleanArray uidAcceptOnQuota = null;
+                synchronized (mRulesLock) {
+                    size = mUidRejectOnMetered.size();
+                    if (size > 0) {
+                        if (DBG) {
+                            Slog.d(TAG, "Pushing " + size + " UIDs to metered denylist rules");
+                        }
+                        uidRejectOnQuota = mUidRejectOnMetered;
+                        mUidRejectOnMetered = new SparseBooleanArray();
+                    }
 
-                size = mUidAllowOnMetered.size();
-                if (size > 0) {
-                    if (DBG) Slog.d(TAG, "Pushing " + size + " UIDs to metered allowlist rules");
-                    uidAcceptOnQuota = mUidAllowOnMetered;
-                    mUidAllowOnMetered = new SparseBooleanArray();
+                    size = mUidAllowOnMetered.size();
+                    if (size > 0) {
+                        if (DBG) {
+                            Slog.d(TAG, "Pushing " + size + " UIDs to metered allowlist rules");
+                        }
+                        uidAcceptOnQuota = mUidAllowOnMetered;
+                        mUidAllowOnMetered = new SparseBooleanArray();
+                    }
                 }
-            }
-            if (uidRejectOnQuota != null) {
-                for (int i = 0; i < uidRejectOnQuota.size(); i++) {
-                    setUidOnMeteredNetworkDenylist(uidRejectOnQuota.keyAt(i),
-                            uidRejectOnQuota.valueAt(i));
+                if (uidRejectOnQuota != null) {
+                    for (int i = 0; i < uidRejectOnQuota.size(); i++) {
+                        setUidOnMeteredNetworkDenylist(uidRejectOnQuota.keyAt(i),
+                                uidRejectOnQuota.valueAt(i));
+                    }
                 }
-            }
-            if (uidAcceptOnQuota != null) {
-                for (int i = 0; i < uidAcceptOnQuota.size(); i++) {
-                    setUidOnMeteredNetworkAllowlist(uidAcceptOnQuota.keyAt(i),
-                            uidAcceptOnQuota.valueAt(i));
+                if (uidAcceptOnQuota != null) {
+                    for (int i = 0; i < uidAcceptOnQuota.size(); i++) {
+                        setUidOnMeteredNetworkAllowlist(uidAcceptOnQuota.keyAt(i),
+                                uidAcceptOnQuota.valueAt(i));
+                    }
                 }
             }
 
@@ -459,8 +506,16 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             syncFirewallChainLocked(FIREWALL_CHAIN_RESTRICTED, "restricted ");
             syncFirewallChainLocked(FIREWALL_CHAIN_LOW_POWER_STANDBY, "low power standby ");
             syncFirewallChainLocked(FIREWALL_CHAIN_BACKGROUND, FIREWALL_CHAIN_NAME_BACKGROUND);
+            if (mUseMeteredFirewallChains) {
+                syncFirewallChainLocked(FIREWALL_CHAIN_METERED_ALLOW,
+                        FIREWALL_CHAIN_NAME_METERED_ALLOW);
+                syncFirewallChainLocked(FIREWALL_CHAIN_METERED_DENY_USER,
+                        FIREWALL_CHAIN_NAME_METERED_DENY_USER);
+                syncFirewallChainLocked(FIREWALL_CHAIN_METERED_DENY_ADMIN,
+                        FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN);
+            }
 
-            final int[] chains = {
+            final int[] chainsToEnable = {
                     FIREWALL_CHAIN_STANDBY,
                     FIREWALL_CHAIN_DOZABLE,
                     FIREWALL_CHAIN_POWERSAVE,
@@ -469,13 +524,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     FIREWALL_CHAIN_BACKGROUND,
             };
 
-            for (int chain : chains) {
+            for (int chain : chainsToEnable) {
                 if (getFirewallChainState(chain)) {
                     setFirewallChainEnabled(chain, true);
                 }
             }
         }
-
 
         try {
             getBatteryStats().noteNetworkStatsEnabled();
@@ -1077,6 +1131,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     mContext.getSystemService(ConnectivityManager.class)
                             .setDataSaverEnabled(enable);
                     mDataSaverMode = enable;
+                    if (mUseMeteredFirewallChains) {
+                        // Copy mDataSaverMode state to FIREWALL_CHAIN_METERED_ALLOW
+                        // until ConnectivityService allows manipulation of the data saver mode via
+                        // FIREWALL_CHAIN_METERED_ALLOW.
+                        synchronized (mRulesLock) {
+                            mFirewallChainStates.put(FIREWALL_CHAIN_METERED_ALLOW, enable);
+                        }
+                    }
                     return true;
                 } else {
                     final boolean changed = mNetdService.bandwidthEnableDataSaver(enable);
@@ -1191,9 +1253,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 setFirewallChainState(chain, enable);
             }
 
-            final String chainName = getFirewallChainName(chain);
-            if (chain == FIREWALL_CHAIN_NONE) {
-                throw new IllegalArgumentException("Bad child chain: " + chainName);
+            if (!isValidFirewallChainForSetEnabled(chain)) {
+                throw new IllegalArgumentException("Invalid chain for setFirewallChainEnabled: "
+                        + NetworkPolicyLogger.getFirewallChainName(chain));
             }
 
             final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
@@ -1205,38 +1267,29 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    private String getFirewallChainName(int chain) {
-        switch (chain) {
-            case FIREWALL_CHAIN_STANDBY:
-                return FIREWALL_CHAIN_NAME_STANDBY;
-            case FIREWALL_CHAIN_DOZABLE:
-                return FIREWALL_CHAIN_NAME_DOZABLE;
-            case FIREWALL_CHAIN_POWERSAVE:
-                return FIREWALL_CHAIN_NAME_POWERSAVE;
-            case FIREWALL_CHAIN_RESTRICTED:
-                return FIREWALL_CHAIN_NAME_RESTRICTED;
-            case FIREWALL_CHAIN_LOW_POWER_STANDBY:
-                return FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
-            case FIREWALL_CHAIN_BACKGROUND:
-                return FIREWALL_CHAIN_NAME_BACKGROUND;
-            default:
-                throw new IllegalArgumentException("Bad child chain: " + chain);
-        }
+    private boolean isValidFirewallChainForSetEnabled(int chain) {
+        return switch (chain) {
+            case FIREWALL_CHAIN_STANDBY, FIREWALL_CHAIN_DOZABLE, FIREWALL_CHAIN_POWERSAVE,
+                    FIREWALL_CHAIN_RESTRICTED, FIREWALL_CHAIN_LOW_POWER_STANDBY,
+                    FIREWALL_CHAIN_BACKGROUND -> true;
+            // METERED_* firewall chains are not yet supported by
+            // ConnectivityService#setFirewallChainEnabled.
+            default -> false;
+        };
     }
 
     private int getFirewallType(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_STANDBY:
+            case FIREWALL_CHAIN_METERED_DENY_ADMIN:
+            case FIREWALL_CHAIN_METERED_DENY_USER:
                 return FIREWALL_DENYLIST;
             case FIREWALL_CHAIN_DOZABLE:
-                return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_POWERSAVE:
-                return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_RESTRICTED:
-                return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_LOW_POWER_STANDBY:
-                return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_BACKGROUND:
+            case FIREWALL_CHAIN_METERED_ALLOW:
                 return FIREWALL_ALLOWLIST;
             default:
                 return isFirewallEnabled() ? FIREWALL_ALLOWLIST : FIREWALL_DENYLIST;
@@ -1360,6 +1413,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 return mUidFirewallLowPowerStandbyRules;
             case FIREWALL_CHAIN_BACKGROUND:
                 return mUidFirewallBackgroundRules;
+            case FIREWALL_CHAIN_METERED_ALLOW:
+                return mUidMeteredFirewallAllowRules;
+            case FIREWALL_CHAIN_METERED_DENY_USER:
+                return mUidMeteredFirewallDenyUserRules;
+            case FIREWALL_CHAIN_METERED_DENY_ADMIN:
+                return mUidMeteredFirewallDenyAdminRules;
             case FIREWALL_CHAIN_NONE:
                 return mUidFirewallRules;
             default:
@@ -1377,6 +1436,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
+        pw.println("Flags:");
+        pw.println(Flags.FLAG_USE_METERED_FIREWALL_CHAINS + ": " + mUseMeteredFirewallChains);
+        pw.println();
 
         synchronized (mQuotaLock) {
             pw.print("Active quota ifaces: "); pw.println(mActiveQuotas.toString());
@@ -1416,6 +1479,27 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             pw.print("UID firewall background chain enabled: ");
             pw.println(getFirewallChainState(FIREWALL_CHAIN_BACKGROUND));
             dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_BACKGROUND, mUidFirewallBackgroundRules);
+
+            pw.print("UID firewall metered allow chain enabled (Data saver mode): ");
+            // getFirewallChainState should maintain a duplicated state from mDataSaverMode when
+            // mUseMeteredFirewallChains is enabled.
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_METERED_ALLOW));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_METERED_ALLOW,
+                    mUidMeteredFirewallAllowRules);
+
+            pw.print("UID firewall metered deny_user chain enabled (always-on): ");
+            // This always-on state should be reflected by getFirewallChainState when
+            // mUseMeteredFirewallChains is enabled.
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_METERED_DENY_USER));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_METERED_DENY_USER,
+                    mUidMeteredFirewallDenyUserRules);
+
+            pw.print("UID firewall metered deny_admin chain enabled (always-on): ");
+            // This always-on state should be reflected by getFirewallChainState when
+            // mUseMeteredFirewallChains is enabled.
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_METERED_DENY_ADMIN));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_METERED_DENY_ADMIN,
+                    mUidMeteredFirewallDenyAdminRules);
         }
 
         pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);
@@ -1520,14 +1604,40 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because it is in background");
                 return true;
             }
-            if (mUidRejectOnMetered.get(uid)) {
-                if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of no metered data"
-                        + " in the background");
-                return true;
-            }
-            if (mDataSaverMode && !mUidAllowOnMetered.get(uid)) {
-                if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of data saver mode");
-                return true;
+            if (mUseMeteredFirewallChains) {
+                if (getFirewallChainState(FIREWALL_CHAIN_METERED_DENY_USER)
+                        && mUidMeteredFirewallDenyUserRules.get(uid) == FIREWALL_RULE_DENY) {
+                    if (DBG) {
+                        Slog.d(TAG, "Uid " + uid + " restricted because of user-restricted metered"
+                                + " data in the background");
+                    }
+                    return true;
+                }
+                if (getFirewallChainState(FIREWALL_CHAIN_METERED_DENY_ADMIN)
+                        && mUidMeteredFirewallDenyAdminRules.get(uid) == FIREWALL_RULE_DENY) {
+                    if (DBG) {
+                        Slog.d(TAG, "Uid " + uid + " restricted because of admin-restricted metered"
+                                + " data in the background");
+                    }
+                    return true;
+                }
+                if (getFirewallChainState(FIREWALL_CHAIN_METERED_ALLOW)
+                        && mUidMeteredFirewallAllowRules.get(uid) != FIREWALL_RULE_ALLOW) {
+                    if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of data saver mode");
+                    return true;
+                }
+            } else {
+                if (mUidRejectOnMetered.get(uid)) {
+                    if (DBG) {
+                        Slog.d(TAG, "Uid " + uid
+                                + " restricted because of no metered data in the background");
+                    }
+                    return true;
+                }
+                if (mDataSaverMode && !mUidAllowOnMetered.get(uid)) {
+                    if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of data saver mode");
+                    return true;
+                }
             }
             return false;
         }
