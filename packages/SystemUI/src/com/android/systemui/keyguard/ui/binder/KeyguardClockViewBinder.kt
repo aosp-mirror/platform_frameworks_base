@@ -33,14 +33,18 @@ import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.clocks.AodClockBurnInModel
 import com.android.systemui.plugins.clocks.ClockController
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 object KeyguardClockViewBinder {
     private val TAG = KeyguardClockViewBinder::class.simpleName!!
     // When changing to new clock, we need to remove old clock views from burnInLayer
     private var lastClock: ClockController? = null
+
     @JvmStatic
     fun bind(
         clockSection: ClockSection,
@@ -48,6 +52,7 @@ object KeyguardClockViewBinder {
         viewModel: KeyguardClockViewModel,
         keyguardClockInteractor: KeyguardClockInteractor,
         blueprintInteractor: KeyguardBlueprintInteractor,
+        rootViewModel: KeyguardRootViewModel,
     ) {
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -105,6 +110,28 @@ object KeyguardClockViewBinder {
                         }
                     }
                 }
+
+                launch {
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
+                    combine(
+                            rootViewModel.translationX,
+                            rootViewModel.translationY,
+                            rootViewModel.scale,
+                            ::Triple
+                        )
+                        .collect { (translationX, translationY, scale) ->
+                            viewModel.currentClock.value
+                                ?.largeClock
+                                ?.layout
+                                ?.applyAodBurnIn(
+                                    AodClockBurnInModel(
+                                        translationX = translationX.value!!,
+                                        translationY = translationY,
+                                        scale = scale.scale
+                                    )
+                                )
+                        }
+                }
             }
         }
     }
@@ -117,17 +144,16 @@ object KeyguardClockViewBinder {
     ) {
         val burnInLayer = viewModel.burnInLayer
         val clockController = viewModel.currentClock.value
+        // Large clocks won't be added to or removed from burn in layer
+        // Weather large clock has customized burn in preventing mechanism
+        // Non-weather large clock will only scale and translate vertically
         clockController?.let { clock ->
             when (clockSize) {
                 ClockSize.LARGE -> {
                     clock.smallClock.layout.views.forEach { burnInLayer?.removeView(it) }
-                    if (clock.config.useAlternateSmartspaceAODTransition) {
-                        clock.largeClock.layout.views.forEach { burnInLayer?.addView(it) }
-                    }
                 }
                 ClockSize.SMALL -> {
                     clock.smallClock.layout.views.forEach { burnInLayer?.addView(it) }
-                    clock.largeClock.layout.views.forEach { burnInLayer?.removeView(it) }
                 }
             }
         }
@@ -147,13 +173,6 @@ object KeyguardClockViewBinder {
             clock.smallClock.layout.views.forEach {
                 burnInLayer?.removeView(it)
                 rootView.removeView(it)
-            }
-
-            // add large clock to burn in layer only when it will have same transition with other
-            // components in AOD otherwise, it will have a separate scale transition while other
-            // components only have translate transition
-            if (clock.config.useAlternateSmartspaceAODTransition) {
-                clock.largeClock.layout.views.forEach { burnInLayer?.removeView(it) }
             }
             clock.largeClock.layout.views.forEach { rootView.removeView(it) }
         }
