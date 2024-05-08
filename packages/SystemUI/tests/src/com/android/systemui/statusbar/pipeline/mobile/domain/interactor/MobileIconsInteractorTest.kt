@@ -408,6 +408,107 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun filteredSubscriptions_subNotExclusivelyNonTerrestrial_hasSub() =
+        testScope.runTest {
+            val notExclusivelyNonTerrestrialSub =
+                SubscriptionModel(
+                    isExclusivelyNonTerrestrial = false,
+                    subscriptionId = 5,
+                    carrierName = "Carrier 5",
+                    profileClass = PROFILE_CLASS_UNSET,
+                )
+
+            connectionsRepository.setSubscriptions(listOf(notExclusivelyNonTerrestrialSub))
+
+            val latest by collectLastValue(underTest.filteredSubscriptions)
+
+            assertThat(latest).isEqualTo(listOf(notExclusivelyNonTerrestrialSub))
+        }
+
+    @Test
+    fun filteredSubscriptions_subExclusivelyNonTerrestrial_doesNotHaveSub() =
+        testScope.runTest {
+            val exclusivelyNonTerrestrialSub =
+                SubscriptionModel(
+                    isExclusivelyNonTerrestrial = true,
+                    subscriptionId = 5,
+                    carrierName = "Carrier 5",
+                    profileClass = PROFILE_CLASS_UNSET,
+                )
+
+            connectionsRepository.setSubscriptions(listOf(exclusivelyNonTerrestrialSub))
+
+            val latest by collectLastValue(underTest.filteredSubscriptions)
+
+            assertThat(latest).isEmpty()
+        }
+
+    @Test
+    fun filteredSubscription_mixOfExclusivelyNonTerrestrialAndOther_hasOtherSubsOnly() =
+        testScope.runTest {
+            val exclusivelyNonTerrestrialSub =
+                SubscriptionModel(
+                    isExclusivelyNonTerrestrial = true,
+                    subscriptionId = 5,
+                    carrierName = "Carrier 5",
+                    profileClass = PROFILE_CLASS_UNSET,
+                )
+            val otherSub1 =
+                SubscriptionModel(
+                    isExclusivelyNonTerrestrial = false,
+                    subscriptionId = 1,
+                    carrierName = "Carrier 1",
+                    profileClass = PROFILE_CLASS_UNSET,
+                )
+            val otherSub2 =
+                SubscriptionModel(
+                    isExclusivelyNonTerrestrial = false,
+                    subscriptionId = 2,
+                    carrierName = "Carrier 2",
+                    profileClass = PROFILE_CLASS_UNSET,
+                )
+
+            connectionsRepository.setSubscriptions(
+                listOf(otherSub1, exclusivelyNonTerrestrialSub, otherSub2)
+            )
+
+            val latest by collectLastValue(underTest.filteredSubscriptions)
+
+            assertThat(latest).isEqualTo(listOf(otherSub1, otherSub2))
+        }
+
+    @Test
+    fun filteredSubscriptions_exclusivelyNonTerrestrialSub_andOpportunistic_bothFiltersHappen() =
+        testScope.runTest {
+            // Exclusively non-terrestrial sub
+            val exclusivelyNonTerrestrialSub =
+                SubscriptionModel(
+                    isExclusivelyNonTerrestrial = true,
+                    subscriptionId = 5,
+                    carrierName = "Carrier 5",
+                    profileClass = PROFILE_CLASS_UNSET,
+                )
+
+            // Opportunistic subs
+            val (sub3, sub4) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_3_ID, SUB_4_ID),
+                    opportunistic = Pair(true, true),
+                    grouped = true,
+                )
+
+            // WHEN both an exclusively non-terrestrial sub and opportunistic sub pair is included
+            connectionsRepository.setSubscriptions(listOf(sub3, sub4, exclusivelyNonTerrestrialSub))
+            connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
+
+            val latest by collectLastValue(underTest.filteredSubscriptions)
+
+            // THEN both the only-non-terrestrial sub and the non-active sub are filtered out,
+            // leaving only sub3.
+            assertThat(latest).isEqualTo(listOf(sub3))
+        }
+
+    @Test
     fun activeDataConnection_turnedOn() =
         testScope.runTest {
             CONNECTION_1.setDataEnabled(true)
