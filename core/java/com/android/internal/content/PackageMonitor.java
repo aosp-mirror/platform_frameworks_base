@@ -166,10 +166,24 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     }
 
     /**
+     * Same as {@link #onPackageAdded(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageAddedWithExtras(String packageName, int uid, Bundle extras) {
+    }
+
+    /**
      * Called when a package is really removed (and not replaced).
      */
     @UnsupportedAppUsage
     public void onPackageRemoved(String packageName, int uid) {
+    }
+
+    /**
+     * Same as {@link #onPackageRemoved(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageRemovedWithExtras(String packageName, int uid, Bundle extras) {
     }
 
     /**
@@ -179,10 +193,31 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     public void onPackageRemovedAllUsers(String packageName, int uid) {
     }
 
+    /**
+     * Same as {@link #onPackageRemovedAllUsers(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageRemovedAllUsersWithExtras(String packageName, int uid, Bundle extras) {
+    }
+
     public void onPackageUpdateStarted(String packageName, int uid) {
     }
 
+    /**
+     * Same as {@link #onPackageUpdateStarted(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageUpdateStartedWithExtras(String packageName, int uid, Bundle extras) {
+    }
+
     public void onPackageUpdateFinished(String packageName, int uid) {
+    }
+
+    /**
+     * Same as {@link #onPackageUpdateFinished(String, int)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageUpdateFinishedWithExtras(String packageName, int uid, Bundle extras) {
     }
 
     /**
@@ -280,6 +315,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
      * Called when an existing package is updated or its disabled state changes.
      */
     public void onPackageModified(@NonNull String packageName) {
+    }
+
+    /**
+     * Same as {@link #onPackageModified(String)}, but this callback
+     * has extras passed in.
+     */
+    public void onPackageModifiedWithExtras(@NonNull String packageName, Bundle extras) {
     }
 
     /**
@@ -425,10 +467,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     mModifiedPackages = mTempArray;
                     mChangeType = PACKAGE_UPDATING;
                     onPackageUpdateFinished(pkg, uid);
+                    onPackageUpdateFinishedWithExtras(pkg, uid, intent.getExtras());
                     onPackageModified(pkg);
+                    onPackageModifiedWithExtras(pkg, intent.getExtras());
                 } else {
                     mChangeType = PACKAGE_PERMANENT_CHANGE;
                     onPackageAdded(pkg, uid);
+                    onPackageAddedWithExtras(pkg, uid, intent.getExtras());
                 }
                 onPackageAppearedWithExtras(pkg, intent.getExtras());
                 onPackageAppeared(pkg, mChangeType);
@@ -442,11 +487,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                     mChangeType = PACKAGE_UPDATING;
                     onPackageUpdateStarted(pkg, uid);
+                    onPackageUpdateStartedWithExtras(pkg, uid, intent.getExtras());
                     if (intent.getBooleanExtra(Intent.EXTRA_ARCHIVAL, false)) {
                         // In case it is a removal event due to archiving, we trigger package
                         // update event to refresh details like icons, title etc. corresponding to
                         // the archived app.
                         onPackageModified(pkg);
+                        onPackageModifiedWithExtras(pkg, intent.getExtras());
                     }
                 } else {
                     mChangeType = PACKAGE_PERMANENT_CHANGE;
@@ -455,8 +502,10 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     // it when it is re-added.
                     mSomePackagesChanged = true;
                     onPackageRemoved(pkg, uid);
+                    onPackageRemovedWithExtras(pkg, uid, intent.getExtras());
                     if (intent.getBooleanExtra(Intent.EXTRA_REMOVED_FOR_ALL_USERS, false)) {
                         onPackageRemovedAllUsers(pkg, uid);
+                        onPackageRemovedAllUsersWithExtras(pkg, uid, intent.getExtras());
                     }
                 }
                 onPackageDisappearedWithExtras(pkg, intent.getExtras());
@@ -476,6 +525,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                 }
                 onPackageChangedWithExtras(pkg, intent.getExtras());
                 onPackageModified(pkg);
+                onPackageModifiedWithExtras(pkg, intent.getExtras());
             }
         } else if (Intent.ACTION_PACKAGE_DATA_CLEARED.equals(action)) {
             String pkg = getPackageName(intent);
