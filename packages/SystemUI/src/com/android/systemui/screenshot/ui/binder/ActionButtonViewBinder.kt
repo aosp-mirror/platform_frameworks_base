@@ -23,8 +23,9 @@ import android.widget.TextView
 import com.android.systemui.res.R
 import com.android.systemui.screenshot.ui.TransitioningIconDrawable
 import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
+import javax.inject.Inject
 
-object ActionButtonViewBinder {
+class ActionButtonViewBinder @Inject constructor() {
     /** Binds the given view to the given view-model */
     fun bind(view: View, viewModel: ActionButtonViewModel) {
         val iconView = view.requireViewById<ImageView>(R.id.overlay_action_chip_icon)
