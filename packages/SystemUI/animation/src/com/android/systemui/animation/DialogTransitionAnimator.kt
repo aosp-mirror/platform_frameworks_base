@@ -37,6 +37,7 @@ import com.android.internal.jank.Cuj.CujType
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.util.maybeForceFullscreen
 import com.android.systemui.util.registerAnimationOnBackInvoked
+import java.util.concurrent.Executor
 import kotlin.math.roundToInt
 
 private const val TAG = "DialogTransitionAnimator"
@@ -55,10 +56,16 @@ private const val TAG = "DialogTransitionAnimator"
 class DialogTransitionAnimator
 @JvmOverloads
 constructor(
+    private val mainExecutor: Executor,
     private val callback: Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
     private val featureFlags: AnimationFeatureFlags,
-    private val transitionAnimator: TransitionAnimator = TransitionAnimator(TIMINGS, INTERPOLATORS),
+    private val transitionAnimator: TransitionAnimator =
+        TransitionAnimator(
+            mainExecutor,
+            TIMINGS,
+            INTERPOLATORS,
+        ),
     private val isForTesting: Boolean = false,
 ) {
     private companion object {
@@ -937,24 +944,9 @@ private class AnimatedDialog(
                 }
 
                 override fun onTransitionAnimationEnd(isExpandingFullyAbove: Boolean) {
-                    // onLaunchAnimationEnd is called by an Animator at the end of the animation,
-                    // on a Choreographer animation tick. The following calls will move the animated
-                    // content from the dialog overlay back to its original position, and this
-                    // change must be reflected in the next frame given that we then sync the next
-                    // frame of both the content and dialog ViewRoots. However, in case that content
-                    // is rendered by Compose, whose compositions are also scheduled on a
-                    // Choreographer frame, any state change made *right now* won't be reflected in
-                    // the next frame given that a Choreographer frame can't schedule another and
-                    // have it happen in the same frame. So we post the forwarded calls to
-                    // [Controller.onLaunchAnimationEnd], leaving this Choreographer frame, ensuring
-                    // that the move of the content back to its original window will be reflected in
-                    // the next frame right after [onLaunchAnimationEnd] is called.
-                    dialog.context.mainExecutor.execute {
-                        startController.onTransitionAnimationEnd(isExpandingFullyAbove)
-                        endController.onTransitionAnimationEnd(isExpandingFullyAbove)
-
-                        onLaunchAnimationEnd()
-                    }
+                    startController.onTransitionAnimationEnd(isExpandingFullyAbove)
+                    endController.onTransitionAnimationEnd(isExpandingFullyAbove)
+                    onLaunchAnimationEnd()
                 }
 
                 override fun onTransitionAnimationProgress(

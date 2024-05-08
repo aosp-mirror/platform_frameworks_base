@@ -46,7 +46,8 @@ import org.mockito.junit.MockitoJUnit
 @RunWithLooper
 class ActivityTransitionAnimatorTest : SysuiTestCase() {
     private val transitionContainer = LinearLayout(mContext)
-    private val testTransitionAnimator = fakeTransitionAnimator()
+    private val mainExecutor = context.mainExecutor
+    private val testTransitionAnimator = fakeTransitionAnimator(mainExecutor)
     @Mock lateinit var callback: ActivityTransitionAnimator.Callback
     @Mock lateinit var listener: ActivityTransitionAnimator.Listener
     @Spy private val controller = TestTransitionAnimatorController(transitionContainer)
@@ -59,9 +60,10 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     fun setup() {
         activityTransitionAnimator =
             ActivityTransitionAnimator(
+                mainExecutor,
                 testTransitionAnimator,
                 testTransitionAnimator,
-                disableWmTimeout = true
+                disableWmTimeout = true,
             )
         activityTransitionAnimator.callback = callback
         activityTransitionAnimator.addListener(listener)
