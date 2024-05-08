@@ -29,6 +29,9 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
     val previewAction: StateFlow<(() -> Unit)?> = _previewAction
     private val _actions = MutableStateFlow(emptyList<ActionButtonViewModel>())
     val actions: StateFlow<List<ActionButtonViewModel>> = _actions
+    private val _animationState = MutableStateFlow(AnimationState.NOT_STARTED)
+    val animationState: StateFlow<AnimationState> = _animationState
+
     val showDismissButton: Boolean
         get() = accessibilityManager.isEnabled
 
@@ -40,9 +43,14 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         _previewAction.value = onClick
     }
 
-    fun addAction(actionAppearance: ActionButtonAppearance, onClicked: (() -> Unit)): Int {
+    fun addAction(
+        actionAppearance: ActionButtonAppearance,
+        showDuringEntrance: Boolean,
+        onClicked: (() -> Unit)
+    ): Int {
         val actionList = _actions.value.toMutableList()
-        val action = ActionButtonViewModel.withNextId(actionAppearance, onClicked)
+        val action =
+            ActionButtonViewModel.withNextId(actionAppearance, showDuringEntrance, onClicked)
         actionList.add(action)
         _actions.value = actionList
         return action.id
@@ -57,6 +65,7 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
                     actionList[index].appearance,
                     actionId,
                     visible,
+                    actionList[index].showDuringEntrance,
                     actionList[index].onClicked
                 )
             _actions.value = actionList
@@ -74,6 +83,7 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
                     appearance,
                     actionId,
                     actionList[index].visible,
+                    actionList[index].showDuringEntrance,
                     actionList[index].onClicked
                 )
             _actions.value = actionList
@@ -92,13 +102,26 @@ class ScreenshotViewModel(private val accessibilityManager: AccessibilityManager
         }
     }
 
+    // TODO: this should be handled entirely within the view binder.
+    fun setAnimationState(state: AnimationState) {
+        _animationState.value = state
+    }
+
     fun reset() {
         _preview.value = null
         _previewAction.value = null
         _actions.value = listOf()
+        _animationState.value = AnimationState.NOT_STARTED
     }
 
     companion object {
         const val TAG = "ScreenshotViewModel"
     }
+}
+
+enum class AnimationState {
+    NOT_STARTED,
+    ENTRANCE_STARTED, // The first 200ms of the entrance animation
+    ENTRANCE_REVEAL, // The rest of the entrance animation
+    ENTRANCE_COMPLETE,
 }

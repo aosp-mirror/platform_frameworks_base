@@ -58,7 +58,7 @@ object KeyguardDismissInteractorFactory {
         bouncerRepository: FakeKeyguardBouncerRepository = FakeKeyguardBouncerRepository(),
         keyguardUpdateMonitor: KeyguardUpdateMonitor = mock(KeyguardUpdateMonitor::class.java),
         powerRepository: FakePowerRepository = FakePowerRepository(),
-        userRepository: FakeUserRepository = FakeUserRepository()
+        userRepository: FakeUserRepository = FakeUserRepository(),
     ): WithDependencies {
         val primaryBouncerInteractor =
             PrimaryBouncerInteractor(
@@ -95,11 +95,7 @@ object KeyguardDismissInteractorFactory {
             PowerInteractorFactory.create(
                 repository = powerRepository,
             )
-        val selectedUserInteractor =
-            SelectedUserInteractor(
-                applicationScope = testScope.backgroundScope,
-                repository = userRepository
-            )
+        val selectedUserInteractor = SelectedUserInteractor(repository = userRepository)
         return WithDependencies(
             trustRepository = trustRepository,
             keyguardRepository = keyguardRepository,

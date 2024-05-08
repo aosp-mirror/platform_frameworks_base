@@ -41,6 +41,7 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransition
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.OffToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToDozingTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
@@ -192,6 +193,12 @@ abstract class DeviceEntryIconTransitionModule {
     @IntoSet
     abstract fun occludedToLockscreen(
         impl: OccludedToLockscreenTransitionViewModel
+    ): DeviceEntryIconTransition
+
+    @Binds
+    @IntoSet
+    abstract fun offToLockscreen(
+        impl: OffToLockscreenTransitionViewModel
     ): DeviceEntryIconTransition
 
     @Binds

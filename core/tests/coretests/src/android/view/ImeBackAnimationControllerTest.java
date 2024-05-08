@@ -241,6 +241,23 @@ public class ImeBackAnimationControllerTest {
         });
     }
 
+    @Test
+    public void testOnBackInvokedHidesImeEvenIfInsetsControlCancelled() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // start back gesture
+            WindowInsetsAnimationControlListener animationControlListener = startBackGesture();
+
+            // simulate ImeBackAnimationController not receiving control (e.g. due to split screen)
+            animationControlListener.onCancelled(mWindowInsetsAnimationController);
+
+            // commit back gesture
+            mBackAnimationController.onBackInvoked();
+
+            // verify that InsetsController#hide is called
+            verify(mInsetsController, times(1)).hide(ime());
+        });
+    }
+
     private WindowInsetsAnimationControlListener startBackGesture() {
         // start back gesture
         mBackAnimationController.onBackStarted(new BackEvent(0f, 0f, 0f, EDGE_LEFT));

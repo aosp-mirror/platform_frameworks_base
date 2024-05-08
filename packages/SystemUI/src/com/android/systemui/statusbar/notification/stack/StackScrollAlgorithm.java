@@ -169,6 +169,14 @@ public class StackScrollAlgorithm {
                 }
             }
 
+            // On the final call to {@link #resetViewState}, the alpha is set back to 1f but
+            // ambientState.isExpansionChanging() is now false. This causes a flicker on the
+            // EmptyShadeView after the shade is collapsed. Make sure the empty shade view
+            // isn't visible unless the shade is expanded.
+            if (view instanceof EmptyShadeView && ambientState.getExpansionFraction() == 0f) {
+                viewState.setAlpha(0f);
+            }
+
             // For EmptyShadeView if on keyguard, we need to control the alpha to create
             // a nice transition when the user is dragging down the notification panel.
             if (view instanceof EmptyShadeView && ambientState.isOnKeyguard()) {

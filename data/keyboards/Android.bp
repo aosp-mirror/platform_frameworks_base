@@ -33,7 +33,7 @@ prebuilt_usr_keylayout {
     srcs: [
         "*.kl",
     ],
-    installable: false,
+    no_full_install: true,
 }
 
 prebuilt_usr_keychars {
@@ -41,7 +41,7 @@ prebuilt_usr_keychars {
     srcs: [
         "*.kcm",
     ],
-    installable: false,
+    no_full_install: true,
 }
 
 prebuilt_usr_idc {
@@ -49,5 +49,5 @@ prebuilt_usr_idc {
     srcs: [
         "*.idc",
     ],
-    installable: false,
+    no_full_install: true,
 }

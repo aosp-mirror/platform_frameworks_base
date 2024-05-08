@@ -272,7 +272,10 @@ void PointerController::setSpots(const PointerCoords* spotCoords, const uint32_t
     if (it == mLocked.spotControllers.end()) {
         mLocked.spotControllers.try_emplace(displayId, displayId, mContext);
     }
-    mLocked.spotControllers.at(displayId).setSpots(outSpotCoords.data(), spotIdToIndex, spotIdBits);
+    bool skipScreenshot = mLocked.displaysToSkipScreenshot.find(displayId) !=
+            mLocked.displaysToSkipScreenshot.end();
+    mLocked.spotControllers.at(displayId).setSpots(outSpotCoords.data(), spotIdToIndex, spotIdBits,
+                                                   skipScreenshot);
 }
 
 void PointerController::clearSpots() {
@@ -350,6 +353,17 @@ void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
 
     std::scoped_lock lock(getLock());
     mCursorController.setCustomPointerIcon(icon);
+}
+
+void PointerController::setSkipScreenshot(int32_t displayId, bool skip) {
+    if (!mEnabled) return;
+
+    std::scoped_lock lock(getLock());
+    if (skip) {
+        mLocked.displaysToSkipScreenshot.insert(displayId);
+    } else {
+        mLocked.displaysToSkipScreenshot.erase(displayId);
+    }
 }
 
 void PointerController::doInactivityTimeout() {

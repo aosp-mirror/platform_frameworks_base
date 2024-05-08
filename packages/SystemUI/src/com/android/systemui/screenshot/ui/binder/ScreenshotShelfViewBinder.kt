@@ -31,6 +31,8 @@ import com.android.systemui.res.R
 import com.android.systemui.screenshot.ScreenshotEvent
 import com.android.systemui.screenshot.ui.ScreenshotShelfView
 import com.android.systemui.screenshot.ui.SwipeGestureListener
+import com.android.systemui.screenshot.ui.viewmodel.ActionButtonViewModel
+import com.android.systemui.screenshot.ui.viewmodel.AnimationState
 import com.android.systemui.screenshot.ui.viewmodel.ScreenshotViewModel
 import com.android.systemui.util.children
 import kotlinx.coroutines.Dispatchers
@@ -59,7 +61,6 @@ object ScreenshotShelfViewBinder {
         val previewBorder = view.requireViewById<View>(R.id.screenshot_preview_border)
         previewView.clipToOutline = true
         previewViewBlur.clipToOutline = true
-        val actionsContainer: LinearLayout = view.requireViewById(R.id.screenshot_actions)
         val dismissButton = view.requireViewById<View>(R.id.screenshot_dismiss_button)
         dismissButton.visibility = if (viewModel.showDismissButton) View.VISIBLE else View.GONE
         dismissButton.setOnClickListener {
@@ -90,47 +91,72 @@ object ScreenshotShelfViewBinder {
                     }
                     launch {
                         viewModel.actions.collect { actions ->
-                            val visibleActions = actions.filter { it.visible }
-
-                            if (visibleActions.isNotEmpty()) {
-                                view
-                                    .requireViewById<View>(R.id.actions_container_background)
-                                    .visibility = View.VISIBLE
-                            }
-
-                            // Remove any buttons not in the new list, then do another pass to add
-                            // any new actions and update any that are already there.
-                            // This assumes that actions can never change order and that each action
-                            // ID is unique.
-                            val newIds = visibleActions.map { it.id }
-
-                            for (child in actionsContainer.children.toList()) {
-                                if (child.tag !in newIds) {
-                                    actionsContainer.removeView(child)
-                                }
-                            }
-
-                            for ((index, action) in visibleActions.withIndex()) {
-                                val currentView: View? = actionsContainer.getChildAt(index)
-                                if (action.id == currentView?.tag) {
-                                    // Same ID, update the display
-                                    ActionButtonViewBinder.bind(currentView, action)
-                                } else {
-                                    // Different ID. Removals have already happened so this must
-                                    // mean that the new action must be inserted here.
-                                    val actionButton =
-                                        layoutInflater.inflate(
-                                            R.layout.shelf_action_chip,
-                                            actionsContainer,
-                                            false
-                                        )
-                                    actionsContainer.addView(actionButton, index)
-                                    ActionButtonViewBinder.bind(actionButton, action)
-                                }
-                            }
+                            updateActions(
+                                actions,
+                                viewModel.animationState.value,
+                                view,
+                                layoutInflater
+                            )
+                        }
+                    }
+                    launch {
+                        viewModel.animationState.collect { animationState ->
+                            updateActions(
+                                viewModel.actions.value,
+                                animationState,
+                                view,
+                                layoutInflater
+                            )
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun updateActions(
+        actions: List<ActionButtonViewModel>,
+        animationState: AnimationState,
+        view: ScreenshotShelfView,
+        layoutInflater: LayoutInflater
+    ) {
+        val actionsContainer: LinearLayout = view.requireViewById(R.id.screenshot_actions)
+        val visibleActions =
+            actions.filter {
+                it.visible &&
+                    (animationState == AnimationState.ENTRANCE_COMPLETE ||
+                        animationState == AnimationState.ENTRANCE_REVEAL ||
+                        it.showDuringEntrance)
+            }
+
+        if (visibleActions.isNotEmpty()) {
+            view.requireViewById<View>(R.id.actions_container_background).visibility = View.VISIBLE
+        }
+
+        // Remove any buttons not in the new list, then do another pass to add
+        // any new actions and update any that are already there.
+        // This assumes that actions can never change order and that each action
+        // ID is unique.
+        val newIds = visibleActions.map { it.id }
+
+        for (child in actionsContainer.children.toList()) {
+            if (child.tag !in newIds) {
+                actionsContainer.removeView(child)
+            }
+        }
+
+        for ((index, action) in visibleActions.withIndex()) {
+            val currentView: View? = actionsContainer.getChildAt(index)
+            if (action.id == currentView?.tag) {
+                // Same ID, update the display
+                ActionButtonViewBinder.bind(currentView, action)
+            } else {
+                // Different ID. Removals have already happened so this must
+                // mean that the new action must be inserted here.
+                val actionButton =
+                    layoutInflater.inflate(R.layout.shelf_action_chip, actionsContainer, false)
+                actionsContainer.addView(actionButton, index)
+                ActionButtonViewBinder.bind(actionButton, action)
             }
         }
     }

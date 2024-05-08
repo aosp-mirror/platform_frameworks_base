@@ -84,19 +84,21 @@ constructor(
             .map { it.deviceEntryParentViewAlpha }
             .merge()
             .shareIn(scope, SharingStarted.WhileSubscribed())
+            .onStart { emit(initialAlphaFromKeyguardState(transitionInteractor.getCurrentState())) }
     private val alphaMultiplierFromShadeExpansion: Flow<Float> =
         combine(
-            showingAlternateBouncer,
-            shadeExpansion,
-            qsProgress,
-        ) { showingAltBouncer, shadeExpansion, qsProgress ->
-            val interpolatedQsProgress = (qsProgress * 2).coerceIn(0f, 1f)
-            if (showingAltBouncer) {
-                1f
-            } else {
-                (1f - shadeExpansion) * (1f - interpolatedQsProgress)
+                showingAlternateBouncer,
+                shadeExpansion,
+                qsProgress,
+            ) { showingAltBouncer, shadeExpansion, qsProgress ->
+                val interpolatedQsProgress = (qsProgress * 2).coerceIn(0f, 1f)
+                if (showingAltBouncer) {
+                    1f
+                } else {
+                    (1f - shadeExpansion) * (1f - interpolatedQsProgress)
+                }
             }
-        }
+            .onStart { emit(1f) }
     // Burn-in offsets in AOD
     private val nonAnimatedBurnInOffsets: Flow<BurnInOffsets> =
         combine(
@@ -122,14 +124,34 @@ constructor(
             )
         }
 
-    val deviceEntryViewAlpha: StateFlow<Float> =
+    val deviceEntryViewAlpha: Flow<Float> =
         combine(
                 transitionAlpha,
                 alphaMultiplierFromShadeExpansion,
             ) { alpha, alphaMultiplier ->
                 alpha * alphaMultiplier
             }
-            .stateIn(scope = scope, started = SharingStarted.WhileSubscribed(), initialValue = 0f)
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = 0f,
+            )
+
+    private fun initialAlphaFromKeyguardState(keyguardState: KeyguardState): Float {
+        return when (keyguardState) {
+            KeyguardState.OFF,
+            KeyguardState.PRIMARY_BOUNCER,
+            KeyguardState.DOZING,
+            KeyguardState.DREAMING,
+            KeyguardState.GLANCEABLE_HUB,
+            KeyguardState.GONE,
+            KeyguardState.OCCLUDED,
+            KeyguardState.DREAMING_LOCKSCREEN_HOSTED, -> 0f
+            KeyguardState.AOD,
+            KeyguardState.ALTERNATE_BOUNCER,
+            KeyguardState.LOCKSCREEN -> 1f
+        }
+    }
     val useBackgroundProtection: StateFlow<Boolean> = isUdfpsSupported
     val burnInOffsets: Flow<BurnInOffsets> =
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled

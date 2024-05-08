@@ -32,6 +32,7 @@ import com.android.systemui.res.R
 fun SliceAndroidView(
     slice: Slice?,
     modifier: Modifier = Modifier,
+    isEnabled: Boolean = true,
     onWidthChanged: ((Int) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
@@ -40,7 +41,6 @@ fun SliceAndroidView(
         factory = { context: Context ->
             ClickableSliceView(
                     ContextThemeWrapper(context, R.style.Widget_SliceView_VolumePanel),
-                    onClick,
                 )
                 .apply {
                     mode = SliceView.MODE_LARGE
@@ -50,12 +50,14 @@ fun SliceAndroidView(
                     if (onWidthChanged != null) {
                         addOnLayoutChangeListener(OnWidthChangedLayoutListener(onWidthChanged))
                     }
-                    if (onClick != null) {
-                        setOnClickListener { onClick() }
-                    }
                 }
         },
-        update = { sliceView: SliceView -> sliceView.slice = slice }
+        update = { sliceView: ClickableSliceView ->
+            sliceView.slice = slice
+            sliceView.onClick = onClick
+            sliceView.isEnabled = isEnabled
+            sliceView.isClickable = isEnabled
+        }
     )
 }
 
@@ -86,10 +88,9 @@ class OnWidthChangedLayoutListener(private val widthChanged: (Int) -> Unit) :
  * first.
  */
 @SuppressLint("ViewConstructor") // only used in this class
-private class ClickableSliceView(
-    context: Context,
-    private val onClick: (() -> Unit)?,
-) : SliceView(context) {
+private class ClickableSliceView(context: Context) : SliceView(context) {
+
+    var onClick: (() -> Unit)? = null
 
     init {
         if (onClick != null) {

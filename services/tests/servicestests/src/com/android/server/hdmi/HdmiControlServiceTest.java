@@ -106,6 +106,7 @@ public class HdmiControlServiceTest {
     private HdmiPortInfo[] mHdmiPortInfo;
     private ArrayList<Integer> mLocalDeviceTypes = new ArrayList<>();
     private static final int PORT_ID_EARC_SUPPORTED = 3;
+    private static final int EARC_TRIGGER_START_ARC_ACTION_DELAY = 500;
 
     @Before
     public void setUp() throws Exception {
@@ -1374,6 +1375,11 @@ public class HdmiControlServiceTest {
                 PORT_ID_EARC_SUPPORTED);
         verify(mHdmiControlServiceSpy, times(1))
                 .notifyEarcStatusToAudioService(eq(false), eq(new ArrayList<>()));
+        // ARC should be never initiated here. It should be started after 500 ms.
+        verify(mHdmiControlServiceSpy, times(0)).startArcAction(anyBoolean(), any());
+        // We move 500 ms forward because the action is only started 500 ms later.
+        mTestLooper.moveTimeForward(EARC_TRIGGER_START_ARC_ACTION_DELAY);
+        mTestLooper.dispatchAll();
         verify(mHdmiControlServiceSpy, times(1)).startArcAction(eq(true), any());
     }
 

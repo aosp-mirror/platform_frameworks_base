@@ -87,9 +87,7 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
                 mContentResolver, Settings.Secure.EVEN_DIMMER_MIN_NITS,
                 /* def= */ MIN_NITS_DEFAULT, userId);
 
-        boolean isActive = Settings.Secure.getFloatForUser(mContentResolver,
-                Settings.Secure.EVEN_DIMMER_ACTIVATED,
-                /* def= */ 0, userId) == 1.0f && mAutoBrightnessEnabled;
+        boolean isActive = isSettingEnabled() && mAutoBrightnessEnabled;
 
         float luxBasedNitsLowerBound = mDisplayDeviceConfig.getMinNitsFromLux(mAmbientLux);
 
@@ -200,6 +198,17 @@ public class BrightnessLowLuxModifier extends BrightnessModifier {
         pw.println("  mReason=" + mReason);
         pw.println("  mAmbientLux=" + mAmbientLux);
         pw.println("  mMinNitsAllowed=" + mMinNitsAllowed);
+    }
+
+    /**
+     * Defaults to true, on devices where setting is unset.
+     *
+     * @return if setting indicates feature is enabled
+     */
+    private boolean isSettingEnabled() {
+        return Settings.Secure.getFloatForUser(mContentResolver,
+                Settings.Secure.EVEN_DIMMER_ACTIVATED,
+                /* def= */ 1.0f, UserHandle.USER_CURRENT) == 1.0f;
     }
 
     private float getBrightnessFromNits(float nits) {

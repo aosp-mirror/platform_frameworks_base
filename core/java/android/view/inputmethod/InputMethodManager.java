@@ -2461,6 +2461,7 @@ public final class InputMethodManager {
      * @hide
      */
     public boolean hideSoftInputFromView(@NonNull View view, @HideFlags int flags) {
+        checkFocus();
         final boolean isFocusedAndWindowFocused = view.hasWindowFocus() && view.isFocused();
         synchronized (mH) {
             final boolean hasServedByInputMethod = hasServedByInputMethodLocked(view);

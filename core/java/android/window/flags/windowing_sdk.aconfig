@@ -121,3 +121,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "pip_restore_to_overlay"
+    description: "Restore exit-pip activity back to ActivityEmbedding overlay"
+    bug: "297887697"
+}

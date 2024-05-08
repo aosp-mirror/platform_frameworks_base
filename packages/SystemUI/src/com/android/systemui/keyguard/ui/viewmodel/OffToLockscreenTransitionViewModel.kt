@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +29,7 @@ class OffToLockscreenTransitionViewModel
 @Inject
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
-) {
+) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
         animationFlow.setup(
@@ -43,4 +44,7 @@ constructor(
             onStep = { it },
             onCancel = { 0f },
         )
+
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(1f)
 }

@@ -25,6 +25,7 @@ import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_LOCATION;
+import static android.view.flags.Flags.sensitiveContentPrematureProtectionRemovedFix;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
@@ -4338,29 +4339,42 @@ public final class ViewRootImpl implements ViewParent,
      *   <li>It should only notify service to unblock projection when all sensitive view are
      *   removed from the window.
      * </ol>
+     *
+     * @param enableProtection if true, the protection is enabled for this window.
+     *                         if false, the protection is removed for this window.
      */
-    void notifySensitiveContentAppProtection(boolean showSensitiveContent) {
+    private void applySensitiveContentAppProtection(boolean enableProtection) {
         try {
             if (mSensitiveContentProtectionService == null) {
                 return;
             }
             if (DEBUG_SENSITIVE_CONTENT) {
                 Log.d(TAG, "Notify sensitive content, package=" + mContext.getPackageName()
-                        + ", token=" + getWindowToken() + ", flag=" + showSensitiveContent);
+                        + ", token=" + getWindowToken() + ", flag=" + enableProtection);
             }
             // The window would be blocked during screen share if it shows sensitive content.
             mSensitiveContentProtectionService.setSensitiveContentProtection(
-                    getWindowToken(), mContext.getPackageName(), showSensitiveContent);
+                    getWindowToken(), mContext.getPackageName(), enableProtection);
         } catch (RemoteException ex) {
             Log.e(TAG, "Unable to protect sensitive content during screen share", ex);
         }
     }
 
     /**
-     * Sensitive protection is removed on transaction commit to avoid prematurely removing
-     * the protection.
+     * Add sensitive content protection, when there are one or more visible sensitive views.
      */
-    void removeSensitiveContentProtectionOnTransactionCommit() {
+    void addSensitiveContentAppProtection() {
+        applySensitiveContentAppProtection(true);
+    }
+
+    /**
+     * Remove sensitive content protection, when there is no visible sensitive view.
+     */
+    void removeSensitiveContentAppProtection() {
+        if (!sensitiveContentPrematureProtectionRemovedFix()) {
+            applySensitiveContentAppProtection(false);
+            return;
+        }
         if (DEBUG_SENSITIVE_CONTENT) {
             Log.d(TAG, "Add transaction to remove sensitive content protection, package="
                     + mContext.getPackageName() + ", token=" + getWindowToken());
@@ -4368,7 +4382,7 @@ public final class ViewRootImpl implements ViewParent,
         Transaction t = new Transaction();
         t.addTransactionCommittedListener(mExecutor, () -> {
             if (mAttachInfo.mSensitiveViewsCount == 0) {
-                notifySensitiveContentAppProtection(false);
+                applySensitiveContentAppProtection(false);
             }
         });
         applyTransactionOnDraw(t);

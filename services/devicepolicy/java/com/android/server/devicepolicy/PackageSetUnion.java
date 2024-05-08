@@ -18,14 +18,15 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.app.admin.PolicyValue;
-import android.app.admin.StringSetPolicyValue;
+import android.app.admin.PackageSetPolicyValue;
+import android.app.admin.StringSetUnion;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Set;
 
-final class StringSetUnion extends ResolutionMechanism<Set<String>> {
+final class PackageSetUnion extends ResolutionMechanism<Set<String>> {
 
     @Override
     PolicyValue<Set<String>> resolve(
@@ -38,17 +39,17 @@ final class StringSetUnion extends ResolutionMechanism<Set<String>> {
         for (PolicyValue<Set<String>> policy : adminPolicies.values()) {
             unionOfPolicies.addAll(policy.getValue());
         }
-        return new StringSetPolicyValue(unionOfPolicies);
+        return new PackageSetPolicyValue(unionOfPolicies);
     }
 
     @Override
-    android.app.admin.StringSetUnion getParcelableResolutionMechanism() {
-        return new android.app.admin.StringSetUnion();
+    StringSetUnion getParcelableResolutionMechanism() {
+        return new StringSetUnion();
     }
 
 
     @Override
     public String toString() {
-        return "SetUnion {}";
+        return "PackageSetUnion {}";
     }
 }

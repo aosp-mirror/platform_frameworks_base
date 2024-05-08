@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,116 +18,92 @@ package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import android.graphics.Rect
 import android.graphics.drawable.Icon
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
-import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.andSceneContainer
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.DarkIconDispatcher
-import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
-import com.android.systemui.statusbar.notification.data.repository.HeadsUpNotificationIconViewStateRepository
-import com.android.systemui.statusbar.phone.DozeParameters
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.headsUpNotificationIconViewStateRepository
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
-import com.android.systemui.statusbar.phone.data.repository.FakeDarkIconRepository
-import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
-import com.android.systemui.user.domain.UserDomainLayerModule
+import com.android.systemui.statusbar.phone.data.repository.fakeDarkIconRepository
+import com.android.systemui.statusbar.phone.dozeParameters
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterization?) :
+    SysuiTestCase() {
 
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                BiometricsDomainLayerModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<NotificationIconContainerStatusBarViewModel> {
-
-        val activeNotificationsRepository: ActiveNotificationListRepository
-        val darkIconRepository: FakeDarkIconRepository
-        val deviceProvisioningRepository: FakeDeviceProvisioningRepository
-        val headsUpViewStateRepository: HeadsUpNotificationIconViewStateRepository
-        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val powerRepository: FakePowerRepository
-        val shadeRepository: FakeShadeRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                mocks: TestMocksModule,
-                featureFlags: FakeFeatureFlagsClassicModule,
-            ): TestComponent
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
         }
     }
 
-    private val dozeParams: DozeParameters = mock()
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
 
-    private val testComponent: TestComponent =
-        DaggerNotificationIconContainerStatusBarViewModelTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule {
-                        set(Flags.FULL_SCREEN_USER_SWITCHER, value = false)
-                    },
-                mocks =
-                    TestMocksModule(
-                        dozeParameters = dozeParams,
-                    ),
-            )
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val powerRepository = kosmos.fakePowerRepository
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val darkIconRepository = kosmos.fakeDarkIconRepository
+    private val headsUpViewStateRepository = kosmos.headsUpNotificationIconViewStateRepository
+    private val activeNotificationsRepository = kosmos.activeNotificationListRepository
+
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+
+    private val dozeParams = kosmos.dozeParameters
+
+    lateinit var underTest: NotificationIconContainerStatusBarViewModel
 
     @Before
     fun setup() {
-        testComponent.apply {
-            keyguardRepository.setKeyguardShowing(false)
-            powerRepository.updateWakefulness(
-                rawState = WakefulnessState.AWAKE,
-                lastWakeReason = WakeSleepReason.OTHER,
-                lastSleepReason = WakeSleepReason.OTHER,
-            )
-        }
+        underTest = kosmos.notificationIconContainerStatusBarViewModel
+        keyguardRepository.setKeyguardShowing(false)
+        powerRepository.updateWakefulness(
+            rawState = WakefulnessState.AWAKE,
+            lastWakeReason = WakeSleepReason.OTHER,
+            lastSleepReason = WakeSleepReason.OTHER,
+        )
     }
 
     @Test
     fun animationsEnabled_isFalse_whenDeviceAsleepAndNotPulsing() =
-        testComponent.runTest {
+        testScope.runTest {
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.ASLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -150,7 +126,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun animationsEnabled_isTrue_whenDeviceAsleepAndPulsing() =
-        testComponent.runTest {
+        testScope.runTest {
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.ASLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -173,7 +149,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun animationsEnabled_isFalse_whenStartingToSleepAndNotControlScreenOff() =
-        testComponent.runTest {
+        testScope.runTest {
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.STARTING_TO_SLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -194,7 +170,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun animationsEnabled_isTrue_whenStartingToSleepAndControlScreenOff() =
-        testComponent.runTest {
+        testScope.runTest {
             val animationsEnabled by collectLastValue(underTest.animationsEnabled)
             assertThat(animationsEnabled).isTrue()
 
@@ -218,7 +194,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun animationsEnabled_isTrue_whenNotAsleep() =
-        testComponent.runTest {
+        testScope.runTest {
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.AWAKE,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -236,7 +212,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun animationsEnabled_isTrue_whenKeyguardIsNotShowing() =
-        testComponent.runTest {
+        testScope.runTest {
             val animationsEnabled by collectLastValue(underTest.animationsEnabled)
 
             keyguardTransitionRepository.sendTransitionStep(
@@ -257,7 +233,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun iconColors_testsDarkBounds() =
-        testComponent.runTest {
+        testScope.runTest {
             darkIconRepository.darkState.value =
                 SysuiDarkIconDispatcher.DarkChange(
                     emptyList(),
@@ -280,7 +256,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun iconColors_staticDrawableColor_notInDarkTintArea() =
-        testComponent.runTest {
+        testScope.runTest {
             darkIconRepository.darkState.value =
                 SysuiDarkIconDispatcher.DarkChange(
                     listOf(Rect(0, 0, 5, 5)),
@@ -295,7 +271,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun iconColors_notInDarkTintArea() =
-        testComponent.runTest {
+        testScope.runTest {
             darkIconRepository.darkState.value =
                 SysuiDarkIconDispatcher.DarkChange(
                     listOf(Rect(0, 0, 5, 5)),
@@ -309,9 +285,9 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun isolatedIcon_animateOnAppear_shadeCollapsed() =
-        testComponent.runTest {
+        testScope.runTest {
             val icon: Icon = mock()
-            shadeRepository.setLegacyShadeExpansion(0f)
+            shadeTestUtil.setShadeExpansion(0f)
             activeNotificationsRepository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()
                     .apply {
@@ -336,9 +312,9 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun isolatedIcon_dontAnimateOnAppear_shadeExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val icon: Icon = mock()
-            shadeRepository.setLegacyShadeExpansion(.5f)
+            shadeTestUtil.setShadeExpansion(.5f)
             activeNotificationsRepository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()
                     .apply {
@@ -363,7 +339,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun isolatedIcon_updateWhenIconDataChanges() =
-        testComponent.runTest {
+        testScope.runTest {
             val icon: Icon = mock()
             val isolatedIcon by collectLastValue(underTest.isolatedIcon)
             runCurrent()
@@ -390,7 +366,7 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
 
     @Test
     fun isolatedIcon_lastMessageIsFromReply_notNull() =
-        testComponent.runTest {
+        testScope.runTest {
             val icon: Icon = mock()
             headsUpViewStateRepository.isolatedNotification.value = "notif1"
             activeNotificationsRepository.activeNotifications.value =

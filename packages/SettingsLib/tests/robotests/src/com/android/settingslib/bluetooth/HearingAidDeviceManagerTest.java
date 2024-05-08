@@ -299,6 +299,7 @@ public class HearingAidDeviceManagerTest {
         mHearingAidDeviceManager.setSubDeviceIfNeeded(mCachedDevice2);
 
         assertThat(mCachedDevice1.getSubDevice()).isEqualTo(mCachedDevice2);
+        verify(mDevice2).setAlias(DEVICE_ALIAS_1);
     }
 
     /**

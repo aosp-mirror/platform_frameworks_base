@@ -100,6 +100,7 @@ public class HearingAidDeviceManager {
             // device.
             if (hearingAidDevice != null) {
                 hearingAidDevice.setSubDevice(newDevice);
+                newDevice.setName(hearingAidDevice.getName());
                 return true;
             }
         }

@@ -20,6 +20,8 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 
+import static com.android.wm.shell.transition.Transitions.TRANSIT_TASK_FRAGMENT_DRAG_RESIZE;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -96,6 +98,20 @@ public class ActivityEmbeddingAnimationRunnerTests extends ActivityEmbeddingAnim
                 new ArrayList());
 
         // The animation should be empty when it is behind starting window.
+        assertEquals(0, animator.getDuration());
+    }
+
+    @Test
+    public void testTransitionTypeDragResize() {
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_TASK_FRAGMENT_DRAG_RESIZE, 0)
+                .addChange(createChange(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY))
+                .build();
+        final Animator animator = mAnimRunner.createAnimator(
+                info, mStartTransaction, mFinishTransaction,
+                () -> mFinishCallback.onTransitionFinished(null /* wct */),
+                new ArrayList());
+
+        // The animation should be empty when it is a jump cut for drag resize.
         assertEquals(0, animator.getDuration());
     }
 

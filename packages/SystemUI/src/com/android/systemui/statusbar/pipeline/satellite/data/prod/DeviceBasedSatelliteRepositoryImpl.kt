@@ -318,8 +318,8 @@ constructor(
         }
 
     companion object {
-        // TTL for satellite polling is one hour
-        const val POLLING_INTERVAL_MS: Long = 1000 * 60 * 60
+        // TTL for satellite polling is twenty minutes
+        const val POLLING_INTERVAL_MS: Long = 1000 * 60 * 20
 
         // Let the system boot up and stabilize before we check for system support
         const val MIN_UPTIME: Long = 1000 * 60

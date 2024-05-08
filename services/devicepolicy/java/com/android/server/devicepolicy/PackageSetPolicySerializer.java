@@ -19,7 +19,7 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.PolicyValue;
-import android.app.admin.StringSetPolicyValue;
+import android.app.admin.PackageSetPolicyValue;
 import android.util.Log;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.Set;
 
 // TODO(scottjonathan): Replace with generic set implementation
-final class StringSetPolicySerializer extends PolicySerializer<Set<String>> {
+final class PackageSetPolicySerializer extends PolicySerializer<Set<String>> {
     private static final String ATTR_VALUES = "strings";
     private static final String ATTR_VALUES_SEPARATOR = ";";
     @Override
@@ -45,10 +45,10 @@ final class StringSetPolicySerializer extends PolicySerializer<Set<String>> {
     PolicyValue<Set<String>> readFromXml(TypedXmlPullParser parser) {
         String valuesStr = parser.getAttributeValue(/* namespace= */ null, ATTR_VALUES);
         if (valuesStr == null) {
-            Log.e(DevicePolicyEngine.TAG, "Error parsing StringSet policy value.");
+            Log.e(DevicePolicyEngine.TAG, "Error parsing PackageSet policy value.");
             return null;
         }
         Set<String> values = Set.of(valuesStr.split(ATTR_VALUES_SEPARATOR));
-        return new StringSetPolicyValue(values);
+        return new PackageSetPolicyValue(values);
     }
 }

@@ -23,6 +23,7 @@ import androidx.slice.SliceViewManager
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.media.BluetoothMediaDevice
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.slice.sliceForUri
 import com.android.systemui.volume.panel.component.mediaoutput.data.repository.LocalMediaRepositoryFactory
 import dagger.assisted.Assisted
@@ -57,6 +58,7 @@ class AncSliceRepositoryImpl
 constructor(
     mediaRepositoryFactory: LocalMediaRepositoryFactory,
     @Background private val backgroundCoroutineContext: CoroutineContext,
+    @Main private val mainCoroutineContext: CoroutineContext,
     @Assisted private val sliceViewManager: SliceViewManager,
 ) : AncSliceRepository {
 
@@ -73,7 +75,7 @@ constructor(
             .distinctUntilChanged()
             .flatMapLatest { sliceUri ->
                 sliceUri ?: return@flatMapLatest flowOf(null)
-                sliceViewManager.sliceForUri(sliceUri)
+                sliceViewManager.sliceForUri(sliceUri).flowOn(mainCoroutineContext)
             }
             .flowOn(backgroundCoroutineContext)
     }

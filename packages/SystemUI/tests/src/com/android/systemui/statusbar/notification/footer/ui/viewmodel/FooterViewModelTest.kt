@@ -19,12 +19,13 @@
 package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
-import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -33,7 +34,7 @@ import com.android.systemui.power.data.repository.powerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.res.R
-import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.shared.settings.data.repository.fakeSecureSettingsRepository
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
@@ -45,13 +46,16 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @SmallTest
 @EnableFlags(FooterViewRefactor.FLAG_NAME)
-class FooterViewModelTest : SysuiTestCase() {
+class FooterViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
@@ -59,11 +63,29 @@ class FooterViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
     private val fakeKeyguardRepository = kosmos.fakeKeyguardRepository
-    private val shadeRepository = kosmos.shadeRepository
     private val powerRepository = kosmos.powerRepository
     private val fakeSecureSettingsRepository = kosmos.fakeSecureSettingsRepository
 
-    val underTest = kosmos.footerViewModel
+    private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+
+    private lateinit var underTest: FooterViewModel
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags!!)
+    }
+
+    @Before
+    fun setup() {
+        underTest = kosmos.footerViewModel
+    }
 
     @Test
     fun messageVisible_whenFilteredNotifications() =
@@ -146,11 +168,9 @@ class FooterViewModelTest : SysuiTestCase() {
             val visible by collectLastValue(underTest.clearAllButton.isVisible)
             runCurrent()
 
-            // WHEN shade is expanded
+            // WHEN shade is expanded AND QS not expanded
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            shadeRepository.setLegacyShadeExpansion(1f)
-            // AND QS not expanded
-            shadeRepository.setQsExpansion(0f)
+            shadeTestUtil.setShadeAndQsExpansion(1f, 0f)
             // AND device is awake
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.AWAKE,
@@ -182,9 +202,9 @@ class FooterViewModelTest : SysuiTestCase() {
 
             // WHEN shade is collapsed
             fakeKeyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            shadeRepository.setLegacyShadeExpansion(0f)
+            shadeTestUtil.setShadeExpansion(0f)
             // AND QS not expanded
-            shadeRepository.setQsExpansion(0f)
+            shadeTestUtil.setQsExpansion(0f)
             // AND device is awake
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.AWAKE,

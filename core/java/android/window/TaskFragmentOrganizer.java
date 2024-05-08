@@ -18,6 +18,7 @@ package android.window;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -93,6 +94,19 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
     @TaskFragmentTransitionType
     public static final int TASK_FRAGMENT_TRANSIT_CHANGE = TRANSIT_CHANGE;
 
+
+    /**
+     * The task fragment drag resize transition used by activity embedding.
+     *
+     * This value is also used in Transitions.TRANSIT_TASK_FRAGMENT_DRAG_RESIZE and must not
+     * conflict with other predefined transition types.
+     *
+     * @hide
+     */
+    @WindowManager.TransitionType
+    @TaskFragmentTransitionType
+    public static final int TASK_FRAGMENT_TRANSIT_DRAG_RESIZE = TRANSIT_FIRST_CUSTOM + 17;
+
     /**
      * Introduced a sub set of {@link WindowManager.TransitionType} for the types that are used for
      * TaskFragment transition.
@@ -106,6 +120,7 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
             TASK_FRAGMENT_TRANSIT_OPEN,
             TASK_FRAGMENT_TRANSIT_CLOSE,
             TASK_FRAGMENT_TRANSIT_CHANGE,
+            TASK_FRAGMENT_TRANSIT_DRAG_RESIZE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TaskFragmentTransitionType {}

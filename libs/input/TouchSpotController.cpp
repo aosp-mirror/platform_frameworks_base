@@ -40,12 +40,13 @@ namespace android {
 // --- Spot ---
 
 void TouchSpotController::Spot::updateSprite(const SpriteIcon* icon, float newX, float newY,
-                                             int32_t displayId) {
+                                             int32_t displayId, bool skipScreenshot) {
     sprite->setLayer(Sprite::BASE_LAYER_SPOT + id);
     sprite->setAlpha(alpha);
     sprite->setTransformationMatrix(SpriteTransformationMatrix(scale, 0.0f, 0.0f, scale));
     sprite->setPosition(newX, newY);
     sprite->setDisplayId(displayId);
+    sprite->setSkipScreenshot(skipScreenshot);
     x = newX;
     y = newY;
 
@@ -84,7 +85,7 @@ TouchSpotController::~TouchSpotController() {
 }
 
 void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
-                                   BitSet32 spotIdBits) {
+                                   BitSet32 spotIdBits, bool skipScreenshot) {
 #if DEBUG_SPOT_UPDATES
     ALOGD("setSpots: idBits=%08x", spotIdBits.value);
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty();) {
@@ -116,7 +117,7 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
             spot = createAndAddSpotLocked(id, mLocked.displaySpots);
         }
 
-        spot->updateSprite(&icon, x, y, mDisplayId);
+        spot->updateSprite(&icon, x, y, mDisplayId, skipScreenshot);
     }
 
     for (Spot* spot : mLocked.displaySpots) {

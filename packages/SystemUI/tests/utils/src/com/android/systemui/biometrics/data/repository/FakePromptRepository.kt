@@ -81,7 +81,8 @@ class FakePromptRepository : PromptRepository {
                 com.android.systemui.Flags.constraintBp() &&
                 !Utils.isBiometricAllowed(promptInfo) &&
                 Utils.isDeviceCredentialAllowed(promptInfo) &&
-                promptInfo.contentView != null
+                promptInfo.contentView != null &&
+                !promptInfo.isContentViewMoreOptionsButtonUsed
         _showBpWithoutIconForCredential.value = showBpForCredential && !hasCredentialViewShown
     }
 

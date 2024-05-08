@@ -22,6 +22,7 @@ import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 
 import static com.android.wm.shell.transition.DefaultTransitionHandler.isSupportedOverrideAnimation;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_TASK_FRAGMENT_DRAG_RESIZE;
 
 import static java.util.Objects.requireNonNull;
 
@@ -90,6 +91,12 @@ public class ActivityEmbeddingController implements Transitions.TransitionHandle
 
     /** Whether ActivityEmbeddingController should animate this transition. */
     public boolean shouldAnimate(@NonNull TransitionInfo info) {
+        if (info.getType() == TRANSIT_TASK_FRAGMENT_DRAG_RESIZE) {
+            // The TRANSIT_TASK_FRAGMENT_DRAG_RESIZE type happens when the user drags the
+            // interactive divider to resize the split containers. The content is veiled, so we will
+            // handle the transition with a jump cut.
+            return true;
+        }
         boolean containsEmbeddingChange = false;
         for (TransitionInfo.Change change : info.getChanges()) {
             if (!change.hasFlags(FLAG_FILLS_TASK) && change.hasFlags(

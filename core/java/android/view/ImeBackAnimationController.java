@@ -134,7 +134,9 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     @Override
     public void onBackInvoked() {
-        if (!isBackAnimationAllowed()) {
+        if (!isBackAnimationAllowed() || !mIsPreCommitAnimationInProgress) {
+            // play regular hide animation if back-animation is not allowed or if insets control has
+            // been cancelled by the system (this can happen in split screen for example)
             mInsetsController.hide(ime());
             return;
         }
