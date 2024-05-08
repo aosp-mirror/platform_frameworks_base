@@ -264,9 +264,9 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Laat toe dat die selflaaiprogram ontsluit word"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Laat OEM-ontsluit toe?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"WAARSKUWING: Toestelbeskermingkenmerke sal nie op hierdie toestel werk terwyl hierdie instelling aangeskakel is nie."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Kies skynliggingprogram"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Kies skynliggingapp"</string>
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Geen skynliggingprogram gestel nie"</string>
-    <string name="mock_location_app_set" msgid="4706722469342913843">"Skynliggingprogram: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="4706722469342913843">"Skynliggingapp: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Inligtingruiling"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktiveer Wi-Fi-woordryke aanmelding"</string>
