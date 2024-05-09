@@ -181,6 +181,7 @@ fun FooterActions(
     val horizontalPadding = dimensionResource(R.dimen.qs_content_horizontal_padding)
     Row(
         modifier
+            .sysuiResTag("qs_footer_actions")
             .fillMaxWidth()
             .graphicsLayer { this.alpha = alpha }
             .then(backgroundModifier)
