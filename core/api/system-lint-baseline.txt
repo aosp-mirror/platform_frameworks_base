@@ -1941,10 +1941,6 @@ UnflaggedApi: android.app.ActivityManager#getExternalHistoricalProcessStartReaso
     New API must be flagged with @FlaggedApi: method android.app.ActivityManager.getExternalHistoricalProcessStartReasons(String,int)
 UnflaggedApi: android.app.AppOpsManager#OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO:
     New API must be flagged with @FlaggedApi: field android.app.AppOpsManager.OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO
-UnflaggedApi: android.app.StatusBarManager.DisableInfo#CREATOR:
-    New API must be flagged with @FlaggedApi: field android.app.StatusBarManager.DisableInfo.CREATOR
-UnflaggedApi: android.app.StatusBarManager.DisableInfo#isBackDisabled():
-    New API must be flagged with @FlaggedApi: method android.app.StatusBarManager.DisableInfo.isBackDisabled()
 UnflaggedApi: android.companion.virtual.VirtualDeviceManager.VirtualDevice#getPersistentDeviceId():
     New API must be flagged with @FlaggedApi: method android.companion.virtual.VirtualDeviceManager.VirtualDevice.getPersistentDeviceId()
 UnflaggedApi: android.content.Context#THREAD_NETWORK_SERVICE:
