@@ -1255,7 +1255,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             for (int uidIdx = mUidStates.size() - 1; uidIdx >= 0; uidIdx--) {
                 int uid = mUidStates.keyAt(uidIdx);
                 if (knownUids.get(uid, false)) {
-                    if (uid >= Process.FIRST_APPLICATION_UID) {
+                    int appId = UserHandle.getAppId(uid);
+                    if (appId >= Process.FIRST_APPLICATION_UID
+                            && appId <= Process.LAST_APPLICATION_UID) {
                         ArrayMap<String, Ops> pkgOps = mUidStates.valueAt(uidIdx).pkgOps;
                         for (int pkgIdx = pkgOps.size() - 1; pkgIdx >= 0; pkgIdx--) {
                             String pkgName = pkgOps.keyAt(pkgIdx);
