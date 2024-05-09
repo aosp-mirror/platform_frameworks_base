@@ -52,6 +52,7 @@ import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipContentOverlay;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
@@ -392,8 +393,14 @@ public class PipTransition extends PipTransitionController implements
         // cache the PiP task token and leash
         WindowContainerToken pipTaskToken = pipChange.getContainer();
 
-        startTransaction.apply();
-        finishCallback.onTransitionFinished(null);
+        Preconditions.checkNotNull(mPipLeash, "Leash is null for alpha transition.");
+        // start transition with 0 alpha
+        startTransaction.setAlpha(mPipLeash, 0f);
+        PipAlphaAnimator animator = new PipAlphaAnimator(mPipLeash,
+                startTransaction, PipAlphaAnimator.FADE_IN);
+        animator.setAnimationEndCallback(() -> finishCallback.onTransitionFinished(null));
+
+        animator.start();
         return true;
     }
 
