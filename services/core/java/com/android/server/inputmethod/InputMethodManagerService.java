@@ -485,16 +485,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return userData.mBindingController.getSelectedMethodId();
     }
 
-    /**
-     * The current binding sequence number, incremented every time there is
-     * a new bind performed.
-     */
-    @GuardedBy("ImfLock.class")
-    private int getSequenceNumberLocked() {
-        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-        return userData.mBindingController.getSequenceNumber();
-    }
-
     @GuardedBy("ImfLock.class")
     @Nullable
     InputMethodInfo queryInputMethodForCurrentUserLocked(@NonNull String imeId) {
@@ -1938,7 +1928,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         return mClientController.getClient(client.asBinder());
     }
 
-    // TODO(b/314150112): Move this to ClientController.
     @GuardedBy("ImfLock.class")
     void unbindCurrentClientLocked(@UnbindReason int unbindClientReason) {
         if (mCurClient != null) {
@@ -1958,7 +1947,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             // all accessibility too. That means, when input method get disconnected (including
             // switching ime), we also unbind accessibility
             mCurClient.mClient.setActive(false /* active */, false /* fullscreen */);
-            mCurClient.mClient.onUnbindMethod(getSequenceNumberLocked(), unbindClientReason);
+
+            // TODO(b/325515685): make binding controller user independent. Before this change, the
+            //  following dependencies also need to be user independent: mCurClient, mBoundToMethod,
+            //  getCurMethodLocked(), and mMenuController.
+            final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
+            mCurClient.mClient.onUnbindMethod(userData.mBindingController.getSequenceNumber(),
+                    unbindClientReason);
             mCurClient.mSessionRequested = false;
             mCurClient.mSessionRequestedForAccessibility = false;
             mCurClient = null;
@@ -2036,12 +2031,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         final boolean restarting = !initial;
         final Binder startInputToken = new Binder();
+        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
         final StartInputInfo info = new StartInputInfo(mCurrentUserId,
                 getCurTokenLocked(),
                 mCurTokenDisplayId, getCurIdLocked(), startInputReason, restarting,
                 UserHandle.getUserId(mCurClient.mUid),
                 mCurClient.mSelfReportedDisplayId, mImeBindingState.mFocusedWindow, mCurEditorInfo,
-                mImeBindingState.mFocusedWindowSoftInputMode, getSequenceNumberLocked());
+                mImeBindingState.mFocusedWindowSoftInputMode,
+                userData.mBindingController.getSequenceNumber());
         mImeTargetWindowMap.put(startInputToken, mImeBindingState.mFocusedWindow);
         mStartInputHistory.addEntry(info);
 
@@ -2074,21 +2071,20 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     null /* resultReceiver */, SoftInputShowHideReason.ATTACH_NEW_INPUT);
         }
 
-        String curId = getCurIdLocked();
+        final var curId = getCurIdLocked();
         final InputMethodInfo curInputMethodInfo = InputMethodSettingsRepository.get(mCurrentUserId)
                 .getMethodMap().get(curId);
         final boolean suppressesSpellChecker =
                 curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
         final SparseArray<IAccessibilityInputMethodSession> accessibilityInputMethodSessions =
                 createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
-        final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
         if (userData.mBindingController.supportsStylusHandwriting() && hasSupportedStylusLocked()) {
             mHwController.setInkWindowInitializer(new InkWindowInitializer());
         }
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.mSession, accessibilityInputMethodSessions,
                 (session.mChannel != null ? session.mChannel.dup() : null),
-                curId, getSequenceNumberLocked(), suppressesSpellChecker);
+                curId, userData.mBindingController.getSequenceNumber(), suppressesSpellChecker);
     }
 
     @GuardedBy("ImfLock.class")
@@ -2364,7 +2360,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 requestClientSessionForAccessibilityLocked(cs);
                 return new InputBindResult(
                         InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
-                        null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
+                        null, null, null, getCurIdLocked(),
+                        userData.mBindingController.getSequenceNumber(), false);
             } else {
                 final long lastBindTime = userData.mBindingController.getLastBindTime();
                 long bindingDuration = SystemClock.uptimeMillis() - lastBindTime;
@@ -2378,7 +2375,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     // to see if we can get back in touch with the service.
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                            null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
+                            null, null, null, getCurIdLocked(),
+                            userData.mBindingController.getSequenceNumber(), false);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             getSelectedMethodIdLocked(), bindingDuration, 0);
@@ -3590,12 +3588,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     "InputMethodManagerService#startInputOrWindowGainedFocus", mDumper);
             final InputBindResult result;
             synchronized (ImfLock.class) {
+                final var userData = mUserDataRepository.getOrCreate(userId);
                 // If the system is not yet ready, we shouldn't be running third party code.
                 if (!mSystemReady) {
                     return new InputBindResult(
                             InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
                             null /* method */, null /* accessibilitySessions */, null /* channel */,
-                            getSelectedMethodIdLocked(), getSequenceNumberLocked(),
+                            getSelectedMethodIdLocked(),
+                            userData.mBindingController.getSequenceNumber(),
                             false /* isInputMethodSuppressingSpellChecker */);
                 }
                 final ClientState cs = mClientController.getClient(client.asBinder());
@@ -4452,7 +4452,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
             final long token = proto.start(fieldId);
             proto.write(CUR_METHOD_ID, getSelectedMethodIdLocked());
-            proto.write(CUR_SEQ, getSequenceNumberLocked());
+            proto.write(CUR_SEQ, userData.mBindingController.getSequenceNumber());
             proto.write(CUR_CLIENT, Objects.toString(mCurClient));
             mImeBindingState.dumpDebug(proto, mWindowManagerInternal);
             proto.write(LAST_IME_TARGET_WINDOW_NAME,
@@ -5646,6 +5646,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
                 IAccessibilityInputMethodSession session, @UserIdInt int userId) {
             synchronized (ImfLock.class) {
+                final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
                 // TODO(b/305829876): Implement user ID verification
                 if (mCurClient != null) {
                     clearClientSessionForAccessibilityLocked(mCurClient, accessibilityConnectionId);
@@ -5667,8 +5668,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                                     mCurClient.mAccessibilitySessions);
                     final InputBindResult res = new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION,
-                            imeSession, accessibilityInputMethodSessions, null, getCurIdLocked(),
-                            getSequenceNumberLocked(), false);
+                            imeSession, accessibilityInputMethodSessions, /* channel= */ null,
+                            getCurIdLocked(),
+                            userData.mBindingController.getSequenceNumber(),
+                            /* isInputMethodSuppressingSpellChecker= */ false);
                     mCurClient.mClient.onBindAccessibilityService(res, accessibilityConnectionId);
                 }
             }
@@ -5678,6 +5681,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId,
                 @UserIdInt int userId) {
             synchronized (ImfLock.class) {
+                final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
                 // TODO(b/305829876): Implement user ID verification
                 if (mCurClient != null) {
                     if (DEBUG) {
@@ -5687,7 +5691,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     // A11yManagerService unbinds the disabled accessibility service. We don't need
                     // to do it here.
                     mCurClient.mClient.onUnbindAccessibilityService(
-                            getSequenceNumberLocked(),
+                            userData.mBindingController.getSequenceNumber(),
                             accessibilityConnectionId);
                 }
                 // We only have sessions when we bound to an input method. Remove this session
@@ -5897,13 +5901,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             @SuppressWarnings("GuardedBy") Consumer<ClientState> clientControllerDump = c -> {
                 p.println("  " + c + ":");
                 p.println("    client=" + c.mClient);
-
                 p.println("    fallbackInputConnection="
                         + c.mFallbackInputConnection);
                 p.println("    sessionRequested="
                         + c.mSessionRequested);
-                p.println(
-                        "    sessionRequestedForAccessibility="
+                p.println("    sessionRequestedForAccessibility="
                                 + c.mSessionRequestedForAccessibility);
                 p.println("    curSession=" + c.mCurSession);
                 p.println("    selfReportedDisplayId=" + c.mSelfReportedDisplayId);
@@ -5911,13 +5913,15 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 p.println("    pid=" + c.mPid);
             };
             mClientController.forAllClients(clientControllerDump);
+            final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
             p.println("  mCurrentUserId=" + mCurrentUserId);
             p.println("  mCurMethodId=" + getSelectedMethodIdLocked());
             client = mCurClient;
-            p.println("  mCurClient=" + client + " mCurSeq=" + getSequenceNumberLocked());
+            p.println("  mCurClient=" + client + " mCurSeq="
+                    + userData.mBindingController.getSequenceNumber());
             p.println("  mFocusedWindowPerceptible=" + mFocusedWindowPerceptible);
             mImeBindingState.dump(/* prefix= */ "  ", p);
-            final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
+
             p.println("  mCurId=" + getCurIdLocked()
                     + " mHaveConnection=" + userData.mBindingController.hasMainConnection()
                     + " mBoundToMethod=" + mBoundToMethod + " mVisibleBound="
