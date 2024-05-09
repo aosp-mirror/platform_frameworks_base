@@ -2530,18 +2530,6 @@ public final class InputMethodManager {
                 view, /* delegatorPackageName= */ null, /* handwritingDelegateFlags= */ 0);
     }
 
-    private void startStylusHandwritingInternalAsync(
-            @NonNull View view, @Nullable String delegatorPackageName,
-            @HandwritingDelegateFlags int handwritingDelegateFlags,
-            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        Objects.requireNonNull(view);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(callback);
-
-        startStylusHandwritingInternal(
-                view, delegatorPackageName, handwritingDelegateFlags, executor, callback);
-    }
-
     private void sendFailureCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
         if (executor == null || callback == null) {
@@ -2891,7 +2879,7 @@ public final class InputMethodManager {
         if (Flags.homeScreenHandwritingDelegator()) {
             flags = delegateView.getHandwritingDelegateFlags();
         }
-        startStylusHandwritingInternalAsync(
+        acceptStylusHandwritingDelegation(
                 delegateView, delegatorPackageName, flags, executor, callback);
     }
 
@@ -2926,6 +2914,9 @@ public final class InputMethodManager {
             @HandwritingDelegateFlags int flags, @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
         Objects.requireNonNull(delegatorPackageName);
+        Objects.requireNonNull(delegateView);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
 
         startStylusHandwritingInternal(
                 delegateView, delegatorPackageName, flags, executor, callback);
