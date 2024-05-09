@@ -298,6 +298,7 @@ private fun SceneScope.SingleShade(
                             stackScrollView = notificationStackScrollView,
                             viewModel = viewModel.notifications,
                             maxScrimTop = { maxNotifScrimTop.value },
+                            shadeMode = ShadeMode.Single,
                             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
                         )
                     },
@@ -492,6 +493,7 @@ private fun SceneScope.SplitShade(
                     viewModel = viewModel.notifications,
                     maxScrimTop = { 0f },
                     shouldPunchHoleBehindScrim = false,
+                    shadeMode = ShadeMode.Split,
                     modifier =
                         Modifier.weight(1f)
                             .fillMaxHeight()
