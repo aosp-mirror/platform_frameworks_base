@@ -1168,9 +1168,7 @@ public final class ActiveServices {
     }
 
     private boolean shouldAllowBootCompletedStart(ServiceRecord r, int foregroundServiceType) {
-        @PowerExemptionManager.ReasonCode final int fgsStartReasonCode =
-                r.mInfoTempFgsAllowListReason != null ? r.mInfoTempFgsAllowListReason.mReasonCode
-                                                      : REASON_DENIED;
+        @PowerExemptionManager.ReasonCode final int fgsStartReasonCode = r.getFgsAllowStart();
         if (Flags.fgsBootCompleted()
                 && CompatChanges.isChangeEnabled(FGS_BOOT_COMPLETED_RESTRICTIONS, r.appInfo.uid)
                 && fgsStartReasonCode == PowerExemptionManager.REASON_BOOT_COMPLETED) {
