@@ -2463,18 +2463,10 @@ static void nativeDisableInputDevice(JNIEnv* env, jobject nativeImplObj, jint de
     im->setInputDeviceEnabled(deviceId, false);
 }
 
-static void nativeSetPointerIconType(JNIEnv* env, jobject nativeImplObj, jint iconId) {
-    // TODO(b/311416205): Remove
-}
-
 static void nativeReloadPointerIcons(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     im->reloadPointerIcons();
-}
-
-static void nativeSetCustomPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject iconObj) {
-    // TODO(b/311416205): Remove
 }
 
 static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject iconObj,
@@ -2796,10 +2788,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"isInputDeviceEnabled", "(I)Z", (void*)nativeIsInputDeviceEnabled},
         {"enableInputDevice", "(I)V", (void*)nativeEnableInputDevice},
         {"disableInputDevice", "(I)V", (void*)nativeDisableInputDevice},
-        {"setPointerIconType", "(I)V", (void*)nativeSetPointerIconType},
         {"reloadPointerIcons", "()V", (void*)nativeReloadPointerIcons},
-        {"setCustomPointerIcon", "(Landroid/view/PointerIcon;)V",
-         (void*)nativeSetCustomPointerIcon},
         {"setPointerIcon", "(Landroid/view/PointerIcon;IIILandroid/os/IBinder;)Z",
          (void*)nativeSetPointerIcon},
         {"setPointerIconVisibility", "(IZ)V", (void*)nativeSetPointerIconVisibility},
