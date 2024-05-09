@@ -132,9 +132,12 @@ public class VolumeHelperTest {
     @Mock
     private PermissionEnforcer mMockPermissionEnforcer;
     @Mock
+    private AudioServerPermissionProvider mMockPermissionProvider;
+    @Mock
     private AudioVolumeGroupHelperBase mAudioVolumeGroupHelper;
 
-    private final AudioPolicyFacade mFakeAudioPolicy = lookbackAudio -> false;
+    @Mock
+    private AudioPolicyFacade mMockAudioPolicy;
 
     private AudioVolumeGroup mAudioMusicVolumeGroup;
 
@@ -153,9 +156,10 @@ public class VolumeHelperTest {
                 SystemServerAdapter systemServer, SettingsAdapter settings,
                 AudioVolumeGroupHelperBase audioVolumeGroupHelper, AudioPolicyFacade audioPolicy,
                 @Nullable Looper looper, AppOpsManager appOps,
-                @NonNull PermissionEnforcer enforcer) {
+                @NonNull PermissionEnforcer enforcer,
+                AudioServerPermissionProvider permissionProvider) {
             super(context, audioSystem, systemServer, settings, audioVolumeGroupHelper,
-                    audioPolicy, looper, appOps, enforcer);
+                    audioPolicy, looper, appOps, enforcer, permissionProvider);
         }
 
         public void setDeviceForStream(int stream, int device) {
@@ -209,8 +213,9 @@ public class VolumeHelperTest {
         mAm = mContext.getSystemService(AudioManager.class);
 
         mAudioService = new MyAudioService(mContext, mSpyAudioSystem, mSpySystemServer,
-                mSettingsAdapter, mAudioVolumeGroupHelper, mFakeAudioPolicy,
-                mTestLooper.getLooper(), mMockAppOpsManager, mMockPermissionEnforcer);
+                mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy,
+                mTestLooper.getLooper(), mMockAppOpsManager, mMockPermissionEnforcer,
+                mMockPermissionProvider);
 
         mTestLooper.dispatchAll();
         prepareAudioServiceState();
