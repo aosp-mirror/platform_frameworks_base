@@ -29,6 +29,7 @@ import static android.system.OsConstants.EPIPE;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -874,10 +875,9 @@ public class SoundTrigger {
     /*****************************************************************************
      * A GenericSoundModel is a specialized {@link SoundModel} for non-voice sound
      * patterns.
-     *
-     * @hide
      ****************************************************************************/
-    public static class GenericSoundModel extends SoundModel implements Parcelable {
+    @FlaggedApi(android.media.soundtrigger.Flags.FLAG_SOUND_TRIGGER_GENERIC_MODEL_API)
+    public static final class GenericSoundModel extends SoundModel implements Parcelable {
 
         public static final @android.annotation.NonNull Parcelable.Creator<GenericSoundModel> CREATOR
                 = new Parcelable.Creator<GenericSoundModel>() {
@@ -890,13 +890,27 @@ public class SoundTrigger {
             }
         };
 
+        /**
+         * Constructor for {@link GenericSoundModel} with version.
+         *
+         * @param uuid Unique identifier for this sound model.
+         * @param vendorUuid Unique vendor identifier for this sound model.
+         * @param data Opaque data for this sound model.
+         * @param version Vendor-specific version number of this sound model.
+         */
         public GenericSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
                 @Nullable byte[] data, int version) {
             super(uuid, Objects.requireNonNull(vendorUuid, "vendorUuid cannot be null"),
                     TYPE_GENERIC_SOUND, data, version);
         }
 
-        @UnsupportedAppUsage
+        /**
+         * Constructor for {@link GenericSoundModel} without version. The version is set to -1.
+         *
+         * @param uuid Unique identifier for this sound model.
+         * @param vendorUuid Unique vendor identifier for this sound model.
+         * @param data Opaque data for this sound model.
+         */
         public GenericSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
                 @Nullable byte[] data) {
             this(uuid, vendorUuid, data, -1);
@@ -920,7 +934,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(getUuid().toString());
             if (getVendorUuid() == null) {
                 dest.writeInt(-1);
