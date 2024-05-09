@@ -110,4 +110,6 @@ interface INfcAdapter
     void registerOemExtensionCallback(INfcOemExtensionCallback callbacks);
     void unregisterOemExtensionCallback(INfcOemExtensionCallback callbacks);
     void clearPreference();
+    void setScreenState();
+    void checkFirmware();
 }

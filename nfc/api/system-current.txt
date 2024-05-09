@@ -58,7 +58,9 @@ package android.nfc {
 
   @FlaggedApi("android.nfc.nfc_oem_extension") public final class NfcOemExtension {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void clearPreference();
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void maybeTriggerFirmwareUpdate();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcOemExtension.Callback);
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void synchronizeScreenState();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterCallback(@NonNull android.nfc.NfcOemExtension.Callback);
   }
 
