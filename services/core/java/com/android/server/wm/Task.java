@@ -3532,6 +3532,8 @@ class Task extends TaskFragment {
         // Whether the direct top activity is eligible for letterbox education.
         appCompatTaskInfo.topActivityEligibleForLetterboxEducation = isTopActivityResumed
                 && top.isEligibleForLetterboxEducation();
+        appCompatTaskInfo.isLetterboxEducationEnabled = top != null
+                && top.mLetterboxUiController.isLetterboxEducationEnabled();
         // Whether the direct top activity requested showing camera compat control.
         appCompatTaskInfo.cameraCompatControlState = isTopActivityResumed
                 ? top.getCameraCompatControlState()

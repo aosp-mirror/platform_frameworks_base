@@ -1581,6 +1581,12 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         assertTrue(mController.allowHorizontalReachabilityForThinLetterbox());
     }
 
+    @Test
+    public void testIsLetterboxEducationEnabled() {
+        mController.isLetterboxEducationEnabled();
+        verify(mLetterboxConfiguration).getIsEducationEnabled();
+    }
+
     private void mockThatProperty(String propertyName, boolean value) throws Exception {
         Property property = new Property(propertyName, /* value */ value, /* packageName */ "",
                  /* className */ "");
