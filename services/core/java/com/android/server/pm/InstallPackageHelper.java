@@ -37,7 +37,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
-import static android.content.pm.PackageManager.PROPERTY_ANDROID_SAFETY_LABEL_PATH;
+import static android.content.pm.PackageManager.PROPERTY_ANDROID_SAFETY_LABEL;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
@@ -505,6 +505,7 @@ final class InstallPackageHelper {
         // metadata file path for the new package.
         if (oldPkgSetting != null) {
             pkgSetting.setAppMetadataFilePath(null);
+            pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_UNKNOWN);
         }
         // If the app metadata file path is not null then this is a system app with a preloaded app
         // metadata file on the system image. Do not reset the path and source if this is the
@@ -523,7 +524,7 @@ final class InstallPackageHelper {
                 }
             } else if (Flags.aslInApkAppMetadataSource()) {
                 Map<String, PackageManager.Property> properties = pkg.getProperties();
-                if (properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL_PATH)) {
+                if (properties.containsKey(PROPERTY_ANDROID_SAFETY_LABEL)) {
                     // ASL file extraction is done in post-install
                     pkgSetting.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
                     pkgSetting.setAppMetadataSource(APP_METADATA_SOURCE_APK);

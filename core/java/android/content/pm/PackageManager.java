@@ -270,11 +270,20 @@ public abstract class PackageManager {
     /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager
      * .Property} for a app to inform the installer that a file containing the app's android
-     * safety label data is bundled into the APK at the given path.
+     * safety label data is bundled into the APK as a raw resource.
+     *
+     * <p>For example:
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.content.PROPERTY_ANDROID_SAFETY_LABEL"
+     *     android:resource="@raw/app-metadata"/&gt;
+     * &lt;/application&gt;
+     * </pre>
      * @hide
      */
-    public static final String PROPERTY_ANDROID_SAFETY_LABEL_PATH =
-            "android.content.SAFETY_LABEL_PATH";
+    public static final String PROPERTY_ANDROID_SAFETY_LABEL =
+            "android.content.PROPERTY_ANDROID_SAFETY_LABEL";
 
     /**
      * A property value set within the manifest.
