@@ -90,15 +90,15 @@ constructor(
     override var isDismissing = false
     override var isPendingSharedTransition = false
 
-    private val animationController = ScreenshotAnimationController(view)
+    private val animationController = ScreenshotAnimationController(view, viewModel)
 
     init {
         shelfViewBinder.bind(
             view,
             viewModel,
+            animationController,
             LayoutInflater.from(context),
             onDismissalRequested = { event, velocity -> requestDismissal(event, velocity) },
-            onDismissalCancelled = { animationController.getSwipeReturnAnimation().start() },
             onUserInteraction = { callbacks?.onUserInteraction() }
         )
         view.updateInsets(windowManager.currentWindowMetrics.windowInsets)
@@ -188,24 +188,53 @@ constructor(
 
     override fun prepareScrollingTransition(
         response: ScrollCaptureResponse,
-        screenBitmap: Bitmap,
+        screenBitmap: Bitmap, // unused
         newScreenshot: Bitmap,
         screenshotTakenInPortrait: Boolean,
         onTransitionPrepared: Runnable,
     ) {
-        onTransitionPrepared.run()
+        viewModel.setScrollingScrimBitmap(newScreenshot)
+        viewModel.setScrollableRect(scrollableAreaOnScreen(response))
+        animationController.fadeForLongScreenshotTransition()
+        view.post { onTransitionPrepared.run() }
+    }
+
+    private fun scrollableAreaOnScreen(response: ScrollCaptureResponse): Rect {
+        val r = Rect(response.boundsInWindow)
+        val windowInScreen = response.windowBounds
+        r.offset(windowInScreen?.left ?: 0, windowInScreen?.top ?: 0)
+        r.intersect(
+            Rect(
+                0,
+                0,
+                context.resources.displayMetrics.widthPixels,
+                context.resources.displayMetrics.heightPixels
+            )
+        )
+        return r
     }
 
     override fun startLongScreenshotTransition(
         transitionDestination: Rect,
         onTransitionEnd: Runnable,
-        longScreenshot: ScrollCaptureController.LongScreenshot
+        longScreenshot: ScrollCaptureController.LongScreenshot,
     ) {
-        onTransitionEnd.run()
-        callbacks?.onDismiss()
+        val transitionAnimation =
+            animationController.runLongScreenshotTransition(
+                transitionDestination,
+                longScreenshot,
+                onTransitionEnd
+            )
+        transitionAnimation.doOnEnd { callbacks?.onDismiss() }
+        transitionAnimation.start()
     }
 
-    override fun restoreNonScrollingUi() {}
+    override fun restoreNonScrollingUi() {
+        viewModel.setScrollableRect(null)
+        viewModel.setScrollingScrimBitmap(null)
+        animationController.restoreUI()
+        callbacks?.onUserInteraction() // reset the timeout
+    }
 
     override fun stopInputListening() {}
 
@@ -226,6 +255,10 @@ constructor(
                 }
             }
         )
+    }
+
+    override fun fadeForSharedTransition() {
+        animationController.fadeForSharedTransition()
     }
 
     private fun addPredictiveBackListener(onDismissRequested: (ScreenshotEvent) -> Unit) {
