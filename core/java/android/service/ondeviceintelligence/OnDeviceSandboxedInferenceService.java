@@ -105,6 +105,21 @@ public abstract class OnDeviceSandboxedInferenceService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService";
 
+    // TODO(339594686): make API
+    /**
+     * @hide
+     */
+    public static final String REGISTER_MODEL_UPDATE_CALLBACK_BUNDLE_KEY =
+            "register_model_update_callback";
+    /**
+     * @hide
+     */
+    public static final String MODEL_LOADED_BUNDLE_KEY = "model_loaded";
+    /**
+     * @hide
+     */
+    public static final String MODEL_UNLOADED_BUNDLE_KEY = "model_unloaded";
+
     private IRemoteStorageService mRemoteStorageService;
 
     /**

@@ -3941,6 +3941,8 @@
   <java-symbol type="string" name="config_defaultWearableSensingService" />
   <java-symbol type="string" name="config_defaultOnDeviceIntelligenceService" />
   <java-symbol type="string" name="config_defaultOnDeviceSandboxedInferenceService" />
+  <java-symbol type="string" name="config_onDeviceIntelligenceModelLoadedBroadcastKey" />
+  <java-symbol type="string" name="config_onDeviceIntelligenceModelUnloadedBroadcastKey" />
   <java-symbol type="string" name="config_retailDemoPackage" />
   <java-symbol type="string" name="config_retailDemoPackageSignature" />
 

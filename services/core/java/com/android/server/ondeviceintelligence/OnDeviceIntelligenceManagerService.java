@@ -16,6 +16,10 @@
 
 package com.android.server.ondeviceintelligence;
 
+import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_LOADED_BUNDLE_KEY;
+import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_UNLOADED_BUNDLE_KEY;
+import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.REGISTER_MODEL_UPDATE_CALLBACK_BUNDLE_KEY;
+
 import static com.android.server.ondeviceintelligence.BundleUtil.sanitizeInferenceParams;
 import static com.android.server.ondeviceintelligence.BundleUtil.validatePfdReadOnly;
 import static com.android.server.ondeviceintelligence.BundleUtil.sanitizeStateParams;
@@ -41,6 +45,7 @@ import android.app.ondeviceintelligence.ITokenInfoCallback;
 import android.app.ondeviceintelligence.OnDeviceIntelligenceException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
@@ -105,12 +110,20 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     /** Handler message to {@link #resetTemporaryServices()} */
     private static final int MSG_RESET_TEMPORARY_SERVICE = 0;
 
+    /** Handler message to clean up temporary broadcast keys. */
+    private static final int MSG_RESET_BROADCAST_KEYS = 1;
+
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
     private static final String NAMESPACE_ON_DEVICE_INTELLIGENCE = "ondeviceintelligence";
 
+    private static final String SYSTEM_PACKAGE = "android";
+
+
     private final Executor resourceClosingExecutor = Executors.newCachedThreadPool();
     private final Executor callbackExecutor = Executors.newCachedThreadPool();
+    private final Executor broadcastExecutor = Executors.newCachedThreadPool();
+
 
     private final Context mContext;
     protected final Object mLock = new Object();
@@ -123,10 +136,14 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     @GuardedBy("mLock")
     private String[] mTemporaryServiceNames;
 
+    @GuardedBy("mLock")
+    private String[] mTemporaryBroadcastKeys;
+    @GuardedBy("mLock")
+    private String mBroadcastPackageName;
+
     /**
      * Handler used to reset the temporary service names.
      */
-    @GuardedBy("mLock")
     private Handler mTemporaryHandler;
 
     public OnDeviceIntelligenceManagerService(Context context) {
@@ -482,6 +499,8 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                                     ensureRemoteIntelligenceServiceInitialized();
                                     mRemoteOnDeviceIntelligenceService.run(
                                             IOnDeviceIntelligenceService::notifyInferenceServiceConnected);
+                                    broadcastExecutor.execute(
+                                            () -> registerModelLoadingBroadcasts(service));
                                     service.registerRemoteStorageService(
                                             getIRemoteStorageService());
                                 } catch (RemoteException ex) {
@@ -490,6 +509,56 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                             }
                         });
             }
+        }
+    }
+
+    private void registerModelLoadingBroadcasts(IOnDeviceSandboxedInferenceService service) {
+        String[] modelBroadcastKeys;
+        try {
+            modelBroadcastKeys = getBroadcastKeys();
+        } catch (Resources.NotFoundException e) {
+            Slog.d(TAG, "Skipping model broadcasts as broadcast intents configured.");
+            return;
+        }
+
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(REGISTER_MODEL_UPDATE_CALLBACK_BUNDLE_KEY, true);
+        try {
+            service.updateProcessingState(bundle, new IProcessingUpdateStatusCallback.Stub() {
+                @Override
+                public void onSuccess(PersistableBundle statusParams) {
+                    Binder.clearCallingIdentity();
+                    synchronized (mLock) {
+                        if (statusParams.containsKey(MODEL_LOADED_BUNDLE_KEY)) {
+                            String modelLoadedBroadcastKey = modelBroadcastKeys[0];
+                            if (modelLoadedBroadcastKey != null
+                                    && !modelLoadedBroadcastKey.isEmpty()) {
+                                final Intent intent = new Intent(modelLoadedBroadcastKey);
+                                intent.setPackage(mBroadcastPackageName);
+                                mContext.sendBroadcast(intent,
+                                        Manifest.permission.USE_ON_DEVICE_INTELLIGENCE);
+                            }
+                        } else if (statusParams.containsKey(MODEL_UNLOADED_BUNDLE_KEY)) {
+                            String modelUnloadedBroadcastKey = modelBroadcastKeys[1];
+                            if (modelUnloadedBroadcastKey != null
+                                    && !modelUnloadedBroadcastKey.isEmpty()) {
+                                final Intent intent = new Intent(modelUnloadedBroadcastKey);
+                                intent.setPackage(mBroadcastPackageName);
+                                mContext.sendBroadcast(intent,
+                                        Manifest.permission.USE_ON_DEVICE_INTELLIGENCE);
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(int errorCode, String errorMessage) {
+                    Slog.e(TAG, "Failed to register model loading callback with status code",
+                            new OnDeviceIntelligenceException(errorCode, errorMessage));
+                }
+            });
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register model loading callback with status code", e);
         }
     }
 
@@ -629,6 +698,20 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                         R.string.config_defaultOnDeviceSandboxedInferenceService)};
     }
 
+    protected String[] getBroadcastKeys() throws Resources.NotFoundException {
+        // TODO 329240495 : Consider a small class with explicit field names for the two services
+        synchronized (mLock) {
+            if (mTemporaryBroadcastKeys != null && mTemporaryBroadcastKeys.length == 2) {
+                return mTemporaryBroadcastKeys;
+            }
+        }
+
+        return new String[]{mContext.getResources().getString(
+                R.string.config_onDeviceIntelligenceModelLoadedBroadcastKey),
+                mContext.getResources().getString(
+                        R.string.config_onDeviceIntelligenceModelUnloadedBroadcastKey)};
+    }
+
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
     public void setTemporaryServices(@NonNull String[] componentNames, int durationMs) {
         Objects.requireNonNull(componentNames);
@@ -645,25 +728,26 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 mRemoteOnDeviceIntelligenceService.unbind();
                 mRemoteOnDeviceIntelligenceService = null;
             }
-            if (mTemporaryHandler == null) {
-                mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        if (msg.what == MSG_RESET_TEMPORARY_SERVICE) {
-                            synchronized (mLock) {
-                                resetTemporaryServices();
-                            }
-                        } else {
-                            Slog.wtf(TAG, "invalid handler msg: " + msg);
-                        }
-                    }
-                };
-            } else {
-                mTemporaryHandler.removeMessages(MSG_RESET_TEMPORARY_SERVICE);
-            }
 
             if (durationMs != -1) {
-                mTemporaryHandler.sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_SERVICE, durationMs);
+                getTemporaryHandler().sendEmptyMessageDelayed(MSG_RESET_TEMPORARY_SERVICE,
+                        durationMs);
+            }
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)
+    public void setModelBroadcastKeys(@NonNull String[] broadcastKeys, String receiverPackageName,
+            int durationMs) {
+        Objects.requireNonNull(broadcastKeys);
+        enforceShellOnly(Binder.getCallingUid(), "setModelBroadcastKeys");
+        mContext.enforceCallingPermission(
+                Manifest.permission.USE_ON_DEVICE_INTELLIGENCE, TAG);
+        synchronized (mLock) {
+            mTemporaryBroadcastKeys = broadcastKeys;
+            mBroadcastPackageName = receiverPackageName;
+            if (durationMs != -1) {
+                getTemporaryHandler().sendEmptyMessageDelayed(MSG_RESET_BROADCAST_KEYS, durationMs);
             }
         }
     }
@@ -750,5 +834,29 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
                 Log.e(TAG, "Failed to close parcel file descriptor ", e);
             }
         }
+    }
+
+    private synchronized Handler getTemporaryHandler() {
+        if (mTemporaryHandler == null) {
+            mTemporaryHandler = new Handler(Looper.getMainLooper(), null, true) {
+                @Override
+                public void handleMessage(Message msg) {
+                    if (msg.what == MSG_RESET_TEMPORARY_SERVICE) {
+                        synchronized (mLock) {
+                            resetTemporaryServices();
+                        }
+                    } else if (msg.what == MSG_RESET_BROADCAST_KEYS) {
+                        synchronized (mLock) {
+                            mTemporaryBroadcastKeys = null;
+                            mBroadcastPackageName = SYSTEM_PACKAGE;
+                        }
+                    } else {
+                        Slog.wtf(TAG, "invalid handler msg: " + msg);
+                    }
+                }
+            };
+        }
+
+        return mTemporaryHandler;
     }
 }
