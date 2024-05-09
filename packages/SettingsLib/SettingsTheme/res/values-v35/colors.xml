@@ -38,7 +38,7 @@
     <color name="settingslib_track_off_color">@color/settingslib_materialColorSurfaceContainerHighest</color>
 
     <!-- Dialog background color. -->
-    <color name="settingslib_dialog_background">@color/settingslib_materialColorSurfaceInverse</color>
+    <color name="settingslib_dialog_background">@color/settingslib_materialColorSurfaceContainer</color>
 
     <!-- Material next track outline color-->
     <color name="settingslib_track_online_color">@color/settingslib_switch_track_outline_color</color>
