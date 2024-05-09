@@ -442,7 +442,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                                         | PackageManager.MATCH_DISABLED_COMPONENTS
                                         | PackageManager.GET_SHARED_LIBRARY_FILES));
                 int resId = resources.getIdentifier(
-                        "gesture_blocking_activities", "array", recentsPackageName);
+                        "back_gesture_blocking_activities", "array", recentsPackageName);
 
                 if (resId == 0) {
                     Log.e(TAG, "No resource found for gesture-blocking activities");
