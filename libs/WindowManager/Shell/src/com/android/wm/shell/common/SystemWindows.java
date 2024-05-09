@@ -409,5 +409,10 @@ public class SystemWindows {
                 // ignore
             }
         }
+
+        @Override
+        public void dumpWindow(ParcelFileDescriptor pfd) {
+
+        }
     }
 }
