@@ -5432,4 +5432,15 @@
 
   <!-- For PowerManagerService to determine whether to use auto-suspend mode -->
   <java-symbol type="bool" name="config_useAutoSuspend" />
+
+  <!-- Biometric dangling notification strings -->
+  <java-symbol type="string" name="fingerprint_dangling_notification_title" />
+  <java-symbol type="string" name="fingerprint_dangling_notification_msg_1" />
+  <java-symbol type="string" name="fingerprint_dangling_notification_msg_2" />
+  <java-symbol type="string" name="fingerprint_dangling_notification_msg_all_deleted_1" />
+  <java-symbol type="string" name="fingerprint_dangling_notification_msg_all_deleted_2" />
+  <java-symbol type="string" name="face_dangling_notification_title" />
+  <java-symbol type="string" name="face_dangling_notification_msg" />
+  <java-symbol type="string" name="biometric_dangling_notification_action_set_up" />
+  <java-symbol type="string" name="biometric_dangling_notification_action_not_now" />
 </resources>
