@@ -5829,6 +5829,10 @@
     <string name="dynamic_mode_notification_title">Battery Saver turned on</string>
     <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
     <string name="dynamic_mode_notification_summary">Reducing battery usage to extend battery life</string>
+    <!-- Title of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
+    <string name="dynamic_mode_notification_title_v2">Battery Saver is on</string>
+    <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
+    <string name="dynamic_mode_notification_summary_v2">Battery Saver is turned on to extend battery life</string>
 
     <!-- Battery saver strings -->
     <!-- The user visible name of the notification channel for battery saver notifications [CHAR_LIMIT=80] -->

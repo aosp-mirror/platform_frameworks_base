@@ -4241,7 +4241,9 @@
   <java-symbol type="string" name="battery_saver_charged_notification_summary" />
   <java-symbol type="string" name="dynamic_mode_notification_channel_name" />
   <java-symbol type="string" name="dynamic_mode_notification_title" />
+  <java-symbol type="string" name="dynamic_mode_notification_title_v2" />
   <java-symbol type="string" name="dynamic_mode_notification_summary" />
+  <java-symbol type="string" name="dynamic_mode_notification_summary_v2" />
   <java-symbol type="drawable" name="ic_battery" />
 
   <java-symbol type="bool" name="config_skipSensorAvailable" />

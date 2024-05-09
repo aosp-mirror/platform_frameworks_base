@@ -241,6 +241,7 @@ java_library_static {
         "securebox",
         "apache-commons-math",
         "backstage_power_flags_lib",
+        "battery_saver_flag_lib",
         "notification_flags_lib",
         "biometrics_flags_lib",
         "am_flags_lib",
