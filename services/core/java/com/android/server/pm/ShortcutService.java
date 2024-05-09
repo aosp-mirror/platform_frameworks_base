@@ -4482,8 +4482,9 @@ public class ShortcutService extends IShortcutService.Stub {
             ActivityOptions options = ActivityOptions.makeBasic()
                     .setPendingIntentBackgroundActivityStartMode(
                             MODE_BACKGROUND_ACTIVITY_START_DENIED);
-            intentSender.sendIntent(mContext, /* code= */ 0, extras,
-                    /* onFinished=*/ null, /* handler= */ null, null, options.toBundle());
+            intentSender.sendIntent(mContext, 0 /* code */, extras,
+                    null /* requiredPermission */, options.toBundle(),
+                    null /* executor */, null /* onFinished*/);
         } catch (SendIntentException e) {
             Slog.w(TAG, "sendIntent failed().", e);
         }
