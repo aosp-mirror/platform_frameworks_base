@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <com_android_input_flags.h>
 #include <flag_macros.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -29,8 +28,6 @@
 #include "mocks/MockSpriteController.h"
 
 namespace android {
-
-namespace input_flags = com::android::input::flags;
 
 enum TestCursorType {
     CURSOR_TYPE_DEFAULT = 0,
@@ -150,7 +147,6 @@ public:
                           SpriteController& spriteController)
           : PointerController(
                     policy, looper, spriteController,
-                    /*enabled=*/true,
                     [&registeredListener](const sp<android::gui::WindowInfosListener>& listener)
                             -> std::vector<gui::DisplayInfo> {
                         // Register listener
@@ -258,8 +254,7 @@ TEST_F(PointerControllerTest, useStylusTypeForStylusHover) {
     mPointerController->reloadPointerResources();
 }
 
-TEST_F_WITH_FLAGS(PointerControllerTest, setPresentationBeforeDisplayViewportDoesNotLoadResources,
-                  REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(input_flags, enable_pointer_choreographer))) {
+TEST_F(PointerControllerTest, setPresentationBeforeDisplayViewportDoesNotLoadResources) {
     // Setting the presentation mode before a display viewport is set will not load any resources.
     mPointerController->setPresentation(PointerController::Presentation::POINTER);
     ASSERT_TRUE(mPolicy->noResourcesAreLoaded());
@@ -269,26 +264,7 @@ TEST_F_WITH_FLAGS(PointerControllerTest, setPresentationBeforeDisplayViewportDoe
     ASSERT_TRUE(mPolicy->allResourcesAreLoaded());
 }
 
-TEST_F_WITH_FLAGS(PointerControllerTest, updatePointerIcon,
-                  REQUIRES_FLAGS_DISABLED(ACONFIG_FLAG(input_flags,
-                                                       enable_pointer_choreographer))) {
-    ensureDisplayViewportIsSet();
-    mPointerController->setPresentation(PointerController::Presentation::POINTER);
-    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
-
-    int32_t type = CURSOR_TYPE_ADDITIONAL;
-    std::pair<float, float> hotspot = getHotSpotCoordinatesForType(type);
-    EXPECT_CALL(*mPointerSprite, setVisible(true));
-    EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
-    EXPECT_CALL(*mPointerSprite,
-                setIcon(AllOf(Field(&SpriteIcon::style, static_cast<PointerIconStyle>(type)),
-                              Field(&SpriteIcon::hotSpotX, hotspot.first),
-                              Field(&SpriteIcon::hotSpotY, hotspot.second))));
-    mPointerController->updatePointerIcon(static_cast<PointerIconStyle>(type));
-}
-
-TEST_F_WITH_FLAGS(PointerControllerTest, updatePointerIconWithChoreographer,
-                  REQUIRES_FLAGS_ENABLED(ACONFIG_FLAG(input_flags, enable_pointer_choreographer))) {
+TEST_F(PointerControllerTest, updatePointerIconWithChoreographer) {
     // When PointerChoreographer is enabled, the presentation mode is set before the viewport.
     mPointerController->setPresentation(PointerController::Presentation::POINTER);
     ensureDisplayViewportIsSet();
