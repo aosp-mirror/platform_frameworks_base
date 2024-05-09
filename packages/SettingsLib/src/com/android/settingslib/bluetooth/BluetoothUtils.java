@@ -10,8 +10,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothStatusCodes;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -37,12 +39,9 @@ import com.android.settingslib.flags.Flags;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
-import com.google.common.collect.ImmutableSet;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,8 +55,6 @@ public class BluetoothUtils {
     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
     private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
     private static final String KEY_HEARABLE_CONTROL_SLICE = "HEARABLE_CONTROL_SLICE_WITH_WIDTH";
-    private static final Set<String> EXCLUSIVE_MANAGERS =
-            ImmutableSet.of("com.google.android.gms.dck");
 
     private static ErrorListener sErrorListener;
 
@@ -740,14 +737,13 @@ public class BluetoothUtils {
 
     /**
      * Returns the BluetoothDevice's exclusive manager ({@link
-     * BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata) if it exists and is in the given
-     * set, otherwise null.
+     * BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata) if it exists, otherwise null.
      */
     @Nullable
-    private static String getAllowedExclusiveManager(BluetoothDevice bluetoothDevice) {
-        byte[] exclusiveManagerNameBytes =
+    private static String getExclusiveManager(BluetoothDevice bluetoothDevice) {
+        byte[] exclusiveManagerBytes =
                 bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER);
-        if (exclusiveManagerNameBytes == null) {
+        if (exclusiveManagerBytes == null) {
             Log.d(
                     TAG,
                     "Bluetooth device "
@@ -755,45 +751,44 @@ public class BluetoothUtils {
                             + " doesn't have exclusive manager");
             return null;
         }
-        String exclusiveManagerName = new String(exclusiveManagerNameBytes);
-        return getExclusiveManagers().contains(exclusiveManagerName) ? exclusiveManagerName : null;
+        return new String(exclusiveManagerBytes);
     }
 
-    /** Checks if given package is installed */
-    private static boolean isPackageInstalled(Context context, String packageName) {
+    /** Checks if given package is installed and enabled */
+    private static boolean isPackageInstalledAndEnabled(Context context, String packageName) {
         PackageManager packageManager = context.getPackageManager();
         try {
-            packageManager.getPackageInfo(packageName, 0);
-            return true;
+            ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+            return appInfo.enabled;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.d(TAG, "Package " + packageName + " is not installed");
+            Log.d(TAG, "Package " + packageName + " is not installed/enabled");
         }
         return false;
     }
 
     /**
      * A BluetoothDevice is exclusively managed if 1) it has field {@link
-     * BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata. 2) the exclusive manager app name is
-     * in the allowlist. 3) the exclusive manager app is installed.
+     * BluetoothDevice.METADATA_EXCLUSIVE_MANAGER} in metadata. 2) the exclusive manager app is
+     * installed and enabled.
      */
     public static boolean isExclusivelyManagedBluetoothDevice(
             @NonNull Context context, @NonNull BluetoothDevice bluetoothDevice) {
-        String exclusiveManagerName = getAllowedExclusiveManager(bluetoothDevice);
+        String exclusiveManagerName = getExclusiveManager(bluetoothDevice);
         if (exclusiveManagerName == null) {
             return false;
         }
-        if (!isPackageInstalled(context, exclusiveManagerName)) {
+
+        ComponentName exclusiveManagerComponent =
+                ComponentName.unflattenFromString(exclusiveManagerName);
+        String exclusiveManagerPackage = exclusiveManagerComponent != null
+                ? exclusiveManagerComponent.getPackageName() : exclusiveManagerName;
+
+        if (!isPackageInstalledAndEnabled(context, exclusiveManagerPackage)) {
             return false;
         } else {
-            Log.d(TAG, "Found exclusively managed app " + exclusiveManagerName);
+            Log.d(TAG, "Found exclusively managed app " + exclusiveManagerPackage);
             return true;
         }
-    }
-
-    /** Return the allowlist for exclusive manager names. */
-    @NonNull
-    public static Set<String> getExclusiveManagers() {
-        return EXCLUSIVE_MANAGERS;
     }
 
     /**

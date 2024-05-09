@@ -17,7 +17,7 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothDevice
-import android.content.pm.PackageInfo
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.platform.test.annotations.DisableFlags
@@ -25,7 +25,6 @@ import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
-import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.flags.Flags
 import com.android.systemui.SysuiTestCase
@@ -120,11 +119,10 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
     fun testSavedFactory_isFilterMatched_exclusivelyManaged_returnsFalse() {
-        val exclusiveManagerName =
-            BluetoothUtils.getExclusiveManagers().firstOrNull() ?: FAKE_EXCLUSIVE_MANAGER_NAME
         `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
-            .thenReturn(exclusiveManagerName.toByteArray())
-        `when`(packageManager.getPackageInfo(exclusiveManagerName, 0)).thenReturn(PackageInfo())
+            .thenReturn(TEST_EXCLUSIVE_MANAGER.toByteArray())
+        `when`(packageManager.getApplicationInfo(TEST_EXCLUSIVE_MANAGER, 0))
+            .thenReturn(ApplicationInfo())
         `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
         `when`(cachedDevice.isConnected).thenReturn(false)
 
@@ -144,11 +142,11 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
-    fun testSavedFactory_isFilterMatched_notAllowedExclusiveManager_returnsTrue() {
+    fun testSavedFactory_isFilterMatched_exclusiveManagerNotEnabled_returnsTrue() {
         `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
-            .thenReturn(FAKE_EXCLUSIVE_MANAGER_NAME.toByteArray())
-        `when`(packageManager.getPackageInfo(FAKE_EXCLUSIVE_MANAGER_NAME, 0))
-            .thenReturn(PackageInfo())
+            .thenReturn(TEST_EXCLUSIVE_MANAGER.toByteArray())
+        `when`(packageManager.getApplicationInfo(TEST_EXCLUSIVE_MANAGER, 0))
+            .thenReturn(ApplicationInfo().also { it.enabled = false })
         `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
         `when`(cachedDevice.isConnected).thenReturn(false)
 
@@ -158,12 +156,10 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
-    fun testSavedFactory_isFilterMatched_uninstalledExclusiveManager_returnsTrue() {
-        val exclusiveManagerName =
-            BluetoothUtils.getExclusiveManagers().firstOrNull() ?: FAKE_EXCLUSIVE_MANAGER_NAME
+    fun testSavedFactory_isFilterMatched_exclusiveManagerNotInstalled_returnsTrue() {
         `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
-            .thenReturn(exclusiveManagerName.toByteArray())
-        `when`(packageManager.getPackageInfo(exclusiveManagerName, 0))
+            .thenReturn(TEST_EXCLUSIVE_MANAGER.toByteArray())
+        `when`(packageManager.getApplicationInfo(TEST_EXCLUSIVE_MANAGER, 0))
             .thenThrow(PackageManager.NameNotFoundException("Test!"))
         `when`(cachedDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
         `when`(cachedDevice.isConnected).thenReturn(false)
@@ -228,11 +224,10 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
     fun testConnectedFactory_isFilterMatched_exclusivelyManaged_returnsFalse() {
-        val exclusiveManagerName =
-            BluetoothUtils.getExclusiveManagers().firstOrNull() ?: FAKE_EXCLUSIVE_MANAGER_NAME
         `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
-            .thenReturn(exclusiveManagerName.toByteArray())
-        `when`(packageManager.getPackageInfo(exclusiveManagerName, 0)).thenReturn(PackageInfo())
+            .thenReturn(TEST_EXCLUSIVE_MANAGER.toByteArray())
+        `when`(packageManager.getApplicationInfo(TEST_EXCLUSIVE_MANAGER, 0))
+            .thenReturn(ApplicationInfo())
         `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
         `when`(bluetoothDevice.isConnected).thenReturn(true)
         audioManager.setMode(AudioManager.MODE_NORMAL)
@@ -254,11 +249,11 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
-    fun testConnectedFactory_isFilterMatched_notAllowedExclusiveManager_returnsTrue() {
+    fun testConnectedFactory_isFilterMatched_exclusiveManagerNotEnabled_returnsTrue() {
         `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
-            .thenReturn(FAKE_EXCLUSIVE_MANAGER_NAME.toByteArray())
-        `when`(packageManager.getPackageInfo(FAKE_EXCLUSIVE_MANAGER_NAME, 0))
-            .thenReturn(PackageInfo())
+            .thenReturn(TEST_EXCLUSIVE_MANAGER.toByteArray())
+        `when`(packageManager.getApplicationInfo(TEST_EXCLUSIVE_MANAGER, 0))
+            .thenReturn(ApplicationInfo().also { it.enabled = false })
         `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
         `when`(bluetoothDevice.isConnected).thenReturn(true)
         audioManager.setMode(AudioManager.MODE_NORMAL)
@@ -269,12 +264,10 @@ class DeviceItemFactoryTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_HIDE_EXCLUSIVELY_MANAGED_BLUETOOTH_DEVICE)
-    fun testConnectedFactory_isFilterMatched_uninstalledExclusiveManager_returnsTrue() {
-        val exclusiveManagerName =
-            BluetoothUtils.getExclusiveManagers().firstOrNull() ?: FAKE_EXCLUSIVE_MANAGER_NAME
+    fun testConnectedFactory_isFilterMatched_exclusiveManagerNotInstalled_returnsTrue() {
         `when`(bluetoothDevice.getMetadata(BluetoothDevice.METADATA_EXCLUSIVE_MANAGER))
-            .thenReturn(exclusiveManagerName.toByteArray())
-        `when`(packageManager.getPackageInfo(exclusiveManagerName, 0))
+            .thenReturn(TEST_EXCLUSIVE_MANAGER.toByteArray())
+        `when`(packageManager.getApplicationInfo(TEST_EXCLUSIVE_MANAGER, 0))
             .thenThrow(PackageManager.NameNotFoundException("Test!"))
         `when`(bluetoothDevice.bondState).thenReturn(BluetoothDevice.BOND_BONDED)
         `when`(bluetoothDevice.isConnected).thenReturn(true)
@@ -317,7 +310,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
     companion object {
         const val DEVICE_NAME = "DeviceName"
         const val CONNECTION_SUMMARY = "ConnectionSummary"
-        private const val FAKE_EXCLUSIVE_MANAGER_NAME = "com.fake.name"
+        private const val TEST_EXCLUSIVE_MANAGER = "com.test.manager"
         private const val DEVICE_ADDRESS = "04:52:C7:0B:D8:3C"
     }
 }
