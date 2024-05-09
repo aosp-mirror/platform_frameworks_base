@@ -5625,7 +5625,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
 
         @Override
         public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-                int displayId) {
+                int displayId, @UserIdInt int userId) {
             //TODO(b/150843766): Check if Input Token is valid.
             final IBinder curHostInputToken;
             synchronized (ImfLock.class) {

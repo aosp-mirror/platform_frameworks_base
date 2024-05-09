@@ -150,10 +150,11 @@ public abstract class InputMethodManagerInternal {
      *
      * @param sourceInputToken the source token.
      * @param displayId        the display hosting the IME window
+     * @param userId           the user ID this request is about
      * @return {@code true} if the transfer is successful
      */
     public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-            int displayId);
+            int displayId, @UserIdInt int userId);
 
     /**
      * Reports that IME control has transferred to the given window token, or if null that
@@ -287,7 +288,7 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
-                        int displayId) {
+                        int displayId, @UserIdInt int userId) {
                     return false;
                 }
 
