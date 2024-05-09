@@ -2184,7 +2184,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
         if (mStatusBarStateController.leaveOpenOnKeyguardHide()) {
             if (!mStatusBarStateController.isKeyguardRequested()) {
-                mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
+                if (!MigrateClocksToBlueprint.isEnabled()) {
+                    mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
+                }
             }
             long delay = mKeyguardStateController.calculateGoingToFullShadeDelay();
             mLockscreenShadeTransitionController.onHideKeyguard(delay, previousState);

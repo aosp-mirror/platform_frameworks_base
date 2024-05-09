@@ -33,7 +33,10 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -69,7 +72,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val mockDarkAnimator = mock<ObjectAnimator>()
 
     private lateinit var underTest: StatusBarStateControllerImpl
@@ -98,6 +101,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
                     uiEventLogger,
                     { kosmos.interactionJankMonitor },
                     JavaAdapter(testScope.backgroundScope),
+                    { kosmos.keyguardTransitionInteractor },
                     { kosmos.shadeInteractor },
                     { kosmos.deviceUnlockedInteractor },
                     { kosmos.sceneInteractor },
@@ -329,5 +333,26 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
             runCurrent()
             assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
             assertThat(statusBarState).isEqualTo(StatusBarState.SHADE)
+        }
+
+    @Test
+    fun leaveOpenOnKeyguard_whenGone_isFalse() =
+        testScope.runTest {
+            underTest.start()
+            underTest.setLeaveOpenOnKeyguardHide(true)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                testScope = testScope,
+            )
+            assertThat(underTest.leaveOpenOnKeyguardHide()).isEqualTo(true)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope = testScope,
+            )
+            assertThat(underTest.leaveOpenOnKeyguardHide()).isEqualTo(false)
         }
 }
