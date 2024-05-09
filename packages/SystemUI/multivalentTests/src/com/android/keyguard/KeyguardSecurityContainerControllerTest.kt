@@ -17,8 +17,11 @@
 
 package com.android.keyguard
 
+import android.app.admin.DevicePolicyManager
+import android.app.admin.flags.Flags as DevicePolicyFlags
 import android.content.res.Configuration
 import android.media.AudioManager
+import android.platform.test.annotations.EnableFlags
 import android.telephony.TelephonyManager
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.TestableResources
@@ -148,6 +151,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var faceAuthAccessibilityDelegate: FaceAuthAccessibilityDelegate
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var postureController: DevicePostureController
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     @Captor
     private lateinit var swipeListenerArgumentCaptor:
@@ -273,6 +277,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor,
                 deviceProvisionedController,
                 faceAuthAccessibilityDelegate,
+                devicePolicyManager,
                 keyguardTransitionInteractor,
                 { primaryBouncerInteractor },
             ) {
@@ -932,6 +937,45 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             .addUserSwitchCallback(capture(userSwitchCallbackArgumentCaptor))
         userSwitchCallbackArgumentCaptor.value.onUserSwitched()
         verify(viewFlipperController).asynchronouslyInflateView(any(), any(), any())
+    }
+
+    @Test
+    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
+    fun showAlmostAtWipeDialog_calledOnMainUser_setsCorrectUserType() {
+        val mainUserId = 10
+
+        underTest.showMessageForFailedUnlockAttempt(
+            /* userId = */ mainUserId,
+            /* expiringUserId = */ mainUserId,
+            /* mainUserId = */ mainUserId,
+            /* remainingBeforeWipe = */ 1,
+            /* failedAttempts = */ 1
+        )
+
+        verify(view)
+            .showAlmostAtWipeDialog(any(), any(), eq(KeyguardSecurityContainer.USER_TYPE_PRIMARY))
+    }
+
+    @Test
+    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
+    fun showAlmostAtWipeDialog_calledOnNonMainUser_setsCorrectUserType() {
+        val secondaryUserId = 10
+        val mainUserId = 0
+
+        underTest.showMessageForFailedUnlockAttempt(
+            /* userId = */ secondaryUserId,
+            /* expiringUserId = */ secondaryUserId,
+            /* mainUserId = */ mainUserId,
+            /* remainingBeforeWipe = */ 1,
+            /* failedAttempts = */ 1
+        )
+
+        verify(view)
+            .showAlmostAtWipeDialog(
+                any(),
+                any(),
+                eq(KeyguardSecurityContainer.USER_TYPE_SECONDARY_USER)
+            )
     }
 
     private val registeredSwipeListener: KeyguardSecurityContainer.SwipeListener
