@@ -3222,6 +3222,58 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return saveInfo == null ? 0 : saveInfo.getFlags();
     }
 
+    static class SaveInfoStats {
+        public int saveInfoCount;
+        public int saveDataTypeCount;
+    }
+
+    /**
+     * Get statistic information of save info in current session. Specifically
+     *   1. how many save info the current session has.
+     *   2. How many distinct save data types current session has.
+     *
+     * @return SaveInfoStats returns the above two number in a SaveInfoStats object
+     */
+    @GuardedBy("mLock")
+    private SaveInfoStats getSaveInfoStatsLocked() {
+        SaveInfoStats retSaveInfoStats = new SaveInfoStats();
+        retSaveInfoStats.saveInfoCount = -1;
+        retSaveInfoStats.saveDataTypeCount = -1;
+
+        if (mContexts == null) {
+            if (sVerbose) {
+                Slog.v(TAG, "getSaveInfoStatsLocked(): mContexts is null");
+            }
+        } else if (mResponses == null) {
+            // Happens when the activity / session was finished before the service replied, or
+            // when the service cannot autofill it (and returned a null response).
+            if (sVerbose) {
+                Slog.v(TAG, "getSaveInfoStatsLocked(): mResponses is null");
+            }
+            return retSaveInfoStats;
+        } else {
+            int numSaveInfos = 0;
+            int numSaveDataTypes = 0;
+            ArraySet<Integer> saveDataTypeSeen = new ArraySet<>();
+            final int numResponses = mResponses.size();
+            for (int responseNum = 0; responseNum < numResponses; responseNum++) {
+                final FillResponse response = mResponses.valueAt(responseNum);
+                if (response != null && response.getSaveInfo() != null) {
+                    numSaveInfos += 1;
+                    int saveDataType = response.getSaveInfo().getType();
+                    if (!saveDataTypeSeen.contains(saveDataType)) {
+                        saveDataTypeSeen.add(saveDataType);
+                        numSaveDataTypes += 1;
+                    }
+                }
+            }
+            retSaveInfoStats.saveInfoCount = numSaveInfos;
+            retSaveInfoStats.saveDataTypeCount = numSaveDataTypes;
+        }
+
+        return retSaveInfoStats;
+    }
+
     /**
      * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
      * when necessary.
@@ -3258,6 +3310,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mSessionCommittedEventLogger.maybeSetCommitReason(commitReason);
         mSessionCommittedEventLogger.maybeSetRequestCount(mRequestCount);
+        SaveInfoStats saveInfoStats = getSaveInfoStatsLocked();
+        mSessionCommittedEventLogger.maybeSetSaveInfoCount(saveInfoStats.saveInfoCount);
+        mSessionCommittedEventLogger.maybeSetSaveDataTypeCount(saveInfoStats.saveDataTypeCount);
+        mSessionCommittedEventLogger.maybeSetLastFillResponseHasSaveInfo(
+                getSaveInfoLocked() != null);
         mSaveEventLogger.maybeSetSaveUiNotShownReason(NO_SAVE_REASON_NONE);
     }
 
