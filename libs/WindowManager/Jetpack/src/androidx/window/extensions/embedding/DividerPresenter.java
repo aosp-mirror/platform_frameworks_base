@@ -35,6 +35,7 @@ import static androidx.window.extensions.embedding.SplitPresenter.CONTAINER_POSI
 
 import android.annotation.DimenRes;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -42,6 +43,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RotateDrawable;
 import android.hardware.display.DisplayManager;
@@ -213,7 +215,11 @@ class DividerPresenter implements View.OnTouchListener {
                             isVerticalSplit,
                             isReversedLayout,
                             parentInfo.getDisplayId(),
-                            isDraggableExpandType
+                            isDraggableExpandType,
+                            getContainerBackgroundColor(topSplitContainer.getPrimaryContainer(),
+                                    DEFAULT_PRIMARY_VEIL_COLOR),
+                            getContainerBackgroundColor(topSplitContainer.getSecondaryContainer(),
+                                    DEFAULT_SECONDARY_VEIL_COLOR)
                     ));
         }
     }
@@ -239,6 +245,27 @@ class DividerPresenter implements View.OnTouchListener {
             // Otherwise, update the renderer for the new properties.
             mRenderer.update(mProperties);
         }
+    }
+
+    /**
+     * Returns the window background color of the top activity in the container if set, or the
+     * default color if the background color of the top activity is unavailable.
+     */
+    @VisibleForTesting
+    @NonNull
+    static Color getContainerBackgroundColor(
+            @NonNull TaskFragmentContainer container, @NonNull Color defaultColor) {
+        final Activity activity = container.getTopNonFinishingActivity();
+        if (activity == null || !activity.isResumed()) {
+            // This can happen when the top activity in the container is from a different process.
+            return defaultColor;
+        }
+
+        final Drawable drawable = activity.getWindow().getDecorView().getBackground();
+        if (drawable instanceof ColorDrawable colorDrawable) {
+            return Color.valueOf(colorDrawable.getColor());
+        }
+        return defaultColor;
     }
 
     /**
@@ -800,6 +827,8 @@ class DividerPresenter implements View.OnTouchListener {
         private final int mDisplayId;
         private final boolean mIsReversedLayout;
         private final boolean mIsDraggableExpandType;
+        private final Color mPrimaryVeilColor;
+        private final Color mSecondaryVeilColor;
 
         @VisibleForTesting
         Properties(
@@ -810,7 +839,9 @@ class DividerPresenter implements View.OnTouchListener {
                 boolean isVerticalSplit,
                 boolean isReversedLayout,
                 int displayId,
-                boolean isDraggableExpandType) {
+                boolean isDraggableExpandType,
+                @NonNull Color primaryVeilColor,
+                @NonNull Color secondaryVeilColor) {
             mConfiguration = configuration;
             mDividerAttributes = dividerAttributes;
             mDecorSurface = decorSurface;
@@ -819,6 +850,8 @@ class DividerPresenter implements View.OnTouchListener {
             mIsReversedLayout = isReversedLayout;
             mDisplayId = displayId;
             mIsDraggableExpandType = isDraggableExpandType;
+            mPrimaryVeilColor = primaryVeilColor;
+            mSecondaryVeilColor = secondaryVeilColor;
         }
 
         /**
@@ -840,7 +873,9 @@ class DividerPresenter implements View.OnTouchListener {
                     && a.mIsVerticalSplit == b.mIsVerticalSplit
                     && a.mDisplayId == b.mDisplayId
                     && a.mIsReversedLayout == b.mIsReversedLayout
-                    && a.mIsDraggableExpandType == b.mIsDraggableExpandType;
+                    && a.mIsDraggableExpandType == b.mIsDraggableExpandType
+                    && a.mPrimaryVeilColor.equals(b.mPrimaryVeilColor)
+                    && a.mSecondaryVeilColor.equals(b.mSecondaryVeilColor);
         }
 
         private static boolean areSameSurfaces(
@@ -1087,8 +1122,8 @@ class DividerPresenter implements View.OnTouchListener {
         }
 
         private void showVeils(@NonNull SurfaceControl.Transaction t) {
-            t.setColor(mPrimaryVeil, colorToFloatArray(DEFAULT_PRIMARY_VEIL_COLOR))
-                    .setColor(mSecondaryVeil, colorToFloatArray(DEFAULT_SECONDARY_VEIL_COLOR))
+            t.setColor(mPrimaryVeil, colorToFloatArray(mProperties.mPrimaryVeilColor))
+                    .setColor(mSecondaryVeil, colorToFloatArray(mProperties.mSecondaryVeilColor))
                     .setLayer(mDividerSurface, DIVIDER_LAYER)
                     .setLayer(mPrimaryVeil, VEIL_LAYER)
                     .setLayer(mSecondaryVeil, VEIL_LAYER)
