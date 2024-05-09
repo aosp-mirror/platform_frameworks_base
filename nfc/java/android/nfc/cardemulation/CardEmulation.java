@@ -970,16 +970,16 @@ public final class CardEmulation {
      *
      * @param service The ComponentName of the service
      * @param status  true to enable, false to disable
+     * @param userId the user handle of the user whose information is being requested.
      * @return set service for the category and true if service is already set return false.
      *
      * @hide
      */
-    public boolean setServiceEnabledForCategoryOther(ComponentName service, boolean status) {
+    public boolean setServiceEnabledForCategoryOther(ComponentName service, boolean status,
+                                                     int userId) {
         if (service == null) {
             throw new NullPointerException("activity or service or category is null");
         }
-        int userId = mContext.getUser().getIdentifier();
-
         try {
             return sService.setServiceEnabledForCategoryOther(userId, service, status);
         } catch (RemoteException e) {
