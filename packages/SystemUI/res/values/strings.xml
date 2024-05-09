@@ -1636,9 +1636,15 @@
     <string name="volume_panel_collapsed_sliders">Volume sliders collapsed</string>
 
     <!-- Hint for accessibility. A stream name is a parameter. For example: double tap to mute media [CHAR_LIMIT=NONE] -->
-    <string name="volume_panel_hint_mute">mute %s</string>
+    <string name="volume_panel_hint_mute">Mute %s</string>
     <!-- Hint for accessibility. A stream name is a parameter. For example: double tap to unmute media [CHAR_LIMIT=NONE] -->
-    <string name="volume_panel_hint_unmute">unmute %s</string>
+    <string name="volume_panel_hint_unmute">Unmute %s</string>
+
+    <!-- Hint for accessibility. This is announced when the stream is muted [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_hint_muted">muted</string>
+
+    <!-- Hint for accessibility. This is announced when ring mode is set to Vibrate. [CHAR_LIMIT=NONE] -->
+    <string name="volume_panel_hint_vibrate">vibrate</string>
 
     <!-- Title with application label for media output settings when there is media playing. [CHAR LIMIT=20] -->
     <string name="media_output_label_title">Playing <xliff:g id="label" example="Music Player">%s</xliff:g> on</string>
