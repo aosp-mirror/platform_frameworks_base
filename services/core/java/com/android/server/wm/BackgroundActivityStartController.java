@@ -806,14 +806,25 @@ public class BackgroundActivityStartController {
      * or {@link #BAL_BLOCK} if the launch should be blocked
      */
     BalVerdict checkBackgroundActivityStartAllowedByCaller(BalState state) {
-        int callingUid = state.mCallingUid;
-        int callingPid = state.mCallingPid;
-        final String callingPackage = state.mCallingPackage;
-        WindowProcessController callerApp = state.mCallerApp;
+        // This is used to block background activity launch even if the app is still
+        // visible to user after user clicking home button.
+
+        // Normal apps with visible app window will be allowed to start activity if app switching
+        // is allowed, or apps like live wallpaper with non app visible window will be allowed.
+        final boolean appSwitchAllowedOrFg = state.mAppSwitchState == APP_SWITCH_ALLOW
+                || state.mAppSwitchState == APP_SWITCH_FG_ONLY;
+        if (appSwitchAllowedOrFg && state.mCallingUidHasAnyVisibleWindow) {
+            return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
+                    /*background*/ false, "callingUid has visible window");
+        }
+        if (mService.mActiveUids.hasNonAppVisibleWindow(state.mCallingUid)) {
+            return new BalVerdict(BAL_ALLOW_NON_APP_VISIBLE_WINDOW,
+                    /*background*/ false, "callingUid has non-app visible window");
+        }
 
         // don't abort for the most important UIDs
-        final int callingAppId = UserHandle.getAppId(callingUid);
-        if (callingUid == Process.ROOT_UID
+        final int callingAppId = UserHandle.getAppId(state.mCallingUid);
+        if (state.mCallingUid == Process.ROOT_UID
                 || callingAppId == Process.SYSTEM_UID
                 || callingAppId == Process.NFC_UID) {
             return new BalVerdict(
@@ -822,7 +833,7 @@ public class BackgroundActivityStartController {
         }
 
         // Always allow home application to start activities.
-        if (isHomeApp(callingUid, callingPackage)) {
+        if (isHomeApp(state.mCallingUid, state.mCallingPackage)) {
             return new BalVerdict(BAL_ALLOW_ALLOWLISTED_COMPONENT,
                     /*background*/ false,
                     "Home app");
@@ -837,67 +848,46 @@ public class BackgroundActivityStartController {
                     "Active ime");
         }
 
-        // This is used to block background activity launch even if the app is still
-        // visible to user after user clicking home button.
-        final int appSwitchState = mService.getBalAppSwitchesState();
-
-        // don't abort if the callingUid has a visible window or is a persistent system process
-        final int callingUidProcState = mService.mActiveUids.getUidState(callingUid);
-        final boolean callingUidHasAnyVisibleWindow = mService.hasActiveVisibleWindow(callingUid);
-        final boolean isCallingUidPersistentSystemProcess =
-                callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
-
-        // Normal apps with visible app window will be allowed to start activity if app switching
-        // is allowed, or apps like live wallpaper with non app visible window will be allowed.
-        final boolean appSwitchAllowedOrFg =
-                appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY;
-        if (appSwitchAllowedOrFg && callingUidHasAnyVisibleWindow) {
-            return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
-                    /*background*/ false, "callingUid has visible window");
-        }
-        if (mService.mActiveUids.hasNonAppVisibleWindow(callingUid)) {
-            return new BalVerdict(BAL_ALLOW_NON_APP_VISIBLE_WINDOW,
-                    /*background*/ false, "callingUid has non-app visible window");
-        }
-
-        if (isCallingUidPersistentSystemProcess) {
+        // don't abort if the callingUid is a persistent system process
+        if (state.mIsCallingUidPersistentSystemProcess) {
             return new BalVerdict(BAL_ALLOW_ALLOWLISTED_COMPONENT,
                     /*background*/ false, "callingUid is persistent system process");
         }
 
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
-        if (hasBalPermission(callingUid, callingPid)) {
+        if (hasBalPermission(state.mCallingUid, state.mCallingPid)) {
             return new BalVerdict(BAL_ALLOW_PERMISSION,
                     /*background*/ true,
                     "START_ACTIVITIES_FROM_BACKGROUND permission granted");
         }
         // don't abort if the caller has the same uid as the recents component
-        if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
+        if (mSupervisor.mRecentTasks.isCallerRecents(state.mCallingUid)) {
             return new BalVerdict(BAL_ALLOW_ALLOWLISTED_COMPONENT,
                     /*background*/ true, "Recents Component");
         }
         // don't abort if the callingUid is the device owner
-        if (mService.isDeviceOwner(callingUid)) {
+        if (mService.isDeviceOwner(state.mCallingUid)) {
             return new BalVerdict(BAL_ALLOW_ALLOWLISTED_COMPONENT,
                     /*background*/ true, "Device Owner");
         }
         // don't abort if the callingUid is a affiliated profile owner
-        if (mService.isAffiliatedProfileOwner(callingUid)) {
+        if (mService.isAffiliatedProfileOwner(state.mCallingUid)) {
             return new BalVerdict(BAL_ALLOW_ALLOWLISTED_COMPONENT,
                     /*background*/ true, "Affiliated Profile Owner");
         }
         // don't abort if the callingUid has companion device
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
+        final int callingUserId = UserHandle.getUserId(state.mCallingUid);
+        if (mService.isAssociatedCompanionApp(callingUserId, state.mCallingUid)) {
             return new BalVerdict(BAL_ALLOW_ALLOWLISTED_COMPONENT,
                     /*background*/ true, "Companion App");
         }
         // don't abort if the callingUid has SYSTEM_ALERT_WINDOW permission
-        if (mService.hasSystemAlertWindowPermission(callingUid, callingPid, callingPackage)) {
+        if (mService.hasSystemAlertWindowPermission(state.mCallingUid, state.mCallingPid,
+                state.mCallingPackage)) {
             Slog.w(
                     TAG,
                     "Background activity start for "
-                            + callingPackage
+                            + state.mCallingPackage
                             + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
             return new BalVerdict(BAL_ALLOW_SAW_PERMISSION,
                     /*background*/ true, "SYSTEM_ALERT_WINDOW permission is granted");
@@ -906,7 +896,7 @@ public class BackgroundActivityStartController {
         // OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop
         if (isSystemExemptFlagEnabled() && mService.getAppOpsManager().checkOpNoThrow(
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
-                callingUid, callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                state.mCallingUid, state.mCallingPackage) == AppOpsManager.MODE_ALLOWED) {
             return new BalVerdict(BAL_ALLOW_PERMISSION, /*background*/ true,
                     "OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop is granted");
         }
@@ -915,7 +905,7 @@ public class BackgroundActivityStartController {
         // That's the case for PendingIntent-based starts, since the creator's process might not be
         // up and alive.
         // Don't abort if the callerApp or other processes of that uid are allowed in any way.
-        BalVerdict callerAppAllowsBal = checkProcessAllowsBal(callerApp, state);
+        BalVerdict callerAppAllowsBal = checkProcessAllowsBal(state.mCallerApp, state);
         if (callerAppAllowsBal.allows()) {
             return callerAppAllowsBal;
         }
@@ -929,13 +919,6 @@ public class BackgroundActivityStartController {
      * or {@link #BAL_BLOCK} if the launch should be blocked
      */
     BalVerdict checkBackgroundActivityStartAllowedBySender(BalState state) {
-
-        if (state.isPendingIntentBalAllowedByPermission()
-                && hasBalPermission(state.mRealCallingUid, state.mRealCallingPid)) {
-            return new BalVerdict(BAL_ALLOW_PERMISSION,
-                    /*background*/ false,
-                    "realCallingUid has BAL permission.");
-        }
 
         // Normal apps with visible app window will be allowed to start activity if app switching
         // is allowed, or apps like live wallpaper with non app visible window will be allowed.
@@ -960,6 +943,13 @@ public class BackgroundActivityStartController {
                         /*background*/ false,
                         "realCallingUid has visible (non-toast) window.");
             }
+        }
+
+        if (state.isPendingIntentBalAllowedByPermission()
+                && hasBalPermission(state.mRealCallingUid, state.mRealCallingPid)) {
+            return new BalVerdict(BAL_ALLOW_PERMISSION,
+                    /*background*/ false,
+                    "realCallingUid has BAL permission.");
         }
 
         // if the realCallingUid is a persistent system process, abort if the IntentSender
