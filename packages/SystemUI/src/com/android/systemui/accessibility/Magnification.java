@@ -30,6 +30,8 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.SurfaceControl;
@@ -40,6 +42,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.window.InputTransferToken;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -68,6 +72,9 @@ import javax.inject.Inject;
 @SysUISingleton
 public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     private static final String TAG = "Magnification";
+
+    @VisibleForTesting static final int DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS = 300;
+    private static final int MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL = 1;
 
     private final ModeSwitchesController mModeSwitchesController;
     private final Context mContext;
@@ -209,8 +216,26 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
             SysUiState sysUiState, OverviewProxyService overviewProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
             DisplayManager displayManager, AccessibilityLogger a11yLogger) {
+        this(context, mainHandler.getLooper(), executor, commandQueue,
+                modeSwitchesController, sysUiState, overviewProxyService, secureSettings,
+                displayTracker, displayManager, a11yLogger);
+    }
+
+    @VisibleForTesting
+    public Magnification(Context context, Looper looper, @Main Executor executor,
+            CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
+            SysUiState sysUiState, OverviewProxyService overviewProxyService,
+            SecureSettings secureSettings, DisplayTracker displayTracker,
+            DisplayManager displayManager, AccessibilityLogger a11yLogger) {
         mContext = context;
-        mHandler = mainHandler;
+        mHandler = new Handler(looper) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                if (msg.what == MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL) {
+                    showMagnificationButtonInternal(msg.arg1, msg.arg2);
+                }
+            }
+        };
         mExecutor = executor;
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mCommandQueue = commandQueue;
@@ -350,6 +375,21 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
 
     @MainThread
     void showMagnificationButton(int displayId, int magnificationMode) {
+        if (Flags.delayShowMagnificationButton()) {
+            if (mHandler.hasMessages(MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL)) {
+                return;
+            }
+            mHandler.sendMessageDelayed(
+                    mHandler.obtainMessage(
+                            MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL, displayId, magnificationMode),
+                    DELAY_SHOW_MAGNIFICATION_TIMEOUT_MS);
+        } else {
+            showMagnificationButtonInternal(displayId, magnificationMode);
+        }
+    }
+
+    @MainThread
+    private void showMagnificationButtonInternal(int displayId, int magnificationMode) {
         // not to show mode switch button if settings panel is already showing to
         // prevent settings panel be covered by the button.
         if (isMagnificationSettingsPanelShowing(displayId)) {
@@ -360,6 +400,9 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
 
     @MainThread
     void removeMagnificationButton(int displayId) {
+        if (Flags.delayShowMagnificationButton()) {
+            mHandler.removeMessages(MSG_SHOW_MAGNIFICATION_BUTTON_INTERNAL);
+        }
         mModeSwitchesController.removeButton(displayId);
     }
 
