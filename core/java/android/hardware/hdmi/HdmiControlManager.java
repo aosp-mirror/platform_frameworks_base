@@ -1353,9 +1353,6 @@ public final class HdmiControlManager {
     /**
      * Get a snapshot of the real-time status of the devices on the CEC bus.
      *
-     * <p>This only applies to devices with switch functionality, which are devices with one
-     * or more than one HDMI inputs.
-     *
      * @return a list of {@link HdmiDeviceInfo} of the connected CEC devices on the CEC bus. An
      * empty list will be returned if there is none.
      */
