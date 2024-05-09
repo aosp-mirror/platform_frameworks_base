@@ -83,6 +83,7 @@ import android.graphics.Point;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -172,6 +173,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private static final String TAG = "AppWidgetServiceImpl";
 
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_NULL_PROVIDER_INFO = Build.IS_DEBUGGABLE;
 
     private static final String OLD_KEYGUARD_HOST_PACKAGE = "android";
     private static final String NEW_KEYGUARD_HOST_PACKAGE = "com.android.keyguard";
@@ -736,7 +738,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
         RemoteViews views = new RemoteViews(mContext.getPackageName(),
                 R.layout.work_widget_mask_view);
-        ApplicationInfo appInfo = provider.info.providerInfo.applicationInfo;
+        final ActivityInfo activityInfo = provider.info.providerInfo;
+        final ApplicationInfo appInfo = activityInfo != null ? activityInfo.applicationInfo : null;
+        final String packageName = appInfo != null
+                ? appInfo.packageName : provider.id.componentName.getPackageName();
         final int appUserId = provider.getUserId();
         boolean showBadge = false;
 
@@ -750,7 +755,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             } else if (provider.maskedBySuspendedPackage) {
                 showBadge = mUserManager.hasBadge(appUserId);
                 final UserPackage suspendingPackage = mPackageManagerInternal.getSuspendingPackage(
-                        appInfo.packageName, appUserId);
+                        packageName, appUserId);
                 // TODO(b/281839596): don't rely on platform always meaning suspended by admin.
                 if (suspendingPackage != null
                         && PLATFORM_PACKAGE_NAME.equals(suspendingPackage.packageName)) {
@@ -759,11 +764,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 } else {
                     final SuspendDialogInfo dialogInfo =
                             mPackageManagerInternal.getSuspendedDialogInfo(
-                                    appInfo.packageName, suspendingPackage, appUserId);
+                                    packageName, suspendingPackage, appUserId);
                     // onUnsuspend is null because we don't want to start any activity on
                     // unsuspending from a suspended widget.
                     onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
-                            appInfo.packageName, suspendingPackage, dialogInfo, null, null,
+                            packageName, suspendingPackage, dialogInfo, null, null,
                             appUserId);
                 }
             } else if (provider.maskedByLockedProfile) {
@@ -778,7 +783,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 showBadge = mUserManager.hasBadge(appUserId);
             }
 
-            Icon icon = appInfo.icon != 0
+            Icon icon = (appInfo != null && appInfo.icon != 0)
                     ? Icon.createWithResource(appInfo.packageName, appInfo.icon)
                     : Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
             views.setImageViewIcon(R.id.work_widget_app_icon, icon);
@@ -2934,6 +2939,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             AppWidgetProviderInfo info = new AppWidgetProviderInfo();
             info.provider = providerId.componentName;
             info.providerInfo = ri.activityInfo;
+            if (DEBUG_NULL_PROVIDER_INFO) {
+                Objects.requireNonNull(ri.activityInfo);
+            }
             return info;
         }
         return null;
@@ -2968,6 +2976,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             AppWidgetProviderInfo info = new AppWidgetProviderInfo();
             info.provider = providerId.componentName;
             info.providerInfo = activityInfo;
+            if (DEBUG_NULL_PROVIDER_INFO) {
+                Objects.requireNonNull(activityInfo);
+            }
 
             final Resources resources;
             final long identity = Binder.clearCallingIdentity();
@@ -3543,6 +3554,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             AppWidgetProviderInfo info = new AppWidgetProviderInfo();
                             info.provider = providerId.componentName;
                             info.providerInfo = providerInfo;
+                            if (DEBUG_NULL_PROVIDER_INFO) {
+                                Objects.requireNonNull(providerInfo);
+                            }
 
                             provider = new Provider();
                             provider.setPartialInfoLocked(info);
@@ -3559,6 +3573,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                             if (info != null) {
                                 info.provider = providerId.componentName;
                                 info.providerInfo = providerInfo;
+                                if (DEBUG_NULL_PROVIDER_INFO) {
+                                    Objects.requireNonNull(providerInfo);
+                                }
                                 provider.setInfoLocked(info);
                             }
                         }
