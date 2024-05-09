@@ -3546,8 +3546,6 @@ class Task extends TaskFragment {
         info.isVisibleRequested = isVisibleRequested();
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
-        appCompatTaskInfo.isLetterboxDoubleTapEnabled = top != null
-                && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();
         appCompatTaskInfo.topActivityLetterboxVerticalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         appCompatTaskInfo.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
@@ -3562,15 +3560,29 @@ class Task extends TaskFragment {
             appCompatTaskInfo.topActivityLetterboxWidth = top.getBounds().width();
             appCompatTaskInfo.topActivityLetterboxHeight = top.getBounds().height();
         }
+        // We need to consider if letterboxed or pillarboxed
+        // TODO(b/336807329) Encapsulate reachability logic
+        appCompatTaskInfo.isLetterboxDoubleTapEnabled = top != null
+                && top.mLetterboxUiController.isLetterboxDoubleTapEducationEnabled();
         if (appCompatTaskInfo.isLetterboxDoubleTapEnabled) {
             if (appCompatTaskInfo.isTopActivityPillarboxed()) {
-                // Pillarboxed
-                appCompatTaskInfo.topActivityLetterboxHorizontalPosition =
-                        top.mLetterboxUiController.getLetterboxPositionForHorizontalReachability();
+                if (top.mLetterboxUiController.allowHorizontalReachabilityForThinLetterbox()) {
+                    // Pillarboxed
+                    appCompatTaskInfo.topActivityLetterboxHorizontalPosition =
+                            top.mLetterboxUiController
+                                    .getLetterboxPositionForHorizontalReachability();
+                } else {
+                    appCompatTaskInfo.isLetterboxDoubleTapEnabled = false;
+                }
             } else {
-                // Letterboxed
-                appCompatTaskInfo.topActivityLetterboxVerticalPosition =
-                        top.mLetterboxUiController.getLetterboxPositionForVerticalReachability();
+                if (top.mLetterboxUiController.allowVerticalReachabilityForThinLetterbox()) {
+                    // Letterboxed
+                    appCompatTaskInfo.topActivityLetterboxVerticalPosition =
+                            top.mLetterboxUiController
+                                    .getLetterboxPositionForVerticalReachability();
+                } else {
+                    appCompatTaskInfo.isLetterboxDoubleTapEnabled = false;
+                }
             }
         }
         appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton = top != null

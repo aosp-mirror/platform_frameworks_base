@@ -131,6 +131,7 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 import com.android.server.wm.utils.OptPropFactory;
 import com.android.server.wm.utils.OptPropFactory.OptProp;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1004,6 +1005,67 @@ final class LetterboxUiController {
         return getSplitScreenAspectRatio();
     }
 
+    /**
+     * @return {@value true} if the resulting app is letterboxed in a way defined as thin.
+     */
+    boolean isVerticalThinLetterboxed() {
+        final int thinHeight = mLetterboxConfiguration.getThinLetterboxHeightPx();
+        if (thinHeight < 0) {
+            return false;
+        }
+        final Task task = mActivityRecord.getTask();
+        if (task == null) {
+            return false;
+        }
+        final int padding = Math.abs(
+                task.getBounds().height() - mActivityRecord.getBounds().height()) / 2;
+        return padding <= thinHeight;
+    }
+
+    /**
+     * @return {@value true} if the resulting app is pillarboxed in a way defined as thin.
+     */
+    boolean isHorizontalThinLetterboxed() {
+        final int thinWidth = mLetterboxConfiguration.getThinLetterboxWidthPx();
+        if (thinWidth < 0) {
+            return false;
+        }
+        final Task task = mActivityRecord.getTask();
+        if (task == null) {
+            return false;
+        }
+        final int padding = Math.abs(
+                task.getBounds().width() - mActivityRecord.getBounds().width()) / 2;
+        return padding <= thinWidth;
+    }
+
+
+    /**
+     * @return {@value true} if the vertical reachability should be allowed in case of
+     * thin letteboxing
+     */
+    boolean allowVerticalReachabilityForThinLetterbox() {
+        if (!Flags.disableThinLetterboxingReachability()) {
+            return true;
+        }
+        // When the flag is enabled we allow vertical reachability only if the
+        // app is not thin letterboxed vertically.
+        return !isVerticalThinLetterboxed();
+    }
+
+    /**
+     * @return {@value true} if the vertical reachability should be enabled in case of
+     * thin letteboxing
+     */
+    boolean allowHorizontalReachabilityForThinLetterbox() {
+        if (!Flags.disableThinLetterboxingReachability()) {
+            return true;
+        }
+        // When the flag is enabled we allow horizontal reachability only if the
+        // app is not thin pillarboxed.
+        return !isHorizontalThinLetterboxed();
+    }
+
     float getSplitScreenAspectRatio() {
         // Getting the same aspect ratio that apps get in split screen.
         final DisplayArea displayArea = mActivityRecord.getDisplayArea();
@@ -1243,6 +1305,9 @@ final class LetterboxUiController {
      * </ul>
      */
     private boolean isHorizontalReachabilityEnabled(Configuration parentConfiguration) {
+        if (!allowHorizontalReachabilityForThinLetterbox()) {
+            return false;
+        }
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
         final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
@@ -1278,6 +1343,9 @@ final class LetterboxUiController {
      * </ul>
      */
     private boolean isVerticalReachabilityEnabled(Configuration parentConfiguration) {
+        if (!allowVerticalReachabilityForThinLetterbox()) {
+            return false;
+        }
         // Use screen resolved bounds which uses resolved bounds or size compat bounds
         // as activity bounds can sometimes be empty
         final Rect opaqueActivityBounds = hasInheritedLetterboxBehavior()
@@ -1551,6 +1619,8 @@ final class LetterboxUiController {
         if (!shouldShowLetterboxUi) {
             return;
         }
+        pw.println(prefix + "  isVerticalThinLetterboxed=" + isVerticalThinLetterboxed());
+        pw.println(prefix + "  isHorizontalThinLetterboxed=" + isHorizontalThinLetterboxed());
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
                 getLetterboxBackgroundColor().toArgb()));
         pw.println(prefix + "  letterboxBackgroundType="
