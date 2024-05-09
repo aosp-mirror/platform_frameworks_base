@@ -23,7 +23,6 @@ import static com.android.app.animation.Interpolators.STANDARD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.server.notification.Flags.screenshareNotificationHiding;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
-import static com.android.systemui.Flags.nsslFalsingFix;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnEmptySpaceClickListener;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.OnOverscrollTopChangedListener;
@@ -2062,32 +2061,18 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             }
             boolean horizontalSwipeWantsIt = false;
             boolean scrollerWantsIt = false;
-            if (nsslFalsingFix() || MigrateClocksToBlueprint.isEnabled()) {
-                // Reverse the order relative to the else statement. onScrollTouch will reset on an
-                // UP event, causing horizontalSwipeWantsIt to be set to true on vertical swipes.
-                if (mLongPressedView == null && !mView.isBeingDragged()
-                        && !expandingNotification
-                        && !mView.getExpandedInThisMotion()
-                        && !onlyScrollingInThisMotion
-                        && !mView.getDisallowDismissInThisMotion()) {
-                    horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
-                }
-                if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
-                        && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
-                    scrollerWantsIt = mView.onScrollTouch(ev);
-                }
-            } else {
-                if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
-                        && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
-                    scrollerWantsIt = mView.onScrollTouch(ev);
-                }
-                if (mLongPressedView == null && !mView.isBeingDragged()
-                        && !expandingNotification
-                        && !mView.getExpandedInThisMotion()
-                        && !onlyScrollingInThisMotion
-                        && !mView.getDisallowDismissInThisMotion()) {
-                    horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
-                }
+            // NOTE: the order of these is important. If reversed, onScrollTouch will reset on an
+            // UP event, causing horizontalSwipeWantsIt to be set to true on vertical swipes.
+            if (mLongPressedView == null && !mView.isBeingDragged()
+                    && !expandingNotification
+                    && !mView.getExpandedInThisMotion()
+                    && !onlyScrollingInThisMotion
+                    && !mView.getDisallowDismissInThisMotion()) {
+                horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
+            }
+            if (mLongPressedView == null && mView.isExpanded() && !mSwipeHelper.isSwiping()
+                    && !expandingNotification && !mView.getDisallowScrollingInThisMotion()) {
+                scrollerWantsIt = mView.onScrollTouch(ev);
             }
 
             // Check if we need to clear any snooze leavebehinds
