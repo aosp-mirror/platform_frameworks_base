@@ -137,6 +137,18 @@ flag {
 }
 
 flag {
+    name: "get_package_storage_stats"
+    namespace: "system_performance"
+    is_exported: true
+    description: "Add dumpsys entry point for package StorageStats"
+    bug: "332905331"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "provide_info_of_apk_in_apex"
     is_exported: true
     namespace: "package_manager_service"
