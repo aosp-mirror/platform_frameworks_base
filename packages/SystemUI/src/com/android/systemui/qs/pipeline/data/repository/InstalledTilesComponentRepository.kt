@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.ResolveInfoFlags
+import android.content.pm.ServiceInfo
 import android.os.UserHandle
 import android.service.quicksettings.TileService
 import androidx.annotation.GuardedBy
@@ -36,14 +37,17 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 
 interface InstalledTilesComponentRepository {
 
     fun getInstalledTilesComponents(userId: Int): Flow<Set<ComponentName>>
+
+    fun getInstalledTilesServiceInfos(userId: Int): List<ServiceInfo>
 }
 
 @SysUISingleton
@@ -55,38 +59,45 @@ constructor(
     private val packageChangeRepository: PackageChangeRepository
 ) : InstalledTilesComponentRepository {
 
-    @GuardedBy("userMap") private val userMap = mutableMapOf<Int, Flow<Set<ComponentName>>>()
+    @GuardedBy("userMap") private val userMap = mutableMapOf<Int, StateFlow<List<ServiceInfo>>>()
 
     override fun getInstalledTilesComponents(userId: Int): Flow<Set<ComponentName>> =
-        synchronized(userMap) {
-            userMap.getOrPut(userId) {
-                /*
-                 * In order to query [PackageManager] for different users, this implementation will
-                 * call [Context.createContextAsUser] and retrieve the [PackageManager] from that
-                 * context.
-                 */
-                val packageManager =
-                    if (applicationContext.userId == userId) {
-                        applicationContext.packageManager
-                    } else {
-                        applicationContext
-                            .createContextAsUser(
-                                UserHandle.of(userId),
-                                /* flags */ 0,
-                            )
-                            .packageManager
-                    }
-                packageChangeRepository
-                    .packageChanged(UserHandle.of(userId))
-                    .onStart { emit(PackageChangeModel.Empty) }
-                    .map { reloadComponents(userId, packageManager) }
-                    .distinctUntilChanged()
-                    .shareIn(backgroundScope, SharingStarted.WhileSubscribed(), replay = 1)
-            }
+        synchronized(userMap) { getForUserLocked(userId) }
+            .map { it.mapTo(mutableSetOf()) { it.componentName } }
+
+    override fun getInstalledTilesServiceInfos(userId: Int): List<ServiceInfo> {
+        return synchronized(userMap) { getForUserLocked(userId).value }
+    }
+
+    private fun getForUserLocked(userId: Int): StateFlow<List<ServiceInfo>> {
+        return userMap.getOrPut(userId) {
+            /*
+             * In order to query [PackageManager] for different users, this implementation will
+             * call [Context.createContextAsUser] and retrieve the [PackageManager] from that
+             * context.
+             */
+            val packageManager =
+                if (applicationContext.userId == userId) {
+                    applicationContext.packageManager
+                } else {
+                    applicationContext
+                        .createContextAsUser(
+                            UserHandle.of(userId),
+                            /* flags */ 0,
+                        )
+                        .packageManager
+                }
+            packageChangeRepository
+                .packageChanged(UserHandle.of(userId))
+                .onStart { emit(PackageChangeModel.Empty) }
+                .map { reloadComponents(userId, packageManager) }
+                .distinctUntilChanged()
+                .stateIn(backgroundScope, SharingStarted.WhileSubscribed(), emptyList())
         }
+    }
 
     @WorkerThread
-    private fun reloadComponents(userId: Int, packageManager: PackageManager): Set<ComponentName> {
+    private fun reloadComponents(userId: Int, packageManager: PackageManager): List<ServiceInfo> {
         return packageManager
             .queryIntentServicesAsUser(INTENT, FLAGS, userId)
             .mapNotNull { it.serviceInfo }
@@ -100,7 +111,6 @@ constructor(
                     false
                 }
             }
-            .mapTo(mutableSetOf()) { it.componentName }
     }
 
     companion object {

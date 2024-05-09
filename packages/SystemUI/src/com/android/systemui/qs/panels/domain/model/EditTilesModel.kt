@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.ui.viewmodel
+package com.android.systemui.qs.panels.domain.model
 
-import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
-import javax.inject.Inject
+import com.android.systemui.qs.panels.shared.model.EditTileData
 
-@SysUISingleton
-class QuickSettingsContainerViewModel
-@Inject
-constructor(
-    val brightnessSliderViewModel: BrightnessSliderViewModel,
-    val tileGridViewModel: TileGridViewModel,
-    val editModeViewModel: EditModeViewModel,
+data class EditTilesModel(
+    val stockTiles: List<EditTileData>,
+    val customTiles: List<EditTileData>,
 )

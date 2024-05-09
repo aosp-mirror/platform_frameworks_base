@@ -32,6 +32,7 @@ import com.android.systemui.dump.nano.SystemUIProtoDump
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTile.BooleanState
 import com.android.systemui.qs.FakeQSFactory
+import com.android.systemui.qs.FakeQSTile
 import com.android.systemui.qs.external.CustomTile
 import com.android.systemui.qs.external.CustomTileStatePersister
 import com.android.systemui.qs.external.TileLifecycleManager
