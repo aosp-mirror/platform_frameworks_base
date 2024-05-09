@@ -327,7 +327,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
     private boolean shouldEnableRunningTasksForDesktopMode() {
         return mPcFeatureEnabled
-                || (DesktopModeStatus.isEnabled() && enableDesktopWindowingTaskbarRunningApps());
+                || (DesktopModeStatus.canEnterDesktopMode(mContext)
+                && enableDesktopWindowingTaskbarRunningApps());
     }
 
     @VisibleForTesting
@@ -371,7 +372,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 continue;
             }
 
-            if (DesktopModeStatus.isEnabled() && mDesktopModeTaskRepository.isPresent()
+            if (DesktopModeStatus.canEnterDesktopMode(mContext)
+                    && mDesktopModeTaskRepository.isPresent()
                     && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
                 if (mDesktopModeTaskRepository.get().isMinimizedTask(taskInfo.taskId)) {
                     // Minimized freeform tasks should not be shown at all.

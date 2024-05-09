@@ -891,13 +891,13 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<DesktopTasksController> providesDesktopTasksController(
+    static Optional<DesktopTasksController> providesDesktopTasksController(Context context,
             @DynamicOverride Optional<Lazy<DesktopTasksController>> desktopTasksController) {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
         return desktopTasksController.flatMap((lazy)-> {
-            if (DesktopModeStatus.isEnabled()) {
+            if (DesktopModeStatus.canEnterDesktopMode(context)) {
                 return Optional.of(lazy.get());
             }
             return Optional.empty();
@@ -910,13 +910,13 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static Optional<DesktopModeTaskRepository> provideDesktopTaskRepository(
+    static Optional<DesktopModeTaskRepository> provideDesktopTaskRepository(Context context,
             @DynamicOverride Optional<Lazy<DesktopModeTaskRepository>> desktopModeTaskRepository) {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
         return desktopModeTaskRepository.flatMap((lazy)-> {
-            if (DesktopModeStatus.isEnabled()) {
+            if (DesktopModeStatus.canEnterDesktopMode(context)) {
                 return Optional.of(lazy.get());
             }
             return Optional.empty();

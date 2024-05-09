@@ -59,6 +59,7 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -75,11 +76,13 @@ import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
 import com.android.wm.shell.util.SplitBounds;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +91,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Tests for {@link RecentTasksController}.
+ * Tests for {@link RecentTasksController}
+ *
+ * Usage: atest WMShellUnitTests:RecentTasksControllerTest
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -118,9 +123,15 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private ShellInit mShellInit;
     private ShellController mShellController;
     private TestShellExecutor mMainExecutor;
+    private static StaticMockitoSession sMockitoSession;
 
     @Before
     public void setUp() {
+        sMockitoSession = mockitoSession().initMocks(this).strictness(Strictness.LENIENT)
+                .mockStatic(DesktopModeStatus.class).startMocking();
+        ExtendedMockito.doReturn(true)
+                .when(() -> DesktopModeStatus.canEnterDesktopMode(any()));
+
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         mShellInit = spy(new ShellInit(mMainExecutor));
@@ -134,6 +145,11 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
                 mMainExecutor);
         mShellInit.init();
+    }
+
+    @After
+    public void tearDown() {
+        sMockitoSession.finishMocking();
     }
 
     @Test
@@ -275,10 +291,6 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
     @Test
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_groupFreeformTasks() {
-        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
-                DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(true);
-
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
         ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
@@ -309,16 +321,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         // Check single entries
         assertEquals(t2, singleGroup1.getTaskInfo1());
         assertEquals(t4, singleGroup2.getTaskInfo1());
-
-        mockitoSession.finishMocking();
     }
 
     @Test
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Enabled_freeformTaskOrder() {
-        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
-                DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(true);
-
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
         ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
@@ -357,15 +363,12 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Check single entry
         assertEquals(t4, singleGroup.getTaskInfo1());
-
-        mockitoSession.finishMocking();
     }
 
     @Test
     public void testGetRecentTasks_hasActiveDesktopTasks_proto2Disabled_doNotGroupFreeformTasks() {
-        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
-                DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(false);
+        ExtendedMockito.doReturn(false)
+                .when(() -> DesktopModeStatus.canEnterDesktopMode(any()));
 
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -390,16 +393,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         assertEquals(t2, recentTasks.get(1).getTaskInfo1());
         assertEquals(t3, recentTasks.get(2).getTaskInfo1());
         assertEquals(t4, recentTasks.get(3).getTaskInfo1());
-
-        mockitoSession.finishMocking();
     }
 
     @Test
     public void testGetRecentTasks_proto2Enabled_ignoresMinimizedFreeformTasks() {
-        StaticMockitoSession mockitoSession = mockitoSession().mockStatic(
-                DesktopModeStatus.class).startMocking();
-        when(DesktopModeStatus.isEnabled()).thenReturn(true);
-
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
         ActivityManager.RecentTaskInfo t3 = makeTaskInfo(3);
@@ -435,8 +432,6 @@ public class RecentTasksControllerTest extends ShellTestCase {
         // Check single entries
         assertEquals(t2, singleGroup1.getTaskInfo1());
         assertEquals(t4, singleGroup2.getTaskInfo1());
-
-        mockitoSession.finishMocking();
     }
 
     @Test

@@ -638,7 +638,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .setOnClickListener(mOnCaptionButtonClickListener)
                 .setOnTouchListener(mOnCaptionTouchListener)
                 .setLayoutId(mRelayoutParams.mLayoutResId)
-                .setWindowingButtonsVisible(DesktopModeStatus.isEnabled())
+                .setWindowingButtonsVisible(DesktopModeStatus.canEnterDesktopMode(mContext))
                 .setCaptionHeight(mResult.mCaptionHeight)
                 .build();
         mWindowDecorViewHolder.onHandleMenuOpened();

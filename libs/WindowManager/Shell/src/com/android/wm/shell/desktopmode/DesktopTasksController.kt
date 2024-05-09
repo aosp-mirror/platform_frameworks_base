@@ -167,7 +167,7 @@ class DesktopTasksController(
 
     init {
         desktopMode = DesktopModeImpl()
-        if (DesktopModeStatus.isEnabled()) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback({ onInit() }, this)
         }
     }
