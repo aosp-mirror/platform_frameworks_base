@@ -184,6 +184,7 @@ import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -266,6 +267,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.UiThread;
@@ -7400,8 +7402,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /** Cache the return value for {@link #isPip2ExperimentEnabled()} */
+    private static Boolean sIsPip2ExperimentEnabled = null;
+
+    /**
+     * @return {@code true} if PiP2 implementation should be used. Besides the trunk stable flag,
+     * system property can be used to override this read only flag during development.
+     * It's currently limited to phone form factor, i.e., not enabled on ARC / TV.
+     */
     static boolean isPip2ExperimentEnabled() {
-        return Flags.enablePip2Implementation() || SystemProperties.getBoolean(
-                "wm_shell.pip2", false);
+        if (sIsPip2ExperimentEnabled == null) {
+            final FeatureInfo arcFeature = SystemConfig.getInstance().getAvailableFeatures().get(
+                    "org.chromium.arc");
+            final FeatureInfo tvFeature = SystemConfig.getInstance().getAvailableFeatures().get(
+                    FEATURE_LEANBACK);
+            final boolean isArc = arcFeature != null && arcFeature.version >= 0;
+            final boolean isTv = tvFeature != null && tvFeature.version >= 0;
+            sIsPip2ExperimentEnabled = SystemProperties.getBoolean("wm_shell.pip2", false)
+                    || (Flags.enablePip2Implementation() && !isArc && !isTv);
+        }
+        return sIsPip2ExperimentEnabled;
     }
 }
