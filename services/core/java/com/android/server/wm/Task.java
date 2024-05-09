@@ -20,7 +20,6 @@ import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.INVALID_WINDOWING_MODE;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
-import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -171,7 +170,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
@@ -438,16 +436,6 @@ class Task extends TaskFragment {
     // Id of the previous display the root task was on.
     int mPrevDisplayId = INVALID_DISPLAY;
 
-    /** ID of the display which rotation {@link #mRotation} has. */
-    private int mLastRotationDisplayId = INVALID_DISPLAY;
-
-    /**
-     * Display rotation as of the last time {@link #setBounds(Rect)} was called or this task was
-     * moved to a new display.
-     */
-    @Surface.Rotation
-    private int mRotation;
-
     int mMultiWindowRestoreWindowingMode = INVALID_WINDOWING_MODE;
 
     /**
@@ -458,10 +446,7 @@ class Task extends TaskFragment {
      */
     int mLastReportedRequestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
-    // For comparison with DisplayContent bounds.
-    private Rect mTmpRect = new Rect();
-    // For handling display rotations.
-    private Rect mTmpRect2 = new Rect();
+    private final Rect mTmpRect = new Rect();
 
     // Resize mode of the task. See {@link ActivityInfo#resizeMode}
     // Based on the {@link ActivityInfo#resizeMode} of the root activity.
@@ -1193,9 +1178,6 @@ class Task extends TaskFragment {
             // before we unified Task level. Look into if this can be done in a better place.
             updateOverrideConfigurationFromLaunchBounds();
         }
-
-        // Update task bounds if needed.
-        adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
         mRootWindowContainer.updateUIDsPresentOnDisplay();
 
@@ -2731,15 +2713,7 @@ class Task extends TaskFragment {
             return setBounds(getRequestedOverrideBounds(), bounds);
         }
 
-        int rotation = Surface.ROTATION_0;
-        final DisplayContent displayContent = getRootTask() != null
-                ? getRootTask().getDisplayContent() : null;
-        if (displayContent != null) {
-            rotation = displayContent.getDisplayInfo().rotation;
-        }
-
         final int boundsChange = super.setBounds(bounds);
-        mRotation = rotation;
         updateSurfacePositionNonOrganized();
         return boundsChange;
     }
@@ -2799,10 +2773,6 @@ class Task extends TaskFragment {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        final boolean isRootTask = isRootTask();
-        if (!isRootTask && !mCreatedByOrganizer) {
-            adjustBoundsForDisplayChangeIfNeeded(dc);
-        }
         super.onDisplayChanged(dc);
         if (isLeafTask()) {
             final int displayId = (dc != null) ? dc.getDisplayId() : INVALID_DISPLAY;
@@ -2951,48 +2921,6 @@ class Task extends TaskFragment {
 
     boolean isDragResizing() {
         return mDragResizing;
-    }
-
-    void adjustBoundsForDisplayChangeIfNeeded(final DisplayContent displayContent) {
-        if (displayContent == null) {
-            return;
-        }
-        if (getRequestedOverrideBounds().isEmpty()) {
-            return;
-        }
-        final int displayId = displayContent.getDisplayId();
-        final int newRotation = displayContent.getDisplayInfo().rotation;
-        if (displayId != mLastRotationDisplayId) {
-            // This task is on a display that it wasn't on. There is no point to keep the relative
-            // position if display rotations for old and new displays are different. Just keep these
-            // values.
-            mLastRotationDisplayId = displayId;
-            mRotation = newRotation;
-            return;
-        }
-
-        if (mRotation == newRotation) {
-            // Rotation didn't change. We don't need to adjust the bounds to keep the relative
-            // position.
-            return;
-        }
-
-        // Device rotation changed.
-        // - We don't want the task to move around on the screen when this happens, so update the
-        //   task bounds so it stays in the same place.
-        // - Rotate the bounds and notify activity manager if the task can be resized independently
-        //   from its root task. The root task will take care of task rotation for the other case.
-        mTmpRect2.set(getBounds());
-
-        if (!getWindowConfiguration().canResizeTask()) {
-            setBounds(mTmpRect2);
-            return;
-        }
-
-        displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
-        if (setBounds(mTmpRect2) != BOUNDS_CHANGE_NONE) {
-            mAtmService.resizeTask(mTaskId, getBounds(), RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
-        }
     }
 
     /** Cancels any running app transitions associated with the task. */
