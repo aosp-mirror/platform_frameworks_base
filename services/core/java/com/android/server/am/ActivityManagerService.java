@@ -1670,7 +1670,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int BIND_APPLICATION_TIMEOUT_SOFT_MSG = 82;
     static final int BIND_APPLICATION_TIMEOUT_HARD_MSG = 83;
     static final int SERVICE_FGS_TIMEOUT_MSG = 84;
-    static final int SERVICE_FGS_ANR_TIMEOUT_MSG = 85;
+    static final int SERVICE_FGS_CRASH_TIMEOUT_MSG = 85;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -2041,8 +2041,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case SERVICE_FGS_TIMEOUT_MSG: {
                     mServices.onFgsTimeout((ServiceRecord) msg.obj);
                 } break;
-                case SERVICE_FGS_ANR_TIMEOUT_MSG: {
-                    mServices.onFgsAnrTimeout((ServiceRecord) msg.obj);
+                case SERVICE_FGS_CRASH_TIMEOUT_MSG: {
+                    mServices.onFgsCrashTimeout((ServiceRecord) msg.obj);
                 } break;
             }
         }

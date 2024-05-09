@@ -1198,8 +1198,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * Callback called when a particular foreground service type has timed out.
      *
      * <p>This callback is meant to give the app a small grace period of a few seconds to finish
-     * the foreground service of the associated type - if it fails to do so, the app will be
-     * declared an ANR.
+     * the foreground service of the associated type - if it fails to do so, the app will crash.
      *
      * <p>The foreground service of the associated type can be stopped within the time limit by
      * {@link android.app.Service#stopSelf()},
