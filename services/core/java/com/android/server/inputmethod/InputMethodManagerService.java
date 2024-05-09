@@ -204,7 +204,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 
 /**
@@ -1301,12 +1300,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
             mNonPreemptibleInputMethods = mRes.getStringArray(
                     com.android.internal.R.array.config_nonPreemptibleInputMethods);
-            IntConsumer toolTypeConsumer =
-                    Flags.useHandwritingListenerForTooltype()
-                            ? toolType -> onUpdateEditorToolType(toolType) : null;
             Runnable discardDelegationTextRunnable = () -> discardHandwritingDelegationText();
             mHwController = new HandwritingModeController(mContext, thread.getLooper(),
-                    new InkWindowInitializer(), toolTypeConsumer, discardDelegationTextRunnable);
+                    new InkWindowInitializer(), discardDelegationTextRunnable);
             registerDeviceListenerAndCheckStylusSupport();
         }
     }
@@ -3372,8 +3368,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_HAS_IME);
             mCurStatsToken = null;
 
-            if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
-                curMethod.updateEditorToolType(lastClickToolType);
+            if (Flags.useHandwritingListenerForTooltype()) {
+                maybeReportToolType();
+            } else if (lastClickToolType != MotionEvent.TOOL_TYPE_UNKNOWN) {
+                onUpdateEditorToolType(lastClickToolType);
             }
             mVisibilityApplier.performShowIme(windowToken, statsToken,
                     mVisibilityStateComputer.getShowFlagsForInputMethodServiceOnly(),
@@ -3385,6 +3383,29 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mCurStatsToken = statsToken;
         }
         return false;
+    }
+
+    @GuardedBy("ImfLock.class")
+    private void maybeReportToolType() {
+        int lastDeviceId = mInputManagerInternal.getLastUsedInputDeviceId();
+        final InputManager im = mContext.getSystemService(InputManager.class);
+        if (im == null) {
+            return;
+        }
+        InputDevice device = im.getInputDevice(lastDeviceId);
+        if (device == null) {
+            return;
+        }
+        int toolType;
+        if (isStylusDevice(device)) {
+            toolType = MotionEvent.TOOL_TYPE_STYLUS;
+        } else if (isFingerDevice(device)) {
+            toolType = MotionEvent.TOOL_TYPE_FINGER;
+        } else {
+            // other toolTypes are irrelevant and reported as unknown.
+            toolType = MotionEvent.TOOL_TYPE_UNKNOWN;
+        }
+        onUpdateEditorToolType(toolType);
     }
 
     @Override
@@ -4240,6 +4261,10 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private static boolean isStylusDevice(InputDevice inputDevice) {
         return inputDevice.supportsSource(InputDevice.SOURCE_STYLUS)
                 || inputDevice.supportsSource(InputDevice.SOURCE_BLUETOOTH_STYLUS);
+    }
+
+    private static boolean isFingerDevice(InputDevice inputDevice) {
+        return inputDevice.supportsSource(InputDevice.SOURCE_TOUCHSCREEN);
     }
 
     @GuardedBy("ImfLock.class")
