@@ -33,7 +33,7 @@ interface IBubbles {
 
     oneway void showBubble(in String key, in Rect bubbleBarBounds) = 3;
 
-    oneway void removeBubble(in String key) = 4;
+    oneway void dragBubbleToDismiss(in String key) = 4;
 
     oneway void removeAllBubbles() = 5;
 
@@ -47,5 +47,5 @@ interface IBubbles {
 
     oneway void setBubbleBarBounds(in Rect bubbleBarBounds) = 10;
 
-    oneway void stopBubbleDrag(in String key, in BubbleBarLocation location) = 11;
+    oneway void stopBubbleDrag(in BubbleBarLocation location) = 11;
 }

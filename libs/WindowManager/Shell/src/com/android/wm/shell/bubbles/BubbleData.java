@@ -327,6 +327,14 @@ public class BubbleData {
         return mSelectedBubble;
     }
 
+    /**
+     * Returns the key of the selected bubble, or null if no bubble is selected.
+     */
+    @Nullable
+    public String getSelectedBubbleKey() {
+        return mSelectedBubble != null ? mSelectedBubble.getKey() : null;
+    }
+
     public BubbleOverflow getOverflow() {
         return mOverflow;
     }
@@ -1228,9 +1236,7 @@ public class BubbleData {
     public void dump(PrintWriter pw) {
         pw.println("BubbleData state:");
         pw.print("  selected: ");
-        pw.println(mSelectedBubble != null
-                ? mSelectedBubble.getKey()
-                : "null");
+        pw.println(getSelectedBubbleKey());
         pw.print("  expanded: ");
         pw.println(mExpanded);
 
