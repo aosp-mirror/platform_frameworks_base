@@ -7401,6 +7401,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     static boolean isPip2ExperimentEnabled() {
-        return Flags.enablePip2Implementation();
+        return Flags.enablePip2Implementation() || SystemProperties.getBoolean(
+                "wm_shell.pip2", false);
     }
 }
