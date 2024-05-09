@@ -121,7 +121,6 @@ public final class PinnerService extends SystemService {
             SystemProperties.getBoolean("pinner.use_pinlist", true);
 
     private static final int MAX_CAMERA_PIN_SIZE = 80 * (1 << 20); // 80MB max for camera app.
-    private static final int MAX_HOME_PIN_SIZE = 6 * (1 << 20); // 6MB max for home app.
     private static final int MAX_ASSISTANT_PIN_SIZE = 60 * (1 << 20); // 60MB max for assistant app.
 
     public static final String ANON_REGION_STAT_NAME = "[anon]";
@@ -176,7 +175,7 @@ public final class PinnerService extends SystemService {
 
     // Resource-configured pinner flags;
     private final boolean mConfiguredToPinCamera;
-    private final boolean mConfiguredToPinHome;
+    private final int mConfiguredHomePinBytes;
     private final boolean mConfiguredToPinAssistant;
     private final int mConfiguredWebviewPinBytes;
 
@@ -238,8 +237,8 @@ public final class PinnerService extends SystemService {
         mDeviceConfigInterface = mInjector.getDeviceConfigInterface();
         mConfiguredToPinCamera = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerCameraApp);
-        mConfiguredToPinHome = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_pinnerHomeApp);
+        mConfiguredHomePinBytes = context.getResources().getInteger(
+                com.android.internal.R.integer.config_pinnerHomePinBytes);
         mConfiguredToPinAssistant = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerAssistantApp);
         mConfiguredWebviewPinBytes = context.getResources().getInteger(
@@ -390,7 +389,7 @@ public final class PinnerService extends SystemService {
                     @Override
                     public void onChange(boolean selfChange, Uri uri) {
                         if (userSetupCompleteUri.equals(uri)) {
-                            if (mConfiguredToPinHome) {
+                            if (mConfiguredHomePinBytes > 0) {
                                 sendPinAppMessage(KEY_HOME, ActivityManager.getCurrentUser(),
                                         true /* force */);
                             }
@@ -594,7 +593,7 @@ public final class PinnerService extends SystemService {
             Slog.i(TAG, "Pinner - skip pinning camera app");
         }
 
-        if (mConfiguredToPinHome) {
+        if (mConfiguredHomePinBytes > 0) {
             pinKeys.add(KEY_HOME);
         }
         if (mConfiguredToPinAssistant) {
@@ -815,7 +814,7 @@ public final class PinnerService extends SystemService {
             case KEY_CAMERA:
                 return MAX_CAMERA_PIN_SIZE;
             case KEY_HOME:
-                return MAX_HOME_PIN_SIZE;
+                return mConfiguredHomePinBytes;
             case KEY_ASSISTANT:
                 return MAX_ASSISTANT_PIN_SIZE;
             default:
