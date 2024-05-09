@@ -2454,10 +2454,19 @@ public final class ActiveServices {
                                 } else if (lastTimeOutAt > 0) {
                                     // Time limit was exhausted within the past 24 hours and the app
                                     // has not been in the TOP state since then, throw an exception.
-                                    throw new ForegroundServiceStartNotAllowedException("Time limit"
-                                            + " already exhausted for foreground service type "
+                                    final String exceptionMsg = "Time limit already exhausted for"
+                                            + " foreground service type "
                                             + ServiceInfo.foregroundServiceTypeToLabel(
-                                                            foregroundServiceType));
+                                                    foregroundServiceType);
+                                    if (!android.app.Flags.gateFgsTimeoutAnrBehavior()) {
+                                        throw new ForegroundServiceStartNotAllowedException(
+                                                    exceptionMsg);
+                                    } else {
+                                        // Only throw an exception above while the new ANR behavior
+                                        // is not gated, otherwise, reset the limit temporarily.
+                                        Slog.wtf(TAG, exceptionMsg);
+                                        fgsTypeInfo.reset();
+                                    }
                                 }
                             }
                         } else {
@@ -3942,6 +3951,12 @@ public final class ActiveServices {
         final String reason = "A foreground service of type "
                 + ServiceInfo.foregroundServiceTypeToLabel(fgsType)
                 + " did not stop within its timeout: " + sr.getComponentName();
+
+        if (android.app.Flags.gateFgsTimeoutAnrBehavior()) {
+            // Log a WTF instead of throwing an ANR while the new behavior is gated.
+            Slog.wtf(TAG, reason);
+            return;
+        }
 
         final TimeoutRecord tr = TimeoutRecord.forFgsTimeout(reason);
         tr.mLatencyTracker.waitingOnAMSLockStarted();
