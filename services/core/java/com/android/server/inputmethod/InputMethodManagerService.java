@@ -2250,7 +2250,9 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Check if the input method is changing.
         // We expect the caller has already verified that the client is allowed to access this
         // display ID.
-        if (isSelectedMethodBoundLocked()) {
+        final String curId = bindingController.getCurId();
+        if (curId != null && curId.equals(bindingController.getSelectedMethodId())
+                && mDisplayIdToShowIme == mCurTokenDisplayId) {
             if (cs.mCurSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
@@ -2366,13 +2368,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return false;
         }
         return true;
-    }
-
-    @GuardedBy("ImfLock.class")
-    private boolean isSelectedMethodBoundLocked() {
-        String curId = getCurIdLocked();
-        return curId != null && curId.equals(getSelectedMethodIdLocked())
-                && mDisplayIdToShowIme == mCurTokenDisplayId;
     }
 
     @GuardedBy("ImfLock.class")
