@@ -1556,8 +1556,7 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         // Allow RAW formats, even when not advertised.
-        if (inputFormat == ImageFormat.RAW_PRIVATE || inputFormat == ImageFormat.RAW10
-                || inputFormat == ImageFormat.RAW12 || inputFormat == ImageFormat.RAW_SENSOR) {
+        if (isRawFormat(inputFormat)) {
             return true;
         }
 
@@ -1625,6 +1624,11 @@ public class CameraDeviceImpl extends CameraDevice
                 if (format == inputFormat) {
                     validFormat = true;
                 }
+            }
+
+            // Allow RAW formats, even when not advertised.
+            if (Flags.multiResRawReprocessing() && isRawFormat(inputFormat)) {
+                return;
             }
 
             if (validFormat == false) {
@@ -2567,6 +2571,11 @@ public class CameraDeviceImpl extends CameraDevice
 
     private CameraCharacteristics getCharacteristics() {
         return mCharacteristics;
+    }
+
+    private boolean isRawFormat(int format) {
+        return (format == ImageFormat.RAW_PRIVATE || format == ImageFormat.RAW10
+                || format == ImageFormat.RAW12 || format == ImageFormat.RAW_SENSOR);
     }
 
     /**
