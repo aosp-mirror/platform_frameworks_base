@@ -4241,7 +4241,9 @@
   <java-symbol type="string" name="battery_saver_charged_notification_summary" />
   <java-symbol type="string" name="dynamic_mode_notification_channel_name" />
   <java-symbol type="string" name="dynamic_mode_notification_title" />
+  <java-symbol type="string" name="dynamic_mode_notification_title_v2" />
   <java-symbol type="string" name="dynamic_mode_notification_summary" />
+  <java-symbol type="string" name="dynamic_mode_notification_summary_v2" />
   <java-symbol type="drawable" name="ic_battery" />
 
   <java-symbol type="bool" name="config_skipSensorAvailable" />
@@ -4693,6 +4695,8 @@
   <java-symbol type="integer" name="config_letterboxDefaultPositionForTabletopModeReachability" />
   <java-symbol type="bool" name="config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled" />
   <java-symbol type="bool" name="config_letterboxIsEducationEnabled" />
+  <java-symbol type="dimen" name="config_letterboxThinLetterboxWidthDp" />
+  <java-symbol type="dimen" name="config_letterboxThinLetterboxHeightDp" />
   <java-symbol type="dimen" name="config_letterboxDefaultMinAspectRatioForUnresizableApps" />
   <java-symbol type="bool" name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled" />
   <java-symbol type="bool" name="config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled" />

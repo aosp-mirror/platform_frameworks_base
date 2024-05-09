@@ -218,12 +218,12 @@ constructor(
     ) {
         SideFpsControllerRefactor.assertInLegacyMode()
         if (!displayStateInteractor.isInRearDisplayMode.value) {
-            requests.add(request)
             mainExecutor.execute {
                 if (overlayView == null) {
                     traceSection(
                         "SideFpsController#show(request=${request.name}, reason=$reason)"
                     ) {
+                        requests.add(request)
                         createOverlayForDisplay(reason)
                     }
                 } else {
@@ -323,7 +323,7 @@ constructor(
         )
         lottie.addLottieOnCompositionLoadedListener {
             // Check that view is not stale, and that overlayView has not been hidden/removed
-            if (overlayView?.isAttachedToWindow == true && overlayView == view) {
+            if (overlayView != null && overlayView == view) {
                 updateOverlayParams(display, it.bounds)
             }
         }

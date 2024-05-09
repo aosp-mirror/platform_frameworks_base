@@ -121,6 +121,10 @@ class TaskContainer {
         return mIsVisible;
     }
 
+    void setIsVisible(boolean visible) {
+        mIsVisible = visible;
+    }
+
     boolean hasDirectActivity() {
         return mHasDirectActivity;
     }
@@ -148,13 +152,15 @@ class TaskContainer {
     boolean shouldUpdateContainer(@NonNull TaskFragmentParentInfo info) {
         final Configuration configuration = info.getConfiguration();
 
-        return info.isVisible()
-                // No need to update presentation in PIP until the Task exit PIP.
-                && !isInPictureInPicture(configuration)
-                // If the task properties equals regardless of starting position, don't need to
-                // update the container.
-                && (mConfiguration.diffPublicOnly(configuration) != 0
-                || mDisplayId != info.getDisplayId());
+        if (isInPictureInPicture(configuration)) {
+            // No need to update presentation in PIP until the Task exit PIP.
+            return false;
+        }
+
+        // If the task properties equals regardless of starting position, don't
+        // need to update the container.
+        return mConfiguration.diffPublicOnly(configuration) != 0
+                || mDisplayId != info.getDisplayId();
     }
 
     /**
