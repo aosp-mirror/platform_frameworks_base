@@ -55,6 +55,7 @@ import android.view.Surface;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
+import com.android.server.biometrics.BiometricDanglingReceiver;
 import com.android.server.biometrics.BiometricHandlerProvider;
 import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
@@ -209,6 +210,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mBiometricHandlerProvider = biometricHandlerProvider;
 
         initAuthenticationBroadcastReceiver();
+        initFaceDanglingBroadcastReceiver();
         initSensors(resetLockoutRequiresChallenge, props);
     }
 
@@ -220,6 +222,10 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     Slog.d(getTag(), "Initializing AuthenticationStatsCollector");
                     mAuthenticationStatsCollector = collector;
                 });
+    }
+
+    private void initFaceDanglingBroadcastReceiver() {
+        new BiometricDanglingReceiver(mContext, BiometricsProtoEnums.MODALITY_FACE);
     }
 
     private void initSensors(boolean resetLockoutRequiresChallenge, SensorProps[] props) {

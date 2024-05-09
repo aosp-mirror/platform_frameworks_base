@@ -1240,6 +1240,11 @@ public class BiometricSchedulerTest {
             Slog.d(TAG, "TestInternalEnumerateClient#startHalOperation");
             onEnumerationResult(TEST_FINGERPRINT, 0 /* remaining */);
         }
+
+        @Override
+        protected int getModality() {
+            return BiometricsProtoEnums.MODALITY_FINGERPRINT;
+        }
     }
 
     private static class TestRemovalClient extends RemovalClient<Fingerprint, Object> {
