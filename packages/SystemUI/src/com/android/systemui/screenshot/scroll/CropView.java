@@ -45,6 +45,7 @@ import androidx.customview.widget.ExploreByTouchHelper;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.systemui.Flags;
 import com.android.systemui.res.R;
 
 import java.util.List;
@@ -378,8 +379,14 @@ public class CropView extends View {
                 upper = 1;
                 break;
         }
-        Log.i(TAG, "getAllowedValues: " + boundary + ", "
-                + "result=[lower=" + lower + ", upper=" + upper + "]");
+        if (lower >= upper) {
+            Log.wtf(TAG, "getAllowedValues computed an invalid range "
+                    + "[" + lower + ", " + upper + "]");
+            if (Flags.screenshotScrollCropViewCrashFix()) {
+                lower = Math.min(lower, upper);
+                upper = lower;
+            }
+        }
         return new Range<>(lower, upper);
     }
 
