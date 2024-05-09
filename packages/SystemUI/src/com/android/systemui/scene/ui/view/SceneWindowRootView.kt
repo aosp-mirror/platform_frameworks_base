@@ -56,9 +56,8 @@ class SceneWindowRootView(
     }
 
     // TODO(b/298525212): remove once Compose exposes window inset bounds.
-    override fun onApplyWindowInsets(windowInsets: WindowInsets): WindowInsets? {
-        val insets = super.onApplyWindowInsets(windowInsets)
-        this.windowInsets.value = insets
-        return insets
+    override fun onApplyWindowInsets(windowInsets: WindowInsets): WindowInsets {
+        this.windowInsets.value = windowInsets
+        return windowInsets
     }
 }

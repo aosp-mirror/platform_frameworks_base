@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -67,6 +68,8 @@ import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
+import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
@@ -208,6 +211,8 @@ private fun SceneScope.SingleShade(
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
 ) {
+    val cutoutLocation = LocalDisplayCutout.current.location
+
     val maxNotifScrimTop = remember { mutableStateOf(0f) }
     val tileSquishiness by
         animateSceneFloatAsState(
@@ -243,9 +248,15 @@ private fun SceneScope.SingleShade(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier =
-                                Modifier.fillMaxWidth().thenIf(isClickable) {
-                                    Modifier.clickable(onClick = { viewModel.onContentClicked() })
-                                }
+                                Modifier.fillMaxWidth()
+                                    .thenIf(isClickable) {
+                                        Modifier.clickable(
+                                            onClick = { viewModel.onContentClicked() }
+                                        )
+                                    }
+                                    .thenIf(cutoutLocation != CutoutLocation.CENTER) {
+                                        Modifier.displayCutoutPadding()
+                                    },
                         ) {
                             CollapsedShadeHeader(
                                 viewModel = viewModel.shadeHeaderViewModel,
