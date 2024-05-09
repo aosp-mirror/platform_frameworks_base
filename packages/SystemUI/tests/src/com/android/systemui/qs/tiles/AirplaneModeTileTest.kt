@@ -22,7 +22,7 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.res.R
+import com.android.internal.telephony.flags.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.classifier.FalsingManagerFake
@@ -33,10 +33,12 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.GlobalSettings
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import kotlinx.coroutines.Job
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -44,11 +46,15 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class AirplaneModeTileTest : SysuiTestCase() {
+
     @Mock
     private lateinit var mHost: QSHost
     @Mock
@@ -62,13 +68,18 @@ class AirplaneModeTileTest : SysuiTestCase() {
     @Mock
     private lateinit var mBroadcastDispatcher: BroadcastDispatcher
     @Mock
-    private lateinit var mConnectivityManager: Lazy<ConnectivityManager>
+    private lateinit var mLazyConnectivityManager: Lazy<ConnectivityManager>
+    @Mock
+    private lateinit var mConnectivityManager: ConnectivityManager
     @Mock
     private lateinit var mGlobalSettings: GlobalSettings
     @Mock
     private lateinit var mUserTracker: UserTracker
     @Mock
     private lateinit var mUiEventLogger: QsEventLogger
+    @Mock
+    private lateinit var mClickJob: Job
+
     private lateinit var mTestableLooper: TestableLooper
     private lateinit var mTile: AirplaneModeTile
 
@@ -78,7 +89,7 @@ class AirplaneModeTileTest : SysuiTestCase() {
         mTestableLooper = TestableLooper.get(this)
         Mockito.`when`(mHost.context).thenReturn(mContext)
         Mockito.`when`(mHost.userContext).thenReturn(mContext)
-
+        Mockito.`when`(mLazyConnectivityManager.get()).thenReturn(mConnectivityManager)
         mTile = AirplaneModeTile(
             mHost,
             mUiEventLogger,
@@ -90,7 +101,7 @@ class AirplaneModeTileTest : SysuiTestCase() {
             mActivityStarter,
             mQsLogger,
             mBroadcastDispatcher,
-            mConnectivityManager,
+            mLazyConnectivityManager,
             mGlobalSettings,
             mUserTracker)
     }
@@ -119,5 +130,25 @@ class AirplaneModeTileTest : SysuiTestCase() {
 
         assertThat(state.icon)
             .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_airplane_icon_on))
+    }
+
+    @Test
+    fun handleClick_noSatelliteFeature_directSetAirplaneMode() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+
+        mTile.handleClick(null)
+
+        verify(mConnectivityManager).setAirplaneMode(any())
+    }
+
+    @Test
+    fun handleClick_hasSatelliteFeatureButClickIsProcessing_doNothing() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+        Mockito.`when`(mClickJob.isCompleted).thenReturn(false)
+        mTile.mClickJob = mClickJob
+
+        mTile.handleClick(null)
+
+        verify(mConnectivityManager, times(0)).setAirplaneMode(any())
     }
 }
