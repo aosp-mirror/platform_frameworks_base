@@ -51,9 +51,9 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
-import com.android.systemui.util.kotlin.BooleanFlowOperators.and
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
-import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.android.systemui.util.kotlin.collectFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -145,7 +145,7 @@ constructor(
 
     /** Returns a flow that tracks whether communal hub is available. */
     fun communalAvailable(): Flow<Boolean> =
-        or(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
+        anyOf(communalInteractor.isCommunalAvailable, communalInteractor.editModeOpen)
 
     /**
      * Creates the container view containing the glanceable hub UI.
@@ -248,7 +248,7 @@ constructor(
         // transition to the bouncer would be incorrectly intercepted by the hub.
         collectFlow(
             containerView,
-            or(
+            anyOf(
                 keyguardInteractor.primaryBouncerShowing,
                 keyguardInteractor.alternateBouncerShowing
             ),
@@ -267,7 +267,7 @@ constructor(
         )
         collectFlow(
             containerView,
-            and(shadeInteractor.isAnyFullyExpanded, not(shadeInteractor.isUserInteracting)),
+            allOf(shadeInteractor.isAnyFullyExpanded, not(shadeInteractor.isUserInteracting)),
             {
                 shadeShowing = it
                 updateTouchHandlingState()

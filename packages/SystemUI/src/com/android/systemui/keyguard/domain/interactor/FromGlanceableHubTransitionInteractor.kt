@@ -28,7 +28,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.util.kotlin.BooleanFlowOperators.and
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -148,7 +148,7 @@ constructor(
             }
         } else {
             scope.launch {
-                and(keyguardInteractor.isKeyguardOccluded, not(keyguardInteractor.isDreaming))
+                allOf(keyguardInteractor.isKeyguardOccluded, not(keyguardInteractor.isDreaming))
                     .filterRelevantKeyguardStateAnd { isOccludedAndNotDreaming ->
                         isOccludedAndNotDreaming
                     }

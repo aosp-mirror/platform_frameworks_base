@@ -42,7 +42,7 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.util.kotlin.BooleanFlowOperators.or
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
@@ -64,7 +64,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -134,7 +133,7 @@ constructor(
     private val isOnLockscreen: Flow<Boolean> =
         combine(
                 keyguardTransitionInteractor.isFinishedInState(LOCKSCREEN).onStart { emit(false) },
-                or(
+                anyOf(
                     keyguardTransitionInteractor.isInTransitionToState(LOCKSCREEN),
                     keyguardTransitionInteractor.isInTransitionFromState(LOCKSCREEN),
                 ),

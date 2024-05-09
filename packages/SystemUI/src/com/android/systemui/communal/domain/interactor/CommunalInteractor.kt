@@ -60,9 +60,9 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
-import com.android.systemui.util.kotlin.BooleanFlowOperators.and
+import com.android.systemui.util.kotlin.BooleanFlowOperators.allOf
+import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
-import com.android.systemui.util.kotlin.BooleanFlowOperators.or
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -127,10 +127,10 @@ constructor(
 
     /** Whether communal features are enabled and available. */
     val isCommunalAvailable: Flow<Boolean> =
-        and(
+        allOf(
                 communalSettingsInteractor.isCommunalEnabled,
                 not(keyguardInteractor.isEncryptedOrLockdown),
-                or(keyguardInteractor.isKeyguardShowing, keyguardInteractor.isDreaming)
+                anyOf(keyguardInteractor.isKeyguardShowing, keyguardInteractor.isDreaming)
             )
             .distinctUntilChanged()
             .onEach { available ->
