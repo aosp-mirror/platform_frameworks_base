@@ -53,7 +53,7 @@ public class PipInputConsumer {
      * Listener interface for callers to learn when this class is registered or unregistered with
      * window manager
      */
-    private interface RegistrationListener {
+    interface RegistrationListener {
         void onRegistrationChanged(boolean isRegistered);
     }
 
