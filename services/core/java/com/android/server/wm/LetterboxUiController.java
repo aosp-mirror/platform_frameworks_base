@@ -1675,7 +1675,7 @@ final class LetterboxUiController {
         if (mainWin.isLetterboxedForDisplayCutout()) {
             return "DISPLAY_CUTOUT";
         }
-        if (mActivityRecord.isAspectRatioApplied()) {
+        if (mActivityRecord.isLetterboxedForAspectRatioOnly()) {
             return "ASPECT_RATIO";
         }
         return "UNKNOWN_REASON";
