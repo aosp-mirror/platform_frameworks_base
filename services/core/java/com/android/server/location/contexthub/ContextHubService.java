@@ -333,7 +333,8 @@ public class ContextHubService extends IContextHubService.Stub {
                 return false;
             }
 
-            if (didEventHappen(MESSAGE_DUPLICATION_PROBABILITY_PERCENT)) {
+            if (Flags.reliableMessageDuplicateDetectionService()
+                && didEventHappen(MESSAGE_DUPLICATION_PROBABILITY_PERCENT)) {
                 for (int i = 0; i < NUM_MESSAGES_TO_DUPLICATE; ++i) {
                     handleClientMessageCallback(contextHubId, hostEndpointId,
                             message, nanoappPermissions, messagePermissions);
