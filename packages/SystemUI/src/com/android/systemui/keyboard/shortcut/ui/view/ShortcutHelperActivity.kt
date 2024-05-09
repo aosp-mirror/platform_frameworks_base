@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyboard.shortcut
+package com.android.systemui.keyboard.shortcut.ui.view
 
 import android.graphics.Insets
 import android.os.Bundle
@@ -24,16 +24,25 @@ import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.updatePadding
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.res.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
+import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 /**
  * Activity that hosts the new version of the keyboard shortcut helper. It will be used both for
  * small and large screen devices.
  */
-class ShortcutHelperActivity : ComponentActivity() {
+class ShortcutHelperActivity
+@Inject
+constructor(
+    private val viewModel: ShortcutHelperViewModel,
+) : ComponentActivity() {
 
     private val bottomSheetContainer
         get() = requireViewById<View>(R.id.shortcut_helper_sheet_container)
@@ -53,6 +62,24 @@ class ShortcutHelperActivity : ComponentActivity() {
         setUpPredictiveBack()
         setUpSheetDismissListener()
         setUpDismissOnTouchOutside()
+        observeFinishRequired()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (isFinishing) {
+            viewModel.onUserLeave()
+        }
+    }
+
+    private fun observeFinishRequired() {
+        lifecycleScope.launch {
+            viewModel.shouldShow.flowWithLifecycle(lifecycle).collect { shouldShow ->
+                if (!shouldShow) {
+                    finish()
+                }
+            }
+        }
     }
 
     private fun setupEdgeToEdge() {
