@@ -6594,6 +6594,11 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews createCompactHeadsUpContentView() {
+            // Don't show compact heads up for FSI notifications.
+            if (mN.fullScreenIntent != null) {
+                return createHeadsUpContentView(/* increasedHeight= */ false);
+            }
+
             if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeCompactHeadsUpContentView();
                 if (styleView != null) {
@@ -10351,7 +10356,7 @@ public class Notification implements Parcelable
         @Nullable
         @Override
         public RemoteViews makeCompactHeadsUpContentView() {
-            // TODO(b/336228700): Apply minimal HUN treatment for Call Style.
+            // Use existing heads up for call style.
             return makeHeadsUpContentView(false);
         }
 
