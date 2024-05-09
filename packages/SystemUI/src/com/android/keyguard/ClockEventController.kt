@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -432,6 +433,7 @@ constructor(
                         listenForDozeAmountTransition(this)
                         listenForAnyStateToAodTransition(this)
                         listenForAnyStateToLockscreenTransition(this)
+                        listenForAnyStateToDozingTransition(this)
                     } else {
                         listenForDozeAmount(this)
                     }
@@ -577,6 +579,21 @@ constructor(
                     .collect { handleDoze(0f) }
         }
     }
+
+    /**
+     * When keyguard is displayed due to pulsing notifications when AOD is off,
+     * we should make sure clock is in dozing state instead of LS state
+     */
+    @VisibleForTesting
+    internal fun listenForAnyStateToDozingTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor
+                    .transitionStepsToState(DOZING)
+                    .filter { it.transitionState == TransitionState.FINISHED }
+                    .collect { handleDoze(1f) }
+        }
+    }
+
 
     @VisibleForTesting
     internal fun listenForDozing(scope: CoroutineScope): Job {
