@@ -954,7 +954,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
         if (mBar != null) {
             try {
-                mBar.togglePanel();
+                mBar.toggleNotificationsPanel();
             } catch (RemoteException ex) {
             }
         }

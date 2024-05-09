@@ -64,7 +64,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
