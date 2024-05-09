@@ -22,7 +22,6 @@ import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
-import androidx.annotation.VisibleForTesting
 import androidx.core.view.updateLayoutParams
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.BubblePositioner
@@ -79,25 +78,16 @@ class BubbleExpandedViewPinController(
 
     override fun updateLocation(location: BubbleBarLocation) {
         val view = dropTargetView ?: return
-        getBounds(location.isOnLeft(view.isLayoutRtl), tempRect)
+        positioner.getBubbleBarExpandedViewBounds(
+            location.isOnLeft(view.isLayoutRtl),
+            false /* isOverflowExpanded */,
+            tempRect
+        )
         view.updateLayoutParams<FrameLayout.LayoutParams> {
             width = tempRect.width()
             height = tempRect.height()
         }
         view.x = tempRect.left.toFloat()
         view.y = tempRect.top.toFloat()
-    }
-
-    private fun getBounds(onLeft: Boolean, out: Rect) {
-        positioner.getBubbleBarExpandedViewBounds(onLeft, false /* isOverflowExpanded */, out)
-        val centerX = out.centerX()
-        val centerY = out.centerY()
-        out.scale(DROP_TARGET_SCALE)
-        // Move rect center back to the same position as before scale
-        out.offset(centerX - out.centerX(), centerY - out.centerY())
-    }
-
-    companion object {
-        @VisibleForTesting const val DROP_TARGET_SCALE = 0.9f
     }
 }

@@ -18,6 +18,7 @@ package com.android.wm.shell.common.bubbles;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -49,6 +50,8 @@ public class BubbleBarUpdate implements Parcelable {
     public String unsupressedBubbleKey;
     @Nullable
     public BubbleBarLocation bubbleBarLocation;
+    @Nullable
+    public Point expandedViewDropTargetSize;
 
     // This is only populated if bubbles have been removed.
     public List<RemovedBubble> removedBubbles = new ArrayList<>();
@@ -81,12 +84,14 @@ public class BubbleBarUpdate implements Parcelable {
         suppressedBubbleKey = parcel.readString();
         unsupressedBubbleKey = parcel.readString();
         removedBubbles = parcel.readParcelableList(new ArrayList<>(),
-                RemovedBubble.class.getClassLoader());
+                RemovedBubble.class.getClassLoader(), RemovedBubble.class);
         parcel.readStringList(bubbleKeysInOrder);
         currentBubbleList = parcel.readParcelableList(new ArrayList<>(),
-                BubbleInfo.class.getClassLoader());
+                BubbleInfo.class.getClassLoader(), BubbleInfo.class);
         bubbleBarLocation = parcel.readParcelable(BubbleBarLocation.class.getClassLoader(),
                 BubbleBarLocation.class);
+        expandedViewDropTargetSize = parcel.readParcelable(Point.class.getClassLoader(),
+                Point.class);
     }
 
     /**
@@ -105,6 +110,7 @@ public class BubbleBarUpdate implements Parcelable {
                 || bubbleBarLocation != null;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BubbleBarUpdate{"
@@ -121,6 +127,7 @@ public class BubbleBarUpdate implements Parcelable {
                 + " bubbles=" + bubbleKeysInOrder
                 + " currentBubbleList=" + currentBubbleList
                 + " bubbleBarLocation=" + bubbleBarLocation
+                + " expandedViewDropTargetSize=" + expandedViewDropTargetSize
                 + " }";
     }
 
@@ -144,6 +151,7 @@ public class BubbleBarUpdate implements Parcelable {
         parcel.writeStringList(bubbleKeysInOrder);
         parcel.writeParcelableList(currentBubbleList, flags);
         parcel.writeParcelable(bubbleBarLocation, flags);
+        parcel.writeParcelable(expandedViewDropTargetSize, flags);
     }
 
     /**
@@ -157,10 +165,11 @@ public class BubbleBarUpdate implements Parcelable {
 
     @NonNull
     public static final Creator<BubbleBarUpdate> CREATOR =
-            new Creator<BubbleBarUpdate>() {
+            new Creator<>() {
                 public BubbleBarUpdate createFromParcel(Parcel source) {
                     return new BubbleBarUpdate(source);
                 }
+
                 public BubbleBarUpdate[] newArray(int size) {
                     return new BubbleBarUpdate[size];
                 }

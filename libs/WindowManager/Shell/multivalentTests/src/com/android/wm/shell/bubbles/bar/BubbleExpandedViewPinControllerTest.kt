@@ -31,7 +31,6 @@ import com.android.internal.protolog.common.ProtoLog
 import com.android.wm.shell.R
 import com.android.wm.shell.bubbles.BubblePositioner
 import com.android.wm.shell.bubbles.DeviceConfig
-import com.android.wm.shell.bubbles.bar.BubbleExpandedViewPinController.Companion.DROP_TARGET_SCALE
 import com.android.wm.shell.common.bubbles.BaseBubblePinController
 import com.android.wm.shell.common.bubbles.BaseBubblePinController.Companion.DROP_TARGET_ALPHA_IN_DURATION
 import com.android.wm.shell.common.bubbles.BaseBubblePinController.Companion.DROP_TARGET_ALPHA_OUT_DURATION
@@ -248,15 +247,8 @@ class BubbleExpandedViewPinControllerTest {
     private val dropTargetView: View?
         get() = container.findViewById(R.id.bubble_bar_drop_target)
 
-    private fun getExpectedDropTargetBounds(onLeft: Boolean): Rect {
-        val rect = Rect()
-        positioner.getBubbleBarExpandedViewBounds(onLeft, false /* isOveflowExpanded */, rect)
-        // Scale the rect to expected size, but keep the center point the same
-        val centerX = rect.centerX()
-        val centerY = rect.centerY()
-        rect.scale(DROP_TARGET_SCALE)
-        rect.offset(centerX - rect.centerX(), centerY - rect.centerY())
-        return rect
+    private fun getExpectedDropTargetBounds(onLeft: Boolean): Rect = Rect().also {
+        positioner.getBubbleBarExpandedViewBounds(onLeft, false /* isOveflowExpanded */, it)
     }
 
     private fun runOnMainSync(runnable: Runnable) {
