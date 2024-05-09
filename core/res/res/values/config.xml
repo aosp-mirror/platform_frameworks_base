@@ -6093,6 +6093,18 @@
     <!-- Whether displaying letterbox education is enabled for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsEducationEnabled">false</bool>
 
+    <!-- The width in dp to use to detect vertical thin letterboxing.
+         If W is the available width and w is the letterbox width, an app
+         is thin letterboxed if the value here is < (W - w) / 2
+         If the value is < 0 the thin letterboxing policy is disabled -->
+    <dimen name="config_letterboxThinLetterboxWidthDp">-1dp</dimen>
+
+    <!-- The height in dp to use to detect horizontal thin letterboxing
+         If H is the available height and h is the letterbox height, an app
+         is thin letterboxed if the value here is < (H - h) / 2
+         If the value is < 0 the thin letterboxing policy is disabled -->
+    <dimen name="config_letterboxThinLetterboxHeightDp">-1dp</dimen>
+
     <!-- Default min aspect ratio for unresizable apps which are eligible for size compat mode.
          Values <= 1.0 will be ignored. Activity min/max aspect ratio restrictions will still be
          espected so this override can control the maximum screen area that can be occupied by
