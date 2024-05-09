@@ -19,6 +19,7 @@ package com.android.systemui.screenshot;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
+import static com.android.systemui.Flags.screenshotPrivateProfileAccessibilityAnnouncementFix;
 import static com.android.systemui.Flags.screenshotShelfUi2;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
@@ -217,6 +218,7 @@ public class ScreenshotController {
     private final AssistContentRequester mAssistContentRequester;
 
     private final MessageContainerController mMessageContainerController;
+    private final AnnouncementResolver mAnnouncementResolver;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
@@ -268,6 +270,7 @@ public class ScreenshotController {
             AssistContentRequester assistContentRequester,
             MessageContainerController messageContainerController,
             Provider<ScreenshotSoundController> screenshotSoundController,
+            AnnouncementResolver announcementResolver,
             @Assisted Display display,
             @Assisted boolean showUIOnExternalDisplay
     ) {
@@ -297,6 +300,7 @@ public class ScreenshotController {
         mUserManager = userManager;
         mMessageContainerController = messageContainerController;
         mAssistContentRequester = assistContentRequester;
+        mAnnouncementResolver = announcementResolver;
 
         mViewProxy = viewProxyFactory.getProxy(mContext, mDisplay.getDisplayId());
 
@@ -460,12 +464,20 @@ public class ScreenshotController {
 
     void prepareViewForNewScreenshot(@NonNull ScreenshotData screenshot, String oldPackageName) {
         withWindowAttached(() -> {
-            if (mUserManager.isManagedProfile(screenshot.getUserHandle().getIdentifier())) {
-                mViewProxy.announceForAccessibility(mContext.getResources().getString(
-                        R.string.screenshot_saving_work_profile_title));
+            if (screenshotPrivateProfileAccessibilityAnnouncementFix()) {
+                mAnnouncementResolver.getScreenshotAnnouncement(
+                        screenshot.getUserHandle().getIdentifier(),
+                        announcement -> {
+                            mViewProxy.announceForAccessibility(announcement);
+                        });
             } else {
-                mViewProxy.announceForAccessibility(
-                        mContext.getResources().getString(R.string.screenshot_saving_title));
+                if (mUserManager.isManagedProfile(screenshot.getUserHandle().getIdentifier())) {
+                    mViewProxy.announceForAccessibility(mContext.getResources().getString(
+                            R.string.screenshot_saving_work_profile_title));
+                } else {
+                    mViewProxy.announceForAccessibility(
+                            mContext.getResources().getString(R.string.screenshot_saving_title));
+                }
             }
         });
 

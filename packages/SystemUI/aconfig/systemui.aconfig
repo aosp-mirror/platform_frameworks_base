@@ -523,6 +523,16 @@ flag {
 }
 
 flag {
+    name: "screenshot_private_profile_accessibility_announcement_fix"
+    namespace: "systemui"
+    description: "Modified a11y announcement for private space screenshots"
+    bug: "326941376"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "screenshot_private_profile_behavior_fix"
     namespace: "systemui"
     description: "Private profile support for screenshots"
