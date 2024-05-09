@@ -46,6 +46,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApexStagedEvent;
+import android.content.pm.Flags;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IStagedApexObserver;
 import android.content.pm.PackageManager;
@@ -766,6 +767,10 @@ public final class DexOptHelper {
         final PackageSetting ps = installRequest.getScannedPackageSetting();
         final AndroidPackage pkg = ps.getPkg();
         final boolean onIncremental = isIncrementalPath(ps.getPathString());
+        final boolean performDexOptForRollback = Flags.recoverabilityDetection()
+                ? !(installRequest.isRollback()
+                && installRequest.getInstallSource().mInitiatingPackageName.equals("android"))
+                : true;
 
         return (!instantApp || Global.getInt(context.getContentResolver(),
                 Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
@@ -773,7 +778,8 @@ public final class DexOptHelper {
                 && !pkg.isDebuggable()
                 && (!onIncremental)
                 && dexoptOptions.isCompilationEnabled()
-                && !isApex;
+                && !isApex
+                && performDexOptForRollback;
     }
 
     private static class StagedApexObserver extends IStagedApexObserver.Stub {
