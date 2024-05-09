@@ -5,10 +5,13 @@ import com.android.compose.animation.scene.transitions
 import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.CollapseShadeInstantly
+import com.android.systemui.scene.shared.model.TransitionKeys.GoneToSplitShade
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToShadeTransition
+import com.android.systemui.scene.ui.composable.transitions.goneToSplitShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToBouncerTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToCommunalTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToGoneTransition
@@ -35,6 +38,13 @@ val SceneContainerTransitions = transitions {
 
     from(Scenes.Bouncer, to = Scenes.Gone) { bouncerToGoneTransition() }
     from(Scenes.Gone, to = Scenes.Shade) { goneToShadeTransition() }
+    from(
+        Scenes.Gone,
+        to = Scenes.Shade,
+        key = GoneToSplitShade,
+    ) {
+        goneToSplitShadeTransition()
+    }
     from(
         Scenes.Gone,
         to = Scenes.Shade,
@@ -66,6 +76,10 @@ val SceneContainerTransitions = transitions {
     overscroll(Scenes.Shade, Orientation.Vertical) {
         translate(
             Notifications.Elements.NotificationScrim,
+            y = { Shade.Dimensions.ScrimOverscrollLimit }
+        )
+        translate(
+            Shade.Elements.SplitShadeStartColumn,
             y = { Shade.Dimensions.ScrimOverscrollLimit }
         )
     }

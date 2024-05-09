@@ -50,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexScenePicker
@@ -63,6 +64,7 @@ import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
+import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.res.R
@@ -77,6 +79,7 @@ import com.android.systemui.statusbar.phone.ui.TintedIconManager
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernShadeCarrierGroupMobileView
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel
 import com.android.systemui.statusbar.policy.Clock
+import kotlin.math.max
 
 object ShadeHeader {
     object Elements {
@@ -121,7 +124,11 @@ fun SceneScope.CollapsedShadeHeader(
     }
 
     val cutoutWidth = LocalDisplayCutout.current.width()
+    val cutoutHeight = LocalDisplayCutout.current.height()
+    val cutoutTop = LocalDisplayCutout.current.top
     val cutoutLocation = LocalDisplayCutout.current.location
+    val horizontalPadding =
+        max(LocalScreenCornerRadius.current / 2f, Shade.Dimensions.HorizontalPadding)
 
     val useExpandedFormat by
         remember(cutoutLocation) {
@@ -140,7 +147,7 @@ fun SceneScope.CollapsedShadeHeader(
         contents =
             listOf(
                 {
-                    Row {
+                    Row(modifier = Modifier.padding(horizontal = horizontalPadding)) {
                         Clock(
                             scale = 1f,
                             viewModel = viewModel,
@@ -157,7 +164,12 @@ fun SceneScope.CollapsedShadeHeader(
                 },
                 {
                     if (isPrivacyChipVisible) {
-                        Box(modifier = Modifier.height(CollapsedHeight).fillMaxWidth()) {
+                        Box(
+                            modifier =
+                                Modifier.height(CollapsedHeight)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = horizontalPadding)
+                        ) {
                             PrivacyChip(
                                 viewModel = viewModel,
                                 modifier = Modifier.align(Alignment.CenterEnd),
@@ -166,9 +178,13 @@ fun SceneScope.CollapsedShadeHeader(
                     } else {
                         Row(
                             horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.element(ShadeHeader.Elements.CollapsedContentEnd)
+                            modifier =
+                                Modifier.element(ShadeHeader.Elements.CollapsedContentEnd)
+                                    .padding(horizontal = horizontalPadding)
                         ) {
-                            SystemIconContainer {
+                            SystemIconContainer(
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            ) {
                                 when (LocalWindowSizeClass.current.widthSizeClass) {
                                     WindowWidthSizeClass.Medium,
                                     WindowWidthSizeClass.Expanded ->
@@ -206,7 +222,7 @@ fun SceneScope.CollapsedShadeHeader(
 
         val screenWidth = constraints.maxWidth
         val cutoutWidthPx = cutoutWidth.roundToPx()
-        val height = CollapsedHeight.roundToPx()
+        val height = max(cutoutHeight + (cutoutTop * 2), CollapsedHeight).roundToPx()
         val childConstraints = Constraints.fixed((screenWidth - cutoutWidthPx) / 2, height)
 
         val startMeasurable = measurables[0][0]

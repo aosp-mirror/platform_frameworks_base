@@ -1469,9 +1469,10 @@ public class NotificationStackScrollLayout
     public void setExpandedHeight(float height) {
         final boolean skipHeightUpdate = shouldSkipHeightUpdate();
 
-        // when scene framework is enabled, updateStackPosition is already called by
-        // updateTopPadding every time the stack moves, so skip it here to avoid flickering.
-        if (!SceneContainerFlag.isEnabled()) {
+        // when scene framework is enabled and in single shade, updateStackPosition is already
+        // called by updateTopPadding every time the stack moves, so skip it here to avoid
+        // flickering.
+        if (!SceneContainerFlag.isEnabled() || mShouldUseSplitNotificationShade) {
             updateStackPosition();
         }
 
