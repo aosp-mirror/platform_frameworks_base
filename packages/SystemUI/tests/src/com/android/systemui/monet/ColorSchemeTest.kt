@@ -15,13 +15,11 @@
  */
 package com.android.systemui.monet
 
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.util.Log
-import android.util.Pair
-import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.theme.DynamicColors
-import com.google.ux.material.libmonet.dynamiccolor.DynamicColor
 import com.google.ux.material.libmonet.hct.Hct
 import com.google.ux.material.libmonet.scheme.SchemeTonalSpot
 import java.io.File
@@ -83,10 +81,6 @@ private fun commentShade(paletteName: String, tone: Int): String {
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class ColorSchemeTest : SysuiTestCase() {
-    private val defaultContrast = 0.0
-    private val defaultIsDark = false
-    private val defaultIsFidelity = false
-
     @Test
     fun generateThemeStyles() {
         val document = buildDoc<Any>()
@@ -113,7 +107,7 @@ class ColorSchemeTest : SysuiTestCase() {
                 }
 
                 val style = document.createElement(styleValue.name.lowercase())
-                val colorScheme = ColorScheme(sourceColor.toInt(), defaultIsDark, styleValue)
+                val colorScheme = ColorScheme(sourceColor.toInt(), false, styleValue)
 
                 style.appendChild(
                     document.createTextNode(
@@ -145,7 +139,7 @@ class ColorSchemeTest : SysuiTestCase() {
         document.appendWithBreak(resources)
 
         // shade colors
-        val colorScheme = ColorScheme(GOOGLE_BLUE, defaultIsDark)
+        val colorScheme = ColorScheme(GOOGLE_BLUE, false)
         arrayOf(
                 Triple("accent1", "Primary", colorScheme.accent1),
                 Triple("accent2", "Secondary", colorScheme.accent2),
@@ -168,34 +162,23 @@ class ColorSchemeTest : SysuiTestCase() {
 
         resources.appendWithBreak(document.createComment(commentRoles), 2)
 
-        fun generateDynamic(pairs: List<Pair<String, DynamicColor>>) {
-            arrayOf(false, true).forEach { isDark ->
-                val suffix = if (isDark) "_dark" else "_light"
-                val dynamicScheme =
-                    SchemeTonalSpot(Hct.fromInt(GOOGLE_BLUE), isDark, defaultContrast)
-                pairs.forEach {
-                    resources.createColorEntry(
-                        "system_${it.first}$suffix",
-                        it.second.getArgb(dynamicScheme)
-                    )
-                }
+        // dynamic colors
+        arrayOf(false, true).forEach { isDark ->
+            val suffix = if (isDark) "_dark" else "_light"
+            val dynamicScheme = SchemeTonalSpot(Hct.fromInt(GOOGLE_BLUE), isDark, 0.5)
+            DynamicColors.allDynamicColorsMapped(false).forEach {
+                resources.createColorEntry(
+                    "system_${it.first}$suffix",
+                    it.second.getArgb(dynamicScheme)
+                )
             }
         }
 
-        // dynamic colors
-        generateDynamic(DynamicColors.allDynamicColorsMapped(defaultIsFidelity))
-
         // fixed colors
-        val dynamicScheme =
-            SchemeTonalSpot(Hct.fromInt(GOOGLE_BLUE), defaultIsDark, defaultContrast)
-        DynamicColors.getFixedColorsMapped(defaultIsFidelity).forEach {
+        val dynamicScheme = SchemeTonalSpot(Hct.fromInt(GOOGLE_BLUE), false, 0.5)
+        DynamicColors.getFixedColorsMapped(false).forEach {
             resources.createColorEntry("system_${it.first}", it.second.getArgb(dynamicScheme))
         }
-
-        resources.appendWithBreak(document.createComment(commentRoles), 2)
-
-        // custom colors
-        generateDynamic(DynamicColors.getCustomColorsMapped(defaultIsFidelity))
 
         saveFile(document, "role_values.xml")
     }

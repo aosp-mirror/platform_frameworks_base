@@ -103,33 +103,5 @@ class DynamicColors {
                 Pair.create("on_tertiary_fixed_variant", mdc.onTertiaryFixedVariant()),
             )
         }
-
-        @JvmStatic
-        fun getCustomColorsMapped(isExtendedFidelity: Boolean): List<Pair<String, DynamicColor>> {
-            val customMdc = CustomDynamicColors(isExtendedFidelity)
-            return arrayListOf(
-                Pair.create("widget_background", customMdc.widgetBackground()),
-                Pair.create("clock_hour", customMdc.clockHour()),
-                Pair.create("clock_minute", customMdc.clockMinute()),
-                Pair.create("clock_second", customMdc.weatherTemp()),
-                Pair.create("theme_app", customMdc.themeApp()),
-                Pair.create("on_theme_app", customMdc.onThemeApp()),
-                Pair.create("theme_app_ring", customMdc.themeAppRing()),
-                Pair.create("on_theme_app_ring", customMdc.themeNotif()),
-                Pair.create("brand_a", customMdc.brandA()),
-                Pair.create("brand_b", customMdc.brandB()),
-                Pair.create("brand_c", customMdc.brandC()),
-                Pair.create("brand_d", customMdc.brandD()),
-                Pair.create("under_surface", customMdc.underSurface()),
-                Pair.create("shade_active", customMdc.shadeActive()),
-                Pair.create("on_shade_active", customMdc.onShadeActive()),
-                Pair.create("on_shade_active_variant", customMdc.onShadeActiveVariant()),
-                Pair.create("shade_inactive", customMdc.shadeInactive()),
-                Pair.create("on_shade_inactive", customMdc.onShadeInactive()),
-                Pair.create("on_shade_inactive_variant", customMdc.onShadeInactiveVariant()),
-                Pair.create("shade_disabled", customMdc.shadeDisabled()),
-                Pair.create("overview_background", customMdc.overviewBackground())
-            )
-        }
     }
 }
