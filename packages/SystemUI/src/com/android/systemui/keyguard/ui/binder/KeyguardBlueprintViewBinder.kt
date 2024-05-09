@@ -95,17 +95,8 @@ constructor(
                             null as KeyguardBlueprint?,
                         )
                         .collect { (prevBlueprint, blueprint) ->
-                            val cs =
-                                ConstraintSet().apply {
-                                    clone(constraintLayout)
-                                    val emptyLayout = ConstraintSet.Layout()
-                                    knownIds.forEach {
-                                        getConstraint(it).layout.copyFrom(emptyLayout)
-                                    }
-                                    blueprint.applyConstraints(this)
-                                }
-
-                            var transition =
+                            val config = Config.DEFAULT
+                            val transition =
                                 if (
                                     !KeyguardBottomAreaRefactor.isEnabled &&
                                         prevBlueprint != null &&
@@ -114,23 +105,37 @@ constructor(
                                     BaseBlueprintTransition(clockViewModel)
                                         .addTransition(
                                             IntraBlueprintTransition(
-                                                Config.DEFAULT,
+                                                config,
                                                 clockViewModel,
                                                 smartspaceViewModel
                                             )
                                         )
                                 } else {
                                     IntraBlueprintTransition(
-                                        Config.DEFAULT,
+                                        config,
                                         clockViewModel,
                                         smartspaceViewModel
                                     )
                                 }
 
-                            runTransition(constraintLayout, transition, Config.DEFAULT) {
-                                // Add and remove views of sections that are not contained by the
-                                // other.
-                                blueprint.replaceViews(constraintLayout, prevBlueprint)
+                            runTransition(constraintLayout, transition, config) {
+                                // Replace sections from the previous blueprint with the new ones
+                                blueprint.replaceViews(
+                                    constraintLayout,
+                                    prevBlueprint,
+                                    config.rebuildSections
+                                )
+
+                                val cs =
+                                    ConstraintSet().apply {
+                                        clone(constraintLayout)
+                                        val emptyLayout = ConstraintSet.Layout()
+                                        knownIds.forEach {
+                                            getConstraint(it).layout.copyFrom(emptyLayout)
+                                        }
+                                        blueprint.applyConstraints(this)
+                                    }
+
                                 logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
                                 cs.applyTo(constraintLayout)
                             }
@@ -138,22 +143,21 @@ constructor(
                 }
 
                 launch("$TAG#viewModel.refreshTransition") {
-                    viewModel.refreshTransition.collect { transition ->
-                        val cs =
-                            ConstraintSet().apply {
-                                clone(constraintLayout)
-                                viewModel.blueprint.value.applyConstraints(this)
-                            }
+                    viewModel.refreshTransition.collect { config ->
+                        val blueprint = viewModel.blueprint.value
 
                         runTransition(
                             constraintLayout,
-                            IntraBlueprintTransition(
-                                transition,
-                                clockViewModel,
-                                smartspaceViewModel
-                            ),
-                            transition,
+                            IntraBlueprintTransition(config, clockViewModel, smartspaceViewModel),
+                            config,
                         ) {
+                            blueprint.rebuildViews(constraintLayout, config.rebuildSections)
+
+                            val cs =
+                                ConstraintSet().apply {
+                                    clone(constraintLayout)
+                                    blueprint.applyConstraints(this)
+                                }
                             logAlphaVisibilityOfAppliedConstraintSet(cs, clockViewModel)
                             cs.applyTo(constraintLayout)
                         }

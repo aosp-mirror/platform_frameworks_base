@@ -91,9 +91,9 @@ constructor(
      */
     fun refreshBlueprint(config: Config = Config.DEFAULT) {
         fun scheduleCallback() {
-            // We use a handler here instead of a CoroutineDipsatcher because the one provided by
+            // We use a handler here instead of a CoroutineDispatcher because the one provided by
             // @Main CoroutineDispatcher is currently Dispatchers.Main.immediate, which doesn't
-            // delay the callback, and instead runs it imemdiately.
+            // delay the callback, and instead runs it immediately.
             handler.post {
                 assert.isMainThread()
                 targetTransitionConfig?.let {

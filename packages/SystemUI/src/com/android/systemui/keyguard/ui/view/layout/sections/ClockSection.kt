@@ -32,6 +32,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import com.android.systemui.customization.R as custR
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
@@ -57,6 +58,7 @@ internal fun ConstraintSet.setAlpha(
     alpha: Float,
 ) = views.forEach { view -> this.setAlpha(view.id, alpha) }
 
+@SysUISingleton
 class ClockSection
 @Inject
 constructor(
@@ -72,6 +74,7 @@ constructor(
         if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
+
         KeyguardClockViewBinder.bind(
             this,
             constraintLayout,
@@ -86,6 +89,7 @@ constructor(
         if (!MigrateClocksToBlueprint.isEnabled) {
             return
         }
+
         keyguardClockViewModel.currentClock.value?.let { clock ->
             constraintSet.applyDeltaFrom(buildConstraints(clock, constraintSet))
         }

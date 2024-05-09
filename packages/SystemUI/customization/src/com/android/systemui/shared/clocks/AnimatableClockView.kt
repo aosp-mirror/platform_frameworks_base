@@ -17,7 +17,6 @@ package com.android.systemui.shared.clocks
 
 import android.animation.TimeInterpolator
 import android.annotation.ColorInt
-import android.annotation.FloatRange
 import android.annotation.IntRange
 import android.annotation.SuppressLint
 import android.content.Context
@@ -27,7 +26,7 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.util.MathUtils.constrainedMap
-import android.util.TypedValue
+import android.util.TypedValue.COMPLEX_UNIT_PX
 import android.view.View
 import android.view.View.MeasureSpec.EXACTLY
 import android.widget.TextView
@@ -219,9 +218,7 @@ constructor(
 
     override fun setTextSize(type: Int, size: Float) {
         super.setTextSize(type, size)
-        if (type == TypedValue.COMPLEX_UNIT_PX) {
-            lastUnconstrainedTextSize = size
-        }
+        lastUnconstrainedTextSize = if (type == COMPLEX_UNIT_PX) size else Float.MAX_VALUE
     }
 
     @SuppressLint("DrawAllocation")
@@ -234,23 +231,19 @@ constructor(
                 MeasureSpec.getMode(heightMeasureSpec) == EXACTLY
         ) {
             // Call straight into TextView.setTextSize to avoid setting lastUnconstrainedTextSize
-            super.setTextSize(
-                TypedValue.COMPLEX_UNIT_PX,
-                min(lastUnconstrainedTextSize, MeasureSpec.getSize(heightMeasureSpec) / 2F)
-            )
+            val size = min(lastUnconstrainedTextSize, MeasureSpec.getSize(heightMeasureSpec) / 2F)
+            super.setTextSize(COMPLEX_UNIT_PX, size)
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        val animator = textAnimator
-        if (animator == null) {
-            textAnimator =
-                textAnimatorFactory(layout, ::invalidate)?.also {
-                    onTextAnimatorInitialized?.invoke(it)
-                    onTextAnimatorInitialized = null
-                }
-        } else {
-            animator.updateLayout(layout)
-        }
+        textAnimator?.let { animator -> animator.updateLayout(layout, textSize) }
+            ?: run {
+                textAnimator =
+                    textAnimatorFactory(layout, ::invalidate).also {
+                        onTextAnimatorInitialized?.invoke(it)
+                        onTextAnimatorInitialized = null
+                    }
+            }
 
         if (migratedClocks && hasCustomPositionUpdatedAnimation) {
             // Expand width to avoid clock being clipped during stepping animation
@@ -307,18 +300,18 @@ constructor(
         logger.d("animateColorChange")
         setTextStyle(
             weight = lockScreenWeight,
-            textSize = -1f,
             color = null, /* using current color */
             animate = false,
+            interpolator = null,
             duration = 0,
             delay = 0,
             onAnimationEnd = null
         )
         setTextStyle(
             weight = lockScreenWeight,
-            textSize = -1f,
             color = lockScreenColor,
             animate = true,
+            interpolator = null,
             duration = COLOR_ANIM_DURATION,
             delay = 0,
             onAnimationEnd = null
@@ -329,16 +322,15 @@ constructor(
         logger.d("animateAppearOnLockscreen")
         setTextStyle(
             weight = dozingWeight,
-            textSize = -1f,
             color = lockScreenColor,
             animate = false,
+            interpolator = null,
             duration = 0,
             delay = 0,
             onAnimationEnd = null
         )
         setTextStyle(
             weight = lockScreenWeight,
-            textSize = -1f,
             color = lockScreenColor,
             animate = true,
             duration = APPEAR_ANIM_DURATION,
@@ -356,16 +348,15 @@ constructor(
         logger.d("animateFoldAppear")
         setTextStyle(
             weight = lockScreenWeightInternal,
-            textSize = -1f,
             color = lockScreenColor,
             animate = false,
+            interpolator = null,
             duration = 0,
             delay = 0,
             onAnimationEnd = null
         )
         setTextStyle(
             weight = dozingWeightInternal,
-            textSize = -1f,
             color = dozingColor,
             animate = animate,
             interpolator = Interpolators.EMPHASIZED_DECELERATE,
@@ -385,9 +376,9 @@ constructor(
         val startAnimPhase2 = Runnable {
             setTextStyle(
                 weight = if (isDozing()) dozingWeight else lockScreenWeight,
-                textSize = -1f,
                 color = null,
                 animate = true,
+                interpolator = null,
                 duration = CHARGE_ANIM_DURATION_PHASE_1,
                 delay = 0,
                 onAnimationEnd = null
@@ -395,9 +386,9 @@ constructor(
         }
         setTextStyle(
             weight = if (isDozing()) lockScreenWeight else dozingWeight,
-            textSize = -1f,
             color = null,
             animate = true,
+            interpolator = null,
             duration = CHARGE_ANIM_DURATION_PHASE_0,
             delay = chargeAnimationDelay.toLong(),
             onAnimationEnd = startAnimPhase2
@@ -408,9 +399,9 @@ constructor(
         logger.d("animateDoze")
         setTextStyle(
             weight = if (isDozing) dozingWeight else lockScreenWeight,
-            textSize = -1f,
             color = if (isDozing) dozingColor else lockScreenColor,
             animate = animate,
+            interpolator = null,
             duration = DOZE_ANIM_DURATION,
             delay = 0,
             onAnimationEnd = null
@@ -448,7 +439,6 @@ constructor(
      */
     private fun setTextStyle(
         @IntRange(from = 0, to = 1000) weight: Int,
-        @FloatRange(from = 0.0) textSize: Float,
         color: Int?,
         animate: Boolean,
         interpolator: TimeInterpolator?,
@@ -459,7 +449,6 @@ constructor(
         textAnimator?.let {
             it.setTextStyle(
                 weight = weight,
-                textSize = textSize,
                 color = color,
                 animate = animate && isAnimationEnabled,
                 duration = duration,
@@ -474,7 +463,6 @@ constructor(
                 onTextAnimatorInitialized = { textAnimator ->
                     textAnimator.setTextStyle(
                         weight = weight,
-                        textSize = textSize,
                         color = color,
                         animate = false,
                         duration = duration,
@@ -485,27 +473,6 @@ constructor(
                     textAnimator.glyphFilter = glyphFilter
                 }
             }
-    }
-
-    private fun setTextStyle(
-        @IntRange(from = 0, to = 1000) weight: Int,
-        @FloatRange(from = 0.0) textSize: Float,
-        color: Int?,
-        animate: Boolean,
-        duration: Long,
-        delay: Long,
-        onAnimationEnd: Runnable?
-    ) {
-        setTextStyle(
-            weight = weight,
-            textSize = textSize,
-            color = color,
-            animate = animate,
-            interpolator = null,
-            duration = duration,
-            delay = delay,
-            onAnimationEnd = onAnimationEnd
-        )
     }
 
     fun refreshFormat() = refreshFormat(DateFormat.is24HourFormat(context))

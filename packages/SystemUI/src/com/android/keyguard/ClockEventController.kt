@@ -15,12 +15,12 @@
  */
 package com.android.keyguard
 
-import android.os.Trace
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
+import android.os.Trace
 import android.text.format.DateFormat
 import android.util.Log
 import android.util.TypedValue
@@ -466,15 +466,11 @@ constructor(
         largeRegionSampler?.stopRegionSampler()
         smallTimeListener?.stop()
         largeTimeListener?.stop()
-        clock
-            ?.smallClock
-            ?.view
-            ?.removeOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
+        clock?.apply {
+            smallClock.view.removeOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
+            largeClock.view.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
+        }
         smallClockFrame?.viewTreeObserver?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
-        clock
-            ?.largeClock
-            ?.view
-            ?.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
     }
 
     /**
@@ -505,13 +501,15 @@ constructor(
         }
     }
 
-    private fun updateFontSizes() {
+    fun updateFontSizes() {
         clock?.run {
-            smallClock.events.onFontSettingChanged(
-                resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat()
-            )
+            smallClock.events.onFontSettingChanged(getSmallClockSizePx())
             largeClock.events.onFontSettingChanged(getLargeClockSizePx())
         }
+    }
+
+    private fun getSmallClockSizePx(): Float {
+        return resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat()
     }
 
     private fun getLargeClockSizePx(): Float {
@@ -549,9 +547,8 @@ constructor(
                         it.copy(value = 1f - it.value)
                     },
                     keyguardTransitionInteractor.transition(Edge.create(LOCKSCREEN, AOD)),
-                ).filter {
-                    it.transitionState != TransitionState.FINISHED
-                }
+                )
+                .filter { it.transitionState != TransitionState.FINISHED }
                 .collect { handleDoze(it.value) }
         }
     }
@@ -574,27 +571,26 @@ constructor(
     internal fun listenForAnyStateToLockscreenTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                    .transitionStepsToState(LOCKSCREEN)
-                    .filter { it.transitionState == TransitionState.STARTED }
-                    .filter { it.from != AOD }
-                    .collect { handleDoze(0f) }
+                .transitionStepsToState(LOCKSCREEN)
+                .filter { it.transitionState == TransitionState.STARTED }
+                .filter { it.from != AOD }
+                .collect { handleDoze(0f) }
         }
     }
 
     /**
-     * When keyguard is displayed due to pulsing notifications when AOD is off,
-     * we should make sure clock is in dozing state instead of LS state
+     * When keyguard is displayed due to pulsing notifications when AOD is off, we should make sure
+     * clock is in dozing state instead of LS state
      */
     @VisibleForTesting
     internal fun listenForAnyStateToDozingTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor
-                    .transitionStepsToState(DOZING)
-                    .filter { it.transitionState == TransitionState.FINISHED }
-                    .collect { handleDoze(1f) }
+                .transitionStepsToState(DOZING)
+                .filter { it.transitionState == TransitionState.FINISHED }
+                .collect { handleDoze(1f) }
         }
     }
-
 
     @VisibleForTesting
     internal fun listenForDozing(scope: CoroutineScope): Job {

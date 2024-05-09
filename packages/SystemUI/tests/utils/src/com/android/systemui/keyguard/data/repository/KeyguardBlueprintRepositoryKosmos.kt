@@ -23,12 +23,14 @@ import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
+import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.util.mockito.mock
 import java.util.Optional
+import org.mockito.Mockito.spy
 
 val Kosmos.keyguardClockSection: ClockSection by
     Kosmos.Fixture {
@@ -41,6 +43,9 @@ val Kosmos.keyguardClockSection: ClockSection by
             rootViewModel = keyguardRootViewModel,
         )
     }
+
+val Kosmos.keyguardSmartspaceSection: SmartspaceSection by
+    Kosmos.Fixture { mock<SmartspaceSection>() }
 
 val Kosmos.defaultKeyguardBlueprint by
     Kosmos.Fixture {
@@ -57,7 +62,7 @@ val Kosmos.defaultKeyguardBlueprint by
             aodBurnInSection = mock(),
             communalTutorialIndicatorSection = mock(),
             clockSection = keyguardClockSection,
-            smartspaceSection = mock(),
+            smartspaceSection = keyguardSmartspaceSection,
             keyguardSliceViewSection = mock(),
             udfpsAccessibilityOverlaySection = mock(),
             accessibilityActionsSection = mock(),
@@ -80,7 +85,7 @@ val Kosmos.splitShadeBlueprint by
             aodBurnInSection = mock(),
             communalTutorialIndicatorSection = mock(),
             clockSection = keyguardClockSection,
-            smartspaceSection = mock(),
+            smartspaceSection = keyguardSmartspaceSection,
             mediaSection = mock(),
             accessibilityActionsSection = mock(),
         )
@@ -88,13 +93,15 @@ val Kosmos.splitShadeBlueprint by
 
 val Kosmos.keyguardBlueprintRepository by
     Kosmos.Fixture {
-        KeyguardBlueprintRepository(
-            blueprints =
-                setOf(
-                    defaultKeyguardBlueprint,
-                    splitShadeBlueprint,
-                ),
-            handler = fakeExecutorHandler,
-            assert = mock(),
+        spy(
+            KeyguardBlueprintRepository(
+                blueprints =
+                    setOf(
+                        defaultKeyguardBlueprint,
+                        splitShadeBlueprint,
+                    ),
+                handler = fakeExecutorHandler,
+                assert = mock(),
+            )
         )
     }

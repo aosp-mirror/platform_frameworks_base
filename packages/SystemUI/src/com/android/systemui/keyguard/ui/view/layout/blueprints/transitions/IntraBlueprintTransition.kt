@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.view.layout.blueprints.transitions
 
 import android.transition.TransitionSet
+import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.ClockSizeTransition
 import com.android.systemui.keyguard.ui.view.layout.sections.transitions.DefaultClockSteppingTransition
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
@@ -46,6 +47,7 @@ class IntraBlueprintTransition(
         val type: Type,
         val checkPriority: Boolean = true,
         val terminatePrevious: Boolean = true,
+        val rebuildSections: List<KeyguardSection> = listOf(),
     ) {
         companion object {
             val DEFAULT = Config(Type.NoTransition)
