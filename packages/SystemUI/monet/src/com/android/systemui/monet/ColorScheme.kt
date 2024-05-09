@@ -133,7 +133,7 @@ class ColorScheme(
         @ColorInt seed: Int,
         darkTheme: Boolean,
         style: Style
-    ) : this(seed, darkTheme, style, 0.0)
+    ) : this(seed, darkTheme, style, 0.5)
 
     @JvmOverloads
     constructor(

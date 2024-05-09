@@ -581,51 +581,6 @@
     <color name="system_on_tertiary_fixed">#FFFFFF</color>
     <color name="system_on_tertiary_fixed_variant">#FFFFFF</color>
 
-    <!--Colors used in Android system, from design system. These values can be overlaid at runtime
-     by OverlayManager RROs.-->
-    <color name="system_widget_background_light">#EEF0FF</color>
-    <color name="system_clock_hour_light">#1D2435</color>
-    <color name="system_clock_minute_light">#20386A</color>
-    <color name="system_clock_second_light">#000000</color>
-    <color name="system_theme_app_light">#2F4578</color>
-    <color name="system_on_theme_app_light">#D6DFFF</color>
-    <color name="system_theme_app_ring_light">#94AAE4</color>
-    <color name="system_on_theme_app_ring_light">#FDD7FA</color>
-    <color name="system_brand_a_light">#3A5084</color>
-    <color name="system_brand_b_light">#6E7488</color>
-    <color name="system_brand_c_light">#6076AC</color>
-    <color name="system_brand_d_light">#8C6D8C</color>
-    <color name="system_under_surface_light">#000000</color>
-    <color name="system_shade_active_light">#D9E2FF</color>
-    <color name="system_on_shade_active_light">#152E60</color>
-    <color name="system_on_shade_active_variant_light">#2F4578</color>
-    <color name="system_shade_inactive_light">#2F3036</color>
-    <color name="system_on_shade_inactive_light">#E1E2EC</color>
-    <color name="system_on_shade_inactive_variant_light">#C5C6D0</color>
-    <color name="system_shade_disabled_light">#0C0E13</color>
-    <color name="system_overview_background_light">#50525A</color>
-    <color name="system_widget_background_dark">#152E60</color>
-    <color name="system_clock_hour_dark">#9AA0B6</color>
-    <color name="system_clock_minute_dark">#D8E1FF</color>
-    <color name="system_clock_second_dark">#FFFFFF</color>
-    <color name="system_theme_app_dark">#D9E2FF</color>
-    <color name="system_on_theme_app_dark">#304679</color>
-    <color name="system_theme_app_ring_dark">#94AAE4</color>
-    <color name="system_on_theme_app_ring_dark">#E0BBDD</color>
-    <color name="system_brand_a_dark">#90A6DF</color>
-    <color name="system_brand_b_dark">#A4ABC1</color>
-    <color name="system_brand_c_dark">#7A90C8</color>
-    <color name="system_brand_d_dark">#A886A6</color>
-    <color name="system_under_surface_dark">#000000</color>
-    <color name="system_shade_active_dark">#D9E2FF</color>
-    <color name="system_on_shade_active_dark">#001945</color>
-    <color name="system_on_shade_active_variant_dark">#2F4578</color>
-    <color name="system_shade_inactive_dark">#2F3036</color>
-    <color name="system_on_shade_inactive_dark">#E1E2EC</color>
-    <color name="system_on_shade_inactive_variant_dark">#C5C6D0</color>
-    <color name="system_shade_disabled_dark">#0C0E13</color>
-    <color name="system_overview_background_dark">#C5C6D0</color>
-
     <!-- Accessibility shortcut icon background color -->
     <color name="accessibility_feature_background">#5F6368</color> <!-- Google grey 700 -->
     <color name="accessibility_magnification_background">#F50D60</color>

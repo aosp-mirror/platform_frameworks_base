@@ -1346,51 +1346,6 @@
         <attr name="materialColorTertiary" format="color"/>
         <!-- The error color for the app, intended to draw attention to error conditions. @hide -->
         <attr name="materialColorError" format="color"/>
-
-        <!-- System Custom Tokens-->
-        <!-- @hide -->
-        <attr name="customColorWidgetBackground" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockHour" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockMinute" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockSecond" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeApp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnThemeApp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeAppRing" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnThemeAppRing" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandA" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandB" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandC" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandD" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorUnderSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeActive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeActive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeActiveVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeInactive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeInactive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeInactiveVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeDisabled" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOverviewBackground" format="color"/>
-
     </declare-styleable>
 
     <!-- **************************************************************** -->
