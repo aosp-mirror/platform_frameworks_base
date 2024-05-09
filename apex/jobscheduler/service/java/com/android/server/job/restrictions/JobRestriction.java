@@ -62,10 +62,11 @@ public abstract class JobRestriction {
      * fine with it).
      *
      * @param job to be checked
+     * @param bias job bias to be checked
      * @return false if the {@link JobSchedulerService} should not schedule this job at the moment,
      * true - otherwise
      */
-    public abstract boolean isJobRestricted(JobStatus job);
+    public abstract boolean isJobRestricted(JobStatus job, int bias);
 
     /** Dump any internal constants the Restriction may have. */
     public abstract void dumpConstants(IndentingPrintWriter pw);
