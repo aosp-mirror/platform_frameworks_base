@@ -6490,7 +6490,8 @@ public class Notification implements Parcelable
         // visual regressions.
         @SuppressWarnings("AndroidFrameworkCompatChange")
         private boolean bigContentViewRequired() {
-            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
+            if (!Flags.notificationExpansionOptional()
+                    && mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
                 return true;
             }
             // Notifications with contentView and without a bigContentView, style, or actions would
