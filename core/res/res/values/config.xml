@@ -7051,6 +7051,9 @@
          event gets ignored. -->
     <integer name="config_defaultMinEmergencyGestureTapDurationMillis">200</integer>
 
+    <!-- Control whether to enable CallMetadataSyncInCallService. -->
+    <bool name="config_enableContextSyncInCall">false</bool>
+
     <!-- Whether the system uses auto-suspend mode. -->
     <bool name="config_useAutoSuspend">true</bool>
 </resources>
