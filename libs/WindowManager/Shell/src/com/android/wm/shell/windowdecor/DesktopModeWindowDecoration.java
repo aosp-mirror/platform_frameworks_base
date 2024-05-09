@@ -110,6 +110,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private ResizeVeil mResizeVeil;
     private Bitmap mAppIconBitmap;
+    private Bitmap mResizeVeilBitmap;
+
     private CharSequence mAppName;
 
     private ExclusionRegionListener mExclusionRegionListener;
@@ -468,16 +470,27 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             PackageManager pm = mContext.getApplicationContext().getPackageManager();
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
-            final Resources resources = mContext.getResources();
-            final BaseIconFactory factory = new BaseIconFactory(mContext,
-                    resources.getDisplayMetrics().densityDpi,
-                    resources.getDimensionPixelSize(R.dimen.desktop_mode_caption_icon_radius));
-            mAppIconBitmap = factory.createScaledBitmap(appIconDrawable, MODE_DEFAULT);
+            final BaseIconFactory headerIconFactory = createIconFactory(mContext,
+                    R.dimen.desktop_mode_caption_icon_radius);
+            mAppIconBitmap = headerIconFactory.createScaledBitmap(appIconDrawable, MODE_DEFAULT);
+
+            final BaseIconFactory resizeVeilIconFactory = createIconFactory(mContext,
+                    R.dimen.desktop_mode_resize_veil_icon_size);
+            mResizeVeilBitmap = resizeVeilIconFactory
+                    .createScaledBitmap(appIconDrawable, MODE_DEFAULT);
+
             final ApplicationInfo applicationInfo = activityInfo.applicationInfo;
             mAppName = pm.getApplicationLabel(applicationInfo);
         } finally {
             Trace.endSection();
         }
+    }
+
+    private BaseIconFactory createIconFactory(Context context, int dimensions) {
+        final Resources resources = context.getResources();
+        final int densityDpi = resources.getDisplayMetrics().densityDpi;
+        final int iconSize = resources.getDimensionPixelSize(dimensions);
+        return new BaseIconFactory(context, densityDpi, iconSize);
     }
 
     private void closeDragResizeListener() {
@@ -495,7 +508,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private void createResizeVeilIfNeeded() {
         if (mResizeVeil != null) return;
         loadAppInfoIfNeeded();
-        mResizeVeil = new ResizeVeil(mContext, mDisplayController, mAppIconBitmap, mTaskInfo,
+        mResizeVeil = new ResizeVeil(mContext, mDisplayController, mResizeVeilBitmap, mTaskInfo,
                 mTaskSurface, mSurfaceControlTransactionSupplier);
     }
 
