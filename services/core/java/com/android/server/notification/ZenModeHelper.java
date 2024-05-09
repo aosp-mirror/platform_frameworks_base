@@ -486,6 +486,7 @@ public class ZenModeHelper {
         }
     }
 
+    @GuardedBy("mConfigLock")
     private ZenRule maybeRestoreRemovedRule(ZenModeConfig config, ZenRule ruleToAdd,
             AutomaticZenRule azrToAdd, @ConfigChangeOrigin int origin) {
         if (!Flags.modesApi()) {
@@ -1112,6 +1113,7 @@ public class ZenModeHelper {
      * <p>The rule's {@link ZenRule#condition} is cleared (meaning that an active rule will be
      * deactivated) unless the update has origin == {@link ZenModeConfig#UPDATE_ORIGIN_USER}.
      */
+    @GuardedBy("mConfigLock")
     private boolean populateZenRule(String pkg, AutomaticZenRule azr, ZenRule rule,
                          @ConfigChangeOrigin int origin, boolean isNew) {
         if (Flags.modesApi()) {
@@ -1261,12 +1263,14 @@ public class ZenModeHelper {
      *
      * <p>Returns {@code true} if the policy of the rule was modified.
      */
+    @GuardedBy("mConfigLock")
     private boolean updatePolicy(ZenRule zenRule, @Nullable ZenPolicy newPolicy,
             boolean updateBitmask, boolean isNew) {
         if (newPolicy == null) {
             if (isNew) {
                 // Newly created rule with no provided policy; fill in with the default.
-                zenRule.zenPolicy = mDefaultConfig.toZenPolicy();
+                zenRule.zenPolicy =
+                        Flags.modesUi() ? mDefaultConfig.toZenPolicy() : mConfig.toZenPolicy();
                 return true;
             }
             // Otherwise, a null policy means no policy changes, so we can stop here.
@@ -1275,8 +1279,9 @@ public class ZenModeHelper {
 
         // If oldPolicy is null, we compare against the default policy when determining which
         // fields in the bitmask should be marked as updated.
-        ZenPolicy oldPolicy =
-                zenRule.zenPolicy != null ? zenRule.zenPolicy : mDefaultConfig.toZenPolicy();
+        ZenPolicy oldPolicy = zenRule.zenPolicy != null
+                ? zenRule.zenPolicy
+                : (Flags.modesUi() ? mDefaultConfig.toZenPolicy() : mConfig.toZenPolicy());
 
         // If this is updating a rule rather than creating a new one, keep any fields from the
         // old policy if they are unspecified in the new policy. For newly created rules, oldPolicy
@@ -2033,7 +2038,8 @@ public class ZenModeHelper {
                     // rule's policy fields should be set upon creation, this is a fallback to
                     // catch any that may have fallen through the cracks.
                     Log.wtf(TAG, "active automatic rule found with no specified policy: " + rule);
-                    policy.apply(mDefaultConfig.toZenPolicy());
+                    policy.apply(
+                            Flags.modesUi() ? mDefaultConfig.toZenPolicy() : mConfig.toZenPolicy());
                 }
             } else {
                 // active rule with no specified policy inherits the global config settings

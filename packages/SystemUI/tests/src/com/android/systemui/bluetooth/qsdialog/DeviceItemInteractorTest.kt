@@ -23,7 +23,6 @@ import android.media.AudioManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
-import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.systemui.SysuiTestCase
@@ -39,7 +38,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
@@ -71,8 +69,6 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var localBluetoothManager: LocalBluetoothManager
 
-    @Mock private lateinit var uiEventLogger: UiEventLogger
-
     @Mock private lateinit var logger: BluetoothTileDialogLogger
 
     private val fakeSystemClock = FakeSystemClock()
@@ -94,7 +90,6 @@ class DeviceItemInteractorTest : SysuiTestCase() {
                 adapter,
                 localBluetoothManager,
                 fakeSystemClock,
-                uiEventLogger,
                 logger,
                 testScope.backgroundScope,
                 dispatcher
@@ -215,61 +210,6 @@ class DeviceItemInteractorTest : SysuiTestCase() {
             interactor.updateDeviceItems(mContext, DeviceFetchTrigger.FIRST_LOAD)
 
             assertThat(latest).isEqualTo(listOf(deviceItem2, deviceItem1))
-        }
-    }
-
-    @Test
-    fun testUpdateDeviceItemOnClick_connectedMedia_setActive() {
-        testScope.runTest {
-            `when`(deviceItem1.type).thenReturn(DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
-
-            interactor.updateDeviceItemOnClick(deviceItem1)
-
-            verify(cachedDevice1).setActive()
-            verify(logger)
-                .logDeviceClick(
-                    cachedDevice1.address,
-                    DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE
-                )
-        }
-    }
-
-    @Test
-    fun testUpdateDeviceItemOnClick_activeMedia_disconnect() {
-        testScope.runTest {
-            `when`(deviceItem1.type).thenReturn(DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
-
-            interactor.updateDeviceItemOnClick(deviceItem1)
-
-            verify(cachedDevice1).disconnect()
-            verify(logger)
-                .logDeviceClick(cachedDevice1.address, DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
-        }
-    }
-
-    @Test
-    fun testUpdateDeviceItemOnClick_connectedOtherDevice_disconnect() {
-        testScope.runTest {
-            `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
-
-            interactor.updateDeviceItemOnClick(deviceItem1)
-
-            verify(cachedDevice1).disconnect()
-            verify(logger)
-                .logDeviceClick(cachedDevice1.address, DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
-        }
-    }
-
-    @Test
-    fun testUpdateDeviceItemOnClick_saved_connect() {
-        testScope.runTest {
-            `when`(deviceItem1.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
-
-            interactor.updateDeviceItemOnClick(deviceItem1)
-
-            verify(cachedDevice1).connect()
-            verify(logger)
-                .logDeviceClick(cachedDevice1.address, DeviceItemType.SAVED_BLUETOOTH_DEVICE)
         }
     }
 

@@ -2148,10 +2148,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"إشعار معلومات \"وضع سلسلة الإجراءات\""</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"تم تفعيل ميزة توفير شحن البطارية"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"يتم تقليل استخدام البطارية لإطالة عمرها."</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"تم تفعيل ميزة \"توفير شحن البطارية\""</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"تم تفعيل ميزة \"توفير شحن البطارية\" لإطالة عمر البطارية"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"توفير شحن البطارية"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"تم تفعيل ميزة \"توفير شحن البطارية\""</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"تم شحن الهاتف بدرجة كافية وتفعيل الميزات مرة أخرى"</string>

@@ -423,6 +423,12 @@ public final class ViewRootImpl implements ViewParent,
 
     private static final long NANOS_PER_SEC = 1000000000;
 
+    // If the ViewRootImpl has been idle for more than 200ms, clear the preferred
+    // frame rate category and frame rate.
+    private static final int IDLE_TIME_MILLIS = 250;
+
+    private static final long NANOS_PER_MILLI = 1_000_000;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
@@ -655,6 +661,8 @@ public final class ViewRootImpl implements ViewParent,
     private int mMinusOneFrameIntervalMillis = 0;
     // VRR interval between the previous and the frame before
     private int mMinusTwoFrameIntervalMillis = 0;
+    // VRR has the invalidation idle message been posted?
+    private boolean mInvalidationIdleMessagePosted = false;
 
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
@@ -4266,6 +4274,10 @@ public final class ViewRootImpl implements ViewParent,
         // when the values are applicable.
         if (mDrawnThisFrame) {
             mDrawnThisFrame = false;
+            if (!mInvalidationIdleMessagePosted) {
+                mInvalidationIdleMessagePosted = true;
+                mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE, IDLE_TIME_MILLIS);
+            }
             setCategoryFromCategoryCounts();
             updateInfrequentCount();
             setPreferredFrameRate(mPreferredFrameRate);
@@ -5300,10 +5312,12 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_CONTENT_CAPTURE) {
             Log.v(mTag, "performContentCaptureInitialReport() on " + rootView);
         }
+        boolean traceDispatchCapture = false;
         try {
             if (!isContentCaptureEnabled()) return;
 
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            traceDispatchCapture = Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
+            if (traceDispatchCapture) {
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchContentCapture() for "
                         + getClass().getSimpleName());
             }
@@ -5319,7 +5333,9 @@ public final class ViewRootImpl implements ViewParent,
             // Content capture is a go!
             rootView.dispatchInitialProvideContentCaptureStructure();
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            if (traceDispatchCapture) {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
         }
     }
 
@@ -5327,10 +5343,12 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_CONTENT_CAPTURE) {
             Log.v(mTag, "handleContentCaptureFlush()");
         }
+        boolean traceFlushContentCapture = false;
         try {
             if (!isContentCaptureEnabled()) return;
 
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            traceFlushContentCapture = Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
+            if (traceFlushContentCapture) {
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, "flushContentCapture for "
                         + getClass().getSimpleName());
             }
@@ -5342,7 +5360,9 @@ public final class ViewRootImpl implements ViewParent,
             }
             ccm.flush(ContentCaptureSession.FLUSH_REASON_VIEW_ROOT_ENTERED);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            if (traceFlushContentCapture) {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
         }
     }
 
@@ -6499,6 +6519,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_WINDOW_TOUCH_MODE_CHANGED";
                 case MSG_KEEP_CLEAR_RECTS_CHANGED:
                     return "MSG_KEEP_CLEAR_RECTS_CHANGED";
+                case MSG_CHECK_INVALIDATION_IDLE:
+                    return "MSG_CHECK_INVALIDATION_IDLE";
                 case MSG_REFRESH_POINTER_ICON:
                     return "MSG_REFRESH_POINTER_ICON";
                 case MSG_TOUCH_BOOST_TIMEOUT:
@@ -6763,6 +6785,30 @@ public final class ViewRootImpl implements ViewParent,
                     mNumPausedForSync = 0;
                     scheduleTraversals();
                     break;
+                case MSG_CHECK_INVALIDATION_IDLE: {
+                    long delta;
+                    if (mIsTouchBoosting || mIsFrameRateBoosting || mInsetsAnimationRunning) {
+                        delta = 0;
+                    } else {
+                        delta = System.nanoTime() / NANOS_PER_MILLI - mLastUpdateTimeMillis;
+                    }
+                    if (delta >= IDLE_TIME_MILLIS) {
+                        mFrameRateCategoryHighCount = 0;
+                        mFrameRateCategoryHighHintCount = 0;
+                        mFrameRateCategoryNormalCount = 0;
+                        mFrameRateCategoryLowCount = 0;
+                        mPreferredFrameRate = 0;
+                        mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
+                        setPreferredFrameRateCategory(FRAME_RATE_CATEGORY_NO_PREFERENCE);
+                        setPreferredFrameRate(0f);
+                        mInvalidationIdleMessagePosted = false;
+                    } else {
+                        mInvalidationIdleMessagePosted = true;
+                        mHandler.sendEmptyMessageDelayed(MSG_CHECK_INVALIDATION_IDLE,
+                                IDLE_TIME_MILLIS - delta);
+                    }
+                    break;
+                }
                 case MSG_TOUCH_BOOST_TIMEOUT:
                     /**
                      * Lower the frame rate after the boosting period (FRAME_RATE_TOUCH_BOOST_TIME).
@@ -7792,6 +7838,7 @@ public final class ViewRootImpl implements ViewParent,
                     mWindowAttributes.type)) {
                 // set the frame rate to the maximum value.
                 mIsTouchBoosting = true;
+                setPreferredFrameRateCategory(mLastPreferredFrameRateCategory);
             }
             /**
              * We want to lower the refresh rate when MotionEvent.ACTION_UP,
@@ -9599,6 +9646,8 @@ public final class ViewRootImpl implements ViewParent,
         mInsetsController.dump(prefix, writer);
 
         mOnBackInvokedDispatcher.dump(prefix, writer);
+
+        mImeBackAnimationController.dump(prefix, writer);
 
         writer.println(prefix + "View Hierarchy:");
         dumpViewHierarchy(innerPrefix, writer, mView);
@@ -12656,10 +12705,12 @@ public final class ViewRootImpl implements ViewParent,
             view = mFrameRateCategoryView;
         }
 
+        boolean traceFrameRateCategory = false;
         try {
             if (frameRateCategory != FRAME_RATE_CATEGORY_DEFAULT
                     && mLastPreferredFrameRateCategory != frameRateCategory) {
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                traceFrameRateCategory = Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
+                if (traceFrameRateCategory) {
                     String reason = reasonToString(frameRateReason);
                     String sourceView = view == null ? "-" : view;
                     String category = categoryToString(frameRateCategory);
@@ -12677,7 +12728,9 @@ public final class ViewRootImpl implements ViewParent,
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate category", e);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            if (traceFrameRateCategory) {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
         }
     }
 
@@ -13001,6 +13054,10 @@ public final class ViewRootImpl implements ViewParent,
     private void removeVrrMessages() {
         mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
         mHandler.removeMessages(MSG_FRAME_RATE_SETTING);
+        if (mInvalidationIdleMessagePosted) {
+            mInvalidationIdleMessagePosted = false;
+            mHandler.removeMessages(MSG_CHECK_INVALIDATION_IDLE);
+        }
     }
 
     /**

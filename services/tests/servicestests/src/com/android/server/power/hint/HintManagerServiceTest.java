@@ -26,12 +26,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -39,9 +42,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
+import android.hardware.power.ChannelConfig;
+import android.hardware.power.IPower;
 import android.hardware.power.SessionConfig;
 import android.hardware.power.SessionTag;
 import android.hardware.power.WorkDuration;
@@ -50,6 +56,7 @@ import android.os.IBinder;
 import android.os.IHintSession;
 import android.os.PerformanceHintManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -130,12 +137,15 @@ public class HintManagerServiceTest {
     @Mock
     private HintManagerService.NativeWrapper mNativeWrapperMock;
     @Mock
+    private IPower mIPowerMock;
+    @Mock
     private ActivityManagerInternal mAmInternalMock;
     @Rule
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private HintManagerService mService;
+    private ChannelConfig mConfig;
 
     private static Answer<Long> fakeCreateWithConfig(Long ptr, Long sessionId) {
         return new Answer<Long>() {
@@ -149,6 +159,9 @@ public class HintManagerServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mConfig = new ChannelConfig();
+        mConfig.readFlagBitmask = 1;
+        mConfig.writeFlagBitmask = 2;
         when(mNativeWrapperMock.halGetHintSessionPreferredRate())
                 .thenReturn(DEFAULT_HINT_PREFERRED_RATE);
         when(mNativeWrapperMock.halCreateHintSession(eq(TGID), eq(UID), eq(SESSION_TIDS_A),
@@ -170,6 +183,8 @@ public class HintManagerServiceTest {
                 any(SessionConfig.class))).thenAnswer(fakeCreateWithConfig(SESSION_PTRS[2],
                     SESSION_IDS[2]));
 
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(5);
+        when(mIPowerMock.getSessionChannel(anyInt(), anyInt())).thenReturn(mConfig);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
         LocalServices.addService(ActivityManagerInternal.class, mAmInternalMock);
     }
@@ -252,6 +267,9 @@ public class HintManagerServiceTest {
             NativeWrapper createNativeWrapper() {
                 return mNativeWrapperMock;
             }
+            IPower createIPower() {
+                return mIPowerMock;
+            }
         });
         return mService;
     }
@@ -260,6 +278,9 @@ public class HintManagerServiceTest {
         mService = new HintManagerService(mContext, new Injector() {
             NativeWrapper createNativeWrapper() {
                 return new NativeWrapperFake();
+            }
+            IPower createIPower() {
+                return mIPowerMock;
             }
         });
         return mService;
@@ -728,6 +749,102 @@ public class HintManagerServiceTest {
         verify(mNativeWrapperMock, never()).halSetMode(anyLong(), anyInt(), anyBoolean());
     }
 
+    @Test
+    public void testGetChannel() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        // Should only call once, after caching the first call
+        ChannelConfig config = service.getBinderServiceInstance().getSessionChannel(token);
+        ChannelConfig config2 = service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        assertEquals(config.readFlagBitmask, mConfig.readFlagBitmask);
+        assertEquals(config.writeFlagBitmask, mConfig.writeFlagBitmask);
+        assertEquals(config2.readFlagBitmask, mConfig.readFlagBitmask);
+        assertEquals(config2.writeFlagBitmask, mConfig.writeFlagBitmask);
+    }
+
+    @Test
+    public void testGetChannelTwice() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        service.getBinderServiceInstance().closeSessionChannel();
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+
+        clearInvocations(mIPowerMock);
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        service.getBinderServiceInstance().closeSessionChannel();
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+    }
+
+    @Test
+    public void testGetChannelFails() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        when(mIPowerMock.getSessionChannel(anyInt(), anyInt())).thenThrow(RemoteException.class);
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.getBinderServiceInstance().getSessionChannel(token);
+        });
+    }
+
+
+    @Test
+    public void testGetChannelBadVersion() throws Exception {
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(3);
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        reset(mIPowerMock);
+        when(mIPowerMock.getInterfaceVersion()).thenReturn(3);
+        when(mIPowerMock.getSessionChannel(anyInt(), anyInt())).thenReturn(mConfig);
+
+        ChannelConfig channel = service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(0)).getSessionChannel(eq(TGID), eq(UID));
+        assertNull(channel);
+    }
+
+    @Test
+    public void testCloseChannel() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        service.getBinderServiceInstance().closeSessionChannel();
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+    }
+
+    @Test
+    public void testCloseChannelFails() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+
+        doThrow(RemoteException.class).when(mIPowerMock).closeSessionChannel(anyInt(), anyInt());
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.getBinderServiceInstance().closeSessionChannel();
+        });
+    }
+
+    @Test
+    public void testDoubleClose() throws Exception {
+        HintManagerService service = createService();
+        Binder token = new Binder();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        service.getBinderServiceInstance().closeSessionChannel();
+        service.getBinderServiceInstance().closeSessionChannel();
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+    }
+
     // This test checks that concurrent operations from different threads on IHintService,
     // IHintSession and UidObserver will not cause data race or deadlock. Ideally we should also
     // check the output of threads' reportActualDuration performance to detect lock starvation
@@ -934,5 +1051,41 @@ public class HintManagerServiceTest {
         assertFalse(service.mUidObserver.isUidForeground(a.mUid));
         a.reportActualWorkDuration2(WORK_DURATIONS_FIVE);
         verify(mNativeWrapperMock, never()).halReportActualWorkDuration(anyLong(), any(), any());
+    }
+
+    @Test
+    public void testChannelDiesWhenTokenDies() throws Exception {
+        HintManagerService service = createService();
+
+        class DyingToken extends Binder {
+            DeathRecipient mToNotify;
+            @Override
+            public void linkToDeath(@NonNull DeathRecipient recipient, int flags) {
+                mToNotify = recipient;
+                super.linkToDeath(recipient, flags);
+            }
+
+            public void fakeDeath() {
+                mToNotify.binderDied();
+            }
+        }
+
+        DyingToken token = new DyingToken();
+
+        service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        assertTrue(service.hasChannel(TGID, UID));
+
+        token.fakeDeath();
+
+        assertFalse(service.hasChannel(TGID, UID));
+        verify(mIPowerMock, times(1)).closeSessionChannel(eq(TGID), eq(UID));
+
+        clearInvocations(mIPowerMock);
+
+        token = new DyingToken();
+        service.getBinderServiceInstance().getSessionChannel(token);
+        verify(mIPowerMock, times(1)).getSessionChannel(eq(TGID), eq(UID));
+        assertTrue(service.hasChannel(TGID, UID));
     }
 }

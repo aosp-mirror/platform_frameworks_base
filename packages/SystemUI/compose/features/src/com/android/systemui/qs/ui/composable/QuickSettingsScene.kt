@@ -80,6 +80,7 @@ import com.android.systemui.notifications.ui.composable.NotificationScrollingSta
 import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibility
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.res.R
+import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
@@ -103,6 +104,7 @@ class QuickSettingsScene
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
+    private val shadeSession: SaveableSession,
     private val viewModel: QuickSettingsSceneViewModel,
     private val notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
@@ -133,6 +135,7 @@ constructor(
             mediaCarouselController = mediaCarouselController,
             mediaHost = mediaHost,
             modifier = modifier,
+            shadeSession = shadeSession,
         )
     }
 }
@@ -147,6 +150,7 @@ private fun SceneScope.QuickSettingsScene(
     mediaCarouselController: MediaCarouselController,
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
+    shadeSession: SaveableSession,
 ) {
     val brightnessMirrorShowing by viewModel.brightnessMirrorViewModel.isShowing.collectAsState()
     val contentAlpha by
@@ -316,7 +320,6 @@ private fun SceneScope.QuickSettingsScene(
                                 createTintedIconManager = createTintedIconManager,
                                 createBatteryMeterViewController = createBatteryMeterViewController,
                                 statusBarIconController = statusBarIconController,
-                                modifier = Modifier.padding(horizontal = 16.dp),
                             )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -347,6 +350,7 @@ private fun SceneScope.QuickSettingsScene(
         }
         NotificationScrollingStack(
             viewModel = notificationsPlaceholderViewModel,
+            shadeSession = shadeSession,
             maxScrimTop = { screenHeight },
             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
             modifier =

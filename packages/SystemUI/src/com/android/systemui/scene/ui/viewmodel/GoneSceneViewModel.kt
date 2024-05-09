@@ -24,6 +24,7 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.GoneToSplitShade
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
@@ -70,10 +71,11 @@ constructor(
                     )] = UserActionResult(Scenes.QuickSettingsShade)
             }
 
+            val downSceneKey =
+                if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade
+            val downTransitionKey = GoneToSplitShade.takeIf { shadeMode is ShadeMode.Split }
             this[Swipe(direction = SwipeDirection.Down)] =
-                UserActionResult(
-                    if (shadeMode is ShadeMode.Dual) Scenes.NotificationsShade else Scenes.Shade
-                )
+                UserActionResult(downSceneKey, downTransitionKey)
         }
     }
 }

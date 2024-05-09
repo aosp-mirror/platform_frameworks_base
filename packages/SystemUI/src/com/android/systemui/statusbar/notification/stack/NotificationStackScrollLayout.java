@@ -126,7 +126,6 @@ import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.ColorUtilKt;
-import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 
 import com.google.errorprone.annotations.CompileTimeConstant;
@@ -156,7 +155,6 @@ public class NotificationStackScrollLayout
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
     private static final boolean SPEW = Log.isLoggable(TAG, Log.VERBOSE);
-    private static final boolean DEBUG_UPDATE_SIDE_PADDING = Compile.IS_DEBUG;
 
     private boolean mShadeNeedsToClose = false;
 
@@ -933,11 +931,6 @@ public class NotificationStackScrollLayout
                         + " mSkinnyNotifsInLandscape=" + mSkinnyNotifsInLandscape;
         mLastInitViewElapsedRealtime = SystemClock.elapsedRealtime();
 
-        if (DEBUG_UPDATE_SIDE_PADDING) {
-            Log.v(TAG, "initView @ elapsedRealtime " + mLastInitViewElapsedRealtime + ": "
-                    + mLastInitViewDumpString);
-        }
-
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
         mStackScrollAlgorithm.initView(context);
         mStateAnimator.initView(context);
@@ -966,12 +959,6 @@ public class NotificationStackScrollLayout
                 + " skinnyNotifsInLandscape=" + mSkinnyNotifsInLandscape
                 + " orientation=" + orientation;
         mLastUpdateSidePaddingElapsedRealtime = SystemClock.elapsedRealtime();
-
-        if (DEBUG_UPDATE_SIDE_PADDING) {
-            Log.v(TAG,
-                    "updateSidePadding @ elapsedRealtime " + mLastUpdateSidePaddingElapsedRealtime
-                            + ": " + mLastUpdateSidePaddingDumpString);
-        }
 
         if (viewWidth == 0) {
             Log.e(TAG, "updateSidePadding: viewWidth is zero");
@@ -1482,9 +1469,10 @@ public class NotificationStackScrollLayout
     public void setExpandedHeight(float height) {
         final boolean skipHeightUpdate = shouldSkipHeightUpdate();
 
-        // when scene framework is enabled, updateStackPosition is already called by
-        // updateTopPadding every time the stack moves, so skip it here to avoid flickering.
-        if (!SceneContainerFlag.isEnabled()) {
+        // when scene framework is enabled and in single shade, updateStackPosition is already
+        // called by updateTopPadding every time the stack moves, so skip it here to avoid
+        // flickering.
+        if (!SceneContainerFlag.isEnabled() || mShouldUseSplitNotificationShade) {
             updateStackPosition();
         }
 

@@ -20,7 +20,6 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.SceneFrameworkLog
-import java.util.Stack
 import javax.inject.Inject
 
 class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: LogBuffer) {
@@ -47,6 +46,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         from: SceneKey,
         to: SceneKey,
         reason: String,
+        isInstant: Boolean,
     ) {
         logBuffer.log(
             tag = TAG,
@@ -55,8 +55,17 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
                 str1 = from.toString()
                 str2 = to.toString()
                 str3 = reason
+                bool1 = isInstant
             },
-            messagePrinter = { "Scene change requested: $str1 → $str2, reason: $str3" },
+            messagePrinter = {
+                buildString {
+                    append("Scene change requested: $str1 → $str2")
+                    if (isInstant) {
+                        append(" (instant)")
+                    }
+                    append(", reason: $str3")
+                }
+            },
         )
     }
 
@@ -116,7 +125,7 @@ class SceneLogger @Inject constructor(@SceneFrameworkLog private val logBuffer: 
         )
     }
 
-    fun logSceneBackStack(backStack: Stack<SceneKey>) {
+    fun logSceneBackStack(backStack: Iterable<SceneKey>) {
         logBuffer.log(
             tag = TAG,
             level = LogLevel.INFO,

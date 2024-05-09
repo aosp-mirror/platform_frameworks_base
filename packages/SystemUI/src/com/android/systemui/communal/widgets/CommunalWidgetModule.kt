@@ -69,16 +69,18 @@ interface CommunalWidgetModule {
         @SysUISingleton
         @Provides
         fun provideCommunalWidgetHost(
+            @Application applicationScope: CoroutineScope,
             appWidgetManager: Optional<AppWidgetManager>,
             appWidgetHost: CommunalAppWidgetHost,
             selectedUserInteractor: SelectedUserInteractor,
             @CommunalLog logBuffer: LogBuffer,
         ): CommunalWidgetHost {
             return CommunalWidgetHost(
+                applicationScope,
                 appWidgetManager,
                 appWidgetHost,
                 selectedUserInteractor,
-                logBuffer
+                logBuffer,
             )
         }
 

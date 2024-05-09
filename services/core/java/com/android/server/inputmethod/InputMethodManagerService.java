@@ -2234,7 +2234,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             mInputManagerInternal.notifyInputMethodConnectionActive(connectionIsActive);
         }
         final var userData = mUserDataRepository.getOrCreate(mCurrentUserId);
-
+        final var bindingController = userData.mBindingController;
 
         // If configured, we want to avoid starting up the IME if it is not supposed to be showing
         if (shouldPreventImeStartupLocked(selectedMethodId, startInputFlags,
@@ -2243,7 +2243,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 Slog.d(TAG, "Avoiding IME startup and unbinding current input method.");
             }
             invalidateAutofillSessionLocked();
-            userData.mBindingController.unbindCurrentMethod();
+            bindingController.unbindCurrentMethod();
             return InputBindResult.NO_EDITOR;
         }
 
@@ -2275,8 +2275,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             }
         }
 
-        userData.mBindingController.unbindCurrentMethod();
-        return userData.mBindingController.bindCurrentMethod();
+        bindingController.unbindCurrentMethod();
+        return bindingController.bindCurrentMethod();
     }
 
     /**

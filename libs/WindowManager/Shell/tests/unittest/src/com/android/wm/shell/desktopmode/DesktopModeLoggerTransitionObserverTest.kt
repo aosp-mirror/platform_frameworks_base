@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 import android.app.ActivityManager
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
+import android.content.Context
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
@@ -35,6 +36,7 @@ import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.modules.utils.testing.ExtendedMockitoRule
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
@@ -58,6 +60,11 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.same
 import org.mockito.kotlin.times
 
+/**
+ * Test class for {@link DesktopModeLoggerTransitionObserver}
+ *
+ * Usage: atest WMShellUnitTests:DesktopModeLoggerTransitionObserverTest
+ */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class DesktopModeLoggerTransitionObserverTest {
@@ -74,6 +81,8 @@ class DesktopModeLoggerTransitionObserverTest {
     private lateinit var mockShellInit: ShellInit
     @Mock
     private lateinit var transitions: Transitions
+    @Mock
+    private lateinit var context: Context
 
     private lateinit var transitionObserver: DesktopModeLoggerTransitionObserver
     private lateinit var shellInit: ShellInit
@@ -81,12 +90,12 @@ class DesktopModeLoggerTransitionObserverTest {
 
     @Before
     fun setup() {
-        Mockito.`when`(DesktopModeStatus.isEnabled()).thenReturn(true)
+        doReturn(true).`when`{ DesktopModeStatus.canEnterDesktopMode(any()) }
         shellInit = Mockito.spy(ShellInit(testExecutor))
         desktopModeEventLogger = mock(DesktopModeEventLogger::class.java)
 
         transitionObserver = DesktopModeLoggerTransitionObserver(
-            mockShellInit, transitions, desktopModeEventLogger)
+            context, mockShellInit, transitions, desktopModeEventLogger)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             val initRunnableCaptor = ArgumentCaptor.forClass(
                 Runnable::class.java)

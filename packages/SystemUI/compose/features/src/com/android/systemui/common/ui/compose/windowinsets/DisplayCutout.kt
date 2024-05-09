@@ -35,6 +35,7 @@ data class DisplayCutout(
     val viewDisplayCutoutKeyguardStatusBarView: ViewDisplayCutout? = null,
 ) {
     fun width() = abs(right.value - left.value).dp
+    fun height() = abs(bottom.value - top.value).dp
 }
 
 enum class CutoutLocation {

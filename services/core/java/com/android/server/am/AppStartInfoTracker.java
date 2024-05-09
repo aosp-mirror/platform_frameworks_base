@@ -294,9 +294,11 @@ public final class AppStartInfoTracker {
                 mInProgRecords.removeAt(index);
                 return;
             }
-            info.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
             info.setLaunchMode(launchMode);
-            checkCompletenessAndCallback(info);
+            if (!android.app.Flags.appStartInfoTimestamps()) {
+                info.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
+                checkCompletenessAndCallback(info);
+            }
         }
     }
 
@@ -424,14 +426,6 @@ public final class AppStartInfoTracker {
         }
     }
 
-    void reportApplicationOnCreateTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_APPLICATION_ONCREATE);
-    }
-
     /**
      * Helper functions for monitoring shell command.
      * > adb shell am start-info-detailed-monitoring [package-name]
@@ -466,41 +460,14 @@ public final class AppStartInfoTracker {
         }
     }
 
-    /** Report a bind application timestamp to add to {@link ApplicationStartInfo}. */
-    public void reportBindApplicationTimeNanos(ProcessRecord app, long timeNs) {
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_BIND_APPLICATION);
-    }
-
-    void reportFirstFrameTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME);
-    }
-
-    void reportFullyDrawnTimeNanos(ProcessRecord app, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(app, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN);
-    }
-
-    void reportFullyDrawnTimeNanos(String processName, int uid, long timeNs) {
-        if (!mEnabled) {
-            return;
-        }
-        addTimestampToStart(processName, uid, timeNs,
-                ApplicationStartInfo.START_TIMESTAMP_FULLY_DRAWN);
-    }
-
-    private void addTimestampToStart(ProcessRecord app, long timeNs, int key) {
+    void addTimestampToStart(ProcessRecord app, long timeNs, int key) {
         addTimestampToStart(app.info.packageName, app.uid, timeNs, key);
     }
 
     void addTimestampToStart(String packageName, int uid, long timeNs, int key) {
+        if (!mEnabled) {
+            return;
+        }
         synchronized (mLock) {
             AppStartInfoContainer container = mData.get(packageName, uid);
             if (container == null) {
@@ -539,9 +506,9 @@ public final class AppStartInfoTracker {
     }
 
     /**
-     * Called whenever data is added to a {@link ApplicationStartInfo} object. Checks for
-     * completeness and triggers callback if a callback has been registered and the object
-     * is complete.
+     * Called whenever a potentially final piece of data is added to a {@link ApplicationStartInfo}
+     * object. Checks for completeness and triggers callback if a callback has been registered and
+     * the object is complete.
      */
     private void checkCompletenessAndCallback(ApplicationStartInfo startInfo) {
         synchronized (mLock) {
@@ -1124,10 +1091,23 @@ public final class AppStartInfoTracker {
                     Long.compare(getStartTimestamp(b), getStartTimestamp(a)));
         }
 
+        /**
+         * Add the provided key/timestamp to the most recent start record, if it is currently
+         * accepting new timestamps.
+         *
+         * Will also update the start records startup state and trigger the completion listener when
+         * appropriate.
+         */
         @GuardedBy("mLock")
         void addTimestampToStartLocked(int key, long timestampNs) {
+            if (mInfos.isEmpty()) {
+                if (DEBUG) Slog.d(TAG, "No records to add to.");
+                return;
+            }
+
             // Records are sorted newest to oldest, grab record at index 0.
-            int startupState = mInfos.get(0).getStartupState();
+            ApplicationStartInfo startInfo = mInfos.get(0);
+            int startupState = startInfo.getStartupState();
 
             // If startup state is error then don't accept any further timestamps.
             if (startupState == ApplicationStartInfo.STARTUP_STATE_ERROR) {
@@ -1145,7 +1125,13 @@ public final class AppStartInfoTracker {
                 return;
             }
 
-            mInfos.get(0).addStartupTimestamp(key, timestampNs);
+            startInfo.addStartupTimestamp(key, timestampNs);
+
+            if (key == ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME
+                    && android.app.Flags.appStartInfoTimestamps()) {
+                startInfo.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
+                checkCompletenessAndCallback(startInfo);
+            }
         }
 
         @GuardedBy("mLock")

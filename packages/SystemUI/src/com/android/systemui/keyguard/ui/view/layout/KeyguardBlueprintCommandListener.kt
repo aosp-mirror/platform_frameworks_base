@@ -46,15 +46,14 @@ constructor(
                 return
             }
 
-            if (
-                arg.isDigitsOnly() && keyguardBlueprintInteractor.transitionToBlueprint(arg.toInt())
-            ) {
-                pw.println("Transition succeeded!")
-            } else if (keyguardBlueprintInteractor.transitionToBlueprint(arg)) {
-                pw.println("Transition succeeded!")
-            } else {
-                pw.println("Invalid argument! To see available blueprint ids, run:")
-                pw.println("$ adb shell cmd statusbar blueprint help")
+            when {
+                arg.isDigitsOnly() -> pw.println("Invalid argument! Use string ids.")
+                keyguardBlueprintInteractor.transitionOrRefreshBlueprint(arg) ->
+                    pw.println("Transition succeeded!")
+                else -> {
+                    pw.println("Invalid argument! To see available blueprint ids, run:")
+                    pw.println("$ adb shell cmd statusbar blueprint help")
+                }
             }
         }
 

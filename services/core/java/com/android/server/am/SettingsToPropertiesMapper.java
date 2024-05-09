@@ -185,6 +185,7 @@ public class SettingsToPropertiesMapper {
         "pmw",
         "power",
         "preload_safety",
+        "printing",
         "privacy_infra_policy",
         "resource_manager",
         "responsible_apis",

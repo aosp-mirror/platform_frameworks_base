@@ -986,6 +986,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
+        Handler receiverHandler =
+                Flags.managerAvoidReceiverTimeout() ? BackgroundThread.getHandler() : null;
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -1033,7 +1035,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }
-        }, UserHandle.ALL, intentFilter, null, null);
+        }, UserHandle.ALL, intentFilter, null, receiverHandler);
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(SafetyCenterManager.ACTION_SAFETY_CENTER_ENABLED_CHANGED);

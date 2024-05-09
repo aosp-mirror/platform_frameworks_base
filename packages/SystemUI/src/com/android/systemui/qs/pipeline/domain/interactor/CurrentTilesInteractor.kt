@@ -115,6 +115,10 @@ interface CurrentTilesInteractor : ProtoDumpable {
      * @see TileSpecRepository.setTiles
      */
     fun setTiles(specs: List<TileSpec>)
+
+    companion object {
+        val POSITION_AT_END: Int = TileSpecRepository.POSITION_AT_END
+    }
 }
 
 /**

@@ -55,31 +55,4 @@ public class SaveEventLoggerTest {
         assertThat(latencySaveFinishMillis.getValue())
                 .isNotEqualTo(SaveEventLogger.UNINITIATED_TIMESTAMP);
     }
-
-    @Test
-    public void testTimestampsNotInitialized() {
-        SaveEventLogger mLogger =
-                spy(SaveEventLogger.forSessionId(1, SaveEventLogger.UNINITIATED_TIMESTAMP));
-
-        mLogger.maybeSetLatencySaveUiDisplayMillis();
-        mLogger.maybeSetLatencySaveRequestMillis();
-        mLogger.maybeSetLatencySaveFinishMillis();
-        ArgumentCaptor<Long> latencySaveUiDisplayMillis = ArgumentCaptor.forClass(Long.class);
-        ArgumentCaptor<Long> latencySaveRequestMillis = ArgumentCaptor.forClass(Long.class);
-        ArgumentCaptor<Long> latencySaveFinishMillis = ArgumentCaptor.forClass(Long.class);
-
-        verify(mLogger, times(1))
-                .maybeSetLatencySaveUiDisplayMillis(latencySaveUiDisplayMillis.capture());
-        verify(mLogger, times(1))
-                .maybeSetLatencySaveRequestMillis(latencySaveRequestMillis.capture());
-        verify(mLogger, times(1))
-                .maybeSetLatencySaveFinishMillis(latencySaveFinishMillis.capture());
-
-        assertThat(latencySaveUiDisplayMillis.getValue())
-                .isEqualTo(SaveEventLogger.UNINITIATED_TIMESTAMP);
-        assertThat(latencySaveRequestMillis.getValue())
-                .isEqualTo(SaveEventLogger.UNINITIATED_TIMESTAMP);
-        assertThat(latencySaveFinishMillis.getValue())
-                .isEqualTo(SaveEventLogger.UNINITIATED_TIMESTAMP);
-    }
 }

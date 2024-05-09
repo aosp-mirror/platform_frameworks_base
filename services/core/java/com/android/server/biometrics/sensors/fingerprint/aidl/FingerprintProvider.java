@@ -58,6 +58,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
+import com.android.server.biometrics.BiometricDanglingReceiver;
 import com.android.server.biometrics.BiometricHandlerProvider;
 import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
@@ -205,6 +206,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mBiometricHandlerProvider = biometricHandlerProvider;
 
         initAuthenticationBroadcastReceiver();
+        initFingerprintDanglingBroadcastReceiver();
         initSensors(resetLockoutRequiresHardwareAuthToken, props, gestureAvailabilityDispatcher);
     }
 
@@ -216,6 +218,10 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     Slog.d(getTag(), "Initializing AuthenticationStatsCollector");
                     mAuthenticationStatsCollector = collector;
                 });
+    }
+
+    private void initFingerprintDanglingBroadcastReceiver() {
+        new BiometricDanglingReceiver(mContext, BiometricsProtoEnums.MODALITY_FINGERPRINT);
     }
 
     private void initSensors(boolean resetLockoutRequiresHardwareAuthToken, SensorProps[] props,

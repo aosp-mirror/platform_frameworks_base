@@ -27,6 +27,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.FakeQSFactory
+import com.android.systemui.qs.FakeQSTile
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.data.repository.fakeRestoreRepository
 import com.android.systemui.qs.pipeline.data.repository.fakeTileSpecRepository
@@ -54,9 +55,7 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCoroutinesApi::class)
 class WorkProfileAutoAddedAfterRestoreTest : SysuiTestCase() {
 
-    private val kosmos by lazy {
-        Kosmos().apply { fakeUserTracker.set(listOf(USER_0_INFO), 0) }
-    }
+    private val kosmos by lazy { Kosmos().apply { fakeUserTracker.set(listOf(USER_0_INFO), 0) } }
     // Getter here so it can change when there is a managed profile.
     private val workTileAvailable: Boolean
         get() = hasManagedProfile()

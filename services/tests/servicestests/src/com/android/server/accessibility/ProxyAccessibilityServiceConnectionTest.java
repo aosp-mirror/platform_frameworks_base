@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
+import android.os.test.FakePermissionEnforcer;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.server.wm.WindowManagerInternal;
@@ -79,6 +80,7 @@ public class ProxyAccessibilityServiceConnectionTest {
     AccessibilityTrace mMockA11yTrace;
     @Mock
     WindowManagerInternal mMockWindowManagerInternal;
+    FakePermissionEnforcer mFakePermissionEnforcer  = new FakePermissionEnforcer();
     ProxyAccessibilityServiceConnection mProxyConnection;
     AccessibilityServiceInfo mAccessibilityServiceInfo;
     private int mFocusStrokeWidthDefaultValue;
@@ -90,6 +92,8 @@ public class ProxyAccessibilityServiceConnectionTest {
         MockitoAnnotations.initMocks(this);
         when(mMockContext.getResources()).thenReturn(resources);
         when(mMockSecurityPolicy.checkAccessibilityAccess(any())).thenReturn(true);
+        when(mMockContext.getSystemService(Context.PERMISSION_ENFORCER_SERVICE))
+                .thenReturn(mFakePermissionEnforcer);
 
         mAccessibilityServiceInfo = new AccessibilityServiceInfo();
         mProxyConnection = new ProxyAccessibilityServiceConnection(mMockContext, COMPONENT_NAME,

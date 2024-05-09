@@ -159,7 +159,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"రద్దు చేయండి"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"పెయిర్ చేయడం వలన కనెక్ట్ చేయబడినప్పుడు మీ కాంటాక్ట్‌లకు అలాగే కాల్ హిస్టరీకి యాక్సెస్‌ను మంజూరు చేస్తుంది."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో జత చేయడం సాధ్యపడలేదు."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN లేదా పాస్‌కీ చెల్లని కారణంగా <xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో పెయిర్ చేయడం సాధ్యపడలేదు."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN గానీ, పాస్‌కీ గానీ చెల్లని కారణంగా <xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో పెయిర్ చేయడం సాధ్యపడలేదు."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో కమ్యూనికేట్ చేయడం సాధ్యపడదు."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> జత చేయడాన్ని తిరస్కరించింది."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"కంప్యూటర్"</string>
@@ -721,6 +721,5 @@
     <string name="neuter" msgid="2075249330106127310">"తటస్థం"</string>
     <string name="feminine" msgid="1529155595310784757">"స్త్రీ"</string>
     <string name="masculine" msgid="4653978041013996303">"పురుషుడు"</string>
-    <!-- no translation found for system_update_settings_list_item_title (6618098383615432484) -->
-    <skip />
+    <string name="system_update_settings_list_item_title" msgid="6618098383615432484">"సిస్టమ్ అప్‌డేట్‌లు"</string>
 </resources>

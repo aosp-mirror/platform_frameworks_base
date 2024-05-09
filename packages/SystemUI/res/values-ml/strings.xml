@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ഇടത് വശത്തെ അതിർത്തി <xliff:g id="PERCENT">%1$d</xliff:g> ശതമാനം"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"വലത് വശത്തെ അതിർത്തി <xliff:g id="PERCENT">%1$d</xliff:g> ശതമാനം"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ഔദ്യോഗിക പ്രൊഫൈലിൽ <xliff:g id="APP">%1$s</xliff:g> ആപ്പിൽ സംരക്ഷിച്ചു"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"സ്വകാര്യ പ്രൊഫൈലിൽ <xliff:g id="APP">%1$s</xliff:g> ആപ്പിൽ സംരക്ഷിച്ചു"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ഫയലുകൾ"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ഈ സ്ക്രീൻഷോട്ട് തിരിച്ചറിഞ്ഞു."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്ന ആപ്പും തുറന്നിരിക്കുന്ന മറ്റ് ആപ്പും ഈ സ്ക്രീൻഷോട്ട് തിരിച്ചറിഞ്ഞു."</string>
@@ -461,7 +460,10 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"ലോക്ക് സ്ക്രീനിൽ വിജറ്റുകൾ അടയ്ക്കുക"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"വിജറ്റുകൾ ഇഷ്ടാനുസൃതമാക്കുക"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"ലോക്ക് സ്‌ക്രീനിൽ വിജറ്റുകൾ"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"വിജറ്റ് തിരഞ്ഞെടുക്കുക"</string>
+    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ഉപയോക്താവ് മാറുക"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"പുൾഡൗൺ മെനു"</string>
@@ -631,8 +633,7 @@
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"%s അൺമ്യൂട്ട് ചെയ്യുക"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"<xliff:g id="LABEL">%s</xliff:g> എന്നതിൽ പ്ലേ ചെയ്യുന്നു"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"ഓഡിയോ പ്ലേ ചെയ്യും"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"കോൾ പുരോഗമിക്കുന്നു"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"സിസ്റ്റം UI ട്യൂണർ"</string>
     <string name="status_bar" msgid="4357390266055077437">"സ്റ്റാറ്റസ് ബാർ"</string>
     <string name="demo_mode" msgid="263484519766901593">"സിസ്റ്റം UI ഡെമോ മോഡ്"</string>
@@ -660,8 +661,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"സാറ്റലൈറ്റ്, മോശം കണക്ഷൻ"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"സാറ്റലൈറ്റ്, മികച്ച കണക്ഷൻ"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"സാറ്റലൈറ്റ്, കണക്ഷൻ ലഭ്യമാണ്"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"സാറ്റലൈറ്റ് SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ഔദ്യോഗിക പ്രൊഫൈൽ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ചിലർക്ക് വിനോദം, എന്നാൽ എല്ലാവർക്കുമില്ല"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Android ഉപയോക്തൃ ഇന്റർഫേസ് ആവശ്യമുള്ള രീതിയിൽ മാറ്റുന്നതിനും ഇഷ്ടാനുസൃതമാക്കുന്നതിനും സിസ്റ്റം UI ട്യൂണർ നിങ്ങൾക്ക് അധിക വഴികൾ നൽകുന്നു. ഭാവി റിലീസുകളിൽ ഈ പരീക്ഷണാത്മക ഫീച്ചറുകൾ മാറ്റുകയോ നിർത്തുകയോ അപ്രത്യക്ഷമാവുകയോ ചെയ്തേക്കാം. ശ്രദ്ധയോടെ മുന്നോട്ടുപോകുക."</string>
@@ -866,8 +866,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ടൈൽ ചേർക്കുക"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> എന്നതിലേക്ക് നീക്കുക"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> എന്ന സ്ഥാനത്തേക്ക് ചേർക്കുക"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"സ്ഥാനം അസാധുവാണ്."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"സ്ഥാനം <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"ടൈൽ ചേർത്തു"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"ടൈൽ നീക്കം ചെയ്‌തു"</string>

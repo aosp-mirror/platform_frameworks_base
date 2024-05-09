@@ -23,6 +23,7 @@ class FakeCommunalRepository(
 ) : CommunalRepository {
     override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) {
         this.currentScene.value = toScene
+        this._transitionState.value = flowOf(ObservableTransitionState.Idle(toScene))
     }
 
     private val defaultTransitionState = ObservableTransitionState.Idle(CommunalScenes.Default)

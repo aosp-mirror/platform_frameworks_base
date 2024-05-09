@@ -186,7 +186,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val locInScreen = IntArray(2)
 
     /** Visuo-haptic long-press effects */
-    private var haveLongPressPropertiesBeenReset = true
+    var haveLongPressPropertiesBeenReset = true
+        private set
     private var paddingForLaunch = Rect()
     private var initialLongPressProperties: QSLongPressProperties? = null
     private var finalLongPressProperties: QSLongPressProperties? = null
@@ -772,7 +773,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
     }
 
-    override fun onActivityLaunchAnimationEnd() = resetLongPressEffectProperties()
+    override fun onActivityLaunchAnimationEnd() {
+        if (longPressEffect != null && !haveLongPressPropertiesBeenReset) {
+            resetLongPressEffectProperties()
+        }
+    }
 
     fun prepareForLaunch() {
         val startingHeight = initialLongPressProperties?.height?.toInt() ?: 0
@@ -877,8 +882,8 @@ open class QSTileViewImpl @JvmOverloads constructor(
         background.updateBounds(
             left = 0,
             top = 0,
-            right = initialLongPressProperties?.width?.toInt() ?: 0,
-            bottom = initialLongPressProperties?.height?.toInt() ?: 0,
+            right = initialLongPressProperties?.width?.toInt() ?: measuredWidth,
+            bottom = initialLongPressProperties?.height?.toInt() ?: measuredHeight,
         )
         changeCornerRadius(resources.getDimensionPixelSize(R.dimen.qs_corner_radius).toFloat())
         setAllColors(

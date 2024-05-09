@@ -245,7 +245,6 @@ import android.os.DeadObjectException;
 import android.os.DeviceIdleManager;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -2038,19 +2037,21 @@ public class NotificationManagerService extends SystemService {
                     mSnoozeHelper.clearData(userHandle);
                 }
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
-                mUserProfiles.updateCache(context);
-                if (!mUserProfiles.isProfileUser(userId, context)) {
-                    // reload per-user settings
-                    mSettingsObserver.update(null);
-                    // Refresh managed services
-                    mConditionProviders.onUserSwitched(userId);
-                    mListeners.onUserSwitched(userId);
-                    mZenModeHelper.onUserSwitched(userId);
-                    mPreferencesHelper.syncChannelsBypassingDnd();
+                if (!Flags.useSsmUserSwitchSignal()) {
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
+                    mUserProfiles.updateCache(context);
+                    if (!mUserProfiles.isProfileUser(userId, context)) {
+                        // reload per-user settings
+                        mSettingsObserver.update(null);
+                        // Refresh managed services
+                        mConditionProviders.onUserSwitched(userId);
+                        mListeners.onUserSwitched(userId);
+                        mZenModeHelper.onUserSwitched(userId);
+                        mPreferencesHelper.syncChannelsBypassingDnd();
+                    }
+                    // assistant is the only thing that cares about managed profiles specifically
+                    mAssistants.onUserSwitched(userId);
                 }
-                // assistant is the only thing that cares about managed profiles specifically
-                mAssistants.onUserSwitched(userId);
             } else if (action.equals(Intent.ACTION_USER_ADDED)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 if (userId != USER_NULL) {
@@ -2570,7 +2571,9 @@ public class NotificationManagerService extends SystemService {
         // calling onDestroy()
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_STOPPED);
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        if (!Flags.useSsmUserSwitchSignal()) {
+            filter.addAction(Intent.ACTION_USER_SWITCHED);
+        }
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
@@ -2963,6 +2966,26 @@ public class NotificationManagerService extends SystemService {
                 Slog.w(TAG, "Can't notify app about app block change", e);
             }
         }, 500);
+    }
+
+    @Override
+    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
+        if (!Flags.useSsmUserSwitchSignal()) {
+            return;
+        }
+        final int userId = to.getUserIdentifier();
+        mUserProfiles.updateCache(getContext());
+        if (!mUserProfiles.isProfileUser(userId, getContext())) {
+            // reload per-user settings
+            mSettingsObserver.update(null);
+            // Refresh managed services
+            mConditionProviders.onUserSwitched(userId);
+            mListeners.onUserSwitched(userId);
+            mZenModeHelper.onUserSwitched(userId);
+            mPreferencesHelper.syncChannelsBypassingDnd();
+        }
+        // assistant is the only thing that cares about managed profiles specifically
+        mAssistants.onUserSwitched(userId);
     }
 
     @Override

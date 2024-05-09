@@ -27,6 +27,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.FakeQSFactory
+import com.android.systemui.qs.FakeQSTile
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.data.repository.FakeDefaultTilesRepository
 import com.android.systemui.qs.pipeline.data.repository.MinimumTilesFixedRepository

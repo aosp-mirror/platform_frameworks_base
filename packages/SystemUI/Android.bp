@@ -382,6 +382,7 @@ android_library {
         "androidx.compose.material_material-icons-extended",
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
+        "device_policy_aconfig_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -622,6 +623,7 @@ android_app {
         "//frameworks/libs/systemui:compilelib",
         "SystemUI-tests-base",
         "androidx.compose.runtime_runtime",
+        "SystemUI-core",
     ],
     libs: [
         "keepanno-annotations",

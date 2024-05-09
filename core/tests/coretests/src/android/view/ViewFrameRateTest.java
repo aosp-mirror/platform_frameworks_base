@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH_HINT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
@@ -584,6 +585,66 @@ public class ViewFrameRateTest {
         assertEquals(0f, mViewRoot.getLastPreferredFrameRate(), 0f);
     }
 
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+    })
+    public void testQuickTouchBoost() throws Throwable {
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_LOW);
+            ViewGroup.LayoutParams layoutParams = mMovingView.getLayoutParams();
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            mMovingView.setLayoutParams(layoutParams);
+            mMovingView.setOnClickListener((v) -> {});
+        });
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> assertEquals(FRAME_RATE_CATEGORY_LOW,
+                mViewRoot.getLastPreferredFrameRateCategory()));
+        int[] position = new int[2];
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.getLocationOnScreen(position);
+            position[0] += mMovingView.getWidth() / 2;
+            position[1] += mMovingView.getHeight() / 2;
+        });
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+
+        long now = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(
+                now, // downTime
+                now, // eventTime
+                MotionEvent.ACTION_DOWN, // action
+                position[0], // x
+                position[1], // y
+                0 // metaState
+        );
+        down.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        instrumentation.sendPointerSync(down);
+        assertEquals(FRAME_RATE_CATEGORY_HIGH_HINT, mViewRoot.getLastPreferredFrameRateCategory());
+    }
+
+    @Test
+    @RequiresFlagsEnabled({FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY,
+            FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY
+    })
+    public void idleDetected() throws Throwable {
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.setRequestedFrameRate(View.REQUESTED_FRAME_RATE_CATEGORY_HIGH);
+            mMovingView.setFrameContentVelocity(Float.MAX_VALUE);
+            mMovingView.invalidate();
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_HIGH,
+                    mViewRoot.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
+
+        // Wait for idle timeout
+        Thread.sleep(500);
+        assertEquals(0f, mViewRoot.getLastPreferredFrameRate());
+        assertEquals(FRAME_RATE_CATEGORY_NO_PREFERENCE,
+                mViewRoot.getLastPreferredFrameRateCategory());
+    }
+
     private void runAfterDraw(@NonNull Runnable runnable) {
         Handler handler = new Handler(Looper.getMainLooper());
         mAfterDrawLatch = new CountDownLatch(1);
@@ -615,7 +676,6 @@ public class ViewFrameRateTest {
         for (int i = 0; i < 5 || mViewRoot.getIsFrameRateBoosting(); i++) {
             final CountDownLatch drawLatch = new CountDownLatch(1);
 
-            // Now that it is small, any invalidation should have a normal category
             ViewTreeObserver.OnDrawListener listener = drawLatch::countDown;
 
             mActivityRule.runOnUiThread(() -> {
@@ -627,5 +687,12 @@ public class ViewFrameRateTest {
             mActivityRule.runOnUiThread(
                     () -> mMovingView.getViewTreeObserver().removeOnDrawListener(listener));
         }
+        // after boosting is complete, wait for one more draw cycle to ensure the boost isn't
+        // the last frame rate set
+        mActivityRule.runOnUiThread(() -> {
+            mMovingView.invalidate();
+            runAfterDraw(() -> {});
+        });
+        waitForAfterDraw();
     }
 }

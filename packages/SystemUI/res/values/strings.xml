@@ -1158,6 +1158,8 @@
     <string name="button_to_configure_widgets_text">Customize widgets</string>
     <!-- Description for the App icon of disabled widget. [CHAR LIMIT=NONE] -->
     <string name="icon_description_for_disabled_widget">App icon for disabled widget</string>
+    <!-- Description for the App icon of a package that is currently being installed. [CHAR LIMIT=NONE] -->
+    <string name="icon_description_for_pending_widget">App icon for a widget being installed</string>
     <!-- Label for the button which configures widgets [CHAR LIMIT=NONE] -->
     <string name="edit_widget">Edit widget</string>
     <!-- Description for the button that removes a widget on click. [CHAR LIMIT=50] -->

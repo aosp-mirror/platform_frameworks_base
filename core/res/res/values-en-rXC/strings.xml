@@ -2144,10 +2144,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‎‏‏‏‎‎‏‏‏‎‏‏‎‎‎‏‏‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‏‎‎‎‎‎‏‏‎‎‏‎‎‏‎‏‎‏‏‎‎‎‎‎‎Routine Mode info notification‎‏‎‎‏‎"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‎‏‎‏‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‏‎‎‏‏‎‏‏‏‏‎‎‎‎‏‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‏‎Battery Saver turned on‎‏‎‎‏‎"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‎‎‏‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎Reducing battery usage to extend battery life‎‏‎‎‏‎"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‏‎‎‏‎‎‏‎‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‏‎‎‎‏‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‎‎‏‎‎‎‎‎‎Battery Saver is on‎‏‎‎‏‎"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‏‏‎‏‏‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‏‎‎‎‎‏‎‏‎‏‏‎‎‎‏‎‎‎‎‎‏‎‏‏‎‏‎‎‎‏‎‎Battery Saver is turned on to extend battery life‎‏‎‎‏‎"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‎‎‎‎‎‎‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‏‎‏‎‏‎‏‏‎‏‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‏‏‎‎‎‏‎Battery Saver‎‏‎‎‏‎"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‏‏‏‎‏‎‎‎‏‏‎‎‎‎‎‎‎‎‏‏‎Battery Saver turned off‎‏‎‎‏‎"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‏‏‏‎‎‎‏‏‏‎‏‏‏‏‎‏‎‎‎‏‏‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎‏‎‏‏‎‎‏‎‏‎‏‏‎‏‏‏‏‎Phone has enough charge. Features no longer restricted.‎‏‎‎‏‎"</string>

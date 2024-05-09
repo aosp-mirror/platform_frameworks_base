@@ -206,7 +206,7 @@ class FalsingCollectorImpl implements FalsingCollector {
         );
         final CommunalInteractor communalInteractor = mCommunalInteractorLazy.get();
         mJavaAdapter.alwaysCollectFlow(
-                BooleanFlowOperators.INSTANCE.and(
+                BooleanFlowOperators.INSTANCE.allOf(
                         communalInteractor.isCommunalEnabled(),
                         communalInteractor.isCommunalShowing()),
                 this::onShowingCommunalHubChanged
@@ -292,6 +292,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onKeyEvent(KeyEvent ev) {
+        logDebug("REAL: onKeyEvent(" + KeyEvent.actionToString(ev.getAction()) + ")");
         // Only collect if it is an ACTION_UP action and is allow-listed
         if (ev.getAction() == KeyEvent.ACTION_UP && mAcceptedKeycodes.contains(ev.getKeyCode())) {
             mFalsingDataProvider.onKeyEvent(ev);
@@ -300,7 +301,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onTouchEvent(MotionEvent ev) {
-        logDebug("REAL: onTouchEvent(" + ev.getActionMasked() + ")");
+        logDebug("REAL: onTouchEvent(" + MotionEvent.actionToString(ev.getActionMasked()) + ")");
         if (!mKeyguardStateController.isShowing()) {
             avoidGesture();
             return;

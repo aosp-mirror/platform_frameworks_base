@@ -310,7 +310,8 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Note: do not add to or remove from this list at runtime except in the constructor, because we
      * do not synchronize access to this list.
      */
-    private final List<JobRestriction> mJobRestrictions;
+    @VisibleForTesting
+    final List<JobRestriction> mJobRestrictions;
 
     @GuardedBy("mLock")
     @VisibleForTesting
@@ -3498,8 +3499,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     /**
      * Check if a job is restricted by any of the declared {@link JobRestriction JobRestrictions}.
-     * Note, that the jobs with {@link JobInfo#BIAS_FOREGROUND_SERVICE} bias or higher may not
-     * be restricted, thus we won't even perform the check, but simply return null early.
      *
      * @param job to be checked
      * @return the first {@link JobRestriction} restricting the given job that has been found; null
@@ -3508,13 +3507,9 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     @GuardedBy("mLock")
     JobRestriction checkIfRestricted(JobStatus job) {
-        if (evaluateJobBiasLocked(job) >= JobInfo.BIAS_FOREGROUND_SERVICE) {
-            // Jobs with BIAS_FOREGROUND_SERVICE or higher should not be restricted
-            return null;
-        }
         for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
             final JobRestriction restriction = mJobRestrictions.get(i);
-            if (restriction.isJobRestricted(job)) {
+            if (restriction.isJobRestricted(job, evaluateJobBiasLocked(job))) {
                 return restriction;
             }
         }
@@ -4221,6 +4216,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         return curBias;
     }
 
+    /** Gets and returns the adjusted Job Bias **/
     int evaluateJobBiasLocked(JobStatus job) {
         int bias = job.getBias();
         if (bias >= JobInfo.BIAS_BOUND_FOREGROUND_SERVICE) {
@@ -5907,7 +5903,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (isRestricted) {
                         for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
                             final JobRestriction restriction = mJobRestrictions.get(i);
-                            if (restriction.isJobRestricted(job)) {
+                            if (restriction.isJobRestricted(job, evaluateJobBiasLocked(job))) {
                                 final int reason = restriction.getInternalReason();
                                 pw.print(" ");
                                 pw.print(JobParameters.getInternalReasonCodeDescription(reason));
@@ -6240,7 +6236,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         proto.write(JobSchedulerServiceDumpProto.JobRestriction.REASON,
                                 restriction.getInternalReason());
                         proto.write(JobSchedulerServiceDumpProto.JobRestriction.IS_RESTRICTING,
-                                restriction.isJobRestricted(job));
+                                restriction.isJobRestricted(job, evaluateJobBiasLocked(job)));
                         proto.end(restrictionsToken);
                     }
 

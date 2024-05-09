@@ -1799,8 +1799,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.println("InsetsController:");
-        mState.dump(prefix + "  ", pw);
+        final String innerPrefix = prefix + "    ";
+        pw.println(prefix + "InsetsController:");
+        mState.dump(innerPrefix, pw);
+        pw.println(innerPrefix + "mIsPredictiveBackImeHideAnimInProgress="
+                + mIsPredictiveBackImeHideAnimInProgress);
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

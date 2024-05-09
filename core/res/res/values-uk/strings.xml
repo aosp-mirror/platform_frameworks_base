@@ -2405,14 +2405,10 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Робочий профіль 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Тестовий профіль"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Спільний профіль"</string>
-    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
-    <skip />
-    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
-    <skip />
-    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
-    <skip />
-    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Робочий профіль"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Приватний простір"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Копія профілю"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Спільний профіль"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Чутливий вміст сповіщення приховано"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"З міркувань безпеки вміст додатка приховано під час показу екрана"</string>

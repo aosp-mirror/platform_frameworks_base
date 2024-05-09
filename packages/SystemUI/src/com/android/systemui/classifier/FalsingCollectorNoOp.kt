@@ -61,11 +61,11 @@ class FalsingCollectorNoOp @Inject constructor() : FalsingCollector {
     }
 
     override fun onKeyEvent(ev: KeyEvent) {
-        logDebug("NOOP: onKeyEvent(${ev.action}")
+        logDebug("NOOP: onKeyEvent(${KeyEvent.actionToString(ev.action)}")
     }
 
     override fun onTouchEvent(ev: MotionEvent) {
-        logDebug("NOOP: onTouchEvent(${ev.actionMasked})")
+        logDebug("NOOP: onTouchEvent(${MotionEvent.actionToString(ev.actionMasked)})")
     }
 
     override fun onMotionEventComplete() {

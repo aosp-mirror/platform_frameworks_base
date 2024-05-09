@@ -36,7 +36,6 @@
     </style>
     <style name="Keyguard.Bouncer.SecondaryMessage" parent="Theme.SystemUI">
         <item name="android:textSize">14sp</item>
-        <item name="android:lineHeight">20dp</item>
         <item name="android:maxLines">@integer/bouncer_secondary_message_lines</item>
         <item name="android:lines">@integer/bouncer_secondary_message_lines</item>
         <item name="android:textAlignment">center</item>

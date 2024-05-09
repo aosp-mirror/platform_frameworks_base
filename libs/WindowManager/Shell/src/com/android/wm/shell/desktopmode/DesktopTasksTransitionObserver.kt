@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.content.Context
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
@@ -33,13 +34,15 @@ import com.android.wm.shell.util.KtProtoLog
  * and other transitions that originate both within and outside shell.
  */
 class DesktopTasksTransitionObserver(
+    context: Context,
     private val desktopModeTaskRepository: DesktopModeTaskRepository,
     private val transitions: Transitions,
     shellInit: ShellInit
 ) : Transitions.TransitionObserver {
 
     init {
-        if (Transitions.ENABLE_SHELL_TRANSITIONS && DesktopModeStatus.isEnabled()) {
+        if (Transitions.ENABLE_SHELL_TRANSITIONS &&
+            DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(::onInit, this)
         }
     }

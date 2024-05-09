@@ -753,6 +753,9 @@ public final class AttributionSource implements Parcelable {
         @FlaggedApi(Flags.FLAG_SET_NEXT_ATTRIBUTION_SOURCE)
         public @NonNull Builder setNextAttributionSource(@NonNull AttributionSource value) {
             checkNotUsed();
+            if (value == null) {
+                throw new IllegalArgumentException("Null AttributionSource not permitted.");
+            }
             mBuilderFieldsSet |= 0x20;
             mAttributionSourceState.next =
                     new AttributionSourceState[]{value.mAttributionSourceState};

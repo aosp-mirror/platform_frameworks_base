@@ -60,6 +60,13 @@ flag {
 }
 
 flag {
+  name: "notification_expansion_optional"
+  namespace: "systemui"
+  description: "Experiment to restore the pre-S behavior where standard notifications are not expandable unless they have actions."
+  bug: "339523906"
+}
+
+flag {
   name: "keyguard_private_notifications"
   namespace: "systemui"
   description: "Fixes the behavior of KeyguardManager#setPrivateNotificationsAllowed()"

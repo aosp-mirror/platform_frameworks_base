@@ -38,6 +38,8 @@ import com.android.systemui.shared.R as sharedR
 import com.google.android.material.math.MathUtils
 import kotlin.math.abs
 
+internal fun View.getRect(): Rect = Rect(this.left, this.top, this.right, this.bottom)
+
 internal fun View.setRect(rect: Rect) =
     this.setLeftTopRightBottom(rect.left, rect.top, rect.right, rect.bottom)
 
@@ -66,12 +68,18 @@ class ClockSizeTransition(
             val view = transition.view
             transition.values[PROP_VISIBILITY] = view.visibility
             transition.values[PROP_ALPHA] = view.alpha
-            transition.values[PROP_BOUNDS] = Rect(view.left, view.top, view.right, view.bottom)
+            transition.values[PROP_BOUNDS] = view.getRect()
 
             if (!captureSmartspace) return
-            val ss = (view.parent as View).findViewById<View>(sharedR.id.bc_smartspace_view)
-            if (ss == null) return
-            transition.values[SMARTSPACE_BOUNDS] = Rect(ss.left, ss.top, ss.right, ss.bottom)
+            val parent = view.parent as View
+            val targetSSView =
+                parent.findViewById<View>(sharedR.id.bc_smartspace_view)
+                    ?: parent.findViewById<View>(R.id.keyguard_slice_view)
+            if (targetSSView == null) {
+                Log.e(TAG, "Failed to find smartspace equivalent target for animation")
+                return
+            }
+            transition.values[SMARTSPACE_BOUNDS] = targetSSView.getRect()
         }
 
         open fun mutateBounds(
@@ -89,7 +97,13 @@ class ClockSizeTransition(
             startValues: TransitionValues?,
             endValues: TransitionValues?
         ): Animator? {
-            if (startValues == null || endValues == null) return null
+            if (startValues == null || endValues == null) {
+                Log.w(
+                    TAG,
+                    "Couldn't create animator: startValues=$startValues; endValues=$endValues"
+                )
+                return null
+            }
 
             var fromVis = startValues.values[PROP_VISIBILITY] as Int
             var fromIsVis = fromVis == View.VISIBLE
@@ -141,11 +155,12 @@ class ClockSizeTransition(
             fun assignAnimValues(src: String, fract: Float, vis: Int? = null) {
                 val bounds = computeBounds(fract)
                 val alpha = MathUtils.lerp(fromAlpha, toAlpha, fract)
-                if (DEBUG)
+                if (DEBUG) {
                     Log.i(
                         TAG,
                         "$src: $toView; fract=$fract; alpha=$alpha; vis=$vis; bounds=$bounds;"
                     )
+                }
                 toView.setVisibility(vis ?: View.VISIBLE)
                 toView.setAlpha(alpha)
                 toView.setRect(bounds)
@@ -245,12 +260,9 @@ class ClockSizeTransition(
             // Move normally if clock is not changing visibility
             if (fromIsVis == toIsVis) return
 
-            fromBounds.left = toBounds.left
-            fromBounds.right = toBounds.right
+            fromBounds.set(toBounds)
             if (viewModel.isLargeClockVisible.value) {
-                // Large clock shouldn't move
-                fromBounds.top = toBounds.top
-                fromBounds.bottom = toBounds.bottom
+                // Large clock shouldn't move; fromBounds already set
             } else if (toSSBounds != null && fromSSBounds != null) {
                 // Instead of moving the small clock the full distance, we compute the distance
                 // smartspace will move. We then scale this to match the duration of this animation
@@ -306,12 +318,9 @@ class ClockSizeTransition(
             // Move normally if clock is not changing visibility
             if (fromIsVis == toIsVis) return
 
-            toBounds.left = fromBounds.left
-            toBounds.right = fromBounds.right
+            toBounds.set(fromBounds)
             if (!viewModel.isLargeClockVisible.value) {
-                // Large clock shouldn't move
-                toBounds.top = fromBounds.top
-                toBounds.bottom = fromBounds.bottom
+                // Large clock shouldn't move; toBounds already set
             } else if (toSSBounds != null && fromSSBounds != null) {
                 // Instead of moving the small clock the full distance, we compute the distance
                 // smartspace will move. We then scale this to match the duration of this animation
@@ -321,7 +330,7 @@ class ClockSizeTransition(
                 toBounds.top = fromBounds.top - ssTranslation
                 toBounds.bottom = fromBounds.bottom - ssTranslation
             } else {
-                Log.w(TAG, "mutateBounds: smallClock received no smartspace bounds")
+                Log.e(TAG, "mutateBounds: smallClock received no smartspace bounds")
             }
         }
 

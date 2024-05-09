@@ -18,6 +18,7 @@ package com.android.systemui.communal.widgets
 
 import android.appwidget.AppWidgetProviderInfo
 import android.content.pm.UserInfo
+import android.graphics.Bitmap
 import android.os.UserHandle
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -60,6 +61,7 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
     private val kosmos = testKosmos()
 
     @Mock private lateinit var appWidgetHost: CommunalAppWidgetHost
+    @Mock private lateinit var communalWidgetHost: CommunalWidgetHost
 
     private lateinit var appWidgetIdToRemove: MutableSharedFlow<Int>
 
@@ -78,6 +80,7 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
         underTest =
             CommunalAppWidgetHostStartable(
                 appWidgetHost,
+                communalWidgetHost,
                 kosmos.communalInteractor,
                 kosmos.fakeUserTracker,
                 kosmos.applicationCoroutineScope,
@@ -143,16 +146,44 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
         }
 
     @Test
+    fun observeHostWhenCommunalIsAvailable() =
+        with(kosmos) {
+            testScope.runTest {
+                setCommunalAvailable(true)
+                communalInteractor.setEditModeOpen(false)
+                verify(communalWidgetHost, never()).startObservingHost()
+                verify(communalWidgetHost, never()).stopObservingHost()
+
+                underTest.start()
+                runCurrent()
+
+                verify(communalWidgetHost).startObservingHost()
+                verify(communalWidgetHost, never()).stopObservingHost()
+
+                setCommunalAvailable(false)
+                runCurrent()
+
+                verify(communalWidgetHost).stopObservingHost()
+            }
+        }
+
+    @Test
     fun removeAppWidgetReportedByHost() =
         with(kosmos) {
             testScope.runTest {
                 // Set up communal widgets
                 val widget1 =
-                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(1) }
+                    mock<CommunalWidgetContentModel.Available> {
+                        whenever(this.appWidgetId).thenReturn(1)
+                    }
                 val widget2 =
-                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(2) }
+                    mock<CommunalWidgetContentModel.Available> {
+                        whenever(this.appWidgetId).thenReturn(2)
+                    }
                 val widget3 =
-                    mock<CommunalWidgetContentModel> { whenever(this.appWidgetId).thenReturn(3) }
+                    mock<CommunalWidgetContentModel.Available> {
+                        whenever(this.appWidgetId).thenReturn(3)
+                    }
                 fakeCommunalWidgetRepository.setCommunalWidgets(listOf(widget1, widget2, widget3))
 
                 underTest.start()
@@ -184,8 +215,9 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
                     userInfos = listOf(MAIN_USER_INFO, USER_INFO_WORK),
                     selectedUserIndex = 0,
                 )
+                // One work widget, one pending work widget, and one personal widget.
                 val widget1 = createWidgetForUser(1, USER_INFO_WORK.id)
-                val widget2 = createWidgetForUser(2, MAIN_USER_INFO.id)
+                val widget2 = createPendingWidgetForUser(2, USER_INFO_WORK.id)
                 val widget3 = createWidgetForUser(3, MAIN_USER_INFO.id)
                 val widgets = listOf(widget1, widget2, widget3)
                 fakeCommunalWidgetRepository.setCommunalWidgets(widgets)
@@ -209,8 +241,8 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
                 fakeKeyguardRepository.setKeyguardShowing(true)
                 runCurrent()
 
-                // Widget created for work profile is removed.
-                assertThat(communalWidgets).containsExactly(widget2, widget3)
+                // Both work widgets are removed.
+                assertThat(communalWidgets).containsExactly(widget3)
             }
         }
 
@@ -227,13 +259,31 @@ class CommunalAppWidgetHostStartableTest : SysuiTestCase() {
             )
         }
 
-    private fun createWidgetForUser(appWidgetId: Int, userId: Int): CommunalWidgetContentModel =
-        mock<CommunalWidgetContentModel> {
+    private fun createWidgetForUser(
+        appWidgetId: Int,
+        userId: Int
+    ): CommunalWidgetContentModel.Available =
+        mock<CommunalWidgetContentModel.Available> {
             whenever(this.appWidgetId).thenReturn(appWidgetId)
             val providerInfo = mock<AppWidgetProviderInfo>()
             whenever(providerInfo.profile).thenReturn(UserHandle(userId))
             whenever(this.providerInfo).thenReturn(providerInfo)
         }
+
+    private fun createPendingWidgetForUser(
+        appWidgetId: Int,
+        userId: Int,
+        priority: Int = 0,
+        packageName: String = "",
+        icon: Bitmap? = null,
+    ): CommunalWidgetContentModel.Pending =
+        CommunalWidgetContentModel.Pending(
+            appWidgetId = appWidgetId,
+            priority = priority,
+            packageName = packageName,
+            icon = icon,
+            user = UserHandle(userId),
+        )
 
     private companion object {
         val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)

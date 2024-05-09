@@ -90,7 +90,7 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun componentsLoadedOnStart() =
+    fun servicesLoadedOnStart() =
         testScope.runTest {
             val userId = 0
             val resolveInfo =
@@ -106,12 +106,14 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
             runCurrent()
+            val services = underTest.getInstalledTilesServiceInfos(userId)
 
             assertThat(componentNames).containsExactly(TEST_COMPONENT)
+            assertThat(services).containsExactly(resolveInfo.serviceInfo)
         }
 
     @Test
-    fun componentAdded_foundAfterPackageChange() =
+    fun serviceAdded_foundAfterPackageChange() =
         testScope.runTest {
             val userId = 0
             val resolveInfo =
@@ -132,12 +134,14 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 .thenReturn(listOf(resolveInfo))
             kosmos.fakePackageChangeRepository.notifyChange(PackageChangeModel.Empty)
             runCurrent()
+            val services = underTest.getInstalledTilesServiceInfos(userId)
 
             assertThat(componentNames).containsExactly(TEST_COMPONENT)
+            assertThat(services).containsExactly(resolveInfo.serviceInfo)
         }
 
     @Test
-    fun componentWithoutPermission_notValid() =
+    fun serviceWithoutPermission_notValid() =
         testScope.runTest {
             val userId = 0
             val resolveInfo =
@@ -152,13 +156,15 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 .thenReturn(listOf(resolveInfo))
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+            val services = underTest.getInstalledTilesServiceInfos(userId)
             runCurrent()
 
             assertThat(componentNames).isEmpty()
+            assertThat(services).isEmpty()
         }
 
     @Test
-    fun componentNotEnabled_notValid() =
+    fun serviceNotEnabled_notValid() =
         testScope.runTest {
             val userId = 0
             val resolveInfo =
@@ -173,9 +179,11 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
                 .thenReturn(listOf(resolveInfo))
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
+            val services = underTest.getInstalledTilesServiceInfos(userId)
             runCurrent()
 
             assertThat(componentNames).isEmpty()
+            assertThat(services).isEmpty()
         }
 
     @Test
@@ -221,28 +229,20 @@ class InstalledTilesComponentRepositoryImplTest : SysuiTestCase() {
 
             val componentNames by collectLastValue(underTest.getInstalledTilesComponents(userId))
             runCurrent()
+            val service = underTest.getInstalledTilesServiceInfos(userId)
 
             assertThat(componentNames).containsExactly(TEST_COMPONENT)
+            assertThat(service).containsExactly(resolveInfo.serviceInfo)
         }
 
     @Test
-    fun loadComponentsForSameUserTwice_returnsSameFlow() =
+    fun loadServicesForSameUserTwice_returnsSameFlow() =
         testScope.runTest {
-            val flowForUser1 = underTest.getInstalledTilesComponents(1)
-            val flowForUser1TheSecondTime = underTest.getInstalledTilesComponents(1)
+            val flowForUser1 = underTest.getInstalledTilesServiceInfos(1)
+            val flowForUser1TheSecondTime = underTest.getInstalledTilesServiceInfos(1)
             runCurrent()
 
             assertThat(flowForUser1TheSecondTime).isEqualTo(flowForUser1)
-        }
-
-    @Test
-    fun loadComponentsForDifferentUsers_returnsDifferentFlow() =
-        testScope.runTest {
-            val flowForUser1 = underTest.getInstalledTilesComponents(1)
-            val flowForUser2 = underTest.getInstalledTilesComponents(2)
-            runCurrent()
-
-            assertThat(flowForUser2).isNotEqualTo(flowForUser1)
         }
 
     // Tests that a ServiceInfo that is returned by queryIntentServicesAsUser but shortly

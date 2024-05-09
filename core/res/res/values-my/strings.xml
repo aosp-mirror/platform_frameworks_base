@@ -2144,10 +2144,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ဘက်ထရီ အားထိန်း ဖွင့်ထားသည်"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် ဘက်ထရီ အသုံးပြုမှု လျှော့ချခြင်း"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"‘ဘက်ထရီ အားထိန်း’ ဖွင့်ထားသည်"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"ဘက်ထရီ သက်တမ်းရှည်စေရန် ‘ဘက်ထရီ အားထိန်း’ ဖွင့်ထားသည်"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ဘက်ထရီ အားထိန်း"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ဘက်ထရီ အားထိန်းကို ပိတ်ထားသည်"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ဖုန်းတွင် ဘက်ထရီအား အလုံအလောက် ရှိသည်။ လုပ်ဆောင်ချက်များကို ကန့်သတ်မထားတော့ပါ။"</string>

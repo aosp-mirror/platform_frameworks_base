@@ -804,6 +804,8 @@ private fun CommunalContent(
         is CommunalContentModel.WidgetPlaceholder -> HighlightedItem(modifier)
         is CommunalContentModel.WidgetContent.DisabledWidget ->
             DisabledWidgetPlaceholder(model, viewModel, modifier)
+        is CommunalContentModel.WidgetContent.PendingWidget ->
+            PendingWidgetPlaceholder(model, modifier)
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
@@ -929,36 +931,36 @@ private fun WidgetContent(
                     Modifier.semantics {
                         contentDescription = accessibilityLabel
                         onClick(label = clickActionLabel, action = null)
-                            val deleteAction =
-                                CustomAccessibilityAction(removeWidgetActionLabel) {
-                                    contentListState.onRemove(index)
-                                    contentListState.onSaveList()
-                                    true
-                                }
-                            val selectWidgetAction =
-                                CustomAccessibilityAction(clickActionLabel) {
-                                    val currentWidgetKey =
-                                        index?.let {
-                                            keyAtIndexIfEditable(contentListState.list, index)
-                                        }
-                                    viewModel.setSelectedKey(currentWidgetKey)
-                                    true
-                                }
-
-                            val actions = mutableListOf(deleteAction, selectWidgetAction)
-
-                            if (selectedIndex != null && selectedIndex != index) {
-                                actions.add(
-                                    CustomAccessibilityAction(placeWidgetActionLabel) {
-                                        contentListState.onMove(selectedIndex!!, index)
-                                        contentListState.onSaveList()
-                                        viewModel.setSelectedKey(null)
-                                        true
+                        val deleteAction =
+                            CustomAccessibilityAction(removeWidgetActionLabel) {
+                                contentListState.onRemove(index)
+                                contentListState.onSaveList()
+                                true
+                            }
+                        val selectWidgetAction =
+                            CustomAccessibilityAction(clickActionLabel) {
+                                val currentWidgetKey =
+                                    index?.let {
+                                        keyAtIndexIfEditable(contentListState.list, index)
                                     }
-                                )
+                                viewModel.setSelectedKey(currentWidgetKey)
+                                true
                             }
 
-                            customActions = actions
+                        val actions = mutableListOf(deleteAction, selectWidgetAction)
+
+                        if (selectedIndex != null && selectedIndex != index) {
+                            actions.add(
+                                CustomAccessibilityAction(placeWidgetActionLabel) {
+                                    contentListState.onMove(selectedIndex!!, index)
+                                    contentListState.onSaveList()
+                                    viewModel.setSelectedKey(null)
+                                    true
+                                }
+                            )
+                        }
+
+                        customActions = actions
                     }
                 }
     ) {
@@ -1074,8 +1076,38 @@ fun DisabledWidgetPlaceholder(
         Image(
             painter = rememberDrawablePainter(icon.loadDrawable(context)),
             contentDescription = stringResource(R.string.icon_description_for_disabled_widget),
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(Dimensions.IconSize),
             colorFilter = ColorFilter.colorMatrix(Colors.DisabledColorFilter),
+        )
+    }
+}
+
+@Composable
+fun PendingWidgetPlaceholder(
+    model: CommunalContentModel.WidgetContent.PendingWidget,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val icon: Icon =
+        if (model.icon != null) {
+            Icon.createWithBitmap(model.icon)
+        } else {
+            Icon.createWithResource(context, android.R.drawable.sym_def_app_icon)
+        }
+
+    Column(
+        modifier =
+            modifier.background(
+                MaterialTheme.colorScheme.surfaceVariant,
+                RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            painter = rememberDrawablePainter(icon.loadDrawable(context)),
+            contentDescription = stringResource(R.string.icon_description_for_pending_widget),
+            modifier = Modifier.size(Dimensions.IconSize),
         )
     }
 }

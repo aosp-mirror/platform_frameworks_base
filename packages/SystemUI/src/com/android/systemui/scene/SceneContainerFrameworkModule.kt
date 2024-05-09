@@ -18,6 +18,7 @@ package com.android.systemui.scene
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlagsModule
+import com.android.systemui.notifications.ui.composable.NotificationsShadeSessionModule
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -43,6 +44,7 @@ import dagger.multibindings.IntoMap
             ShadeSceneModule::class,
             QuickSettingsShadeSceneModule::class,
             NotificationsShadeSceneModule::class,
+            NotificationsShadeSessionModule::class,
         ],
 )
 interface SceneContainerFrameworkModule {

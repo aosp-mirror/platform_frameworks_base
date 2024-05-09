@@ -97,8 +97,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Sempadan kiri <xliff:g id="PERCENT">%1$d</xliff:g> peratus"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Sempadan kanan <xliff:g id="PERCENT">%1$d</xliff:g> peratus"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Disimpan dalam <xliff:g id="APP">%1$s</xliff:g> dalam profil kerja"</string>
-    <!-- no translation found for screenshot_private_profile_notification (1704440899154243171) -->
-    <skip />
+    <string name="screenshot_private_profile_notification" msgid="1704440899154243171">"Disimpan dalam <xliff:g id="APP">%1$s</xliff:g> pada profil peribadi"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fail"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> telah mengesan tangkapan skrin ini."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dan apl lain yang dibuka telah mengesan tangkapan skrin ini."</string>
@@ -237,7 +236,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Bidai pemberitahuan."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Tetapan pantas."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Tetapan pantas dan Bidai pemberitahuan."</string>
-    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"Kunci skrin"</string>
+    <string name="accessibility_desc_lock_screen" msgid="409034672704273634">"Skrin kunci"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Skrin kunci kerja"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Tutup"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"senyap sepenuhnya"</string>
@@ -461,7 +460,10 @@
     <string name="accessibility_action_label_close_communal_hub" msgid="6790396569621032333">"Tutup widget pada skrin kunci"</string>
     <string name="accessibility_action_label_edit_widgets" msgid="3821868581348322346">"Sesuaikan widget"</string>
     <string name="accessibility_content_description_for_communal_hub" msgid="1670220840599380118">"Widget pada skrin kunci"</string>
-    <!-- no translation found for accessibility_action_label_select_widget (8897281501387398191) -->
+    <string name="accessibility_action_label_select_widget" msgid="8897281501387398191">"pilih widget"</string>
+    <!-- no translation found for accessibility_action_label_remove_widget (3373779447448758070) -->
+    <skip />
+    <!-- no translation found for accessibility_action_label_place_widget (1914197458644168978) -->
     <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Tukar pengguna"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menu tarik turun"</string>
@@ -631,8 +633,7 @@
     <string name="volume_panel_hint_unmute" msgid="7489063242934477382">"nyahredamkan %s"</string>
     <string name="media_output_label_title" msgid="872824698593182505">"Memainkan <xliff:g id="LABEL">%s</xliff:g> pada"</string>
     <string name="media_output_title_without_playing" msgid="3825663683169305013">"Audio dimainkan pada"</string>
-    <!-- no translation found for media_output_title_ongoing_call (208426888064112006) -->
-    <skip />
+    <string name="media_output_title_ongoing_call" msgid="208426888064112006">"Membuat panggilan"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Penala UI Sistem"</string>
     <string name="status_bar" msgid="4357390266055077437">"Bar status"</string>
     <string name="demo_mode" msgid="263484519766901593">"Mod tunjuk cara UI sistem"</string>
@@ -660,8 +661,7 @@
     <string name="accessibility_status_bar_satellite_poor_connection" msgid="5231478574952724160">"Satelit, sambungan yang lemah"</string>
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satelit, sambungan yang baik"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, sambungan tersedia"</string>
-    <!-- no translation found for satellite_connected_carrier_text (118524195198532589) -->
-    <skip />
+    <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS via Satelit"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil kerja"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Menarik untuk sesetengah orang tetapi bukan untuk semua"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Penala UI Sistem memberi anda cara tambahan untuk mengolah dan menyesuaikan antara muka Android. Ciri eksperimen ini boleh berubah, rosak atau hilang dalam keluaran masa hadapan. Teruskan dengan berhati-hati."</string>
@@ -866,8 +866,7 @@
     <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tambahkan jubin"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Alih ke <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Tambahkan pada kedudukan <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <!-- no translation found for accessibilit_qs_edit_tile_add_move_invalid_position (2858467994472624487) -->
-    <skip />
+    <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Kedudukan tidak sah."</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Kedudukan <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"Jubin ditambah"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"Jubin dialih keluar"</string>

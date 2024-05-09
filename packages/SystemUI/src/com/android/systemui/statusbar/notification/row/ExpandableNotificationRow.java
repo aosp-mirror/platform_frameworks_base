@@ -375,6 +375,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             };
 
     private OnClickListener mOnClickListener;
+    @Nullable
+    private OnClickListener mBubbleClickListener;
     private OnDragSuccessListener mOnDragSuccessListener;
     private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
@@ -1234,14 +1236,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * The click listener for the bubble button.
      */
+    @Nullable
     public View.OnClickListener getBubbleClickListener() {
-        return v -> {
-            if (mBubblesManagerOptional.isPresent()) {
-                mBubblesManagerOptional.get()
-                        .onUserChangedBubble(mEntry, !mEntry.isBubble() /* createBubble */);
-            }
-            mHeadsUpManager.removeNotification(mEntry.getKey(), true /* releaseImmediately */);
-        };
+        return mBubbleClickListener;
+    }
+
+    /**
+     * Sets the click listener for the bubble button.
+     */
+    public void setBubbleClickListener(@Nullable OnClickListener l) {
+        mBubbleClickListener = l;
+        // ensure listener is passed to the content views
+        mPrivateLayout.updateBubbleButton(mEntry);
+        mPublicLayout.updateBubbleButton(mEntry);
     }
 
     /**

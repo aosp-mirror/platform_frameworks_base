@@ -2144,10 +2144,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Roetinemodus-inligtingkennisgewing"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Batterybespaarder is aangeskakel"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Verminder tans batterygebruik om batterylewe te verleng"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Batterybespaarder is aan"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"Batterybespaarder is aangeskakel om batterylewe te verleng"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Batterybespaarder"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Batterybespaarder is afgeskakel"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Foon se battery het genoeg krag. Kenmerke is nie meer beperk nie."</string>

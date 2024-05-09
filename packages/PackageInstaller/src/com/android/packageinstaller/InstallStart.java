@@ -193,6 +193,7 @@ public class InstallStart extends Activity {
 
         if (isSessionInstall) {
             nextActivity.setClass(this, PackageInstallerActivity.class);
+            nextActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         } else {
             Uri packageUri = intent.getData();
 

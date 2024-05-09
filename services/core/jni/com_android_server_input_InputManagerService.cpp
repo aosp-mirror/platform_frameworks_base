@@ -88,7 +88,6 @@ namespace input_flags = com::android::input::flags;
 
 namespace android {
 
-static const bool ENABLE_POINTER_CHOREOGRAPHER = input_flags::enable_pointer_choreographer();
 static const bool ENABLE_INPUT_FILTER_RUST = input_flags::enable_input_filter_rust_impl();
 
 // The exponent used to calculate the pointer speed scaling factor.
@@ -298,10 +297,8 @@ public:
     void setShowTouches(bool enabled);
     void setInteractive(bool interactive);
     void reloadCalibration();
-    void setPointerIconType(PointerIconStyle iconId);
     void reloadPointerIcons();
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
-    void setCustomPointerIcon(const SpriteIcon& icon);
     bool setPointerIcon(std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon,
                         int32_t displayId, DeviceId deviceId, int32_t pointerId,
                         const sp<IBinder>& inputToken);
@@ -316,7 +313,6 @@ public:
     /* --- InputReaderPolicyInterface implementation --- */
 
     void getReaderConfiguration(InputReaderConfiguration* outConfig) override;
-    std::shared_ptr<PointerControllerInterface> obtainPointerController(int32_t deviceId) override;
     void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) override;
     std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
             const InputDeviceIdentifier& identifier,
@@ -375,7 +371,6 @@ public:
     virtual PointerIconStyle getDefaultPointerIconId();
     virtual PointerIconStyle getDefaultStylusIconId();
     virtual PointerIconStyle getCustomPointerIconId();
-    virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position);
 
     /* --- PointerChoreographerPolicyInterface implementation --- */
     std::shared_ptr<PointerControllerInterface> createPointerController(
@@ -409,18 +404,11 @@ private:
         // True if pointer gestures are enabled.
         bool pointerGesturesEnabled{true};
 
-        // Show touches feature enable/disable.
-        bool showTouches{false};
-
         // The latest request to enable or disable Pointer Capture.
         PointerCaptureRequest pointerCaptureRequest{};
 
         // Sprite controller singleton, created on first use.
         std::shared_ptr<SpriteController> spriteController{};
-
-        // TODO(b/293587049): Remove when the PointerChoreographer refactoring is complete.
-        // Pointer controller singleton, created and destroyed as needed.
-        std::weak_ptr<PointerController> legacyPointerController{};
 
         // The list of PointerControllers created and managed by the PointerChoreographer.
         std::list<std::weak_ptr<PointerController>> pointerControllers{};
@@ -504,14 +492,10 @@ void NativeInputManager::dump(std::string& dump) {
         dump += StringPrintf(INDENT "Display with Mouse Pointer Acceleration Disabled: %s\n",
                              dumpSet(mLocked.displaysWithMousePointerAccelerationDisabled).c_str());
         dump += StringPrintf(INDENT "Pointer Gestures Enabled: %s\n",
-                toString(mLocked.pointerGesturesEnabled));
-        dump += StringPrintf(INDENT "Show Touches: %s\n", toString(mLocked.showTouches));
+                             toString(mLocked.pointerGesturesEnabled));
         dump += StringPrintf(INDENT "Pointer Capture: %s, seq=%" PRIu32 "\n",
                              mLocked.pointerCaptureRequest.isEnable() ? "Enabled" : "Disabled",
                              mLocked.pointerCaptureRequest.seq);
-        if (auto pc = mLocked.legacyPointerController.lock(); pc) {
-            dump += pc->dump();
-        }
     } // release lock
     dump += "\n";
 
@@ -556,9 +540,7 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
                 [&viewports](PointerController& pc) { pc.onDisplayViewportsUpdated(viewports); });
     } // release lock
 
-    if (ENABLE_POINTER_CHOREOGRAPHER) {
-        mInputManager->getChoreographer().setDisplayViewports(viewports);
-    }
+    mInputManager->getChoreographer().setDisplayViewports(viewports);
     mInputManager->getReader().requestRefreshConfiguration(
             InputReaderConfiguration::Change::DISPLAY_INFO);
 }
@@ -700,8 +682,6 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
                 : 1;
         outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
 
-        outConfig->showTouches = mLocked.showTouches;
-
         outConfig->pointerCaptureRequest = mLocked.pointerCaptureRequest;
 
         outConfig->setDisplayViewports(mLocked.viewports);
@@ -743,10 +723,6 @@ std::unordered_map<std::string, T> NativeInputManager::readMapFromInterleavedJav
 
 void NativeInputManager::forEachPointerControllerLocked(
         std::function<void(PointerController&)> apply) {
-    if (auto pc = mLocked.legacyPointerController.lock(); pc) {
-        apply(*pc);
-    }
-
     auto it = mLocked.pointerControllers.begin();
     while (it != mLocked.pointerControllers.end()) {
         auto pc = it->lock();
@@ -780,48 +756,14 @@ PointerIcon NativeInputManager::loadPointerIcon(JNIEnv* env, int32_t displayId,
     return android_view_PointerIcon_toNative(env, pointerIconObj.get());
 }
 
-// TODO(b/293587049): Remove the old way of obtaining PointerController when the
-//  PointerChoreographer refactoring is complete.
-std::shared_ptr<PointerControllerInterface> NativeInputManager::obtainPointerController(
-        int32_t /* deviceId */) {
-    ATRACE_CALL();
-    std::scoped_lock _l(mLock);
-
-    std::shared_ptr<PointerController> controller = mLocked.legacyPointerController.lock();
-    if (controller == nullptr) {
-        ensureSpriteControllerLocked();
-
-        // Disable the functionality of the legacy PointerController if PointerChoreographer is
-        // enabled.
-        controller = PointerController::create(this, mLooper, *mLocked.spriteController,
-                                               /*enabled=*/!ENABLE_POINTER_CHOREOGRAPHER);
-        mLocked.legacyPointerController = controller;
-        updateInactivityTimeoutLocked();
-    }
-
-    return controller;
-}
-
 std::shared_ptr<PointerControllerInterface> NativeInputManager::createPointerController(
         PointerControllerInterface::ControllerType type) {
     std::scoped_lock _l(mLock);
     ensureSpriteControllerLocked();
     std::shared_ptr<PointerController> pc =
-            PointerController::create(this, mLooper, *mLocked.spriteController, /*enabled=*/true,
-                                      type);
+            PointerController::create(this, mLooper, *mLocked.spriteController, type);
     mLocked.pointerControllers.emplace_back(pc);
     return pc;
-}
-
-void NativeInputManager::onPointerDisplayIdChanged(int32_t pointerDisplayId,
-                                                   const FloatPoint& position) {
-    if (ENABLE_POINTER_CHOREOGRAPHER) {
-        return;
-    }
-    JNIEnv* env = jniEnv();
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDisplayIdChanged, pointerDisplayId,
-                        position.x, position.y);
-    checkAndClearExceptionFromCallback(env, "onPointerDisplayIdChanged");
 }
 
 void NativeInputManager::notifyPointerDisplayIdChanged(int32_t pointerDisplayId,
@@ -1210,23 +1152,7 @@ void NativeInputManager::updateInactivityTimeoutLocked() REQUIRES(mLock) {
 }
 
 void NativeInputManager::setPointerDisplayId(int32_t displayId) {
-    if (ENABLE_POINTER_CHOREOGRAPHER) {
-        mInputManager->getChoreographer().setDefaultMouseDisplayId(displayId);
-    } else {
-        { // acquire lock
-            std::scoped_lock _l(mLock);
-
-            if (mLocked.pointerDisplayId == displayId) {
-                return;
-            }
-
-            ALOGI("Setting pointer display id to %d.", displayId);
-            mLocked.pointerDisplayId = displayId;
-        } // release lock
-
-        mInputManager->getReader().requestRefreshConfiguration(
-                InputReaderConfiguration::Change::DISPLAY_INFO);
-    }
+    mInputManager->getChoreographer().setDefaultMouseDisplayId(displayId);
 }
 
 int32_t NativeInputManager::getMousePointerSpeed() {
@@ -1378,24 +1304,7 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
 }
 
 void NativeInputManager::setShowTouches(bool enabled) {
-    if (ENABLE_POINTER_CHOREOGRAPHER) {
-        mInputManager->getChoreographer().setShowTouchesEnabled(enabled);
-        return;
-    }
-
-    { // acquire lock
-        std::scoped_lock _l(mLock);
-
-        if (mLocked.showTouches == enabled) {
-            return;
-        }
-
-        ALOGI("Setting show touches feature to %s.", enabled ? "enabled" : "disabled");
-        mLocked.showTouches = enabled;
-    } // release lock
-
-    mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::Change::SHOW_TOUCHES);
+    mInputManager->getChoreographer().setShowTouchesEnabled(enabled);
 }
 
 void NativeInputManager::requestPointerCapture(const sp<IBinder>& windowToken, bool enabled) {
@@ -1411,25 +1320,9 @@ void NativeInputManager::reloadCalibration() {
             InputReaderConfiguration::Change::TOUCH_AFFINE_TRANSFORMATION);
 }
 
-void NativeInputManager::setPointerIconType(PointerIconStyle iconId) {
-    std::scoped_lock _l(mLock);
-    std::shared_ptr<PointerController> controller = mLocked.legacyPointerController.lock();
-    if (controller != nullptr) {
-        controller->updatePointerIcon(iconId);
-    }
-}
-
 void NativeInputManager::reloadPointerIcons() {
     std::scoped_lock _l(mLock);
     forEachPointerControllerLocked([](PointerController& pc) { pc.reloadPointerResources(); });
-}
-
-void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
-    std::scoped_lock _l(mLock);
-    std::shared_ptr<PointerController> controller = mLocked.legacyPointerController.lock();
-    if (controller != nullptr) {
-        controller->setCustomPointerIcon(icon);
-    }
 }
 
 bool NativeInputManager::setPointerIcon(
@@ -1447,9 +1340,6 @@ bool NativeInputManager::setPointerIcon(
 }
 
 void NativeInputManager::setPointerIconVisibility(int32_t displayId, bool visible) {
-    if (!ENABLE_POINTER_CHOREOGRAPHER) {
-        return;
-    }
     mInputManager->getChoreographer().setPointerIconVisibility(displayId, visible);
 }
 
@@ -1819,36 +1709,12 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
 }
 
 FloatPoint NativeInputManager::getMouseCursorPosition(int32_t displayId) {
-    if (ENABLE_POINTER_CHOREOGRAPHER) {
-        return mInputManager->getChoreographer().getMouseCursorPosition(displayId);
-    }
-    // To maintain the status-quo, the displayId parameter (used when PointerChoreographer is
-    // enabled) is ignored in the old pipeline.
-    std::scoped_lock _l(mLock);
-    const auto pc = mLocked.legacyPointerController.lock();
-    if (!pc) return {AMOTION_EVENT_INVALID_CURSOR_POSITION, AMOTION_EVENT_INVALID_CURSOR_POSITION};
-
-    return pc->getPosition();
+    return mInputManager->getChoreographer().getMouseCursorPosition(displayId);
 }
 
 void NativeInputManager::setStylusPointerIconEnabled(bool enabled) {
-    if (ENABLE_POINTER_CHOREOGRAPHER) {
-        mInputManager->getChoreographer().setStylusPointerIconEnabled(enabled);
-        return;
-    }
-
-    { // acquire lock
-        std::scoped_lock _l(mLock);
-
-        if (mLocked.stylusPointerIconEnabled == enabled) {
-            return;
-        }
-
-        mLocked.stylusPointerIconEnabled = enabled;
-    } // release lock
-
-    mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::Change::DISPLAY_INFO);
+    mInputManager->getChoreographer().setStylusPointerIconEnabled(enabled);
+    return;
 }
 
 void NativeInputManager::setInputMethodConnectionIsActive(bool isActive) {
@@ -2597,25 +2463,10 @@ static void nativeDisableInputDevice(JNIEnv* env, jobject nativeImplObj, jint de
     im->setInputDeviceEnabled(deviceId, false);
 }
 
-static void nativeSetPointerIconType(JNIEnv* env, jobject nativeImplObj, jint iconId) {
-    // iconId is set in java from from frameworks/base/core/java/android/view/PointerIcon.java,
-    // where the definition in <input/Input.h> is duplicated as a sealed class (type safe enum
-    // equivalent in Java).
-
-    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-
-    im->setPointerIconType(static_cast<PointerIconStyle>(iconId));
-}
-
 static void nativeReloadPointerIcons(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     im->reloadPointerIcons();
-}
-
-static void nativeSetCustomPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject iconObj) {
-    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    im->setCustomPointerIcon(toSpriteIcon(android_view_PointerIcon_toNative(env, iconObj)));
 }
 
 static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject iconObj,
@@ -2937,10 +2788,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"isInputDeviceEnabled", "(I)Z", (void*)nativeIsInputDeviceEnabled},
         {"enableInputDevice", "(I)V", (void*)nativeEnableInputDevice},
         {"disableInputDevice", "(I)V", (void*)nativeDisableInputDevice},
-        {"setPointerIconType", "(I)V", (void*)nativeSetPointerIconType},
         {"reloadPointerIcons", "()V", (void*)nativeReloadPointerIcons},
-        {"setCustomPointerIcon", "(Landroid/view/PointerIcon;)V",
-         (void*)nativeSetCustomPointerIcon},
         {"setPointerIcon", "(Landroid/view/PointerIcon;IIILandroid/os/IBinder;)Z",
          (void*)nativeSetPointerIcon},
         {"setPointerIconVisibility", "(IZ)V", (void*)nativeSetPointerIconVisibility},

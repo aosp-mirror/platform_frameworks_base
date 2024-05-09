@@ -165,29 +165,23 @@ private:
      * on the sprites for a long time.
      * Note that the SpriteIcon holds a reference to a shared (and immutable) bitmap. */
     struct SpriteState {
-        inline SpriteState() :
-                dirty(0), visible(false),
-                positionX(0), positionY(0), layer(0), alpha(1.0f), displayId(ADISPLAY_ID_DEFAULT),
-                surfaceWidth(0), surfaceHeight(0), surfaceDrawn(false), surfaceVisible(false) {
-        }
-
-        uint32_t dirty;
+        uint32_t dirty{0};
 
         SpriteIcon icon;
-        bool visible;
-        float positionX;
-        float positionY;
-        int32_t layer;
-        float alpha;
+        bool visible{false};
+        float positionX{0};
+        float positionY{0};
+        int32_t layer{0};
+        float alpha{1.0f};
         SpriteTransformationMatrix transformationMatrix;
-        int32_t displayId;
+        int32_t displayId{ADISPLAY_ID_DEFAULT};
 
         sp<SurfaceControl> surfaceControl;
-        int32_t surfaceWidth;
-        int32_t surfaceHeight;
-        bool surfaceDrawn;
-        bool surfaceVisible;
-        bool skipScreenshot;
+        int32_t surfaceWidth{0};
+        int32_t surfaceHeight{0};
+        bool surfaceDrawn{false};
+        bool surfaceVisible{false};
+        bool skipScreenshot{false};
 
         inline bool wantSurfaceVisible() const {
             return visible && alpha > 0.0f && icon.isValid();

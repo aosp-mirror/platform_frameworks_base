@@ -234,7 +234,7 @@ public final class PointerIcon implements Parcelable {
         }
 
         int typeIndex = getSystemIconTypeIndex(type);
-        if (typeIndex == 0) {
+        if (typeIndex < 0) {
             typeIndex = getSystemIconTypeIndex(TYPE_DEFAULT);
         }
 
@@ -606,7 +606,7 @@ public final class PointerIcon implements Parcelable {
             case TYPE_HANDWRITING:
                 return com.android.internal.R.styleable.Pointer_pointerIconHandwriting;
             default:
-                return 0;
+                return -1;
         }
     }
 

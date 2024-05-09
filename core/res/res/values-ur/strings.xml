@@ -2144,10 +2144,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"روٹین موڈ معلومات کی اطلاع"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"بیٹری سیور کو آن کیا گیا"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"بیٹری لائف کو بڑھانے کے لیے بیٹری کے استعمال کو کم کیا جا رہا ہے"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"بیٹری سیور آن ہے"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"بیٹری لائف کو بڑھانے کے لیے بیٹری سیور کو آن کر دیا گیا ہے"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"بیٹری سیور"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"بیٹری سیور کو آف کر دیا گیا"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"فون میں کافی چارج ہے۔ خصوصیات پر اب پابندی نہیں ہے۔"</string>

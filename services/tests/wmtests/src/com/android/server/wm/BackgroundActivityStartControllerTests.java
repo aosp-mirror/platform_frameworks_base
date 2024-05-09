@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
+import static com.android.window.flags.Flags.balImprovedMetrics;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -145,6 +147,16 @@ public class BackgroundActivityStartControllerTests {
         }
 
         @Override
+        boolean shouldLogStats(BalVerdict finalVerdict, BalState state) {
+            return true;
+        }
+
+        @Override
+        boolean shouldLogIntentActivity(BalVerdict finalVerdict, BalState state) {
+            return true;
+        }
+
+        @Override
         BalVerdict checkBackgroundActivityStartAllowedByCaller(BalState state) {
             return mCallerVerdict.orElseGet(
                     () -> super.checkBackgroundActivityStartAllowedByCaller(state));
@@ -238,7 +250,12 @@ public class BackgroundActivityStartControllerTests {
 
         // assertions
         assertThat(verdict.getCode()).isEqualTo(BackgroundActivityStartController.BAL_BLOCK);
-        assertThat(mBalAllowedLogs).isEmpty(); // not allowed
+        if (balImprovedMetrics()) {
+            assertThat(mBalAllowedLogs).containsExactly(
+                    new BalAllowedLog("package.app3/someClass", BAL_BLOCK));
+        } else {
+            assertThat(mBalAllowedLogs).isEmpty(); // not allowed
+        }
     }
 
     // Tests for BackgroundActivityStartController.checkBackgroundActivityStart
@@ -268,7 +285,12 @@ public class BackgroundActivityStartControllerTests {
 
         // assertions
         assertThat(verdict).isEqualTo(BalVerdict.BLOCK);
-        assertThat(mBalAllowedLogs).isEmpty(); // not allowed
+        if (balImprovedMetrics()) {
+            assertThat(mBalAllowedLogs).containsExactly(
+                    new BalAllowedLog("package.app3/someClass", BAL_BLOCK));
+        } else {
+            assertThat(mBalAllowedLogs).isEmpty(); // not allowed
+        }
     }
 
     @Test
@@ -298,7 +320,12 @@ public class BackgroundActivityStartControllerTests {
 
         // assertions
         assertThat(verdict).isEqualTo(callerVerdict);
-        assertThat(mBalAllowedLogs).isEmpty(); // non-critical exception
+        if (balImprovedMetrics()) {
+            assertThat(mBalAllowedLogs).containsExactly(
+                    new BalAllowedLog("package.app3/someClass", callerVerdict.getCode()));
+        } else {
+            assertThat(mBalAllowedLogs).isEmpty(); // non-critical exception
+        }
     }
 
     @Test
@@ -362,7 +389,13 @@ public class BackgroundActivityStartControllerTests {
 
         // assertions
         assertThat(verdict).isEqualTo(callerVerdict);
-        assertThat(mBalAllowedLogs).containsExactly(new BalAllowedLog("", callerVerdict.getCode()));
+        if (balImprovedMetrics()) {
+            assertThat(mBalAllowedLogs).containsExactly(
+                    new BalAllowedLog("package.app3/someClass", callerVerdict.getCode()));
+        } else {
+            assertThat(mBalAllowedLogs).containsExactly(
+                    new BalAllowedLog("", callerVerdict.getCode()));
+        }
     }
 
     @Test
@@ -398,7 +431,12 @@ public class BackgroundActivityStartControllerTests {
 
         // assertions
         assertThat(verdict).isEqualTo(BalVerdict.BLOCK);
-        assertThat(mBalAllowedLogs).isEmpty();
+        if (balImprovedMetrics()) {
+            assertThat(mBalAllowedLogs).containsExactly(
+                    new BalAllowedLog("package.app3/someClass", BAL_BLOCK));
+        } else {
+            assertThat(mBalAllowedLogs).isEmpty();
+        }
     }
 
     @Test
@@ -430,7 +468,12 @@ public class BackgroundActivityStartControllerTests {
 
         // assertions
         assertThat(verdict).isEqualTo(callerVerdict);
-        assertThat(mBalAllowedLogs).isEmpty();
+        if (balImprovedMetrics()) {
+            assertThat(mBalAllowedLogs).containsExactly(
+                    new BalAllowedLog("package.app3/someClass", callerVerdict.getCode()));
+        } else {
+            assertThat(mBalAllowedLogs).isEmpty();
+        }
     }
 
     @Test

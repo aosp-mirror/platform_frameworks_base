@@ -2145,10 +2145,8 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informações do Modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Poupança de bateria ativada"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Reduzir a utilização da bateria para prolongar a autonomia da mesma"</string>
-    <!-- no translation found for dynamic_mode_notification_title_v2 (5072385242078021152) -->
-    <skip />
-    <!-- no translation found for dynamic_mode_notification_summary_v2 (2142444344663147938) -->
-    <skip />
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"Poupança de bateria ativada"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"A Poupança de bateria está ativada para prolongar a autonomia da bateria"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Poupança de bateria"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"A Poupança de bateria está desativada"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"O telemóvel tem carga suficiente. As funcionalidades já não estão restritas."</string>
@@ -2404,14 +2402,10 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"Trabalho 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Teste"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"Comum"</string>
-    <!-- no translation found for accessibility_label_managed_profile (3366526886209832641) -->
-    <skip />
-    <!-- no translation found for accessibility_label_private_profile (1436459319135548969) -->
-    <skip />
-    <!-- no translation found for accessibility_label_clone_profile (7579118375042398784) -->
-    <skip />
-    <!-- no translation found for accessibility_label_communal_profile (1437173163111334791) -->
-    <skip />
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"Perfil de trabalho"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"Espaço privado"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"Clone"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"Comum"</string>
     <string name="redacted_notification_message" msgid="1520587845842228816">"Conteúdo das notificações sensíveis ocultado"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Conteúdo da app ocultado da partilha de ecrã por motivos de segurança"</string>

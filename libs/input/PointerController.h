@@ -47,8 +47,7 @@ class PointerController : public PointerControllerInterface {
 public:
     static std::shared_ptr<PointerController> create(
             const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-            SpriteController& spriteController, bool enabled,
-            ControllerType type = ControllerType::LEGACY);
+            SpriteController& spriteController, ControllerType type);
 
     ~PointerController() override;
 
@@ -87,12 +86,12 @@ protected:
 
     // Constructor used to test WindowInfosListener registration.
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      SpriteController& spriteController, bool enabled,
+                      SpriteController& spriteController,
                       const WindowListenerRegisterConsumer& registerListener,
                       WindowListenerUnregisterConsumer unregisterListener);
 
     PointerController(const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-                      SpriteController& spriteController, bool enabled);
+                      SpriteController& spriteController);
 
 private:
     friend PointerControllerContext::LooperCallback;
@@ -103,8 +102,6 @@ private:
     // is given away. To avoid the small overhead of using two separate locks in these two objects,
     // we use the DisplayInfoListener's lock in PointerController.
     std::mutex& getLock() const;
-
-    const bool mEnabled;
 
     PointerControllerContext mContext;
 
@@ -144,8 +141,7 @@ class MousePointerController : public PointerController {
 public:
     /** A version of PointerController that controls one mouse pointer. */
     MousePointerController(const sp<PointerControllerPolicyInterface>& policy,
-                           const sp<Looper>& looper, SpriteController& spriteController,
-                           bool enabled);
+                           const sp<Looper>& looper, SpriteController& spriteController);
 
     ~MousePointerController() override;
 
@@ -164,8 +160,7 @@ class TouchPointerController : public PointerController {
 public:
     /** A version of PointerController that controls touch spots. */
     TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
-                           const sp<Looper>& looper, SpriteController& spriteController,
-                           bool enabled);
+                           const sp<Looper>& looper, SpriteController& spriteController);
 
     ~TouchPointerController() override;
 
@@ -210,8 +205,7 @@ class StylusPointerController : public PointerController {
 public:
     /** A version of PointerController that controls one stylus pointer. */
     StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
-                            const sp<Looper>& looper, SpriteController& spriteController,
-                            bool enabled);
+                            const sp<Looper>& looper, SpriteController& spriteController);
 
     ~StylusPointerController() override;
 

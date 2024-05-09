@@ -34,11 +34,8 @@
 
 #include "jni.h"
 
-using aidl::android::hardware::power::SessionConfig;
-using aidl::android::hardware::power::SessionHint;
-using aidl::android::hardware::power::SessionMode;
-using aidl::android::hardware::power::SessionTag;
-using aidl::android::hardware::power::WorkDuration;
+namespace hal = aidl::android::hardware::power;
+
 using android::power::PowerHintSessionWrapper;
 
 namespace android {
@@ -95,10 +92,11 @@ static jlong createHintSession(JNIEnv* env, int32_t tgid, int32_t uid,
 
 static jlong createHintSessionWithConfig(JNIEnv* env, int32_t tgid, int32_t uid,
                                          std::vector<int32_t> threadIds, int64_t durationNanos,
-                                         int32_t sessionTag, SessionConfig& config) {
+                                         int32_t sessionTag, hal::SessionConfig& config) {
     auto result =
             gPowerHalController.createHintSessionWithConfig(tgid, uid, threadIds, durationNanos,
-                                                            static_cast<SessionTag>(sessionTag),
+                                                            static_cast<hal::SessionTag>(
+                                                                    sessionTag),
                                                             &config);
     if (result.isOk()) {
         jlong session_ptr = reinterpret_cast<jlong>(result.value().get());
@@ -140,12 +138,12 @@ static void updateTargetWorkDuration(int64_t session_ptr, int64_t targetDuration
 }
 
 static void reportActualWorkDuration(int64_t session_ptr,
-                                     const std::vector<WorkDuration>& actualDurations) {
+                                     const std::vector<hal::WorkDuration>& actualDurations) {
     auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->reportActualWorkDuration(actualDurations);
 }
 
-static void sendHint(int64_t session_ptr, SessionHint hint) {
+static void sendHint(int64_t session_ptr, hal::SessionHint hint) {
     auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->sendHint(hint);
 }
@@ -155,7 +153,7 @@ static void setThreads(int64_t session_ptr, const std::vector<int32_t>& threadId
     appSession->setThreads(threadIds);
 }
 
-static void setMode(int64_t session_ptr, SessionMode mode, bool enabled) {
+static void setMode(int64_t session_ptr, hal::SessionMode mode, bool enabled) {
     auto appSession = reinterpret_cast<PowerHintSessionWrapper*>(session_ptr);
     appSession->setMode(mode, enabled);
 }
@@ -189,7 +187,7 @@ static jlong nativeCreateHintSessionWithConfig(JNIEnv* env, jclass /* clazz */, 
         return 0;
     }
     std::vector<int32_t> threadIds(tidArray.get(), tidArray.get() + tidArray.size());
-    SessionConfig config;
+    hal::SessionConfig config;
     jlong out = createHintSessionWithConfig(env, tgid, uid, std::move(threadIds), durationNanos,
                                             sessionTag, config);
     if (out <= 0) {
@@ -223,7 +221,7 @@ static void nativeReportActualWorkDuration(JNIEnv* env, jclass /* clazz */, jlon
     ScopedLongArrayRO arrayActualDurations(env, actualDurations);
     ScopedLongArrayRO arrayTimeStamps(env, timeStamps);
 
-    std::vector<WorkDuration> actualList(arrayActualDurations.size());
+    std::vector<hal::WorkDuration> actualList(arrayActualDurations.size());
     for (size_t i = 0; i < arrayActualDurations.size(); i++) {
         actualList[i].timeStampNanos = arrayTimeStamps[i];
         actualList[i].durationNanos = arrayActualDurations[i];
@@ -232,7 +230,7 @@ static void nativeReportActualWorkDuration(JNIEnv* env, jclass /* clazz */, jlon
 }
 
 static void nativeSendHint(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jint hint) {
-    sendHint(session_ptr, static_cast<SessionHint>(hint));
+    sendHint(session_ptr, static_cast<hal::SessionHint>(hint));
 }
 
 static void nativeSetThreads(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jintArray tids) {
@@ -244,13 +242,13 @@ static void nativeSetThreads(JNIEnv* env, jclass /* clazz */, jlong session_ptr,
 
 static void nativeSetMode(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jint mode,
                           jboolean enabled) {
-    setMode(session_ptr, static_cast<SessionMode>(mode), enabled);
+    setMode(session_ptr, static_cast<hal::SessionMode>(mode), enabled);
 }
 
 static void nativeReportActualWorkDuration2(JNIEnv* env, jclass /* clazz */, jlong session_ptr,
                                             jobjectArray jWorkDurations) {
     int size = env->GetArrayLength(jWorkDurations);
-    std::vector<WorkDuration> workDurations(size);
+    std::vector<hal::WorkDuration> workDurations(size);
     for (int i = 0; i < size; i++) {
         jobject workDuration = env->GetObjectArrayElement(jWorkDurations, i);
         workDurations[i].workPeriodStartTimestampNanos =

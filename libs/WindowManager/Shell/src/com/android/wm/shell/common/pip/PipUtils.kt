@@ -21,6 +21,7 @@ import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Context
 import android.os.RemoteException
+import android.os.SystemProperties
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Pair
@@ -137,5 +138,6 @@ object PipUtils {
 
     @JvmStatic
     val isPip2ExperimentEnabled: Boolean
-        get() = Flags.enablePip2Implementation()
+        get() = Flags.enablePip2Implementation() || SystemProperties.getBoolean(
+                "wm_shell.pip2", false)
 }
