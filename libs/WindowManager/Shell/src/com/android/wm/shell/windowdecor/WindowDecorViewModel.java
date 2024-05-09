@@ -67,6 +67,14 @@ public interface WindowDecorViewModel {
     void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo);
 
     /**
+     * Notifies a task has vanished, which can mean that the task changed windowing mode or was
+     * removed.
+     *
+     * @param taskInfo the task info of the task
+     */
+    void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo);
+
+    /**
      * Notifies a transition is about to start about the given task to give the window decoration a
      * chance to prepare for this transition. Unlike {@link #onTaskInfoChanged}, this method creates
      * a window decoration if one does not exist but is required.

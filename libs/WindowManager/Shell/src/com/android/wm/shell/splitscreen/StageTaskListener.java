@@ -260,6 +260,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public void onTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
         ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskVanished: task=%d", taskInfo.taskId);
         final int taskId = taskInfo.taskId;
+        mWindowDecorViewModel.ifPresent(vm -> vm.onTaskVanished(taskInfo));
         if (mRootTaskInfo.taskId == taskId) {
             mCallbacks.onRootTaskVanished();
             mRootTaskInfo = null;

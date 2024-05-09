@@ -125,7 +125,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 repository.updateVisibleFreeformTasks(taskInfo.displayId, taskInfo.taskId, false);
             });
         }
-
+        mWindowDecorationViewModel.onTaskVanished(taskInfo);
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mWindowDecorationViewModel.destroyWindowDecoration(taskInfo);
         }

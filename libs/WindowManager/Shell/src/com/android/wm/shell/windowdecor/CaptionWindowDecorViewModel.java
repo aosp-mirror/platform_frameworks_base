@@ -119,6 +119,21 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     @Override
+    public void onTaskVanished(RunningTaskInfo taskInfo) {
+        // A task vanishing doesn't necessarily mean the task was closed, it could also mean its
+        // windowing mode changed. We're only interested in closing tasks so checking whether
+        // its info still exists in the task organizer is one way to disambiguate.
+        final boolean closed = mTaskOrganizer.getRunningTaskInfo(taskInfo.taskId) == null;
+        if (closed) {
+            // Destroying the window decoration is usually handled when a TRANSIT_CLOSE transition
+            // changes happen, but there are certain cases in which closing tasks aren't included
+            // in transitions, such as when a non-visible task is closed. See b/296921167.
+            // Destroy the decoration here in case the lack of transition missed it.
+            destroyWindowDecoration(taskInfo);
+        }
+    }
+
+    @Override
     public void onTaskChanging(
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
