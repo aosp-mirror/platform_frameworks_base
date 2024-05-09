@@ -55,6 +55,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedLockUtilsInternal;
+import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.Expandable;
@@ -632,12 +633,23 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     public static class DrawableIcon extends Icon {
+
         protected final Drawable mDrawable;
         protected final Drawable mInvisibleDrawable;
+        private static final String TAG = "QSTileImpl";
 
         public DrawableIcon(Drawable drawable) {
             mDrawable = drawable;
-            mInvisibleDrawable = drawable.getConstantState().newDrawable();
+            Drawable.ConstantState nullableConstantState = drawable.getConstantState();
+            if (nullableConstantState == null) {
+                if (!(drawable instanceof SignalDrawable)) {
+                    Log.w(TAG, "DrawableIcon: drawable has null ConstantState"
+                            + " and is not a SignalDrawable");
+                }
+                mInvisibleDrawable = drawable;
+            } else {
+                mInvisibleDrawable = nullableConstantState.newDrawable();
+            }
         }
 
         @Override

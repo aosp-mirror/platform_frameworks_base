@@ -201,6 +201,7 @@ constructor(
         qsTileViewModel.currentState?.let { mapState(context, it, qsTileViewModel.config) }
 
     override fun getInstanceId(): InstanceId = qsTileViewModel.config.instanceId
+
     override fun getTileLabel(): CharSequence =
         with(qsTileViewModel.config.uiConfig) {
             when (this) {
