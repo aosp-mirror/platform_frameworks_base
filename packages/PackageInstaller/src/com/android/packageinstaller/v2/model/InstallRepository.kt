@@ -446,6 +446,9 @@ class InstallRepository(private val context: Context) {
         // Returns InstallUserActionRequired stage if install details could be successfully
         // computed, else it returns InstallAborted.
         val confirmationSnippet: InstallStage = generateConfirmationSnippet()
+        if (confirmationSnippet.stageCode == InstallStage.STAGE_ABORTED) {
+            return confirmationSnippet
+        }
 
         val existingUpdateOwner: CharSequence? = getExistingUpdateOwner(newPackageInfo!!)
         return if (sessionId == SessionInfo.INVALID_ID &&
