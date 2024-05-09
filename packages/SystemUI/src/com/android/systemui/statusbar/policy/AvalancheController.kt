@@ -253,6 +253,7 @@ class AvalancheController @Inject constructor(
 
         if (nextList.isEmpty()) {
             log { "NO MORE TO SHOW" }
+            previousHunKey = ""
             return
         }
 
