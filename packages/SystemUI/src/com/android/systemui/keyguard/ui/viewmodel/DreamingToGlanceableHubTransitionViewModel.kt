@@ -21,6 +21,7 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -37,7 +38,7 @@ class DreamingToGlanceableHubTransitionViewModel
 constructor(
     animationFlow: KeyguardTransitionAnimationFlow,
     configurationInteractor: ConfigurationInteractor,
-) {
+) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_GLANCEABLE_HUB_DURATION,
@@ -78,6 +79,15 @@ constructor(
                 onFinish = { 1f },
             )
             .map { step -> step != 0f }
+
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            startTime = 167.milliseconds,
+            duration = 167.milliseconds,
+            onStep = { it },
+            onCancel = { 0f },
+            onFinish = { 1f },
+        )
 
     private companion object {
         val TO_GLANCEABLE_HUB_DURATION = 1.seconds

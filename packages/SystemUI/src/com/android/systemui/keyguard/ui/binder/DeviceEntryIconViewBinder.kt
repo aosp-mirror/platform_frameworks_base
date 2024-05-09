@@ -22,6 +22,8 @@ import android.content.res.ColorStateList
 import android.util.StateSet
 import android.view.HapticFeedbackConstants
 import android.view.View
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -61,6 +63,7 @@ object DeviceEntryIconViewBinder {
         bgViewModel: DeviceEntryBackgroundViewModel,
         falsingManager: FalsingManager,
         vibratorHelper: VibratorHelper,
+        overrideColor: Color? = null,
     ) {
         DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
         val longPressHandlingView = view.longPressHandlingView
@@ -157,7 +160,8 @@ object DeviceEntryIconViewBinder {
                                     viewModel.type.contentDescriptionResId
                                 )
                         }
-                        fgIconView.imageTintList = ColorStateList.valueOf(viewModel.tint)
+                        fgIconView.imageTintList =
+                            ColorStateList.valueOf(overrideColor?.toArgb() ?: viewModel.tint)
                         fgIconView.setPadding(
                             viewModel.padding,
                             viewModel.padding,

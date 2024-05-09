@@ -237,7 +237,8 @@ object KeyguardRootViewBinder {
                                                 indicationArea,
                                                 startButton,
                                                 endButton,
-                                                lockIcon -> {
+                                                lockIcon,
+                                                deviceEntryIcon -> {
                                                     // Do not move these views
                                                 }
                                                 else -> childView.translationX = px
@@ -597,6 +598,7 @@ object KeyguardRootViewBinder {
     private val startButton = R.id.start_button
     private val endButton = R.id.end_button
     private val lockIcon = R.id.lock_icon_view
+    private val deviceEntryIcon = R.id.device_entry_icon_view
     private val nsslPlaceholderId = R.id.nssl_placeholder
 
     private const val ID = "occluding_app_device_entry_unlock_msg"
