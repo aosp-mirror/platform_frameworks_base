@@ -9,3 +9,11 @@ flag {
     bug: "313038031"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "network_provider_battery_charging_status"
+    is_exported: true
+    namespace: "wifi"
+    description: "Control the API that allows setting / reading the NetworkProviderInfo's battery charging status"
+    bug: "305067231"
+}
