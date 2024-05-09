@@ -5300,10 +5300,12 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_CONTENT_CAPTURE) {
             Log.v(mTag, "performContentCaptureInitialReport() on " + rootView);
         }
+        boolean traceDispatchCapture = false;
         try {
             if (!isContentCaptureEnabled()) return;
 
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            traceDispatchCapture = Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
+            if (traceDispatchCapture) {
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, "dispatchContentCapture() for "
                         + getClass().getSimpleName());
             }
@@ -5319,7 +5321,9 @@ public final class ViewRootImpl implements ViewParent,
             // Content capture is a go!
             rootView.dispatchInitialProvideContentCaptureStructure();
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            if (traceDispatchCapture) {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
         }
     }
 
@@ -5327,10 +5331,12 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_CONTENT_CAPTURE) {
             Log.v(mTag, "handleContentCaptureFlush()");
         }
+        boolean traceFlushContentCapture = false;
         try {
             if (!isContentCaptureEnabled()) return;
 
-            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            traceFlushContentCapture = Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
+            if (traceFlushContentCapture) {
                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, "flushContentCapture for "
                         + getClass().getSimpleName());
             }
@@ -5342,7 +5348,9 @@ public final class ViewRootImpl implements ViewParent,
             }
             ccm.flush(ContentCaptureSession.FLUSH_REASON_VIEW_ROOT_ENTERED);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            if (traceFlushContentCapture) {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
         }
     }
 
@@ -12659,10 +12667,12 @@ public final class ViewRootImpl implements ViewParent,
             view = mFrameRateCategoryView;
         }
 
+        boolean traceFrameRateCategory = false;
         try {
             if (frameRateCategory != FRAME_RATE_CATEGORY_DEFAULT
                     && mLastPreferredFrameRateCategory != frameRateCategory) {
-                if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                traceFrameRateCategory = Trace.isTagEnabled(Trace.TRACE_TAG_VIEW);
+                if (traceFrameRateCategory) {
                     String reason = reasonToString(frameRateReason);
                     String sourceView = view == null ? "-" : view;
                     String category = categoryToString(frameRateCategory);
@@ -12680,7 +12690,9 @@ public final class ViewRootImpl implements ViewParent,
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate category", e);
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            if (traceFrameRateCategory) {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
         }
     }
 
