@@ -56,6 +56,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -84,6 +85,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.SecureSettings;
 
+import com.google.ux.material.libmonet.dynamiccolor.DynamicColor;
 import com.google.ux.material.libmonet.dynamiccolor.MaterialDynamicColors;
 
 import org.json.JSONException;
@@ -631,29 +633,33 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
     protected FabricatedOverlay createDynamicOverlay() {
         FabricatedOverlay overlay = newFabricatedOverlay("dynamic");
-        assignDynamicPaletteToOverlay(overlay, true /* isDark */);
-        assignDynamicPaletteToOverlay(overlay, false /* isDark */);
-        assignFixedColorsToOverlay(overlay);
+        //Themed Colors
+        assignColorsToOverlay(overlay, DynamicColors.allDynamicColorsMapped(mIsFidelityEnabled),
+                false);
+        // Fixed Colors
+        assignColorsToOverlay(overlay, DynamicColors.getFixedColorsMapped(mIsFidelityEnabled),
+                true);
+        //Custom Colors
+        assignColorsToOverlay(overlay, DynamicColors.getCustomColorsMapped(mIsFidelityEnabled),
+                false);
         return overlay;
     }
 
-    private void assignDynamicPaletteToOverlay(FabricatedOverlay overlay, boolean isDark) {
-        String suffix = isDark ? "dark" : "light";
-        ColorScheme scheme = isDark ? mDarkColorScheme : mLightColorScheme;
-        DynamicColors.allDynamicColorsMapped(mIsFidelityEnabled).forEach(p -> {
-            String resourceName = "android:color/system_" + p.first + "_" + suffix;
-            int colorValue = p.second.getArgb(scheme.getMaterialScheme());
-            overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
-                    null /* configuration */);
-        });
-    }
+    private void assignColorsToOverlay(FabricatedOverlay overlay,
+            List<Pair<String, DynamicColor>> colors, Boolean isFixed) {
+        colors.forEach(p -> {
+            String prefix = "android:color/system_" + p.first;
 
-    private void assignFixedColorsToOverlay(FabricatedOverlay overlay) {
-        DynamicColors.getFixedColorsMapped(mIsFidelityEnabled).forEach(p -> {
-            String resourceName = "android:color/system_" + p.first;
-            int colorValue = p.second.getArgb(mLightColorScheme.getMaterialScheme());
-            overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
-                    null /* configuration */);
+            if (isFixed) {
+                overlay.setResourceValue(prefix, TYPE_INT_COLOR_ARGB8,
+                        p.second.getArgb(mLightColorScheme.getMaterialScheme()), null);
+                return;
+            }
+
+            overlay.setResourceValue(prefix + "_light", TYPE_INT_COLOR_ARGB8,
+                    p.second.getArgb(mLightColorScheme.getMaterialScheme()), null);
+            overlay.setResourceValue(prefix + "_dark", TYPE_INT_COLOR_ARGB8,
+                    p.second.getArgb(mDarkColorScheme.getMaterialScheme()), null);
         });
     }
 
