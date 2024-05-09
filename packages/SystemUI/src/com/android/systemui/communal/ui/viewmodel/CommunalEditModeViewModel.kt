@@ -104,7 +104,12 @@ constructor(
     ): Boolean =
         withContext(backgroundDispatcher) {
             val widgets = communalInteractor.widgetContent.first()
-            val excludeList = widgets.mapTo(ArrayList()) { it.providerInfo }
+            val excludeList =
+                widgets.filterIsInstance<CommunalContentModel.WidgetContent.Widget>().mapTo(
+                    ArrayList()
+                ) {
+                    it.providerInfo
+                }
             getWidgetPickerActivityIntent(resources, packageManager, excludeList)?.let {
                 try {
                     activityLauncher.launch(it)

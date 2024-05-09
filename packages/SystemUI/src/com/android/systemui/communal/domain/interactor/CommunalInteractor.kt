@@ -403,19 +403,30 @@ constructor(
             updateOnWorkProfileBroadcastReceived,
         ) { widgets, allowedCategories, _ ->
             widgets.map { widget ->
-                if (widget.providerInfo.widgetCategory and allowedCategories != 0) {
-                    // At least one category this widget specified is allowed, so show it
-                    WidgetContent.Widget(
-                        appWidgetId = widget.appWidgetId,
-                        providerInfo = widget.providerInfo,
-                        appWidgetHost = appWidgetHost,
-                        inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
-                    )
-                } else {
-                    WidgetContent.DisabledWidget(
-                        appWidgetId = widget.appWidgetId,
-                        providerInfo = widget.providerInfo,
-                    )
+                when (widget) {
+                    is CommunalWidgetContentModel.Available -> {
+                        if (widget.providerInfo.widgetCategory and allowedCategories != 0) {
+                            // At least one category this widget specified is allowed, so show it
+                            WidgetContent.Widget(
+                                appWidgetId = widget.appWidgetId,
+                                providerInfo = widget.providerInfo,
+                                appWidgetHost = appWidgetHost,
+                                inQuietMode = isQuietModeEnabled(widget.providerInfo.profile)
+                            )
+                        } else {
+                            WidgetContent.DisabledWidget(
+                                appWidgetId = widget.appWidgetId,
+                                providerInfo = widget.providerInfo,
+                            )
+                        }
+                    }
+                    is CommunalWidgetContentModel.Pending -> {
+                        WidgetContent.PendingWidget(
+                            appWidgetId = widget.appWidgetId,
+                            packageName = widget.packageName,
+                            icon = widget.icon,
+                        )
+                    }
                 }
             }
         }
@@ -430,7 +441,15 @@ constructor(
         } else {
             // Get associated work profile for the currently selected user.
             val workProfile = userTracker.userProfiles.find { it.isManagedProfile }
-            list.filter { it.providerInfo.profile.identifier != workProfile?.id }
+            list.filter { model ->
+                val uid =
+                    when (model) {
+                        is CommunalWidgetContentModel.Available ->
+                            model.providerInfo.profile.identifier
+                        is CommunalWidgetContentModel.Pending -> model.user.identifier
+                    }
+                uid != workProfile?.id
+            }
         }
 
     /** A flow of available smartspace targets. Currently only showing timers. */
@@ -513,7 +532,11 @@ constructor(
     ): List<CommunalWidgetContentModel> {
         val currentUserIds = userTracker.userProfiles.map { it.id }.toSet()
         return list.filter { widget ->
-            currentUserIds.contains(widget.providerInfo.profile?.identifier)
+            when (widget) {
+                is CommunalWidgetContentModel.Available ->
+                    currentUserIds.contains(widget.providerInfo.profile?.identifier)
+                is CommunalWidgetContentModel.Pending -> true
+            }
         }
     }
 
