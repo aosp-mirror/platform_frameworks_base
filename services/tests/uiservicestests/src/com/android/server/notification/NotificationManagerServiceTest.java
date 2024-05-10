@@ -5969,6 +5969,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+        assertThat(captor.getValue().getNotification().flags
+                & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
         assertThat(captor.getValue().shouldPostSilently()).isTrue();
     }
 
@@ -8798,6 +8800,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(captor.getValue().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(
                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+        assertThat(captor.getValue().getNotification().flags
+                & FLAG_ONLY_ALERT_ONCE).isEqualTo(FLAG_ONLY_ALERT_ONCE);
         assertThat(captor.getValue().shouldPostSilently()).isTrue();
     }
 
