@@ -135,7 +135,7 @@ public final class DisplayBrightnessStrategySelectorTest {
 
                 @Override
                 AutomaticBrightnessStrategy getAutomaticBrightnessStrategy1(Context context,
-                        int displayId) {
+                        int displayId, DisplayManagerFlags displayManagerFlags) {
                     return mAutomaticBrightnessStrategy;
                 }
 
