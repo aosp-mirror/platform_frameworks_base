@@ -20,7 +20,6 @@ import android.animation.ValueAnimator
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
-import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -33,7 +32,6 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import java.util.UUID
@@ -152,7 +150,6 @@ constructor(
     }
 
     private fun listenForLockscreenToPrimaryBouncer() {
-        if (SceneContainerFlag.isEnabled) return
         scope.launch("$TAG#listenForLockscreenToPrimaryBouncer") {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { isBouncerShowing -> isBouncerShowing }
@@ -177,7 +174,6 @@ constructor(
 
     /* Starts transitions when manually dragging up the bouncer from the lockscreen. */
     private fun listenForLockscreenToPrimaryBouncerDragging() {
-        if (SceneContainerFlag.isEnabled) return
         var transitionId: UUID? = null
         scope.launch("$TAG#listenForLockscreenToPrimaryBouncerDragging") {
             shadeRepository.legacyShadeExpansion
@@ -284,7 +280,6 @@ constructor(
     }
 
     private fun listenForLockscreenToGoneDragging() {
-        if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // When the refactor is enabled, we no longer use isKeyguardGoingAway.
             scope.launch("$TAG#listenForLockscreenToGoneDragging") {
@@ -342,9 +337,7 @@ constructor(
      * keyguard transition.
      */
     private fun listenForLockscreenToGlanceableHub() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
-        if (SceneContainerFlag.isEnabled) return
-        if (!Flags.communalHub()) {
+        if (!com.android.systemui.Flags.communalHub()) {
             return
         }
         scope.launch(mainDispatcher) {
