@@ -16,16 +16,11 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
-import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,7 +42,6 @@ constructor(
     fromBouncerInteractor: FromPrimaryBouncerTransitionInteractor,
     fromAlternateBouncerInteractor: FromAlternateBouncerTransitionInteractor,
     notificationLaunchAnimationInteractor: NotificationLaunchAnimationInteractor,
-    sceneInteractor: SceneInteractor,
 ) {
     private val defaultSurfaceBehindVisibility =
         transitionInteractor.finishedKeyguardState.map(::isSurfaceVisible)
@@ -109,42 +103,21 @@ constructor(
      * animation. This is used to keep the RemoteAnimationTarget alive until we're done using it.
      */
     val usingKeyguardGoingAwayAnimation: Flow<Boolean> =
-        if (SceneContainerFlag.isEnabled) {
-            combine(
-                    sceneInteractor.transitionState,
-                    surfaceBehindInteractor.isAnimatingSurface,
-                    notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
-                ) { transition, isAnimatingSurface, isLaunchAnimationRunning ->
-                    // Using the animation if we're animating it directly, or if the
-                    // ActivityLaunchAnimator is in the process of animating it.
-                    val isAnyAnimationRunning = isAnimatingSurface || isLaunchAnimationRunning
-                    // We may still be animating the surface after the keyguard is fully GONE, since
-                    // some animations (like the translation spring) are not tied directly to the
-                    // transition step amount.
-                    transition.isTransitioning(to = Scenes.Gone) ||
-                        (isAnyAnimationRunning &&
-                            (transition.isIdle(Scenes.Gone) ||
-                                transition.isTransitioning(from = Scenes.Gone)))
-                }
-                .distinctUntilChanged()
-        } else {
-            combine(
-                    transitionInteractor.isInTransitionToState(KeyguardState.GONE),
-                    transitionInteractor.finishedKeyguardState,
-                    surfaceBehindInteractor.isAnimatingSurface,
-                    notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
-                ) { isInTransitionToGone, finishedState, isAnimatingSurface, notifLaunchRunning ->
-                    // Using the animation if we're animating it directly, or if the
-                    // ActivityLaunchAnimator is in the process of animating it.
-                    val animationsRunning = isAnimatingSurface || notifLaunchRunning
-                    // We may still be animating the surface after the keyguard is fully GONE, since
-                    // some animations (like the translation spring) are not tied directly to the
-                    // transition step amount.
-                    isInTransitionToGone ||
-                        (finishedState == KeyguardState.GONE && animationsRunning)
-                }
-                .distinctUntilChanged()
-        }
+        combine(
+                transitionInteractor.isInTransitionToState(KeyguardState.GONE),
+                transitionInteractor.finishedKeyguardState,
+                surfaceBehindInteractor.isAnimatingSurface,
+                notificationLaunchAnimationInteractor.isLaunchAnimationRunning,
+            ) { isInTransitionToGone, finishedState, isAnimatingSurface, notifLaunchRunning ->
+                // Using the animation if we're animating it directly, or if the
+                // ActivityLaunchAnimator is in the process of animating it.
+                val animationsRunning = isAnimatingSurface || notifLaunchRunning
+                // We may still be animating the surface after the keyguard is fully GONE, since
+                // some animations (like the translation spring) are not tied directly to the
+                // transition step amount.
+                isInTransitionToGone || (finishedState == KeyguardState.GONE && animationsRunning)
+            }
+            .distinctUntilChanged()
 
     /**
      * Whether the lockscreen is visible, from the Window Manager (WM) perspective.
@@ -154,44 +127,28 @@ constructor(
      * want to know if the AOD/clock/notifs/etc. are visible.
      */
     val lockscreenVisibility: Flow<Boolean> =
-        if (SceneContainerFlag.isEnabled) {
-            sceneInteractor.transitionState
-                .pairwise(ObservableTransitionState.Idle(Scenes.Lockscreen))
-                .map { (prevTransitionState, transitionState) ->
-                    val isReturningToGoneAfterCancellation =
-                        prevTransitionState.isTransitioning(from = Scenes.Gone) &&
-                            transitionState.isTransitioning(to = Scenes.Gone)
-                    val isNotOnGone =
-                        !transitionState.isTransitioning(from = Scenes.Gone) &&
-                            !transitionState.isIdle(Scenes.Gone)
+        transitionInteractor.currentKeyguardState
+            .sample(transitionInteractor.startedStepWithPrecedingStep, ::Pair)
+            .map { (currentState, startedWithPrev) ->
+                val startedFromStep = startedWithPrev?.previousValue
+                val startedStep = startedWithPrev?.newValue
+                val returningToGoneAfterCancellation =
+                    startedStep?.to == KeyguardState.GONE &&
+                        startedFromStep?.transitionState == TransitionState.CANCELED &&
+                        startedFromStep.from == KeyguardState.GONE
 
-                    isNotOnGone && !isReturningToGoneAfterCancellation
+                if (!returningToGoneAfterCancellation) {
+                    // By default, apply the lockscreen visibility of the current state.
+                    KeyguardState.lockscreenVisibleInState(currentState)
+                } else {
+                    // If we're transitioning to GONE after a prior canceled transition from GONE,
+                    // then this is the camera launch transition from an asleep state back to GONE.
+                    // We don't want to show the lockscreen since we're aborting the lock and going
+                    // back to GONE.
+                    KeyguardState.lockscreenVisibleInState(KeyguardState.GONE)
                 }
-                .distinctUntilChanged()
-        } else {
-            transitionInteractor.currentKeyguardState
-                .sample(transitionInteractor.startedStepWithPrecedingStep, ::Pair)
-                .map { (currentState, startedWithPrev) ->
-                    val startedFromStep = startedWithPrev?.previousValue
-                    val startedStep = startedWithPrev?.newValue
-                    val returningToGoneAfterCancellation =
-                        startedStep?.to == KeyguardState.GONE &&
-                            startedFromStep?.transitionState == TransitionState.CANCELED &&
-                            startedFromStep.from == KeyguardState.GONE
-
-                    if (!returningToGoneAfterCancellation) {
-                        // By default, apply the lockscreen visibility of the current state.
-                        KeyguardState.lockscreenVisibleInState(currentState)
-                    } else {
-                        // If we're transitioning to GONE after a prior canceled transition from
-                        // GONE, then this is the camera launch transition from an asleep state back
-                        // to GONE. We don't want to show the lockscreen since we're aborting the
-                        // lock and going back to GONE.
-                        KeyguardState.lockscreenVisibleInState(KeyguardState.GONE)
-                    }
-                }
-                .distinctUntilChanged()
-        }
+            }
+            .distinctUntilChanged()
 
     /**
      * Whether always-on-display (AOD) is visible when the lockscreen is visible, from window

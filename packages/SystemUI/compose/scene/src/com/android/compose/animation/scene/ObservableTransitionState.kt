@@ -74,16 +74,6 @@ sealed interface ObservableTransitionState {
          */
         val isUserInputOngoing: Flow<Boolean>,
     ) : ObservableTransitionState
-
-    fun isIdle(scene: SceneKey?): Boolean {
-        return this is Idle && (scene == null || this.currentScene == scene)
-    }
-
-    fun isTransitioning(from: SceneKey? = null, to: SceneKey? = null): Boolean {
-        return this is Transition &&
-            (from == null || this.fromScene == from) &&
-            (to == null || this.toScene == to)
-    }
 }
 
 /**
