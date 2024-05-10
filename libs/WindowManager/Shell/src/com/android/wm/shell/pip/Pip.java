@@ -39,7 +39,7 @@ public interface Pip {
      * @param isSysUiStateValid Is SysUI state valid or not.
      * @param flag Current SysUI state.
      */
-    default void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
+    default void onSystemUiStateChanged(boolean isSysUiStateValid, long flag) {
     }
 
     /**

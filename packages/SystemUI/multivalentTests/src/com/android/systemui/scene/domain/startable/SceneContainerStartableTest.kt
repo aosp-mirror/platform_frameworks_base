@@ -437,12 +437,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
             assertThat(
                     sysUiState.flags and
-                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED != 0
+                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED != 0L
                 )
                 .isTrue()
             assertThat(
                     sysUiState.flags and
-                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0
+                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0L
                 )
                 .isFalse()
 
@@ -450,12 +450,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
             runCurrent()
             assertThat(
                     sysUiState.flags and
-                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED != 0
+                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED != 0L
                 )
                 .isFalse()
             assertThat(
                     sysUiState.flags and
-                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0
+                        QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING != 0L
                 )
                 .isTrue()
         }

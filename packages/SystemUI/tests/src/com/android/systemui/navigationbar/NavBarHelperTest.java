@@ -125,7 +125,7 @@ public class NavBarHelperTest extends SysuiTestCase {
     private AccessibilityManager.AccessibilityServicesStateChangeListener
             mAccessibilityServicesStateChangeListener;
 
-    private static final int ACCESSIBILITY_BUTTON_CLICKABLE_STATE =
+    private static final long ACCESSIBILITY_BUTTON_CLICKABLE_STATE =
             SYSUI_STATE_A11Y_BUTTON_CLICKABLE | SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
     private NavBarHelper mNavBarHelper;
 

@@ -38,7 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -300,7 +300,7 @@ public class NavigationBarTest extends SysuiTestCase {
         doNothing().when(mWindowManager).addView(any(), any());
         doNothing().when(mWindowManager).removeViewImmediate(any());
         mMockSysUiState = mock(SysUiState.class);
-        when(mMockSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mMockSysUiState);
+        when(mMockSysUiState.setFlag(anyLong(), anyBoolean())).thenReturn(mMockSysUiState);
 
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
         mSysuiTestableContextExternal.addMockSystemService(WindowManager.class, mWindowManager);

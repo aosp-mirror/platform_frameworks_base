@@ -23,6 +23,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.QuickStepContract.SystemUiStateFlags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -42,10 +43,10 @@ public class SysUiState implements Dumpable {
 
     private final DisplayTracker mDisplayTracker;
     private final SceneContainerPlugin mSceneContainerPlugin;
-    private @QuickStepContract.SystemUiStateFlags int mFlags;
+    private @SystemUiStateFlags long mFlags;
     private final List<SysUiStateCallback> mCallbacks = new ArrayList<>();
-    private int mFlagsToSet = 0;
-    private int mFlagsToClear = 0;
+    private long mFlagsToSet = 0;
+    private long mFlagsToClear = 0;
 
     public SysUiState(DisplayTracker displayTracker, SceneContainerPlugin sceneContainerPlugin) {
         mDisplayTracker = displayTracker;
@@ -67,12 +68,13 @@ public class SysUiState implements Dumpable {
     }
 
     /** Returns the current sysui state flags. */
-    public int getFlags() {
+    @SystemUiStateFlags
+    public long getFlags() {
         return mFlags;
     }
 
     /** Methods to this call can be chained together before calling {@link #commitUpdate(int)}. */
-    public SysUiState setFlag(int flag, boolean enabled) {
+    public SysUiState setFlag(@SystemUiStateFlags long flag, boolean enabled) {
         final Boolean overrideOrNull = mSceneContainerPlugin.flagValueOverride(flag);
         if (overrideOrNull != null && enabled != overrideOrNull) {
             if (DEBUG) {
@@ -91,7 +93,7 @@ public class SysUiState implements Dumpable {
         return this;
     }
 
-    /** Call to save all the flags updated from {@link #setFlag(int, boolean)}. */
+    /** Call to save all the flags updated from {@link #setFlag(long, boolean)}. */
     public void commitUpdate(int displayId) {
         updateFlags(displayId);
         mFlagsToSet = 0;
@@ -105,14 +107,14 @@ public class SysUiState implements Dumpable {
             return;
         }
 
-        int newState = mFlags;
+        long newState = mFlags;
         newState |= mFlagsToSet;
         newState &= ~mFlagsToClear;
         notifyAndSetSystemUiStateChanged(newState, mFlags);
     }
 
     /** Notify all those who are registered that the state has changed. */
-    private void notifyAndSetSystemUiStateChanged(int newFlags, int oldFlags) {
+    private void notifyAndSetSystemUiStateChanged(long newFlags, long oldFlags) {
         if (DEBUG) {
             Log.d(TAG, "SysUiState changed: old=" + oldFlags + " new=" + newFlags);
         }
@@ -137,7 +139,7 @@ public class SysUiState implements Dumpable {
     /** Callback to be notified whenever system UI state flags are changed. */
     public interface SysUiStateCallback{
         /** To be called when any SysUiStateFlag gets updated */
-        void onSystemUiStateChanged(@QuickStepContract.SystemUiStateFlags int sysUiFlags);
+        void onSystemUiStateChanged(@SystemUiStateFlags long sysUiFlags);
     }
 }
 
