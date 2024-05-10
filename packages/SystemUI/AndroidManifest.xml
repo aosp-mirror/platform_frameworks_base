@@ -826,20 +826,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".contrast.ContrastDialogActivity"
-            android:label="@string/quick_settings_contrast_label"
-            android:theme="@style/Theme.SystemUI.ContrastDialog"
-            android:finishOnCloseSystemDialogs="true"
-            android:launchMode="singleInstance"
-            android:excludeFromRecents="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.intent.action.SHOW_CONTRAST_DIALOG" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
         <activity android:name=".ForegroundServicesDialog"
             android:process=":fgservices"
             android:excludeFromRecents="true"

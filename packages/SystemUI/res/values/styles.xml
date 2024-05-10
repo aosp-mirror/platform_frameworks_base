@@ -523,10 +523,6 @@
         <item name="android:windowExitAnimation">@anim/instant_fade_out</item>
     </style>
 
-    <style name="Theme.SystemUI.ContrastDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
-        <item name="android:windowBackground">@android:color/transparent</item>
-    </style>
-
     <style name="Theme.SystemUI.QuickSettings.Dialog" parent="@style/Theme.SystemUI.Dialog.QuickSettings">
     </style>
 

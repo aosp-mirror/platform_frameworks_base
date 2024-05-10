@@ -1957,15 +1957,6 @@
     <dimen name="broadcast_dialog_btn_minHeight">44dp</dimen>
     <dimen name="broadcast_dialog_margin">16dp</dimen>
 
-    <!-- Contrast dialog -->
-    <dimen name="contrast_dialog_button_total_size">90dp</dimen>
-    <dimen name="contrast_dialog_button_inner_size">82dp</dimen>
-    <dimen name="contrast_dialog_button_radius">20dp</dimen>
-    <dimen name="contrast_dialog_button_stroke_width">4dp</dimen>
-    <dimen name="contrast_dialog_button_text_size">14sp</dimen>
-    <dimen name="contrast_dialog_button_text_spacing">4dp</dimen>
-    <dimen name="contrast_dialog_button_horizontal_spacing">16dp</dimen>
-
     <!-- Shadow for dream overlay clock complication -->
     <dimen name="dream_overlay_clock_key_text_shadow_dx">0dp</dimen>
     <dimen name="dream_overlay_clock_key_text_shadow_dy">0dp</dimen>

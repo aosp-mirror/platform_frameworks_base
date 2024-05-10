@@ -900,15 +900,6 @@
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
 
-    <!-- QuickSettings: Contrast tile [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_label">Contrast</string>
-    <!-- QuickSettings: Contrast tile description: standard [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_standard">Standard</string>
-    <!-- QuickSettings: Contrast tile description: medium [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_medium">Medium</string>
-    <!-- QuickSettings: Contrast tile description: high [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_contrast_high">High</string>
-
     <!-- Hearing devices -->
     <!-- QuickSettings: Hearing devices [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hearing_devices_label">Hearing devices</string>
