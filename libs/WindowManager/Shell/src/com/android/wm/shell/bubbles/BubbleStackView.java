@@ -2341,8 +2341,8 @@ public class BubbleStackView extends FrameLayout
 
         showScrim(true, null /* runnable */);
         updateBubbleShadows(mIsExpanded);
-        updateBadges(false /* setBadgeForCollapsedStack */);
         mBubbleContainer.setActiveController(mExpandedAnimationController);
+        updateBadges(false /* setBadgeForCollapsedStack */);
         updateOverflowVisibility();
         updatePointerPosition(false /* forIme */);
         mExpandedAnimationController.expandFromStack(() -> {
