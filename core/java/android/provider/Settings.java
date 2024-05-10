@@ -14909,6 +14909,17 @@ public final class Settings {
         public static final String DROPBOX_TAG_PREFIX = "dropbox:";
 
         /**
+         * Lines of kernel logs to include with system crash/ANR/etc. reports, as a
+         * prefix of the dropbox tag of the report type. For example,
+         * "kernel_logs_for_system_server_anr" controls the lines of kernel logs
+         * captured with system server ANR reports. 0 to disable.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ERROR_KERNEL_LOG_PREFIX = "kernel_logs_for_";
+
+        /**
          * Lines of logcat to include with system crash/ANR/etc. reports, as a
          * prefix of the dropbox tag of the report type. For example,
          * "logcat_for_system_server_anr" controls the lines of logcat captured

@@ -598,6 +598,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // as one line, but close enough for now.
     static final int RESERVED_BYTES_PER_LOGCAT_LINE = 100;
 
+    // How many seconds should the system wait before terminating the spawned logcat process.
+    static final int LOGCAT_TIMEOUT_SEC = 10;
+
     // Necessary ApplicationInfo flags to mark an app as persistent
     static final int PERSISTENT_MASK =
             ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT;
@@ -9939,126 +9942,70 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If process is null, we are being called from some internal code
         // and may be about to die -- run this synchronously.
         final boolean runSynchronously = process == null;
-        Thread worker =
-                new Thread("Error dump: " + dropboxTag) {
-                    @Override
-                    public void run() {
-                        if (report != null) {
-                            sb.append(report);
+        Thread worker = new Thread("Error dump: " + dropboxTag) {
+            @Override
+            public void run() {
+                if (report != null) {
+                    sb.append(report);
+                }
+
+                String logcatSetting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
+                String kerLogSetting = Settings.Global.ERROR_KERNEL_LOG_PREFIX + dropboxTag;
+                String maxBytesSetting = Settings.Global.MAX_ERROR_BYTES_PREFIX + dropboxTag;
+                int logcatLines = Build.IS_USER
+                        ? 0
+                        : Settings.Global.getInt(mContext.getContentResolver(), logcatSetting, 0);
+                int kernelLogLines = Build.IS_USER
+                        ? 0
+                        : Settings.Global.getInt(mContext.getContentResolver(), kerLogSetting, 0);
+                int dropboxMaxSize = Settings.Global.getInt(
+                        mContext.getContentResolver(), maxBytesSetting, DROPBOX_DEFAULT_MAX_SIZE);
+
+                if (dataFile != null) {
+                    // Attach the stack traces file to the report so collectors can load them
+                    // by file if they have access.
+                    sb.append(DATA_FILE_PATH_HEADER)
+                            .append(dataFile.getAbsolutePath()).append('\n');
+
+                    int maxDataFileSize = dropboxMaxSize
+                            - sb.length()
+                            - logcatLines * RESERVED_BYTES_PER_LOGCAT_LINE
+                            - kernelLogLines * RESERVED_BYTES_PER_LOGCAT_LINE
+                            - DATA_FILE_PATH_FOOTER.length();
+
+                    if (maxDataFileSize > 0) {
+                        // Inline dataFile contents if there is room.
+                        try {
+                            sb.append(FileUtils.readTextFile(dataFile, maxDataFileSize,
+                                    "\n\n[[TRUNCATED]]\n"));
+                        } catch (IOException e) {
+                            Slog.e(TAG, "Error reading " + dataFile, e);
                         }
-
-                        String logcatSetting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
-                        String maxBytesSetting =
-                                Settings.Global.MAX_ERROR_BYTES_PREFIX + dropboxTag;
-                        int lines =
-                                Build.IS_USER
-                                        ? 0
-                                        : Settings.Global.getInt(
-                                                mContext.getContentResolver(), logcatSetting, 0);
-                        int dropboxMaxSize =
-                                Settings.Global.getInt(
-                                        mContext.getContentResolver(),
-                                        maxBytesSetting,
-                                        DROPBOX_DEFAULT_MAX_SIZE);
-
-                        if (dataFile != null) {
-                            // Attach the stack traces file to the report so collectors can load
-                            // them
-                            // by file if they have access.
-                            sb.append(DATA_FILE_PATH_HEADER)
-                                    .append(dataFile.getAbsolutePath())
-                                    .append('\n');
-
-                            int maxDataFileSize =
-                                    dropboxMaxSize
-                                            - sb.length()
-                                            - lines * RESERVED_BYTES_PER_LOGCAT_LINE
-                                            - DATA_FILE_PATH_FOOTER.length();
-
-                            if (maxDataFileSize > 0) {
-                                // Inline dataFile contents if there is room.
-                                try {
-                                    sb.append(
-                                            FileUtils.readTextFile(
-                                                    dataFile,
-                                                    maxDataFileSize,
-                                                    "\n\n[[TRUNCATED]]\n"));
-                                } catch (IOException e) {
-                                    Slog.e(TAG, "Error reading " + dataFile, e);
-                                }
-                            }
-
-                            // Always append the footer, even there wasn't enough space to inline
-                            // the
-                            // dataFile contents.
-                            sb.append(DATA_FILE_PATH_FOOTER);
-                        }
-
-                        if (crashInfo != null && crashInfo.stackTrace != null) {
-                            sb.append(crashInfo.stackTrace);
-                        }
-
-                        if (lines > 0 && !runSynchronously) {
-                            sb.append("\n");
-
-                            InputStreamReader input = null;
-                            try {
-                                java.lang.Process logcat =
-                                        new ProcessBuilder(
-                                                        // Time out after 10s of inactivity, but
-                                                        // kill logcat with SEGV
-                                                        // so we can investigate why it didn't
-                                                        // finish.
-                                                        "/system/bin/timeout",
-                                                        "-i",
-                                                        "-s",
-                                                        "SEGV",
-                                                        "10s",
-                                                        // Merge several logcat streams, and take
-                                                        // the last N lines.
-                                                        "/system/bin/logcat",
-                                                        "-v",
-                                                        "threadtime",
-                                                        "-b",
-                                                        "events",
-                                                        "-b",
-                                                        "system",
-                                                        "-b",
-                                                        "main",
-                                                        "-b",
-                                                        "crash",
-                                                        "-t",
-                                                        String.valueOf(lines))
-                                                .redirectErrorStream(true)
-                                                .start();
-
-                                try {
-                                    logcat.getOutputStream().close();
-                                } catch (IOException e) {
-                                }
-                                try {
-                                    logcat.getErrorStream().close();
-                                } catch (IOException e) {
-                                }
-                                input = new InputStreamReader(logcat.getInputStream());
-
-                                int num;
-                                char[] buf = new char[8192];
-                                while ((num = input.read(buf)) > 0) sb.append(buf, 0, num);
-                            } catch (IOException e) {
-                                Slog.e(TAG, "Error running logcat", e);
-                            } finally {
-                                if (input != null)
-                                    try {
-                                        input.close();
-                                    } catch (IOException e) {
-                                    }
-                            }
-                        }
-
-                        dbox.addText(dropboxTag, sb.toString());
                     }
-                };
+                    // Always append the footer, even there wasn't enough space to inline the
+                    // dataFile contents.
+                    sb.append(DATA_FILE_PATH_FOOTER);
+                }
+
+                if (crashInfo != null && crashInfo.stackTrace != null) {
+                    sb.append(crashInfo.stackTrace);
+                }
+                boolean shouldAddLogs = logcatLines > 0 || kernelLogLines > 0;
+                if (!runSynchronously && shouldAddLogs) {
+                    sb.append("\n");
+                    if (logcatLines > 0) {
+                        fetchLogcatBuffers(sb, logcatLines, LOGCAT_TIMEOUT_SEC,
+                                List.of("events", "system", "main", "crash"));
+                    }
+                    if (kernelLogLines > 0) {
+                        fetchLogcatBuffers(sb, kernelLogLines, LOGCAT_TIMEOUT_SEC / 2,
+                                List.of("kernel"));
+                    }
+                }
+
+                dbox.addText(dropboxTag, sb.toString());
+            }
+        };
 
         if (runSynchronously) {
             final int oldMask = StrictMode.allowThreadDiskWritesMask();
@@ -10318,6 +10265,67 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         mProcessList.mAppExitInfoTracker.setProcessStateSummary(Binder.getCallingUid(),
                 Binder.getCallingPid(), state);
+    }
+
+    /**
+     * Retrieves logs from specified logcat buffers and appends them to a StringBuilder
+     * in the supplied order. The method executes a logcat command to fetch specific
+     * log entries from the supplied buffers.
+     *
+     * @param sb the StringBuilder to append the logcat output to.
+     * @param lines the number of lines to retrieve.
+     * @param timeout the maximum allowed time in seconds for logcat to run before being terminated.
+     * @param buffers the list of log buffers from which to retrieve logs.
+     */
+    private static void fetchLogcatBuffers(StringBuilder sb, int lines,
+            int timeout, List<String> buffers) {
+
+        if (buffers.size() == 0 || lines <= 0 || timeout <= 0) {
+            return;
+        }
+
+        List<String> command = new ArrayList<>(10 + (2 * buffers.size()));
+        // Time out after 10s of inactivity, but kill logcat with SEGV
+        // so we can investigate why it didn't finish.
+        command.add("/system/bin/timeout");
+        command.add("-i");
+        command.add("-s");
+        command.add("SEGV");
+        command.add(timeout + "s");
+
+        // Merge several logcat streams, and take the last N lines.
+        command.add("/system/bin/logcat");
+        command.add("-v");
+        // This adds a timestamp and thread info to each log line.
+        command.add("threadtime");
+        for (String buffer : buffers) {
+            command.add("-b");
+            command.add(buffer);
+        }
+        // Limit the output to the last N lines.
+        command.add("-t");
+        command.add(String.valueOf(lines));
+
+        try {
+            java.lang.Process proc =
+                    new ProcessBuilder(command).redirectErrorStream(true).start();
+
+            // Close the output stream immediately as we do not send input to the process.
+            try {
+                proc.getOutputStream().close();
+            } catch (IOException e) {
+            }
+
+            try (InputStreamReader reader = new InputStreamReader(proc.getInputStream())) {
+                char[] buffer = new char[8192];
+                int numRead;
+                while ((numRead = reader.read(buffer, 0, buffer.length)) > 0) {
+                    sb.append(buffer, 0, numRead);
+                }
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Error running logcat", e);
+        }
     }
 
     /**
