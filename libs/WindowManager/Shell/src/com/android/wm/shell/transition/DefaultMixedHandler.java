@@ -426,7 +426,8 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
                     ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                             "Converting mixed transition into a keyguard transition");
                     // Consume the original mixed transition
-                    onTransitionConsumed(transition, false, null);
+                    mActiveTransitions.remove(mixed);
+                    mixed.onTransitionConsumed(transition, false, null);
                     return true;
                 } else {
                     // Keyguard handler cannot handle it, process through original mixed
