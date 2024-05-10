@@ -645,14 +645,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private int mCurTokenDisplayId = INVALID_DISPLAY;
 
     /**
-     * The host input token of the current active input method.
-     */
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    @MultiUserUnawareField
-    private IBinder mCurHostInputToken;
-
-    /**
      * The display ID of the input method indicates the fallback display which returned by
      * {@link #computeImeDisplayIdForTarget}.
      */
@@ -1840,21 +1832,6 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     }
 
     /**
-     * Sets current host input token.
-     *
-     * @param callerImeToken the token has been made for the current active input method
-     * @param hostInputToken the host input token of the current active input method
-     */
-    void setCurHostInputToken(@NonNull IBinder callerImeToken, @Nullable IBinder hostInputToken) {
-        synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(callerImeToken)) {
-                return;
-            }
-            mCurHostInputToken = hostInputToken;
-        }
-    }
-
-    /**
      * Gets enabled subtypes of the specified {@link InputMethodInfo}.
      *
      * @param imiId if null, returns enabled subtypes for the current {@link InputMethodInfo}.
@@ -2527,7 +2504,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
         updateSystemUiLocked(mImeWindowVis, mBackDisposition);
         mCurTokenDisplayId = INVALID_DISPLAY;
-        mCurHostInputToken = null;
+        mAutofillController.onResetSystemUi();
     }
 
     @GuardedBy("ImfLock.class")
@@ -5624,10 +5601,13 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             //TODO(b/150843766): Check if Input Token is valid.
             final IBinder curHostInputToken;
             synchronized (ImfLock.class) {
-                if (displayId != mCurTokenDisplayId || mCurHostInputToken == null) {
+                if (displayId != mCurTokenDisplayId) {
                     return false;
                 }
-                curHostInputToken = mCurHostInputToken;
+                curHostInputToken = mAutofillController.getCurHostInputToken();
+                if (curHostInputToken == null) {
+                    return false;
+                }
             }
             return mInputManagerInternal.transferTouchGesture(sourceInputToken, curHostInputToken);
         }
@@ -5949,7 +5929,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     + userData.mBindingController.isVisibleBound());
             p.println("  mCurToken=" + getCurTokenLocked());
             p.println("  mCurTokenDisplayId=" + mCurTokenDisplayId);
-            p.println("  mCurHostInputToken=" + mCurHostInputToken);
+            p.println("  mCurHostInputToken=" + mAutofillController.getCurHostInputToken());
             p.println("  mCurIntent=" + getCurIntentLocked());
             method = getCurMethodLocked();
             p.println("  mCurMethod=" + getCurMethodLocked());
