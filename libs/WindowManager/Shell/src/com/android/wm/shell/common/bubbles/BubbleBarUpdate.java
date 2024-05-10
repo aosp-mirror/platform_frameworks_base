@@ -52,6 +52,8 @@ public class BubbleBarUpdate implements Parcelable {
     public BubbleBarLocation bubbleBarLocation;
     @Nullable
     public Point expandedViewDropTargetSize;
+    public boolean showOverflowChanged;
+    public boolean showOverflow;
 
     // This is only populated if bubbles have been removed.
     public List<RemovedBubble> removedBubbles = new ArrayList<>();
@@ -92,6 +94,8 @@ public class BubbleBarUpdate implements Parcelable {
                 BubbleBarLocation.class);
         expandedViewDropTargetSize = parcel.readParcelable(Point.class.getClassLoader(),
                 Point.class);
+        showOverflowChanged = parcel.readBoolean();
+        showOverflow = parcel.readBoolean();
     }
 
     /**
@@ -107,7 +111,8 @@ public class BubbleBarUpdate implements Parcelable {
                 || suppressedBubbleKey != null
                 || unsupressedBubbleKey != null
                 || !currentBubbleList.isEmpty()
-                || bubbleBarLocation != null;
+                || bubbleBarLocation != null
+                || showOverflowChanged;
     }
 
     @NonNull
@@ -128,6 +133,8 @@ public class BubbleBarUpdate implements Parcelable {
                 + " currentBubbleList=" + currentBubbleList
                 + " bubbleBarLocation=" + bubbleBarLocation
                 + " expandedViewDropTargetSize=" + expandedViewDropTargetSize
+                + " showOverflowChanged=" + showOverflowChanged
+                + " showOverflow=" + showOverflow
                 + " }";
     }
 
@@ -152,6 +159,8 @@ public class BubbleBarUpdate implements Parcelable {
         parcel.writeParcelableList(currentBubbleList, flags);
         parcel.writeParcelable(bubbleBarLocation, flags);
         parcel.writeParcelable(expandedViewDropTargetSize, flags);
+        parcel.writeBoolean(showOverflowChanged);
+        parcel.writeBoolean(showOverflow);
     }
 
     /**
