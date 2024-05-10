@@ -295,6 +295,50 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun subscriptions_subIsOnlyNtn_modelHasExclusivelyNtnTrue() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.subscriptions)
+
+            val onlyNtnSub =
+                mock<SubscriptionInfo>().also {
+                    whenever(it.isOnlyNonTerrestrialNetwork).thenReturn(true)
+                    whenever(it.subscriptionId).thenReturn(45)
+                    whenever(it.groupUuid).thenReturn(GROUP_1)
+                    whenever(it.carrierName).thenReturn("NTN only")
+                    whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
+                }
+
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(onlyNtnSub))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0].isExclusivelyNonTerrestrial).isTrue()
+        }
+
+    @Test
+    fun subscriptions_subIsNotOnlyNtn_modelHasExclusivelyNtnFalse() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.subscriptions)
+
+            val notOnlyNtnSub =
+                mock<SubscriptionInfo>().also {
+                    whenever(it.isOnlyNonTerrestrialNetwork).thenReturn(false)
+                    whenever(it.subscriptionId).thenReturn(45)
+                    whenever(it.groupUuid).thenReturn(GROUP_1)
+                    whenever(it.carrierName).thenReturn("NTN only")
+                    whenever(it.profileClass).thenReturn(PROFILE_CLASS_UNSET)
+                }
+
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(notOnlyNtnSub))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0].isExclusivelyNonTerrestrial).isFalse()
+        }
+
+    @Test
     fun testSubscriptions_carrierMergedOnly_listHasCarrierMerged() =
         testScope.runTest {
             val latest by collectLastValue(underTest.subscriptions)
