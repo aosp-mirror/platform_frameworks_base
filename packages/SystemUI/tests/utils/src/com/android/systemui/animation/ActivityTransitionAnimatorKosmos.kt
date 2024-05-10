@@ -17,5 +17,13 @@
 package com.android.systemui.animation
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testCase
 
-val Kosmos.activityTransitionAnimator by Kosmos.Fixture { ActivityTransitionAnimator() }
+val Kosmos.activityTransitionAnimator by
+    Kosmos.Fixture {
+        ActivityTransitionAnimator(
+            // The main thread is checked in a bunch of places inside the different transitions
+            // animators, so we have to pass the real main executor here.
+            mainExecutor = testCase.context.mainExecutor,
+        )
+    }
