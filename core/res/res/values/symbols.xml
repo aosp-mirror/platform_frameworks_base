@@ -5426,6 +5426,8 @@
   <java-symbol type="string" name="lockscreen_too_many_failed_attempts_countdown" />
 
   <java-symbol type="bool" name="config_enable_a11y_magnification_single_panning" />
+  <java-symbol type="bool" name="config_enable_a11y_fullscreen_magnification_overscroll_handler" />
+  <java-symbol type="dimen" name="accessibility_fullscreen_magnification_gesture_edge_slop" />
 
   <java-symbol type="string" name="config_hapticFeedbackCustomizationFile" />
 
