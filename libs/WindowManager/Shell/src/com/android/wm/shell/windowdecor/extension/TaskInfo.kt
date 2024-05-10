@@ -17,7 +17,6 @@
 package com.android.wm.shell.windowdecor.extension
 
 import android.app.TaskInfo
-import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS
 import android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
@@ -36,6 +35,3 @@ val TaskInfo.isLightCaptionBarAppearance: Boolean
 
 val TaskInfo.isFullscreen: Boolean
     get() = windowingMode == WINDOWING_MODE_FULLSCREEN
-
-val TaskInfo.isFreeform: Boolean
-    get() = windowingMode == WINDOWING_MODE_FREEFORM
