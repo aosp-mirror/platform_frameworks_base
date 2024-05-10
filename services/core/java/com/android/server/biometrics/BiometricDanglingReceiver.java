@@ -16,6 +16,7 @@
 package com.android.server.biometrics;
 
 import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
+import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
@@ -63,7 +64,7 @@ public class BiometricDanglingReceiver extends BroadcastReceiver {
             intentFilter.addAction(ACTION_FACE_RE_ENROLL_LAUNCH);
             intentFilter.addAction(ACTION_FACE_RE_ENROLL_DISMISS);
         }
-        context.registerReceiver(this, intentFilter);
+        context.registerReceiver(this, intentFilter, Context.RECEIVER_NOT_EXPORTED);
     }
 
     @Override
@@ -84,7 +85,8 @@ public class BiometricDanglingReceiver extends BroadcastReceiver {
     }
 
     private void launchBiometricEnrollActivity(Context context, String action) {
-        context.sendBroadcast(new Intent(ACTION_CLOSE_SYSTEM_DIALOGS));
+        context.sendBroadcast(
+                new Intent(ACTION_CLOSE_SYSTEM_DIALOGS).setFlags(FLAG_RECEIVER_FOREGROUND));
         final Intent intent = new Intent(action);
         intent.setPackage(SETTINGS_PACKAGE);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

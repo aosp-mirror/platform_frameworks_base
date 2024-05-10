@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.UserHandle;
@@ -75,13 +76,15 @@ public class BiometricDanglingReceiverTest {
     @Test
     public void testFingerprintRegisterReceiver() {
         initBroadcastReceiver(BiometricsProtoEnums.MODALITY_FINGERPRINT);
-        verify(mContext).registerReceiver(eq(mBiometricDanglingReceiver), any());
+        verify(mContext).registerReceiver(eq(mBiometricDanglingReceiver), any(),
+                eq(Context.RECEIVER_NOT_EXPORTED));
     }
 
     @Test
     public void testFaceRegisterReceiver() {
         initBroadcastReceiver(BiometricsProtoEnums.MODALITY_FACE);
-        verify(mContext).registerReceiver(eq(mBiometricDanglingReceiver), any());
+        verify(mContext).registerReceiver(eq(mBiometricDanglingReceiver), any(),
+                eq(Context.RECEIVER_NOT_EXPORTED));
     }
 
     @Test
