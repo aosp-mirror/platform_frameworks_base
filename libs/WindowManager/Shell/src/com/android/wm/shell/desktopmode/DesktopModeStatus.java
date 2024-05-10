@@ -65,7 +65,7 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_use_window_shadows_focused_window", false);
 
     /**
-     * Flag to indicate whether to apply shadows to windows in desktop mode.
+     * Flag to indicate whether to use rounded corners for windows in desktop mode.
      */
     private static final boolean USE_ROUNDED_CORNERS = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_use_rounded_corners", true);
