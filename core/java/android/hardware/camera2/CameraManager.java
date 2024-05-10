@@ -105,6 +105,33 @@ public final class CameraManager {
     private static final int CAMERA_TYPE_ALL = 1;
 
     private ArrayList<String> mDeviceIdList;
+    /**
+     * Caches the mapping between a logical camera ID and 'MultiResolutionStreamConfigurationMap'
+     * that is calculated by {@link #getPhysicalCameraMultiResolutionConfigs} as the calculation
+     * might take many binder calls.
+     * <p>
+     * Note, this is a map of maps. The structure is:
+     * <pre>
+     * {
+     *     logicalCameraId_1 -> {
+     *         physicalCameraId_1 -> [
+     *             streamConfiguration_1,
+     *             streamConfiguration_2,
+     *             ...
+     *         ],
+     *         physicalCameraId_2 -> [...],
+     *         ...
+     *     },
+     *     logicalCameraId_2 -> {
+     *         ...
+     *     },
+     *     ...
+     * }
+     * </pre>
+     * </p>
+     */
+    private final Map<String, Map<String, StreamConfiguration[]>>
+            mCameraIdToMultiResolutionStreamConfigurationMap = new HashMap<>();
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -540,8 +567,14 @@ public final class CameraManager {
     private Map<String, StreamConfiguration[]> getPhysicalCameraMultiResolutionConfigs(
             String cameraId, CameraMetadataNative info, ICameraService cameraService)
             throws CameraAccessException {
+        if (mCameraIdToMultiResolutionStreamConfigurationMap.containsKey(cameraId)) {
+            return mCameraIdToMultiResolutionStreamConfigurationMap.get(cameraId);
+        }
+
         HashMap<String, StreamConfiguration[]> multiResolutionStreamConfigurations =
-                new HashMap<String, StreamConfiguration[]>();
+                new HashMap<>();
+        mCameraIdToMultiResolutionStreamConfigurationMap.put(cameraId,
+                multiResolutionStreamConfigurations);
 
         Boolean multiResolutionStreamSupported = info.get(
                 CameraCharacteristics.SCALER_MULTI_RESOLUTION_STREAM_SUPPORTED);
@@ -649,28 +682,9 @@ public final class CameraManager {
                         "Camera service is currently unavailable");
             }
             try {
-                Size displaySize = getDisplaySize();
-
                 CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId,
                         mContext.getApplicationInfo().targetSdkVersion, overrideToPortrait);
-                try {
-                    info.setCameraId(Integer.parseInt(cameraId));
-                } catch (NumberFormatException e) {
-                    Log.v(TAG, "Failed to parse camera Id " + cameraId + " to integer");
-                }
-
-                boolean hasConcurrentStreams =
-                        CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId);
-                info.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
-                info.setDisplaySize(displaySize);
-
-                Map<String, StreamConfiguration[]> multiResolutionSizeMap =
-                        getPhysicalCameraMultiResolutionConfigs(cameraId, info, cameraService);
-                if (multiResolutionSizeMap.size() > 0) {
-                    info.setMultiResolutionStreamConfigurationMap(multiResolutionSizeMap);
-                }
-
-                characteristics = new CameraCharacteristics(info);
+                characteristics = prepareCameraCharacteristics(cameraId, info, cameraService);
             } catch (ServiceSpecificException e) {
                 throw ExceptionUtils.throwAsPublicException(e);
             } catch (RemoteException e) {
@@ -681,6 +695,47 @@ public final class CameraManager {
         }
         registerDeviceStateListener(characteristics);
         return characteristics;
+    }
+
+
+    /**
+     * Utility method to take a {@link CameraMetadataNative} object and wrap it into a
+     * {@link CameraCharacteristics} object that has all required fields and keys set and is fit
+     * for apps to consume.
+     *
+     * @param cameraId      camera Id that the CameraMetadataNative was fetched for.
+     * @param metadata      base CameraMetadataNative to be wrapped
+     * @param cameraService remote cameraservice instance to be used if binder calls need
+     *                      to be made.
+     * @return A CameraCharacteristics object that can be used by the apps.
+     * @hide
+     */
+    @NonNull
+    public CameraCharacteristics prepareCameraCharacteristics(
+            @NonNull String cameraId, CameraMetadataNative metadata, ICameraService cameraService)
+            throws CameraAccessException {
+        synchronized (mLock) {
+            try {
+                metadata.setCameraId(Integer.parseInt(cameraId));
+            } catch (NumberFormatException e) {
+                Log.v(TAG, "Failed to parse camera Id " + cameraId + " to integer");
+            }
+
+            boolean hasConcurrentStreams =
+                    CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId);
+            metadata.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
+
+            Size displaySize = getDisplaySize();
+            metadata.setDisplaySize(displaySize);
+
+            Map<String, StreamConfiguration[]> multiResolutionSizeMap =
+                    getPhysicalCameraMultiResolutionConfigs(cameraId, metadata, cameraService);
+            if (!multiResolutionSizeMap.isEmpty()) {
+                metadata.setMultiResolutionStreamConfigurationMap(multiResolutionSizeMap);
+            }
+
+            return new CameraCharacteristics(metadata);
+        }
     }
 
     /**
