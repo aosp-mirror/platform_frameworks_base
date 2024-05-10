@@ -1771,7 +1771,13 @@ public final class FlexibilityController extends StateController {
                     final int logicalIndex = mapping.getLogicalSlotIndex();
                     if (mCarrierPrivilegedCallbacks.contains(logicalIndex)) {
                         // Callback already exists. No need to create a new one or remove it.
-                        callbacksToRemove.remove(logicalIndex);
+                        for (int i = callbacksToRemove.size() - 1; i >= 0; i--) {
+                            if (callbacksToRemove.get(i) == logicalIndex) {
+                                callbacksToRemove.remove(i);
+                                break;
+                            }
+                        }
+
                         continue;
                     }
                     final LogicalIndexCarrierPrivilegesCallback callback =
