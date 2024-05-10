@@ -5681,7 +5681,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         // so we tear it down in anticipation of it (possibly) being
                         // reconstructed due to the restore
                         host.widgets.remove(widget);
-                        provider.widgets.remove(widget);
+                        if (provider != null) {
+                            provider.widgets.remove(widget);
+                        }
                         // Check if we need to destroy any services (if no other app widgets are
                         // referencing the same service)
                         decrementAppWidgetServiceRefCount(widget);
