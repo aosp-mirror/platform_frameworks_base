@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
@@ -141,8 +140,6 @@ constructor(
     }
 
     private fun listenForAlternateBouncerToGone() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
-        if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // Handled via #dismissAlternateBouncer.
             return
@@ -165,8 +162,6 @@ constructor(
     }
 
     private fun listenForAlternateBouncerToPrimaryBouncer() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
-        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .filterRelevantKeyguardStateAnd { isPrimaryBouncerShowing ->
