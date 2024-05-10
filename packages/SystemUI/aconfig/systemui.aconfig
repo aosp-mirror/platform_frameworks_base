@@ -943,3 +943,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "glanceable_hub_gesture_handle"
+  namespace: "systemui"
+  description: "Shows a vertical bar at the right edge to indicate the user can swipe to open the glanceable hub"
+  bug: "339667383"
+}

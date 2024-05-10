@@ -25,6 +25,7 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
@@ -63,6 +64,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     @Main private val resources: Resources,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    keyguardInteractor: KeyguardInteractor,
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
     private val shadeInteractor: ShadeInteractor,
@@ -235,6 +237,14 @@ constructor(
      * fall through to the glanceable hub, which we don't want.
      */
     val touchesAllowed: Flow<Boolean> = not(shadeInteractor.isAnyFullyExpanded)
+
+    // TODO(b/339667383): remove this temporary swipe gesture handle
+    /**
+     * The dream overlay has its own gesture handle as the SysUI window is not visible above the
+     * dream. This flow will be false when dreaming so that we don't show a duplicate handle when
+     * opening the hub over the dream.
+     */
+    val showGestureIndicator: Flow<Boolean> = not(keyguardInteractor.isDreaming)
 
     companion object {
         const val POPUP_AUTO_HIDE_TIMEOUT_MS = 12000L
