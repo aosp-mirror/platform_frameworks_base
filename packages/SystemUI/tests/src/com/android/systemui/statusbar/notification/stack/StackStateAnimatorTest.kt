@@ -134,7 +134,8 @@ class StackStateAnimatorTest : SysuiTestCase() {
                 /* isHeadsUpAnimation= */ eq(true),
                 /* onStartedRunnable= */ any(),
                 /* onFinishedRunnable= */ runnableCaptor.capture(),
-                /* animationListener= */ any()
+                /* animationListener= */ any(),
+                /* clipSide= */ eq(ExpandableView.ClipSide.BOTTOM),
             )
 
         animatorTestRule.advanceTimeBy(disappearDuration) // move to the end of SSA animations
