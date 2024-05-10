@@ -37,6 +37,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.hardware.CameraExtensionSessionStats;
 import android.hardware.CameraSessionStats;
@@ -906,6 +907,7 @@ public class CameraServiceProxy extends SystemService
 
             int extensionType = FrameworkStatsLog.CAMERA_ACTION_EVENT__EXT_TYPE__EXTENSION_NONE;
             boolean extensionIsAdvanced = false;
+            int extensionCaptureFormat = ImageFormat.UNKNOWN;
             if (e.mExtSessionStats != null) {
                 switch (e.mExtSessionStats.type) {
                     case CameraExtensionSessionStats.Type.EXTENSION_AUTOMATIC:
@@ -932,6 +934,9 @@ public class CameraServiceProxy extends SystemService
                         Slog.w(TAG, "Unknown extension type: " + e.mExtSessionStats.type);
                 }
                 extensionIsAdvanced = e.mExtSessionStats.isAdvanced;
+                if (Flags.analytics24q3()) {
+                    extensionCaptureFormat = e.mExtSessionStats.captureFormat;
+                }
             }
 
             int streamCount = 0;
@@ -945,10 +950,13 @@ public class CameraServiceProxy extends SystemService
                 String zoomOverrideDebug = Flags.logZoomOverrideUsage()
                         ? ", zoomOverrideUsage " + e.mUsedZoomOverride
                         : "";
-
                 String mostRequestedFpsRangeDebug = Flags.analytics24q3()
                         ? ", mostRequestedFpsRange " + e.mMostRequestedFpsRange
                         : "";
+                String extensionCaptureFormatDebug = Flags.analytics24q3()
+                        ? " extensionCaptureFormat " + e.mExtSessionStats.captureFormat
+                        : "";
+
                 Slog.v(TAG, "CAMERA_ACTION_EVENT: action " + e.mAction
                         + " clientName " + e.mClientName
                         + ", duration " + e.getDuration()
@@ -971,8 +979,10 @@ public class CameraServiceProxy extends SystemService
                         + ", logId " + e.mLogId
                         + ", sessionIndex " + e.mSessionIndex
                         + ", mExtSessionStats {type " + extensionType
-                        + " isAdvanced " + extensionIsAdvanced + "}");
+                        + " isAdvanced " + extensionIsAdvanced
+                        + extensionCaptureFormatDebug + "}");
             }
+
             // Convert from CameraStreamStats to CameraStreamProto
             CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
             for (int i = 0; i < MAX_STREAM_STATISTICS; i++) {
@@ -1035,7 +1045,8 @@ public class CameraServiceProxy extends SystemService
                     e.mLogId, e.mSessionIndex,
                     extensionType, extensionIsAdvanced, e.mUsedUltraWide,
                     e.mUsedZoomOverride,
-                    e.mMostRequestedFpsRange.getLower(), e.mMostRequestedFpsRange.getUpper());
+                    e.mMostRequestedFpsRange.getLower(), e.mMostRequestedFpsRange.getUpper(),
+                    extensionCaptureFormat);
         }
     }
 
