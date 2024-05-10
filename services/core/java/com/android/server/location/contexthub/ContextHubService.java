@@ -317,9 +317,6 @@ public class ContextHubService extends IContextHubService.Stub {
          */
         private static final int MAX_PROBABILITY_PERCENT = 100;
 
-        /**
-         * Random number generator.
-         */
         private Random mRandom = new Random();
 
         /**
@@ -994,50 +991,75 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        if (message.isReliable()) {
-            byte errorCode = ErrorCode.OK;
-            synchronized (mReliableMessageRecordQueue) {
-                Optional<ReliableMessageRecord> record = Optional.empty();
-                for (ReliableMessageRecord r: mReliableMessageRecordQueue) {
-                    if (r.getContextHubId() == contextHubId
-                            && r.getMessageSequenceNumber() == message.getMessageSequenceNumber()) {
-                        record = Optional.of(r);
-                        break;
-                    }
-                }
-
-                if (record.isPresent()) {
-                    errorCode = record.get().getErrorCode();
-                    if (errorCode == ErrorCode.TRANSIENT_ERROR) {
-                        Log.w(TAG, "Found duplicate reliable message with message sequence number: "
-                                + record.get().getMessageSequenceNumber() + ": retrying");
-                        errorCode = mClientManager.onMessageFromNanoApp(
-                                contextHubId, hostEndpointId, message,
-                                nanoappPermissions, messagePermissions);
-                        record.get().setErrorCode(errorCode);
-                    } else {
-                        Log.w(TAG, "Found duplicate reliable message with message sequence number: "
-                                + record.get().getMessageSequenceNumber());
-                    }
-                } else {
-                    errorCode = mClientManager.onMessageFromNanoApp(
-                            contextHubId, hostEndpointId, message,
-                            nanoappPermissions, messagePermissions);
-                    mReliableMessageRecordQueue.add(
-                            new ReliableMessageRecord(contextHubId,
-                                    SystemClock.elapsedRealtimeNanos(),
-                                    message.getMessageSequenceNumber(),
-                                    errorCode));
-                }
-            }
-            sendMessageDeliveryStatusToContextHub(contextHubId,
-                    message.getMessageSequenceNumber(), errorCode);
-        } else {
+        if (!message.isReliable()) {
             mClientManager.onMessageFromNanoApp(
                     contextHubId, hostEndpointId, message,
                     nanoappPermissions, messagePermissions);
+            cleanupReliableMessageRecordQueue();
+            return;
         }
 
+        byte errorCode = ErrorCode.OK;
+        synchronized (mReliableMessageRecordQueue) {
+            Optional<ReliableMessageRecord> record =
+                    findReliableMessageRecord(contextHubId,
+                            message.getMessageSequenceNumber());
+
+            if (record.isPresent()) {
+                errorCode = record.get().getErrorCode();
+                if (errorCode == ErrorCode.TRANSIENT_ERROR) {
+                    Log.w(TAG, "Found duplicate reliable message with message sequence number: "
+                            + record.get().getMessageSequenceNumber() + ": retrying");
+                    errorCode = mClientManager.onMessageFromNanoApp(
+                            contextHubId, hostEndpointId, message,
+                            nanoappPermissions, messagePermissions);
+                    record.get().setErrorCode(errorCode);
+                } else {
+                    Log.w(TAG, "Found duplicate reliable message with message sequence number: "
+                            + record.get().getMessageSequenceNumber());
+                }
+            } else {
+                errorCode = mClientManager.onMessageFromNanoApp(
+                        contextHubId, hostEndpointId, message,
+                        nanoappPermissions, messagePermissions);
+                mReliableMessageRecordQueue.add(
+                        new ReliableMessageRecord(contextHubId,
+                                SystemClock.elapsedRealtimeNanos(),
+                                message.getMessageSequenceNumber(),
+                                errorCode));
+            }
+        }
+
+        sendMessageDeliveryStatusToContextHub(contextHubId,
+                message.getMessageSequenceNumber(), errorCode);
+        cleanupReliableMessageRecordQueue();
+    }
+
+    /**
+     * Finds a reliable message record in the queue that matches the given
+     * context hub ID and message sequence number. This function assumes
+     * the caller is synchronized on mReliableMessageRecordQueue.
+     *
+     * @param contextHubId the ID of the hub
+     * @param messageSequenceNumber the message sequence number
+     *
+     * @return the record if found, or empty if not found
+     */
+    private Optional<ReliableMessageRecord> findReliableMessageRecord(
+            int contextHubId, int messageSequenceNumber) {
+        for (ReliableMessageRecord record: mReliableMessageRecordQueue) {
+            if (record.getContextHubId() == contextHubId
+                && record.getMessageSequenceNumber() == messageSequenceNumber) {
+                return Optional.of(record);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Removes old entries from the reliable message record queue.
+     */
+    private void cleanupReliableMessageRecordQueue() {
         synchronized (mReliableMessageRecordQueue) {
             while (mReliableMessageRecordQueue.peek() != null
                    && mReliableMessageRecordQueue.peek().isExpired()) {
