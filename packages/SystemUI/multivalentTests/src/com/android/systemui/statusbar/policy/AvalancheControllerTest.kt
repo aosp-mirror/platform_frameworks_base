@@ -249,22 +249,40 @@ class AvalancheControllerTest : SysuiTestCase() {
 
 
     @Test
-    fun testDelete_showingEntryKeyBecomesPreviousHunKey() {
+    fun testDelete_deleteSecondToLastEntry_showingEntryKeyBecomesPreviousHunKey() {
         mAvalancheController.previousHunKey = ""
 
         // Entry is showing
+        val firstEntry = createHeadsUpEntry(id = 0)
+        mAvalancheController.headsUpEntryShowing = firstEntry
+
+        // There's another entry waiting to show next
+        val secondEntry = createHeadsUpEntry(id = 1)
+        mAvalancheController.addToNext(secondEntry, runnableMock!!)
+
+        // Delete
+        mAvalancheController.delete(firstEntry, runnableMock, "testLabel")
+
+        // Next entry is shown
+        assertThat(mAvalancheController.previousHunKey).isEqualTo(firstEntry.mEntry!!.key)
+    }
+
+    @Test
+    fun testDelete_deleteLastEntry_previousHunKeyCleared() {
+        mAvalancheController.previousHunKey = "key"
+
+        // Nothing waiting to show
+        mAvalancheController.clearNext()
+
+        // One entry is showing
         val showingEntry = createHeadsUpEntry(id = 0)
         mAvalancheController.headsUpEntryShowing = showingEntry
 
-        // There's another entry waiting to show next
-        val nextEntry = createHeadsUpEntry(id = 1)
-        mAvalancheController.addToNext(nextEntry, runnableMock!!)
-
         // Delete
-        mAvalancheController.delete(showingEntry, runnableMock, "testLabel")
+        mAvalancheController.delete(showingEntry, runnableMock!!, "testLabel")
 
         // Next entry is shown
-        assertThat(mAvalancheController.previousHunKey).isEqualTo(showingEntry.mEntry!!.key)
+        assertThat(mAvalancheController.previousHunKey).isEqualTo("");
     }
 
     @Test
