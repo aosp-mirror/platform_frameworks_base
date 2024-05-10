@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -88,6 +89,8 @@ constructor(
 
     private fun listenForDreamingToGlanceableHub() {
         if (!communalHub()) return
+        if (SceneContainerFlag.isEnabled)
+            return // TODO(b/336576536): Check if adaptation for scene framework is needed
         scope.launch("$TAG#listenForDreamingToGlanceableHub", mainDispatcher) {
             glanceableHubTransitions.listenForGlanceableHubTransition(
                 transitionOwnerName = TAG,
@@ -175,6 +178,8 @@ constructor(
     }
 
     private fun listenForDreamingToGoneWhenDismissable() {
+        if (SceneContainerFlag.isEnabled)
+            return // TODO(b/336576536): Check if adaptation for scene framework is needed
         scope.launch {
             keyguardInteractor.isAbleToDream
                 .sampleCombine(
@@ -190,6 +195,8 @@ constructor(
     }
 
     private fun listenForDreamingToGoneFromBiometricUnlock() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.biometricUnlockState
                 .filterRelevantKeyguardStateAnd { biometricUnlockState ->

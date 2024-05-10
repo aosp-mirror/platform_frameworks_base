@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
@@ -98,6 +99,8 @@ constructor(
     }
 
     private fun listenForPrimaryBouncerToLockscreenHubOrOccluded() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             scope.launch {
                 keyguardInteractor.primaryBouncerShowing
@@ -158,10 +161,14 @@ constructor(
     }
 
     private fun listenForPrimaryBouncerToAsleep() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch { listenForSleepTransition() }
     }
 
     private fun listenForPrimaryBouncerToDreamingLockscreenHosted() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .sample(keyguardInteractor.isActiveDreamLockscreenHosted, ::Pair)
@@ -174,6 +181,8 @@ constructor(
     }
 
     private fun listenForPrimaryBouncerToGone() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
         if (KeyguardWmStateRefactor.isEnabled) {
             // This is handled in KeyguardSecurityContainerController and
             // StatusBarKeyguardViewManager, which calls the transition interactor to kick off a
