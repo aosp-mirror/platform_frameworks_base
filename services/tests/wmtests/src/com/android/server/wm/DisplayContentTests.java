@@ -113,15 +113,10 @@ import android.hardware.HardwareBuffer;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
-import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -131,7 +126,6 @@ import android.view.IDisplayChangeWindowController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
 import android.view.InsetsState;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -151,7 +145,6 @@ import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.WmDisplayCutout;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -177,10 +170,6 @@ import java.util.concurrent.TimeoutException;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class DisplayContentTests extends WindowTestsBase {
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @SetupWindows(addAllCommonWindows = true)
     @Test
@@ -512,44 +501,6 @@ public class DisplayContentTests extends WindowTestsBase {
         globalConfig = mWm.mRoot.getConfiguration();
         assertEquals(currentConfig.densityDpi, globalConfig.densityDpi);
         assertEquals(currentConfig.fontScale, globalConfig.fontScale, 0.1 /* delta */);
-    }
-
-    /**
-     * Tests tapping on a root task in different display results in window gaining focus.
-     */
-    @Test
-    @RequiresFlagsDisabled(com.android.input.flags.Flags.FLAG_REMOVE_POINTER_EVENT_TRACKING_IN_WM)
-    public void testInputEventBringsCorrectDisplayInFocus() {
-        DisplayContent dc0 = mWm.getDefaultDisplayContentLocked();
-        // Create a second display
-        final DisplayContent dc1 = createNewDisplay();
-
-        // Add root task with activity.
-        final Task rootTask0 = createTask(dc0);
-        final Task task0 = createTaskInRootTask(rootTask0, 0 /* userId */);
-        final ActivityRecord activity = createNonAttachedActivityRecord(dc0);
-        task0.addChild(activity, 0);
-        dc0.configureDisplayPolicy();
-        assertNotNull(dc0.mTapDetector);
-
-        final Task rootTask1 = createTask(dc1);
-        final Task task1 = createTaskInRootTask(rootTask1, 0 /* userId */);
-        final ActivityRecord activity1 = createNonAttachedActivityRecord(dc0);
-        task1.addChild(activity1, 0);
-        dc1.configureDisplayPolicy();
-        assertNotNull(dc1.mTapDetector);
-
-        // tap on primary display.
-        tapOnDisplay(dc0);
-        // Check focus is on primary display.
-        assertEquals(mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus,
-                dc0.findFocusedWindow());
-
-        // Tap on secondary display.
-        tapOnDisplay(dc1);
-        // Check focus is on secondary.
-        assertEquals(mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus,
-                dc1.findFocusedWindow());
     }
 
     @Test
@@ -2958,34 +2909,5 @@ public class DisplayContentTests extends WindowTestsBase {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void tapOnDisplay(final DisplayContent dc) {
-        final DisplayMetrics dm = dc.getDisplayMetrics();
-        final float x = dm.widthPixels / 2;
-        final float y = dm.heightPixels / 2;
-        final long downTime = SystemClock.uptimeMillis();
-        final long eventTime = SystemClock.uptimeMillis() + 100;
-        // sending ACTION_DOWN
-        final MotionEvent downEvent = MotionEvent.obtain(
-                downTime,
-                downTime,
-                MotionEvent.ACTION_DOWN,
-                x,
-                y,
-                0 /*metaState*/);
-        downEvent.setDisplayId(dc.getDisplayId());
-        dc.mTapDetector.onPointerEvent(downEvent);
-
-        // sending ACTION_UP
-        final MotionEvent upEvent = MotionEvent.obtain(
-                downTime,
-                eventTime,
-                MotionEvent.ACTION_UP,
-                x,
-                y,
-                0 /*metaState*/);
-        upEvent.setDisplayId(dc.getDisplayId());
-        dc.mTapDetector.onPointerEvent(upEvent);
     }
 }

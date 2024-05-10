@@ -81,15 +81,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
-import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -1524,18 +1520,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    static boolean excludeWindowTypeFromTapOutTask(int windowType) {
-        switch (windowType) {
-            case TYPE_STATUS_BAR:
-            case TYPE_NOTIFICATION_SHADE:
-            case TYPE_NAVIGATION_BAR:
-            case TYPE_INPUT_METHOD_DIALOG:
-            case TYPE_VOLUME_OVERLAY:
-                return true;
-        }
-        return false;
-    }
-
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, @InsetsType int requestedVisibleTypes,
             InputChannel outInputChannel, InsetsState outInsetsState,
@@ -1832,10 +1816,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // From now on, no exceptions or errors allowed!
             if (displayContent.mCurrentFocus == null) {
                 displayContent.mWinAddedSinceNullFocus.add(win);
-            }
-
-            if (excludeWindowTypeFromTapOutTask(type)) {
-                displayContent.mTapExcludedWindows.add(win);
             }
 
             win.mSession.onWindowAdded(win);

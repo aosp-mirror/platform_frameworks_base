@@ -2359,18 +2359,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final int type = mAttrs.type;
-        if (WindowManagerService.excludeWindowTypeFromTapOutTask(type)) {
-            dc.mTapExcludedWindows.remove(this);
-        }
 
         if (type == TYPE_PRESENTATION || type == TYPE_PRIVATE_PRESENTATION) {
             mWmService.mDisplayManagerInternal.onPresentation(dc.getDisplay().getDisplayId(),
                     /*isShown=*/ false);
         }
 
-        // Remove this window from mTapExcludeProvidingWindows. If it was not registered, this will
-        // not do anything.
-        dc.mTapExcludeProvidingWindows.remove(this);
         dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
@@ -5526,18 +5520,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Clear the tap excluded region if the region passed in is null or empty.
         if (region == null || region.isEmpty()) {
             mTapExcludeRegion.setEmpty();
-            // Remove this window from mTapExcludeProvidingWindows since it won't be providing
-            // tap exclude regions.
-            currentDisplay.mTapExcludeProvidingWindows.remove(this);
         } else {
             mTapExcludeRegion.set(region);
-            // Make sure that this window is registered as one that provides a tap exclude region
-            // for its containing display.
-            currentDisplay.mTapExcludeProvidingWindows.add(this);
         }
 
-        // Trigger touch exclude region update on current display.
-        currentDisplay.updateTouchExcludeRegion();
         // Trigger touchable region update for this window.
         currentDisplay.getInputMonitor().updateInputWindowsLw(true /* force */);
     }
