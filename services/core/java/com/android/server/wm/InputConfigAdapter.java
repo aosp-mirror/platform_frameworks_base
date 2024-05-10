@@ -20,8 +20,6 @@ import android.os.InputConfig;
 import android.view.InputWindowHandle.InputConfigFlags;
 import android.view.WindowManager.LayoutParams;
 
-import java.util.List;
-
 /**
  * A helper to determine the {@link InputConfigFlags} that control the behavior of an input window
  * from several WM attributes.
@@ -47,7 +45,7 @@ class InputConfigAdapter {
      * input configurations that can be mapped directly from a corresponding LayoutParams input
      * feature.
      */
-    private static final List<FlagMapping> INPUT_FEATURE_TO_CONFIG_MAP = List.of(
+    private static final FlagMapping[] INPUT_FEATURE_TO_CONFIG_MAP = {
             new FlagMapping(
                     LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL,
                     InputConfig.NO_INPUT_CHANNEL, false /* inverted */),
@@ -59,7 +57,8 @@ class InputConfigAdapter {
                     InputConfig.SPY, false /* inverted */),
             new FlagMapping(
                     LayoutParams.INPUT_FEATURE_SENSITIVE_FOR_PRIVACY,
-                    InputConfig.SENSITIVE_FOR_PRIVACY, false /* inverted */));
+                    InputConfig.SENSITIVE_FOR_PRIVACY, false /* inverted */)
+    };
 
     @InputConfigFlags
     private static final int INPUT_FEATURE_TO_CONFIG_MASK =
@@ -72,7 +71,7 @@ class InputConfigAdapter {
      * NOTE: The layout params flag {@link LayoutParams#FLAG_NOT_FOCUSABLE} is not handled by this
      * adapter, and must be handled explicitly.
      */
-    private static final List<FlagMapping> LAYOUT_PARAM_FLAG_TO_CONFIG_MAP = List.of(
+    private static final FlagMapping[] LAYOUT_PARAM_FLAG_TO_CONFIG_MAP = {
             new FlagMapping(
                     LayoutParams.FLAG_NOT_TOUCHABLE,
                     InputConfig.NOT_TOUCHABLE, false /* inverted */),
@@ -84,7 +83,8 @@ class InputConfigAdapter {
                     InputConfig.WATCH_OUTSIDE_TOUCH, false /* inverted */),
             new FlagMapping(
                     LayoutParams.FLAG_SLIPPERY,
-                    InputConfig.SLIPPERY, false /* inverted */));
+                    InputConfig.SLIPPERY, false /* inverted */)
+    };
 
     @InputConfigFlags
     private static final int LAYOUT_PARAM_FLAG_TO_CONFIG_MASK =
@@ -119,7 +119,7 @@ class InputConfigAdapter {
     }
 
     @InputConfigFlags
-    private static int applyMapping(int flags, List<FlagMapping> flagToConfigMap) {
+    private static int applyMapping(int flags, FlagMapping[] flagToConfigMap) {
         int inputConfig = 0;
         for (final FlagMapping mapping : flagToConfigMap) {
             final boolean flagSet = (flags & mapping.mFlag) != 0;
@@ -131,7 +131,7 @@ class InputConfigAdapter {
     }
 
     @InputConfigFlags
-    private static int computeMask(List<FlagMapping> flagToConfigMap) {
+    private static int computeMask(FlagMapping[] flagToConfigMap) {
         int mask = 0;
         for (final FlagMapping mapping : flagToConfigMap) {
             mask |= mapping.mInputConfig;
