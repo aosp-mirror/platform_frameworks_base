@@ -169,12 +169,6 @@ class InputManagerServiceTests {
         localService.setDisplayViewports(viewports)
         verify(native).setDisplayViewports(any(Array<DisplayViewport>::class.java))
         verify(native).setPointerDisplayId(displayId)
-
-        val x = 42f
-        val y = 314f
-        service.onPointerDisplayIdChanged(displayId, x, y)
-        testLooper.dispatchNext()
-        verify(wmCallbacks).notifyPointerDisplayIdChanged(displayId, x, y)
     }
 
     @Test

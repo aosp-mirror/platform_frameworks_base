@@ -45,7 +45,6 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -58,9 +57,7 @@ import android.view.Display;
 import android.view.DragEvent;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
-import android.view.InputDevice;
 import android.view.InputWindowHandle;
-import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
@@ -110,7 +107,6 @@ class DragState {
     boolean mCrossProfileCopyAllowed;
     ClipData mData;
     ClipDescription mDataDescription;
-    int mTouchSource;
     boolean mDragResult;
     boolean mRelinquishDragSurfaceToDropTarget;
     float mAnimatedScale = 1.0f;
@@ -261,12 +257,6 @@ class DragState {
             mNotifiedWindows.clear();
             mDragInProgress = false;
             Trace.instant(TRACE_TAG_WINDOW_MANAGER, "DragDropController#DRAG_ENDED");
-        }
-
-        // Take the cursor back if it has been changed.
-        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            mService.restorePointerIconLocked(mDisplayContent, mCurrentX, mCurrentY);
-            mTouchSource = 0;
         }
 
         // Clear the internal variables.
@@ -760,18 +750,6 @@ class DragState {
 
         mService.mAnimationHandler.post(() -> animator.start());
         return animator;
-    }
-
-    private boolean isFromSource(int source) {
-        return (mTouchSource & source) == source;
-    }
-
-    void overridePointerIconLocked(int touchSource) {
-        mTouchSource = touchSource;
-        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            // TODO(b/293587049): Pointer Icon Refactor: Set the pointer icon from the drag window.
-            InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
-        }
     }
 
     private class AnimationListener

@@ -1202,9 +1202,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mTapDetector = new TaskTapPointerEventListener(mWmService, this);
             registerPointerEventListener(mTapDetector);
         }
-        if (mWmService.mMousePositionTracker != null) {
-            registerPointerEventListener(mWmService.mMousePositionTracker);
-        }
         if (mWmService.mAtmService.getRecentTasks() != null) {
             registerPointerEventListener(
                     mWmService.mAtmService.getRecentTasks().getInputListener());

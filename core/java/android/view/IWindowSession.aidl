@@ -288,8 +288,6 @@ interface IWindowSession {
 
     oneway void finishMovingTask(IWindow window);
 
-    oneway void updatePointerIcon(IWindow window);
-
     /**
      * Update a tap exclude region identified by provided id in the window. Touches on this region
      * will neither be dispatched to this window nor change the focus to this window. Passing an

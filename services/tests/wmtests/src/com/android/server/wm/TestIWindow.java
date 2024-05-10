@@ -95,10 +95,6 @@ public class TestIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void updatePointerIcon(float x, float y) throws RemoteException {
-    }
-
-    @Override
     public void dispatchWindowShown() throws RemoteException {
     }
 

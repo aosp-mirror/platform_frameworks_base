@@ -24,12 +24,9 @@ import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
 
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.hardware.input.InputManagerGlobal;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
-
-import com.android.server.wm.WindowManagerService.H;
 
 /**
  * 1. Adjust the top most focus display if touch down on some display.
@@ -56,10 +53,6 @@ public class TaskTapPointerEventListener implements PointerEventListener {
     private void restorePointerIcon(int x, int y) {
         if (mPointerIconType != TYPE_NOT_SPECIFIED) {
             mPointerIconType = TYPE_NOT_SPECIFIED;
-            // Find the underlying window and ask it to restore the pointer icon.
-            mService.mH.removeMessages(H.RESTORE_POINTER_ICON);
-            mService.mH.obtainMessage(H.RESTORE_POINTER_ICON,
-                    x, y, mDisplayContent).sendToTarget();
         }
     }
 
@@ -115,15 +108,6 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                 }
                 if (mPointerIconType != iconType) {
                     mPointerIconType = iconType;
-                    if (mPointerIconType == TYPE_NOT_SPECIFIED) {
-                        // Find the underlying window and ask it restore the pointer icon.
-                        mService.mH.removeMessages(H.RESTORE_POINTER_ICON);
-                        mService.mH.obtainMessage(H.RESTORE_POINTER_ICON,
-                                x, y, mDisplayContent).sendToTarget();
-                    } else {
-                        InputManagerGlobal.getInstance()
-                                .setPointerIconType(mPointerIconType);
-                    }
                 }
             }
             break;
