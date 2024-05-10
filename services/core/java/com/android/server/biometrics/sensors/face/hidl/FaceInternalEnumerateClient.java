@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -56,5 +57,10 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<IBiometricsFac
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    protected int getModality() {
+        return BiometricsProtoEnums.MODALITY_FACE;
     }
 }
