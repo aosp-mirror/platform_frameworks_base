@@ -425,7 +425,7 @@ public class InternetDialogDelegate implements
         }
 
         boolean isWifiEnabled = mInternetDialogController.isWifiEnabled();
-        if (!mInternetDialogController.hasActiveSubId()
+        if (!mInternetDialogController.hasActiveSubIdOnDds()
                 && (!isWifiEnabled || !isCarrierNetworkActive)) {
             mMobileNetworkLayout.setVisibility(View.GONE);
             if (mSecondaryMobileNetworkLayout != null) {
