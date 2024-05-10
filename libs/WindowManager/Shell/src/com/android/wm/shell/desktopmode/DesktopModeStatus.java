@@ -41,15 +41,6 @@ public class DesktopModeStatus {
     public static final boolean IS_DISPLAY_CHANGE_ENABLED = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_change_display", false);
 
-
-    /**
-     * Flag to indicate that desktop stashing is enabled.
-     * When enabled, swiping home from desktop stashes the open apps. Next app that launches,
-     * will be added to the desktop.
-     */
-    private static final boolean IS_STASHING_ENABLED = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_stashing", false);
-
     /**
      * Flag to indicate whether to apply shadows to windows in desktop mode.
      */
@@ -106,14 +97,6 @@ public class DesktopModeStatus {
      */
     public static boolean isVeiledResizeEnabled() {
         return IS_VEILED_RESIZE_ENABLED;
-    }
-
-    /**
-     * Return {@code true} if desktop task stashing is enabled when going home.
-     * Allows users to use home screen to add tasks to desktop.
-     */
-    public static boolean isStashingEnabled() {
-        return IS_STASHING_ENABLED;
     }
 
     /**

@@ -1044,29 +1044,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-    fun handleRequest_fullscreenTask_desktopStashed_returnWCTWithAllAppsBroughtToFront() {
-        assumeTrue(ENABLE_SHELL_TRANSITIONS)
-        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
-
-        val stashedFreeformTask = setUpFreeformTask(DEFAULT_DISPLAY)
-        markTaskHidden(stashedFreeformTask)
-
-        val fullscreenTask = createFullscreenTask(DEFAULT_DISPLAY)
-
-        controller.stashDesktopApps(DEFAULT_DISPLAY)
-
-        val result = controller.handleRequest(Binder(), createTransition(fullscreenTask))
-        assertThat(result).isNotNull()
-        result!!.assertReorderSequence(stashedFreeformTask, fullscreenTask)
-        assertThat(result.changes[fullscreenTask.token.asBinder()]?.windowingMode)
-                .isEqualTo(WINDOWING_MODE_FREEFORM)
-
-        // Stashed state should be cleared
-        assertThat(desktopModeTaskRepository.isStashed(DEFAULT_DISPLAY)).isFalse()
-    }
-
-    @Test
     fun handleRequest_freeformTask_freeformVisible_returnNull() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
@@ -1130,27 +1107,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val result = controller.handleRequest(Binder(), createTransition(taskDefaultDisplay))
         assertThat(result?.changes?.get(taskDefaultDisplay.token.asBinder())?.windowingMode)
             .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-    fun handleRequest_freeformTask_desktopStashed_returnWCTWithAllAppsBroughtToFront() {
-        assumeTrue(ENABLE_SHELL_TRANSITIONS)
-        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
-
-        val stashedFreeformTask = setUpFreeformTask(DEFAULT_DISPLAY)
-        markTaskHidden(stashedFreeformTask)
-
-        val freeformTask = createFreeformTask(DEFAULT_DISPLAY)
-
-        controller.stashDesktopApps(DEFAULT_DISPLAY)
-
-        val result = controller.handleRequest(Binder(), createTransition(freeformTask))
-        assertThat(result).isNotNull()
-        result?.assertReorderSequence(stashedFreeformTask, freeformTask)
-
-        // Stashed state should be cleared
-        assertThat(desktopModeTaskRepository.isStashed(DEFAULT_DISPLAY)).isFalse()
     }
 
     @Test
@@ -1266,29 +1222,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
             controller.handleRequest(Binder(), createTransition(task1, type = TRANSIT_TO_BACK))
         // Doesn't handle request
         assertThat(result).isNull()
-    }
-
-    @Test
-    fun stashDesktopApps_stateUpdates() {
-        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
-
-        controller.stashDesktopApps(DEFAULT_DISPLAY)
-
-        assertThat(desktopModeTaskRepository.isStashed(DEFAULT_DISPLAY)).isTrue()
-        assertThat(desktopModeTaskRepository.isStashed(SECOND_DISPLAY)).isFalse()
-    }
-
-    @Test
-    fun hideStashedDesktopApps_stateUpdates() {
-        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
-
-        desktopModeTaskRepository.setStashed(DEFAULT_DISPLAY, true)
-        desktopModeTaskRepository.setStashed(SECOND_DISPLAY, true)
-        controller.hideStashedDesktopApps(DEFAULT_DISPLAY)
-
-        assertThat(desktopModeTaskRepository.isStashed(DEFAULT_DISPLAY)).isFalse()
-        // Check that second display is not affected
-        assertThat(desktopModeTaskRepository.isStashed(SECOND_DISPLAY)).isTrue()
     }
 
     @Test
