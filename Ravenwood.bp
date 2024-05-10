@@ -246,12 +246,20 @@ java_genrule {
     visibility: ["//visibility:private"],
 }
 
+java_genrule {
+    name: "z00-all-updatable-modules-system-stubs",
+    cmd: "cp $(in) $(out)",
+    srcs: [":all-updatable-modules-system-stubs"],
+    out: ["z00-all-updatable-modules-system-stubs.jar"],
+    visibility: ["//visibility:private"],
+}
+
 android_ravenwood_libgroup {
     name: "ravenwood-runtime",
     libs: [
         "100-framework-minus-apex.ravenwood",
         "200-kxml2-android",
-        "all-updatable-modules-system-stubs",
+
         "android.test.mock.ravenwood",
         "ravenwood-helper-runtime",
         "hoststubgen-helper-runtime.ravenwood",
@@ -267,6 +275,9 @@ android_ravenwood_libgroup {
         "ravenwood-junit-impl-flag",
         "mockito-ravenwood-prebuilt",
         "inline-mockito-ravenwood-prebuilt",
+
+        // It's a stub, so it should be towards the end.
+        "z00-all-updatable-modules-system-stubs",
     ],
     jni_libs: [
         "libandroid_runtime",
