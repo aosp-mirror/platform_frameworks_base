@@ -49,7 +49,7 @@ import platform.test.runner.parameterized.Parameters
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class LockscreenToAodTransitionViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class LockscreenToAodTransitionViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeFeatureFlagsClassic.apply { set(FULL_SCREEN_USER_SWITCHER, false) }
@@ -73,7 +73,7 @@ class LockscreenToAodTransitionViewModelTest(flags: FlagsParameterization?) : Sy
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

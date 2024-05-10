@@ -51,7 +51,7 @@ import platform.test.runner.parameterized.Parameters
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class LockscreenToDreamingTransitionViewModelTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class LockscreenToDreamingTransitionViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     private val kosmos =
         testKosmos().apply {
@@ -73,7 +73,7 @@ class LockscreenToDreamingTransitionViewModelTest(flags: FlagsParameterization?)
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

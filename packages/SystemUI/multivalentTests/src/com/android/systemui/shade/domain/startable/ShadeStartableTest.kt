@@ -60,7 +60,7 @@ import platform.test.runner.parameterized.Parameters
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class ShadeStartableTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class ShadeStartableTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val shadeInteractor by lazy { kosmos.shadeInteractor }
@@ -80,7 +80,7 @@ class ShadeStartableTest(flags: FlagsParameterization?) : SysuiTestCase() {
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Test

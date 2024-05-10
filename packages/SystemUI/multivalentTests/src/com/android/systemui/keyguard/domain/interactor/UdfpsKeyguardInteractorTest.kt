@@ -58,7 +58,7 @@ import platform.test.runner.parameterized.Parameters
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class UdfpsKeyguardInteractorTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class UdfpsKeyguardInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
     val keyguardRepository = kosmos.fakeKeyguardRepository
@@ -88,7 +88,7 @@ class UdfpsKeyguardInteractorTest(flags: FlagsParameterization?) : SysuiTestCase
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before

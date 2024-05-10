@@ -65,7 +65,7 @@ import platform.test.runner.parameterized.Parameters
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4::class)
 @TestableLooper.RunWithLooper
-class StatusBarStateControllerImplTest(flags: FlagsParameterization?) : SysuiTestCase() {
+class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
@@ -84,7 +84,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization?) : SysuiTes
     }
 
     init {
-        mSetFlagsRule.setFlagsParameterization(flags!!)
+        mSetFlagsRule.setFlagsParameterization(flags)
     }
 
     @Before
