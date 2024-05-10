@@ -22,17 +22,19 @@ namespace aapt {
 namespace xml {
 
 static bool wrapper_one(const XmlNodeAction::ActionFunc& f, Element* el,
-                        const XmlActionExecutorPolicy& policy, SourcePathDiagnostics*) {
+                        const XmlActionExecutorPolicy& policy, android::SourcePathDiagnostics*) {
   return f(el);
 }
 
 static bool wrapper_two(const XmlNodeAction::ActionFuncWithDiag& f, Element* el,
-                        const XmlActionExecutorPolicy& policy, SourcePathDiagnostics* diag) {
+                        const XmlActionExecutorPolicy& policy,
+                        android::SourcePathDiagnostics* diag) {
   return f(el, diag);
 }
 
 static bool wrapper_three(const XmlNodeAction::ActionFuncWithPolicyAndDiag& f, Element* el,
-                          const XmlActionExecutorPolicy& policy, SourcePathDiagnostics* diag) {
+                          const XmlActionExecutorPolicy& policy,
+                          android::SourcePathDiagnostics* diag) {
   return f(el, policy, diag);
 }
 
@@ -51,7 +53,7 @@ void XmlNodeAction::Action(XmlNodeAction::ActionFuncWithPolicyAndDiag f) {
                                   std::placeholders::_2, std::placeholders::_3));
 }
 
-static void PrintElementToDiagMessage(const Element* el, DiagMessage* msg) {
+static void PrintElementToDiagMessage(const Element* el, android::DiagMessage* msg) {
   *msg << "<";
   if (!el->namespace_uri.empty()) {
     *msg << el->namespace_uri << ":";
@@ -60,7 +62,7 @@ static void PrintElementToDiagMessage(const Element* el, DiagMessage* msg) {
 }
 
 bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, std::vector<StringPiece>* bread_crumb,
-                            SourcePathDiagnostics* diag, Element* el) const {
+                            android::SourcePathDiagnostics* diag, Element* el) const {
   bool error = false;
   for (const ActionFuncWithPolicyAndDiag& action : actions_) {
     error |= !action(el, policy, diag);
@@ -78,11 +80,11 @@ bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, std::vector<StringPi
       }
 
       if (policy != XmlActionExecutorPolicy::kNone) {
-        DiagMessage error_msg(child_el->line_number);
+        android::DiagMessage error_msg(child_el->line_number);
         error_msg << "unexpected element ";
         PrintElementToDiagMessage(child_el, &error_msg);
         error_msg << " found in ";
-        for (const StringPiece& element : *bread_crumb) {
+        for (StringPiece element : *bread_crumb) {
           error_msg << "<" << element << ">";
         }
         if (policy == XmlActionExecutorPolicy::kAllowListWarning) {
@@ -99,14 +101,14 @@ bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, std::vector<StringPi
   return !error;
 }
 
-bool XmlActionExecutor::Execute(XmlActionExecutorPolicy policy, IDiagnostics* diag,
+bool XmlActionExecutor::Execute(XmlActionExecutorPolicy policy, android::IDiagnostics* diag,
                                 XmlResource* doc) const {
-  SourcePathDiagnostics source_diag(doc->file.source, diag);
+  android::SourcePathDiagnostics source_diag(doc->file.source, diag);
 
   Element* el = doc->root.get();
   if (!el) {
     if (policy == XmlActionExecutorPolicy::kAllowList) {
-      source_diag.Error(DiagMessage() << "no root XML tag found");
+      source_diag.Error(android::DiagMessage() << "no root XML tag found");
       return false;
     }
     return true;
@@ -121,7 +123,7 @@ bool XmlActionExecutor::Execute(XmlActionExecutorPolicy policy, IDiagnostics* di
     }
 
     if (policy == XmlActionExecutorPolicy::kAllowList) {
-      DiagMessage error_msg(el->line_number);
+      android::DiagMessage error_msg(el->line_number);
       error_msg << "unexpected root element ";
       PrintElementToDiagMessage(el, &error_msg);
       source_diag.Error(error_msg);

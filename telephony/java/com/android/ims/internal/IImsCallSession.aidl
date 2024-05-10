@@ -91,6 +91,8 @@ interface IImsCallSession {
      * override the previous listener.
      *
      * @param listener to listen to the session events of this object
+     *
+     * @deprecated This is depreacated.
      */
     void setListener(in IImsCallSessionListener listener);
 
@@ -305,4 +307,15 @@ interface IImsCallSession {
      * @param extensions the header extensions to be sent
      */
     void sendRtpHeaderExtensions(in List<RtpHeaderExtension> extensions);
+
+    /*
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     */
+    void callSessionNotifyAnbr(int mediaType, int direction, int bitsPerSecond);
 }

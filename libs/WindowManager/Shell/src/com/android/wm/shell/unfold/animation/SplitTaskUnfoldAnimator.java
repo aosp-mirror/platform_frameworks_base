@@ -28,13 +28,16 @@ import android.animation.RectEvaluator;
 import android.animation.TypeEvaluator;
 import android.app.TaskInfo;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.os.Trace;
 import android.util.SparseArray;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -42,13 +45,15 @@ import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
 
+import dagger.Lazy;
+
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import dagger.Lazy;
 
 /**
  * This helper class contains logic that calculates scaling and cropping parameters
@@ -62,16 +67,17 @@ import dagger.Lazy;
  * They use independent instances of SplitTaskUnfoldAnimator.
  */
 public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
-        DisplayInsetsController.OnInsetsChangedListener, SplitScreenListener {
+        DisplayInsetsController.OnInsetsChangedListener, SplitScreenListener,
+        ConfigurationChangeListener {
 
     private static final TypeEvaluator<Rect> RECT_EVALUATOR = new RectEvaluator(new Rect());
     private static final float CROPPING_START_MARGIN_FRACTION = 0.05f;
 
+    private final Context mContext;
     private final Executor mExecutor;
     private final DisplayInsetsController mDisplayInsetsController;
     private final SparseArray<AnimationContext> mAnimationContextByTaskId = new SparseArray<>();
-    private final int mExpandedTaskBarHeight;
-    private final float mWindowCornerRadiusPx;
+    private final ShellController mShellController;
     private final Lazy<Optional<SplitScreenController>> mSplitScreenController;
     private final UnfoldBackgroundController mUnfoldBackgroundController;
 
@@ -79,7 +85,8 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     private final Rect mSideStageBounds = new Rect();
     private final Rect mRootStageBounds = new Rect();
 
-    private InsetsSource mTaskbarInsetsSource;
+    private float mWindowCornerRadiusPx;
+    private InsetsSource mExpandedTaskbarInsetsSource;
 
     @SplitPosition
     private int mMainStagePosition = SPLIT_POSITION_UNDEFINED;
@@ -88,14 +95,14 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
 
     public SplitTaskUnfoldAnimator(Context context, Executor executor,
             Lazy<Optional<SplitScreenController>> splitScreenController,
-            UnfoldBackgroundController unfoldBackgroundController,
+            ShellController shellController, UnfoldBackgroundController unfoldBackgroundController,
             DisplayInsetsController displayInsetsController) {
         mDisplayInsetsController = displayInsetsController;
         mExecutor = executor;
+        mContext = context;
+        mShellController = shellController;
         mUnfoldBackgroundController = unfoldBackgroundController;
         mSplitScreenController = splitScreenController;
-        mExpandedTaskBarHeight = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.taskbar_frame_height);
         mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(context);
     }
 
@@ -103,6 +110,14 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     @Override
     public void init() {
         mDisplayInsetsController.addInsetsChangedListener(DEFAULT_DISPLAY, this);
+        mShellController.addConfigurationChangeListener(this);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfiguration) {
+        Trace.beginSection("SplitTaskUnfoldAnimator#onConfigurationChanged");
+        mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
+        Trace.endSection();
     }
 
     /**
@@ -126,8 +141,19 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
 
     @Override
     public void insetsChanged(InsetsState insetsState) {
-        mTaskbarInsetsSource = insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        mExpandedTaskbarInsetsSource = getExpandedTaskbarSource(insetsState);
         updateContexts();
+    }
+
+    private static InsetsSource getExpandedTaskbarSource(InsetsState state) {
+        for (int i = state.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            if (source.getType() == WindowInsets.Type.navigationBars()
+                    && source.hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
+                return source;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -187,7 +213,7 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     @Override
     public boolean isApplicableTask(TaskInfo taskInfo) {
         return taskInfo.hasParentTask()
-                && taskInfo.isVisible
+                && taskInfo.isRunning
                 && taskInfo.realActivity != null // to filter out parents created by organizer
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW;
     }
@@ -244,7 +270,6 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     @Override
     public void prepareStartTransaction(Transaction transaction) {
         mUnfoldBackgroundController.ensureBackground(transaction);
-        mSplitScreenController.get().get().updateSplitScreenSurfaces(transaction);
     }
 
     @Override
@@ -264,6 +289,11 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
         transaction
                 .setWindowCrop(context.mLeash, null)
                 .setCornerRadius(context.mLeash, 0.0F);
+    }
+
+    @Override
+    public void onSplitVisibilityChanged(boolean visible) {
+        mUnfoldBackgroundController.onSplitVisibilityChanged(visible);
     }
 
     private class AnimationContext {
@@ -290,7 +320,8 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
             boolean taskbarExpanded = isTaskbarExpanded();
             if (taskbarExpanded) {
                 // Only insets the cropping window with taskbar when taskbar is expanded
-                mStartCropRect.inset(mTaskbarInsetsSource.calculateVisibleInsets(mStartCropRect));
+                mStartCropRect.inset(mExpandedTaskbarInsetsSource.calculateVisibleInsets(
+                        mStartCropRect));
             }
 
             // Offset to surface coordinates as layout bounds are in screen coordinates
@@ -343,8 +374,7 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
         }
 
         private boolean isTaskbarExpanded() {
-            return mTaskbarInsetsSource != null
-                    && mTaskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight;
+            return mExpandedTaskbarInsetsSource != null;
         }
     }
 }

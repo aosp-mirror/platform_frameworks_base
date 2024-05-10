@@ -38,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class PluginActionManager<T extends Plugin> {
 
     private static final boolean DEBUG = false;
 
-    private static final String TAG = "PluginInstanceManager";
+    private static final String TAG = "PluginActionManager";
     public static final String PLUGIN_PERMISSION = "com.android.systemui.permission.PLUGIN";
 
     private final Context mContext;
@@ -108,7 +109,7 @@ public class PluginActionManager<T extends Plugin> {
     /** Load all plugins matching this instance's action. */
     public void loadAll() {
         if (DEBUG) Log.d(TAG, "startListening");
-        mBgExecutor.execute(this::queryAll);
+        mBgExecutor.execute(() -> queryAll());
     }
 
     /** Unload all plugins managed by this instance. */
@@ -209,12 +210,12 @@ public class PluginActionManager<T extends Plugin> {
     private void onPluginConnected(PluginInstance<T> pluginInstance) {
         if (DEBUG) Log.d(TAG, "onPluginConnected");
         PluginPrefs.setHasPlugins(mContext);
-        pluginInstance.onCreate(mContext, mListener);
+        pluginInstance.onCreate();
     }
 
     private void onPluginDisconnected(PluginInstance<T> pluginInstance) {
         if (DEBUG) Log.d(TAG, "onPluginDisconnected");
-        pluginInstance.onDestroy(mListener);
+        pluginInstance.onDestroy();
     }
 
     private void queryAll() {
@@ -254,17 +255,18 @@ public class PluginActionManager<T extends Plugin> {
             intent.setPackage(pkgName);
         }
         List<ResolveInfo> result = mPm.queryIntentServices(intent, 0);
-        if (DEBUG) Log.d(TAG, "Found " + result.size() + " plugins");
+        if (DEBUG) {
+            Log.d(TAG, "Found " + result.size() + " plugins");
+            for (ResolveInfo info : result) {
+                ComponentName name = new ComponentName(info.serviceInfo.packageName,
+                        info.serviceInfo.name);
+                Log.d(TAG, "  " + name);
+            }
+        }
+
         if (result.size() > 1 && !mAllowMultiple) {
             // TODO: Show warning.
             Log.w(TAG, "Multiple plugins found for " + mAction);
-            if (DEBUG) {
-                for (ResolveInfo info : result) {
-                    ComponentName name = new ComponentName(info.serviceInfo.packageName,
-                            info.serviceInfo.name);
-                    Log.w(TAG, "  " + name);
-                }
-            }
             return;
         }
         for (ResolveInfo info : result) {
@@ -306,17 +308,17 @@ public class PluginActionManager<T extends Plugin> {
             // TODO: Only create the plugin before version check if we need it for
             // legacy version check.
             if (DEBUG) {
-                Log.d(TAG, "createPlugin");
+                Log.d(TAG, "createPlugin: " + component);
             }
             try {
                 return mPluginInstanceFactory.create(
                         mContext, appInfo, component,
-                        mPluginClass);
+                        mPluginClass, mListener);
             } catch (InvalidVersionException e) {
                 reportInvalidVersion(component, component.getClassName(), e);
             }
         } catch (Throwable e) {
-            Log.w(TAG, "Couldn't load plugin: " + packageName, e);
+            Log.w(TAG, "Couldn't load plugin: " + component, e);
             return null;
         }
 
@@ -361,8 +363,7 @@ public class PluginActionManager<T extends Plugin> {
         nb.addAction(new Action.Builder(null, "Disable plugin", pi).build());
         mNotificationManager.notify(SystemMessage.NOTE_PLUGIN, nb.build());
         // TODO: Warn user.
-        Log.w(TAG, "Plugin has invalid interface version " + e.getActualVersion()
-                + ", expected " + e.getExpectedVersion());
+        Log.w(TAG, "Error loading plugin; " + e.getMessage());
     }
 
     /**

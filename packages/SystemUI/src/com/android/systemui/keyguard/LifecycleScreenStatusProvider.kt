@@ -17,6 +17,8 @@ package com.android.systemui.keyguard
 
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
+import com.android.app.tracing.traceSection
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,7 +30,7 @@ class LifecycleScreenStatusProvider @Inject constructor(screenLifecycle: ScreenL
         screenLifecycle.addObserver(this)
     }
 
-    private val listeners: MutableList<ScreenListener> = mutableListOf()
+    private val listeners: MutableList<ScreenListener> = CopyOnWriteArrayList()
 
     override fun removeCallback(listener: ScreenListener) {
         listeners.remove(listener)
@@ -39,14 +41,22 @@ class LifecycleScreenStatusProvider @Inject constructor(screenLifecycle: ScreenL
     }
 
     override fun onScreenTurnedOn() {
-        listeners.forEach(ScreenListener::onScreenTurnedOn)
+        traceSection("$TRACE_TAG#onScreenTurnedOn") {
+            listeners.forEach(ScreenListener::onScreenTurnedOn)
+        }
     }
 
     override fun onScreenTurningOff() {
-        listeners.forEach(ScreenListener::onScreenTurningOff)
+        traceSection("$TRACE_TAG#onScreenTurningOff") {
+            listeners.forEach(ScreenListener::onScreenTurningOff)
+        }
     }
 
-    override fun onScreenTurningOn(ignored: Runnable) {
-        listeners.forEach(ScreenListener::onScreenTurningOn)
+    override fun onScreenTurningOn() {
+        traceSection("$TRACE_TAG#onScreenTurningOn") {
+            listeners.forEach(ScreenListener::onScreenTurningOn)
+        }
     }
 }
+
+private const val TRACE_TAG = "LifecycleScreenStatusProvider"

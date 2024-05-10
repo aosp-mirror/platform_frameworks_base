@@ -20,7 +20,6 @@ import android.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,9 +27,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,28 +38,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
-import com.android.systemui.compose.theme.LocalAndroidColorScheme
+import com.android.compose.theme.LocalAndroidColorScheme
+import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
-import kotlinx.coroutines.flow.collect
+import com.android.systemui.res.R
 
 /**
  * Compose the screen associated to a [PeopleViewModel].
  *
  * @param viewModel the [PeopleViewModel] that should be composed.
  * @param onResult the callback called with the result of this screen. Callers should usually finish
- * the Activity/Fragment/View hosting this Composable once a result is available.
+ *   the Activity/Fragment/View hosting this Composable once a result is available.
  */
 @Composable
 fun PeopleScreen(
@@ -69,15 +66,6 @@ fun PeopleScreen(
 ) {
     val priorityTiles by viewModel.priorityTiles.collectAsState()
     val recentTiles by viewModel.recentTiles.collectAsState()
-
-    // Make sure to refresh the tiles/conversations when the lifecycle is resumed, so that it
-    // updates them when going back to the Activity after leaving it.
-    val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(lifecycleOwner, viewModel) {
-        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            viewModel.onTileRefreshRequested()
-        }
-    }
 
     // Call [onResult] this activity when the ViewModel tells us so.
     LaunchedEffect(viewModel.result) {
@@ -91,16 +79,16 @@ fun PeopleScreen(
 
     // Make sure to use the Android colors and not the default Material3 colors to have the exact
     // same colors as the View implementation.
-    val androidColors = LocalAndroidColorScheme.current
+    val androidColors = LocalAndroidColorScheme.current.deprecated
     Surface(
         color = androidColors.colorBackground,
         contentColor = androidColors.textColorPrimary,
         modifier = Modifier.fillMaxSize(),
     ) {
         if (priorityTiles.isNotEmpty() || recentTiles.isNotEmpty()) {
-            PeopleScreenWithConversations(priorityTiles, recentTiles, viewModel::onTileClicked)
+            PeopleScreenWithConversations(priorityTiles, recentTiles, viewModel.onTileClicked)
         } else {
-            PeopleScreenEmpty(viewModel::onUserJourneyCancelled)
+            PeopleScreenEmpty(viewModel.onUserJourneyCancelled)
         }
     }
 }
@@ -111,7 +99,9 @@ private fun PeopleScreenWithConversations(
     recentTiles: List<PeopleTileViewModel>,
     onTileClicked: (PeopleTileViewModel) -> Unit,
 ) {
-    Column {
+    Column(
+        Modifier.sysuiResTag("top_level_with_conversations"),
+    ) {
         Column(
             Modifier.fillMaxWidth().padding(PeopleSpacePadding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -132,50 +122,57 @@ private fun PeopleScreenWithConversations(
             )
         }
 
-        LazyColumn(
-            Modifier.fillMaxWidth(),
-            contentPadding =
-                PaddingValues(
+        Column(
+            Modifier.fillMaxWidth()
+                .sysuiResTag("scroll_view")
+                .verticalScroll(rememberScrollState())
+                .padding(
                     top = 16.dp,
                     bottom = PeopleSpacePadding,
                     start = 8.dp,
                     end = 8.dp,
-                )
+                ),
         ) {
-            ConversationList(R.string.priority_conversations, priorityTiles, onTileClicked)
-            item { Spacer(Modifier.height(35.dp)) }
-            ConversationList(R.string.recent_conversations, recentTiles, onTileClicked)
+            val hasPriorityConversations = priorityTiles.isNotEmpty()
+            if (hasPriorityConversations) {
+                ConversationList(R.string.priority_conversations, priorityTiles, onTileClicked)
+            }
+
+            if (recentTiles.isNotEmpty()) {
+                if (hasPriorityConversations) {
+                    Spacer(Modifier.height(35.dp))
+                }
+
+                ConversationList(R.string.recent_conversations, recentTiles, onTileClicked)
+            }
         }
     }
 }
 
-private fun LazyListScope.ConversationList(
+@Composable
+private fun ConversationList(
     @StringRes headerTextResource: Int,
     tiles: List<PeopleTileViewModel>,
     onTileClicked: (PeopleTileViewModel) -> Unit
 ) {
-    item {
-        Text(
-            stringResource(headerTextResource),
-            Modifier.padding(start = 16.dp),
-            style = MaterialTheme.typography.labelLarge,
-            color = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-        )
+    Text(
+        stringResource(headerTextResource),
+        Modifier.padding(start = 16.dp),
+        style = MaterialTheme.typography.labelLarge,
+        color = LocalAndroidColorScheme.current.deprecated.colorAccentPrimaryVariant,
+    )
 
-        Spacer(Modifier.height(10.dp))
-    }
+    Spacer(Modifier.height(10.dp))
 
     tiles.forEachIndexed { index, tile ->
         if (index > 0) {
-            item {
-                Divider(
-                    color = LocalAndroidColorScheme.current.colorBackground,
-                    thickness = 2.dp,
-                )
-            }
+            Divider(
+                color = LocalAndroidColorScheme.current.deprecated.colorBackground,
+                thickness = 2.dp,
+            )
         }
 
-        item(tile.key.toString()) {
+        key(tile.key.toString()) {
             Tile(
                 tile,
                 onTileClicked,
@@ -193,7 +190,7 @@ private fun Tile(
     withTopCornerRadius: Boolean,
     withBottomCornerRadius: Boolean,
 ) {
-    val androidColors = LocalAndroidColorScheme.current
+    val androidColors = LocalAndroidColorScheme.current.deprecated
     val cornerRadius = dimensionResource(R.dimen.people_space_widget_radius)
     val topCornerRadius = if (withTopCornerRadius) cornerRadius else 0.dp
     val bottomCornerRadius = if (withBottomCornerRadius) cornerRadius else 0.dp

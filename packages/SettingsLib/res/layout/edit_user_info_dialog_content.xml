@@ -13,14 +13,14 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:id="@+id/user_info_editor"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:baselineAligned="false"
-    android:orientation="vertical"
-    android:padding="16dp">
-
+    android:orientation="vertical">
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
             android:layout_width="@dimen/add_a_photo_icon_size_in_user_info_dialog"
             android:layout_height="@dimen/add_a_photo_icon_size_in_user_info_dialog"
             android:src="@drawable/add_a_photo_circled"
-            android:layout_gravity="bottom|right" />
+            android:layout_gravity="bottom|right"/>
     </FrameLayout>
 
     <EditText
@@ -57,3 +57,5 @@
         android:maxLength="100"/>
 
 </LinearLayout>
+
+

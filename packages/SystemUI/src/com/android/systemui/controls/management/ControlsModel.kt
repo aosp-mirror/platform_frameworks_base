@@ -71,6 +71,11 @@ interface ControlsModel {
          * Use to notify that the model has changed for the first time
          */
         fun onFirstChange()
+
+        /**
+         * Use to notify that the model has changed
+         */
+        fun onChange()
     }
 
     /**
@@ -132,7 +137,7 @@ data class ControlInfoWrapper(
         controlInfo: ControlInfo,
         favorite: Boolean,
         customIconGetter: (ComponentName, String) -> Icon?
-    ): this(component, controlInfo, favorite) {
+    ) : this(component, controlInfo, favorite) {
         this.customIconGetter = customIconGetter
     }
 

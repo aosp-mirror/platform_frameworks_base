@@ -16,12 +16,15 @@
 
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.HdmiControlService.DEVICE_CLEANUP_TIMEOUT;
+
 import android.annotation.CallSuper;
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.hardware.tv.cec.V1_0.Result;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.media.AudioManager;
@@ -54,24 +57,19 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Class that models a logical CEC device hosted in this system. Handles initialization, CEC
  * commands that call for actions customized per device type.
  */
-abstract class HdmiCecLocalDevice {
+abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     private static final String TAG = "HdmiCecLocalDevice";
 
     private static final int MAX_HDMI_ACTIVE_SOURCE_HISTORY = 10;
     private static final int MSG_DISABLE_DEVICE_TIMEOUT = 1;
     private static final int MSG_USER_CONTROL_RELEASE_TIMEOUT = 2;
-    // Timeout in millisecond for device clean up (5s).
-    // Normal actions timeout is 2s but some of them would have several sequence of timeout.
-    private static final int DEVICE_CLEANUP_TIMEOUT = 5000;
     // Within the timer, a received <User Control Pressed> will start "Press and Hold" behavior.
     // When it expires, we can assume <User Control Release> is received.
     private static final int FOLLOWER_SAFETY_TIMEOUT = 550;
 
-    protected final HdmiControlService mService;
-    protected final int mDeviceType;
     protected int mPreferredAddress;
     @GuardedBy("mLock")
-    protected HdmiDeviceInfo mDeviceInfo;
+    private HdmiDeviceInfo mDeviceInfo;
     protected int mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
     protected int mLastKeyRepeatCount = 0;
 
@@ -154,8 +152,6 @@ abstract class HdmiCecLocalDevice {
     private int mActiveRoutingPath;
 
     protected final HdmiCecMessageCache mCecMessageCache = new HdmiCecMessageCache();
-    @VisibleForTesting
-    protected final Object mLock;
 
     // A collection of FeatureAction.
     // Note that access to this collection should happen in service thread.
@@ -178,6 +174,14 @@ abstract class HdmiCecLocalDevice {
             };
 
     /**
+     * A callback interface used by local devices use to indicate that they have finished their part
+     * of the standby process.
+     */
+    interface StandbyCompletedCallback {
+        void onStandbyCompleted();
+    }
+
+    /**
      * A callback interface to get notified when all pending action is cleared. It can be called
      * when timeout happened.
      */
@@ -188,9 +192,7 @@ abstract class HdmiCecLocalDevice {
     protected PendingActionClearedCallback mPendingActionClearedCallback;
 
     protected HdmiCecLocalDevice(HdmiControlService service, int deviceType) {
-        mService = service;
-        mDeviceType = deviceType;
-        mLock = service.getServiceLock();
+        super(service, deviceType);
     }
 
     // Factory method that returns HdmiCecLocalDevice of corresponding type.
@@ -564,7 +566,9 @@ abstract class HdmiCecLocalDevice {
 
         HdmiDeviceInfo cecDeviceInfo = mService.getHdmiCecNetwork().getCecDeviceInfo(address);
         // If no non-default display name is available for the device, request the devices OSD name.
-        if (cecDeviceInfo != null && cecDeviceInfo.getDisplayName().equals(
+        // On TV devices, the OSD name is queried in NewDeviceAction instead.
+        if (!mService.isTvDevice() && cecDeviceInfo != null
+                && cecDeviceInfo.getDisplayName().equals(
                 HdmiUtils.getDefaultDeviceName(address))) {
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildGiveOsdNameCommand(
@@ -649,6 +653,13 @@ abstract class HdmiCecLocalDevice {
         return Constants.NOT_HANDLED;
     }
 
+    /**
+     * Called after logical address allocation is finished, allowing a local device to react to
+     * messages in the buffer before they are processed. This method may be used to cancel deferred
+     * actions.
+     */
+    protected void preprocessBufferedMessages(List<HdmiCecMessage> bufferedMessages) {}
+
     @Constants.RcProfile
     protected abstract int getRcProfile();
 
@@ -666,11 +677,9 @@ abstract class HdmiCecLocalDevice {
      * Computes the set of supported device features, and updates local state to match.
      */
     private void updateDeviceFeatures() {
-        synchronized (mLock) {
-            setDeviceInfo(getDeviceInfo().toBuilder()
-                    .setDeviceFeatures(computeDeviceFeatures())
-                    .build());
-        }
+        setDeviceInfo(getDeviceInfo().toBuilder()
+                .setDeviceFeatures(computeDeviceFeatures())
+                .build());
     }
 
     /**
@@ -678,9 +687,7 @@ abstract class HdmiCecLocalDevice {
      */
     protected final DeviceFeatures getDeviceFeatures() {
         updateDeviceFeatures();
-        synchronized (mLock) {
-            return getDeviceInfo().getDeviceFeatures();
-        }
+        return getDeviceInfo().getDeviceFeatures();
     }
 
     @Constants.HandleMessageResult
@@ -695,7 +702,7 @@ abstract class HdmiCecLocalDevice {
 
     protected void reportFeatures() {
         List<Integer> localDeviceTypes = new ArrayList<>();
-        for (HdmiCecLocalDevice localDevice : mService.getAllLocalDevices()) {
+        for (HdmiCecLocalDevice localDevice : mService.getAllCecLocalDevices()) {
             localDeviceTypes.add(localDevice.mDeviceType);
         }
 
@@ -725,7 +732,7 @@ abstract class HdmiCecLocalDevice {
     protected int handleStandby(HdmiCecMessage message) {
         assertRunOnServiceThread();
         // Seq #12
-        if (mService.isControlEnabled()
+        if (mService.isCecControlEnabled()
                 && !mService.isProhibitMode()
                 && mService.isPowerOnOrTransient()) {
             mService.standby();
@@ -830,7 +837,7 @@ abstract class HdmiCecLocalDevice {
                         KeyEvent.FLAG_FROM_SYSTEM,
                         InputDevice.SOURCE_HDMI,
                         null);
-        InputManager.getInstance()
+        InputManagerGlobal.getInstance()
                 .injectInputEvent(keyEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
         keyEvent.recycle();
     }
@@ -967,8 +974,10 @@ abstract class HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    final void handleAddressAllocated(int logicalAddress, int reason) {
+    final void handleAddressAllocated(
+            int logicalAddress, List<HdmiCecMessage> bufferedMessages, int reason) {
         assertRunOnServiceThread();
+        preprocessBufferedMessages(bufferedMessages);
         mPreferredAddress = logicalAddress;
         updateDeviceFeatures();
         if (mService.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
@@ -982,14 +991,12 @@ abstract class HdmiCecLocalDevice {
         return mDeviceType;
     }
 
-    @GuardedBy("mLock")
     HdmiDeviceInfo getDeviceInfo() {
         synchronized (mLock) {
             return mDeviceInfo;
         }
     }
 
-    @GuardedBy("mLock")
     void setDeviceInfo(HdmiDeviceInfo info) {
         synchronized (mLock) {
             mDeviceInfo = info;
@@ -1008,26 +1015,50 @@ abstract class HdmiCecLocalDevice {
         assertRunOnServiceThread();
         mActions.add(action);
         if (mService.isPowerStandby() || !mService.isAddressAllocated()) {
+            if (action.getClass() == ResendCecCommandAction.class) {
+                Slog.i(TAG, "Not ready to start ResendCecCommandAction. "
+                        + "This action is cancelled.");
+                removeAction(action);
+                return;
+            }
             Slog.i(TAG, "Not ready to start action. Queued for deferred start:" + action);
             return;
         }
         action.start();
     }
 
-    void addAvcAudioStatusAction(int targetAddress) {
-        if (!hasAction(AbsoluteVolumeAudioStatusAction.class)) {
-            addAndStartAction(new AbsoluteVolumeAudioStatusAction(this, targetAddress));
-        }
+    @ServiceThreadOnly
+    void startNewAvbAudioStatusAction(int targetAddress) {
+        assertRunOnServiceThread();
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
+        addAndStartAction(new AbsoluteVolumeAudioStatusAction(this, targetAddress));
     }
 
-    void removeAvcAudioStatusAction() {
+    @ServiceThreadOnly
+    void removeAvbAudioStatusAction() {
+        assertRunOnServiceThread();
         removeAction(AbsoluteVolumeAudioStatusAction.class);
     }
 
-    void updateAvcVolume(int volumeIndex) {
+    @ServiceThreadOnly
+    void updateAvbVolume(int volumeIndex) {
+        assertRunOnServiceThread();
         for (AbsoluteVolumeAudioStatusAction action :
                 getActions(AbsoluteVolumeAudioStatusAction.class)) {
             action.updateVolume(volumeIndex);
+        }
+    }
+
+    /**
+     * If AVB has been enabled, request the System Audio device's audio status and notify
+     * AudioService of its response.
+     */
+    @ServiceThreadOnly
+    void requestAndUpdateAvbAudioStatus() {
+        assertRunOnServiceThread();
+        for (AbsoluteVolumeAudioStatusAction action :
+                getActions(AbsoluteVolumeAudioStatusAction.class)) {
+            action.requestAndUpdateAudioStatus();
         }
     }
 
@@ -1037,15 +1068,13 @@ abstract class HdmiCecLocalDevice {
      * and send <Set Audio Volume Level> (to see if it gets a <Feature Abort> in response).
      */
     @ServiceThreadOnly
-    void queryAvcSupport(int targetAddress) {
+    void querySetAudioVolumeLevelSupport(int targetAddress) {
         assertRunOnServiceThread();
 
         // Send <Give Features> if using CEC 2.0 or above.
         if (mService.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
-            synchronized (mLock) {
-                mService.sendCecCommand(HdmiCecMessageBuilder.buildGiveFeatures(
-                        getDeviceInfo().getLogicalAddress(), targetAddress));
-            }
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildGiveFeatures(
+                    getDeviceInfo().getLogicalAddress(), targetAddress));
         }
 
         // If we don't already have a {@link SetAudioVolumeLevelDiscoveryAction} for the target
@@ -1058,7 +1087,7 @@ abstract class HdmiCecLocalDevice {
                             @Override
                             public void onComplete(int result) {
                                 if (result == HdmiControlManager.RESULT_SUCCESS) {
-                                    getService().checkAndUpdateAbsoluteVolumeControlState();
+                                    getService().checkAndUpdateAbsoluteVolumeBehavior();
                                 }
                             }
                         }));
@@ -1090,6 +1119,7 @@ abstract class HdmiCecLocalDevice {
     }
 
     // Returns all actions matched with given class type.
+    @VisibleForTesting
     @ServiceThreadOnly
     <T extends HdmiCecFeatureAction> List<T> getActions(final Class<T> clazz) {
         assertRunOnServiceThread();
@@ -1123,6 +1153,16 @@ abstract class HdmiCecLocalDevice {
     <T extends HdmiCecFeatureAction> void removeAction(final Class<T> clazz) {
         assertRunOnServiceThread();
         removeActionExcept(clazz, null);
+    }
+
+    // Remove all running actions.
+    @ServiceThreadOnly
+    void removeAllActions() {
+        assertRunOnServiceThread();
+        for (HdmiCecFeatureAction action : mActions) {
+            action.finish(false);
+        }
+        mActions.clear();
     }
 
     // Remove all actions matched with the given Class type besides |exception|.
@@ -1249,8 +1289,14 @@ abstract class HdmiCecLocalDevice {
      *     messages like &lt;Standby&gt;
      * @param standbyAction Intent action that drives the standby process, either {@link
      *     HdmiControlService#STANDBY_SCREEN_OFF} or {@link HdmiControlService#STANDBY_SHUTDOWN}
+     * @param callback callback invoked after the standby process for the local device is completed.
      */
-    protected void onStandby(boolean initiatedByCec, int standbyAction) {}
+    protected void onStandby(boolean initiatedByCec, int standbyAction,
+            StandbyCompletedCallback callback) {}
+
+    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        onStandby(initiatedByCec, standbyAction, null);
+    }
 
     /**
      * Called when the initialization of local devices is complete.
@@ -1270,6 +1316,8 @@ abstract class HdmiCecLocalDevice {
             boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
         removeAction(AbsoluteVolumeAudioStatusAction.class);
         removeAction(SetAudioVolumeLevelDiscoveryAction.class);
+        removeAction(ActiveSourceAction.class);
+        removeAction(ResendCecCommandAction.class);
 
         mPendingActionClearedCallback =
                 new PendingActionClearedCallback() {
@@ -1357,7 +1405,8 @@ abstract class HdmiCecLocalDevice {
         List<SendKeyAction> action = getActions(SendKeyAction.class);
         int logicalAddress = findAudioReceiverAddress();
         if (logicalAddress == Constants.ADDR_INVALID
-                || logicalAddress == mDeviceInfo.getLogicalAddress()) {
+                || mService.getAllCecLocalDevices().stream().anyMatch(
+                        device -> device.getDeviceInfo().getLogicalAddress() == logicalAddress)) {
             // Don't send key event to invalid device or itself.
             Slog.w(
                     TAG,
@@ -1407,6 +1456,16 @@ abstract class HdmiCecLocalDevice {
         } catch (RemoteException e) {
             Slog.e(TAG, "Invoking callback failed:" + e);
         }
+    }
+
+    @ServiceThreadOnly
+    @VisibleForTesting
+    public void invokeStandbyCompletedCallback(StandbyCompletedCallback callback) {
+        assertRunOnServiceThread();
+        if (callback == null) {
+            return;
+        }
+        callback.onStandbyCompleted();
     }
 
     void sendUserControlPressedAndReleased(int targetAddress, int cecKeycode) {

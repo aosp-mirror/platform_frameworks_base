@@ -30,6 +30,8 @@ import androidx.annotation.GravityInt;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.button.R;
+
 /**
  * A preference handled a button
  */
@@ -132,8 +134,7 @@ public class ButtonPreference extends Preference {
         }
     }
 
-    @Override
-    public CharSequence getTitle() {
+    @Override public CharSequence getTitle() {
         return mTitle;
     }
 

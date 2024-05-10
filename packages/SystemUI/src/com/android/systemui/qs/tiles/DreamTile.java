@@ -38,7 +38,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -48,9 +47,11 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -60,17 +61,19 @@ import javax.inject.Named;
 /** Quick settings tile: Screensaver (dream) **/
 public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
 
+    public static final String TILE_SPEC = "dream";
+
     private static final String LOG_TAG = "QSDream";
     // TODO: consider 1 animated icon instead
     private final Icon mIconDocked = ResourceIcon.get(R.drawable.ic_qs_screen_saver);
     private final Icon mIconUndocked = ResourceIcon.get(R.drawable.ic_qs_screen_saver_undocked);
     private final IDreamManager mDreamManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final SettingObserver mEnabledSettingObserver;
-    private final SettingObserver mDreamSettingObserver;
+    private final UserSettingObserver mEnabledSettingObserver;
+    private final UserSettingObserver mDreamSettingObserver;
     private final UserTracker mUserTracker;
     private final boolean mDreamSupported;
-    private final boolean mDreamOnlyEnabledForSystemUser;
+    private final boolean mDreamOnlyEnabledForDockUser;
 
     private boolean mIsDocked = false;
 
@@ -88,6 +91,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     @Inject
     public DreamTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -100,22 +104,22 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
             BroadcastDispatcher broadcastDispatcher,
             UserTracker userTracker,
             @Named(DreamModule.DREAM_SUPPORTED) boolean dreamSupported,
-            @Named(DreamModule.DREAM_ONLY_ENABLED_FOR_SYSTEM_USER)
-                    boolean dreamOnlyEnabledForSystemUser
+            @Named(DreamModule.DREAM_ONLY_ENABLED_FOR_DOCK_USER)
+                    boolean dreamOnlyEnabledForDockUser
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDreamManager = dreamManager;
         mBroadcastDispatcher = broadcastDispatcher;
-        mEnabledSettingObserver = new SettingObserver(secureSettings, mHandler,
-                Settings.Secure.SCREENSAVER_ENABLED) {
+        mEnabledSettingObserver = new UserSettingObserver(secureSettings, mHandler,
+                Settings.Secure.SCREENSAVER_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 refreshState();
             }
         };
-        mDreamSettingObserver = new SettingObserver(secureSettings, mHandler,
-                Settings.Secure.SCREENSAVER_COMPONENTS) {
+        mDreamSettingObserver = new UserSettingObserver(secureSettings, mHandler,
+                Settings.Secure.SCREENSAVER_COMPONENTS, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 refreshState();
@@ -123,7 +127,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         };
         mUserTracker = userTracker;
         mDreamSupported = dreamSupported;
-        mDreamOnlyEnabledForSystemUser = dreamOnlyEnabledForSystemUser;
+        mDreamOnlyEnabledForDockUser = dreamOnlyEnabledForDockUser;
     }
 
     @Override
@@ -162,17 +166,6 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     }
 
     @Override
-    protected void handleLongClick(@Nullable View view) {
-        try {
-            // Need to wake on long click so bouncer->settings works.
-            mDreamManager.awaken();
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "Can't awaken", e);
-        }
-        super.handleLongClick(view);
-    }
-
-    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = getTileLabel();
         state.secondaryLabel = getActiveDreamName();
@@ -203,7 +196,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         // For now, restrict to debug users.
         return Build.isDebuggable()
                 && mDreamSupported
-                && (!mDreamOnlyEnabledForSystemUser || mUserTracker.getUserHandle().isSystem());
+                && (!mDreamOnlyEnabledForDockUser || mUserTracker.getUserInfo().isMain());
     }
 
     @VisibleForTesting
@@ -223,7 +216,8 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
 
     private ComponentName getActiveDream() {
         try {
-            final ComponentName[] dreams = mDreamManager.getDreamComponents();
+            final ComponentName[] dreams = mDreamManager.getDreamComponentsForUser(
+                                                mUserTracker.getUserId());
             return dreams != null && dreams.length > 0 ? dreams[0] : null;
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get active dream", e);

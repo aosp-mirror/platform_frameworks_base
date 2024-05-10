@@ -23,7 +23,11 @@ import java.math.BigInteger;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -91,6 +95,11 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         } else {
             out.writeStringArray(null);
         }
+        if (mSpec.isMgf1DigestsSpecified()) {
+            out.writeStringList(List.copyOf(mSpec.getMgf1Digests()));
+        } else {
+            out.writeStringList(null);
+        }
         out.writeStringArray(mSpec.getEncryptionPaddings());
         out.writeStringArray(mSpec.getSignaturePaddings());
         out.writeStringArray(mSpec.getBlockModes());
@@ -111,6 +120,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         out.writeBoolean(mSpec.isCriticalToDeviceEncryption());
         out.writeInt(mSpec.getMaxUsageCount());
         out.writeString(mSpec.getAttestKeyAlias());
+        out.writeLong(mSpec.getBoundToSpecificSecureUserId());
     }
 
     private static Date readDateOrNull(Parcel in) {
@@ -152,6 +162,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         final Date keyValidityForOriginationEnd = readDateOrNull(in);
         final Date keyValidityForConsumptionEnd = readDateOrNull(in);
         final String[] digests = in.createStringArray();
+        final ArrayList<String> mgf1Digests = in.createStringArrayList();
         final String[] encryptionPaddings = in.createStringArray();
         final String[] signaturePaddings = in.createStringArray();
         final String[] blockModes = in.createStringArray();
@@ -172,6 +183,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         final boolean criticalToDeviceEncryption = in.readBoolean();
         final int maxUsageCount = in.readInt();
         final String attestKeyAlias = in.readString();
+        final long boundToSecureUserId = in.readLong();
         // The KeyGenParameterSpec is intentionally not constructed using a Builder here:
         // The intention is for this class to break if new parameters are added to the
         // KeyGenParameterSpec constructor (whereas using a builder would silently drop them).
@@ -189,6 +201,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
                 keyValidityForConsumptionEnd,
                 purposes,
                 digests,
+                mgf1Digests != null ? Set.copyOf(mgf1Digests) : Collections.emptySet(),
                 encryptionPaddings,
                 signaturePaddings,
                 blockModes,
@@ -208,7 +221,8 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
                 unlockedDeviceRequired,
                 criticalToDeviceEncryption,
                 maxUsageCount,
-                attestKeyAlias);
+                attestKeyAlias,
+                boundToSecureUserId);
     }
 
     public static final @android.annotation.NonNull Creator<ParcelableKeyGenParameterSpec> CREATOR = new Creator<ParcelableKeyGenParameterSpec>() {

@@ -54,6 +54,7 @@ import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -86,6 +87,13 @@ public class Utils {
             return false;
         }
         return true;
+    }
+
+    /** If virtualized biometrics are supported (requires debug build). */
+    public static boolean isVirtualEnabled(@NonNull Context context) {
+        return Build.isDebuggable()
+                && Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -374,6 +382,15 @@ public class Utils {
         }
         return false;
     }
+
+    /** Same as checkPermission but also allows shell. */
+    public static void checkPermissionOrShell(Context context, String permission) {
+        if (Binder.getCallingUid() == Process.SHELL_UID) {
+            return;
+        }
+        checkPermission(context, permission);
+    }
+
 
     public static void checkPermission(Context context, String permission) {
         context.enforceCallingOrSelfPermission(permission,

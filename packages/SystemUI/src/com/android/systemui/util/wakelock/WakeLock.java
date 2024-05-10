@@ -29,13 +29,18 @@ import javax.inject.Inject;
 /** WakeLock wrapper for testability */
 public interface WakeLock {
 
-    static final String TAG = "WakeLock";
-    static final String REASON_WRAP = "wrap";
+    String TAG = "WakeLock";
+    String REASON_WRAP = "wrap";
 
     /**
      * Default wake-lock timeout in milliseconds, to avoid battery regressions.
      */
     long DEFAULT_MAX_TIMEOUT = 20000;
+
+    /**
+     * Default wake-lock levels and flags.
+     */
+    int DEFAULT_LEVELS_AND_FLAGS = PowerManager.PARTIAL_WAKE_LOCK;
 
     /**
      * @param why A tag that will be saved for sysui dumps.
@@ -52,21 +57,39 @@ public interface WakeLock {
     /** @see android.os.PowerManager.WakeLock#wrap(Runnable) */
     Runnable wrap(Runnable r);
 
-    static WakeLock createPartial(Context context, String tag) {
-        return createPartial(context, tag, DEFAULT_MAX_TIMEOUT);
+    /**
+     * Creates a {@link WakeLock} that has a default release timeout and flags.
+     * @see android.os.PowerManager.WakeLock#acquire(long)
+     */
+    static WakeLock createPartial(Context context, WakeLockLogger logger, String tag) {
+        return createPartial(context, logger, tag, DEFAULT_MAX_TIMEOUT);
     }
 
     /**
-     * Creates a {@link WakeLock} that has a default release timeout.
-     * @see android.os.PowerManager.WakeLock#acquire(long) */
-    static WakeLock createPartial(Context context, String tag, long maxTimeout) {
-        return wrap(createPartialInner(context, tag), maxTimeout);
+     * Creates a {@link WakeLock} that has default flags.
+     * @see android.os.PowerManager.WakeLock#acquire(long)
+     */
+    static WakeLock createPartial(
+            Context context, WakeLockLogger logger, String tag, long maxTimeout) {
+        return wrap(
+                createWakeLockInner(context, tag, DEFAULT_LEVELS_AND_FLAGS), logger, maxTimeout);
+    }
+
+    /**
+     * Creates a {@link WakeLock}.
+     * @see android.os.PowerManager.WakeLock#acquire(long)
+     */
+    static WakeLock createWakeLock(
+            Context context, WakeLockLogger logger, String tag, int flags, long maxTimeout) {
+        return wrap(
+                createWakeLockInner(context, tag, flags), logger, maxTimeout);
     }
 
     @VisibleForTesting
-    static PowerManager.WakeLock createPartialInner(Context context, String tag) {
+    static PowerManager.WakeLock createWakeLockInner(
+            Context context, String tag, int levelsAndFlags) {
         return context.getSystemService(PowerManager.class)
-                    .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, tag);
+                    .newWakeLock(levelsAndFlags, tag);
     }
 
     static Runnable wrapImpl(WakeLock w, Runnable r) {
@@ -87,14 +110,19 @@ public interface WakeLock {
      * @return The new wake lock.
      */
     @VisibleForTesting
-    static WakeLock wrap(final PowerManager.WakeLock inner, long maxTimeout) {
+    static WakeLock wrap(
+            final PowerManager.WakeLock inner, WakeLockLogger logger, long maxTimeout) {
         return new WakeLock() {
             private final HashMap<String, Integer> mActiveClients = new HashMap<>();
 
             /** @see PowerManager.WakeLock#acquire() */
             public void acquire(String why) {
                 mActiveClients.putIfAbsent(why, 0);
-                mActiveClients.put(why, mActiveClients.get(why) + 1);
+                int count = mActiveClients.get(why) + 1;
+                mActiveClients.put(why, count);
+                if (logger != null) {
+                    logger.logAcquire(inner, why, count);
+                }
                 inner.acquire(maxTimeout);
             }
 
@@ -105,10 +133,15 @@ public interface WakeLock {
                     Log.wtf(TAG, "Releasing WakeLock with invalid reason: " + why,
                             new Throwable());
                     return;
-                } else if (count == 1) {
+                }
+                count--;
+                if (count == 0) {
                     mActiveClients.remove(why);
                 } else {
-                    mActiveClients.put(why, count - 1);
+                    mActiveClients.put(why, count);
+                }
+                if (logger != null) {
+                    logger.logRelease(inner, why, count);
                 }
                 inner.release();
             }
@@ -120,7 +153,7 @@ public interface WakeLock {
 
             @Override
             public String toString() {
-                return "active clients= " + mActiveClients.toString();
+                return "active clients= " + mActiveClients;
             }
         };
     }
@@ -130,16 +163,24 @@ public interface WakeLock {
      */
     class Builder {
         private final Context mContext;
+        private final WakeLockLogger mLogger;
         private String mTag;
+        private int mLevelsAndFlags = DEFAULT_LEVELS_AND_FLAGS;
         private long mMaxTimeout = DEFAULT_MAX_TIMEOUT;
 
         @Inject
-        public Builder(Context context) {
+        public Builder(Context context, WakeLockLogger logger) {
             mContext = context;
+            mLogger = logger;
         }
 
         public Builder setTag(String tag) {
             this.mTag = tag;
+            return this;
+        }
+
+        public Builder setLevelsAndFlags(int levelsAndFlags) {
+            this.mLevelsAndFlags = levelsAndFlags;
             return this;
         }
 
@@ -149,7 +190,7 @@ public interface WakeLock {
         }
 
         public WakeLock build() {
-            return WakeLock.createPartial(mContext, mTag, mMaxTimeout);
+            return WakeLock.createWakeLock(mContext, mLogger, mTag, mLevelsAndFlags, mMaxTimeout);
         }
     }
 }

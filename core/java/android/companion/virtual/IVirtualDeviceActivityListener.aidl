@@ -30,8 +30,9 @@ oneway interface IVirtualDeviceActivityListener {
      *
      * @param displayId The display ID on which the activity change happened.
      * @param topActivity The component name of the top activity.
+     * @param userId The user ID associated with the top activity.
      */
-    void onTopActivityChanged(int displayId, in ComponentName topActivity);
+    void onTopActivityChanged(int displayId, in ComponentName topActivity, in int userId);
 
     /**
      * Called when the display becomes empty (e.g. if the user hits back on the last

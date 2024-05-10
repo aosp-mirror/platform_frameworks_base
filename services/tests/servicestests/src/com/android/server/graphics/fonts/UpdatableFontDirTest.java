@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.graphics.FontListParser;
+import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontUpdateRequest;
@@ -66,6 +67,8 @@ import java.util.stream.Collectors;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public final class UpdatableFontDirTest {
+
+    private static final String LEGACY_FONTS_XML = "/system/etc/fonts.xml";
 
     /**
      * A {@link UpdatableFontDir.FontFileParser} for testing. Instead of using real font files,
@@ -140,7 +143,7 @@ public final class UpdatableFontDirTest {
     private List<File> mPreinstalledFontDirs;
     private final Supplier<Long> mCurrentTimeSupplier = () -> CURRENT_TIME;
     private final Function<Map<String, File>, FontConfig> mConfigSupplier =
-            (map) -> SystemFonts.getSystemFontConfig(map, 0, 0);
+            (map) -> SystemFonts.getSystemFontConfigForTesting(LEGACY_FONTS_XML, map, 0, 0);
     private FakeFontFileParser mParser;
     private FakeFsverityUtil mFakeFsverityUtil;
 
@@ -210,7 +213,8 @@ public final class UpdatableFontDirTest {
         assertThat(mUpdatableFontFilesDir.list()).hasLength(2);
         assertNamedFamilyExists(dir.getSystemFontConfig(), "foobar");
         assertThat(dir.getFontFamilyMap()).containsKey("foobar");
-        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar");
+        assertThat(dir.getFontFamilyMap().get("foobar").getFamilies().size()).isEqualTo(1);
+        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar").getFamilies().get(0);
         assertThat(foobar.getFontList()).hasSize(2);
         assertThat(foobar.getFontList().get(0).getFile())
                 .isEqualTo(dir.getPostScriptMap().get("foo"));
@@ -326,9 +330,13 @@ public final class UpdatableFontDirTest {
                     new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT), 0, null, null);
 
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Arrays.asList(fooFont, barFont), "sans-serif", null,
-                    FontConfig.FontFamily.VARIANT_DEFAULT);
-            return new FontConfig(Collections.singletonList(family),
+                    Arrays.asList(fooFont, barFont), null,
+                    FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
+            return new FontConfig(Collections.emptyList(),
+                    Collections.emptyList(),
+                    Collections.singletonList(new FontConfig.NamedFamilyList(
+                            Collections.singletonList(family), "sans-serif")),
                     Collections.emptyList(), 0, 1);
         };
 
@@ -411,7 +419,8 @@ public final class UpdatableFontDirTest {
         assertThat(dir.getPostScriptMap()).containsKey("foo");
         assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(1);
         assertThat(dir.getFontFamilyMap()).containsKey("foobar");
-        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar");
+        assertThat(dir.getFontFamilyMap().get("foobar").getFamilies().size()).isEqualTo(1);
+        FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar").getFamilies().get(0);
         assertThat(foobar.getFontList()).hasSize(1);
         assertThat(foobar.getFontList().get(0).getFile())
                 .isEqualTo(dir.getPostScriptMap().get("foo"));
@@ -485,9 +494,13 @@ public final class UpdatableFontDirTest {
                     file, null, "bar", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT),
                     0, null, null);
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Collections.singletonList(font), "sans-serif", null,
-                    FontConfig.FontFamily.VARIANT_DEFAULT);
-            return new FontConfig(Collections.singletonList(family),
+                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
+            return new FontConfig(
+                    Collections.emptyList(),
+                    Collections.emptyList(),
+                    Collections.singletonList(new FontConfig.NamedFamilyList(
+                            Collections.singletonList(family), "sans-serif")),
                     Collections.emptyList(), 0, 1);
         });
         dir.loadFontFileMap();
@@ -636,9 +649,12 @@ public final class UpdatableFontDirTest {
                     file, null, "test", new FontStyle(400, FontStyle.FONT_SLANT_UPRIGHT), 0, null,
                     null);
             FontConfig.FontFamily family = new FontConfig.FontFamily(
-                    Collections.singletonList(font), "sans-serif", null,
-                    FontConfig.FontFamily.VARIANT_DEFAULT);
-            return new FontConfig(Collections.singletonList(family), Collections.emptyList(), 0, 1);
+                    Collections.singletonList(font), null, FontConfig.FontFamily.VARIANT_DEFAULT,
+                    FontFamily.Builder.VARIABLE_FONT_FAMILY_TYPE_NONE);
+            return new FontConfig(Collections.emptyList(), Collections.emptyList(),
+                    Collections.singletonList(new FontConfig.NamedFamilyList(
+                            Collections.singletonList(family), "sans-serif")),
+                    Collections.emptyList(), 0, 1);
         });
         dir.loadFontFileMap();
 
@@ -873,13 +889,14 @@ public final class UpdatableFontDirTest {
                         + "</family>")));
         assertThat(dir.getPostScriptMap()).containsKey("test");
         assertThat(dir.getFontFamilyMap()).containsKey("test");
-        FontConfig.FontFamily test = dir.getFontFamilyMap().get("test");
+        assertThat(dir.getFontFamilyMap().get("test").getFamilies().size()).isEqualTo(1);
+        FontConfig.FontFamily test = dir.getFontFamilyMap().get("test").getFamilies().get(0);
         assertThat(test.getFontList()).hasSize(1);
         assertThat(test.getFontList().get(0).getFile())
                 .isEqualTo(dir.getPostScriptMap().get("test"));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void addFontFamily_noName() throws Exception {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
@@ -891,12 +908,7 @@ public final class UpdatableFontDirTest {
                 newAddFontFamilyRequest("<family lang='en'>"
                         + "  <font>test.ttf</font>"
                         + "</family>"));
-        try {
-            dir.update(requests);
-            fail("Expect NullPointerException");
-        } catch (NullPointerException e) {
-            // Expect
-        }
+        dir.update(requests);
     }
 
     @Test
@@ -955,17 +967,16 @@ public final class UpdatableFontDirTest {
         dir.loadFontFileMap();
         assertThat(dir.getSystemFontConfig().getFontFamilies()).isNotEmpty();
         FontConfig.FontFamily firstFontFamily = dir.getSystemFontConfig().getFontFamilies().get(0);
-        assertThat(firstFontFamily.getName()).isNotEmpty();
 
         dir.update(Arrays.asList(
                 newFontUpdateRequest("test.ttf,1,test", GOOD_SIGNATURE),
-                newAddFontFamilyRequest("<family name='" + firstFontFamily.getName() + "'>"
+                newAddFontFamilyRequest("<family name='sans-serif'>"
                         + "  <font>test.ttf</font>"
                         + "</family>")));
         FontConfig fontConfig = dir.getSystemFontConfig();
         assertThat(dir.getSystemFontConfig().getFontFamilies()).isNotEmpty();
         assertThat(fontConfig.getFontFamilies().get(0)).isEqualTo(firstFontFamily);
-        FontConfig.FontFamily updated = getLastFamily(fontConfig, firstFontFamily.getName());
+        FontConfig.FontFamily updated = getLastFamily(fontConfig, "sans-serif");
         assertThat(updated.getFontList()).hasSize(1);
         assertThat(updated.getFontList().get(0).getFile())
                 .isEqualTo(dir.getPostScriptMap().get("test"));
@@ -990,6 +1001,563 @@ public final class UpdatableFontDirTest {
         assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
     }
 
+    private UpdatableFontDir createNewUpdateDir() {
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mParser, mFakeFsverityUtil,
+                mConfigFile, mCurrentTimeSupplier, mConfigSupplier);
+        dir.loadFontFileMap();
+        return dir;
+    }
+
+    private UpdatableFontDir installTestFontFamilies(int version) {
+        UpdatableFontDir dir = createNewUpdateDir();
+        try {
+            dir.update(Arrays.asList(
+                    newFontUpdateRequest("foo.ttf," + version + ",foo", GOOD_SIGNATURE),
+                    newFontUpdateRequest("bar.ttf," + version + ",bar", GOOD_SIGNATURE),
+                    newAddFontFamilyRequest("<family name='foobar'>"
+                            + "  <font>foo.ttf</font>"
+                            + "  <font>bar.ttf</font>"
+                            + "</family>")));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return dir;
+    }
+
+    private UpdatableFontDir installTestFontFile(int numFonts, int version) {
+        UpdatableFontDir dir = createNewUpdateDir();
+        List<FontUpdateRequest> requests = new ArrayList<>();
+        if (numFonts <= 0 || numFonts > 3) {
+            throw new IllegalArgumentException("numFont must be 1, 2 or 3");
+        }
+        try {
+            requests.add(newFontUpdateRequest("foo.ttf," + version + ",foo", GOOD_SIGNATURE));
+            if (numFonts >= 2) {
+                requests.add(newFontUpdateRequest("bar.ttf," + version + ",bar", GOOD_SIGNATURE));
+            }
+            if (numFonts == 3) {
+                requests.add(newFontUpdateRequest("baz.ttf," + version + ",baz", GOOD_SIGNATURE));
+            }
+            dir.update(requests);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return dir;
+    }
+
+    private List<File> collectSignatureFiles() {
+        return Arrays.stream(mUpdatableFontFilesDir.listFiles())
+                .map((file) -> file.listFiles((unused, s) -> s.endsWith(".fsv_sig")))
+                .flatMap(Arrays::stream)
+                .toList();
+    }
+
+    private List<File> collectFontFiles() {
+        return Arrays.stream(mUpdatableFontFilesDir.listFiles())
+                .map((file) -> file.listFiles((unused, s) -> s.endsWith(".ttf")))
+                .flatMap(Arrays::stream)
+                .toList();
+    }
+
+    private void removeAll(List<File> files) {
+        files.forEach((File file) -> {
+            if (file.isDirectory()) {
+                removeAll(List.of(file.listFiles()));
+            } else {
+                assertThat(file.delete()).isTrue();
+            }
+        });
+    }
+
+    private void assertTestFontFamilyInstalled(UpdatableFontDir dir, int version) {
+        try {
+            assertNamedFamilyExists(dir.getSystemFontConfig(), "foobar");
+            assertThat(dir.getFontFamilyMap()).containsKey("foobar");
+            assertThat(dir.getFontFamilyMap().get("foobar").getFamilies().size()).isEqualTo(1);
+            FontConfig.FontFamily foobar = dir.getFontFamilyMap().get("foobar").getFamilies()
+                    .get(0);
+            assertThat(foobar.getFontList()).hasSize(2);
+            assertThat(foobar.getFontList().get(0).getFile())
+                    .isEqualTo(dir.getPostScriptMap().get("foo"));
+            assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(version);
+            assertThat(foobar.getFontList().get(1).getFile())
+                    .isEqualTo(dir.getPostScriptMap().get("bar"));
+            assertThat(mParser.getRevision(dir.getPostScriptMap().get("bar"))).isEqualTo(version);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void assertTestFontInstalled(UpdatableFontDir dir, int version) {
+        try {
+            assertThat(dir.getPostScriptMap().containsKey("foo")).isTrue();
+            assertThat(mParser.getRevision(dir.getPostScriptMap().get("foo"))).isEqualTo(version);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void signatureMissingCase_fontFamilyInstalled_fontFamilyInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete one signature file
+        assertThat(collectSignatureFiles().get(0).delete()).isTrue();
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void signatureMissingCase_fontFamilyInstalled_fontInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1);
+
+        // Delete one signature file
+        assertThat(collectSignatureFiles().get(0).delete()).isTrue();
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void signatureMissingCase_fontFileInstalled_fontFamilyInstallLater() {
+        // Install font file, foo.ttf and bar.ttf
+        installTestFontFile(2 /* numFonts */, 1 /* version */);
+
+        // Delete one signature file
+        assertThat(collectSignatureFiles().get(0).delete()).isTrue();
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void signatureMissingCase_fontFileInstalled_fontFileInstallLater() {
+        // Install font file, foo.ttf and bar.ttf
+        installTestFontFile(2 /* numFonts */, 1 /* version */);
+
+        // Delete one signature file
+        assertThat(collectSignatureFiles().get(0).delete()).isTrue();
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(2 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void signatureAllMissingCase_fontFamilyInstalled_fontFamilyInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete all signature files
+        removeAll(collectSignatureFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void signatureAllMissingCase_fontFamilyInstalled_fontInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete all signature files
+        removeAll(collectSignatureFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void signatureAllMissingCase_fontFileInstalled_fontFamilyInstallLater() {
+        // Install font file, foo.ttf
+        installTestFontFile(1 /* numFonts */, 1 /* version */);
+
+        // Delete all signature files
+        removeAll(collectSignatureFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void signatureAllMissingCase_fontFileInstalled_fontFileInstallLater() {
+        // Install font file, foo.ttf
+        installTestFontFile(1 /* numFonts */, 1 /* version */);
+
+        // Delete all signature files
+        removeAll(collectSignatureFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontMissingCase_fontFamilyInstalled_fontFamilyInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete one font file
+        assertThat(collectFontFiles().get(0).delete()).isTrue();
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontMissingCase_fontFamilyInstalled_fontInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1);
+
+        // Delete one font file
+        assertThat(collectFontFiles().get(0).delete()).isTrue();
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontMissingCase_fontFileInstalled_fontFamilyInstallLater() {
+        // Install font file, foo.ttf and bar.ttf
+        installTestFontFile(2 /* numFonts */, 1 /* version */);
+
+        // Delete one font file
+        assertThat(collectFontFiles().get(0).delete()).isTrue();
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontMissingCase_fontFileInstalled_fontFileInstallLater() {
+        // Install font file, foo.ttf and bar.ttf
+        installTestFontFile(2 /* numFonts */, 1 /* version */);
+
+        // Delete one font file
+        assertThat(collectFontFiles().get(0).delete()).isTrue();
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(2 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontAllMissingCase_fontFamilyInstalled_fontFamilyInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete all font files
+        removeAll(collectFontFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontAllMissingCase_fontFamilyInstalled_fontInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete all font files
+        removeAll(collectFontFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontAllMissingCase_fontFileInstalled_fontFamilyInstallLater() {
+        // Install font file, foo.ttf
+        installTestFontFile(1 /* numFonts */, 1 /* version */);
+
+        // Delete all font files
+        removeAll(collectFontFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontAllMissingCase_fontFileInstalled_fontFileInstallLater() {
+        // Install font file, foo.ttf
+        installTestFontFile(1 /* numFonts */, 1 /* version */);
+
+        // Delete all font files
+        removeAll(collectFontFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontDirAllMissingCase_fontFamilyInstalled_fontFamilyInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete all font files
+        removeAll(List.of(mUpdatableFontFilesDir.listFiles()));
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontDirAllMissingCase_fontFamilyInstalled_fontInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete all font files
+        removeAll(List.of(mUpdatableFontFilesDir.listFiles()));
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontDirAllMissingCase_fontFileInstalled_fontFamilyInstallLater() {
+        // Install font file, foo.ttf
+        installTestFontFile(1 /* numFonts */, 1 /* version */);
+
+        // Delete all font files
+        removeAll(List.of(mUpdatableFontFilesDir.listFiles()));
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void fontDirAllMissingCase_fontFileInstalled_fontFileInstallLater() {
+        // Install font file, foo.ttf
+        installTestFontFile(1 /* numFonts */, 1 /* version */);
+
+        // Delete all font files
+        removeAll(List.of(mUpdatableFontFilesDir.listFiles()));
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void dirContentAllMissingCase_fontFamilyInstalled_fontFamilyInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete all font files
+        removeAll(collectFontFiles());
+        removeAll(collectSignatureFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void dirContentAllMissingCase_fontFamilyInstalled_fontInstallLater() {
+        // Install font families, foo.ttf, bar.ttf.
+        installTestFontFamilies(1 /* version */);
+
+        // Delete all font files
+        removeAll(collectFontFiles());
+        removeAll(collectSignatureFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void dirContentAllMissingCase_fontFileInstalled_fontFamilyInstallLater() {
+        // Install font file, foo.ttf
+        installTestFontFile(1 /* numFonts */, 1 /* version */);
+
+        // Delete all font files
+        removeAll(collectFontFiles());
+        removeAll(collectSignatureFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFamilies(2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontFamilyInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontFamilyInstalled(nextDir, 2 /* version */);
+    }
+
+    @Test
+    public void dirContentAllMissingCase_fontFileInstalled_fontFileInstallLater() {
+        // Install font file, foo.ttf
+        installTestFontFile(1 /* numFonts */, 1 /* version */);
+
+        // Delete all font files
+        removeAll(collectFontFiles());
+        removeAll(collectSignatureFiles());
+
+        // New instance of UpdatableFontDir, this emulate a device reboot.
+        UpdatableFontDir dir = installTestFontFile(1 /* numFonts */, 2 /* version */);
+
+        // Make sure the font installation succeeds.
+        assertTestFontInstalled(dir, 2 /* version */);
+
+        // Make sure after the reboot, the configuration remains.
+        UpdatableFontDir nextDir = createNewUpdateDir();
+        assertTestFontInstalled(nextDir, 2 /* version */);
+    }
+
     private FontUpdateRequest newFontUpdateRequest(String content, String signature)
             throws Exception {
         File file = File.createTempFile("font", "ttf", mCacheDir);
@@ -1005,7 +1573,9 @@ public final class UpdatableFontDirTest {
         mParser.setInput(is, "UTF-8");
         mParser.nextTag();
 
-        FontConfig.FontFamily fontFamily = FontListParser.readFamily(mParser, "", null, true);
+        FontConfig.NamedFamilyList namedFamilyList = FontListParser.readNamedFamily(
+                mParser, "", null, true);
+        FontConfig.FontFamily fontFamily = namedFamilyList.getFamilies().get(0);
         List<FontUpdateRequest.Font> fonts = new ArrayList<>();
         for (FontConfig.Font font : fontFamily.getFontList()) {
             String name = font.getFile().getName();
@@ -1014,7 +1584,8 @@ public final class UpdatableFontDirTest {
                     psName, font.getStyle(), font.getTtcIndex(), font.getFontVariationSettings());
             fonts.add(updateFont);
         }
-        FontUpdateRequest.Family family = new FontUpdateRequest.Family(fontFamily.getName(), fonts);
+        FontUpdateRequest.Family family = new FontUpdateRequest.Family(
+                namedFamilyList.getName(), fonts);
         return new FontUpdateRequest(family);
     }
 
@@ -1035,18 +1606,18 @@ public final class UpdatableFontDirTest {
 
     // Returns the last family with the given name, which will be used for creating Typeface.
     private static FontConfig.FontFamily getLastFamily(FontConfig fontConfig, String familyName) {
-        List<FontConfig.FontFamily> fontFamilies = fontConfig.getFontFamilies();
-        for (int i = fontFamilies.size() - 1; i >= 0; i--) {
-            if (familyName.equals(fontFamilies.get(i).getName())) {
-                return fontFamilies.get(i);
+        List<FontConfig.NamedFamilyList> namedFamilyLists = fontConfig.getNamedFamilyLists();
+        for (int i = namedFamilyLists.size() - 1; i >= 0; i--) {
+            if (familyName.equals(namedFamilyLists.get(i).getName())) {
+                return namedFamilyLists.get(i).getFamilies().get(0);
             }
         }
         return null;
     }
 
     private static void assertNamedFamilyExists(FontConfig fontConfig, String familyName) {
-        assertThat(fontConfig.getFontFamilies().stream()
-                .map(FontConfig.FontFamily::getName)
+        assertThat(fontConfig.getNamedFamilyLists().stream()
+                .map(FontConfig.NamedFamilyList::getName)
                 .collect(Collectors.toSet())).contains(familyName);
     }
 }

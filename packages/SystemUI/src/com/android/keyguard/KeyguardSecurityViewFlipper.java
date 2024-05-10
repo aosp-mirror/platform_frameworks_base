@@ -30,7 +30,7 @@ import android.view.ViewHierarchyEncoder;
 import android.widget.FrameLayout;
 import android.widget.ViewFlipper;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Subclass of the current view flipper that allows us to overload dispatchTouchEvent() so
@@ -81,6 +81,16 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper {
             return ksv.getTitle();
         }
         return "";
+    }
+
+    /** Updates the keyguard view's constraints (single or split constraints).
+     *  Split constraints are only used for small landscape screens.
+     *  Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled. */
+    public void updateConstraints(boolean useSplitBouncer) {
+        KeyguardInputView securityView = getSecurityView();
+        if (securityView != null) {
+            securityView.updateConstraints(useSplitBouncer);
+        }
     }
 
     @Override

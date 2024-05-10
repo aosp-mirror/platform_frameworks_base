@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static org.junit.Assume.assumeFalse;
+
 import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Environment;
@@ -112,6 +114,7 @@ public final class BackgroundDexOptServiceIntegrationTests {
 
     @Before
     public void setUp() throws IOException {
+        assumeFalse(SystemProperties.getBoolean("dalvik.vm.useartservice", false));
         File dataDir = getContext().getDataDir();
         mBigFile = new File(dataDir, BIG_FILE);
     }

@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.hardware.biometrics.fingerprint.PointerContext;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
@@ -39,6 +41,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
@@ -246,6 +249,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
     public static Fingerprint21UdfpsMock newInstance(@NonNull Context context,
             @NonNull BiometricStateCallback biometricStateCallback,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
@@ -257,8 +261,9 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
                 new TestableBiometricScheduler(TAG, handler, gestureAvailabilityDispatcher);
         final MockHalResultController controller =
                 new MockHalResultController(sensorProps.sensorId, context, handler, scheduler);
-        return new Fingerprint21UdfpsMock(context, biometricStateCallback, sensorProps, scheduler,
-                handler, lockoutResetDispatcher, controller, biometricContext);
+        return new Fingerprint21UdfpsMock(context, biometricStateCallback,
+                authenticationStateListeners, sensorProps, scheduler, handler,
+                lockoutResetDispatcher, controller, biometricContext);
     }
 
     private static abstract class FakeFingerRunnable implements Runnable {
@@ -361,13 +366,16 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             // Store the authClient parameters so it can be rescheduled
             final IBinder token = client.getToken();
             final long operationId = authClient.getOperationId();
-            final int user = client.getTargetUserId();
             final int cookie = client.getCookie();
             final ClientMonitorCallbackConverter listener = client.getListener();
-            final String opPackageName = client.getOwnerString();
             final boolean restricted = authClient.isRestricted();
             final int statsClient = client.getLogger().getStatsClient();
             final boolean isKeyguard = authClient.isKeyguard();
+            final FingerprintAuthenticateOptions options =
+                    new FingerprintAuthenticateOptions.Builder()
+                            .setUserId(client.getTargetUserId())
+                            .setOpPackageName(client.getOwnerString())
+                            .build();
 
             // Don't actually send cancel() to the HAL, since successful auth already finishes
             // HAL authenticate() lifecycle. Just
@@ -375,22 +383,23 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
             // Schedule this only after we invoke onClientFinished for the previous client, so that
             // internal preemption logic is not run.
-            mFingerprint21.scheduleAuthenticate(mFingerprint21.mSensorProperties.sensorId, token,
-                    operationId, user, cookie, listener, opPackageName, restricted, statsClient,
+            mFingerprint21.scheduleAuthenticate(token,
+                    operationId, cookie, listener, options, restricted, statsClient,
                     isKeyguard);
         }
     }
 
     private Fingerprint21UdfpsMock(@NonNull Context context,
             @NonNull BiometricStateCallback biometricStateCallback,
+            @NonNull AuthenticationStateListeners authenticationStateListeners,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull TestableBiometricScheduler scheduler,
             @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull MockHalResultController controller,
             @NonNull BiometricContext biometricContext) {
-        super(context, biometricStateCallback, sensorProps, scheduler, handler,
-                lockoutResetDispatcher, controller, biometricContext);
+        super(context, biometricStateCallback, authenticationStateListeners, sensorProps, scheduler,
+                handler, lockoutResetDispatcher, controller, biometricContext);
         mScheduler = scheduler;
         mScheduler.init(this);
         mHandler = handler;
@@ -417,7 +426,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onTrustChanged(boolean enabled, int userId, int flags,
+    public void onTrustChanged(boolean enabled, boolean newlyUnlocked, int userId, int flags,
             List<String> trustGrantedMessages) {
         mUserHasTrust.put(userId, enabled);
     }
@@ -433,6 +442,16 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
+    public void onEnabledTrustAgentsChanged(int userId) {
+
+    }
+
+    @Override
+    public void onIsActiveUnlockRunningChanged(boolean isRunning, int userId) {
+
+    }
+
+    @Override
     @NonNull
     public List<FingerprintSensorPropertiesInternal> getSensorProperties() {
         final List<FingerprintSensorPropertiesInternal> properties = new ArrayList<>();
@@ -441,8 +460,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onPointerDown(long requestId, int sensorId, int x, int y, float minor,
-            float major) {
+    public void onPointerDown(long requestId, int sensorId, PointerContext pc) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerDown");
             final AuthenticationConsumer lastAuthenticatedConsumer =
@@ -489,7 +507,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onPointerUp(long requestId, int sensorId) {
+    public void onPointerUp(long requestId, int sensorId, PointerContext pc) {
         mHandler.post(() -> {
             Slog.d(TAG, "onFingerUp");
 

@@ -247,7 +247,7 @@ public class ImsRcsManager {
      * @param c The {@link RegistrationManager.RegistrationCallback} to be added.
      * @see #unregisterImsRegistrationCallback(RegistrationManager.RegistrationCallback)
      * @throws ImsException if the subscription associated with this callback is valid, but
-     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the {@code ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
      */
@@ -540,6 +540,8 @@ public class ImsRcsManager {
 
         try {
             return imsRcsController.isCapable(mSubId, capability, radioTech);
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException e) {
             Log.w(TAG, "Error calling IImsRcsController#isCapable", e);
             throw new ImsException("Remote IMS Service is not available",
@@ -577,6 +579,8 @@ public class ImsRcsManager {
 
         try {
             return imsRcsController.isAvailable(mSubId, capability, radioTech);
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException e) {
             Log.w(TAG, "Error calling IImsRcsController#isAvailable", e);
             throw new ImsException("Remote IMS Service is not available",

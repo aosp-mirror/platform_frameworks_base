@@ -16,13 +16,15 @@
 
 package com.android.server.policy;
 
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
+import android.hardware.input.InputManager;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -30,11 +32,14 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.XmlUtils;
+import com.android.server.input.KeyboardMetricsCollector;
+import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -59,8 +64,8 @@ class ModifierShortcutManager {
     private static final String ATTRIBUTE_CATEGORY = "category";
     private static final String ATTRIBUTE_SHIFT = "shift";
 
-    private final SparseArray<ShortcutInfo> mIntentShortcuts = new SparseArray<>();
-    private final SparseArray<ShortcutInfo> mShiftShortcuts = new SparseArray<>();
+    private final SparseArray<Intent> mIntentShortcuts = new SparseArray<>();
+    private final SparseArray<Intent> mShiftShortcuts = new SparseArray<>();
 
     private LongSparseArray<IShortcutService> mShortcutKeyServices = new LongSparseArray<>();
 
@@ -88,11 +93,13 @@ class ModifierShortcutManager {
     }
 
     private final Context mContext;
+    private final Handler mHandler;
     private boolean mSearchKeyShortcutPending = false;
     private boolean mConsumeSearchKeyUp = true;
 
-    ModifierShortcutManager(Context context) {
+    ModifierShortcutManager(Context context, Handler handler) {
         mContext = context;
+        mHandler = handler;
         loadShortcuts();
     }
 
@@ -118,26 +125,26 @@ class ModifierShortcutManager {
             return null;
         }
 
-        ShortcutInfo shortcut = null;
+        Intent shortcutIntent = null;
 
         // If the Shift key is pressed, then search for the shift shortcuts.
-        SparseArray<ShortcutInfo> shortcutMap = isShiftOn ? mShiftShortcuts : mIntentShortcuts;
+        SparseArray<Intent> shortcutMap = isShiftOn ? mShiftShortcuts : mIntentShortcuts;
 
         // First try the exact keycode (with modifiers).
         int shortcutChar = kcm.get(keyCode, metaState);
         if (shortcutChar != 0) {
-            shortcut = shortcutMap.get(shortcutChar);
+            shortcutIntent = shortcutMap.get(shortcutChar);
         }
 
         // Next try the primary character on that key.
-        if (shortcut == null) {
+        if (shortcutIntent == null) {
             shortcutChar = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
             if (shortcutChar != 0) {
-                shortcut = shortcutMap.get(shortcutChar);
+                shortcutIntent = shortcutMap.get(shortcutChar);
             }
         }
 
-        return (shortcut != null) ? shortcut.intent : null;
+        return shortcutIntent;
     }
 
     private void loadShortcuts() {
@@ -173,12 +180,10 @@ class ModifierShortcutManager {
                 final boolean isShiftShortcut = (shiftName != null && shiftName.equals("true"));
 
                 final Intent intent;
-                final String title;
                 if (packageName != null && className != null) {
-                    ActivityInfo info = null;
                     ComponentName componentName = new ComponentName(packageName, className);
                     try {
-                        info = packageManager.getActivityInfo(componentName,
+                        packageManager.getActivityInfo(componentName,
                                 PackageManager.MATCH_DIRECT_BOOT_AWARE
                                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                                         | PackageManager.MATCH_UNINSTALLED_PACKAGES);
@@ -187,7 +192,7 @@ class ModifierShortcutManager {
                                 new String[] { packageName });
                         componentName = new ComponentName(packages[0], className);
                         try {
-                            info = packageManager.getActivityInfo(componentName,
+                            packageManager.getActivityInfo(componentName,
                                     PackageManager.MATCH_DIRECT_BOOT_AWARE
                                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                                             | PackageManager.MATCH_UNINSTALLED_PACKAGES);
@@ -201,21 +206,18 @@ class ModifierShortcutManager {
                     intent = new Intent(Intent.ACTION_MAIN);
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
                     intent.setComponent(componentName);
-                    title = info.loadLabel(packageManager).toString();
                 } else if (categoryName != null) {
                     intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, categoryName);
-                    title = "";
                 } else {
                     Log.w(TAG, "Unable to add bookmark for shortcut " + shortcutName
                             + ": missing package/class or category attributes");
                     continue;
                 }
 
-                ShortcutInfo shortcut = new ShortcutInfo(title, intent);
                 if (isShiftShortcut) {
-                    mShiftShortcuts.put(shortcutChar, shortcut);
+                    mShiftShortcuts.put(shortcutChar, intent);
                 } else {
-                    mIntentShortcuts.put(shortcutChar, shortcut);
+                    mIntentShortcuts.put(shortcutChar, intent);
                 }
             }
         } catch (XmlPullParserException | IOException e) {
@@ -273,11 +275,13 @@ class ModifierShortcutManager {
      * Handle the shortcut to {@link Intent}
      *
      * @param kcm the {@link KeyCharacterMap} associated with the keyboard device.
-     * @param keyCode The key code of the event.
+     * @param keyEvent The key event.
      * @param metaState The meta key modifier state.
      * @return True if invoked the shortcut, otherwise false.
      */
-    private boolean handleIntentShortcut(KeyCharacterMap kcm, int keyCode, int metaState) {
+    @SuppressLint("MissingPermission")
+    private boolean handleIntentShortcut(KeyCharacterMap kcm, KeyEvent keyEvent, int metaState) {
+        final int keyCode = keyEvent.getKeyCode();
         // Shortcuts are invoked through Search+key, so intercept those here
         // Any printing key that is chorded with Search should be consumed
         // even if no shortcut was invoked.  This prevents text from being
@@ -307,6 +311,7 @@ class ModifierShortcutManager {
                             + "keyCode=" + KeyEvent.keyCodeToString(keyCode) + ","
                             + " category=" + category);
                 }
+                logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(intent));
                 return true;
             } else {
                 return false;
@@ -323,9 +328,22 @@ class ModifierShortcutManager {
                         + "the activity to which it is registered was not found: "
                         + "META+ or SEARCH" + KeyEvent.keyCodeToString(keyCode));
             }
+            logKeyboardShortcut(keyEvent, KeyboardLogEvent.getLogEventFromIntent(shortcutIntent));
             return true;
         }
         return false;
+    }
+
+    private void logKeyboardShortcut(KeyEvent event, KeyboardLogEvent logEvent) {
+        mHandler.post(() -> handleKeyboardLogging(event, logEvent));
+    }
+
+    private void handleKeyboardLogging(KeyEvent event, KeyboardLogEvent logEvent) {
+        final InputManager inputManager = mContext.getSystemService(InputManager.class);
+        final InputDevice inputDevice = inputManager != null
+                ? inputManager.getInputDevice(event.getDeviceId()) : null;
+        KeyboardMetricsCollector.logKeyboardSystemsEventReportedAtom(inputDevice,
+                logEvent, event.getMetaState(), event.getKeyCode());
     }
 
     /**
@@ -360,7 +378,7 @@ class ModifierShortcutManager {
         }
 
         final KeyCharacterMap kcm = event.getKeyCharacterMap();
-        if (handleIntentShortcut(kcm, keyCode, metaState)) {
+        if (handleIntentShortcut(kcm, event, metaState)) {
             return true;
         }
 
@@ -369,15 +387,5 @@ class ModifierShortcutManager {
         }
 
         return false;
-    }
-
-    private static final class ShortcutInfo {
-        public final String title;
-        public final Intent intent;
-
-        ShortcutInfo(String title, Intent intent) {
-            this.title = title;
-            this.intent = intent;
-        }
     }
 }

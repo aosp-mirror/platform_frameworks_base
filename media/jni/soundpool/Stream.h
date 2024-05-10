@@ -93,7 +93,8 @@ public:
 
     // returns the pair stream if successful, nullptr otherwise.
     // garbage is used to release tracks and data outside of any lock.
-    Stream* playPairStream(std::vector<std::any>& garbage);
+    Stream* playPairStream(std::vector<std::any>& garbage,
+                           int32_t playerIId = PLAYER_PIID_INVALID);
 
     // These parameters are explicitly checked in the SoundPool class
     // so never deviate from the Java API specified values.
@@ -157,7 +158,7 @@ private:
     // garbage is used to release tracks and data outside of any lock.
     void play_l(const std::shared_ptr<Sound>& sound, int streamID,
             float leftVolume, float rightVolume, int priority, int loop, float rate,
-            std::vector<std::any>& garbage) REQUIRES(mLock);
+            std::vector<std::any>& garbage, int playerIId) REQUIRES(mLock);
     void stop_l() REQUIRES(mLock);
     void setVolume_l(float leftVolume, float rightVolume) REQUIRES(mLock);
 

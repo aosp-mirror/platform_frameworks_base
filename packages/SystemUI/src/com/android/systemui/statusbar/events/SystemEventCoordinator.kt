@@ -16,55 +16,69 @@
 
 package com.android.systemui.statusbar.events
 
+import android.annotation.IntRange
 import android.content.Context
 import android.provider.DeviceConfig
 import android.provider.DeviceConfig.NAMESPACE_PRIVACY
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.privacy.PrivacyChipBuilder
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 /**
- * Listens for system events (battery, privacy, connectivity) and allows listeners
- * to show status bar animations when they happen
+ * Listens for system events (battery, privacy, connectivity) and allows listeners to show status
+ * bar animations when they happen
  */
 @SysUISingleton
-class SystemEventCoordinator @Inject constructor(
+class SystemEventCoordinator
+@Inject
+constructor(
     private val systemClock: SystemClock,
     private val batteryController: BatteryController,
     private val privacyController: PrivacyItemController,
-    private val context: Context
+    private val context: Context,
+    @Application private val appScope: CoroutineScope,
+    connectedDisplayInteractor: ConnectedDisplayInteractor
 ) {
+    private val onDisplayConnectedFlow =
+        connectedDisplayInteractor.connectedDisplayAddition
+
+    private var connectedDisplayCollectionJob: Job? = null
     private lateinit var scheduler: SystemStatusAnimationScheduler
 
     fun startObserving() {
-        /* currently unused
         batteryController.addCallback(batteryStateListener)
-        */
         privacyController.addCallback(privacyStateListener)
+        startConnectedDisplayCollection()
     }
 
     fun stopObserving() {
-        /* currently unused
         batteryController.removeCallback(batteryStateListener)
-        */
         privacyController.removeCallback(privacyStateListener)
+        connectedDisplayCollectionJob?.cancel()
     }
 
     fun attachScheduler(s: SystemStatusAnimationScheduler) {
         this.scheduler = s
     }
 
-    fun notifyPluggedIn() {
-        scheduler.onStatusEvent(BatteryEvent())
+    fun notifyPluggedIn(@IntRange(from = 0, to = 100) batteryLevel: Int) {
+        scheduler.onStatusEvent(BatteryEvent(batteryLevel))
     }
 
     fun notifyPrivacyItemsEmpty() {
-        scheduler.setShouldShowPersistentPrivacyIndicator(false)
+        scheduler.removePersistentDot()
     }
 
     fun notifyPrivacyItemsChanged(showAnimation: Boolean = true) {
@@ -78,26 +92,36 @@ class SystemEventCoordinator @Inject constructor(
         scheduler.onStatusEvent(event)
     }
 
+    private fun startConnectedDisplayCollection() {
+        val connectedDisplayEvent = ConnectedDisplayEvent().apply {
+            contentDescription = context.getString(R.string.connected_display_icon_desc)
+        }
+        connectedDisplayCollectionJob =
+                onDisplayConnectedFlow
+                        .onEach { scheduler.onStatusEvent(connectedDisplayEvent) }
+                        .launchIn(appScope)
+    }
+
     private val batteryStateListener = object : BatteryController.BatteryStateChangeCallback {
-        var plugged = false
-        var stateKnown = false
+        private var plugged = false
+        private var stateKnown = false
         override fun onBatteryLevelChanged(level: Int, pluggedIn: Boolean, charging: Boolean) {
             if (!stateKnown) {
                 stateKnown = true
                 plugged = pluggedIn
-                notifyListeners()
+                notifyListeners(level)
                 return
             }
 
             if (plugged != pluggedIn) {
                 plugged = pluggedIn
-                notifyListeners()
+                notifyListeners(level)
             }
         }
 
-        private fun notifyListeners() {
+        private fun notifyListeners(@IntRange(from = 0, to = 100) batteryLevel: Int) {
             // We only care about the plugged in status
-            if (plugged) notifyPluggedIn()
+            if (plugged) notifyPluggedIn(batteryLevel)
         }
     }
 
@@ -136,7 +160,9 @@ class SystemEventCoordinator @Inject constructor(
         }
 
         private fun isChipAnimationEnabled(): Boolean {
-            return DeviceConfig.getBoolean(NAMESPACE_PRIVACY, CHIP_ANIMATION_ENABLED, true)
+            val defaultValue =
+                context.resources.getBoolean(R.bool.config_enablePrivacyChipAnimation)
+            return DeviceConfig.getBoolean(NAMESPACE_PRIVACY, CHIP_ANIMATION_ENABLED, defaultValue)
         }
     }
 }

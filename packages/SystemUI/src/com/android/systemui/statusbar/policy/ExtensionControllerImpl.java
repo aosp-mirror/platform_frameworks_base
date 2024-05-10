@@ -22,7 +22,7 @@ import android.util.ArrayMap;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;

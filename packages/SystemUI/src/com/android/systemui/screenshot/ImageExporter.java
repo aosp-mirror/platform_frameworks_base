@@ -19,6 +19,7 @@ package com.android.systemui.screenshot;
 import static android.os.FileUtils.closeQuietly;
 
 import android.annotation.IntRange;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.graphics.Bitmap;
@@ -29,13 +30,16 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Display;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.flags.FeatureFlags;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -53,13 +57,17 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-class ImageExporter {
+/** A class to help with exporting screenshot to storage. */
+public class ImageExporter {
     private static final String TAG = LogConfig.logTag(ImageExporter.class);
 
     static final Duration PENDING_ENTRY_TTL = Duration.ofHours(24);
 
     // ex: 'Screenshot_20201215-090626.png'
     private static final String FILENAME_PATTERN = "Screenshot_%1$tY%<tm%<td-%<tH%<tM%<tS.%2$s";
+    // ex: 'Screenshot_20201215-090626-display-1.png'
+    private static final String CONNECTED_DISPLAY_FILENAME_PATTERN =
+            "Screenshot_%1$tY%<tm%<td-%<tH%<tM%<tS-display-%2$d.%3$s";
     private static final String SCREENSHOTS_PATH = Environment.DIRECTORY_PICTURES
             + File.separator + Environment.DIRECTORY_SCREENSHOTS;
 
@@ -83,10 +91,12 @@ class ImageExporter {
     private final ContentResolver mResolver;
     private CompressFormat mCompressFormat = CompressFormat.PNG;
     private int mQuality = 100;
+    private final FeatureFlags mFlags;
 
     @Inject
-    ImageExporter(ContentResolver resolver) {
+    public ImageExporter(ContentResolver resolver, FeatureFlags flags) {
         mResolver = resolver;
+        mFlags = flags;
     }
 
     /**
@@ -139,11 +149,12 @@ class ImageExporter {
      *
      * @param executor the thread for execution
      * @param bitmap the bitmap to export
-     *
+     * @param displayId the display id the bitmap comes from.
      * @return a listenable future result
      */
-    ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap) {
-        return export(executor, requestId, bitmap, ZonedDateTime.now());
+    public ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
+            UserHandle owner, int displayId) {
+        return export(executor, requestId, bitmap, ZonedDateTime.now(), owner, displayId);
     }
 
     /**
@@ -155,10 +166,10 @@ class ImageExporter {
      * @return a listenable future result
      */
     ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
-            ZonedDateTime captureTime) {
+            ZonedDateTime captureTime, UserHandle owner, int displayId) {
 
         final Task task = new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
-                mQuality, /* publish */ true);
+                mQuality, /* publish */ true, owner, mFlags, displayId);
 
         return CallbackToFutureAdapter.getFuture(
                 (completer) -> {
@@ -174,36 +185,14 @@ class ImageExporter {
         );
     }
 
-    /**
-     * Delete the entry.
-     *
-     * @param executor the thread for execution
-     * @param uri the uri of the image to publish
-     *
-     * @return a listenable future result
-     */
-    ListenableFuture<Result> delete(Executor executor, Uri uri) {
-        return CallbackToFutureAdapter.getFuture((completer) -> {
-            executor.execute(() -> {
-                mResolver.delete(uri, null);
-
-                Result result = new Result();
-                result.uri = uri;
-                result.deleted = true;
-                completer.set(result);
-            });
-            return "ContentResolver#delete";
-        });
-    }
-
-    static class Result {
-        Uri uri;
-        UUID requestId;
-        String fileName;
-        long timestamp;
-        CompressFormat format;
-        boolean published;
-        boolean deleted;
+    /** The result returned by the task exporting screenshots to storage. */
+    public static class Result {
+        public Uri uri;
+        public UUID requestId;
+        public String fileName;
+        public long timestamp;
+        public CompressFormat format;
+        public boolean published;
 
         @Override
         public String toString() {
@@ -214,7 +203,6 @@ class ImageExporter {
             sb.append(", timestamp=").append(timestamp);
             sb.append(", format=").append(format);
             sb.append(", published=").append(published);
-            sb.append(", deleted=").append(deleted);
             sb.append('}');
             return sb.toString();
         }
@@ -227,19 +215,24 @@ class ImageExporter {
         private final ZonedDateTime mCaptureTime;
         private final CompressFormat mFormat;
         private final int mQuality;
+        private final UserHandle mOwner;
         private final String mFileName;
         private final boolean mPublish;
+        private final FeatureFlags mFlags;
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
-                CompressFormat format, int quality, boolean publish) {
+                CompressFormat format, int quality, boolean publish, UserHandle owner,
+                FeatureFlags flags, int displayId) {
             mResolver = resolver;
             mRequestId = requestId;
             mBitmap = bitmap;
             mCaptureTime = captureTime;
             mFormat = format;
             mQuality = quality;
-            mFileName = createFilename(mCaptureTime, mFormat);
+            mOwner = owner;
+            mFileName = createFilename(mCaptureTime, mFormat, displayId);
             mPublish = publish;
+            mFlags = flags;
         }
 
         public Result execute() throws ImageExportException, InterruptedException {
@@ -253,7 +246,7 @@ class ImageExporter {
                     start = Instant.now();
                 }
 
-                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName);
+                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName, mOwner, mFlags);
                 throwIfInterrupted();
 
                 writeImage(mResolver, mBitmap, mFormat, mQuality, uri);
@@ -297,15 +290,20 @@ class ImageExporter {
     }
 
     private static Uri createEntry(ContentResolver resolver, CompressFormat format,
-            ZonedDateTime time, String fileName) throws ImageExportException {
+            ZonedDateTime time, String fileName, UserHandle owner, FeatureFlags flags)
+            throws ImageExportException {
         Trace.beginSection("ImageExporter_createEntry");
         try {
             final ContentValues values = createMetadata(time, format, fileName);
 
-            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            Uri uriWithUserId = ContentProvider.maybeAddUserId(baseUri, owner.getIdentifier());
+
+            Uri uri = resolver.insert(uriWithUserId, values);
             if (uri == null) {
                 throw new ImageExportException(RESOLVER_INSERT_RETURNED_NULL);
             }
+            Log.d(TAG, "Inserted new URI: " + uri);
             return uri;
         } finally {
             Trace.endSection();
@@ -377,8 +375,12 @@ class ImageExporter {
     }
 
     @VisibleForTesting
-    static String createFilename(ZonedDateTime time, CompressFormat format) {
-        return String.format(FILENAME_PATTERN, time, fileExtension(format));
+    static String createFilename(ZonedDateTime time, CompressFormat format, int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return String.format(FILENAME_PATTERN, time, fileExtension(format));
+        }
+        return String.format(CONNECTED_DISPLAY_FILENAME_PATTERN, time, displayId,
+            fileExtension(format));
     }
 
     static ContentValues createMetadata(ZonedDateTime captureTime, CompressFormat format,

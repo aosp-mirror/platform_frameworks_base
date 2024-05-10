@@ -16,25 +16,13 @@
 
 package com.android.server.media;
 
-import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
-import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
-import static android.media.MediaRoute2Info.FEATURE_LOCAL_PLAYBACK;
-import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
-import static android.media.MediaRoute2Info.TYPE_DOCK;
-import static android.media.MediaRoute2Info.TYPE_HDMI;
-import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
-import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
-import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.media.AudioRoutesInfo;
-import android.media.IAudioRoutesObserver;
-import android.media.IAudioService;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
@@ -43,49 +31,46 @@ import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.media.flags.Flags;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Provides routes for local playbacks such as phone speaker, wired headset, or Bluetooth speakers.
  */
 // TODO: check thread safety. We may need to use lock to protect variables.
 class SystemMediaRoute2Provider extends MediaRoute2Provider {
-    private static final String TAG = "MR2SystemProvider";
+    // Package-visible to use this tag for all system routing logic (done across multiple classes).
+    /* package */ static final String TAG = "MR2SystemProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
-    static final String DEVICE_ROUTE_ID = "DEVICE_ROUTE";
+    private static final ComponentName COMPONENT_NAME = new ComponentName(
+            SystemMediaRoute2Provider.class.getPackage().getName(),
+            SystemMediaRoute2Provider.class.getName());
+
     static final String SYSTEM_SESSION_ID = "SYSTEM_SESSION";
 
     private final AudioManager mAudioManager;
-    private final IAudioService mAudioService;
     private final Handler mHandler;
     private final Context mContext;
     private final UserHandle mUser;
-    private final BluetoothRouteProvider mBtRouteProvider;
 
-    private static ComponentName sComponentName = new ComponentName(
-            SystemMediaRoute2Provider.class.getPackage().getName(),
-            SystemMediaRoute2Provider.class.getName());
+    private final DeviceRouteController mDeviceRouteController;
+    private final BluetoothRouteController mBluetoothRouteController;
 
     private String mSelectedRouteId;
     // For apps without MODIFYING_AUDIO_ROUTING permission.
     // This should be the currently selected route.
     MediaRoute2Info mDefaultRoute;
-    MediaRoute2Info mDeviceRoute;
     RoutingSessionInfo mDefaultSessionInfo;
-    final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
-    int mDeviceVolume;
 
     private final AudioManagerBroadcastReceiver mAudioReceiver =
             new AudioManagerBroadcastReceiver();
@@ -94,44 +79,39 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @GuardedBy("mRequestLock")
     private volatile SessionCreationRequest mPendingSessionCreationRequest;
 
-    final IAudioRoutesObserver.Stub mAudioRoutesObserver = new IAudioRoutesObserver.Stub() {
-        @Override
-        public void dispatchAudioRoutesChanged(final AudioRoutesInfo newRoutes) {
-            mHandler.post(() -> {
-                updateDeviceRoute(newRoutes);
-                notifyProviderState();
-                if (updateSessionInfosIfNeeded()) {
-                    notifySessionInfoUpdated();
-                }
-            });
-        }
-    };
-
     SystemMediaRoute2Provider(Context context, UserHandle user) {
-        super(sComponentName);
-
+        super(COMPONENT_NAME);
         mIsSystemRouteProvider = true;
         mContext = context;
         mUser = user;
-        mHandler = new Handler(Looper.getMainLooper());
+        Looper looper = Looper.getMainLooper();
+        mHandler = new Handler(looper);
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        mAudioService = IAudioService.Stub.asInterface(
-                ServiceManager.getService(Context.AUDIO_SERVICE));
-        AudioRoutesInfo newAudioRoutes = null;
-        try {
-            newAudioRoutes = mAudioService.startWatchingRoutes(mAudioRoutesObserver);
-        } catch (RemoteException e) {
-        }
-        updateDeviceRoute(newAudioRoutes);
 
-        // .getInstance returns null if there is no bt adapter available
-        mBtRouteProvider = BluetoothRouteProvider.createInstance(context, (routes) -> {
-            publishProviderState();
-            if (updateSessionInfosIfNeeded()) {
-                notifySessionInfoUpdated();
-            }
-        });
+        mBluetoothRouteController =
+                BluetoothRouteController.createInstance(
+                        context,
+                        () -> {
+                            publishProviderState();
+                            if (updateSessionInfosIfNeeded()) {
+                                notifySessionInfoUpdated();
+                            }
+                        });
+
+        mDeviceRouteController =
+                DeviceRouteController.createInstance(
+                        context,
+                        looper,
+                        () ->
+                                mHandler.post(
+                                        () -> {
+                                            publishProviderState();
+                                            if (updateSessionInfosIfNeeded()) {
+                                                notifySessionInfoUpdated();
+                                            }
+                                        }));
+        updateProviderState();
         updateSessionInfosIfNeeded();
     }
 
@@ -140,24 +120,22 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         intentFilter.addAction(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
         mContext.registerReceiverAsUser(mAudioReceiver, mUser,
                 intentFilter, null, null);
-
-        if (mBtRouteProvider != null) {
-            mHandler.post(() -> {
-                mBtRouteProvider.start(mUser);
-                notifyProviderState();
-            });
-        }
+        mHandler.post(
+                () -> {
+                    mDeviceRouteController.start(mUser);
+                    mBluetoothRouteController.start(mUser);
+                });
         updateVolume();
     }
 
     public void stop() {
         mContext.unregisterReceiver(mAudioReceiver);
-        if (mBtRouteProvider != null) {
-            mHandler.post(() -> {
-                mBtRouteProvider.stop();
-                notifyProviderState();
-            });
-        }
+        mHandler.post(
+                () -> {
+                    mBluetoothRouteController.stop();
+                    mDeviceRouteController.stop();
+                    notifyProviderState();
+                });
     }
 
     @Override
@@ -172,7 +150,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             Bundle sessionHints) {
         // Assume a router without MODIFY_AUDIO_ROUTING permission can't request with
         // a route ID different from the default route ID. The service should've filtered.
-        if (TextUtils.equals(routeId, DEFAULT_ROUTE_ID)) {
+        if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             mCallback.onSessionCreated(this, requestId, mDefaultSessionInfo);
             return;
         }
@@ -199,7 +177,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+    public void updateDiscoveryPreference(
+            Set<String> activelyScanningPackages, RouteDiscoveryPreference discoveryPreference) {
         // Do nothing
     }
 
@@ -215,16 +194,29 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     @Override
     public void transferToRoute(long requestId, String sessionId, String routeId) {
-        if (TextUtils.equals(routeId, DEFAULT_ROUTE_ID)) {
+        if (TextUtils.equals(routeId, MediaRoute2Info.ROUTE_ID_DEFAULT)) {
             // The currently selected route is the default route.
+            Log.w(TAG, "Ignoring transfer to " + MediaRoute2Info.ROUTE_ID_DEFAULT);
             return;
         }
-        if (mBtRouteProvider != null) {
-            if (TextUtils.equals(routeId, mDeviceRoute.getId())) {
-                mBtRouteProvider.transferTo(null);
-            } else {
-                mBtRouteProvider.transferTo(routeId);
-            }
+        MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
+        boolean isAvailableDeviceRoute =
+                mDeviceRouteController.getAvailableRoutes().stream()
+                        .anyMatch(it -> it.getId().equals(routeId));
+        boolean isSelectedDeviceRoute = TextUtils.equals(routeId, selectedDeviceRoute.getId());
+
+        if (isSelectedDeviceRoute || isAvailableDeviceRoute) {
+            // The requested route is managed by the device route controller. Note that the selected
+            // device route doesn't necessarily match mSelectedRouteId (which is the selected route
+            // of the routing session). If the selected device route is transferred to, we need to
+            // make the bluetooth routes inactive so that the device route becomes the selected
+            // route of the routing session.
+            mDeviceRouteController.transferTo(routeId);
+            mBluetoothRouteController.transferTo(null);
+        } else {
+            // The requested route is managed by the bluetooth route controller.
+            mDeviceRouteController.transferTo(null);
+            mBluetoothRouteController.transferTo(routeId);
         }
     }
 
@@ -254,69 +246,59 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         return mDefaultSessionInfo;
     }
 
+    /**
+     * Builds a system {@link RoutingSessionInfo} with the selected route set to the currently
+     * selected <b>device</b> route (wired or built-in, but not bluetooth) and transferable routes
+     * set to the currently available (connected) bluetooth routes.
+     *
+     * <p>The session's client package name is set to the provided package name.
+     *
+     * <p>Returns {@code null} if there are no registered system sessions.
+     */
+    @Nullable
     public RoutingSessionInfo generateDeviceRouteSelectedSessionInfo(String packageName) {
         synchronized (mLock) {
             if (mSessionInfos.isEmpty()) {
                 return null;
             }
-            RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
-                    SYSTEM_SESSION_ID, packageName).setSystemSession(true);
-            builder.addSelectedRoute(mDeviceRoute.getId());
-            if (mBtRouteProvider != null) {
-                for (MediaRoute2Info route : mBtRouteProvider.getAllBluetoothRoutes()) {
-                    builder.addTransferableRoute(route.getId());
+
+            MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
+
+            RoutingSessionInfo.Builder builder =
+                    new RoutingSessionInfo.Builder(SYSTEM_SESSION_ID, packageName)
+                            .setSystemSession(true);
+            builder.addSelectedRoute(selectedDeviceRoute.getId());
+            for (MediaRoute2Info route : mBluetoothRouteController.getAllBluetoothRoutes()) {
+                builder.addTransferableRoute(route.getId());
+            }
+
+            if (Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
+                for (MediaRoute2Info route : mDeviceRouteController.getAvailableRoutes()) {
+                    if (!TextUtils.equals(selectedDeviceRoute.getId(), route.getId())) {
+                        builder.addTransferableRoute(route.getId());
+                    }
                 }
             }
             return builder.setProviderId(mUniqueId).build();
         }
     }
 
-    private void updateDeviceRoute(AudioRoutesInfo newRoutes) {
-        int name = R.string.default_audio_route_name;
-        int type = TYPE_BUILTIN_SPEAKER;
-        if (newRoutes != null) {
-            mCurAudioRoutesInfo.mainType = newRoutes.mainType;
-            if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0) {
-                type = TYPE_WIRED_HEADPHONES;
-                name = com.android.internal.R.string.default_audio_route_name_headphones;
-            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADSET) != 0) {
-                type = TYPE_WIRED_HEADSET;
-                name = com.android.internal.R.string.default_audio_route_name_headphones;
-            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
-                type = TYPE_DOCK;
-                name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
-            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HDMI) != 0) {
-                type = TYPE_HDMI;
-                name = com.android.internal.R.string.default_audio_route_name_external_device;
-            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_USB) != 0) {
-                type = TYPE_USB_DEVICE;
-                name = com.android.internal.R.string.default_audio_route_name_usb;
-            }
-        }
-
-        mDeviceRoute = new MediaRoute2Info.Builder(
-                DEVICE_ROUTE_ID, mContext.getResources().getText(name).toString())
-                .setVolumeHandling(mAudioManager.isVolumeFixed()
-                        ? MediaRoute2Info.PLAYBACK_VOLUME_FIXED
-                        : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
-                .setVolume(mDeviceVolume)
-                .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
-                .setType(type)
-                .addFeature(FEATURE_LIVE_AUDIO)
-                .addFeature(FEATURE_LIVE_VIDEO)
-                .addFeature(FEATURE_LOCAL_PLAYBACK)
-                .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED)
-                .build();
-        updateProviderState();
-    }
-
     private void updateProviderState() {
         MediaRoute2ProviderInfo.Builder builder = new MediaRoute2ProviderInfo.Builder();
-        builder.addRoute(mDeviceRoute);
-        if (mBtRouteProvider != null) {
-            for (MediaRoute2Info route : mBtRouteProvider.getAllBluetoothRoutes()) {
+
+        // We must have a device route in the provider info.
+        if (Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
+            List<MediaRoute2Info> deviceRoutes = mDeviceRouteController.getAvailableRoutes();
+            for (MediaRoute2Info route : deviceRoutes) {
                 builder.addRoute(route);
             }
+            setProviderState(builder.build());
+        } else {
+            builder.addRoute(mDeviceRouteController.getSelectedRoute());
+        }
+
+        for (MediaRoute2Info route : mBluetoothRouteController.getAllBluetoothRoutes()) {
+            builder.addRoute(route);
         }
         MediaRoute2ProviderInfo providerInfo = builder.build();
         setProviderState(providerInfo);
@@ -337,44 +319,36 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     SYSTEM_SESSION_ID, "" /* clientPackageName */)
                     .setSystemSession(true);
 
-            MediaRoute2Info selectedRoute = mDeviceRoute;
-            if (mBtRouteProvider != null) {
-                MediaRoute2Info selectedBtRoute = mBtRouteProvider.getSelectedRoute();
-                if (selectedBtRoute != null) {
-                    selectedRoute = selectedBtRoute;
-                    builder.addTransferableRoute(mDeviceRoute.getId());
-                }
+            MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
+            MediaRoute2Info selectedRoute = selectedDeviceRoute;
+            MediaRoute2Info selectedBtRoute = mBluetoothRouteController.getSelectedRoute();
+            if (selectedBtRoute != null) {
+                selectedRoute = selectedBtRoute;
+                builder.addTransferableRoute(selectedDeviceRoute.getId());
             }
             mSelectedRouteId = selectedRoute.getId();
-            mDefaultRoute = new MediaRoute2Info.Builder(DEFAULT_ROUTE_ID, selectedRoute)
-                    .setSystemRoute(true)
-                    .setProviderId(mUniqueId)
-                    .build();
+            mDefaultRoute =
+                    new MediaRoute2Info.Builder(MediaRoute2Info.ROUTE_ID_DEFAULT, selectedRoute)
+                            .setSystemRoute(true)
+                            .setProviderId(mUniqueId)
+                            .build();
             builder.addSelectedRoute(mSelectedRouteId);
-
-            if (mBtRouteProvider != null) {
-                for (MediaRoute2Info route : mBtRouteProvider.getTransferableRoutes()) {
-                    builder.addTransferableRoute(route.getId());
+            if (Flags.enableAudioPoliciesDeviceAndBluetoothController()) {
+                for (MediaRoute2Info route : mDeviceRouteController.getAvailableRoutes()) {
+                    String routeId = route.getId();
+                    if (!mSelectedRouteId.equals(routeId)) {
+                        builder.addTransferableRoute(routeId);
+                    }
                 }
+            }
+            for (MediaRoute2Info route : mBluetoothRouteController.getTransferableRoutes()) {
+                builder.addTransferableRoute(route.getId());
             }
 
             RoutingSessionInfo newSessionInfo = builder.setProviderId(mUniqueId).build();
 
-            if (mPendingSessionCreationRequest != null) {
-                SessionCreationRequest sessionCreationRequest;
-                synchronized (mRequestLock) {
-                    sessionCreationRequest = mPendingSessionCreationRequest;
-                    mPendingSessionCreationRequest = null;
-                }
-                if (sessionCreationRequest != null) {
-                    if (TextUtils.equals(mSelectedRouteId, sessionCreationRequest.mRouteId)) {
-                        mCallback.onSessionCreated(this,
-                                sessionCreationRequest.mRequestId, newSessionInfo);
-                    } else {
-                        mCallback.onRequestFailed(this, sessionCreationRequest.mRequestId,
-                                MediaRoute2ProviderService.REASON_UNKNOWN_ERROR);
-                    }
-                }
+            synchronized (mRequestLock) {
+                reportPendingSessionRequestResultLockedIfNeeded(newSessionInfo);
             }
 
             if (Objects.equals(oldSessionInfo, newSessionInfo)) {
@@ -385,15 +359,69 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 }
                 mSessionInfos.clear();
                 mSessionInfos.add(newSessionInfo);
-                mDefaultSessionInfo = new RoutingSessionInfo.Builder(
-                        SYSTEM_SESSION_ID, "" /* clientPackageName */)
-                        .setProviderId(mUniqueId)
-                        .setSystemSession(true)
-                        .addSelectedRoute(DEFAULT_ROUTE_ID)
-                        .build();
+                mDefaultSessionInfo =
+                        new RoutingSessionInfo.Builder(
+                                        SYSTEM_SESSION_ID, "" /* clientPackageName */)
+                                .setProviderId(mUniqueId)
+                                .setSystemSession(true)
+                                .addSelectedRoute(MediaRoute2Info.ROUTE_ID_DEFAULT)
+                                .build();
                 return true;
             }
         }
+    }
+
+    @GuardedBy("mRequestLock")
+    private void reportPendingSessionRequestResultLockedIfNeeded(
+            RoutingSessionInfo newSessionInfo) {
+        if (mPendingSessionCreationRequest == null) {
+            // No pending request, nothing to report.
+            return;
+        }
+
+        long pendingRequestId = mPendingSessionCreationRequest.mRequestId;
+        if (TextUtils.equals(mSelectedRouteId, mPendingSessionCreationRequest.mRouteId)) {
+            if (DEBUG) {
+                Slog.w(
+                        TAG,
+                        "Session creation success to route "
+                                + mPendingSessionCreationRequest.mRouteId);
+            }
+            mPendingSessionCreationRequest = null;
+            mCallback.onSessionCreated(this, pendingRequestId, newSessionInfo);
+        } else {
+            boolean isRequestedRouteConnectedBtRoute = isRequestedRouteConnectedBtRoute();
+            if (!Flags.enableWaitingStateForSystemSessionCreationRequest()
+                    || !isRequestedRouteConnectedBtRoute) {
+                if (DEBUG) {
+                    Slog.w(
+                            TAG,
+                            "Session creation failed to route "
+                                    + mPendingSessionCreationRequest.mRouteId);
+                }
+                mPendingSessionCreationRequest = null;
+                mCallback.onRequestFailed(
+                        this, pendingRequestId, MediaRoute2ProviderService.REASON_UNKNOWN_ERROR);
+            } else if (DEBUG) {
+                Slog.w(
+                        TAG,
+                        "Session creation waiting state to route "
+                                + mPendingSessionCreationRequest.mRouteId);
+            }
+        }
+    }
+
+    @GuardedBy("mRequestLock")
+    private boolean isRequestedRouteConnectedBtRoute() {
+        // Using AllRoutes instead of TransferableRoutes as BT Stack sends an intermediate update
+        // where two BT routes are active so the transferable routes list is empty.
+        // See b/307723189 for context
+        for (MediaRoute2Info btRoute : mBluetoothRouteController.getAllBluetoothRoutes()) {
+            if (TextUtils.equals(btRoute.getId(), mPendingSessionCreationRequest.mRouteId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void publishProviderState() {
@@ -412,6 +440,15 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
 
         mCallback.onSessionUpdated(this, sessionInfo);
+    }
+
+    @Override
+    protected String getDebugString() {
+        return TextUtils.formatSimple(
+                "SystemMR2Provider - package: %s, selected route id: %s, bluetooth impl: %s",
+                mComponentName.getPackageName(),
+                mSelectedRouteId,
+                mBluetoothRouteController.getClass().getSimpleName());
     }
 
     private static class SessionCreationRequest {
@@ -434,15 +471,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     .build();
         }
 
-        if (mBtRouteProvider != null && mBtRouteProvider.updateVolumeForDevices(devices, volume)) {
+        if (mBluetoothRouteController.updateVolumeForDevices(devices, volume)) {
             return;
         }
-        if (mDeviceVolume != volume) {
-            mDeviceVolume = volume;
-            mDeviceRoute = new MediaRoute2Info.Builder(mDeviceRoute)
-                    .setVolume(volume)
-                    .build();
-        }
+
+        mDeviceRouteController.updateVolume(volume);
+
         publishProviderState();
     }
 

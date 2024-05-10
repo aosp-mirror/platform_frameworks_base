@@ -21,6 +21,7 @@
         <option name="push" value="hwuimacro->/data/local/tmp/benchmarktest/hwuimacro" />
     </target_preparer>
     <option name="test-suite-tag" value="apct" />
+    <option name="not-shardable" value="true" />
     <test class="com.android.tradefed.testtype.GTest" >
         <option name="native-test-device-path" value="/data/local/tmp/nativetest" />
         <option name="module-name" value="hwui_unit_tests" />

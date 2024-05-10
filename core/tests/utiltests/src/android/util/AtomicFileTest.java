@@ -20,19 +20,23 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.longThat;
+import static org.mockito.Mockito.spy;
 
-import android.app.Instrumentation;
-import android.content.Context;
+import android.os.SystemClock;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -42,9 +46,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 @RunWith(Parameterized.class)
 public class AtomicFileTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final String BASE_NAME = "base";
     private static final String NEW_NAME = BASE_NAME + ".new";
     private static final String LEGACY_BACKUP_NAME = BASE_NAME + ".bak";
@@ -76,14 +84,10 @@ public class AtomicFileTest {
     @Parameterized.Parameter(3)
     public byte[] mExpectedBytes;
 
-    private final Instrumentation mInstrumentation =
-            InstrumentationRegistry.getInstrumentation();
-    private final Context mContext = mInstrumentation.getContext();
-
-    private final File mDirectory = mContext.getFilesDir();
-    private final File mBaseFile = new File(mDirectory, BASE_NAME);
-    private final File mNewFile = new File(mDirectory, NEW_NAME);
-    private final File mLegacyBackupFile = new File(mDirectory, LEGACY_BACKUP_NAME);
+    private File mDirectory;
+    private File mBaseFile;
+    private File mNewFile;
+    private File mLegacyBackupFile;
 
     @Parameterized.Parameters(name = "{0}")
     public static Object[][] data() {
@@ -195,6 +199,13 @@ public class AtomicFileTest {
     }
 
     @Before
+    public void setUp() throws Exception {
+        mDirectory = Files.createTempDirectory("AtomicFile").toFile();
+        mBaseFile = new File(mDirectory, BASE_NAME);
+        mNewFile = new File(mDirectory, NEW_NAME);
+        mLegacyBackupFile = new File(mDirectory, LEGACY_BACKUP_NAME);
+    }
+
     @After
     public void deleteFiles() {
         mBaseFile.delete();
@@ -267,6 +278,30 @@ public class AtomicFileTest {
 
         assertThat(toString).contains("AtomicFile");
         assertThat(toString).contains(mBaseFile.getAbsolutePath());
+    }
+
+    @Test
+    @IgnoreUnderRavenwood(blockedBy = SystemConfigFileCommitEventLogger.class)
+    public void testTimeLogging() throws Exception {
+        var logger = spy(new SystemConfigFileCommitEventLogger("name"));
+        var file = new AtomicFile(mBaseFile, logger);
+        var startTime1 = SystemClock.uptimeMillis();
+        try (var writer = file.startWrite()) {
+            file.finishWrite(writer);
+        }
+        var endTime1 = SystemClock.uptimeMillis();
+        SystemClock.sleep(10);
+        var startTime2 = SystemClock.uptimeMillis();
+        try (var writer = file.startWrite()) {
+            file.finishWrite(writer);
+        }
+        var endTime2 = SystemClock.uptimeMillis();
+
+        var inOrder = Mockito.inOrder(logger);
+        inOrder.verify(logger).writeLogRecord(longThat(
+                l -> l <= endTime1 - startTime1));
+        inOrder.verify(logger).writeLogRecord(longThat(
+                l -> l <= endTime2 - startTime2 && l < endTime2 - startTime1));
     }
 
     private static void writeBytes(@NonNull File file, @NonNull byte[] bytes) throws IOException {

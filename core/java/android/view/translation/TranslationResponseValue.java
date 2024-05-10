@@ -27,7 +27,7 @@ import com.android.internal.util.DataClass;
 import java.util.Objects;
 
 /**
- * A translated response value from {@link android.service.translation.TranslationService}.
+ * A translated response value from translation service.
  */
 @DataClass(genBuilder = true, genToString = true, genEqualsHashCode = true,
         genHiddenConstDefs = true)

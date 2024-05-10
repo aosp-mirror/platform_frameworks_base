@@ -19,9 +19,11 @@ package com.android.systemui.shared.clocks
 import android.testing.AndroidTestingRunner
 import android.view.LayoutInflater
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.app.animation.Interpolators
+import com.android.systemui.customization.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.TextAnimator
+import com.android.systemui.util.mockito.any
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -55,8 +57,19 @@ class AnimatableClockViewTest : SysuiTestCase() {
         clockView.animateAppearOnLockscreen()
         clockView.measure(50, 50)
 
-        verify(mockTextAnimator).glyphFilter = null
-        verify(mockTextAnimator).setTextStyle(300, -1.0f, 200, false, 350L, null, 0L, null)
+        verify(mockTextAnimator).glyphFilter = any()
+        verify(mockTextAnimator)
+            .setTextStyle(
+                weight = 300,
+                textSize = -1.0f,
+                color = 200,
+                strokeWidth = -1F,
+                animate = false,
+                duration = 833L,
+                interpolator = Interpolators.EMPHASIZED_DECELERATE,
+                delay = 0L,
+                onAnimationEnd = null
+            )
         verifyNoMoreInteractions(mockTextAnimator)
     }
 
@@ -66,9 +79,31 @@ class AnimatableClockViewTest : SysuiTestCase() {
         clockView.measure(50, 50)
         clockView.animateAppearOnLockscreen()
 
-        verify(mockTextAnimator, times(2)).glyphFilter = null
-        verify(mockTextAnimator).setTextStyle(100, -1.0f, 200, false, 0L, null, 0L, null)
-        verify(mockTextAnimator).setTextStyle(300, -1.0f, 200, true, 350L, null, 0L, null)
+        verify(mockTextAnimator, times(2)).glyphFilter = any()
+        verify(mockTextAnimator)
+            .setTextStyle(
+                weight = 100,
+                textSize = -1.0f,
+                color = 200,
+                strokeWidth = -1F,
+                animate = false,
+                duration = 0L,
+                interpolator = null,
+                delay = 0L,
+                onAnimationEnd = null
+            )
+        verify(mockTextAnimator)
+            .setTextStyle(
+                weight = 300,
+                textSize = -1.0f,
+                color = 200,
+                strokeWidth = -1F,
+                animate = true,
+                duration = 833L,
+                interpolator = Interpolators.EMPHASIZED_DECELERATE,
+                delay = 0L,
+                onAnimationEnd = null
+            )
         verifyNoMoreInteractions(mockTextAnimator)
     }
 }

@@ -21,10 +21,6 @@ gensrcs {
         "soong_zip",
     ],
 
-    tool_files: [
-        ":libprotobuf-internal-protos",
-    ],
-
     cmd: "mkdir -p $(genDir)/$(in) " +
         "&& $(location aprotoc) " +
         "  --plugin=$(location protoc-gen-javastream) " +
@@ -41,8 +37,12 @@ gensrcs {
         ":libtombstone_proto-src",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        ":service-permission-streaming-proto-sources",
     ],
+
+    data: [
+        ":libprotobuf-internal-protos",
+    ],
+
     output_extension: "srcjar",
 }
 
@@ -52,10 +52,6 @@ gensrcs {
     tools: [
         "aprotoc",
         "protoc-gen-cppstream",
-    ],
-
-    tool_files: [
-        ":libprotobuf-internal-protos",
     ],
 
     cmd: "mkdir -p $(genDir) " +
@@ -72,10 +68,49 @@ gensrcs {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        ":service-permission-streaming-proto-sources",
+    ],
+
+    data: [
+        ":libprotobuf-internal-protos",
     ],
 
     output_extension: "proto.h",
+}
+
+// ====  nfc framework java library  ==============================
+gensrcs {
+    name: "framework-nfc-javastream-protos",
+
+    tools: [
+        "aprotoc",
+        "protoc-gen-javastream",
+        "soong_zip",
+    ],
+
+    cmd: "mkdir -p $(genDir)/$(in) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-javastream) " +
+        "  --javastream_out=$(genDir)/$(in) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in) " +
+        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
+
+    srcs: [
+        "core/proto/android/app/pendingintent.proto",
+        "core/proto/android/content/component_name.proto",
+        "core/proto/android/content/intent.proto",
+        "core/proto/android/nfc/*.proto",
+        "core/proto/android/os/patternmatcher.proto",
+        "core/proto/android/os/persistablebundle.proto",
+        "core/proto/android/privacy.proto",
+    ],
+
+    data: [
+        ":libprotobuf-internal-protos",
+    ],
+
+    output_extension: "srcjar",
 }
 
 // ====  java proto host library  ==============================
@@ -83,15 +118,12 @@ java_library_host {
     name: "platformprotos",
     srcs: [
         ":ipconnectivity-proto-src",
-        ":libstats_atom_enum_protos",
-        ":libstats_atom_message_protos",
         ":libstats_internal_protos",
         ":statsd_internal_protos",
         "cmds/am/proto/instrumentation_data.proto",
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
-        ":service-permission-streaming-proto-sources",
     ],
     proto: {
         include_dirs: [
@@ -128,7 +160,6 @@ java_library {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
-        ":service-permission-streaming-proto-sources",
     ],
     // Protos have lots of MissingOverride and similar.
     errorprone: {
@@ -150,7 +181,6 @@ java_library {
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
-        ":service-permission-streaming-proto-sources",
     ],
     exclude_srcs: [
         "core/proto/android/privacy.proto",
@@ -186,7 +216,6 @@ cc_defaults {
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
-        ":service-permission-streaming-proto-sources",
     ],
 }
 

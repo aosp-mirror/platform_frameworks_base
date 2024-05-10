@@ -206,4 +206,11 @@ final class AutofillInlineSessionController {
         }
         return false;
     }
+
+    boolean isImeShowing() {
+        if (mSession != null) {
+            return mSession.isImeShowing();
+        }
+        return false;
+    }
 }

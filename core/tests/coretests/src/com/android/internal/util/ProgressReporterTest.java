@@ -16,14 +16,28 @@
 
 package com.android.internal.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class ProgressReporterTest extends TestCase {
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = ProgressReporter.class)
+public class ProgressReporterTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private ProgressReporter r;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         r = new ProgressReporter(0);
     }
 
@@ -37,6 +51,7 @@ public class ProgressReporterTest extends TestCase {
         assertEquals("len", len, range[1]);
     }
 
+    @Test
     public void testBasic() throws Exception {
         assertProgress(0);
 
@@ -50,6 +65,7 @@ public class ProgressReporterTest extends TestCase {
         assertProgress(100);
     }
 
+    @Test
     public void testSegment() throws Exception {
         r.setProgress(20);
         assertProgress(20);
@@ -68,6 +84,7 @@ public class ProgressReporterTest extends TestCase {
         assertProgress(80);
     }
 
+    @Test
     public void testSegmentOvershoot() throws Exception {
         r.setProgress(20);
         assertProgress(20);
@@ -87,6 +104,7 @@ public class ProgressReporterTest extends TestCase {
         assertProgress(60);
     }
 
+    @Test
     public void testSegmentNested() throws Exception {
         r.setProgress(20);
         assertProgress(20);

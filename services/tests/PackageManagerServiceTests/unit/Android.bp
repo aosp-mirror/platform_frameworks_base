@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_framework_android_packages",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -33,9 +34,15 @@ android_test {
         "junit",
         "kotlin-test",
         "kotlin-reflect",
+        "mockito-target-extended-minus-junit4",
         "services.core",
         "servicestests-utils",
-        "truth-prebuilt",
+        "servicestests-core-utils",
+        "truth",
+    ],
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
     ],
     platform_apis: true,
     test_suites: ["device-tests"],

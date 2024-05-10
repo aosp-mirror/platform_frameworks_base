@@ -32,6 +32,7 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.drawer.Tile;
+import com.android.settingslib.widget.adaptiveicon.R;
 
 /**
  * Adaptive icon that can set background color

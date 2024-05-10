@@ -18,8 +18,8 @@
 #include <sys/types.h>  // umask
 
 #include <fstream>
+#include <iostream>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <vector>
 
@@ -51,7 +51,7 @@ using android::idmap2::utils::UidHasWriteAccessToPath;
 Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
   SYSTRACE << "CreateMultiple " << args;
   std::string target_apk_path;
-  std::string idmap_dir = kIdmapCacheDir;
+  std::string idmap_dir{kIdmapCacheDir};
   std::vector<std::string> overlay_apk_paths;
   std::vector<std::string> policies;
   bool ignore_overlayable = false;
@@ -67,7 +67,7 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
           .OptionalOption("--idmap-dir",
                           StringPrintf("output: path to the directory in which to write idmap file"
                                        " (defaults to %s)",
-                                       kIdmapCacheDir),
+                                       kIdmapCacheDir.data()),
                           &idmap_dir)
           .OptionalOption("--policy",
                           "input: an overlayable policy this overlay fulfills"
@@ -142,7 +142,7 @@ Result<Unit> CreateMultiple(const std::vector<std::string>& args) {
   }
 
   for (const std::string& idmap_path : idmap_paths) {
-    std::cout << idmap_path << std::endl;
+    std::cout << idmap_path << '\n';
   }
 
   return Unit{};

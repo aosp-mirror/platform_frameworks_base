@@ -24,13 +24,13 @@
             <shape>
                 <size android:height="@dimen/rounded_slider_track_width" />
                 <corners android:radius="@dimen/rounded_slider_track_corner_radius" />
-                <solid android:color="?attr/offStateColor" />
+                <solid android:color="?attr/shadeInactive" />
             </shape>
         </inset>
     </item>
     <item android:id="@android:id/progress"
           android:gravity="center_vertical|fill_horizontal">
-            <com.android.systemui.util.RoundedCornerProgressDrawable
+            <com.android.systemui.util.BrightnessProgressDrawable
                 android:drawable="@drawable/brightness_progress_full_drawable"
             />
     </item>

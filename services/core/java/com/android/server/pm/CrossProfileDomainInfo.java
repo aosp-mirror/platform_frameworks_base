@@ -16,16 +16,28 @@
 
 package com.android.server.pm;
 
+import android.annotation.UserIdInt;
 import android.content.pm.ResolveInfo;
+import android.os.UserHandle;
 
 public final class CrossProfileDomainInfo {
     /* ResolveInfo for IntentForwarderActivity to send the intent to the other profile */
-    ResolveInfo mResolveInfo;
+    final ResolveInfo mResolveInfo;
     int mHighestApprovalLevel;
+    @UserIdInt
+    final int mTargetUserId;
+
+    CrossProfileDomainInfo(ResolveInfo resolveInfo, int highestApprovalLevel, @UserIdInt
+            int targetUserId) {
+        this.mResolveInfo = resolveInfo;
+        this.mHighestApprovalLevel = highestApprovalLevel;
+        this.mTargetUserId = targetUserId;
+    }
 
     CrossProfileDomainInfo(ResolveInfo resolveInfo, int highestApprovalLevel) {
         this.mResolveInfo = resolveInfo;
         this.mHighestApprovalLevel = highestApprovalLevel;
+        this.mTargetUserId = UserHandle.USER_CURRENT; // default as current user
     }
 
     @Override
@@ -33,6 +45,7 @@ public final class CrossProfileDomainInfo {
         return "CrossProfileDomainInfo{"
                 + "resolveInfo=" + mResolveInfo
                 + ", highestApprovalLevel=" + mHighestApprovalLevel
+                + ", targetUserId= " + mTargetUserId
                 + '}';
     }
 }

@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.os.Trace;
 import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -62,12 +63,15 @@ public class ImageFloatingTextView extends TextView {
     public ImageFloatingTextView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL_FAST);
+        setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY);
     }
 
     @Override
     protected Layout makeSingleLayout(int wantWidth, BoringLayout.Metrics boring, int ellipsisWidth,
             Layout.Alignment alignment, boolean shouldEllipsize,
             TextUtils.TruncateAt effectiveEllipsize, boolean useSaved) {
+        Trace.beginSection("ImageFloatingTextView#makeSingleLayout");
         TransformationMethod transformationMethod = getTransformationMethod();
         CharSequence text = getText();
         if (transformationMethod != null) {
@@ -81,8 +85,8 @@ public class ImageFloatingTextView extends TextView {
                 .setLineSpacing(getLineSpacingExtra(), getLineSpacingMultiplier())
                 .setIncludePad(getIncludeFontPadding())
                 .setUseLineSpacingFromFallbacks(true)
-                .setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY)
-                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL);
+                .setBreakStrategy(getBreakStrategy())
+                .setHyphenationFrequency(getHyphenationFrequency());
         int maxLines;
         if (mMaxLinesForHeight > 0) {
             maxLines = mMaxLinesForHeight;
@@ -110,7 +114,9 @@ public class ImageFloatingTextView extends TextView {
             builder.setIndents(null, margins);
         }
 
-        return builder.build();
+        final StaticLayout result = builder.build();
+        Trace.endSection();
+        return result;
     }
 
     /**
@@ -135,6 +141,7 @@ public class ImageFloatingTextView extends TextView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("ImageFloatingTextView#onMeasure");
         int availableHeight = MeasureSpec.getSize(heightMeasureSpec) - mPaddingTop - mPaddingBottom;
         if (getLayout() != null && getLayout().getHeight() != availableHeight) {
             // We've been measured before and the new size is different than before, lets make sure
@@ -161,6 +168,7 @@ public class ImageFloatingTextView extends TextView {
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             }
         }
+        Trace.endSection();
     }
 
     @Override

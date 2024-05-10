@@ -22,11 +22,13 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Dialog;
 import android.os.Handler;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
@@ -35,21 +37,26 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +72,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     @Mock
     private RecordingController mController;
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private KeyguardDismissUtil mKeyguardDismissUtil;
     @Mock
@@ -82,6 +89,16 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private DialogLaunchAnimator mDialogLaunchAnimator;
+    @Mock
+    private PanelInteractor mPanelInteractor;
+    @Mock
+    private QsEventLogger mUiEventLogger;
+    @Mock
+    private MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
+    @Mock
+    private Dialog mPermissionDialogPrompt;
+    @Mock
+    private UserContextProvider mUserContextProvider;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -92,10 +109,12 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
 
+        when(mUserContextProvider.getUserContext()).thenReturn(mContext);
         when(mHost.getContext()).thenReturn(mContext);
 
         mTile = new ScreenRecordTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -107,10 +126,19 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mController,
                 mKeyguardDismissUtil,
                 mKeyguardStateController,
-                mDialogLaunchAnimator
+                mDialogLaunchAnimator,
+                mPanelInteractor,
+                mMediaProjectionMetricsLogger,
+                mUserContextProvider
         );
 
         mTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 
@@ -139,7 +167,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         assertNotNull(onStartRecordingClicked.getValue());
         onStartRecordingClicked.getValue().run();
         verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
-        verify(mHost).collapsePanels();
+        verify(mPanelInteractor).collapsePanels();
     }
 
     // Test that the tile is active and labeled correctly when the controller is starting
@@ -263,6 +291,30 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, /* arg= */ null);
 
         assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.qs_screen_record_icon_off));
+    }
+
+    @Test
+    public void showingDialogPrompt_logsMediaProjectionPermissionRequested() {
+        when(mController.isStarting()).thenReturn(false);
+        when(mController.isRecording()).thenReturn(false);
+        when(mController.createScreenRecordDialog(any(), any(), any(), any(), any()))
+                .thenReturn(mPermissionDialogPrompt);
+
+        mTile.handleClick(null /* view */);
+        mTestableLooper.processAllMessages();
+
+        verify(mController).createScreenRecordDialog(any(), eq(mFeatureFlags),
+                eq(mDialogLaunchAnimator), eq(mActivityStarter), any());
+        var onDismissAction = ArgumentCaptor.forClass(ActivityStarter.OnDismissAction.class);
+        verify(mKeyguardDismissUtil).executeWhenUnlocked(
+                onDismissAction.capture(), anyBoolean(), anyBoolean());
+        assertNotNull(onDismissAction.getValue());
+
+        onDismissAction.getValue().onDismiss();
+
+        verify(mPermissionDialogPrompt).show();
+        verify(mMediaProjectionMetricsLogger)
+                .notifyPermissionRequestDisplayed(mContext.getUserId());
     }
 
 }

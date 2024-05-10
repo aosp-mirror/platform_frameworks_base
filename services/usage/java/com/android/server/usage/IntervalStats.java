@@ -31,6 +31,7 @@ import static android.app.usage.UsageEvents.Event.KEYGUARD_SHOWN;
 import static android.app.usage.UsageEvents.Event.LOCUS_ID_SET;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_INTERRUPTION;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
+import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 import static android.app.usage.UsageEvents.Event.SCREEN_INTERACTIVE;
 import static android.app.usage.UsageEvents.Event.SCREEN_NON_INTERACTIVE;
 import static android.app.usage.UsageEvents.Event.SHORTCUT_INVOCATION;
@@ -42,7 +43,9 @@ import android.app.usage.EventList;
 import android.app.usage.EventStats;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.res.Configuration;
+import android.os.PersistableBundle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -575,6 +578,23 @@ public class IntervalStats {
                         continue;
                     }
                     break;
+                case USER_INTERACTION:
+                    if (event.mUserInteractionExtrasToken != null) {
+                        String category = packagesTokenData.getString(packageToken,
+                                event.mUserInteractionExtrasToken.mCategoryToken);
+                        String action = packagesTokenData.getString(packageToken,
+                                event.mUserInteractionExtrasToken.mActionToken);
+                        if (TextUtils.isEmpty(category) || TextUtils.isEmpty(action)) {
+                            this.events.remove(i);
+                            dataOmitted = true;
+                            continue;
+                        }
+                        event.mExtras = new PersistableBundle();
+                        event.mExtras.putString(UsageStatsManager.EXTRA_EVENT_CATEGORY, category);
+                        event.mExtras.putString(UsageStatsManager.EXTRA_EVENT_ACTION, action);
+                        event.mUserInteractionExtrasToken = null;
+                    }
+                    break;
             }
         }
         if (dataOmitted) {
@@ -692,13 +712,30 @@ public class IntervalStats {
                                 event.mPackage, event.mLocusId);
                     }
                     break;
+                case USER_INTERACTION:
+                    if (event.mExtras != null && event.mExtras.size() != 0) {
+                        final String category = event.mExtras.getString(
+                                UsageStatsManager.EXTRA_EVENT_CATEGORY);
+                        final String action = event.mExtras.getString(
+                                UsageStatsManager.EXTRA_EVENT_ACTION);
+                        if (!TextUtils.isEmpty(category) && !TextUtils.isEmpty(action)) {
+                            event.mUserInteractionExtrasToken =
+                                    new Event.UserInteractionEventExtrasToken();
+                            event.mUserInteractionExtrasToken.mCategoryToken =
+                                    packagesTokenData.getTokenOrAdd(packageToken, event.mPackage,
+                                            category);
+                            event.mUserInteractionExtrasToken.mActionToken =
+                                    packagesTokenData.getTokenOrAdd(packageToken, event.mPackage,
+                                            action);
+                        }
+                    }
+                    break;
             }
         }
     }
 
     /**
      * Obfuscates the data in this instance of interval stats.
-     *
      * @hide
      */
     public void obfuscateData(PackagesTokenData packagesTokenData) {

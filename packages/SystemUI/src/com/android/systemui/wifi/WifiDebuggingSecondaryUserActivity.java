@@ -30,7 +30,7 @@ import android.os.Bundle;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Alerts the user that wireless debugging cannot be enabled by a secondary user.
@@ -97,7 +97,7 @@ public class WifiDebuggingSecondaryUserActivity extends AlertActivity
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         registerReceiver(mWifiChangeReceiver, filter);
         // Close quick shade
-        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        closeSystemDialogs();
     }
 
     @Override

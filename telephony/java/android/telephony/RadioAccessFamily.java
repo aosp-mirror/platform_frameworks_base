@@ -24,6 +24,8 @@ import android.telephony.TelephonyManager.PrefNetworkMode;
 
 import com.android.internal.telephony.RILConstants;
 
+import java.util.Locale;
+
 
 /**
  * Object to indicate the phone radio type and access technology.
@@ -367,7 +369,7 @@ public class RadioAccessFamily implements Parcelable {
     }
 
     public static int rafTypeFromString(String rafList) {
-        rafList = rafList.toUpperCase();
+        rafList = rafList.toUpperCase(Locale.ROOT);
         String[] rafs = rafList.split("\\|");
         int result = 0;
         for(String raf : rafs) {

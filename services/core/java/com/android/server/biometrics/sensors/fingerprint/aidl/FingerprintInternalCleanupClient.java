@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
@@ -38,16 +39,16 @@ import java.util.function.Supplier;
  * Fingerprint-specific internal cleanup client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} AIDL interface.
  */
-class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint, AidlSession> {
+public class FingerprintInternalCleanupClient
+        extends InternalCleanupClient<Fingerprint, AidlSession> {
 
-    FingerprintInternalCleanupClient(@NonNull Context context,
+    public FingerprintInternalCleanupClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
             int userId, @NonNull String owner, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            @NonNull List<Fingerprint> enrolledList,
             @NonNull FingerprintUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, logger, biometricContext,
-                enrolledList, utils, authenticatorIds);
+                utils, authenticatorIds);
     }
 
     @Override
@@ -71,5 +72,12 @@ class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint
                 null /* ClientMonitorCallbackConverter */, new int[] {biometricId}, userId, owner,
                 utils, sensorId, logger.swapAction(context, BiometricsProtoEnums.ACTION_REMOVE),
                 biometricContext, authenticatorIds);
+    }
+
+    @Override
+    protected void onAddUnknownTemplate(int userId,
+            @NonNull BiometricAuthenticator.Identifier identifier) {
+        FingerprintUtils.getInstance(getSensorId()).addBiometricForUser(
+                getContext(), getTargetUserId(), (Fingerprint) identifier);
     }
 }

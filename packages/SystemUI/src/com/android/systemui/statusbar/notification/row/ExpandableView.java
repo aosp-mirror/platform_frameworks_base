@@ -32,12 +32,16 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.app.animation.Interpolators;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.notification.Roundable;
+import com.android.systemui.statusbar.notification.RoundableState;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.util.Compile;
 import com.android.systemui.util.DumpUtilsKt;
 
 import java.io.PrintWriter;
@@ -47,9 +51,13 @@ import java.util.List;
 /**
  * An abstract view for expandable views.
  */
-public abstract class ExpandableView extends FrameLayout implements Dumpable {
+public abstract class ExpandableView extends FrameLayout implements Dumpable, Roundable {
     private static final String TAG = "ExpandableView";
+    /** whether the dump() for this class should include verbose details */
+    protected static final boolean DUMP_VERBOSE =
+            Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
 
+    private RoundableState mRoundableState = null;
     protected OnHeightChangedListener mOnHeightChangedListener;
     private int mActualHeight;
     protected int mClipTopAmount;
@@ -62,6 +70,9 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private boolean mClipToActualHeight = true;
     private boolean mChangingPosition = false;
     private ViewGroup mTransientContainer;
+
+    // Needs to be added as transient view when removed from parent, because it's in animation
+    private boolean mInRemovalAnimation;
     private boolean mInShelf;
     private boolean mTransformingInShelf;
     protected float mContentTransformationAmount;
@@ -76,6 +87,20 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         super(context, attrs);
         mViewState = createExpandableViewState();
         initDimens();
+    }
+
+    @Override
+    public RoundableState getRoundableState() {
+        if (mRoundableState == null) {
+            mRoundableState = new RoundableState(this, this, 0f);
+        }
+        return mRoundableState;
+    }
+
+    @Override
+    public int getClipHeight() {
+        int clipHeight = Math.max(mActualHeight - mClipTopAmount - mClipBottomAmount, 0);
+        return Math.max(clipHeight, mMinimumHeightForClipping);
     }
 
     private void initDimens() {
@@ -278,6 +303,11 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
             long duration) {
     }
 
+    public int getHeightWithoutLockscreenConstraints() {
+        // ExpandableNotificationRow overrides this.
+        return getHeight();
+    }
+
     /**
      * @return The desired notification height.
      */
@@ -347,7 +377,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
      *                             such that the  child appears to be going away to the top. 1
      *                             Should mean the opposite.
      * @param isHeadsUpAnimation Is this a headsUp animation.
-     * @param endLocation The location where the horizonal heads up disappear animation should end.
      * @param onFinishedRunnable A runnable which should be run when the animation is finished.
      * @param animationListener An animation listener to add to the animation.
      *
@@ -355,7 +384,8 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
      * animation starts.
      */
     public abstract long performRemoveAnimation(long duration,
-            long delay, float translationDirection, boolean isHeadsUpAnimation, float endLocation,
+            long delay, float translationDirection, boolean isHeadsUpAnimation,
+            Runnable onStartedRunnable,
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener);
 
@@ -371,6 +401,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
      * @param below true if it is below.
      */
     public void setBelowSpeedBump(boolean below) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
     }
 
     public int getPinnedHeadsUpHeight() {
@@ -438,10 +469,9 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     protected void updateClipping() {
         if (mClipToActualHeight && shouldClipToActualHeight()) {
             int top = getClipTopAmount();
-            int bottom = Math.max(Math.max(getActualHeight() + getExtraBottomPadding()
+            int bottom = Math.max(Math.max(getActualHeight()
                     - mClipBottomAmount, top), mMinimumHeightForClipping);
-            int halfExtraWidth = (int) (mExtraWidthForClipping / 2.0f);
-            mClipRect.set(-halfExtraWidth, top, getWidth() + halfExtraWidth, bottom);
+            mClipRect.set(Integer.MIN_VALUE, top, Integer.MAX_VALUE, bottom);
             setClipBounds(mClipRect);
         } else {
             setClipBounds(null);
@@ -455,7 +485,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public void setExtraWidthForClipping(float extraWidthForClipping) {
         mExtraWidthForClipping = extraWidthForClipping;
-        updateClipping();
     }
 
     public float getHeaderVisibleAmount() {
@@ -581,10 +610,22 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     }
 
     /**
-     * @return padding used to alter how much of the view is clipped.
+     * Add the view to a transient container.
      */
-    public int getExtraBottomPadding() {
-        return 0;
+    public void addToTransientContainer(ViewGroup container, int index) {
+        container.addTransientView(this, index);
+        setTransientContainer(container);
+    }
+
+    /**
+     * @return If the view is in a process of removal animation.
+     */
+    public boolean inRemovalAnimation() {
+        return mInRemovalAnimation;
+    }
+
+    public void setInRemovalAnimation(boolean inRemovalAnimation) {
+        mInRemovalAnimation = inRemovalAnimation;
     }
 
     /**
@@ -605,6 +646,10 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         return false;
     }
 
+    public boolean isHeadsUpState() {
+        return false;
+    }
+
     public boolean isChildInGroup() {
         return false;
     }
@@ -621,12 +666,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         // initialize with the default values of the view
         mViewState.height = getIntrinsicHeight();
         mViewState.gone = getVisibility() == View.GONE;
-        mViewState.alpha = 1f;
+        mViewState.setAlpha(1f);
         mViewState.notGoneIndex = -1;
-        mViewState.xTranslation = getTranslationX();
+        mViewState.setXTranslation(getTranslationX());
         mViewState.hidden = false;
-        mViewState.scaleX = getScaleX();
-        mViewState.scaleY = getScaleY();
+        mViewState.setScaleX(getScaleX());
+        mViewState.setScaleY(getScaleY());
         mViewState.inShelf = false;
         mViewState.headsUpIsVisible = false;
 
@@ -816,6 +861,15 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
                 viewState.dump(pw, args);
                 pw.println();
             }
+            if (DUMP_VERBOSE) {
+                pw.println("mInRemovalAnimation: " + mInRemovalAnimation);
+                pw.println("mClipTopAmount: " + mClipTopAmount);
+                pw.println("mClipBottomAmount " + mClipBottomAmount);
+                pw.println("mClipToActualHeight: " + mClipToActualHeight);
+                pw.println("mExtraWidthForClipping: " + mExtraWidthForClipping);
+                pw.println("mMinimumHeightForClipping: " + mMinimumHeightForClipping);
+                pw.println("getClipBounds(): " + getClipBounds());
+            }
         });
     }
 
@@ -842,22 +896,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public boolean isFirstInSection() {
         return mFirstInSection;
-    }
-
-    /**
-     * Set the topRoundness of this view.
-     * @return Whether the roundness was changed.
-     */
-    public boolean setTopRoundness(float topRoundness, boolean animate) {
-        return false;
-    }
-
-    /**
-     * Set the bottom roundness of this view.
-     * @return Whether the roundness was changed.
-     */
-    public boolean setBottomRoundness(float bottomRoundness, boolean animate) {
-        return false;
     }
 
     public int getHeadsUpHeightWithoutHeader() {

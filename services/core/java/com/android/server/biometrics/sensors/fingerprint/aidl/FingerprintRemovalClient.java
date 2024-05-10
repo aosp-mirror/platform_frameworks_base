@@ -37,12 +37,12 @@ import java.util.function.Supplier;
  * Fingerprint-specific removal client supporting the
  * {@link android.hardware.biometrics.fingerprint.IFingerprint} interface.
  */
-class FingerprintRemovalClient extends RemovalClient<Fingerprint, AidlSession> {
+public class FingerprintRemovalClient extends RemovalClient<Fingerprint, AidlSession> {
     private static final String TAG = "FingerprintRemovalClient";
 
     private final int[] mBiometricIds;
 
-    FingerprintRemovalClient(@NonNull Context context,
+    public FingerprintRemovalClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
             @Nullable ClientMonitorCallbackConverter listener, int[] biometricIds, int userId,
             @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,

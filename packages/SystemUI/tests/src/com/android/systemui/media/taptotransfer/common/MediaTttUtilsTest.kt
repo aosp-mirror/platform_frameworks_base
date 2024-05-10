@@ -19,11 +19,13 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
-import com.android.internal.widget.CachingIconView
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
+import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo.Companion.DEFAULT_ICON_TINT
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -39,7 +41,6 @@ class MediaTttUtilsTest : SysuiTestCase() {
     private lateinit var appIconFromPackageName: Drawable
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfo: ApplicationInfo
-    @Mock private lateinit var logger: MediaTttLogger
 
     @Before
     fun setUp() {
@@ -66,71 +67,207 @@ class MediaTttUtilsTest : SysuiTestCase() {
     @Test
     fun getIconInfoFromPackageName_nullPackageName_returnsDefault() {
         val iconInfo =
-            MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = null, logger)
+            MediaTttUtils.getIconInfoFromPackageName(
+                context,
+                appPackageName = null,
+                isReceiver = false,
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isFalse()
-        assertThat(iconInfo.contentDescription)
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
             .isEqualTo(context.getString(R.string.media_output_dialog_unknown_launch_app_name))
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
+    }
+
+    @Test
+    fun getIconInfoFromPackageName_nullPackageName_isReceiver_returnsDefault() {
+        val iconInfo =
+            MediaTttUtils.getIconInfoFromPackageName(
+                context,
+                appPackageName = null,
+                isReceiver = true,
+            ) {}
+
+        assertThat(iconInfo.isAppIcon).isFalse()
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
+            .isEqualTo(
+                context.getString(R.string.media_transfer_receiver_content_description_unknown_app)
+            )
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
+    }
+
+    @Test
+    fun getIconInfoFromPackageName_nullPackageName_exceptionFnNotTriggered() {
+        var exceptionTriggered = false
+
+        MediaTttUtils.getIconInfoFromPackageName(
+            context,
+            appPackageName = null,
+            isReceiver = false,
+        ) {
+            exceptionTriggered = true
+        }
+
+        assertThat(exceptionTriggered).isFalse()
     }
 
     @Test
     fun getIconInfoFromPackageName_invalidPackageName_returnsDefault() {
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, "fakePackageName", logger)
+        val iconInfo =
+            MediaTttUtils.getIconInfoFromPackageName(
+                context,
+                appPackageName = "fakePackageName",
+                isReceiver = false,
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isFalse()
-        assertThat(iconInfo.contentDescription)
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
             .isEqualTo(context.getString(R.string.media_output_dialog_unknown_launch_app_name))
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
+    }
+
+    @Test
+    fun getIconInfoFromPackageName_invalidPackageName_isReceiver_returnsDefault() {
+        val iconInfo =
+            MediaTttUtils.getIconInfoFromPackageName(
+                context,
+                appPackageName = "fakePackageName",
+                isReceiver = true,
+            ) {}
+
+        assertThat(iconInfo.isAppIcon).isFalse()
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
+            .isEqualTo(
+                context.getString(R.string.media_transfer_receiver_content_description_unknown_app)
+            )
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
+        assertThat(iconInfo.tint).isEqualTo(DEFAULT_ICON_TINT)
+    }
+
+    @Test
+    fun getIconInfoFromPackageName_invalidPackageName_exceptionFnTriggered() {
+        var exceptionTriggered = false
+
+        MediaTttUtils.getIconInfoFromPackageName(
+            context,
+            appPackageName = "fakePackageName",
+            isReceiver = false
+        ) {
+            exceptionTriggered = true
+        }
+
+        assertThat(exceptionTriggered).isTrue()
+    }
+
+    @Test
+    fun getIconInfoFromPackageName_invalidPackageName_isReceiver_exceptionFnTriggered() {
+        var exceptionTriggered = false
+
+        MediaTttUtils.getIconInfoFromPackageName(
+            context,
+            appPackageName = "fakePackageName",
+            isReceiver = true
+        ) {
+            exceptionTriggered = true
+        }
+
+        assertThat(exceptionTriggered).isTrue()
     }
 
     @Test
     fun getIconInfoFromPackageName_validPackageName_returnsAppInfo() {
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME, logger)
+        val iconInfo =
+            MediaTttUtils.getIconInfoFromPackageName(
+                context,
+                PACKAGE_NAME,
+                isReceiver = false,
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isTrue()
-        assertThat(iconInfo.drawable).isEqualTo(appIconFromPackageName)
-        assertThat(iconInfo.contentDescription).isEqualTo(APP_NAME)
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Loaded(appIconFromPackageName))
+        assertThat(iconInfo.contentDescription.loadContentDescription(context)).isEqualTo(APP_NAME)
     }
 
     @Test
-    fun setIcon_viewHasIconAndContentDescription() {
-        val view = CachingIconView(context)
-        val icon = context.getDrawable(R.drawable.ic_celebration)!!
-        val contentDescription = "Happy birthday!"
+    fun getIconInfoFromPackageName_validPackageName_isReceiver_returnsAppInfo() {
+        val iconInfo =
+            MediaTttUtils.getIconInfoFromPackageName(
+                context,
+                PACKAGE_NAME,
+                isReceiver = true,
+            ) {}
 
-        MediaTttUtils.setIcon(view, icon, contentDescription)
-
-        assertThat(view.drawable).isEqualTo(icon)
-        assertThat(view.contentDescription).isEqualTo(contentDescription)
+        assertThat(iconInfo.isAppIcon).isTrue()
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Loaded(appIconFromPackageName))
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
+            .isEqualTo(
+                context.getString(
+                    R.string.media_transfer_receiver_content_description_with_app_name,
+                    APP_NAME
+                )
+            )
     }
 
     @Test
-    fun setIcon_iconSizeNull_viewSizeDoesNotChange() {
-        val view = CachingIconView(context)
-        val size = 456
-        view.layoutParams = FrameLayout.LayoutParams(size, size)
+    fun getIconInfoFromPackageName_validPackageName_exceptionFnNotTriggered() {
+        var exceptionTriggered = false
 
-        MediaTttUtils.setIcon(view, context.getDrawable(R.drawable.ic_cake)!!, "desc")
+        MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME, isReceiver = false) {
+            exceptionTriggered = true
+        }
 
-        assertThat(view.layoutParams.width).isEqualTo(size)
-        assertThat(view.layoutParams.height).isEqualTo(size)
+        assertThat(exceptionTriggered).isFalse()
     }
 
     @Test
-    fun setIcon_iconSizeProvided_viewSizeUpdates() {
-        val view = CachingIconView(context)
-        val size = 456
-        view.layoutParams = FrameLayout.LayoutParams(size, size)
+    fun getIconInfoFromPackageName_validPackageName_isReceiver_exceptionFnNotTriggered() {
+        var exceptionTriggered = false
 
-        val newSize = 40
-        MediaTttUtils.setIcon(
-            view,
-            context.getDrawable(R.drawable.ic_cake)!!,
-            "desc",
-            iconSize = newSize
-        )
+        MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME, isReceiver = true) {
+            exceptionTriggered = true
+        }
 
-        assertThat(view.layoutParams.width).isEqualTo(newSize)
-        assertThat(view.layoutParams.height).isEqualTo(newSize)
+        assertThat(exceptionTriggered).isFalse()
+    }
+
+    @Test
+    fun iconInfo_toTintedIcon_loaded() {
+        val contentDescription = ContentDescription.Loaded("test")
+        val drawable = context.getDrawable(R.drawable.ic_cake)!!
+        val tint = R.color.GM2_blue_500
+
+        val iconInfo =
+            IconInfo(
+                contentDescription,
+                MediaTttIcon.Loaded(drawable),
+                tint,
+                isAppIcon = false,
+            )
+
+        val tinted = iconInfo.toTintedIcon()
+
+        assertThat(tinted.icon).isEqualTo(Icon.Loaded(drawable, contentDescription))
+        assertThat(tinted.tint).isEqualTo(tint)
+    }
+
+    @Test
+    fun iconInfo_toTintedIcon_resource() {
+        val contentDescription = ContentDescription.Loaded("test")
+        val drawableRes = R.drawable.ic_cake
+        val tint = R.color.GM2_blue_500
+
+        val iconInfo =
+            IconInfo(
+                contentDescription,
+                MediaTttIcon.Resource(drawableRes),
+                tint,
+                isAppIcon = false
+            )
+
+        val tinted = iconInfo.toTintedIcon()
+
+        assertThat(tinted.icon).isEqualTo(Icon.Resource(drawableRes, contentDescription))
+        assertThat(tinted.tint).isEqualTo(tint)
     }
 }
 

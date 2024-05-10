@@ -16,37 +16,38 @@
 package com.android.systemui.statusbar.core
 
 import android.app.Fragment
-import com.android.systemui.R
+import com.android.systemui.res.R
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarView
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import java.lang.IllegalStateException
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Responsible for creating the status bar window and initializing the root components of that
  * window (see [CollapsedStatusBarFragment])
  */
-@CentralSurfacesScope
+@SysUISingleton
 class StatusBarInitializer @Inject constructor(
     private val windowController: StatusBarWindowController,
+    private val collapsedStatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
     private val creationListeners: Set<@JvmSuppressWildcards OnStatusBarViewInitializedListener>,
 ) {
 
     var statusBarViewUpdatedListener: OnStatusBarViewUpdatedListener? = null
 
     /**
-     * Creates the status bar window and root views, and initializes the component
+     * Creates the status bar window and root views, and initializes the component.
+     *
+     * TODO(b/277764509): Initialize the status bar via [CoreStartable#start].
      */
-    fun initializeStatusBar(
-        centralSurfacesComponent: CentralSurfacesComponent
-    ) {
+    fun initializeStatusBar() {
         windowController.fragmentHostManager.addTagListener(
                 CollapsedStatusBarFragment.TAG,
                 object : FragmentHostManager.FragmentListener {
@@ -66,11 +67,14 @@ class StatusBarInitializer @Inject constructor(
                     override fun onFragmentViewDestroyed(tag: String?, fragment: Fragment?) {
                         // nop
                     }
-                }).fragmentManager
+                }
+        ).fragmentManager
                 .beginTransaction()
-                .replace(R.id.status_bar_container,
-                        centralSurfacesComponent.createCollapsedStatusBarFragment(),
-                        CollapsedStatusBarFragment.TAG)
+                .replace(
+                    R.id.status_bar_container,
+                    collapsedStatusBarFragmentProvider.get(),
+                    CollapsedStatusBarFragment.TAG
+                )
                 .commit()
     }
 

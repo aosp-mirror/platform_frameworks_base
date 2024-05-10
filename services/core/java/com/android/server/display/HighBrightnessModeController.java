@@ -16,19 +16,16 @@
 
 package com.android.server.display;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.display.BrightnessInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IThermalEventListener;
-import android.os.IThermalService;
 import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.Temperature;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MathUtils;
@@ -37,13 +34,15 @@ import android.util.TimeUtils;
 import android.view.SurfaceControlHdrLayerInfoListener;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.display.DisplayDeviceConfig.HighBrightnessModeData;
 import com.android.server.display.DisplayManagerService.Clock;
+import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * Controls the status of high-brightness mode for devices that support it. This class assumes that
@@ -56,13 +55,19 @@ import java.util.LinkedList;
 class HighBrightnessModeController {
     private static final String TAG = "HighBrightnessModeController";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.HighBrightnessModeController DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     @VisibleForTesting
     static final float HBM_TRANSITION_POINT_INVALID = Float.POSITIVE_INFINITY;
 
+    private static final float DEFAULT_MAX_DESIRED_HDR_SDR_RATIO = 1.0f;
+
     public interface HdrBrightnessDeviceConfig {
-        float getHdrBrightnessFromSdr(float sdrBrightness);
+        // maxDesiredHdrSdrRatio will restrict the HDR brightness if the ratio is less than
+        // Float.POSITIVE_INFINITY
+        float getHdrBrightnessFromSdr(float sdrBrightness, float maxDesiredHdrSdrRatio);
     }
 
     private final float mBrightnessMin;
@@ -71,12 +76,13 @@ class HighBrightnessModeController {
     private final Runnable mHbmChangeCallback;
     private final Runnable mRecalcRunnable;
     private final Clock mClock;
-    private final SkinThermalStatusObserver mSkinThermalStatusObserver;
     private final Context mContext;
     private final SettingsObserver mSettingsObserver;
     private final Injector mInjector;
 
     private HdrListener mHdrListener;
+
+    @Nullable
     private HighBrightnessModeData mHbmData;
     private HdrBrightnessDeviceConfig mHdrBrightnessCfg;
     private IBinder mRegisteredDisplayToken;
@@ -96,7 +102,9 @@ class HighBrightnessModeController {
 
     private int mHbmMode = BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
     private boolean mIsHdrLayerPresent = false;
-    private boolean mIsThermalStatusWithinLimit = true;
+    // mMaxDesiredHdrSdrRatio should only be applied when there is a valid backlight->nits mapping
+    private float mMaxDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
+    private boolean mForceHbmChangeCallback = false;
     private boolean mIsBlockedByLowPowerMode = false;
     private int mWidth;
     private int mHeight;
@@ -105,30 +113,25 @@ class HighBrightnessModeController {
     private int mHbmStatsState = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF;
 
     /**
-     * If HBM is currently running, this is the start time for the current HBM session.
+     * If HBM is currently running, this is the start time and set of all events,
+     * for the current HBM session.
      */
-    private long mRunningStartTimeMillis = -1;
-
-    /**
-     * List of previous HBM-events ordered from most recent to least recent.
-     * Meant to store only the events that fall into the most recent
-     * {@link mHbmData.timeWindowMillis}.
-     */
-    private LinkedList<HbmEvent> mEvents = new LinkedList<>();
+    @Nullable
+    private HighBrightnessModeMetadata mHighBrightnessModeMetadata;
 
     HighBrightnessModeController(Handler handler, int width, int height, IBinder displayToken,
             String displayUniqueId, float brightnessMin, float brightnessMax,
             HighBrightnessModeData hbmData, HdrBrightnessDeviceConfig hdrBrightnessCfg,
-            Runnable hbmChangeCallback, Context context) {
+            Runnable hbmChangeCallback, HighBrightnessModeMetadata hbmMetadata, Context context) {
         this(new Injector(), handler, width, height, displayToken, displayUniqueId, brightnessMin,
-            brightnessMax, hbmData, hdrBrightnessCfg, hbmChangeCallback, context);
+            brightnessMax, hbmData, hdrBrightnessCfg, hbmChangeCallback, hbmMetadata, context);
     }
 
     @VisibleForTesting
     HighBrightnessModeController(Injector injector, Handler handler, int width, int height,
             IBinder displayToken, String displayUniqueId, float brightnessMin, float brightnessMax,
             HighBrightnessModeData hbmData, HdrBrightnessDeviceConfig hdrBrightnessCfg,
-            Runnable hbmChangeCallback, Context context) {
+            Runnable hbmChangeCallback, HighBrightnessModeMetadata hbmMetadata, Context context) {
         mInjector = injector;
         mContext = context;
         mClock = injector.getClock();
@@ -137,7 +140,7 @@ class HighBrightnessModeController {
         mBrightnessMin = brightnessMin;
         mBrightnessMax = brightnessMax;
         mHbmChangeCallback = hbmChangeCallback;
-        mSkinThermalStatusObserver = new SkinThermalStatusObserver(mInjector, mHandler);
+        mHighBrightnessModeMetadata = hbmMetadata;
         mSettingsObserver = new SettingsObserver(mHandler);
         mRecalcRunnable = this::recalculateTimeAllowance;
         mHdrListener = new HdrListener();
@@ -183,7 +186,8 @@ class HighBrightnessModeController {
 
     float getHdrBrightnessValue() {
         if (mHdrBrightnessCfg != null) {
-            float hdrBrightness = mHdrBrightnessCfg.getHdrBrightnessFromSdr(mBrightness);
+            float hdrBrightness = mHdrBrightnessCfg.getHdrBrightnessFromSdr(
+                    mBrightness, mMaxDesiredHdrSdrRatio);
             if (hdrBrightness != PowerManager.BRIGHTNESS_INVALID) {
                 return hdrBrightness;
             }
@@ -222,19 +226,22 @@ class HighBrightnessModeController {
 
         // If we are starting or ending a high brightness mode session, store the current
         // session in mRunningStartTimeMillis, or the old one in mEvents.
-        final boolean wasHbmDrainingAvailableTime = mRunningStartTimeMillis != -1;
+        final long runningStartTime = mHighBrightnessModeMetadata.getRunningStartTimeMillis();
+        final boolean wasHbmDrainingAvailableTime = runningStartTime != -1;
         final boolean shouldHbmDrainAvailableTime = mBrightness > mHbmData.transitionPoint
                 && !mIsHdrLayerPresent;
         if (wasHbmDrainingAvailableTime != shouldHbmDrainAvailableTime) {
             final long currentTime = mClock.uptimeMillis();
             if (shouldHbmDrainAvailableTime) {
-                mRunningStartTimeMillis = currentTime;
+                mHighBrightnessModeMetadata.setRunningStartTimeMillis(currentTime);
             } else {
-                mEvents.addFirst(new HbmEvent(mRunningStartTimeMillis, currentTime));
-                mRunningStartTimeMillis = -1;
+                final HbmEvent hbmEvent = new HbmEvent(runningStartTime, currentTime);
+                mHighBrightnessModeMetadata.addHbmEvent(hbmEvent);
+                mHighBrightnessModeMetadata.setRunningStartTimeMillis(-1);
 
                 if (DEBUG) {
-                    Slog.d(TAG, "New HBM event: " + mEvents.getFirst());
+                    Slog.d(TAG, "New HBM event: "
+                            + mHighBrightnessModeMetadata.getHbmEventQueue().peekFirst());
                 }
             }
         }
@@ -256,8 +263,11 @@ class HighBrightnessModeController {
 
     void stop() {
         registerHdrListener(null /*displayToken*/);
-        mSkinThermalStatusObserver.stopObserving();
         mSettingsObserver.stopObserving();
+    }
+
+    void setHighBrightnessModeMetadata(HighBrightnessModeMetadata hbmInfo) {
+        mHighBrightnessModeMetadata = hbmInfo;
     }
 
     void resetHbmData(int width, int height, IBinder displayToken, String displayUniqueId,
@@ -269,15 +279,10 @@ class HighBrightnessModeController {
         mDisplayStatsId = displayUniqueId.hashCode();
 
         unregisterHdrListener();
-        mSkinThermalStatusObserver.stopObserving();
         mSettingsObserver.stopObserving();
         if (deviceSupportsHbm()) {
             registerHdrListener(displayToken);
             recalculateTimeAllowance();
-            if (mHbmData.thermalStatusLimit > PowerManager.THERMAL_STATUS_NONE) {
-                mIsThermalStatusWithinLimit = true;
-                mSkinThermalStatusObserver.startObserving();
-            }
             if (!mHbmData.allowInLowPowerMode) {
                 mIsBlockedByLowPowerMode = false;
                 mSettingsObserver.startObserving();
@@ -316,34 +321,39 @@ class HighBrightnessModeController {
         pw.println("  mBrightnessMax=" + mBrightnessMax);
         pw.println("  remainingTime=" + calculateRemainingTime(mClock.uptimeMillis()));
         pw.println("  mIsTimeAvailable= " + mIsTimeAvailable);
-        pw.println("  mRunningStartTimeMillis=" + TimeUtils.formatUptime(mRunningStartTimeMillis));
-        pw.println("  mIsThermalStatusWithinLimit=" + mIsThermalStatusWithinLimit);
         pw.println("  mIsBlockedByLowPowerMode=" + mIsBlockedByLowPowerMode);
         pw.println("  width*height=" + mWidth + "*" + mHeight);
-        pw.println("  mEvents=");
-        final long currentTime = mClock.uptimeMillis();
-        long lastStartTime = currentTime;
-        if (mRunningStartTimeMillis != -1) {
-            lastStartTime = dumpHbmEvent(pw, new HbmEvent(mRunningStartTimeMillis, currentTime));
-        }
-        for (HbmEvent event : mEvents) {
-            if (lastStartTime > event.endTimeMillis) {
-                pw.println("    event: [normal brightness]: "
-                        + TimeUtils.formatDuration(lastStartTime - event.endTimeMillis));
-            }
-            lastStartTime = dumpHbmEvent(pw, event);
-        }
 
-        mSkinThermalStatusObserver.dump(pw);
+        if (mHighBrightnessModeMetadata != null) {
+            pw.println("  mRunningStartTimeMillis="
+                    + TimeUtils.formatUptime(
+                    mHighBrightnessModeMetadata.getRunningStartTimeMillis()));
+            pw.println("  mEvents=");
+            final long currentTime = mClock.uptimeMillis();
+            long lastStartTime = currentTime;
+            long runningStartTimeMillis = mHighBrightnessModeMetadata.getRunningStartTimeMillis();
+            if (runningStartTimeMillis != -1) {
+                lastStartTime = dumpHbmEvent(pw, new HbmEvent(runningStartTimeMillis, currentTime));
+            }
+            for (HbmEvent event : mHighBrightnessModeMetadata.getHbmEventQueue()) {
+                if (lastStartTime > event.getEndTimeMillis()) {
+                    pw.println("    event: [normal brightness]: "
+                            + TimeUtils.formatDuration(lastStartTime - event.getEndTimeMillis()));
+                }
+                lastStartTime = dumpHbmEvent(pw, event);
+            }
+        } else {
+            pw.println("  mHighBrightnessModeMetadata=null");
+        }
     }
 
     private long dumpHbmEvent(PrintWriter pw, HbmEvent event) {
-        final long duration = event.endTimeMillis - event.startTimeMillis;
+        final long duration = event.getEndTimeMillis() - event.getStartTimeMillis();
         pw.println("    event: ["
-                + TimeUtils.formatUptime(event.startTimeMillis) + ", "
-                + TimeUtils.formatUptime(event.endTimeMillis) + "] ("
+                + TimeUtils.formatUptime(event.getStartTimeMillis()) + ", "
+                + TimeUtils.formatUptime(event.getEndTimeMillis()) + "] ("
                 + TimeUtils.formatDuration(duration) + ")");
-        return event.startTimeMillis;
+        return event.getStartTimeMillis();
     }
 
     private boolean isCurrentlyAllowed() {
@@ -356,11 +366,11 @@ class HighBrightnessModeController {
         // See {@link #getHdrBrightnessValue}.
         return !mIsHdrLayerPresent
                 && (mIsAutoBrightnessEnabled && mIsTimeAvailable && mIsInAllowedAmbientRange
-                && mIsThermalStatusWithinLimit && !mIsBlockedByLowPowerMode);
+                && !mIsBlockedByLowPowerMode);
     }
 
     private boolean deviceSupportsHbm() {
-        return mHbmData != null;
+        return mHbmData != null && mHighBrightnessModeMetadata != null;
     }
 
     private long calculateRemainingTime(long currentTime) {
@@ -372,13 +382,15 @@ class HighBrightnessModeController {
 
         // First, lets see how much time we've taken for any currently running
         // session of HBM.
-        if (mRunningStartTimeMillis > 0) {
-            if (mRunningStartTimeMillis > currentTime) {
+        long runningStartTimeMillis = mHighBrightnessModeMetadata.getRunningStartTimeMillis();
+        if (runningStartTimeMillis > 0) {
+            if (runningStartTimeMillis > currentTime) {
                 Slog.e(TAG, "Start time set to the future. curr: " + currentTime
-                        + ", start: " + mRunningStartTimeMillis);
-                mRunningStartTimeMillis = currentTime;
+                        + ", start: " + runningStartTimeMillis);
+                mHighBrightnessModeMetadata.setRunningStartTimeMillis(currentTime);
+                runningStartTimeMillis = currentTime;
             }
-            timeAlreadyUsed = currentTime - mRunningStartTimeMillis;
+            timeAlreadyUsed = currentTime - runningStartTimeMillis;
         }
 
         if (DEBUG) {
@@ -387,18 +399,19 @@ class HighBrightnessModeController {
 
         // Next, lets iterate through the history of previous sessions and add those times.
         final long windowstartTimeMillis = currentTime - mHbmData.timeWindowMillis;
-        Iterator<HbmEvent> it = mEvents.iterator();
+        Iterator<HbmEvent> it = mHighBrightnessModeMetadata.getHbmEventQueue().iterator();
         while (it.hasNext()) {
             final HbmEvent event = it.next();
 
             // If this event ended before the current Timing window, discard forever and ever.
-            if (event.endTimeMillis < windowstartTimeMillis) {
+            if (event.getEndTimeMillis() < windowstartTimeMillis) {
                 it.remove();
                 continue;
             }
 
-            final long startTimeMillis = Math.max(event.startTimeMillis, windowstartTimeMillis);
-            timeAlreadyUsed += event.endTimeMillis - startTimeMillis;
+            final long startTimeMillis = Math.max(event.getStartTimeMillis(),
+                            windowstartTimeMillis);
+            timeAlreadyUsed += event.getEndTimeMillis() - startTimeMillis;
         }
 
         if (DEBUG) {
@@ -425,17 +438,18 @@ class HighBrightnessModeController {
         // Calculate the time at which we want to recalculate mIsTimeAvailable in case a lux or
         // brightness change doesn't happen before then.
         long nextTimeout = -1;
+        final ArrayDeque<HbmEvent> hbmEvents = mHighBrightnessModeMetadata.getHbmEventQueue();
         if (mBrightness > mHbmData.transitionPoint) {
             // if we're in high-lux now, timeout when we run out of allowed time.
             nextTimeout = currentTime + remainingTime;
-        } else if (!mIsTimeAvailable && mEvents.size() > 0) {
+        } else if (!mIsTimeAvailable && hbmEvents.size() > 0) {
             // If we are not allowed...timeout when the oldest event moved outside of the timing
             // window by at least minTime. Basically, we're calculating the soonest time we can
             // get {@code timeMinMillis} back to us.
             final long windowstartTimeMillis = currentTime - mHbmData.timeWindowMillis;
-            final HbmEvent lastEvent = mEvents.getLast();
+            final HbmEvent lastEvent = hbmEvents.peekLast();
             final long startTimePlusMinMillis =
-                    Math.max(windowstartTimeMillis, lastEvent.startTimeMillis)
+                    Math.max(windowstartTimeMillis, lastEvent.getStartTimeMillis())
                     + mHbmData.timeMinMillis;
             final long timeWhenMinIsGainedBack =
                     currentTime + (startTimePlusMinMillis - windowstartTimeMillis) - remainingTime;
@@ -450,18 +464,19 @@ class HighBrightnessModeController {
                     + ", isLuxHigh: " + mIsInAllowedAmbientRange
                     + ", isHBMCurrentlyAllowed: " + isCurrentlyAllowed()
                     + ", isHdrLayerPresent: " + mIsHdrLayerPresent
+                    + ", mMaxDesiredHdrSdrRatio: " + mMaxDesiredHdrSdrRatio
                     + ", isAutoBrightnessEnabled: " +  mIsAutoBrightnessEnabled
                     + ", mIsTimeAvailable: " + mIsTimeAvailable
                     + ", mIsInAllowedAmbientRange: " + mIsInAllowedAmbientRange
-                    + ", mIsThermalStatusWithinLimit: " + mIsThermalStatusWithinLimit
                     + ", mIsBlockedByLowPowerMode: " + mIsBlockedByLowPowerMode
                     + ", mBrightness: " + mBrightness
                     + ", mUnthrottledBrightness: " + mUnthrottledBrightness
                     + ", mThrottlingReason: "
                         + BrightnessInfo.briMaxReasonToString(mThrottlingReason)
-                    + ", RunningStartTimeMillis: " + mRunningStartTimeMillis
+                    + ", RunningStartTimeMillis: "
+                        + mHighBrightnessModeMetadata.getRunningStartTimeMillis()
                     + ", nextTimeout: " + (nextTimeout != -1 ? (nextTimeout - currentTime) : -1)
-                    + ", events: " + mEvents);
+                    + ", events: " + hbmEvents);
         }
 
         if (nextTimeout != -1) {
@@ -475,20 +490,20 @@ class HighBrightnessModeController {
     private void updateHbmMode() {
         int newHbmMode = calculateHighBrightnessMode();
         updateHbmStats(newHbmMode);
-        if (mHbmMode != newHbmMode) {
+        if (mHbmMode != newHbmMode || mForceHbmChangeCallback) {
+            mForceHbmChangeCallback = false;
             mHbmMode = newHbmMode;
             mHbmChangeCallback.run();
         }
     }
 
     private void updateHbmStats(int newMode) {
-        final float transitionPoint = mHbmData.transitionPoint;
         int state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF;
         if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
-                && getHdrBrightnessValue() > transitionPoint) {
+                && getHdrBrightnessValue() > mHbmData.transitionPoint) {
             state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_HDR;
         } else if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT
-                && mBrightness > transitionPoint) {
+                && mBrightness > mHbmData.transitionPoint) {
             state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT;
         }
         if (state == mHbmStatsState) {
@@ -502,16 +517,6 @@ class HighBrightnessModeController {
         final boolean newHbmSv =
                 (state == FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT);
         if (oldHbmSv && !newHbmSv) {
-            // HighBrightnessModeController (HBMC) currently supports throttling from two sources:
-            //     1. Internal, received from HBMC.SkinThermalStatusObserver.notifyThrottling()
-            //     2. External, received from HBMC.onBrightnessChanged()
-            // TODO(b/216373254): Deprecate internal throttling source
-            final boolean internalThermalThrottling = !mIsThermalStatusWithinLimit;
-            final boolean externalThermalThrottling =
-                mUnthrottledBrightness > transitionPoint && // We would've liked HBM brightness...
-                mBrightness <= transitionPoint &&           // ...but we got NBM, because of...
-                mThrottlingReason == BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL; // ...thermals.
-
             // If more than one conditions are flipped and turn off HBM sunlight
             // visibility, only one condition will be reported to make it simple.
             if (!mIsAutoBrightnessEnabled && mIsAutoBrightnessOffByState) {
@@ -524,7 +529,7 @@ class HighBrightnessModeController {
                 reason = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_LUX_DROP;
             } else if (!mIsTimeAvailable) {
                 reason = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_TIME_LIMIT;
-            } else if (internalThermalThrottling || externalThermalThrottling) {
+            } else if (isThermalThrottlingActive()) {
                 reason = FrameworkStatsLog
                                  .DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_THERMAL_LIMIT;
             } else if (mIsHdrLayerPresent) {
@@ -542,6 +547,14 @@ class HighBrightnessModeController {
 
         mInjector.reportHbmStateChange(mDisplayStatsId, state, reason);
         mHbmStatsState = state;
+    }
+
+    @VisibleForTesting
+    boolean isThermalThrottlingActive() {
+        // We would've liked HBM, but we got NBM (normal brightness mode) because of thermals.
+        return mUnthrottledBrightness > mHbmData.transitionPoint
+                && mBrightness <= mHbmData.transitionPoint
+                && mThrottlingReason == BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL;
     }
 
     private String hbmStatsStateToString(int hbmStatsState) {
@@ -588,114 +601,39 @@ class HighBrightnessModeController {
         }
     }
 
-    /**
-     * Represents an event in which High Brightness Mode was enabled.
-     */
-    private static class HbmEvent {
-        public long startTimeMillis;
-        public long endTimeMillis;
-
-        HbmEvent(long startTimeMillis, long endTimeMillis) {
-            this.startTimeMillis = startTimeMillis;
-            this.endTimeMillis = endTimeMillis;
-        }
-
-        @Override
-        public String toString() {
-            return "[Event: {" + startTimeMillis + ", " + endTimeMillis + "}, total: "
-                    + ((endTimeMillis - startTimeMillis) / 1000) + "]";
-        }
-    }
-
     @VisibleForTesting
     class HdrListener extends SurfaceControlHdrLayerInfoListener {
         @Override
         public void onHdrInfoChanged(IBinder displayToken, int numberOfHdrLayers,
-                int maxW, int maxH, int flags) {
+                int maxW, int maxH, int flags, float maxDesiredHdrSdrRatio) {
             mHandler.post(() -> {
+                Trace.traceBegin(Trace.TRACE_TAG_POWER, "HBMController#onHdrInfoChanged");
                 mIsHdrLayerPresent = numberOfHdrLayers > 0
                         && (float) (maxW * maxH) >= ((float) (mWidth * mHeight)
                                    * mHbmData.minimumHdrPercentOfScreen);
+
+                float candidateDesiredHdrSdrRatio =
+                        mIsHdrLayerPresent && mHdrBrightnessCfg != null
+                                ? maxDesiredHdrSdrRatio
+                                : DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
+
+                if (candidateDesiredHdrSdrRatio < 1.0f) {
+                    Slog.w(TAG, "Ignoring invalid desired HDR/SDR Ratio: "
+                            + candidateDesiredHdrSdrRatio);
+                    candidateDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
+                }
+
+                if (!BrightnessSynchronizer.floatEquals(
+                        mMaxDesiredHdrSdrRatio, candidateDesiredHdrSdrRatio)) {
+                    mForceHbmChangeCallback = true;
+                    mMaxDesiredHdrSdrRatio = candidateDesiredHdrSdrRatio;
+                }
+
                 // Calling the brightness update so that we can recalculate
                 // brightness with HDR in mind.
                 onBrightnessChanged(mBrightness, mUnthrottledBrightness, mThrottlingReason);
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
             });
-        }
-    }
-
-    private final class SkinThermalStatusObserver extends IThermalEventListener.Stub {
-        private final Injector mInjector;
-        private final Handler mHandler;
-
-        private IThermalService mThermalService;
-        private boolean mStarted;
-
-        SkinThermalStatusObserver(Injector injector, Handler handler) {
-            mInjector = injector;
-            mHandler = handler;
-        }
-
-        @Override
-        public void notifyThrottling(Temperature temp) {
-            if (DEBUG) {
-                Slog.d(TAG, "New thermal throttling status "
-                        + ", current thermal status = " + temp.getStatus()
-                        + ", threshold = " + mHbmData.thermalStatusLimit);
-            }
-            mHandler.post(() -> {
-                mIsThermalStatusWithinLimit = temp.getStatus() <= mHbmData.thermalStatusLimit;
-                // This recalculates HbmMode and runs mHbmChangeCallback if the mode has changed
-                updateHbmMode();
-            });
-        }
-
-        void startObserving() {
-            if (mStarted) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Thermal status observer already started");
-                }
-                return;
-            }
-            mThermalService = mInjector.getThermalService();
-            if (mThermalService == null) {
-                Slog.w(TAG, "Could not observe thermal status. Service not available");
-                return;
-            }
-            try {
-                // We get a callback immediately upon registering so there's no need to query
-                // for the current value.
-                mThermalService.registerThermalEventListenerWithType(this, Temperature.TYPE_SKIN);
-                mStarted = true;
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to register thermal status listener", e);
-            }
-        }
-
-        void stopObserving() {
-            mIsThermalStatusWithinLimit = true;
-            if (!mStarted) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Stop skipped because thermal status observer not started");
-                }
-                return;
-            }
-            try {
-                mThermalService.unregisterThermalEventListener(this);
-                mStarted = false;
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to unregister thermal status listener", e);
-            }
-            mThermalService = null;
-        }
-
-        void dump(PrintWriter writer) {
-            writer.println("  SkinThermalStatusObserver:");
-            writer.println("    mStarted: " + mStarted);
-            if (mThermalService != null) {
-                writer.println("    ThermalService available");
-            } else {
-                writer.println("    ThermalService not available");
-            }
         }
     }
 
@@ -752,11 +690,6 @@ class HighBrightnessModeController {
     public static class Injector {
         public Clock getClock() {
             return SystemClock::uptimeMillis;
-        }
-
-        public IThermalService getThermalService() {
-            return IThermalService.Stub.asInterface(
-                    ServiceManager.getService(Context.THERMAL_SERVICE));
         }
 
         public void reportHbmStateChange(int display, int state, int reason) {

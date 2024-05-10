@@ -52,6 +52,30 @@
     <integer name="config_delay_for_ims_dereg_millis">0</integer>
     <java-symbol type="integer" name="config_delay_for_ims_dereg_millis" />
 
+    <!-- Define the bar of considering the availability of a subscription is stable in milliseconds,
+         where 0 means immediate switch, and negative milliseconds indicates the auto data switch
+         feature is disabled.-->
+    <integer name="auto_data_switch_availability_stability_time_threshold_millis">10000</integer>
+    <java-symbol type="integer" name="auto_data_switch_availability_stability_time_threshold_millis" />
+
+    <!-- Define the maximum retry times when a validation for switching failed.-->
+    <integer name="auto_data_switch_validation_max_retry">7</integer>
+    <java-symbol type="integer" name="auto_data_switch_validation_max_retry" />
+
+    <!-- Boolean indicating whether ping test is required to pass on the target data SIM before the
+         device automatically switch to it. -->
+    <bool name="auto_data_switch_ping_test_before_switch">true</bool>
+    <java-symbol type="bool" name="auto_data_switch_ping_test_before_switch" />
+
+    <!-- Define the tolerated gap of score for auto data switch decision, larger than which the
+         device will switch to the SIM with higher score. The score is used in conjunction with the
+         score table defined in
+         CarrierConfigManager#KEY_AUTO_DATA_SWITCH_RAT_SIGNAL_SCORE_STRING_ARRAY.
+         If 0, the device always switch to the higher score SIM.
+         If < 0, the network type and signal strength based auto switch is disabled. -->
+    <integer name="auto_data_switch_score_tolerance">4000</integer>
+    <java-symbol type="integer" name="auto_data_switch_score_tolerance" />
+
     <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
          tunnels across service restart. If iwlan tunnels are not persisted across restart,
          Framework will clean up dangling data connections when service restarts -->
@@ -106,6 +130,88 @@
     <string name="config_qualified_networks_service_class" translatable="false"></string>
     <java-symbol type="string" name="config_qualified_networks_service_class" />
 
+    <!-- Telephony satellite service package name to bind to by default. -->
+    <string name="config_satellite_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_service_package" />
+
+    <!-- Telephony satellite gateway service package name to bind to by default. -->
+    <string name="config_satellite_gateway_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_gateway_service_package" />
+
+    <!-- Telephony pointing UI package name to be launched. -->
+    <string name="config_pointing_ui_package" translatable="false"></string>
+    <java-symbol type="string" name="config_pointing_ui_package" />
+
+    <!-- Telephony pointing UI class name to be launched. -->
+    <string name="config_pointing_ui_class" translatable="false"></string>
+    <java-symbol type="string" name="config_pointing_ui_class" />
+
+    <!-- Telephony resends received satellite datagram to listener
+         if ack is not received within this timeout -->
+    <integer name="config_timeout_to_receive_delivered_ack_millis">300000</integer>
+    <java-symbol type="integer" name="config_timeout_to_receive_delivered_ack_millis" />
+
+    <!-- The time duration in millis that the satellite will stay at listening state to wait for the
+         next incoming page before disabling listening and moving to IDLE state. This timeout
+         duration is used when transitioning from sending state to listening state.
+         -->
+    <integer name="config_satellite_stay_at_listening_from_sending_millis">180000</integer>
+    <java-symbol type="integer" name="config_satellite_stay_at_listening_from_sending_millis" />
+
+    <!-- The time duration in millis that the satellite will stay at listening state to wait for the
+         next incoming page before disabling listening and moving to IDLE state. This timeout
+         duration is used when transitioning from receiving state to listening state.
+         -->
+    <integer name="config_satellite_stay_at_listening_from_receiving_millis">30000</integer>
+    <java-symbol type="integer" name="config_satellite_stay_at_listening_from_receiving_millis" />
+
+    <!-- The time duration in millis after which cellular scanning will be enabled and satellite
+         will move to IDLE state. This timeout duration is used for satellite with NB IOT radio
+         technologies.
+         -->
+    <integer name="config_satellite_nb_iot_inactivity_timeout_millis">180000</integer>
+    <java-symbol type="integer" name="config_satellite_nb_iot_inactivity_timeout_millis" />
+
+    <!-- The timeout duration in milliseconds to determine whether to recommend Dialer to show the
+         emergency messaging option to users.
+
+         The timer is started when there is an ongoing emergency call, and the IMS is not
+         registered, and cellular service is not available. When the timer expires,
+         SatelliteSOSMessageRecommender will send the event EVENT_DISPLAY_EMERGENCY_MESSAGE to
+         Dialer, which will then prompt user to switch to using satellite emergency messaging.
+         -->
+    <integer name="config_emergency_call_wait_for_connection_timeout_millis">20000</integer>
+    <java-symbol type="integer" name="config_emergency_call_wait_for_connection_timeout_millis" />
+
+    <!-- Telephony config for the PLMNs of all satellite providers. This is used by satellite modem
+         to identify providers that should be ignored if the carrier config
+         carrier_supported_satellite_services_per_provider_bundle does not support them.
+         -->
+    <string-array name="config_satellite_providers" translatable="false"></string-array>
+    <java-symbol type="array" name="config_satellite_providers" />
+
+    <!-- The identifier of the satellite's SIM profile. The identifier is composed of MCC and MNC
+         of the satellite PLMN with the format "mccmnc". -->
+    <string name="config_satellite_sim_identifier" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_sim_identifier" />
+
+    <!-- The app to which the emergency call will be handed over for OEM-enabled satellite
+         messaging. The format of the config string is "package_name;class_name". -->
+    <string name="config_oem_enabled_satellite_sos_handover_app" translatable="false"></string>
+    <java-symbol type="string" name="config_oem_enabled_satellite_sos_handover_app" />
+
+    <!-- The action of the intent that Dialer sends to the app to which the emergency call will be
+         handed over for emergency messaging via satellite. -->
+    <string name="config_satellite_emergency_handover_intent_action" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_emergency_handover_intent_action" />
+
+    <!-- Whether outgoing satellite datagrams should be sent to modem in demo mode. When satellite
+         is enabled for demo mode, if this config is enabled, outgoing datagrams will be sent to
+         modem; otherwise, success results will be returned. If demo mode is disabled, outgoing
+         datagrams are always sent to modem. -->
+    <bool name="config_send_satellite_datagram_to_modem_in_demo_mode">false</bool>
+    <java-symbol type="bool" name="config_send_satellite_datagram_to_modem_in_demo_mode" />
+
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not
          supported. The network will be torn down on the source transport, and will be
@@ -114,7 +220,31 @@
     <bool name="config_enhanced_iwlan_handover_check">true</bool>
     <java-symbol type="bool" name="config_enhanced_iwlan_handover_check" />
 
-    <!-- Whether using the new SubscriptionManagerService or the old SubscriptionController -->
-    <bool name="config_using_subscription_manager_service">false</bool>
-    <java-symbol type="bool" name="config_using_subscription_manager_service" />
+    <!-- Whether asynchronously update the subscription database or not. Async mode increases
+         the performance, but sync mode reduces the chance of database/cache out-of-sync. -->
+    <bool name="config_subscription_database_async_update">true</bool>
+    <java-symbol type="bool" name="config_subscription_database_async_update" />
+
+    <!-- Boolean indicating whether the emergency numbers for a country, sourced from modem/config,
+         should be ignored if that country is 'locked' (i.e. ignore_modem_config set to true) in
+         Android Emergency DB. If this value is true, emergency numbers for a country, sourced from
+         modem/config, will be ignored if that country is 'locked' in Android Emergency DB. -->
+    <bool name="ignore_modem_config_emergency_numbers">false</bool>
+    <java-symbol type="bool" name="ignore_modem_config_emergency_numbers" />
+
+    <!-- Boolean indicating whether emergency numbers routing from the android emergency number
+         database should be ignored (i.e. routing will always be set to UNKNOWN). If this value is
+         true, routing from the android emergency number database will be ignored. -->
+    <bool name="ignore_emergency_number_routing_from_db">false</bool>
+    <java-symbol type="bool" name="ignore_emergency_number_routing_from_db" />
+
+    <!-- Boolean indicating whether allow sending null to modem to clear the previous initial attach
+         data profile -->
+    <bool name="allow_clear_initial_attach_data_profile">false</bool>
+    <java-symbol type="bool" name="allow_clear_initial_attach_data_profile" />
+
+    <!-- Whether to enable modem on boot if behavior is not defined -->
+    <bool name="config_enable_cellular_on_boot_default">true</bool>
+    <java-symbol type="bool" name="config_enable_cellular_on_boot_default" />
+
 </resources>

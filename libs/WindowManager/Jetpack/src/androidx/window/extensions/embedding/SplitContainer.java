@@ -17,35 +17,65 @@
 package androidx.window.extensions.embedding;
 
 import android.app.Activity;
-import android.content.res.Configuration;
+import android.os.Binder;
+import android.os.IBinder;
 import android.util.Pair;
 import android.util.Size;
+import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.window.extensions.core.util.function.Function;
 
 /**
  * Client-side descriptor of a split that holds two containers.
  */
 class SplitContainer {
     @NonNull
-    private final TaskFragmentContainer mPrimaryContainer;
+    private TaskFragmentContainer mPrimaryContainer;
     @NonNull
     private final TaskFragmentContainer mSecondaryContainer;
     @NonNull
     private final SplitRule mSplitRule;
+    /** @see SplitContainer#getCurrentSplitAttributes() */
     @NonNull
-    private SplitAttributes mSplitAttributes;
+    private SplitAttributes mCurrentSplitAttributes;
+    /** @see SplitContainer#getDefaultSplitAttributes() */
+    @NonNull
+    private SplitAttributes mDefaultSplitAttributes;
+    @NonNull
+    private final IBinder mToken;
+
+    /**
+     * Whether the selection of which container is primary can be changed at runtime. Runtime
+     * updates is currently possible only for {@link SplitPinContainer}
+     *
+     * @see SplitPinContainer
+     */
+    private final boolean mIsPrimaryContainerMutable;
 
     SplitContainer(@NonNull TaskFragmentContainer primaryContainer,
             @NonNull Activity primaryActivity,
             @NonNull TaskFragmentContainer secondaryContainer,
             @NonNull SplitRule splitRule,
             @NonNull SplitAttributes splitAttributes) {
+        this(primaryContainer, primaryActivity, secondaryContainer, splitRule, splitAttributes,
+                false /* isPrimaryContainerMutable */);
+    }
+
+    SplitContainer(@NonNull TaskFragmentContainer primaryContainer,
+            @NonNull Activity primaryActivity,
+            @NonNull TaskFragmentContainer secondaryContainer,
+            @NonNull SplitRule splitRule,
+            @NonNull SplitAttributes splitAttributes, boolean isPrimaryContainerMutable) {
         mPrimaryContainer = primaryContainer;
         mSecondaryContainer = secondaryContainer;
         mSplitRule = splitRule;
-        mSplitAttributes = splitAttributes;
+        mDefaultSplitAttributes = splitRule.getDefaultSplitAttributes();
+        mCurrentSplitAttributes = splitAttributes;
+        mToken = new Binder("SplitContainer");
+        mIsPrimaryContainerMutable = isPrimaryContainerMutable;
 
         if (shouldFinishPrimaryWithSecondary(splitRule)) {
             if (mPrimaryContainer.getRunningActivityCount() == 1
@@ -63,6 +93,13 @@ class SplitContainer {
         }
     }
 
+    void setPrimaryContainer(@NonNull TaskFragmentContainer primaryContainer) {
+        if (!mIsPrimaryContainerMutable) {
+            throw new IllegalStateException("Cannot update primary TaskFragmentContainer");
+        }
+        mPrimaryContainer = primaryContainer;
+    }
+
     @NonNull
     TaskFragmentContainer getPrimaryContainer() {
         return mPrimaryContainer;
@@ -78,19 +115,60 @@ class SplitContainer {
         return mSplitRule;
     }
 
+    /**
+     * Returns the current {@link SplitAttributes} this {@code SplitContainer} is showing.
+     * <p>
+     * If the {@code SplitAttributes} calculator function is not set by
+     * {@link SplitController#setSplitAttributesCalculator(Function)}, the current
+     * {@code SplitAttributes} is either to expand the containers if the size constraints of
+     * {@link #getSplitRule()} are not satisfied,
+     * or the {@link #getDefaultSplitAttributes()}, otherwise.
+     * </p><p>
+     * If the {@code SplitAttributes} calculator function is set, the current
+     * {@code SplitAttributes} will be customized by the function, which can be any
+     * {@code SplitAttributes}.
+     * </p>
+     *
+     * @see SplitAttributes.SplitType.ExpandContainersSplitType
+     */
     @NonNull
-    SplitAttributes getSplitAttributes() {
-        return mSplitAttributes;
+    SplitAttributes getCurrentSplitAttributes() {
+        return mCurrentSplitAttributes;
+    }
+
+    /**
+     * Returns the default {@link SplitAttributes} when the parent task container bounds satisfy
+     * {@link #getSplitRule()} constraints.
+     * <p>
+     * The value is usually from {@link SplitRule#getDefaultSplitAttributes} unless it is overridden
+     * by {@link SplitController#updateSplitAttributes(IBinder, SplitAttributes)}.
+     */
+    @NonNull
+    SplitAttributes getDefaultSplitAttributes() {
+        return mDefaultSplitAttributes;
+    }
+
+    @NonNull
+    IBinder getToken() {
+        return mToken;
     }
 
     /**
      * Updates the {@link SplitAttributes} to this container.
      * It is usually used when there's a folding state change or
-     * {@link SplitController#onTaskFragmentParentInfoChanged(WindowContainerTransaction, int,
-     * Configuration)}.
+     * {@link SplitController#onTaskFragmentParentInfoChanged(WindowContainerTransaction,
+     * int, TaskFragmentParentInfo)}.
      */
-    void setSplitAttributes(@NonNull SplitAttributes splitAttributes) {
-        mSplitAttributes = splitAttributes;
+    void updateCurrentSplitAttributes(@NonNull SplitAttributes splitAttributes) {
+        mCurrentSplitAttributes = splitAttributes;
+    }
+
+    /**
+     * Overrides the default {@link SplitAttributes} to this container, which may be different
+     * from {@link SplitRule#getDefaultSplitAttributes}.
+     */
+    void updateDefaultSplitAttributes(@NonNull SplitAttributes splitAttributes) {
+        mDefaultSplitAttributes = splitAttributes;
     }
 
     @NonNull
@@ -107,6 +185,23 @@ class SplitContainer {
 
     boolean isPlaceholderContainer() {
         return (mSplitRule instanceof SplitPlaceholderRule);
+    }
+
+    /**
+     * Returns the SplitInfo representing this container.
+     *
+     * @return the SplitInfo representing this container if the underlying TaskFragmentContainers
+     * are stable, or {@code null} if any TaskFragmentContainer is in an intermediate state.
+     */
+    @Nullable
+    SplitInfo toSplitInfoIfStable() {
+        final ActivityStack primaryActivityStack = mPrimaryContainer.toActivityStackIfStable();
+        final ActivityStack secondaryActivityStack = mSecondaryContainer.toActivityStackIfStable();
+        if (primaryActivityStack == null || secondaryActivityStack == null) {
+            return null;
+        }
+        return new SplitInfo(primaryActivityStack, secondaryActivityStack,
+                mCurrentSplitAttributes, mToken);
     }
 
     static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {
@@ -165,9 +260,10 @@ class SplitContainer {
     public String toString() {
         return "SplitContainer{"
                 + " primaryContainer=" + mPrimaryContainer
-                + " secondaryContainer=" + mSecondaryContainer
-                + " splitRule=" + mSplitRule
-                + " splitAttributes" + mSplitAttributes
+                + ", secondaryContainer=" + mSecondaryContainer
+                + ", splitRule=" + mSplitRule
+                + ", currentSplitAttributes" + mCurrentSplitAttributes
+                + ", defaultSplitAttributes" + mDefaultSplitAttributes
                 + "}";
     }
 }

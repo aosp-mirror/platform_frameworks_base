@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
+#define _POSIX_THREAD_SAFE_FUNCTIONS  // For mingw localtime_r().
+
 #include "io/FileSystem.h"
 
 #include <dirent.h>
+#include <sys/stat.h>
 
 #include "android-base/errors.h"
+#include "androidfw/FileStream.h"
+#include "androidfw/Source.h"
 #include "androidfw/StringPiece.h"
-#include "utils/FileMap.h"
-#include "Source.h"
-#include "io/FileStream.h"
 #include "util/Files.h"
-
 #include "util/Util.h"
+#include "utils/FileMap.h"
 
 using ::android::StringPiece;
 using ::android::base::SystemErrorCodeToString;
@@ -33,7 +35,8 @@ using ::android::base::SystemErrorCodeToString;
 namespace aapt {
 namespace io {
 
-RegularFile::RegularFile(const Source& source) : source_(source) {}
+RegularFile::RegularFile(const android::Source& source) : source_(source) {
+}
 
 std::unique_ptr<IData> RegularFile::OpenAsData() {
   android::FileMap map;
@@ -46,12 +49,29 @@ std::unique_ptr<IData> RegularFile::OpenAsData() {
   return {};
 }
 
-std::unique_ptr<io::InputStream> RegularFile::OpenInputStream() {
-  return util::make_unique<FileInputStream>(source_.path);
+std::unique_ptr<android::InputStream> RegularFile::OpenInputStream() {
+  return util::make_unique<android::FileInputStream>(source_.path);
 }
 
-const Source& RegularFile::GetSource() const {
+const android::Source& RegularFile::GetSource() const {
   return source_;
+}
+
+bool RegularFile::GetModificationTime(struct tm* buf) const {
+  if (buf == nullptr) {
+    return false;
+  }
+  struct stat stat_buf;
+  if (stat(source_.path.c_str(), &stat_buf) != 0) {
+    return false;
+  }
+
+  struct tm* ptm;
+  struct tm tm_result;
+  ptm = localtime_r(&stat_buf.st_mtime, &tm_result);
+
+  *buf = *ptm;
+  return true;
 }
 
 FileCollectionIterator::FileCollectionIterator(FileCollection* collection)
@@ -67,8 +87,8 @@ IFile* FileCollectionIterator::Next() {
   return result;
 }
 
-std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiece& root,
-                                                        std::string* outError) {
+std::unique_ptr<FileCollection> FileCollection::Create(android::StringPiece root,
+                                                       std::string* outError) {
   std::unique_ptr<FileCollection> collection =
       std::unique_ptr<FileCollection>(new FileCollection());
 
@@ -80,7 +100,7 @@ std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiec
 
   std::vector<std::string> sorted_files;
   while (struct dirent *entry = readdir(d.get())) {
-    std::string prefix_path = root.to_string();
+    std::string prefix_path(root);
     file::AppendPath(&prefix_path, entry->d_name);
 
     // The directory to iterate over looking for files
@@ -117,12 +137,19 @@ std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiec
   return collection;
 }
 
-IFile* FileCollection::InsertFile(const StringPiece& path) {
-  return (files_[path.to_string()] = util::make_unique<RegularFile>(Source(path))).get();
+IFile* FileCollection::InsertFile(StringPiece path) {
+  auto file = util::make_unique<RegularFile>(android::Source(path));
+  auto it = files_.lower_bound(path);
+  if (it != files_.end() && it->first == path) {
+    it->second = std::move(file);
+  } else {
+    it = files_.emplace_hint(it, path, std::move(file));
+  }
+  return it->second.get();
 }
 
-IFile* FileCollection::FindFile(const StringPiece& path) {
-  auto iter = files_.find(path.to_string());
+IFile* FileCollection::FindFile(StringPiece path) {
+  auto iter = files_.find(path);
   if (iter != files_.end()) {
     return iter->second.get();
   }

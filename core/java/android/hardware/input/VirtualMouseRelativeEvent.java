@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
+import android.view.InputEvent;
 
 /**
  * An event describing a mouse movement interaction originating from a remote device.
@@ -33,26 +35,38 @@ public final class VirtualMouseRelativeEvent implements Parcelable {
 
     private final float mRelativeX;
     private final float mRelativeY;
+    private final long mEventTimeNanos;
 
-    private VirtualMouseRelativeEvent(float relativeX, float relativeY) {
+    private VirtualMouseRelativeEvent(float relativeX, float relativeY, long eventTimeNanos) {
         mRelativeX = relativeX;
         mRelativeY = relativeY;
+        mEventTimeNanos = eventTimeNanos;
     }
 
     private VirtualMouseRelativeEvent(@NonNull Parcel parcel) {
         mRelativeX = parcel.readFloat();
         mRelativeY = parcel.readFloat();
+        mEventTimeNanos = parcel.readLong();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int parcelableFlags) {
         parcel.writeFloat(mRelativeX);
         parcel.writeFloat(mRelativeY);
+        parcel.writeLong(mEventTimeNanos);
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "VirtualMouseRelativeEvent("
+                + " x=" + mRelativeX
+                + " y=" + mRelativeY
+                + " eventTime(ns)=" + mEventTimeNanos;
     }
 
     /**
@@ -70,19 +84,30 @@ public final class VirtualMouseRelativeEvent implements Parcelable {
     }
 
     /**
+     * Returns the time this event occurred, in the {@link SystemClock#uptimeMillis()} time base but
+     * with nanosecond (instead of millisecond) precision.
+     *
+     * @see InputEvent#getEventTime()
+     */
+    public long getEventTimeNanos() {
+        return mEventTimeNanos;
+    }
+
+    /**
      * Builder for {@link VirtualMouseRelativeEvent}.
      */
     public static final class Builder {
 
         private float mRelativeX;
         private float mRelativeY;
+        private long mEventTimeNanos = 0L;
 
         /**
          * Creates a {@link VirtualMouseRelativeEvent} object with the current builder
          * configuration.
          */
         public @NonNull VirtualMouseRelativeEvent build() {
-            return new VirtualMouseRelativeEvent(mRelativeX, mRelativeY);
+            return new VirtualMouseRelativeEvent(mRelativeX, mRelativeY, mEventTimeNanos);
         }
 
         /**
@@ -102,6 +127,23 @@ public final class VirtualMouseRelativeEvent implements Parcelable {
          */
         public @NonNull Builder setRelativeY(float relativeY) {
             mRelativeY = relativeY;
+            return this;
+        }
+
+        /**
+         * Sets the time (in nanoseconds) when this specific event was generated. This may be
+         * obtained from {@link SystemClock#uptimeMillis()} (with nanosecond precision instead of
+         * millisecond), but can be different depending on the use case.
+         * This field is optional and can be omitted.
+         *
+         * @return this builder, to allow for chaining of calls
+         * @see InputEvent#getEventTime()
+         */
+        public @NonNull Builder setEventTimeNanos(long eventTimeNanos) {
+            if (eventTimeNanos < 0L) {
+                throw new IllegalArgumentException("Event time cannot be negative");
+            }
+            this.mEventTimeNanos = eventTimeNanos;
             return this;
         }
     }

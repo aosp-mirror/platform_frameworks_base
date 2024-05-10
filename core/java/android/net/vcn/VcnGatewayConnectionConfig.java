@@ -16,10 +16,12 @@
 package android.net.vcn;
 
 import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
+import static android.net.vcn.Flags.FLAG_SAFE_MODE_CONFIG;
 import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_REQUIRED;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -235,6 +237,9 @@ public final class VcnGatewayConnectionConfig {
             "mMinUdpPort4500NatTimeoutSeconds";
     private final int mMinUdpPort4500NatTimeoutSeconds;
 
+    private static final String IS_SAFE_MODE_DISABLED_KEY = "mIsSafeModeDisabled";
+    private final boolean mIsSafeModeDisabled;
+
     private static final String GATEWAY_OPTIONS_KEY = "mGatewayOptions";
     @NonNull private final Set<Integer> mGatewayOptions;
 
@@ -247,6 +252,7 @@ public final class VcnGatewayConnectionConfig {
             @NonNull long[] retryIntervalsMs,
             @IntRange(from = MIN_MTU_V6) int maxMtu,
             @NonNull int minUdpPort4500NatTimeoutSeconds,
+            boolean isSafeModeDisabled,
             @NonNull Set<Integer> gatewayOptions) {
         mGatewayConnectionName = gatewayConnectionName;
         mTunnelConnectionParams = tunnelConnectionParams;
@@ -255,6 +261,7 @@ public final class VcnGatewayConnectionConfig {
         mMaxMtu = maxMtu;
         mMinUdpPort4500NatTimeoutSeconds = minUdpPort4500NatTimeoutSeconds;
         mGatewayOptions = Collections.unmodifiableSet(new ArraySet(gatewayOptions));
+        mIsSafeModeDisabled = isSafeModeDisabled;
 
         mUnderlyingNetworkTemplates = new ArrayList<>(underlyingNetworkTemplates);
         if (mUnderlyingNetworkTemplates.isEmpty()) {
@@ -317,6 +324,7 @@ public final class VcnGatewayConnectionConfig {
                 in.getInt(
                         MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS_KEY,
                         MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET);
+        mIsSafeModeDisabled = in.getBoolean(IS_SAFE_MODE_DISABLED_KEY);
 
         validate();
     }
@@ -483,6 +491,16 @@ public final class VcnGatewayConnectionConfig {
     }
 
     /**
+     * Check whether safe mode is enabled
+     *
+     * @see Builder#setSafeModeEnabled(boolean)
+     */
+    @FlaggedApi(FLAG_SAFE_MODE_CONFIG)
+    public boolean isSafeModeEnabled() {
+        return !mIsSafeModeDisabled;
+    }
+
+    /**
      * Checks if the given VCN gateway option is enabled.
      *
      * @param option the option to check.
@@ -528,6 +546,7 @@ public final class VcnGatewayConnectionConfig {
         result.putLongArray(RETRY_INTERVAL_MS_KEY, mRetryIntervalsMs);
         result.putInt(MAX_MTU_KEY, mMaxMtu);
         result.putInt(MIN_UDP_PORT_4500_NAT_TIMEOUT_SECONDS_KEY, mMinUdpPort4500NatTimeoutSeconds);
+        result.putBoolean(IS_SAFE_MODE_DISABLED_KEY, mIsSafeModeDisabled);
 
         return result;
     }
@@ -542,6 +561,7 @@ public final class VcnGatewayConnectionConfig {
                 Arrays.hashCode(mRetryIntervalsMs),
                 mMaxMtu,
                 mMinUdpPort4500NatTimeoutSeconds,
+                mIsSafeModeDisabled,
                 mGatewayOptions);
     }
 
@@ -559,6 +579,7 @@ public final class VcnGatewayConnectionConfig {
                 && Arrays.equals(mRetryIntervalsMs, rhs.mRetryIntervalsMs)
                 && mMaxMtu == rhs.mMaxMtu
                 && mMinUdpPort4500NatTimeoutSeconds == rhs.mMinUdpPort4500NatTimeoutSeconds
+                && mIsSafeModeDisabled == rhs.mIsSafeModeDisabled
                 && mGatewayOptions.equals(rhs.mGatewayOptions);
     }
 
@@ -577,6 +598,7 @@ public final class VcnGatewayConnectionConfig {
         @NonNull private long[] mRetryIntervalsMs = DEFAULT_RETRY_INTERVALS_MS;
         private int mMaxMtu = DEFAULT_MAX_MTU;
         private int mMinUdpPort4500NatTimeoutSeconds = MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET;
+        private boolean mIsSafeModeDisabled = false;
 
         @NonNull private final Set<Integer> mGatewayOptions = new ArraySet<>();
 
@@ -789,6 +811,27 @@ public final class VcnGatewayConnectionConfig {
         }
 
         /**
+         * Enable/disable safe mode
+         *
+         * <p>If a VCN fails to provide connectivity within a system-provided timeout, it will enter
+         * safe mode. In safe mode, the VCN Network will be torn down and the system will restore
+         * connectivity by allowing underlying cellular or WiFi networks to be used as default. At
+         * the same time, VCN will continue to retry until it succeeds.
+         *
+         * <p>When safe mode is disabled and VCN connection fails to provide connectivity, end users
+         * might not have connectivity, and may not have access to carrier-owned underlying
+         * networks.
+         *
+         * @param enabled whether safe mode should be enabled. Defaults to {@code true}
+         */
+        @FlaggedApi(FLAG_SAFE_MODE_CONFIG)
+        @NonNull
+        public Builder setSafeModeEnabled(boolean enabled) {
+            mIsSafeModeDisabled = !enabled;
+            return this;
+        }
+
+        /**
          * Builds and validates the VcnGatewayConnectionConfig.
          *
          * @return an immutable VcnGatewayConnectionConfig instance
@@ -803,6 +846,7 @@ public final class VcnGatewayConnectionConfig {
                     mRetryIntervalsMs,
                     mMaxMtu,
                     mMinUdpPort4500NatTimeoutSeconds,
+                    mIsSafeModeDisabled,
                     mGatewayOptions);
         }
     }

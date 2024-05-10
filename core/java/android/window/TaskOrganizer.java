@@ -24,7 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
-import android.app.TaskInfo.CameraCompatControlState;
+import android.app.AppCompatTaskInfo.CameraCompatControlState;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.SurfaceControl;
@@ -92,13 +92,10 @@ public class TaskOrganizer extends WindowOrganizer {
      * has create a starting window for the Task.
      *
      * @param info The information about the Task that's available
-     * @param appToken Token of the application being started.
-     *        context to for resources
      * @hide
      */
     @BinderThread
-    public void addStartingWindow(@NonNull StartingWindowInfo info,
-            @NonNull IBinder appToken) {}
+    public void addStartingWindow(@NonNull StartingWindowInfo info) {}
 
     /**
      * Called when the Task want to remove the starting window.
@@ -152,15 +149,31 @@ public class TaskOrganizer extends WindowOrganizer {
      * @param windowingMode Windowing mode to put the root task in.
      * @param launchCookie Launch cookie to associate with the task so that is can be identified
      *                     when the {@link ITaskOrganizer#onTaskAppeared} callback is called.
+     * @param removeWithTaskOrganizer True if this task should be removed when organizer destroyed.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
+    public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie,
+            boolean removeWithTaskOrganizer) {
+        try {
+            mTaskOrganizerController.createRootTask(displayId, windowingMode, launchCookie,
+                    removeWithTaskOrganizer);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a persistent root task in WM for a particular windowing-mode.
+     * @param displayId The display to create the root task on.
+     * @param windowingMode Windowing mode to put the root task in.
+     * @param launchCookie Launch cookie to associate with the task so that is can be identified
+     *                     when the {@link ITaskOrganizer#onTaskAppeared} callback is called.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie) {
-        try {
-            mTaskOrganizerController.createRootTask(displayId, windowingMode, launchCookie);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        createRootTask(displayId, windowingMode, launchCookie, false /* removeWithTaskOrganizer */);
     }
 
     /** Deletes a persistent root task in WM */
@@ -253,24 +266,6 @@ public class TaskOrganizer extends WindowOrganizer {
     }
 
     /**
-     * Controls whether ignore orientation request logic in {@link
-     * com.android.server.wm.DisplayArea} is disabled at runtime.
-     *
-     * @param isDisabled when {@code true}, the system always ignores the value of {@link
-     *                   com.android.server.wm.DisplayArea#getIgnoreOrientationRequest} and app
-     *                   requested orientation is respected.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
-        try {
-            mTaskOrganizerController.setIsIgnoreOrientationRequestDisabled(isDisabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Gets the executor to run callbacks on.
      * @hide
      */
@@ -281,9 +276,8 @@ public class TaskOrganizer extends WindowOrganizer {
 
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
         @Override
-        public void addStartingWindow(StartingWindowInfo windowInfo,
-                IBinder appToken) {
-            mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(windowInfo, appToken));
+        public void addStartingWindow(StartingWindowInfo windowInfo) {
+            mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(windowInfo));
         }
 
         @Override

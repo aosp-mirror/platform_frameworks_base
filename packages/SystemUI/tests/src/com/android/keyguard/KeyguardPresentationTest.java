@@ -32,7 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardDisplayManager.KeyguardPresentation;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
@@ -69,7 +69,8 @@ public class KeyguardPresentationTest extends SysuiTestCase {
         when(mMockKeyguardSliceView.getContext()).thenReturn(mContext);
         when(mMockKeyguardStatusView.getContext()).thenReturn(mContext);
         when(mMockKeyguardStatusView.findViewById(R.id.clock)).thenReturn(mMockKeyguardStatusView);
-        when(mKeyguardStatusViewComponentFactory.build(any(KeyguardStatusView.class)))
+        when(mKeyguardStatusViewComponentFactory.build(any(KeyguardStatusView.class),
+                any(Display.class)))
                 .thenReturn(mKeyguardStatusViewComponent);
         when(mKeyguardStatusViewComponent.getKeyguardClockSwitchController())
                 .thenReturn(mKeyguardClockSwitchController);

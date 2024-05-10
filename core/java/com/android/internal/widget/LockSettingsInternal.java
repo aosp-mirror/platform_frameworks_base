@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.admin.PasswordMetrics;
 
 import java.lang.annotation.Retention;
@@ -51,6 +52,32 @@ public abstract class LockSettingsInternal {
     public static final int ARM_REBOOT_ERROR_KEYSTORE_FAILURE = 6;
     public static final int ARM_REBOOT_ERROR_STORE_ESCROW_KEY = 7;
     // TODO(b/183140900) split store escrow key errors into detailed ones.
+
+    /**
+     * This is called when Weaver is guaranteed to be available (if the device supports Weaver).
+     * It does any synthetic password related work that was delayed from earlier in the boot.
+     */
+    public abstract void onThirdPartyAppsStarted();
+
+    /**
+     * Creates the locksettings state for a new user.
+     * <p>
+     * This includes creating a synthetic password and protecting it with an empty LSKF.
+     *
+     * @param userId the ID of the new user
+     * @param userSerialNumber the serial number of the new user
+     */
+    public abstract void createNewUser(@UserIdInt int userId, int userSerialNumber);
+
+    /**
+     * Removes the locksettings state for the given user.
+     * <p>
+     * This includes removing the user's synthetic password and any protectors that are protecting
+     * it.
+     *
+     * @param userId the ID of the user being removed
+     */
+    public abstract void removeUser(@UserIdInt int userId);
 
     /**
      * Create an escrow token for the current user, which can later be used to unlock FBE
@@ -139,4 +166,16 @@ public abstract class LockSettingsInternal {
      * Refreshes pending strong auth timeout with the latest admin requirement set by device policy.
      */
     public abstract void refreshStrongAuthTimeout(int userId);
+
+    /**
+     * Register a LockSettingsStateListener
+     * @param listener The listener to be registered
+     */
+    public abstract void registerLockSettingsStateListener(LockSettingsStateListener listener);
+
+    /**
+     * Unregister a LockSettingsStateListener
+     * @param listener The listener to be unregistered
+     */
+    public abstract void unregisterLockSettingsStateListener(LockSettingsStateListener listener);
 }

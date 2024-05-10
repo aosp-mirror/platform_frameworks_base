@@ -19,8 +19,9 @@ package com.android.packageinstaller;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.InstallSourceInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.provider.Settings;
 import android.util.Log;
 
 /**
@@ -33,8 +34,7 @@ public class PackageInstalledReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED, 0) == 0) {
+        if (!context.getPackageManager().shouldShowNewAppInstalledNotification()) {
             return;
         }
 
@@ -63,11 +63,19 @@ public class PackageInstalledReceiver extends BroadcastReceiver {
                 return;
             }
 
-            // TODO: Make sure the installer information here is accurate
-            String installer =
-                    context.getPackageManager().getInstallerPackageName(packageName);
-            new PackageInstalledNotificationUtils(context, installer,
-                    packageName).postAppInstalledNotification();
+            try {
+                InstallSourceInfo installerInfo =
+                        context.getPackageManager().getInstallSourceInfo(packageName);
+                String installer = installerInfo.getInstallingPackageName();
+                if (installer == null) {
+                    Log.e(TAG, "No installer package name for: " + packageName);
+                    return;
+                }
+                new PackageInstalledNotificationUtils(context, installer,
+                        packageName).postAppInstalledNotification();
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Cannot get source info for: " + packageName);
+            }
         }
     }
 }

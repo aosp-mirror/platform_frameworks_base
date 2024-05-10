@@ -16,33 +16,41 @@
 
 package com.android.internal.util.test;
 
-import android.content.ContentResolver;
-import android.database.ContentObserver;
-import android.net.Uri;
-import android.provider.Settings;
-import android.test.AndroidTestCase;
-import android.test.mock.MockContentResolver;
-import android.test.mock.MockContext;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.test.suitebuilder.annotation.Suppress;
-import android.util.Log;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import android.content.ContentProvider;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+import android.provider.Settings;
+import android.test.mock.MockContentResolver;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Unit tests for FakeSettingsProvider.
  */
-public class FakeSettingsProviderTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = ContentProvider.class)
+public class FakeSettingsProviderTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private MockContentResolver mCr;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         mCr = new MockContentResolver();
         mCr.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
     }
 
+    @Test
     @SmallTest
     public void testBasicOperation() throws Exception {
         String settingName = Settings.System.SCREEN_BRIGHTNESS;

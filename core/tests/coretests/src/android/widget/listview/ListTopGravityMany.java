@@ -16,7 +16,7 @@
 
 package android.widget.listview;
 
-import android.util.ListScenario;
+import android.widget.ListScenario;
 
 /**
  * Basic top gravity scenario, nothing fancy. There are

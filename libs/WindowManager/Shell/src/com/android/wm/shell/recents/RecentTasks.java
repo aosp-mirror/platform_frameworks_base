@@ -29,16 +29,15 @@ import java.util.function.Consumer;
 @ExternalThread
 public interface RecentTasks {
     /**
-     * Returns a binder that can be passed to an external process to fetch recent tasks.
-     */
-    default IRecentTasks createExternalInterface() {
-        return null;
-    }
-
-    /**
      * Gets the set of recent tasks.
      */
     default void getRecentTasks(int maxNum, int flags, int userId, Executor callbackExecutor,
             Consumer<List<GroupedRecentTaskInfo>> callback) {
+    }
+
+    /**
+     * Adds the listener to be notified of whether the recent task animation is running.
+     */
+    default void addAnimationStateListener(Executor listenerExecutor, Consumer<Boolean> listener) {
     }
 }

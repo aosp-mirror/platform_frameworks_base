@@ -16,63 +16,88 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
+import android.animation.TimeInterpolator
 import android.annotation.SuppressLint
+import android.animation.ValueAnimator
 import android.app.StatusBarManager
 import android.content.Context
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.os.Handler
 import android.os.PowerManager
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
-import com.android.settingslib.Utils
-import com.android.systemui.R
+import android.view.View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
+import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
+import com.android.internal.widget.CachingIconView
+import com.android.systemui.res.R
+import com.android.app.animation.Interpolators
+import com.android.internal.logging.InstanceId
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.taptotransfer.MediaTttFlags
+import com.android.systemui.media.taptotransfer.common.MediaTttIcon
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.temporarydisplay.DEFAULT_TIMEOUT_MILLIS
 import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.TemporaryViewInfo
+import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
+import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.time.SystemClock
+import com.android.systemui.util.view.ViewUtil
+import com.android.systemui.util.wakelock.WakeLock
 import javax.inject.Inject
 
 /**
  * A controller to display and hide the Media Tap-To-Transfer chip on the **receiving** device.
  *
  * This chip is shown when a user is transferring media to/from a sending device and this device.
+ *
+ * TODO(b/245610654): Re-name this to be MediaTttReceiverCoordinator.
  */
 @SysUISingleton
-class MediaTttChipControllerReceiver @Inject constructor(
-        commandQueue: CommandQueue,
+open class MediaTttChipControllerReceiver @Inject constructor(
+        private val commandQueue: CommandQueue,
         context: Context,
-        @MediaTttReceiverLogger logger: MediaTttLogger,
+        logger: MediaTttReceiverLogger,
         windowManager: WindowManager,
         mainExecutor: DelayableExecutor,
         accessibilityManager: AccessibilityManager,
         configurationController: ConfigurationController,
+        dumpManager: DumpManager,
         powerManager: PowerManager,
         @Main private val mainHandler: Handler,
+        private val mediaTttFlags: MediaTttFlags,
         private val uiEventLogger: MediaTttReceiverUiEventLogger,
-) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttLogger>(
+        private val viewUtil: ViewUtil,
+        wakeLockBuilder: WakeLock.Builder,
+        systemClock: SystemClock,
+        private val rippleController: MediaTttReceiverRippleController,
+        private val temporaryViewUiEventLogger: TemporaryViewUiEventLogger,
+) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttReceiverLogger>(
         context,
         logger,
         windowManager,
         mainExecutor,
         accessibilityManager,
         configurationController,
+        dumpManager,
         powerManager,
         R.layout.media_ttt_chip_receiver,
-        MediaTttUtils.WINDOW_TITLE,
-        MediaTttUtils.WAKE_REASON,
+        wakeLockBuilder,
+        systemClock,
+        temporaryViewUiEventLogger,
 ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
     override val windowLayoutParams = commonWindowLayoutParams.apply {
@@ -82,7 +107,13 @@ class MediaTttChipControllerReceiver @Inject constructor(
         height = WindowManager.LayoutParams.MATCH_PARENT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         fitInsetsTypes = 0 // Ignore insets from all system bars
-        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+    }
+
+    // Value animator that controls the bouncing animation of views.
+    private val bounceAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+        repeatCount = ValueAnimator.INFINITE
+        repeatMode = ValueAnimator.REVERSE
+        duration = ICON_BOUNCE_ANIM_DURATION
     }
 
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
@@ -98,9 +129,10 @@ class MediaTttChipControllerReceiver @Inject constructor(
         }
     }
 
-    init {
-        commandQueue.addCallback(commandQueueCallbacks)
-    }
+    // A map to store instance id per route info id.
+    private var instanceMap: MutableMap<String, InstanceId> = mutableMapOf()
+
+    private val displayListener = Listener { id, _ -> instanceMap.remove(id) }
 
     private fun updateMediaTapToTransferReceiverDisplay(
         @StatusBarManager.MediaTransferReceiverState displayState: Int,
@@ -113,24 +145,46 @@ class MediaTttChipControllerReceiver @Inject constructor(
         logger.logStateChange(stateName, routeInfo.id, routeInfo.clientPackageName)
 
         if (chipState == null) {
-            Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
+            logger.logStateChangeError(displayState)
             return
         }
-        uiEventLogger.logReceiverStateChange(chipState)
 
-        if (chipState == ChipStateReceiver.FAR_FROM_SENDER) {
-            removeView(removalReason = ChipStateReceiver.FAR_FROM_SENDER::class.simpleName!!)
+        val instanceId: InstanceId = instanceMap[routeInfo.id]
+                ?: temporaryViewUiEventLogger.getNewInstanceId()
+        uiEventLogger.logReceiverStateChange(chipState, instanceId)
+
+        if (chipState != ChipStateReceiver.CLOSE_TO_SENDER) {
+            removeView(routeInfo.id, removalReason = chipState.name)
             return
         }
+
+        // Save instance id to use for logging view events.
+        instanceMap[routeInfo.id] = instanceId
         if (appIcon == null) {
-            displayView(ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appName))
+            displayView(
+                ChipReceiverInfo(
+                    routeInfo,
+                    appIconDrawableOverride = null,
+                    appName,
+                    id = routeInfo.id,
+                    instanceId = instanceId,
+                )
+            )
             return
         }
 
         appIcon.loadDrawableAsync(
                 context,
                 Icon.OnDrawableLoadedListener { drawable ->
-                    displayView(ChipReceiverInfo(routeInfo, drawable, appName))
+                    displayView(
+                        ChipReceiverInfo(
+                            routeInfo,
+                            drawable,
+                            appName,
+                            id = routeInfo.id,
+                            instanceId = instanceId,
+                        )
+                    )
                 },
                 // Notify the listener on the main handler since the listener will update
                 // the UI.
@@ -138,90 +192,173 @@ class MediaTttChipControllerReceiver @Inject constructor(
         )
     }
 
+    override fun start() {
+        super.start()
+        if (mediaTttFlags.isMediaTttEnabled()) {
+            commandQueue.addCallback(commandQueueCallbacks)
+        }
+        registerListener(displayListener)
+    }
+
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
-        super.updateView(newInfo, currentView)
+        val packageName: String? = newInfo.routeInfo.clientPackageName
+        var iconInfo = MediaTttUtils.getIconInfoFromPackageName(
+            context,
+            packageName,
+            isReceiver = true,
+        ) {
+            packageName?.let { logger.logPackageNotFound(it) }
+        }
 
-        val iconInfo = MediaTttUtils.getIconInfoFromPackageName(
-            context, newInfo.routeInfo.clientPackageName, logger
-        )
-        val iconDrawable = newInfo.appIconDrawableOverride ?: iconInfo.drawable
-        val iconContentDescription = newInfo.appNameOverride ?: iconInfo.contentDescription
-        val iconSize = context.resources.getDimensionPixelSize(
+        if (newInfo.appNameOverride != null) {
+            iconInfo = iconInfo.copy(
+                contentDescription = ContentDescription.Loaded(newInfo.appNameOverride.toString())
+            )
+        }
+
+        if (newInfo.appIconDrawableOverride != null) {
+            iconInfo = iconInfo.copy(
+                icon = MediaTttIcon.Loaded(newInfo.appIconDrawableOverride),
+                isAppIcon = true,
+            )
+        }
+
+        val iconPadding =
             if (iconInfo.isAppIcon) {
-                R.dimen.media_ttt_icon_size_receiver
+                0
             } else {
-                R.dimen.media_ttt_generic_icon_size_receiver
+                context.resources.getDimensionPixelSize(R.dimen.media_ttt_generic_icon_padding)
             }
-        )
 
-        MediaTttUtils.setIcon(
-            currentView.requireViewById(R.id.app_icon),
-            iconDrawable,
-            iconContentDescription,
-            iconSize,
-        )
+        val iconView = currentView.getAppIconView()
+        iconView.setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
+        TintedIconViewBinder.bind(iconInfo.toTintedIcon(), iconView)
+
+        val iconContainerView = currentView.getIconContainerView()
+        iconContainerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_ASSERTIVE
     }
 
     override fun animateViewIn(view: ViewGroup) {
-        val appIconView = view.requireViewById<View>(R.id.app_icon)
-        appIconView.animate()
-                .translationYBy(-1 * getTranslationAmount().toFloat())
-                .setDuration(30.frames)
-                .start()
-        appIconView.animate()
-                .alpha(1f)
-                .setDuration(5.frames)
-                .start()
-        // Using withEndAction{} doesn't apply a11y focus when screen is unlocked.
-        appIconView.postOnAnimation { view.requestAccessibilityFocus() }
-        startRipple(view.requireViewById(R.id.ripple))
+        val iconContainerView = view.getIconContainerView()
+        val iconRippleView: ReceiverChipRippleView = view.requireViewById(R.id.icon_glow_ripple)
+        val rippleView: ReceiverChipRippleView = view.requireViewById(R.id.ripple)
+        val translationYBy = getTranslationAmount()
+        // Expand ripple before translating icon container to make sure both views have same bounds.
+        rippleController.expandToInProgressState(rippleView, iconRippleView)
+        // Make the icon container view starts animation from bottom of the screen.
+        iconContainerView.translationY = rippleController.getReceiverIconSize().toFloat()
+        animateViewTranslationAndFade(
+            iconContainerView,
+            translationYBy = -1 * translationYBy,
+            alphaEndValue = 1f,
+            Interpolators.EMPHASIZED_DECELERATE,
+        ) {
+            animateBouncingView(iconContainerView, translationYBy * BOUNCE_TRANSLATION_RATIO)
+        }
+    }
+
+    override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
+        val iconContainerView = view.getIconContainerView()
+        val rippleView: ReceiverChipRippleView = view.requireViewById(R.id.ripple)
+        val translationYBy = getTranslationAmount()
+
+        // Remove update listeners from bounce animator to prevent any conflict with
+        // translation animation.
+        bounceAnimator.removeAllUpdateListeners()
+        bounceAnimator.cancel()
+        if (removalReason == ChipStateReceiver.TRANSFER_TO_RECEIVER_SUCCEEDED.name &&
+                mediaTttFlags.isMediaTttReceiverSuccessRippleEnabled()) {
+            rippleController.expandToSuccessState(rippleView, onAnimationEnd)
+            animateViewTranslationAndFade(
+                iconContainerView,
+                -1 * translationYBy,
+                0f,
+                translationDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
+                alphaDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
+            )
+        } else {
+            rippleController.collapseRipple(rippleView, onAnimationEnd)
+            animateViewTranslationAndFade(iconContainerView, translationYBy, 0f)
+        }
+    }
+
+    override fun getTouchableRegion(view: View, outRect: Rect) {
+        // Even though the app icon view isn't touchable, users might think it is. So, use it as the
+        // touchable region to ensure that touches don't get passed to the window below.
+        viewUtil.setRectToViewWindowLocation(view.getAppIconView(), outRect)
+    }
+
+    /** Animation of view translation and fading. */
+    private fun animateViewTranslationAndFade(
+        view: ViewGroup,
+        translationYBy: Float,
+        alphaEndValue: Float,
+        interpolator: TimeInterpolator? = null,
+        translationDuration: Long = ICON_TRANSLATION_ANIM_DURATION,
+        alphaDuration: Long = ICON_ALPHA_ANIM_DURATION,
+        onAnimationEnd: Runnable? = null,
+    ) {
+        view.animate()
+            .translationYBy(translationYBy)
+            .setInterpolator(interpolator)
+            .setDuration(translationDuration)
+            .withEndAction { onAnimationEnd?.run() }
+            .start()
+        view.animate()
+            .alpha(alphaEndValue)
+            .setDuration(alphaDuration)
+            .start()
     }
 
     /** Returns the amount that the chip will be translated by in its intro animation. */
-    private fun getTranslationAmount(): Int {
-        return context.resources.getDimensionPixelSize(R.dimen.media_ttt_receiver_vert_translation)
+    private fun getTranslationAmount(): Float {
+        return rippleController.getReceiverIconSize() * 2f
     }
 
-    private fun startRipple(rippleView: ReceiverChipRippleView) {
-        if (rippleView.rippleInProgress) {
-            // Skip if ripple is still playing
+    private fun View.getAppIconView(): CachingIconView {
+        return this.requireViewById(R.id.app_icon)
+    }
+
+    private fun View.getIconContainerView(): ViewGroup {
+        return this.requireViewById(R.id.icon_container_view)
+    }
+
+    private fun animateBouncingView(iconContainerView: ViewGroup, translationYBy: Float) {
+        if (bounceAnimator.isStarted) {
             return
         }
-        rippleView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewDetachedFromWindow(view: View?) {}
 
-            override fun onViewAttachedToWindow(view: View?) {
-                if (view == null) {
-                    return
-                }
-                val attachedRippleView = view as ReceiverChipRippleView
-                layoutRipple(attachedRippleView)
-                attachedRippleView.startRipple()
-                attachedRippleView.removeOnAttachStateChangeListener(this)
-            }
-        })
+        addViewToBounceAnimation(iconContainerView, translationYBy)
+
+        // In order not to announce description every time the view animate.
+        iconContainerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_NONE
+        bounceAnimator.start()
     }
 
-    private fun layoutRipple(rippleView: ReceiverChipRippleView) {
-        val windowBounds = windowManager.currentWindowMetrics.bounds
-        val height = windowBounds.height()
-        val width = windowBounds.width()
+    private fun addViewToBounceAnimation(view: View, translationYBy: Float) {
+        val prevTranslationY = view.translationY
+        bounceAnimator.addUpdateListener { updateListener ->
+            val progress = updateListener.animatedValue as Float
+            view.translationY = prevTranslationY + translationYBy * progress
+        }
+    }
 
-        val maxDiameter = height / 2.5f
-        rippleView.setMaxSize(maxDiameter, maxDiameter)
-        // Center the ripple on the bottom of the screen in the middle.
-        rippleView.setCenter(width * 0.5f, height.toFloat())
-        val color = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColorAccent)
-        rippleView.setColor(color, 70)
+    companion object {
+        private const val ICON_TRANSLATION_ANIM_DURATION = 500L
+        private const val ICON_BOUNCE_ANIM_DURATION = 750L
+        private const val ICON_TRANSLATION_SUCCEEDED_DURATION = 167L
+        private const val BOUNCE_TRANSLATION_RATIO = 0.15f
+        private val ICON_ALPHA_ANIM_DURATION = 5.frames
     }
 }
 
 data class ChipReceiverInfo(
     val routeInfo: MediaRoute2Info,
     val appIconDrawableOverride: Drawable?,
-    val appNameOverride: CharSequence?
-) : TemporaryViewInfo {
-    override fun getTimeoutMs() = DEFAULT_TIMEOUT_MILLIS
-}
-
-private const val RECEIVER_TAG = "MediaTapToTransferRcvr"
+    val appNameOverride: CharSequence?,
+    override val windowTitle: String = MediaTttUtils.WINDOW_TITLE_RECEIVER,
+    override val wakeReason: String = MediaTttUtils.WAKE_REASON_RECEIVER,
+    override val id: String,
+    override val priority: ViewPriority = ViewPriority.NORMAL,
+    override val instanceId: InstanceId,
+) : TemporaryViewInfo()

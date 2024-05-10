@@ -16,6 +16,7 @@
 
 package android.service.voice;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.Bundle;
@@ -33,9 +34,12 @@ public abstract class VoiceInteractionManagerInternal {
      * Start a new voice interaction session when requested from within an activity
      * by Activity.startLocalVoiceInteraction()
      * @param callingActivity The binder token representing the calling activity.
-     * @param options 
+     * @param attributionTag The attribution tag of the calling context or {@code null} for default
+     *                       attribution
+     * @param options A Bundle of private arguments to the current voice interaction service
      */
-    public abstract void startLocalVoiceInteraction(IBinder callingActivity, Bundle options);
+    public abstract void startLocalVoiceInteraction(@NonNull IBinder callingActivity,
+            @Nullable String attributionTag, @Nullable Bundle options);
 
     /**
      * Returns whether the currently selected voice interaction service supports local voice

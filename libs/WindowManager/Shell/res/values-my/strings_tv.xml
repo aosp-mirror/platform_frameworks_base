@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"ရွှေ့ရန်"</string>
     <string name="pip_expand" msgid="1051966011679297308">"ချဲ့ရန်"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"လျှော့ပြရန်"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" ထိန်းချုပ်မှုအတွက် "<annotation icon="home_icon">" ပင်မခလုတ် "</annotation>" နှစ်ချက်နှိပ်ပါ"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"ထိန်းချုပ်မှုအတွက် "<annotation icon="home_icon">" ပင်မခလုတ် "</annotation>" ကို နှစ်ချက်နှိပ်ပါ"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"နှစ်ခုထပ်၍ ကြည့်ခြင်းမီနူး။"</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"ဘယ်သို့ရွှေ့ရန်"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"ညာသို့ရွှေ့ရန်"</string>

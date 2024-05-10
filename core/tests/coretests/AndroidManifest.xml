@@ -76,6 +76,8 @@
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG" />
+    <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
@@ -84,8 +86,8 @@
     <uses-permission android:name="android.permission.TEST_GRANTED" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="com.google.android.googleapps.permission.ACCESS_GOOGLE_PASSWORD" />
-    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
-    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" />
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" android:maxSdkVersion="34"/>
+    <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" android:maxSdkVersion="34"/>
 
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
@@ -161,6 +163,10 @@
     <!-- ChooserActivityTest permissions-->
     <uses-permission android:name="android.permission.SET_CLIP_SOURCE" />
 
+    <!-- AccessibilityShortcutChooserActivityTest permissions -->
+    <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
+
     <application
         android:theme="@style/Theme"
         android:supportsRtl="true"
@@ -217,6 +223,28 @@
 
         <activity android:name="android.widget.TextViewActivity"
                 android:label="TextViewActivity"
+                android:screenOrientation="portrait"
+                android:exported="true"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.HorizontalScrollViewActivity"
+                android:label="HorizontalScrollViewActivity"
+                android:screenOrientation="portrait"
+                android:exported="true"
+                android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.widget.ScrollViewActivity"
+                android:label="ScrollViewActivity"
                 android:screenOrientation="portrait"
                 android:exported="true"
                 android:theme="@android:style/Theme.Material.Light">
@@ -1414,6 +1442,7 @@
         <activity android:name="com.android.internal.app.ChooserWrapperActivity"/>
         <activity android:name="com.android.internal.app.ResolverWrapperActivity"/>
         <activity android:name="com.android.internal.app.IntentForwarderActivityTest$IntentForwarderWrapperActivity"/>
+        <activity android:name="com.android.internal.accessibility.AccessibilityShortcutChooserActivityTest$TestAccessibilityShortcutChooserActivity"/>
 
         <receiver android:name="android.app.activity.AbortReceiver"
             android:exported="true">
@@ -1603,6 +1632,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.widget.TextViewContextMenuActivity"
+                  android:screenOrientation="locked"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.animation.AnimatorSetActivity"
                   android:screenOrientation="locked"
                   android:exported="true">
@@ -1650,6 +1688,12 @@
             android:exported="true">
         </activity>
 
+        <activity android:name="android.app.activity.ActivityTransitionDrawableTest$TestActivity"
+                  android:exported="true"
+                  android:enabled="true"
+                  android:theme="@style/Theme">
+        </activity>
+
         <activity
             android:name="android.os.TestVrActivity"
             android:enableVrMode="com.android.frameworks.coretests/android.os.TestVrActivity$TestVrListenerService">
@@ -1675,10 +1719,45 @@
                <action android:name="android.intent.action.MAIN" />
                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
            </intent-filter>
-       </activity>
+        </activity>
         <activity android:name="android.window.WindowMetricsHelperTest$TestActivity"
                   android:resizeableActivity="true"
                   android:exported="true">
+        </activity>
+
+        <activity android:name="android.content.res.FontScaleConverterActivityTest$TestActivity"
+                  android:exported="true">
+        </activity>
+
+        <service android:name="android.view.stylus.HandwritingImeService"
+                 android:label="Handwriting IME"
+                 android:permission="android.permission.BIND_INPUT_METHOD"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="android.view.InputMethod"/>
+            </intent-filter>
+            <meta-data android:name="android.view.im"
+                       android:resource="@xml/ime_meta_handwriting"/>
+        </service>
+
+        <activity android:name="android.widget.PointerIconTestActivity"
+                  android:label="PointerIconTestActivity"
+                  android:screenOrientation="portrait"
+                  android:exported="true"
+                  android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="android.view.ViewGroupTestActivity"
+                  android:label="ViewGroup Test"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
         </activity>
     </application>
 

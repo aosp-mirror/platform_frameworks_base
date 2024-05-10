@@ -62,12 +62,28 @@ RAW buffers for {@link android.hardware.camera2.DngCreator} can be
 done with {@link android.media.ImageReader} with the {@link
 android.graphics.ImageFormat#JPEG} and {@link
 android.graphics.ImageFormat#RAW_SENSOR} formats.  Application-driven
-processing of camera data in RenderScript, OpenGL ES, or directly in
-managed or native code is best done through {@link
-android.renderscript.Allocation} with a YUV {@link
-android.renderscript.Type}, {@link android.graphics.SurfaceTexture},
-and {@link android.media.ImageReader} with a {@link
-android.graphics.ImageFormat#YUV_420_888} format, respectively.</p>
+processing of camera data in OpenGL ES, or directly in managed or
+native code is best done through {@link
+android.graphics.SurfaceTexture}, or {@link android.media.ImageReader}
+with a {@link android.graphics.ImageFormat#YUV_420_888} format,
+respectively. </p>
+
+<p>By default, YUV-format buffers provided by the camera are using the
+JFIF YUV<->RGB transform matrix (equivalent to Rec.601 full-range
+encoding), and after conversion to RGB with this matrix, the resulting
+RGB data is in the sRGB colorspace.  Captured JPEG images may contain
+an ICC profile to specify their color space information; if not, they
+should be assumed to be in the sRGB space as well. On some devices,
+the output colorspace can be changed via {@link
+android.hardware.camera2.params.SessionConfiguration#setColorSpace}.
+</p>
+<p>
+Note that although the YUV->RGB transform is the JFIF matrix (Rec.601
+full-range), due to legacy and compatibility reasons, the output is in
+the sRGB colorspace, which uses the Rec.709 color primaries. Image
+processing code can safely treat the output RGB as being in the sRGB
+colorspace.
+</p>
 
 <p>The application then needs to construct a {@link
 android.hardware.camera2.CaptureRequest}, which defines all the

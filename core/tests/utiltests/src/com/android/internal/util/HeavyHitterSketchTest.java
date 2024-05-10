@@ -16,10 +16,17 @@
 
 package com.android.internal.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.util.ArraySet;
 import android.util.Pair;
 
-import junit.framework.TestCase;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,7 +39,8 @@ import java.util.stream.Collectors;
 /**
  * Tests for {@link HeavyHitterSketch}.
  */
-public final class HeavyHitterSketchTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public final class HeavyHitterSketchTest {
 
     private static final float EPSILON = 0.00001f;
 
@@ -163,6 +171,7 @@ public final class HeavyHitterSketchTest extends TestCase {
         return input;
     }
 
+    @Test
     public void testPositive() throws Exception {
         // Simple case
         verify(new int[]{2, 9, 9, 9, 7, 6, 4, 9, 9, 9, 3, 9}, 2, new int[]{9},
@@ -179,6 +188,7 @@ public final class HeavyHitterSketchTest extends TestCase {
                 new float[]{0.32f, 0.24f, 0.16f, 0.08f});
     }
 
+    @Test
     public void testNegative() throws Exception {
         // Simple case
         verifyNotExpected(new int[]{2, 9, 9, 9, 7, 6, 4, 9, 9, 9, 3, 9}, 2, new int[]{0, 1, 2});
@@ -193,6 +203,7 @@ public final class HeavyHitterSketchTest extends TestCase {
         verifyNotExpected(input, 12, new int[]{0, 1, 2, 1000, 1005});
     }
 
+    @Test
     public void testFalsePositive() throws Exception {
         // Simple case
         verifyNotExpected(new int[]{2, 9, 2, 2, 7, 6, 4, 9, 9, 9, 3, 9}, 2, new int[]{9});

@@ -1,0 +1,28 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// TODO: ag/24733147 - Remove this project once it is imported.
+android_library {
+    name: "Horologist",
+    manifest: "AndroidManifest.xml",
+    srcs: ["src/**/*.kt"],
+    static_libs: [
+        "androidx.compose.foundation_foundation",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.ui_ui",
+        "androidx.compose.ui_ui-tooling",
+        "androidx.navigation_navigation-compose",
+        "androidx.lifecycle_lifecycle-extensions",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.lifecycle_lifecycle-viewmodel-compose",
+        "androidx.wear.compose_compose-foundation",
+        "androidx.wear.compose_compose-material",
+        "androidx.wear.compose_compose-navigation",
+    ],
+}

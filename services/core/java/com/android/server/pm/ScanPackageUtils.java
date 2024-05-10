@@ -24,12 +24,14 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static com.android.server.pm.PackageManagerService.DEBUG_ABI_SELECTION;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_FULL_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_ODM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_OEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRODUCT;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_STOPPED_SYSTEM_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM_EXT;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
@@ -71,21 +73,21 @@ import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ComponentMutateUtils;
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedProcess;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedService;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.library.PackageBackwardCompatibility;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProcess;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedService;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.WatchedArraySet;
 
 import dalvik.system.VMRuntime;
@@ -147,6 +149,8 @@ final class ScanPackageUtils {
         String primaryCpuAbiFromSettings = null;
         String secondaryCpuAbiFromSettings = null;
         boolean needToDeriveAbi = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
+        boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
+
         if (!needToDeriveAbi) {
             if (pkgSetting != null) {
                 // TODO(b/154610922): if it is not first boot or upgrade, we should directly use
@@ -156,8 +160,8 @@ final class ScanPackageUtils {
                 if (pkgSetting.getPkg() != null && pkgSetting.getPkg().isStub()) {
                     needToDeriveAbi = true;
                 } else {
-                    primaryCpuAbiFromSettings = pkgSetting.getPrimaryCpuAbi();
-                    secondaryCpuAbiFromSettings = pkgSetting.getSecondaryCpuAbi();
+                    primaryCpuAbiFromSettings = pkgSetting.getPrimaryCpuAbiLegacy();
+                    secondaryCpuAbiFromSettings = pkgSetting.getSecondaryCpuAbiLegacy();
                 }
             } else {
                 // Re-scanning a system package after uninstalling updates; need to derive ABI
@@ -197,6 +201,7 @@ final class ScanPackageUtils {
         if (createNewPackage) {
             final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
             final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
+            final boolean isStoppedSystemApp = (scanFlags & SCAN_AS_STOPPED_SYSTEM_APP) != 0;
 
             // Flags contain system values stored in the server variant of AndroidPackage,
             // and so the server-side PackageInfoUtils is still called, even without a
@@ -211,11 +216,13 @@ final class ScanPackageUtils {
                     AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
                     AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
                     parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
-                    true /*allowInstall*/, instantApp, virtualPreload,
+                    true /*allowInstall*/, instantApp, virtualPreload, isStoppedSystemApp,
                     UserManagerService.getInstance(), usesSdkLibraries,
-                    parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
+                    parsedPackage.getUsesSdkLibrariesVersionsMajor(),
+                    parsedPackage.getUsesSdkLibrariesOptional(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
-                    newDomainSetId);
+                    newDomainSetId,
+                    parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
         } else {
             // make a deep copy to avoid modifying any existing system state.
             pkgSetting = new PackageSetting(pkgSetting);
@@ -228,15 +235,18 @@ final class ScanPackageUtils {
             // to null here, only to reset them at a later point.
             Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, oldSharedUserSetting,
                     sharedUserSetting, destCodeFile, parsedPackage.getNativeLibraryDir(),
-                    AndroidPackageUtils.getPrimaryCpuAbi(parsedPackage, pkgSetting),
-                    AndroidPackageUtils.getSecondaryCpuAbi(parsedPackage, pkgSetting),
+                    pkgSetting.getPrimaryCpuAbi(),
+                    pkgSetting.getSecondaryCpuAbi(),
                     PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
                     PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
                     UserManagerService.getInstance(),
                     usesSdkLibraries, parsedPackage.getUsesSdkLibrariesVersionsMajor(),
+                    parsedPackage.getUsesSdkLibrariesOptional(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
-                    parsedPackage.getMimeGroups(), newDomainSetId);
+                    parsedPackage.getMimeGroups(), newDomainSetId,
+                    parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
         }
+
         if (createNewPackage && originalPkgSetting != null) {
             // This is the initial transition from the original package, so,
             // fix up the new package's name now. We must do this after looking
@@ -264,89 +274,103 @@ final class ScanPackageUtils {
             pkgSetting.getPkgState().setUpdatedSystemApp(true);
         }
 
-        parsedPackage.setSeInfo(SELinuxMMAC.getSeInfo(parsedPackage, sharedUserSetting,
-                injector.getCompatibility()));
+        pkgSetting.getTransientState().setSeInfo(SELinuxMMAC.getSeInfo(pkgSetting, parsedPackage,
+                sharedUserSetting, injector.getCompatibility()));
 
-        if (parsedPackage.isSystem()) {
+        if (pkgSetting.isSystem()) {
             configurePackageComponents(parsedPackage);
         }
 
         final String cpuAbiOverride = deriveAbiOverride(request.mCpuAbiOverride);
-        final boolean isUpdatedSystemApp = pkgSetting.getPkgState().isUpdatedSystemApp();
+        final boolean isSystemApp = pkgSetting.isSystem();
+        final boolean isUpdatedSystemApp = pkgSetting.isUpdatedSystemApp();
 
         final File appLib32InstallDir = getAppLib32InstallDir();
-        if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
-            if (needToDeriveAbi) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
-                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths> derivedAbi =
-                        packageAbiHelper.derivePackageAbi(parsedPackage, isUpdatedSystemApp,
-                                cpuAbiOverride, appLib32InstallDir);
-                derivedAbi.first.applyTo(parsedPackage);
-                derivedAbi.second.applyTo(parsedPackage);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        // The native libs of Apex is located in apex_payload.img, don't need to parse it from
+        // the original apex file
+        if (!isApex) {
+            if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
+                if (needToDeriveAbi) {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
+                    try {
+                        final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
+                                derivedAbi =
+                                packageAbiHelper.derivePackageAbi(
+                                        parsedPackage,
+                                        isSystemApp,
+                                        isUpdatedSystemApp,
+                                        cpuAbiOverride,
+                                        appLib32InstallDir);
+                        derivedAbi.first.applyTo(parsedPackage);
+                        derivedAbi.second.applyTo(parsedPackage);
+                    } finally {
+                        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                    }
 
-                // Some system apps still use directory structure for native libraries
-                // in which case we might end up not detecting abi solely based on apk
-                // structure. Try to detect abi based on directory structure.
+                    // Some system apps still use directory structure for native libraries
+                    // in which case we might end up not detecting abi solely based on apk
+                    // structure. Try to detect abi based on directory structure.
 
-                String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage);
-                if (parsedPackage.isSystem() && !isUpdatedSystemApp
-                        && pkgRawPrimaryCpuAbi == null) {
-                    final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
+                    String pkgRawPrimaryCpuAbi = AndroidPackageUtils.getRawPrimaryCpuAbi(
                             parsedPackage);
-                    abis.applyTo(parsedPackage);
-                    abis.applyTo(pkgSetting);
+                    if (isSystemApp && !isUpdatedSystemApp && pkgRawPrimaryCpuAbi == null) {
+                        final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
+                                parsedPackage);
+                        abis.applyTo(parsedPackage);
+                        abis.applyTo(pkgSetting);
+                        final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
+                                packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
+                                        isSystemApp, isUpdatedSystemApp, appLib32InstallDir);
+                        nativeLibraryPaths.applyTo(parsedPackage);
+                    }
+                } else {
+                    // This is not a first boot or an upgrade, don't bother deriving the
+                    // ABI during the scan. Instead, trust the value that was stored in the
+                    // package setting.
+                    parsedPackage.setPrimaryCpuAbi(primaryCpuAbiFromSettings)
+                            .setSecondaryCpuAbi(secondaryCpuAbiFromSettings);
+
                     final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                            packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
+                            packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isSystemApp,
                                     isUpdatedSystemApp, appLib32InstallDir);
                     nativeLibraryPaths.applyTo(parsedPackage);
+
+                    if (DEBUG_ABI_SELECTION) {
+                        Slog.i(TAG, "Using ABIS and native lib paths from settings : "
+                                + parsedPackage.getPackageName() + " "
+                                + AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage)
+                                + ", "
+                                + AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage));
+                    }
                 }
             } else {
-                // This is not a first boot or an upgrade, don't bother deriving the
-                // ABI during the scan. Instead, trust the value that was stored in the
-                // package setting.
-                parsedPackage.setPrimaryCpuAbi(primaryCpuAbiFromSettings)
-                        .setSecondaryCpuAbi(secondaryCpuAbiFromSettings);
+                if ((scanFlags & SCAN_MOVE) != 0) {
+                    // We haven't run dex-opt for this move (since we've moved the compiled output
+                    // too) but we already have this packages package info in the PackageSetting.
+                    // We just use that and derive the native library path based on the new code
+                    // path.
+                    parsedPackage.setPrimaryCpuAbi(pkgSetting.getPrimaryCpuAbiLegacy())
+                            .setSecondaryCpuAbi(pkgSetting.getSecondaryCpuAbiLegacy());
+                }
 
+                // Set native library paths again. For moves, the path will be updated based on the
+                // ABIs we've determined above. For non-moves, the path will be updated based on the
+                // ABIs we determined during compilation, but the path will depend on the final
+                // package path (after the rename away from the stage path).
                 final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                        packageAbiHelper.deriveNativeLibraryPaths(parsedPackage,
+                        packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isSystemApp,
                                 isUpdatedSystemApp, appLib32InstallDir);
                 nativeLibraryPaths.applyTo(parsedPackage);
-
-                if (DEBUG_ABI_SELECTION) {
-                    Slog.i(TAG, "Using ABIS and native lib paths from settings : "
-                            + parsedPackage.getPackageName() + " "
-                            + AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage)
-                            + ", "
-                            + AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage));
-                }
-            }
-        } else {
-            if ((scanFlags & SCAN_MOVE) != 0) {
-                // We haven't run dex-opt for this move (since we've moved the compiled output too)
-                // but we already have this packages package info in the PackageSetting. We just
-                // use that and derive the native library path based on the new code path.
-                parsedPackage.setPrimaryCpuAbi(pkgSetting.getPrimaryCpuAbi())
-                        .setSecondaryCpuAbi(pkgSetting.getSecondaryCpuAbi());
             }
 
-            // Set native library paths again. For moves, the path will be updated based on the
-            // ABIs we've determined above. For non-moves, the path will be updated based on the
-            // ABIs we determined during compilation, but the path will depend on the final
-            // package path (after the rename away from the stage path).
-            final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
-                    packageAbiHelper.deriveNativeLibraryPaths(parsedPackage, isUpdatedSystemApp,
-                            appLib32InstallDir);
-            nativeLibraryPaths.applyTo(parsedPackage);
-        }
-
-        // This is a special case for the "system" package, where the ABI is
-        // dictated by the zygote configuration (and init.rc). We should keep track
-        // of this ABI so that we can deal with "normal" applications that run under
-        // the same UID correctly.
-        if (isPlatformPackage) {
-            parsedPackage.setPrimaryCpuAbi(VMRuntime.getRuntime().is64Bit()
-                    ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0]);
+            // This is a special case for the "system" package, where the ABI is
+            // dictated by the zygote configuration (and init.rc). We should keep track
+            // of this ABI so that we can deal with "normal" applications that run under
+            // the same UID correctly.
+            if (isPlatformPackage) {
+                parsedPackage.setPrimaryCpuAbi(VMRuntime.getRuntime().is64Bit()
+                        ? Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0]);
+            }
         }
 
         // If there's a mismatch between the abi-override in the package setting
@@ -377,8 +401,8 @@ final class ScanPackageUtils {
 
         if (DEBUG_ABI_SELECTION) {
             Log.d(TAG, "Abis for package[" + parsedPackage.getPackageName() + "] are"
-                    + " primary=" + pkgSetting.getPrimaryCpuAbi()
-                    + " secondary=" + pkgSetting.getSecondaryCpuAbi()
+                    + " primary=" + pkgSetting.getPrimaryCpuAbiLegacy()
+                    + " secondary=" + pkgSetting.getSecondaryCpuAbiLegacy()
                     + " abiOverride=" + pkgSetting.getCpuAbiOverride());
         }
 
@@ -397,7 +421,7 @@ final class ScanPackageUtils {
         parsedPackage.setFactoryTest(isUnderFactoryTest && parsedPackage.getRequestedPermissions()
                 .contains(android.Manifest.permission.FACTORY_TEST));
 
-        if (parsedPackage.isSystem()) {
+        if (isSystemApp) {
             pkgSetting.setIsOrphaned(true);
         }
 
@@ -405,7 +429,7 @@ final class ScanPackageUtils {
         final long scanFileTime = getLastModifiedTime(parsedPackage);
         final long existingFirstInstallTime = userId == UserHandle.USER_ALL
                 ? PackageStateUtils.getEarliestFirstInstallTime(pkgSetting.getUserStates())
-                : pkgSetting.readUserState(userId).getFirstInstallTime();
+                : pkgSetting.readUserState(userId).getFirstInstallTimeMillis();
         if (currentTime != 0) {
             if (existingFirstInstallTime == 0) {
                 pkgSetting.setFirstInstallTime(currentTime, userId)
@@ -427,8 +451,8 @@ final class ScanPackageUtils {
         pkgSetting.setLastModifiedTime(scanFileTime);
         // TODO(b/135203078): Remove, move to constructor
         pkgSetting.setPkg(parsedPackage)
-                .setPkgFlags(PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting),
-                        PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting));
+                .setFlags(PackageInfoUtils.appInfoFlags(parsedPackage, pkgSetting))
+                .setPrivateFlags(PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting));
         if (parsedPackage.getLongVersionCode() != pkgSetting.getVersionCode()) {
             pkgSetting.setLongVersionCode(parsedPackage.getLongVersionCode());
         }
@@ -444,11 +468,11 @@ final class ScanPackageUtils {
         }
 
         SharedLibraryInfo sdkLibraryInfo = null;
-        if (!TextUtils.isEmpty(parsedPackage.getSdkLibName())) {
+        if (!TextUtils.isEmpty(parsedPackage.getSdkLibraryName())) {
             sdkLibraryInfo = AndroidPackageUtils.createSharedLibraryForSdk(parsedPackage);
         }
         SharedLibraryInfo staticSharedLibraryInfo = null;
-        if (!TextUtils.isEmpty(parsedPackage.getStaticSharedLibName())) {
+        if (!TextUtils.isEmpty(parsedPackage.getStaticSharedLibraryName())) {
             staticSharedLibraryInfo =
                     AndroidPackageUtils.createSharedLibraryForStatic(parsedPackage);
         }
@@ -461,7 +485,7 @@ final class ScanPackageUtils {
             }
         }
 
-        return new ScanResult(request, true, pkgSetting, changedAbiCodePath,
+        return new ScanResult(request, pkgSetting, changedAbiCodePath,
                 !createNewPackage /* existingSettingCopied */,
                 Process.INVALID_UID /* previousAppId */ , sdkLibraryInfo,
                 staticSharedLibraryInfo, dynamicSharedLibraryInfos);
@@ -544,7 +568,7 @@ final class ScanPackageUtils {
      */
     public static void assertCodePolicy(AndroidPackage pkg)
             throws PackageManagerException {
-        final boolean shouldHaveCode = pkg.isHasCode();
+        final boolean shouldHaveCode = pkg.isDeclaredHavingCode();
         if (shouldHaveCode && !apkHasCode(pkg.getBaseApkPath())) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Package " + pkg.getBaseApkPath() + " code is missing");
@@ -566,87 +590,101 @@ final class ScanPackageUtils {
             @PackageManagerService.ScanFlags int scanFlags) throws PackageManagerException {
         // Static shared libraries should have at least O target SDK
         if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.O) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs must target O SDK or higher");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs must target O SDK or higher",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_LOW_SDK);
         }
 
         // Package declaring static a shared lib cannot be instant apps
         if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs cannot be instant apps");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs cannot be instant apps",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_INSTANT);
         }
 
         // Package declaring static a shared lib cannot be renamed since the package
         // name is synthetic and apps can't code around package manager internals.
         if (!ArrayUtils.isEmpty(pkg.getOriginalPackages())) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs cannot be renamed");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs cannot be renamed",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_RENAMED);
         }
 
         // Package declaring static a shared lib cannot declare dynamic libs
         if (!ArrayUtils.isEmpty(pkg.getLibraryNames())) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs cannot declare dynamic libs");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs cannot declare dynamic libs",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_DYNAMIC);
         }
 
         // Package declaring static a shared lib cannot declare shared users
         if (pkg.getSharedUserId() != null) {
-            throw new PackageManagerException(
-                    "Packages declaring static-shared libs cannot declare shared users");
+            throw PackageManagerException.ofInternalError(
+                    "Packages declaring static-shared libs cannot declare shared users",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_SHARED_USER);
         }
 
         // Static shared libs cannot declare activities
         if (!pkg.getActivities().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare activities");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare activities",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_ACTIVITY);
         }
 
         // Static shared libs cannot declare services
         if (!pkg.getServices().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare services");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare services",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_SERVICE);
         }
 
         // Static shared libs cannot declare providers
         if (!pkg.getProviders().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare content providers");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare content providers",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_CONTENT_PROVIDER);
         }
 
         // Static shared libs cannot declare receivers
         if (!pkg.getReceivers().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare broadcast receivers");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare broadcast receivers",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_BROADCAST_RECEIVER);
         }
 
         // Static shared libs cannot declare permission groups
         if (!pkg.getPermissionGroups().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare permission groups");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare permission groups",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_PERMISSION_GROUP);
         }
 
         // Static shared libs cannot declare attributions
         if (!pkg.getAttributions().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare features");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare features",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_FEATURE);
         }
 
         // Static shared libs cannot declare permissions
         if (!pkg.getPermissions().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare permissions");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare permissions",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_PERMISSION);
         }
 
         // Static shared libs cannot declare protected broadcasts
         if (!pkg.getProtectedBroadcasts().isEmpty()) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot declare protected broadcasts");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot declare protected broadcasts",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_PROTECTED_BROADCAST);
         }
 
         // Static shared libs cannot be overlay targets
         if (pkg.getOverlayTarget() != null) {
-            throw new PackageManagerException(
-                    "Static shared libs cannot be overlay targets");
+            throw PackageManagerException.ofInternalError(
+                    "Static shared libs cannot be overlay targets",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_OVERLAY_TARGETS);
         }
     }
 
@@ -706,9 +744,9 @@ final class ScanPackageUtils {
      * been installed under one of this package's original names.
      */
     public static @Nullable String getRealPackageName(@NonNull AndroidPackage pkg,
-            @Nullable String renamedPkgName) {
+            @Nullable String renamedPkgName, boolean isSystemApp) {
         if (isPackageRenamed(pkg, renamedPkgName)) {
-            return AndroidPackageUtils.getRealPackageOrNull(pkg);
+            return AndroidPackageUtils.getRealPackageOrNull(pkg, isSystemApp);
         }
         return null;
     }
@@ -822,9 +860,19 @@ final class ScanPackageUtils {
      * ideally be static, but, it requires locks to read system state.
      */
     public static void applyPolicy(ParsedPackage parsedPackage,
-            final @PackageManagerService.ScanFlags int scanFlags, AndroidPackage platformPkg,
-            boolean isUpdatedSystemApp) {
+            final @PackageManagerService.ScanFlags int scanFlags,
+            @Nullable AndroidPackage platformPkg, boolean isUpdatedSystemApp) {
+        // TODO: In the real APIs, an updated system app is always a system app, but that may not
+        //  hold true during scan because PMS doesn't propagate the SCAN_AS_SYSTEM flag for the data
+        //  directory. This tries to emulate that behavior by using either the flag or the boolean,
+        //  but this logic is fragile. Specifically, it may affect the PackageBackwardCompatibility
+        //  checker, which switches branches based on whether an app is a system app. When install
+        //  is refactored, the scan policy flags should not be read this late and instead passed
+        //  around in the PackageSetting or a temporary object which infers these values early, so
+        //  that all further consumers agree on their values.
+        boolean isSystemApp = isUpdatedSystemApp;
         if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
+            isSystemApp = true;
             parsedPackage.setSystem(true);
             // TODO(b/135203078): Can this be done in PackageParser? Or just inferred when the flag
             //  is set during parse.
@@ -852,6 +900,8 @@ final class ScanPackageUtils {
                     .markNotActivitiesAsNotExportedIfSingleUser();
         }
 
+        parsedPackage.setApex((scanFlags & SCAN_AS_APEX) != 0);
+
         parsedPackage.setPrivileged((scanFlags & SCAN_AS_PRIVILEGED) != 0)
                 .setOem((scanFlags & SCAN_AS_OEM) != 0)
                 .setVendor((scanFlags & SCAN_AS_VENDOR) != 0)
@@ -863,18 +913,19 @@ final class ScanPackageUtils {
         parsedPackage.setSignedWithPlatformKey(
                 (PLATFORM_PACKAGE_NAME.equals(parsedPackage.getPackageName())
                         || (platformPkg != null && compareSignatures(
-                        platformPkg.getSigningDetails().getSignatures(),
-                        parsedPackage.getSigningDetails().getSignatures()
+                        platformPkg.getSigningDetails(),
+                        parsedPackage.getSigningDetails()
                 ) == PackageManager.SIGNATURE_MATCH))
         );
 
-        if (!parsedPackage.isSystem()) {
+        if (!isSystemApp) {
             // Only system apps can use these features.
             parsedPackage.clearOriginalPackages()
                     .clearAdoptPermissions();
         }
 
-        PackageBackwardCompatibility.modifySharedLibraries(parsedPackage, isUpdatedSystemApp);
+        PackageBackwardCompatibility.modifySharedLibraries(parsedPackage, isSystemApp,
+                isUpdatedSystemApp);
     }
 
     /**
@@ -898,7 +949,7 @@ final class ScanPackageUtils {
             PackageSetting ps = sharedUserPackageSettings.valueAt(i);
             if (scannedPackage == null
                     || !scannedPackage.getPackageName().equals(ps.getPackageName())) {
-                if (ps.getPrimaryCpuAbi() != null) {
+                if (ps.getPrimaryCpuAbiLegacy() != null) {
                     continue;
                 }
 

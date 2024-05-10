@@ -12,4 +12,28 @@
             column="16"/>
     </issue>
 
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="IRestoreSession permission check should be converted to @EnforcePermission annotation">
+        <location
+            file="frameworks/base/services/backup/java/com/android/server/backup/restore/ActiveRestoreSession.java"
+            line="88"/>
+    </issue>
+
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="IRestoreSession permission check should be converted to @EnforcePermission annotation">
+        <location
+            file="frameworks/base/services/backup/java/com/android/server/backup/restore/ActiveRestoreSession.java"
+            line="144"/>
+    </issue>
+
+    <issue
+        id="SimpleManualPermissionEnforcement"
+        message="IRestoreSession permission check should be converted to @EnforcePermission annotation">
+        <location
+            file="frameworks/base/services/backup/java/com/android/server/backup/restore/ActiveRestoreSession.java"
+            line="207"/>
+    </issue>
+
 </issues>

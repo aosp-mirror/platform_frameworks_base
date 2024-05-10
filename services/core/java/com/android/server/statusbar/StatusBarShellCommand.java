@@ -61,6 +61,8 @@ public class StatusBarShellCommand extends ShellCommand {
                     return runAddTile();
                 case "remove-tile":
                     return runRemoveTile();
+                case "set-tiles":
+                    return runSetTiles();
                 case "click-tile":
                     return runClickTile();
                 case "check-support":
@@ -102,6 +104,11 @@ public class StatusBarShellCommand extends ShellCommand {
 
     private int runRemoveTile() throws RemoteException {
         mInterface.remTile(ComponentName.unflattenFromString(getNextArgRequired()));
+        return 0;
+    }
+
+    private int runSetTiles() throws RemoteException {
+        mInterface.setTiles(getNextArgRequired());
         return 0;
     }
 
@@ -241,6 +248,9 @@ public class StatusBarShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  remove-tile COMPONENT");
         pw.println("    Remove a TileService of the specified component");
+        pw.println("");
+        pw.println("  set-tiles LIST-OF-TILES");
+        pw.println("    Sets the list of tiles as the current Quick Settings tiles");
         pw.println("");
         pw.println("  click-tile COMPONENT");
         pw.println("    Click on a TileService of the specified component");

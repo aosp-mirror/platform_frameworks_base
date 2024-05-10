@@ -44,6 +44,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.om.IOverlayManager;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -483,6 +484,7 @@ public class StatusBarManagerServiceTest {
                 new Callback());
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -533,6 +535,7 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -554,6 +557,7 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -576,6 +580,7 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -598,6 +603,7 @@ public class StatusBarManagerServiceTest {
         mStatusBarManagerService.requestAddTile(TEST_COMPONENT, TILE_LABEL, mIcon, user, callback);
 
         verify(mMockStatusBar).requestAddTile(
+                eq(Binder.getCallingUid()),
                 eq(TEST_COMPONENT),
                 eq(APP_NAME),
                 eq(TILE_LABEL),
@@ -622,6 +628,7 @@ public class StatusBarManagerServiceTest {
                     new Callback());
 
             verify(mMockStatusBar, times(i + 1)).requestAddTile(
+                    eq(Binder.getCallingUid()),
                     eq(TEST_COMPONENT),
                     eq(APP_NAME),
                     eq(TILE_LABEL),
@@ -637,6 +644,7 @@ public class StatusBarManagerServiceTest {
 
         // Only called MAX_NUM_DENIALS times
         verify(mMockStatusBar, times(TileRequestTracker.MAX_NUM_DENIALS)).requestAddTile(
+                anyInt(),
                 any(),
                 any(),
                 any(),
@@ -657,6 +665,7 @@ public class StatusBarManagerServiceTest {
                     new Callback());
 
             verify(mMockStatusBar, times(i + 1)).requestAddTile(
+                    eq(Binder.getCallingUid()),
                     eq(TEST_COMPONENT),
                     eq(APP_NAME),
                     eq(TILE_LABEL),
@@ -669,7 +678,10 @@ public class StatusBarManagerServiceTest {
     }
 
     @Test
-    public void testSetNavBarMode_setsModeKids() throws RemoteException {
+    public void testSetNavBarMode_setsModeKids() throws Exception {
+        mContext.setMockPackageManager(mPackageManager);
+        when(mPackageManager.getPackageInfo(anyString(),
+                any(PackageManager.PackageInfoFlags.class))).thenReturn(new PackageInfo());
         int navBarModeKids = StatusBarManager.NAV_BAR_MODE_KIDS;
 
         mStatusBarManagerService.setNavBarMode(navBarModeKids);

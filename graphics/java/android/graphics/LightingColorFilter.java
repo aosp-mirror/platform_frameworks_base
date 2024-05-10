@@ -78,7 +78,7 @@ public class LightingColorFilter extends ColorFilter {
     public void setColorMultiply(@ColorInt int mul) {
         if (mMul != mul) {
             mMul = mul;
-            discardNativeInstance();
+            native_SetLightingFilterMul(getNativeInstance(), mul);
         }
     }
 
@@ -104,7 +104,7 @@ public class LightingColorFilter extends ColorFilter {
     public void setColorAdd(@ColorInt int add) {
         if (mAdd != add) {
             mAdd = add;
-            discardNativeInstance();
+            native_SetLightingFilterAdd(getNativeInstance(), add);
         }
     }
 
@@ -114,4 +114,8 @@ public class LightingColorFilter extends ColorFilter {
     }
 
     private static native long native_CreateLightingFilter(int mul, int add);
+
+    private static native void native_SetLightingFilterAdd(long lightingFilter, int add);
+
+    private static native void native_SetLightingFilterMul(long lightingFilter, int mul);
 }

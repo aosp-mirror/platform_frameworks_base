@@ -1,0 +1,20 @@
+package {
+    default_applicable_licenses: ["frameworks_base_cmds_uinput_license"],
+}
+
+android_test {
+    name: "UinputTests",
+    srcs: [
+        "src/**/*.java",
+    ],
+    static_libs: [
+        "androidx.test.runner",
+        "frameworks-base-testutils",
+        "platform-test-annotations",
+        "truth",
+        "uinput",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+}

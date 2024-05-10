@@ -17,56 +17,82 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH;
 
 import static com.android.internal.R.bool.config_unfoldTransitionEnabled;
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
+import static com.android.server.wm.DeviceStateController.DeviceState.FOLDED;
+import static com.android.server.wm.DeviceStateController.DeviceState.HALF_FOLDED;
+import static com.android.server.wm.DeviceStateController.DeviceState.OPEN;
 
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
-import android.hardware.devicestate.DeviceStateManager;
-import android.os.HandlerExecutor;
 import android.window.DisplayAreaInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.wm.DeviceStateController.DeviceState;
+
 public class PhysicalDisplaySwitchTransitionLauncher {
 
     private final DisplayContent mDisplayContent;
-    private final WindowManagerService mService;
-    private final DeviceStateManager mDeviceStateManager;
+    private final ActivityTaskManagerService mAtmService;
+    private final Context mContext;
     private final TransitionController mTransitionController;
 
-    private DeviceStateListener mDeviceStateListener;
-
     /**
-     * If on a foldable device represents whether the device is folded or not
+     * If on a foldable device represents whether we need to show unfold animation when receiving
+     * a physical display switch event
      */
-    private boolean mIsFolded;
+    private boolean mShouldRequestTransitionOnDisplaySwitch = false;
+    /**
+     * Current device state from {@link android.hardware.devicestate.DeviceStateManager}
+     */
+    private DeviceState mDeviceState = DeviceState.UNKNOWN;
     private Transition mTransition;
 
     public PhysicalDisplaySwitchTransitionLauncher(DisplayContent displayContent,
             TransitionController transitionController) {
-        mDisplayContent = displayContent;
-        mService = displayContent.mWmService;
-        mTransitionController = transitionController;
-
-        mDeviceStateManager = mService.mContext.getSystemService(DeviceStateManager.class);
-
-        if (mDeviceStateManager != null) {
-            mDeviceStateListener = new DeviceStateListener(mService.mContext);
-            mDeviceStateManager
-                    .registerCallback(new HandlerExecutor(mDisplayContent.mWmService.mH),
-                            mDeviceStateListener);
-        }
+        this(displayContent, displayContent.mWmService.mAtmService,
+                displayContent.mWmService.mContext, transitionController);
     }
 
-    public void destroy() {
-        if (mDeviceStateManager != null) {
-            mDeviceStateManager.unregisterCallback(mDeviceStateListener);
+    @VisibleForTesting
+    public PhysicalDisplaySwitchTransitionLauncher(DisplayContent displayContent,
+            ActivityTaskManagerService service, Context context,
+            TransitionController transitionController) {
+        mDisplayContent = displayContent;
+        mAtmService = service;
+        mContext = context;
+        mTransitionController = transitionController;
+    }
+
+    /**
+     * Called by the display manager just before it applied the device state, it is guaranteed
+     * that in case of physical display change the
+     * {@link PhysicalDisplaySwitchTransitionLauncher#requestDisplaySwitchTransitionIfNeeded}
+     * method will be invoked *after* this one.
+     */
+    void foldStateChanged(DeviceState newDeviceState) {
+        boolean isUnfolding = mDeviceState == FOLDED
+                && (newDeviceState == HALF_FOLDED || newDeviceState == OPEN);
+
+        if (isUnfolding) {
+            // Request transition only if we are unfolding the device
+            mShouldRequestTransitionOnDisplaySwitch = true;
+        } else if (newDeviceState != HALF_FOLDED && newDeviceState != OPEN) {
+            // Cancel the transition request in case if we are folding or switching to back
+            // to the rear display before the displays got switched
+            mShouldRequestTransitionOnDisplaySwitch = false;
         }
+
+        mDeviceState = newDeviceState;
     }
 
     /**
@@ -74,35 +100,51 @@ public class PhysicalDisplaySwitchTransitionLauncher {
      */
     public void requestDisplaySwitchTransitionIfNeeded(int displayId, int oldDisplayWidth,
             int oldDisplayHeight, int newDisplayWidth, int newDisplayHeight) {
+        if (!mShouldRequestTransitionOnDisplaySwitch) return;
         if (!mTransitionController.isShellTransitionsEnabled()) return;
         if (!mDisplayContent.getLastHasContent()) return;
 
-        boolean shouldRequestUnfoldTransition = !mIsFolded
-                && mService.mContext.getResources().getBoolean(config_unfoldTransitionEnabled)
-                && ValueAnimator.areAnimatorsEnabled();
+        boolean shouldRequestUnfoldTransition = mContext.getResources()
+                .getBoolean(config_unfoldTransitionEnabled) && ValueAnimator.areAnimatorsEnabled();
 
         if (!shouldRequestUnfoldTransition) {
             return;
         }
 
-        final TransitionRequestInfo.DisplayChange displayChange =
-                new TransitionRequestInfo.DisplayChange(displayId);
+        mTransition = null;
 
-        final Rect startAbsBounds = new Rect(0, 0, oldDisplayWidth, oldDisplayHeight);
-        displayChange.setStartAbsBounds(startAbsBounds);
-        final Rect endAbsBounds = new Rect(0, 0, newDisplayWidth, newDisplayHeight);
-        displayChange.setEndAbsBounds(endAbsBounds);
-        displayChange.setPhysicalDisplayChanged(true);
+        if (mTransitionController.isCollecting()) {
+            // Add display container to the currently collecting transition
+            mTransitionController.collect(mDisplayContent);
+            mTransition = mTransitionController.getCollectingTransition();
 
-        final Transition t = mTransitionController.requestTransitionIfNeeded(TRANSIT_CHANGE,
-                0 /* flags */,
-                mDisplayContent, mDisplayContent, null /* remoteTransition */,
-                displayChange);
+            // Make sure that transition is not ready until we finish the remote display change
+            mTransition.setReady(mDisplayContent, false);
+            mTransition.addFlag(TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH);
 
-        if (t != null) {
-            mDisplayContent.mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
-            mTransition = t;
+            ProtoLog.d(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Adding display switch to existing collecting transition");
+        } else {
+            final TransitionRequestInfo.DisplayChange displayChange =
+                    new TransitionRequestInfo.DisplayChange(displayId);
+
+            final Rect startAbsBounds = new Rect(0, 0, oldDisplayWidth, oldDisplayHeight);
+            displayChange.setStartAbsBounds(startAbsBounds);
+            final Rect endAbsBounds = new Rect(0, 0, newDisplayWidth, newDisplayHeight);
+            displayChange.setEndAbsBounds(endAbsBounds);
+            displayChange.setPhysicalDisplayChanged(true);
+
+            mTransition = mTransitionController.requestTransitionIfNeeded(TRANSIT_CHANGE,
+                    0 /* flags */,
+                    mDisplayContent, mDisplayContent, null /* remoteTransition */,
+                    displayChange);
         }
+
+        if (mTransition != null) {
+            mAtmService.startPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
+        }
+
+        mShouldRequestTransitionOnDisplaySwitch = false;
     }
 
     /**
@@ -130,7 +172,7 @@ public class PhysicalDisplaySwitchTransitionLauncher {
         if (mTransition == null) return;
 
         if (transaction != null) {
-            mService.mAtmService.mWindowOrganizerController.applyTransaction(transaction);
+            mAtmService.mWindowOrganizerController.applyTransaction(transaction);
         }
 
         markTransitionAsReady();
@@ -143,10 +185,4 @@ public class PhysicalDisplaySwitchTransitionLauncher {
         mTransition = null;
     }
 
-    class DeviceStateListener extends DeviceStateManager.FoldStateListener {
-
-        DeviceStateListener(Context context) {
-            super(context, newIsFolded -> mIsFolded = newIsFolded);
-        }
-    }
 }

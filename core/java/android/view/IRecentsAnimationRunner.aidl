@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
 import android.view.IRecentsAnimationController;
 import android.window.TaskSnapshot;
+import android.os.Bundle;
 
 /**
  * Interface that is used to callback from window manager to the process that runs a recents
@@ -57,7 +58,7 @@ oneway interface IRecentsAnimationRunner {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onAnimationStart(in IRecentsAnimationController controller,
             in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
-            in Rect homeContentInsets, in Rect minimizedHomeBounds) = 2;
+            in Rect homeContentInsets, in Rect minimizedHomeBounds, in Bundle extras) = 2;
 
     /**
      * Called when the task of an activity that has been started while the recents animation

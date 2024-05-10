@@ -30,12 +30,12 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 
@@ -509,7 +509,7 @@ public class TaskPersister implements PersisterQueue.Listener {
 
     private static boolean createParentDirectory(String filePath) {
         File parentDir = new File(filePath).getParentFile();
-        return parentDir.exists() || parentDir.mkdirs();
+        return parentDir.isDirectory() || parentDir.mkdir();
     }
 
     private static class TaskWriteQueueItem implements PersisterQueue.WriteQueueItem {
@@ -549,8 +549,8 @@ public class TaskPersister implements PersisterQueue.Listener {
             // Write out one task.
             byte[] data = null;
             Task task = mTask;
-            if (DEBUG) Slog.d(TAG, "Writing task=" + task);
             synchronized (mService.mGlobalLock) {
+                if (DEBUG) Slog.d(TAG, "Writing task=" + task);
                 if (task.inRecents) {
                     // Still there.
                     try {

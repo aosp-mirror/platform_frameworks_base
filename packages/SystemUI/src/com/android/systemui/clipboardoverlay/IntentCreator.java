@@ -17,16 +17,18 @@
 package com.android.systemui.clipboardoverlay;
 
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 class IntentCreator {
-    private static final String EXTRA_EDIT_SOURCE_CLIPBOARD = "edit_source_clipboard";
+    private static final String EXTRA_EDIT_SOURCE = "edit_source";
+    private static final String EDIT_SOURCE_CLIPBOARD = "clipboard";
     private static final String REMOTE_COPY_ACTION = "android.intent.action.REMOTE_COPY";
 
     static Intent getTextEditorIntent(Context context) {
@@ -41,10 +43,16 @@ class IntentCreator {
         // From the ACTION_SEND docs:
         //   "If using EXTRA_TEXT, the MIME type should be "text/plain"; otherwise it should be the
         //    MIME type of the data in EXTRA_STREAM"
-        if (clipData.getItemAt(0).getUri() != null) {
-            shareIntent.setDataAndType(
-                    clipData.getItemAt(0).getUri(), clipData.getDescription().getMimeType(0));
-            shareIntent.putExtra(Intent.EXTRA_STREAM, clipData.getItemAt(0).getUri());
+        Uri uri = clipData.getItemAt(0).getUri();
+        if (uri != null) {
+            // We don't use setData here because some apps interpret this as "to:".
+            shareIntent.setType(clipData.getDescription().getMimeType(0));
+            // Include URI in ClipData also, so that grantPermission picks it up.
+            shareIntent.setClipData(new ClipData(
+                    new ClipDescription(
+                            "content", new String[]{clipData.getDescription().getMimeType(0)}),
+                    new ClipData.Item(uri)));
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
             shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } else {
             shareIntent.putExtra(
@@ -67,7 +75,7 @@ class IntentCreator {
         editIntent.setDataAndType(uri, "image/*");
         editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        editIntent.putExtra(EXTRA_EDIT_SOURCE_CLIPBOARD, true);
+        editIntent.putExtra(EXTRA_EDIT_SOURCE, EDIT_SOURCE_CLIPBOARD);
         return editIntent;
     }
 

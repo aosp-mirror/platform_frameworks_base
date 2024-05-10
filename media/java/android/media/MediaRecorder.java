@@ -984,13 +984,13 @@ public class MediaRecorder implements AudioRouting,
      * after setVideoSource(). Call this after setOutputFormat() but before
      * prepare().
      *
+     * <p>NOTE: On some devices that have auto-frame rate, this sets the
+     * maximum frame rate, not a constant frame rate. Actual frame rate
+     * will vary according to lighting conditions.</p>
+     *
      * @param rate the number of frames per second of video to capture
      * @throws IllegalStateException if it is called after
      * prepare() or before setOutputFormat().
-     *
-     * NOTE: On some devices that have auto-frame rate, this sets the
-     * maximum frame rate, not a constant frame rate. Actual frame rate
-     * will vary according to lighting conditions.
      */
     public native void setVideoFrameRate(int rate) throws IllegalStateException;
 

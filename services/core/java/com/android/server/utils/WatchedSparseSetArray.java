@@ -65,6 +65,14 @@ public class WatchedSparseSetArray<T> extends WatchableImpl implements Snappable
     }
 
     /**
+     * Add a set of values for key n.
+     */
+    public void addAll(int n, ArraySet<T> values) {
+        mStorage.addAll(n, values);
+        onChanged();
+    }
+
+    /**
      * Removes all mappings from this SparseSetArray.
      */
     public void clear() {
@@ -132,6 +140,20 @@ public class WatchedSparseSetArray<T> extends WatchableImpl implements Snappable
      */
     public T valueAt(int intIndex, int valueIndex) {
         return (T) mStorage.valueAt(intIndex, valueIndex);
+    }
+
+    /**
+     * Copy from another SparseSetArray.
+     */
+    public void copyFrom(@NonNull SparseSetArray<T> c) {
+        clear();
+        final int end = c.size();
+        for (int i = 0; i < end; i++) {
+            final int key = c.keyAt(i);
+            final ArraySet<T> set = c.get(key);
+            mStorage.addAll(key, set);
+        }
+        onChanged();
     }
 
     @NonNull

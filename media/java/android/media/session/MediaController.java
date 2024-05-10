@@ -992,23 +992,23 @@ public final class MediaController {
         /**
          * Creates a new playback info.
          *
-         * @param playbackType The playback type. Should be {@link #PLAYBACK_TYPE_LOCAL} or
-         *                     {@link #PLAYBACK_TYPE_REMOTE}
-         * @param volumeControl The volume control. Should be one of:
-         *                      {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE},
-         *                      {@link VolumeProvider#VOLUME_CONTROL_RELATIVE}, and
-         *                      {@link VolumeProvider#VOLUME_CONTROL_FIXED}.
+         * @param playbackType The playback type. Should be {@link #PLAYBACK_TYPE_LOCAL} or {@link
+         *     #PLAYBACK_TYPE_REMOTE}
+         * @param volumeControl See {@link #getVolumeControl()}.
          * @param maxVolume The max volume. Should be equal or greater than zero.
          * @param currentVolume The current volume. Should be in the interval [0, maxVolume].
          * @param audioAttrs The audio attributes for this playback. Should not be null.
-         * @param volumeControlId The volume control ID. This is used for matching
-         *                        {@link RoutingSessionInfo} and {@link MediaSession}.
+         * @param volumeControlId See {@link #getVolumeControlId()}.
          * @hide
          */
         @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        public PlaybackInfo(@PlaybackType int playbackType, @ControlType int volumeControl,
-                @IntRange(from = 0) int maxVolume, @IntRange(from = 0) int currentVolume,
-                @NonNull AudioAttributes audioAttrs, @Nullable String volumeControlId) {
+        public PlaybackInfo(
+                @PlaybackType int playbackType,
+                @ControlType int volumeControl,
+                @IntRange(from = 0) int maxVolume,
+                @IntRange(from = 0) int currentVolume,
+                @NonNull AudioAttributes audioAttrs,
+                @Nullable String volumeControlId) {
             mPlaybackType = playbackType;
             mVolumeControl = volumeControl;
             mMaxVolume = maxVolume;
@@ -1040,14 +1040,8 @@ public final class MediaController {
         }
 
         /**
-         * Get the type of volume control that can be used. One of:
-         * <ul>
-         * <li>{@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}</li>
-         * <li>{@link VolumeProvider#VOLUME_CONTROL_RELATIVE}</li>
-         * <li>{@link VolumeProvider#VOLUME_CONTROL_FIXED}</li>
-         * </ul>
-         *
-         * @return The type of volume control that may be used with this session.
+         * Get the volume control type associated to the session, as indicated by {@link
+         * VolumeProvider#getVolumeControl()}.
          */
         public int getVolumeControl() {
             return mVolumeControl;
@@ -1072,10 +1066,9 @@ public final class MediaController {
         }
 
         /**
-         * Get the audio attributes for this session. The attributes will affect
-         * volume handling for the session. When the volume type is
-         * {@link PlaybackInfo#PLAYBACK_TYPE_REMOTE} these may be ignored by the
-         * remote volume handler.
+         * Get the audio attributes for this session. The attributes will affect volume handling for
+         * the session. When the playback type is {@link PlaybackInfo#PLAYBACK_TYPE_REMOTE} these
+         * may be ignored by the remote volume handler.
          *
          * @return The attributes for this session.
          */
@@ -1084,19 +1077,9 @@ public final class MediaController {
         }
 
         /**
-         * Gets the volume control ID for this session. It can be used to identify which
-         * volume provider is used by the session.
-         * <p>
-         * When the session starts to use {@link #PLAYBACK_TYPE_REMOTE remote volume handling},
-         * a volume provider should be set and it may set the volume control ID of the provider
-         * if the session wants to inform which volume provider is used.
-         * It can be {@code null} if the session didn't set the volume control ID or it uses
-         * {@link #PLAYBACK_TYPE_LOCAL local playback}.
-         * </p>
-         *
-         * @return the volume control ID for this session or {@code null} if it uses local playback
-         * or not set.
-         * @see VolumeProvider#getVolumeControlId()
+         * Get the routing controller ID for this session, as indicated by {@link
+         * VolumeProvider#getVolumeControlId()}. Returns null if unset, or if {@link
+         * #getPlaybackType()} is {@link #PLAYBACK_TYPE_LOCAL}.
          */
         @Nullable
         public String getVolumeControlId() {

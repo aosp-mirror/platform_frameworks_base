@@ -20,10 +20,18 @@ import android.app.Service;
 
 import com.android.systemui.screenshot.ImageCapture;
 import com.android.systemui.screenshot.ImageCaptureImpl;
+import com.android.systemui.screenshot.RequestProcessor;
 import com.android.systemui.screenshot.ScreenshotPolicy;
 import com.android.systemui.screenshot.ScreenshotPolicyImpl;
 import com.android.systemui.screenshot.ScreenshotProxyService;
+import com.android.systemui.screenshot.ScreenshotRequestProcessor;
+import com.android.systemui.screenshot.ScreenshotSoundController;
+import com.android.systemui.screenshot.ScreenshotSoundControllerImpl;
+import com.android.systemui.screenshot.ScreenshotSoundProvider;
+import com.android.systemui.screenshot.ScreenshotSoundProviderImpl;
 import com.android.systemui.screenshot.TakeScreenshotService;
+import com.android.systemui.screenshot.appclips.AppClipsScreenshotHelperService;
+import com.android.systemui.screenshot.appclips.AppClipsService;
 
 import dagger.Binds;
 import dagger.Module;
@@ -52,4 +60,25 @@ public abstract class ScreenshotModule {
     @Binds
     abstract ImageCapture bindImageCaptureImpl(ImageCaptureImpl capture);
 
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsScreenshotHelperService.class)
+    abstract Service bindAppClipsScreenshotHelperService(AppClipsScreenshotHelperService service);
+
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsService.class)
+    abstract Service bindAppClipsService(AppClipsService service);
+
+    @Binds
+    abstract ScreenshotRequestProcessor bindScreenshotRequestProcessor(
+            RequestProcessor requestProcessor);
+
+    @Binds
+    abstract ScreenshotSoundProvider bindScreenshotSoundProvider(
+            ScreenshotSoundProviderImpl screenshotSoundProviderImpl);
+
+    @Binds
+    abstract ScreenshotSoundController bindScreenshotSoundController(
+            ScreenshotSoundControllerImpl screenshotSoundProviderImpl);
 }

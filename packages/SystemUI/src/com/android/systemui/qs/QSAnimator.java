@@ -26,9 +26,9 @@ import android.view.View.OnLayoutChangeListener;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.animation.Interpolators;
+import com.android.app.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
@@ -36,11 +36,11 @@ import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -64,6 +64,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
     private static final String TAG = "QSAnimator";
 
+    private static final int ANIMATORS_UPDATE_DELAY_MS = 100;
     private static final float EXPANDED_TILE_DELAY = .86f;
     //Non first page delays
     private static final float QS_TILE_LABEL_FADE_OUT_START = 0.15f;
@@ -86,8 +87,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private final QuickQSPanel mQuickQsPanel;
     private final QSPanelController mQsPanelController;
     private final QuickQSPanelController mQuickQSPanelController;
-    private final QuickStatusBarHeader mQuickStatusBarHeader;
-    private final QS mQs;
+    private final View mQsRootView;
 
     @Nullable
     private PagedTileLayout mPagedLayout;
@@ -115,8 +115,6 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     // Brightness slider opacity driver. Uses linear interpolator.
     @Nullable
     private TouchAnimator mBrightnessOpacityAnimator;
-    // Animator for Footer actions in QQS
-    private TouchAnimator mQQSFooterActionsAnimator;
     // Height animator for QQS tiles (height changing from QQS size to QS size)
     @Nullable
     private HeightExpansionAnimator mQQSTileHeightAnimator;
@@ -135,8 +133,8 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int mNumQuickTiles;
     private int mLastQQSTileHeight;
     private float mLastPosition;
-    private final QSTileHost mHost;
-    private final Executor mExecutor;
+    private final QSHost mHost;
+    private final DelayableExecutor mExecutor;
     private boolean mShowCollapsedOnKeyguard;
     private int mQQSTop;
 
@@ -144,22 +142,21 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int[] mTmpLoc2 = new int[2];
 
     @Inject
-    public QSAnimator(QS qs, QuickQSPanel quickPanel, QuickStatusBarHeader quickStatusBarHeader,
+    public QSAnimator(@RootView View rootView, QuickQSPanel quickPanel,
             QSPanelController qsPanelController,
-            QuickQSPanelController quickQSPanelController, QSTileHost qsTileHost,
-            @Main Executor executor, TunerService tunerService,
+            QuickQSPanelController quickQSPanelController, QSHost qsTileHost,
+            @Main DelayableExecutor executor, TunerService tunerService,
             QSExpansionPathInterpolator qsExpansionPathInterpolator) {
-        mQs = qs;
+        mQsRootView = rootView;
         mQuickQsPanel = quickPanel;
         mQsPanelController = qsPanelController;
         mQuickQSPanelController = quickQSPanelController;
-        mQuickStatusBarHeader = quickStatusBarHeader;
         mHost = qsTileHost;
         mExecutor = executor;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
         mHost.addCallback(this);
         mQsPanelController.addOnAttachStateChangeListener(this);
-        qs.getView().addOnLayoutChangeListener(this);
+        mQsRootView.addOnLayoutChangeListener(this);
         if (mQsPanelController.isAttachedToWindow()) {
             onViewAttachedToWindow(null);
         }
@@ -174,6 +171,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
     public void onRtlChanged() {
         updateAnimators();
+        setCurrentPosition();
     }
 
     /**
@@ -213,6 +211,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     @Override
     public void onViewAttachedToWindow(@NonNull View view) {
         updateAnimators();
+        setCurrentPosition();
     }
 
     @Override
@@ -314,8 +313,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                     break;
                 }
 
-                final View tileIcon = tileView.getIcon().getIconView();
-                View view = mQs.getView();
+                View view = mQsRootView;
 
                 // This case: less tiles to animate in small displays.
                 if (count < mQuickQSPanelController.getTileLayout().getNumVisibleTiles()) {
@@ -330,12 +328,8 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
                     // Offset the translation animation on the views
                     // (that goes from 0 to getOffsetTranslation)
-                    int offsetWithQSBHTranslation =
-                            yOffset - mQuickStatusBarHeader.getOffsetTranslation();
-                    qqsTranslationYBuilder.addFloat(quickTileView, "translationY", 0,
-                            offsetWithQSBHTranslation);
-                    translationYBuilder.addFloat(tileView, "translationY",
-                            -offsetWithQSBHTranslation, 0);
+                    qqsTranslationYBuilder.addFloat(quickTileView, "translationY", 0, yOffset);
+                    translationYBuilder.addFloat(tileView, "translationY", -yOffset, 0);
 
                     translationXBuilder.addFloat(quickTileView, "translationX", 0, xOffset);
                     translationXBuilder.addFloat(tileView, "translationX", -xOffset, 0);
@@ -484,12 +478,12 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                 .setStartDelay(QS_TILE_LABEL_FADE_OUT_START)
                 .setEndDelay(QS_TILE_LABEL_FADE_OUT_END);
         SideLabelTileLayout qqsLayout = (SideLabelTileLayout) mQuickQsPanel.getTileLayout();
-        View view = mQs.getView();
+        View view = mQsRootView;
         List<String> specs = mPagedLayout.getSpecsForPage(page);
         if (specs.isEmpty()) {
             // specs should not be empty in a valid secondary page, as we scrolled to it.
             // We may crash later on because there's a null animator.
-            specs = mQsPanelController.getHost().mTileSpecs;
+            specs = mHost.getSpecs();
             Log.e(TAG, "Trying to create animators for empty page " + page + ". Tiles: " + specs);
             // return null;
         }
@@ -581,7 +575,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
             // For (1), compute the distance via the vertical distance between QQS and QS tile
             // layout top.
-            View quickSettingsRootView = mQs.getView();
+            View quickSettingsRootView = mQsRootView;
             View qsTileLayout = (View) mQsPanelController.getTileLayout();
             View qqsTileLayout = (View) mQuickQSPanelController.getTileLayout();
             getRelativePosition(mTmpLoc1, qsTileLayout, quickSettingsRootView);
@@ -611,10 +605,10 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int getRelativeTranslationY(View view1, View view2) {
         int[] qsPosition = new int[2];
         int[] qqsPosition = new int[2];
-        View commonView = mQs.getView();
+        View commonView = mQsRootView;
         getRelativePositionInt(qsPosition, view1, commonView);
         getRelativePositionInt(qqsPosition, view2, commonView);
-        return (qsPosition[1] - qqsPosition[1]) - mQuickStatusBarHeader.getOffsetTranslation();
+        return qsPosition[1] - qqsPosition[1];
     }
 
     private boolean isIconInAnimatedRow(int count) {
@@ -694,9 +688,6 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         if (mBrightnessTranslationAnimator != null) {
             mBrightnessTranslationAnimator.setPosition(position);
         }
-        if (mQQSFooterActionsAnimator != null) {
-            mQQSFooterActionsAnimator.setPosition(position);
-        }
     }
 
     @Override
@@ -765,7 +756,10 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     public void onTilesChanged() {
         // Give the QS panels a moment to generate their new tiles, then create all new animators
         // hooked up to the new views.
-        mExecutor.execute(mUpdateAnimators);
+        mExecutor.executeDelayed(mUpdateAnimators, ANIMATORS_UPDATE_DELAY_MS);
+
+        // Also requests a lazy animators update in case the animation starts before the executor.
+        requestAnimatorUpdate();
     }
 
     private final TouchAnimator.Listener mNonFirstPageListener =

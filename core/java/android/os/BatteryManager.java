@@ -16,10 +16,15 @@
 
 package android.os;
 
+import static android.os.Flags.FLAG_STATE_OF_HEALTH_PUBLIC;
+
 import android.Manifest.permission;
+import android.annotation.FlaggedApi;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -232,6 +237,8 @@ public class BatteryManager {
                                             OsProtoEnums.CHARGING_POLICY_ADAPTIVE_LONGLIFE; // = 4
 
     /** @hide */
+    @SuppressLint("UnflaggedApi") // TestApi without associated feature.
+    @TestApi
     public static final int BATTERY_PLUGGED_ANY =
             BATTERY_PLUGGED_AC | BATTERY_PLUGGED_USB | BATTERY_PLUGGED_WIRELESS
                     | BATTERY_PLUGGED_DOCK;
@@ -352,17 +359,11 @@ public class BatteryManager {
     public static final int BATTERY_PROPERTY_CHARGING_POLICY = 9;
 
     /**
-     *
-     * Percentage representing the measured battery state of health (remaining
-     * estimated full charge capacity relative to the rated capacity in %).
-     *
-     * <p class="note">
-     * The sender must hold the {@link android.Manifest.permission#BATTERY_STATS} permission.
-     *
-     * @hide
+     * Percentage representing the measured battery state of health.
+     * This is the remaining estimated full charge capacity relative
+     * to the rated capacity in %.
      */
-    @RequiresPermission(permission.BATTERY_STATS)
-    @SystemApi
+    @FlaggedApi(FLAG_STATE_OF_HEALTH_PUBLIC)
     public static final int BATTERY_PROPERTY_STATE_OF_HEALTH = 10;
 
     private final Context mContext;

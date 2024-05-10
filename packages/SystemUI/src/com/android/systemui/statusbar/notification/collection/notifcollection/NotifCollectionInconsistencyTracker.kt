@@ -20,6 +20,8 @@ import android.service.notification.NotificationListenerService.RankingMap
 import android.util.ArrayMap
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.printCollection
 import java.io.PrintWriter
 
 class NotifCollectionInconsistencyTracker(val logger: NotifCollectionLogger) {
@@ -104,15 +106,9 @@ class NotifCollectionInconsistencyTracker(val logger: NotifCollectionLogger) {
         }
     }
 
-    fun dump(pw: PrintWriter) {
-        pw.println("notificationsWithoutRankings: ${notificationsWithoutRankings.size}")
-        for (key in notificationsWithoutRankings) {
-            pw.println("\t * : $key")
-        }
-        pw.println("missingNotifications: ${missingNotifications.size}")
-        for (key in missingNotifications) {
-            pw.println("\t * : $key")
-        }
+    fun dump(pw: PrintWriter) = pw.asIndenting().run {
+        printCollection("notificationsWithoutRankings", notificationsWithoutRankings)
+        printCollection("missingNotifications", missingNotifications)
     }
 
     private var attached: Boolean = false

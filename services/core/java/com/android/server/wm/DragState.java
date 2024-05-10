@@ -34,6 +34,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 import static com.android.server.wm.WindowManagerService.MY_UID;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 import android.animation.Animator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
@@ -42,11 +44,10 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.InputConfig;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -70,6 +71,7 @@ import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Drag/drop state
@@ -109,6 +111,7 @@ class DragState {
     int mTouchSource;
     boolean mDragResult;
     boolean mRelinquishDragSurfaceToDropTarget;
+    float mAnimatedScale = 1.0f;
     float mOriginalAlpha;
     float mOriginalX, mOriginalY;
     float mCurrentX, mCurrentY;
@@ -160,7 +163,10 @@ class DragState {
         return mIsClosing;
     }
 
-    private void showInputSurface() {
+    /**
+     * @return a future that completes after window info is sent.
+     */
+    private CompletableFuture<Void> showInputSurface() {
         if (mInputSurface == null) {
             mInputSurface = mService.makeSurfaceBuilder(mDisplayContent.getSession())
                     .setContainerLayer()
@@ -173,21 +179,28 @@ class DragState {
         if (h == null) {
             Slog.w(TAG_WM, "Drag is in progress but there is no "
                     + "drag window handle.");
-            return;
+            return completedFuture(null);
         }
 
         // Crop the input surface to the display size.
         mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
 
+        // Make trusted overlay to not block any touches while D&D ongoing and allowing
+        // touches to pass through to windows underneath. This allows user to interact with the
+        // UI to navigate while dragging.
+        h.setTrustedOverlay(mTransaction, mInputSurface, true);
         mTransaction.show(mInputSurface)
                 .setInputWindowInfo(mInputSurface, h)
                 .setLayer(mInputSurface, Integer.MAX_VALUE)
                 .setCrop(mInputSurface, mTmpClipRect);
 
-        // syncInputWindows here to ensure the input window info is sent before the
+        // A completableFuture is returned to ensure that input window info is sent before the
         // transferTouchFocus is called.
-        mTransaction.syncInputWindows()
-                .apply(true /*sync*/);
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        mTransaction
+            .addWindowInfosReportedListener(() -> result.complete(null))
+            .apply();
+        return result;
     }
 
     /**
@@ -218,8 +231,8 @@ class DragState {
                 SurfaceControl dragSurface = null;
                 if (!mDragResult && (ws.mSession.mPid == mPid)) {
                     // Report unconsumed drop location back to the app that started the drag.
-                    x = mCurrentX;
-                    y = mCurrentY;
+                    x = ws.translateToWindowX(mCurrentX);
+                    y = ws.translateToWindowY(mCurrentY);
                     if (relinquishDragSurfaceToDragSource()) {
                         // If requested (and allowed), report the drag surface back to the app
                         // starting the drag to handle the return animation
@@ -367,11 +380,6 @@ class DragState {
             mDragWindowHandle.ownerUid = MY_UID;
             mDragWindowHandle.scaleFactor = 1.0f;
 
-            // Keep the default behavior of this window to be focusable, which allows the system
-            // to consume keys when dragging is active. This can also be used to modify the drag
-            // state on key press. For example, cancel drag on escape key.
-            mDragWindowHandle.inputConfig = InputConfig.PREVENT_SPLITTING;
-
             // The drag window cannot receive new touches.
             mDragWindowHandle.touchableRegion.setEmpty();
 
@@ -408,17 +416,25 @@ class DragState {
         return mInputInterceptor == null ? null : mInputInterceptor.mDragWindowHandle;
     }
 
+    IBinder getInputToken() {
+        if (mInputInterceptor == null || mInputInterceptor.mClientChannel == null) {
+            return null;
+        }
+        return mInputInterceptor.mClientChannel.getToken();
+    }
+
     /**
      * @param display The Display that the window being dragged is on.
      */
-    void register(Display display) {
+    CompletableFuture<Void> register(Display display) {
         display.getRealSize(mDisplaySize);
         if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
         if (mInputInterceptor != null) {
             Slog.e(TAG_WM, "Duplicate register of drag input channel");
+            return completedFuture(null);
         } else {
             mInputInterceptor = new InputInterceptor(display);
-            showInputSurface();
+            return showInputSurface();
         }
     }
 
@@ -635,7 +651,8 @@ class DragState {
                 PropertyValuesHolder.ofFloat(
                         ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY,
                         mOriginalY - mThumbOffsetY),
-                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, 1, 1),
+                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
+                        mAnimatedScale),
                 PropertyValuesHolder.ofFloat(
                         ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, mOriginalAlpha / 2));
 
@@ -663,7 +680,7 @@ class DragState {
                         ANIMATED_PROPERTY_X, mCurrentX - mThumbOffsetX, mCurrentX),
                 PropertyValuesHolder.ofFloat(
                         ANIMATED_PROPERTY_Y, mCurrentY - mThumbOffsetY, mCurrentY),
-                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, 1, 0),
+                PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale, 0),
                 PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0));
         final AnimationListener listener = new AnimationListener();
         animator.setDuration(MIN_ANIMATION_DURATION_MS);
@@ -682,7 +699,8 @@ class DragState {
     void overridePointerIconLocked(int touchSource) {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
+            // TODO(b/293587049): Pointer Icon Refactor: Set the pointer icon from the drag window.
+            InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
         }
     }
 

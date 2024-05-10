@@ -14,37 +14,22 @@
 // limitations under the License.
 //
 
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
 // Build the android.test.base library
 // ===================================
 // This contains the junit.framework and android.test classes that were in
 // Android API level 25 excluding those from android.test.runner.
 // Also contains the com.android.internal.util.Predicate[s] classes.
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    //   SPDX-license-identifier-CPL-1.0
-    default_applicable_licenses: ["frameworks_base_test-base_license"],
-}
-
-license {
-    name: "frameworks_base_test-base_license",
-    visibility: [":__subpackages__"],
-    license_kinds: [
-        "SPDX-license-identifier-Apache-2.0",
-        "SPDX-license-identifier-CPL-1.0",
-    ],
-    license_text: [
-        "src/junit/cpl-v10.html",
-    ],
-}
-
 java_sdk_library {
     name: "android.test.base",
 
-    srcs: [":android-test-base-sources"],
+    srcs: [
+        ":android-test-base-sources",
+        ":frameworks-base-test-junit-framework",
+    ],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -84,7 +69,10 @@ java_library_static {
     ],
     installable: false,
 
-    srcs: [":android-test-base-sources"],
+    srcs: [
+        ":android-test-base-sources",
+        ":frameworks-base-test-junit-framework",
+    ],
 
     errorprone: {
         javacflags: ["-Xep:DepAnn:ERROR"],
@@ -104,8 +92,7 @@ java_library_static {
     name: "android.test.base-minus-junit",
 
     srcs: [
-        "src/android/**/*.java",
-        "src/com/**/*.java",
+        "src/**/*.java",
     ],
 
     sdk_version: "current",
@@ -120,12 +107,13 @@ filegroup {
     path: "src",
 }
 
-// Make the current.txt available for use by the cts/tests/signature tests.
+// Make the current.txt available for use by the cts/tests/signature and /vendor tests.
 // ========================================================================
 filegroup {
     name: "android-test-base-current.txt",
     visibility: [
         "//cts/tests/signature/api",
+        "//vendor:__subpackages__",
     ],
     srcs: [
         "api/current.txt",

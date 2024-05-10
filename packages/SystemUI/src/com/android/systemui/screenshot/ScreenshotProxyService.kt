@@ -15,30 +15,54 @@
  */
 package com.android.systemui.screenshot
 
-import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.shade.ShadeExpansionStateManager
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import com.android.app.tracing.TraceUtils.Companion.launch
+import kotlinx.coroutines.withContext
 
-/**
- * Provides state from the main SystemUI process on behalf of the Screenshot process.
- */
-internal class ScreenshotProxyService @Inject constructor(
-    private val mExpansionMgr: PanelExpansionStateManager
-) : Service() {
+/** Provides state from the main SystemUI process on behalf of the Screenshot process. */
+internal class ScreenshotProxyService
+@Inject
+constructor(
+    private val mExpansionMgr: ShadeExpansionStateManager,
+    @Main private val mMainDispatcher: CoroutineDispatcher,
+    private val activityStarter: ActivityStarter,
+) : LifecycleService() {
 
-    private val mBinder: IBinder = object : IScreenshotProxy.Stub() {
-        /**
-         * @return true when the notification shade is partially or fully expanded.
-         */
-        override fun isNotificationShadeExpanded(): Boolean {
-            val expanded = !mExpansionMgr.isClosed()
-            Log.d(TAG, "isNotificationShadeExpanded(): $expanded")
-            return expanded
+    private val mBinder: IBinder =
+        object : IScreenshotProxy.Stub() {
+            /** @return true when the notification shade is partially or fully expanded. */
+            override fun isNotificationShadeExpanded(): Boolean {
+                val expanded = !mExpansionMgr.isClosed()
+                Log.d(TAG, "isNotificationShadeExpanded(): $expanded")
+                return expanded
+            }
+
+            override fun dismissKeyguard(callback: IOnDoneCallback) {
+                lifecycleScope.launch("IScreenshotProxy#dismissKeyguard") {
+                    executeAfterDismissing(callback)
+                }
+            }
         }
-    }
+
+    private suspend fun executeAfterDismissing(callback: IOnDoneCallback) =
+        withContext(mMainDispatcher) {
+            activityStarter.executeRunnableDismissingKeyguard(
+                Runnable { callback.onDone(true) },
+                null,
+                true /* dismissShade */,
+                true /* afterKeyguardGone */,
+                true /* deferred */
+            )
+        }
 
     override fun onBind(intent: Intent): IBinder? {
         Log.d(TAG, "onBind: $intent")

@@ -45,6 +45,7 @@ import android.util.Slog;
 import android.view.Surface;
 
 import com.android.internal.util.DumpUtils;
+import com.android.server.display.utils.DebugUtils;
 
 import java.io.PrintWriter;
 import java.net.Inet4Address;
@@ -69,7 +70,10 @@ import java.util.Objects;
  */
 final class WifiDisplayController implements DumpUtils.Dump {
     private static final String TAG = "WifiDisplayController";
-    private static final boolean DEBUG = false;
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.WifiDisplayController DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     private static final int DEFAULT_CONTROL_PORT = 7236;
     private static final int MAX_THROUGHPUT = 50;
@@ -1062,8 +1066,10 @@ final class WifiDisplayController implements DumpUtils.Dump {
     }
 
     private static WifiDisplay createWifiDisplay(WifiP2pDevice device) {
+        WifiP2pWfdInfo wfdInfo = device.getWfdInfo();
+        boolean isSessionAvailable = wfdInfo != null && wfdInfo.isSessionAvailable();
         return new WifiDisplay(device.deviceAddress, device.deviceName, null,
-                true, device.getWfdInfo().isSessionAvailable(), false);
+                true, isSessionAvailable, false);
     }
 
     private final BroadcastReceiver mWifiP2pReceiver = new BroadcastReceiver() {
@@ -1090,7 +1096,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 handlePeersChanged();
             } else if (action.equals(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)) {
                 NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(
-                        WifiP2pManager.EXTRA_NETWORK_INFO);
+                        WifiP2pManager.EXTRA_NETWORK_INFO, android.net.NetworkInfo.class);
                 if (DEBUG) {
                     Slog.d(TAG, "Received WIFI_P2P_CONNECTION_CHANGED_ACTION: networkInfo="
                             + networkInfo);
@@ -1099,7 +1105,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 handleConnectionChanged(networkInfo);
             } else if (action.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)) {
                 mThisDevice = (WifiP2pDevice) intent.getParcelableExtra(
-                        WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+                        WifiP2pManager.EXTRA_WIFI_P2P_DEVICE, android.net.wifi.p2p.WifiP2pDevice.class);
                 if (DEBUG) {
                     Slog.d(TAG, "Received WIFI_P2P_THIS_DEVICE_CHANGED_ACTION: mThisDevice= "
                             + mThisDevice);

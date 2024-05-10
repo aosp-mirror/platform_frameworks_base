@@ -9,6 +9,14 @@
       ]
     },
     {
+      "name": "CtsSdkSandboxWebkitTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       "name": "CtsHostsideWebViewTests",
       "options": [
         {
@@ -18,6 +26,7 @@
     },
     {
       "name": "GtsWebViewTestCases",
+      "keywords": ["internal"],
       "options": [
         {
           "exclude-annotation": "android.test.FlakyTest"
@@ -26,6 +35,7 @@
     },
     {
       "name": "GtsWebViewHostTestCases",
+      "keywords": ["internal"],
       "options": [
         {
           "exclude-annotation": "android.test.FlakyTest"

@@ -37,7 +37,7 @@ constexpr const uint32_t TYPE_STRING = android::ResTable_map::TYPE_STRING;
 }  // namespace
 
 TEST(ResourceValuesTest, PluralEquals) {
-  StringPool pool;
+  android::StringPool pool;
 
   Plural a;
   a.values[Plural::One] = util::make_unique<String>(pool.MakeRef("one"));
@@ -56,7 +56,7 @@ TEST(ResourceValuesTest, PluralEquals) {
 }
 
 TEST(ResourceValuesTest, PluralClone) {
-  StringPool pool;
+  android::StringPool pool;
 
   Plural a;
   a.values[Plural::One] = util::make_unique<String>(pool.MakeRef("one"));
@@ -68,7 +68,7 @@ TEST(ResourceValuesTest, PluralClone) {
 }
 
 TEST(ResourceValuesTest, ArrayEquals) {
-  StringPool pool;
+  android::StringPool pool;
 
   Array a;
   a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
@@ -92,7 +92,7 @@ TEST(ResourceValuesTest, ArrayEquals) {
 }
 
 TEST(ResourceValuesTest, ArrayClone) {
-  StringPool pool;
+  android::StringPool pool;
 
   Array a;
   a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
@@ -104,7 +104,7 @@ TEST(ResourceValuesTest, ArrayClone) {
 }
 
 TEST(ResourceValuesTest, StyleEquals) {
-  StringPool pool;
+  android::StringPool pool;
 
   std::unique_ptr<Style> a = test::StyleBuilder()
       .SetParent("android:style/Parent")
@@ -168,10 +168,10 @@ TEST(ResourceValuesTest, StyleClone) {
 }
 
 TEST(ResourcesValuesTest, StringClones) {
-  StringPool pool_a;
-  StringPool pool_b;
+  android::StringPool pool_a;
+  android::StringPool pool_b;
 
-  String str_a(pool_a.MakeRef("hello", StringPool::Context(test::ParseConfigOrDie("en"))));
+  String str_a(pool_a.MakeRef("hello", android::StringPool::Context(test::ParseConfigOrDie("en"))));
 
   ASSERT_THAT(pool_a, SizeIs(1u));
   EXPECT_THAT(pool_a.strings()[0]->context.config, Eq(test::ParseConfigOrDie("en")));
@@ -185,8 +185,8 @@ TEST(ResourcesValuesTest, StringClones) {
 }
 
 TEST(ResourceValuesTest, StyleMerges) {
-  StringPool pool_a;
-  StringPool pool_b;
+  android::StringPool pool_a;
+  android::StringPool pool_b;
 
   std::unique_ptr<Style> a =
       test::StyleBuilder()
@@ -204,7 +204,7 @@ TEST(ResourceValuesTest, StyleMerges) {
 
   a->MergeWith(b.get(), &pool_a);
 
-  StringPool pool;
+  android::StringPool pool;
   std::unique_ptr<Style> expected =
       test::StyleBuilder()
           .SetParent("android:style/OverlayParent")

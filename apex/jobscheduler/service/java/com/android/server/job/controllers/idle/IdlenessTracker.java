@@ -16,8 +16,13 @@
 
 package com.android.server.job.controllers.idle;
 
+import android.annotation.NonNull;
 import android.content.Context;
+import android.provider.DeviceConfig;
+import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.server.job.JobSchedulerService;
 
 import java.io.PrintWriter;
 
@@ -29,7 +34,7 @@ public interface IdlenessTracker {
      * non-interacting state.  When the idle state changes thereafter, the given
      * listener must be called to report the new state.
      */
-    void startTracking(Context context, IdlenessListener listener);
+    void startTracking(Context context, JobSchedulerService service, IdlenessListener listener);
 
     /**
      * Report whether the device is currently considered "idle" for purposes of
@@ -40,6 +45,12 @@ public interface IdlenessTracker {
      */
     boolean isIdle();
 
+    /** Process the specified constant and update internal constants if relevant. */
+    void processConstant(@NonNull DeviceConfig.Properties properties, @NonNull String key);
+
+    /** Called when the battery state changes. */
+    void onBatteryStateChanged(boolean isCharging, boolean isBatteryNotLow);
+
     /**
      * Dump useful information about tracked idleness-related state in plaintext.
      */
@@ -49,4 +60,7 @@ public interface IdlenessTracker {
      * Dump useful information about tracked idleness-related state to proto.
      */
     void dump(ProtoOutputStream proto, long fieldId);
+
+    /** Dump any internal constants the tracker may have. */
+    void dumpConstants(IndentingPrintWriter pw);
 }

@@ -16,6 +16,8 @@
 
 package android.inputmethodservice;
 
+import static android.inputmethodservice.InputMethodService.ENABLE_HIDE_IME_CAPTION_BAR;
+import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
 import android.animation.ValueAnimator;
@@ -75,6 +77,10 @@ final class NavigationBarController {
         default void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         }
 
+        default boolean isShown() {
+            return false;
+        }
+
         default String toDebugString() {
             return "No-op implementation";
         }
@@ -113,6 +119,13 @@ final class NavigationBarController {
 
     void onNavButtonFlagsChanged(@InputMethodNavButtonFlags int navButtonFlags) {
         mImpl.onNavButtonFlagsChanged(navButtonFlags);
+    }
+
+    /**
+     * Returns whether the IME navigation bar is currently shown.
+     */
+    boolean isShown() {
+        return mImpl.isShown();
     }
 
     String toDebugString() {
@@ -230,6 +243,16 @@ final class NavigationBarController {
 
             setIconTintInternal(calculateTargetDarkIntensity(mAppearance,
                     mDrawLegacyNavigationBarBackground));
+
+            if (ENABLE_HIDE_IME_CAPTION_BAR) {
+                mNavigationBarFrame.setOnApplyWindowInsetsListener((view, insets) -> {
+                    if (mNavigationBarFrame != null) {
+                        boolean visible = insets.isVisible(captionBar());
+                        mNavigationBarFrame.setVisibility(visible ? View.VISIBLE : View.GONE);
+                    }
+                    return view.onApplyWindowInsets(insets);
+                });
+            }
         }
 
         private void uninstallNavigationBarFrameIfNecessary() {
@@ -240,14 +263,16 @@ final class NavigationBarController {
             if (parent instanceof ViewGroup) {
                 ((ViewGroup) parent).removeView(mNavigationBarFrame);
             }
+            if (ENABLE_HIDE_IME_CAPTION_BAR) {
+                mNavigationBarFrame.setOnApplyWindowInsetsListener(null);
+            }
             mNavigationBarFrame = null;
         }
 
         @Override
         public void updateTouchableInsets(@NonNull InputMethodService.Insets originalInsets,
                 @NonNull ViewTreeObserver.InternalInsetsInfo dest) {
-            if (!mImeDrawsImeNavBar || mNavigationBarFrame == null
-                    || mService.isExtractViewShown()) {
+            if (!mImeDrawsImeNavBar || mNavigationBarFrame == null) {
                 return;
             }
 
@@ -255,53 +280,58 @@ final class NavigationBarController {
             if (systemInsets != null) {
                 final Window window = mService.mWindow.getWindow();
                 final View decor = window.getDecorView();
-                Region touchableRegion = null;
-                final View inputFrame = mService.mInputFrame;
-                switch (originalInsets.touchableInsets) {
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
-                        if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getLocationInWindow(mTempPos);
-                            mTempRect.set(mTempPos[0], mTempPos[1],
-                                    mTempPos[0] + inputFrame.getWidth(),
-                                    mTempPos[1] + inputFrame.getHeight());
-                            touchableRegion = new Region(mTempRect);
-                        }
-                        break;
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
-                        if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getLocationInWindow(mTempPos);
-                            mTempRect.set(mTempPos[0], originalInsets.contentTopInsets,
-                                    mTempPos[0] + inputFrame.getWidth() ,
-                                    mTempPos[1] + inputFrame.getHeight());
-                            touchableRegion = new Region(mTempRect);
-                        }
-                        break;
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
-                        if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getLocationInWindow(mTempPos);
-                            mTempRect.set(mTempPos[0], originalInsets.visibleTopInsets,
-                                    mTempPos[0] + inputFrame.getWidth(),
-                                    mTempPos[1] + inputFrame.getHeight());
-                            touchableRegion = new Region(mTempRect);
-                        }
-                        break;
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION:
-                        touchableRegion = new Region();
-                        touchableRegion.set(originalInsets.touchableRegion);
-                        break;
-                }
-                // Hereafter "mTempRect" means a navigation bar rect.
-                mTempRect.set(decor.getLeft(), decor.getBottom() - systemInsets.bottom,
-                        decor.getRight(), decor.getBottom());
-                if (touchableRegion == null) {
-                    touchableRegion = new Region(mTempRect);
-                } else {
-                    touchableRegion.union(mTempRect);
-                }
 
-                dest.touchableRegion.set(touchableRegion);
-                dest.setTouchableInsets(
-                        ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+                // If the extract view is shown, everything is touchable, so no need to update
+                // touchable insets, but we still update normal insets below.
+                if (!mService.isExtractViewShown()) {
+                    Region touchableRegion = null;
+                    final View inputFrame = mService.mInputFrame;
+                    switch (originalInsets.touchableInsets) {
+                        case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
+                            if (inputFrame.getVisibility() == View.VISIBLE) {
+                                inputFrame.getLocationInWindow(mTempPos);
+                                mTempRect.set(mTempPos[0], mTempPos[1],
+                                        mTempPos[0] + inputFrame.getWidth(),
+                                        mTempPos[1] + inputFrame.getHeight());
+                                touchableRegion = new Region(mTempRect);
+                            }
+                            break;
+                        case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
+                            if (inputFrame.getVisibility() == View.VISIBLE) {
+                                inputFrame.getLocationInWindow(mTempPos);
+                                mTempRect.set(mTempPos[0], originalInsets.contentTopInsets,
+                                        mTempPos[0] + inputFrame.getWidth(),
+                                        mTempPos[1] + inputFrame.getHeight());
+                                touchableRegion = new Region(mTempRect);
+                            }
+                            break;
+                        case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
+                            if (inputFrame.getVisibility() == View.VISIBLE) {
+                                inputFrame.getLocationInWindow(mTempPos);
+                                mTempRect.set(mTempPos[0], originalInsets.visibleTopInsets,
+                                        mTempPos[0] + inputFrame.getWidth(),
+                                        mTempPos[1] + inputFrame.getHeight());
+                                touchableRegion = new Region(mTempRect);
+                            }
+                            break;
+                        case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION:
+                            touchableRegion = new Region();
+                            touchableRegion.set(originalInsets.touchableRegion);
+                            break;
+                    }
+                    // Hereafter "mTempRect" means a navigation bar rect.
+                    mTempRect.set(decor.getLeft(), decor.getBottom() - systemInsets.bottom,
+                            decor.getRight(), decor.getBottom());
+                    if (touchableRegion == null) {
+                        touchableRegion = new Region(mTempRect);
+                    } else {
+                        touchableRegion.union(mTempRect);
+                    }
+
+                    dest.touchableRegion.set(touchableRegion);
+                    dest.setTouchableInsets(
+                            ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+                }
 
                 // TODO(b/215443343): See if we can use View#OnLayoutChangeListener().
                 // TODO(b/215443343): See if we can replace DecorView#mNavigationColorViewState.view
@@ -410,7 +440,9 @@ final class NavigationBarController {
                         decor.bringChildToFront(mNavigationBarFrame);
                     }
                 }
-                mNavigationBarFrame.setVisibility(View.VISIBLE);
+                if (!ENABLE_HIDE_IME_CAPTION_BAR) {
+                    mNavigationBarFrame.setVisibility(View.VISIBLE);
+                }
             }
         }
 
@@ -430,6 +462,11 @@ final class NavigationBarController {
             final boolean prevShouldShowImeSwitcherWhenImeIsShown =
                     mShouldShowImeSwitcherWhenImeIsShown;
             mShouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherWhenImeIsShown;
+
+            if (ENABLE_HIDE_IME_CAPTION_BAR) {
+                mService.mWindow.getWindow().getDecorView().getWindowInsetsController()
+                        .setImeCaptionBarInsetsHeight(getImeCaptionBarHeight());
+            }
 
             if (imeDrawsImeNavBar) {
                 installNavigationBarFrameIfNecessary();
@@ -522,6 +559,22 @@ final class NavigationBarController {
                 onSystemBarAppearanceChanged(mAppearance);
             }
             return drawLegacyNavigationBarBackground;
+        }
+
+        /**
+         * Returns the height of the IME caption bar if this should be shown, or {@code 0} instead.
+         */
+        private int getImeCaptionBarHeight() {
+            return mImeDrawsImeNavBar
+                    ? mService.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_frame_height)
+                    : 0;
+        }
+
+        @Override
+        public boolean isShown() {
+            return mNavigationBarFrame != null
+                    && mNavigationBarFrame.getVisibility() == View.VISIBLE;
         }
 
         @Override

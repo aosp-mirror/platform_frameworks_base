@@ -35,11 +35,12 @@ import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
 import com.android.settingslib.drawable.CircleFramedDrawable;
-import com.android.systemui.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.user.UserSwitchDialogController;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -159,7 +160,8 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mStatusBarStateController = statusBarStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters,
-                screenOffAnimationController,  /* animateYPos= */ false);
+                screenOffAnimationController,  /* animateYPos= */ false,
+                /* logBuffer= */ null);
         mUserSwitchDialogController = userSwitchDialogController;
         mUiEventLogger = uiEventLogger;
     }
@@ -190,7 +192,8 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             mUiEventLogger.log(
                     LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP);
 
-            mUserSwitchDialogController.showDialog(mUserAvatarViewWithBackground);
+            mUserSwitchDialogController.showDialog(mUserAvatarViewWithBackground.getContext(),
+                    Expandable.fromView(mUserAvatarViewWithBackground));
         });
 
         mUserAvatarView.setAccessibilityDelegate(new View.AccessibilityDelegate() {
@@ -317,7 +320,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             drawable = new CircleFramedDrawable(mCurrentUser.picture, avatarSize);
         }
 
-        Drawable bg = mContext.getDrawable(R.drawable.user_avatar_bg);
+        Drawable bg = mContext.getDrawable(com.android.settingslib.R.drawable.user_avatar_bg);
         drawable = new LayerDrawable(new Drawable[]{bg, drawable});
         return drawable;
     }

@@ -1,0 +1,68 @@
+package: "android.net.vcn"
+container: "system"
+
+flag {
+    name: "safe_mode_config"
+    is_exported: true
+    namespace: "vcn"
+    description: "Feature flag for safe mode configurability"
+    bug: "276358140"
+}
+
+flag {
+    name: "safe_mode_timeout_config"
+    namespace: "vcn"
+    description: "Feature flag for adjustable safe mode timeout"
+    bug: "317406085"
+}
+
+flag{
+    name: "network_metric_monitor"
+    namespace: "vcn"
+    description: "Feature flag for enabling network metric monitor"
+    bug: "282996138"
+}
+
+flag{
+    name: "validate_network_on_ipsec_loss"
+    namespace: "vcn"
+    description: "Trigger network validation when IPsec packet loss exceeds the threshold"
+    bug: "329139898"
+}
+
+flag{
+    name: "evaluate_ipsec_loss_on_lp_nc_change"
+    namespace: "vcn"
+    description: "Re-evaluate IPsec packet loss on LinkProperties or NetworkCapabilities change"
+    bug: "323238888"
+}
+
+flag{
+    name: "enforce_main_user"
+    namespace: "vcn"
+    description: "Enforce main user to make VCN HSUM compatible"
+    bug: "310310661"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag{
+    name: "handle_seq_num_leap"
+    namespace: "vcn"
+    description: "Do not report bad network when there is a suspected sequence number leap"
+    bug: "332598276"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag{
+    name: "allow_disable_ipsec_loss_detector"
+    namespace: "vcn"
+    description: "Allow disabling IPsec packet loss detector"
+    bug: "336638836"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

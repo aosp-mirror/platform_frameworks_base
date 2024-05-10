@@ -223,7 +223,7 @@ static std::span<const uint8_t> toSpan(const ::std::optional<::std::vector<uint8
 }
 
 binder::Status BinderIncrementalService::makeFile(
-        int32_t storageId, const std::string& path,
+        int32_t storageId, const std::string& path, int32_t mode,
         const ::android::os::incremental::IncrementalNewFileParams& params,
         const ::std::optional<::std::vector<uint8_t>>& content, int32_t* _aidl_return) {
     auto [err, fileId, nfp] = toMakeFileParams(params);
@@ -232,7 +232,7 @@ binder::Status BinderIncrementalService::makeFile(
         return ok();
     }
 
-    *_aidl_return = mImpl.makeFile(storageId, path, 0777, fileId, nfp, toSpan(content));
+    *_aidl_return = mImpl.makeFile(storageId, path, mode, fileId, nfp, toSpan(content));
     return ok();
 }
 binder::Status BinderIncrementalService::makeFileFromRange(int32_t storageId,

@@ -16,19 +16,20 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.util.Property;
 import android.view.View;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.KeyguardSliceView;
-import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.StatusBarIconView;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
@@ -129,7 +130,8 @@ public class StackStateAnimator {
             ArrayList<NotificationStackScrollLayout.AnimationEvent> mAnimationEvents,
             long additionalDelay) {
 
-        processAnimationEvents(mAnimationEvents);
+        // Animation events might generate custom animations, which are started async
+        boolean anyCustomAnimationCreated = processAnimationEvents(mAnimationEvents);
 
         int childCount = mHostLayout.getChildCount();
         mAnimationFilter.applyCombination(mNewEvents);
@@ -152,8 +154,8 @@ public class StackStateAnimator {
             initAnimationProperties(child, viewState, animationStaggerCount);
             viewState.animateTo(child, mAnimationProperties);
         }
-        if (!isRunning()) {
-            // no child has preformed any animation, lets finish
+        if (!isRunning() && !anyCustomAnimationCreated) {
+            // no child has performed any animation or is about to animate, lets finish
             onAnimationFinished();
         }
         mHeadsUpAppearChildren.clear();
@@ -169,9 +171,9 @@ public class StackStateAnimator {
         adaptDurationWhenGoingToFullShade(child, viewState, wasAdded, animationStaggerCount);
         mAnimationProperties.delay = 0;
         if (wasAdded || mAnimationFilter.hasDelays
-                        && (viewState.yTranslation != child.getTranslationY()
-                        || viewState.zTranslation != child.getTranslationZ()
-                        || viewState.alpha != child.getAlpha()
+                        && (viewState.getYTranslation() != child.getTranslationY()
+                        || viewState.getZTranslation() != child.getTranslationZ()
+                        || viewState.getAlpha() != child.getAlpha()
                         || viewState.height != child.getActualHeight()
                         || viewState.clipTopAmount != child.getClipTopAmount())) {
             mAnimationProperties.delay = mCurrentAdditionalDelay
@@ -191,7 +193,7 @@ public class StackStateAnimator {
                 mAnimationProperties.duration = ANIMATION_DURATION_APPEAR_DISAPPEAR + 50
                         + (long) (100 * longerDurationFactor);
             }
-            child.setTranslationY(viewState.yTranslation + startOffset);
+            child.setTranslationY(viewState.getYTranslation() + startOffset);
         }
     }
 
@@ -337,14 +339,17 @@ public class StackStateAnimator {
     }
 
     /**
-     * Process the animationEvents for a new animation
+     * Process the animationEvents for a new animation. Here is the place to do something custom,
+     * like to modify the ViewState or to create a custom animation for an event.
      *
      *  @param animationEvents the animation events for the animation to perform
+     * @return true if any custom animation was created
      */
-    private void processAnimationEvents(
+    private boolean processAnimationEvents(
             ArrayList<NotificationStackScrollLayout.AnimationEvent> animationEvents) {
+        boolean needsCustomAnimation = false;
         for (NotificationStackScrollLayout.AnimationEvent event : animationEvents) {
-            final ExpandableView changingView = (ExpandableView) event.mChangingView;
+            final ExpandableView changingView = event.mChangingView;
             boolean loggable = false;
             boolean isHeadsUp = false;
             String key = null;
@@ -356,7 +361,7 @@ public class StackStateAnimator {
             if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD) {
 
-                // This item is added, initialize it's properties.
+                // This item is added, initialize its properties.
                 ExpandableViewState viewState = changingView.getViewState();
                 if (viewState == null || viewState.gone) {
                     // The position for this child was never generated, let's continue.
@@ -370,7 +375,11 @@ public class StackStateAnimator {
 
             } else if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE) {
-                if (changingView.getVisibility() != View.VISIBLE) {
+                int changingViewVisibility = changingView.getVisibility();
+                if (loggable) {
+                    mLogger.processAnimationEventsRemoval(key, changingViewVisibility, isHeadsUp);
+                }
+                if (changingViewVisibility != View.VISIBLE) {
                     changingView.removeFromTransientContainer();
                     continue;
                 }
@@ -400,27 +409,46 @@ public class StackStateAnimator {
                     // travelled
                     ExpandableViewState viewState =
                             ((ExpandableView) event.viewAfterChangingView).getViewState();
-                    translationDirection = ((viewState.yTranslation
+                    translationDirection = ((viewState.getYTranslation()
                             - (ownPosition + actualHeight / 2.0f)) * 2 /
                             actualHeight);
                     translationDirection = Math.max(Math.min(translationDirection, 1.0f),-1.0f);
 
                 }
-                Runnable postAnimation = changingView::removeFromTransientContainer;
-                if (loggable && isHeadsUp) {
-                    mLogger.logHUNViewDisappearingWithRemoveEvent(key);
+                Runnable postAnimation;
+                Runnable startAnimation;
+                if (loggable) {
                     String finalKey = key;
+                    final boolean finalIsHeadsHp = isHeadsUp;
+                    startAnimation = () -> {
+                        mLogger.animationStart(finalKey, "ANIMATION_TYPE_REMOVE", finalIsHeadsHp);
+                        changingView.setInRemovalAnimation(true);
+                    };
                     postAnimation = () -> {
-                        mLogger.disappearAnimationEnded(finalKey);
+                        mLogger.animationEnd(finalKey, "ANIMATION_TYPE_REMOVE", finalIsHeadsHp);
+                        changingView.setInRemovalAnimation(false);
+                        changingView.removeFromTransientContainer();
+                    };
+                } else {
+                    startAnimation = ()-> {
+                        changingView.setInRemovalAnimation(true);
+                    };
+                    postAnimation = () -> {
+                        changingView.setInRemovalAnimation(false);
                         changingView.removeFromTransientContainer();
                     };
                 }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,
-                        0, postAnimation, null);
+                        startAnimation, postAnimation, getGlobalAnimationFinishedListener());
+                needsCustomAnimation = true;
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
-                if (mHostLayout.isFullySwipedOut(changingView)) {
+                boolean isFullySwipedOut = mHostLayout.isFullySwipedOut(changingView);
+                if (loggable) {
+                    mLogger.processAnimationEventsRemoveSwipeOut(key, isFullySwipedOut, isHeadsUp);
+                }
+                if (isFullySwipedOut) {
                     changingView.removeFromTransientContainer();
                 }
             } else if (event.animationType == NotificationStackScrollLayout
@@ -429,11 +457,11 @@ public class StackStateAnimator {
                 row.prepareExpansionChanged();
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
-                // This item is added, initialize it's properties.
+                // This item is added, initialize its properties.
                 ExpandableViewState viewState = changingView.getViewState();
                 mTmpState.copyFrom(viewState);
                 if (event.headsUpFromBottom) {
-                    mTmpState.yTranslation = mHeadsUpAppearHeightBottom;
+                    mTmpState.setYTranslation(mHeadsUpAppearHeightBottom);
                 } else {
                     Runnable onAnimationEnd = null;
                     if (loggable) {
@@ -451,69 +479,77 @@ public class StackStateAnimator {
                 }
 
                 mTmpState.applyToView(changingView);
-            } else if (event.animationType == NotificationStackScrollLayout
-                            .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR ||
-                    event.animationType == NotificationStackScrollLayout
-                            .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
+            } else if (event.animationType == ANIMATION_TYPE_HEADS_UP_DISAPPEAR
+                    || event.animationType == ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
                 mHeadsUpDisappearChildren.add(changingView);
                 Runnable endRunnable = null;
                 if (changingView.getParent() == null) {
-                    // This notification was actually removed, so we need to add it transiently
+                    // This notification was actually removed, so we need to add it
+                    // transiently
                     mHostLayout.addTransientView(changingView, 0);
                     changingView.setTransientContainer(mHostLayout);
                     mTmpState.initFrom(changingView);
                     endRunnable = changingView::removeFromTransientContainer;
                 }
-                float targetLocation = 0;
+
                 boolean needsAnimation = true;
                 if (changingView instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row = (ExpandableNotificationRow) changingView;
+                    ExpandableNotificationRow row =
+                            (ExpandableNotificationRow) changingView;
                     if (row.isDismissed()) {
                         needsAnimation = false;
                     }
-
-                    NotificationEntry entry = row.getEntry();
-                    StatusBarIconView icon = entry.getIcons().getStatusBarIcon();
-                    final StatusBarIconView centeredIcon = entry.getIcons().getCenteredIcon();
-                    if (centeredIcon != null && centeredIcon.getParent() != null) {
-                        icon = centeredIcon;
-                    }
-                    if (icon.getParent() != null) {
-                        icon.getLocationOnScreen(mTmpLocation);
-                        float iconPosition = mTmpLocation[0] - icon.getTranslationX()
-                                + ViewState.getFinalTranslationX(icon)
-                                + icon.getWidth() * 0.25f;
-                        mHostLayout.getLocationOnScreen(mTmpLocation);
-                        targetLocation = iconPosition - mTmpLocation[0];
-                    }
                 }
-
                 if (needsAnimation) {
                     // We need to add the global animation listener, since once no animations are
                     // running anymore, the panel will instantly hide itself. We need to wait until
                     // the animation is fully finished for this though.
-                    Runnable postAnimation = endRunnable;
+                    final Runnable tmpEndRunnable = endRunnable;
+                    Runnable postAnimation;
+                    Runnable startAnimation;
                     if (loggable) {
-                        mLogger.logHUNViewDisappearing(key);
-
-                        Runnable finalEndRunnable = endRunnable;
                         String finalKey1 = key;
+                        final boolean finalIsHeadsUp = isHeadsUp;
+                        final String type =
+                                event.animationType == ANIMATION_TYPE_HEADS_UP_DISAPPEAR
+                                        ? "ANIMATION_TYPE_HEADS_UP_DISAPPEAR"
+                                        : "ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK";
+                        startAnimation = () -> {
+                            mLogger.animationStart(finalKey1, type, finalIsHeadsUp);
+                            changingView.setInRemovalAnimation(true);
+                        };
                         postAnimation = () -> {
-                            mLogger.disappearAnimationEnded(finalKey1);
-                            if (finalEndRunnable != null) finalEndRunnable.run();
+                            mLogger.animationEnd(finalKey1, type, finalIsHeadsUp);
+                            changingView.setInRemovalAnimation(false);
+                            if (tmpEndRunnable != null) {
+                                tmpEndRunnable.run();
+                            }
+                        };
+                    } else {
+                        postAnimation = () -> {
+                            changingView.setInRemovalAnimation(false);
+                            if (tmpEndRunnable != null) {
+                                tmpEndRunnable.run();
+                            }
+                        };
+                        startAnimation = () -> {
+                            changingView.setInRemovalAnimation(true);
                         };
                     }
                     long removeAnimationDelay = changingView.performRemoveAnimation(
                             ANIMATION_DURATION_HEADS_UP_DISAPPEAR,
-                            0, 0.0f, true /* isHeadsUpAppear */, targetLocation,
-                            postAnimation, getGlobalAnimationFinishedListener());
+                            0, 0.0f, true /* isHeadsUpAppear */,
+                            startAnimation, postAnimation,
+                            getGlobalAnimationFinishedListener());
                     mAnimationProperties.delay += removeAnimationDelay;
                 } else if (endRunnable != null) {
                     endRunnable.run();
                 }
+                needsCustomAnimation |= needsAnimation;
             }
             mNewEvents.add(event);
         }
+        return needsCustomAnimation;
     }
 
     public void animateOverScrollToAmount(float targetAmount, final boolean onTop,

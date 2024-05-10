@@ -28,6 +28,7 @@ import java.time.format.DateTimeParseException;
  * can be used.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class KeyValueListParser {
     private final ArrayMap<String, String> mValues = new ArrayMap<>();
     private final TextUtils.StringSplitter mSplitter;

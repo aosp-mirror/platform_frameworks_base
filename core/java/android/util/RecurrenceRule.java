@@ -42,6 +42,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RecurrenceRule implements Parcelable {
     private static final String TAG = "RecurrenceRule";
     private static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);

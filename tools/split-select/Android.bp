@@ -57,9 +57,6 @@ cc_defaults {
 
     // This tool is prebuilt if we're doing an app-only build.
     product_variables: {
-        pdk: {
-            enabled: false,
-        },
         unbundled_build: {
             enabled: false,
         },

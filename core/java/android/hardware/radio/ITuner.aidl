@@ -49,7 +49,7 @@ interface ITuner {
     /**
      * @throws IllegalStateException if called out of sequence
      */
-    void scan(boolean directionDown, boolean skipSubChannel);
+    void seek(boolean directionDown, boolean skipSubChannel);
 
     /**
      * @throws IllegalArgumentException if invalid arguments are passed

@@ -2018,6 +2018,8 @@ public final class MediaDrm implements AutoCloseable {
      * {@link #HDCP_V2_1},
      * {@link #HDCP_V2_2},
      * {@link #HDCP_V2_3}
+     *
+     * @removed mistakenly exposed previously
      */
     @Deprecated
     @Retention(RetentionPolicy.SOURCE)
@@ -2121,6 +2123,8 @@ public final class MediaDrm implements AutoCloseable {
      * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO},
      * {@link #SECURITY_LEVEL_HW_SECURE_DECODE},
      * {@link #SECURITY_LEVEL_HW_SECURE_ALL}
+     *
+     * @removed mistakenly exposed previously
      */
     @Deprecated
     @Retention(RetentionPolicy.SOURCE)
@@ -2921,7 +2925,7 @@ public final class MediaDrm implements AutoCloseable {
             = "drm.mediadrm.get_device_unique_id.error.list";
 
         /**
-         * Key to extraact the count of {@link KeyStatus#STATUS_EXPIRED} events
+         * Key to extract the count of {@link KeyStatus#STATUS_EXPIRED} events
          * that occured. The count is extracted from the
          * {@link PersistableBundle} returned from a {@link #getMetrics} call.
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).

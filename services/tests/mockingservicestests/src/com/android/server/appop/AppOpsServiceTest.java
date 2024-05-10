@@ -15,15 +15,18 @@
  */
 package com.android.server.appop;
 
-import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
-import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
+import static android.app.AppOpsManager.OP_FLAG_SELF;
+import static android.app.AppOpsManager.OP_READ_DEVICE_IDENTIFIERS;
 import static android.app.AppOpsManager.OP_READ_SMS;
+import static android.app.AppOpsManager.OP_TAKE_AUDIO_FOCUS;
 import static android.app.AppOpsManager.OP_WIFI_SCAN;
 import static android.app.AppOpsManager.OP_WRITE_SMS;
+import static android.os.UserHandle.getAppId;
+import static android.os.UserHandle.getUserId;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -35,30 +38,44 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
-import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
+import android.app.SyncNotedAppOp;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.permission.PermissionManager;
 import android.provider.Settings;
+import android.util.ArrayMap;
+import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.PackageManagerLocal;
+import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -67,8 +84,8 @@ import org.junit.runner.RunWith;
 import org.mockito.quality.Strictness;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Unit tests for AppOpsService. Covers functionality that is difficult to test using CTS tests
@@ -81,21 +98,28 @@ public class AppOpsServiceTest {
 
     private static final String TAG = AppOpsServiceTest.class.getSimpleName();
     // State will be persisted into this XML file.
-    private static final String APP_OPS_FILENAME = "appops-service-test.xml";
+    private static final String APP_OPS_FILENAME = "appops.test.xml";
+    private static final String APP_OPS_ACCESSES_FILENAME = "appops_accesses.test.xml";
 
     private static final Context sContext = InstrumentationRegistry.getTargetContext();
     private static final String sMyPackageName = sContext.getOpPackageName();
+    private static final String sSdkSandboxPackageName = sContext.getPackageManager()
+            .getSdkSandboxPackageName();
 
-    private File mAppOpsFile;
+    private File mStorageFile;
+    private File mRecentAccessesFile;
     private Handler mHandler;
     private AppOpsService mAppOpsService;
     private int mMyUid;
+    private int mSdkSandboxPackageUid;
     private long mTestStartMillis;
     private StaticMockitoSession mMockingSession;
 
     private void setupAppOpsService() {
-        mAppOpsService = new AppOpsService(mAppOpsFile, mHandler, spy(sContext));
+        mAppOpsService = new AppOpsService(mRecentAccessesFile, mStorageFile, mHandler,
+                spy(sContext));
         mAppOpsService.mHistoricalRegistry.systemReady(sContext.getContentResolver());
+        mAppOpsService.prepareInternalCallbacks();
 
         // Always approve all permission checks
         doNothing().when(mAppOpsService.mContext).enforcePermission(anyString(), anyInt(),
@@ -104,16 +128,18 @@ public class AppOpsServiceTest {
 
     @Before
     public void setUp() {
-        mAppOpsFile = new File(sContext.getFilesDir(), APP_OPS_FILENAME);
-        if (mAppOpsFile.exists()) {
-            // Start with a clean state (persisted into XML).
-            mAppOpsFile.delete();
-        }
+        assumeFalse(PermissionManager.USE_ACCESS_CHECKING_SERVICE);
+
+        mStorageFile = new File(sContext.getFilesDir(), APP_OPS_FILENAME);
+        mRecentAccessesFile = new File(sContext.getFilesDir(), APP_OPS_ACCESSES_FILENAME);
+        mStorageFile.delete();
+        mRecentAccessesFile.delete();
 
         HandlerThread handlerThread = new HandlerThread(TAG);
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
         mMyUid = Process.myUid();
+        mSdkSandboxPackageUid = resolveSdkSandboxPackageUid();
 
         initializeStaticMocks();
 
@@ -124,33 +150,100 @@ public class AppOpsServiceTest {
 
     @After
     public void tearDown() {
+        // @After methods are still executed even if there's assumption failure in @Before.
+        if (PermissionManager.USE_ACCESS_CHECKING_SERVICE) {
+            return;
+        }
+
         mAppOpsService.shutdown();
 
         mMockingSession.finishMocking();
+    }
+
+    private static int resolveSdkSandboxPackageUid() {
+        try {
+            return sContext.getPackageManager().getPackageUid(
+                    sSdkSandboxPackageName,
+                    PackageManager.PackageInfoFlags.of(0)
+            );
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Can't resolve sandbox package uid", e);
+            return Process.INVALID_UID;
+        }
+    }
+
+    private static void mockGetPackage(
+            PackageManagerInternal managerMock,
+            String packageName
+    ) {
+        AndroidPackage packageMock = mock(AndroidPackage.class);
+        when(managerMock.getPackage(packageName)).thenReturn(packageMock);
+    }
+
+    private static void mockGetPackageStateInternal(
+            PackageManagerInternal managerMock,
+            String packageName,
+            int uid
+    ) {
+        PackageStateInternal packageStateInternalMock = mock(PackageStateInternal.class);
+        when(packageStateInternalMock.isPrivileged()).thenReturn(false);
+        when(packageStateInternalMock.getAppId()).thenReturn(uid);
+        when(packageStateInternalMock.getAndroidPackage()).thenReturn(mock(AndroidPackage.class));
+        when(managerMock.getPackageStateInternal(packageName))
+                .thenReturn(packageStateInternalMock);
     }
 
     private void initializeStaticMocks() {
         mMockingSession = mockitoSession()
                 .strictness(Strictness.LENIENT)
                 .spyStatic(LocalServices.class)
+                .spyStatic(LocalManagerRegistry.class)
                 .spyStatic(Settings.Global.class)
                 .startMocking();
 
-        // Mock LocalServices.getService(PackageManagerInternal.class).getPackage dependency
-        // needed by AppOpsService
+        // Mock LocalServices.getService(PackageManagerInternal.class).getPackageStateInternal
+        // and getPackage dependency needed by AppOpsService
         PackageManagerInternal mockPackageManagerInternal = mock(PackageManagerInternal.class);
-        AndroidPackage mockMyPkg = mock(AndroidPackage.class);
-        when(mockMyPkg.isPrivileged()).thenReturn(false);
-        when(mockMyPkg.getUid()).thenReturn(mMyUid);
-        when(mockMyPkg.getAttributions()).thenReturn(Collections.emptyList());
-
-        when(mockPackageManagerInternal.getPackage(sMyPackageName)).thenReturn(mockMyPkg);
+        mockGetPackage(mockPackageManagerInternal, sMyPackageName);
+        mockGetPackageStateInternal(mockPackageManagerInternal, sMyPackageName, mMyUid);
+        mockGetPackage(mockPackageManagerInternal, sSdkSandboxPackageName);
+        mockGetPackageStateInternal(mockPackageManagerInternal, sSdkSandboxPackageName,
+                mSdkSandboxPackageUid);
+        when(mockPackageManagerInternal.getPackageUid(eq(sMyPackageName), anyLong(),
+                eq(getUserId(mMyUid)))).thenReturn(mMyUid);
         doReturn(mockPackageManagerInternal).when(
                 () -> LocalServices.getService(PackageManagerInternal.class));
+
+        PackageManagerLocal mockPackageManagerLocal = mock(PackageManagerLocal.class);
+        PackageManagerLocal.UnfilteredSnapshot mockUnfilteredSnapshot =
+                mock(PackageManagerLocal.UnfilteredSnapshot.class);
+        PackageState mockMyPS = mock(PackageState.class);
+        ArrayMap<String, PackageState> packageStates = new ArrayMap<>();
+        packageStates.put(sMyPackageName, mockMyPS);
+        when(mockMyPS.getAppId()).thenReturn(mMyUid);
+        when(mockUnfilteredSnapshot.getPackageStates()).thenReturn(packageStates);
+        when(mockPackageManagerLocal.withUnfilteredSnapshot()).thenReturn(mockUnfilteredSnapshot);
+        doReturn(mockPackageManagerLocal).when(
+                () -> LocalManagerRegistry.getManager(PackageManagerLocal.class));
+
+        UserManagerInternal mockUserManagerInternal = mock(UserManagerInternal.class);
+        when(mockUserManagerInternal.getUserIds()).thenReturn(new int[] {getUserId(mMyUid)});
+        doReturn(mockUserManagerInternal).when(
+                () -> LocalServices.getService(UserManagerInternal.class));
 
         // Mock behavior to use specific Settings.Global.APPOP_HISTORY_PARAMETERS
         doReturn(null).when(() -> Settings.Global.getString(any(ContentResolver.class),
                 eq(Settings.Global.APPOP_HISTORY_PARAMETERS)));
+
+        prepareInstallInvocation(mockPackageManagerInternal);
+    }
+
+    private void prepareInstallInvocation(PackageManagerInternal mockPackageManagerInternal) {
+        when(mockPackageManagerInternal.getPackageList(any())).thenAnswer(invocation -> {
+            PackageManagerInternal.PackageListObserver observer = invocation.getArgument(0);
+            observer.onPackageAdded(sMyPackageName, getAppId(mMyUid));
+            return null;
+        });
     }
 
     @Test
@@ -174,6 +267,21 @@ public class AppOpsServiceTest {
         loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
         assertContainsOp(loggedOps, OP_WRITE_SMS, -1, mTestStartMillis, MODE_ERRORED);
+    }
+
+    @Test
+    public void testNoteOperationFromSdkSandbox() {
+        int sandboxUid = Process.toSdkSandboxUid(mMyUid);
+
+        // Note an op that's allowed.
+        SyncNotedAppOp allowedResult = mAppOpsService.noteOperation(OP_TAKE_AUDIO_FOCUS, sandboxUid,
+                sSdkSandboxPackageName, null, false, null, false);
+        assertThat(allowedResult.getOpMode()).isEqualTo(MODE_ALLOWED);
+
+        // Note another op that's not allowed.
+        SyncNotedAppOp erroredResult = mAppOpsService.noteOperation(OP_READ_DEVICE_IDENTIFIERS,
+                sandboxUid, sSdkSandboxPackageName, null, false, null, false);
+        assertThat(erroredResult.getOpMode()).isEqualTo(MODE_ERRORED);
     }
 
     /**
@@ -209,10 +317,12 @@ public class AppOpsServiceTest {
         mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
         mAppOpsService.noteOperation(OP_WRITE_SMS, mMyUid, sMyPackageName, null, false, null,
                 false);
-        mAppOpsService.writeState();
+
+        mAppOpsService.shutdown();
 
         // Create a new app ops service which will initialize its state from XML.
         setupAppOpsService();
+        mAppOpsService.readState();
 
         // Query the state of the 2nd service.
         List<PackageOps> loggedOps = getLoggedOps();
@@ -331,122 +441,23 @@ public class AppOpsServiceTest {
         assertThat(getLoggedOps()).isNull();
     }
 
-    private void setupProcStateTests() {
-        // For the location proc state tests
-        mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, sMyPackageName, MODE_FOREGROUND);
-        mAppOpsService.mConstants.FG_SERVICE_STATE_SETTLE_TIME = 0;
-        mAppOpsService.mConstants.TOP_STATE_SETTLE_TIME = 0;
-        mAppOpsService.mConstants.BG_STATE_SETTLE_TIME = 0;
-    }
-
     @Test
-    public void testUidProcStateChange_cachedToTopToCached() throws Exception {
-        setupProcStateTests();
-
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP,
-                ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        // Second time to make sure that settle time is overcome
-        Thread.sleep(50);
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
-    }
-
-    @Test
-    public void testUidProcStateChange_cachedToFgs() {
-        setupProcStateTests();
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
-    }
-
-    @Test
-    public void testUidProcStateChange_cachedToFgsLocation() {
-        setupProcStateTests();
-
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
-                ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isEqualTo(MODE_ALLOWED);
-    }
-
-    @Test
-    public void testUidProcStateChange_topToFgs() throws Exception {
-        setupProcStateTests();
-
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP,
-                ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        // Second time to make sure that settle time is overcome
-        Thread.sleep(50);
-        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
-    }
-
-    @Test
-    public void testUidProcStateChange_topToFgsLocationToFgs() throws Exception {
-        setupProcStateTests();
-
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP,
-                ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
-                ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
-        // Second time to make sure that settle time is overcome
-        Thread.sleep(50);
-        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
-                ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isEqualTo(MODE_ALLOWED);
-
-        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        // Second time to make sure that settle time is overcome
-        Thread.sleep(50);
-        mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
-                ActivityManager.PROCESS_CAPABILITY_NONE);
-        assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null, false).getOpMode()).isNotEqualTo(MODE_ALLOWED);
+    public void testUidStateInitializationDoesntClearState() throws InterruptedException {
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
+        mAppOpsService.initializeUidStates();
+        List<PackageOps> ops = mAppOpsService.getOpsForPackage(mMyUid, sMyPackageName,
+                new int[]{OP_READ_SMS});
+        assertNotNull(ops);
+        for (int i = 0; i < ops.size(); i++) {
+            List<OpEntry> opEntries = ops.get(i).getOps();
+            for (int j = 0; j < opEntries.size(); j++) {
+                Map<String, AppOpsManager.AttributedOpEntry> attributedOpEntries = opEntries.get(
+                        j).getAttributedOpEntries();
+                assertNotEquals(-1, attributedOpEntries.get(null)
+                        .getLastAccessTime(OP_FLAG_SELF));
+            }
+        }
     }
 
     private List<PackageOps> getLoggedOps() {

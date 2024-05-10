@@ -45,8 +45,8 @@ public class BinderInternal {
     static ArrayList<Runnable> sGcWatchers = new ArrayList<>();
     static Runnable[] sTmpWatchers = new Runnable[1];
     static long sLastGcTime;
-    static final BinderProxyLimitListenerDelegate sBinderProxyLimitListenerDelegate =
-            new BinderProxyLimitListenerDelegate();
+    static final BinderProxyCountEventListenerDelegate sBinderProxyCountEventListenerDelegate =
+            new BinderProxyCountEventListenerDelegate();
 
     static final class GcWatcher {
         @Override
@@ -226,15 +226,24 @@ public class BinderInternal {
      * @param low   The threshold a binder count must drop below before the callback
      *              can be called again. (This is to avoid many repeated calls to the
      *              callback in a brief period of time)
+     * @param warning The threshold between {@code high} and {@code low} where if the binder count
+     *                exceeds that, the warning callback would be triggered.
      */
-    public static final native void nSetBinderProxyCountWatermarks(int high, int low);
+    public static final native void nSetBinderProxyCountWatermarks(int high, int low, int warning);
 
     /**
      * Interface for callback invocation when the Binder Proxy limit is reached. onLimitReached will
      * be called with the uid of the app causing too many Binder Proxies
      */
-    public interface BinderProxyLimitListener {
+    public interface BinderProxyCountEventListener {
         public void onLimitReached(int uid);
+
+        /**
+         * Call when the number of binder proxies from the uid of the app reaches
+         * the warning threshold.
+         */
+        default void onWarningThresholdReached(int uid) {
+        }
     }
 
     /**
@@ -243,7 +252,17 @@ public class BinderInternal {
      * @param uid The uid of the bad behaving app sending too many binders
      */
     public static void binderProxyLimitCallbackFromNative(int uid) {
-       sBinderProxyLimitListenerDelegate.notifyClient(uid);
+        sBinderProxyCountEventListenerDelegate.notifyLimitReached(uid);
+    }
+
+    /**
+     * Callback used by native code to trigger a callback in java code. The callback will be
+     * triggered when too many binder proxies from a uid hits the warning limit.
+     * @param uid The uid of the bad behaving app sending too many binders
+     */
+    @SuppressWarnings("unused")
+    public static void binderProxyWarningCallbackFromNative(int uid) {
+        sBinderProxyCountEventListenerDelegate.notifyWarningReached(uid);
     }
 
     /**
@@ -252,41 +271,45 @@ public class BinderInternal {
      * @param handler must not be null, callback will be posted through the handler;
      *
      */
-    public static void setBinderProxyCountCallback(BinderProxyLimitListener listener,
+    public static void setBinderProxyCountCallback(BinderProxyCountEventListener listener,
             @NonNull Handler handler) {
         Preconditions.checkNotNull(handler,
                 "Must provide NonNull Handler to setBinderProxyCountCallback when setting "
-                        + "BinderProxyLimitListener");
-        sBinderProxyLimitListenerDelegate.setListener(listener, handler);
+                        + "BinderProxyCountEventListener");
+        sBinderProxyCountEventListenerDelegate.setListener(listener, handler);
     }
 
     /**
      * Clear the Binder Proxy callback
      */
     public static void clearBinderProxyCountCallback() {
-        sBinderProxyLimitListenerDelegate.setListener(null, null);
+        sBinderProxyCountEventListenerDelegate.setListener(null, null);
     }
 
-    static private class BinderProxyLimitListenerDelegate {
-        private BinderProxyLimitListener mBinderProxyLimitListener;
+    private static class BinderProxyCountEventListenerDelegate {
+        private BinderProxyCountEventListener mBinderProxyCountEventListener;
         private Handler mHandler;
 
-        void setListener(BinderProxyLimitListener listener, Handler handler) {
+        void setListener(BinderProxyCountEventListener listener, Handler handler) {
             synchronized (this) {
-                mBinderProxyLimitListener = listener;
+                mBinderProxyCountEventListener = listener;
                 mHandler = handler;
             }
         }
 
-        void notifyClient(final int uid) {
+        void notifyLimitReached(final int uid) {
             synchronized (this) {
-                if (mBinderProxyLimitListener != null) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mBinderProxyLimitListener.onLimitReached(uid);
-                        }
-                    });
+                if (mBinderProxyCountEventListener != null) {
+                    mHandler.post(() -> mBinderProxyCountEventListener.onLimitReached(uid));
+                }
+            }
+        }
+
+        void notifyWarningReached(final int uid) {
+            synchronized (this) {
+                if (mBinderProxyCountEventListener != null) {
+                    mHandler.post(() ->
+                            mBinderProxyCountEventListener.onWarningThresholdReached(uid));
                 }
             }
         }

@@ -23,32 +23,45 @@ interface IColorDisplayManager {
     boolean isDeviceColorManaged();
 
     boolean setSaturationLevel(int saturationLevel);
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setAppSaturationLevel(String packageName, int saturationLevel);
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean isSaturationActivated();
 
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     int getTransformCapabilities();
 
     boolean isNightDisplayActivated();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setNightDisplayActivated(boolean activated);
     int getNightDisplayColorTemperature();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setNightDisplayColorTemperature(int temperature);
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     int getNightDisplayAutoMode();
     int getNightDisplayAutoModeRaw();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setNightDisplayAutoMode(int autoMode);
     Time getNightDisplayCustomStartTime();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setNightDisplayCustomStartTime(in Time time);
     Time getNightDisplayCustomEndTime();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setNightDisplayCustomEndTime(in Time time);
 
     int getColorMode();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     void setColorMode(int colorMode);
 
     boolean isDisplayWhiteBalanceEnabled();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setDisplayWhiteBalanceEnabled(boolean enabled);
 
     boolean isReduceBrightColorsActivated();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setReduceBrightColorsActivated(boolean activated);
     int getReduceBrightColorsStrength();
+    @EnforcePermission("CONTROL_DISPLAY_COLOR_TRANSFORMS")
     boolean setReduceBrightColorsStrength(int strength);
     float getReduceBrightColorsOffsetFactor();
 }

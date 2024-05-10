@@ -35,11 +35,7 @@ public:
                                       jfloatArray intervalArray, jfloat phase) {
         AutoJavaFloatArray autoInterval(env, intervalArray);
         int         count = autoInterval.length() & ~1;  // even number
-#ifdef SK_SCALAR_IS_FLOAT
-        SkScalar*   intervals = autoInterval.ptr();
-#else
-        #error Need to convert float array to SkScalar array before calling the following function.
-#endif
+        SkScalar* intervals = autoInterval.ptr();
         SkPathEffect* effect = SkDashPathEffect::Make(intervals, count, phase).release();
         return reinterpret_cast<jlong>(effect);
     }

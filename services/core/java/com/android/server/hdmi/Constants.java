@@ -19,6 +19,8 @@ package com.android.server.hdmi;
 import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.tv.hdmi.connection.HpdSignal;
+import android.hardware.tv.hdmi.earc.IEArcStatus;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -337,6 +339,8 @@ final class Constants {
     static final int AUDIO_CODEC_WMAPRO = 0xE; // Support WMA-Pro
     static final int AUDIO_CODEC_MAX = 0xF;
 
+    static final int AUDIO_FORMAT_MASK = 0b0111_1000;
+
     @StringDef({
         AUDIO_DEVICE_ARC_IN,
         AUDIO_DEVICE_SPDIF,
@@ -353,7 +357,7 @@ final class Constants {
 
     static final int INVALID_PORT_ID = HdmiDeviceInfo.PORT_INVALID;
     static final int INVALID_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INVALID;
-    static final int PATH_INTERNAL = HdmiDeviceInfo.PATH_INTERNAL;
+    static final int TV_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INTERNAL;
 
     // The relationship from one path (physical address) to another.
     @IntDef({
@@ -596,6 +600,49 @@ final class Constants {
             RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU
     })
     @interface RcProfileSource {}
+
+    static final int HDMI_EARC_STATUS_UNKNOWN = -1;
+    static final int HDMI_EARC_STATUS_IDLE = IEArcStatus.IDLE; // IDLE1
+    static final int HDMI_EARC_STATUS_EARC_PENDING =
+            IEArcStatus.EARC_PENDING; // DISC1 and DISC2
+    static final int HDMI_EARC_STATUS_ARC_PENDING = IEArcStatus.ARC_PENDING; // IDLE2 for ARC
+    static final int HDMI_EARC_STATUS_EARC_CONNECTED =
+            IEArcStatus.EARC_CONNECTED; // eARC connected
+
+    @IntDef({
+            HDMI_EARC_STATUS_UNKNOWN,
+            HDMI_EARC_STATUS_IDLE,
+            HDMI_EARC_STATUS_EARC_PENDING,
+            HDMI_EARC_STATUS_ARC_PENDING,
+            HDMI_EARC_STATUS_EARC_CONNECTED
+            })
+    @interface EarcStatus {}
+
+    static final int HDMI_HPD_TYPE_PHYSICAL =
+            HpdSignal.HDMI_HPD_PHYSICAL; // Default. Physical hotplug signal.
+    static final int HDMI_HPD_TYPE_STATUS_BIT =
+            HpdSignal.HDMI_HPD_STATUS_BIT; // HDMI_HPD status bit.
+
+    @IntDef({
+            HDMI_HPD_TYPE_PHYSICAL,
+            HDMI_HPD_TYPE_STATUS_BIT
+    })
+    @interface HpdSignalType {}
+
+    static final String DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE = "enable_soundbar_mode";
+    static final String DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX = "enable_earc_tx";
+    static final String DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX =
+            "transition_arc_to_earc_tx";
+    // Name is abbreviated slightly to avoid line length issues
+    static final String DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI =
+            "enable_numeric_soundbar_volume_ui_on_tv";
+    @StringDef({
+            DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE,
+            DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX,
+            DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX,
+            DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI
+    })
+    @interface FeatureFlag {}
 
     private Constants() {
         /* cannot be instantiated */

@@ -68,7 +68,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
         }
 
         // Grant 'account'/'type' to mUID
-        mAccount = extras.getParcelable(EXTRAS_ACCOUNT);
+        mAccount = extras.getParcelable(EXTRAS_ACCOUNT, android.accounts.Account.class);
         mAuthTokenType = extras.getString(EXTRAS_AUTH_TOKEN_TYPE);
         mUid = extras.getInt(EXTRAS_REQUESTING_UID);
         final PackageManager pm = getPackageManager();
@@ -199,7 +199,7 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
      */
     public void finish() {
         Intent intent = getIntent();
-        AccountAuthenticatorResponse response = intent.getParcelableExtra(EXTRAS_RESPONSE);
+        AccountAuthenticatorResponse response = intent.getParcelableExtra(EXTRAS_RESPONSE, android.accounts.AccountAuthenticatorResponse.class);
         if (response != null) {
             // send the result bundle back if set, otherwise send an error.
             if (mResultBundle != null) {

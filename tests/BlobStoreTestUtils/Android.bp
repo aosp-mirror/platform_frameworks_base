@@ -22,12 +22,12 @@ package {
 }
 
 java_library {
-  name: "BlobStoreTestUtils",
-  srcs: ["src/**/*.java"],
-  static_libs: [
-    "truth-prebuilt",
-    "androidx.test.uiautomator_uiautomator",
-    "androidx.test.ext.junit",
-  ],
-  sdk_version: "test_current",
+    name: "BlobStoreTestUtils",
+    srcs: ["src/**/*.java"],
+    static_libs: [
+        "truth",
+        "androidx.test.uiautomator_uiautomator",
+        "androidx.test.ext.junit",
+    ],
+    sdk_version: "test_current",
 }

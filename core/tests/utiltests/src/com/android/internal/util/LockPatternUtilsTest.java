@@ -19,6 +19,9 @@ package com.android.internal.util;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
@@ -37,8 +40,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.UserInfo;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 
@@ -54,6 +60,7 @@ import com.android.internal.widget.LockPatternUtils;
 
 import com.google.android.collect.Lists;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -64,7 +71,10 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@IgnoreUnderRavenwood(blockedBy = LockPatternUtils.class)
 public class LockPatternUtilsTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static final int DEMO_USER_ID = 5;
 
@@ -231,6 +241,45 @@ public class LockPatternUtilsTest {
         assertThat(trustAgents).containsExactly(
                 ComponentName.unflattenFromString("com.android/.TrustAgent"),
                 ComponentName.unflattenFromString("com.test/.TestAgent"));
+    }
+
+    @Test
+    public void isBiometricAllowedForUser_afterTrustagentExpired_returnsTrue()
+            throws RemoteException {
+        TestStrongAuthTracker tracker = createStrongAuthTracker();
+        tracker.changeStrongAuth(SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED);
+
+        assertTrue(tracker.isBiometricAllowedForUser(
+                /* isStrongBiometric = */ true,
+                DEMO_USER_ID));
+    }
+
+    @Test
+    public void isBiometricAllowedForUser_afterLockout_returnsFalse()
+            throws RemoteException {
+        TestStrongAuthTracker tracker = createStrongAuthTracker();
+        tracker.changeStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT);
+
+        assertFalse(tracker.isBiometricAllowedForUser(
+                /* isStrongBiometric = */ true,
+                DEMO_USER_ID));
+    }
+
+
+    private TestStrongAuthTracker createStrongAuthTracker() {
+        final Context context = new ContextWrapper(InstrumentationRegistry.getTargetContext());
+        return new TestStrongAuthTracker(context, Looper.getMainLooper());
+    }
+
+    private static class TestStrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+
+        TestStrongAuthTracker(Context context, Looper looper) {
+            super(context, looper);
+        }
+
+        public void changeStrongAuth(@StrongAuthFlags int strongAuthFlags) {
+            handleStrongAuthRequiredChanged(strongAuthFlags, DEMO_USER_ID);
+        }
     }
 
     private ILockSettings createTestLockSettings() {

@@ -31,6 +31,8 @@ import android.widget.Button;
 
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.actionbuttons.R;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,10 +57,10 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setTitle_shouldShowButtonByDefault() {
-        mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton2Text(R.string.install_other_apps);
-        mPref.setButton3Text(R.string.install_other_apps);
-        mPref.setButton4Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton2Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton3Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -107,10 +109,10 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setVisibleIsGoneAndSetTitle_shouldNotShowButton() {
-        mPref.setButton1Text(R.string.install_other_apps).setButton1Visible(false);
-        mPref.setButton2Text(R.string.install_other_apps).setButton2Visible(false);
-        mPref.setButton3Text(R.string.install_other_apps).setButton3Visible(false);
-        mPref.setButton4Text(R.string.install_other_apps).setButton4Visible(false);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps).setButton1Visible(false);
+        mPref.setButton2Text(com.android.settingslib.R.string.install_other_apps).setButton2Visible(false);
+        mPref.setButton3Text(com.android.settingslib.R.string.install_other_apps).setButton3Visible(false);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps).setButton4Visible(false);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -145,10 +147,10 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setVisibility_shouldUpdateButtonVisibility() {
-        mPref.setButton1Text(R.string.install_other_apps).setButton1Visible(false);
-        mPref.setButton2Text(R.string.install_other_apps).setButton2Visible(false);
-        mPref.setButton3Text(R.string.install_other_apps).setButton3Visible(false);
-        mPref.setButton4Text(R.string.install_other_apps).setButton4Visible(false);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps).setButton1Visible(false);
+        mPref.setButton2Text(com.android.settingslib.R.string.install_other_apps).setButton2Visible(false);
+        mPref.setButton3Text(com.android.settingslib.R.string.install_other_apps).setButton3Visible(false);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps).setButton4Visible(false);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -195,26 +197,26 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setText_shouldShowSameText() {
-        mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton2Text(R.string.install_other_apps);
-        mPref.setButton3Text(R.string.install_other_apps);
-        mPref.setButton4Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton2Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton3Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 
         assertThat(((Button) mRootView.findViewById(R.id.button1)).getText())
-                .isEqualTo(mContext.getText(R.string.install_other_apps));
+                .isEqualTo(mContext.getText(com.android.settingslib.R.string.install_other_apps));
         assertThat(((Button) mRootView.findViewById(R.id.button2)).getText())
-                .isEqualTo(mContext.getText(R.string.install_other_apps));
+                .isEqualTo(mContext.getText(com.android.settingslib.R.string.install_other_apps));
         assertThat(((Button) mRootView.findViewById(R.id.button3)).getText())
-                .isEqualTo(mContext.getText(R.string.install_other_apps));
+                .isEqualTo(mContext.getText(com.android.settingslib.R.string.install_other_apps));
         assertThat(((Button) mRootView.findViewById(R.id.button4)).getText())
-                .isEqualTo(mContext.getText(R.string.install_other_apps));
+                .isEqualTo(mContext.getText(com.android.settingslib.R.string.install_other_apps));
     }
 
     @Test
     public void onBindViewHolder_setButtonIcon_iconMustDisplayAboveText() {
-        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
         mPref.setButton1Icon(com.android.internal.R.drawable.ic_plus);
 
         mPref.onBindViewHolder(mHolder);
@@ -227,7 +229,7 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void setButtonIcon_iconResourceIdIsZero_shouldNotDisplayIcon() {
-        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
         mPref.setButton1Icon(0);
 
         mPref.onBindViewHolder(mHolder);
@@ -240,7 +242,7 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void setButtonIcon_iconResourceIdNotExisting_shouldNotDisplayIconAndCrash() {
-        mPref.setButton1Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
         mPref.setButton1Icon(999999999 /* not existing id */);
         // Should not crash here
         mPref.onBindViewHolder(mHolder);
@@ -253,10 +255,10 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setAllButton_shouldShowAllDivider() {
-        mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton2Text(R.string.install_other_apps);
-        mPref.setButton3Text(R.string.install_other_apps);
-        mPref.setButton4Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton2Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton3Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -270,9 +272,9 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setAllButtonWithoutButton2_shouldHideDivider1() {
-        mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton3Text(R.string.install_other_apps);
-        mPref.setButton4Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton3Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -286,9 +288,9 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setAllButtonWithoutButton3_shouldHideDivider2() {
-        mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton2Text(R.string.install_other_apps);
-        mPref.setButton4Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton2Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -302,8 +304,8 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setButton1And4_shouldShowDivider3Only() {
-        mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton4Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -317,7 +319,7 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setOneButtonOnly_noDivider() {
-        mPref.setButton4Text(R.string.install_other_apps);
+        mPref.setButton4Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -331,8 +333,8 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setButton1And2_shouldShowDivider1Only() {
-        mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton2Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton2Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 
@@ -346,8 +348,8 @@ public class ActionButtonsPreferenceTest {
 
     @Test
     public void onBindViewHolder_setButton1And3_shouldShowDivider2Only() {
-        mPref.setButton1Text(R.string.install_other_apps);
-        mPref.setButton3Text(R.string.install_other_apps);
+        mPref.setButton1Text(com.android.settingslib.R.string.install_other_apps);
+        mPref.setButton3Text(com.android.settingslib.R.string.install_other_apps);
 
         mPref.onBindViewHolder(mHolder);
 

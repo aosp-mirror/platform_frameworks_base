@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -57,6 +59,8 @@ public class RankingBuilder {
     private ShortcutInfo mShortcutInfo = null;
     private int mRankingAdjustment = 0;
     private boolean mIsBubble = false;
+    private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
+    private boolean mSensitiveContent = false;
 
     public RankingBuilder() {
     }
@@ -86,6 +90,8 @@ public class RankingBuilder {
         mShortcutInfo = ranking.getConversationShortcutInfo();
         mRankingAdjustment = ranking.getRankingAdjustment();
         mIsBubble = ranking.isBubble();
+        mProposedImportance = ranking.getProposedImportance();
+        mSensitiveContent = ranking.hasSensitiveContent();
     }
 
     public Ranking build() {
@@ -114,7 +120,9 @@ public class RankingBuilder {
                 mIsConversation,
                 mShortcutInfo,
                 mRankingAdjustment,
-                mIsBubble);
+                mIsBubble,
+                mProposedImportance,
+                mSensitiveContent);
         return ranking;
     }
 
@@ -211,6 +219,16 @@ public class RankingBuilder {
 
     public RankingBuilder setImportance(@Importance int importance) {
         mImportance = importance;
+        return this;
+    }
+
+    public RankingBuilder setProposedImportance(@Importance int importance) {
+        mProposedImportance = importance;
+        return this;
+    }
+
+    public RankingBuilder setSensitiveContent(boolean sensitiveContent) {
+        mSensitiveContent = sensitiveContent;
         return this;
     }
 

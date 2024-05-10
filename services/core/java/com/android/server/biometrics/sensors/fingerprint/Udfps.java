@@ -16,6 +16,9 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import android.hardware.biometrics.fingerprint.PointerContext;
+import android.hardware.fingerprint.FingerprintManager;
+
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 /**
@@ -24,8 +27,8 @@ import com.android.server.biometrics.sensors.BaseClientMonitor;
  * finger position (e.g. enroll, authenticate) should implement this.
  */
 public interface Udfps {
-    void onPointerDown(int x, int y, float minor, float major);
-    void onPointerUp();
-    void onUiReady();
+    void onPointerDown(PointerContext pc);
+    void onPointerUp(PointerContext pc);
+    void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event);
     boolean isPointerDown();
 }

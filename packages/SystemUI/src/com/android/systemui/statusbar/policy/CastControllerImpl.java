@@ -35,7 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.Utils;
@@ -215,6 +215,12 @@ public class CastControllerImpl implements CastController {
         } else {
             mMediaRouter.getFallbackRoute().select();
         }
+    }
+
+    @Override
+    public boolean hasConnectedCastDevice() {
+        return getCastDevices().stream().anyMatch(
+                castDevice -> castDevice.state == CastDevice.STATE_CONNECTED);
     }
 
     private void setProjection(MediaProjectionInfo projection, boolean started) {

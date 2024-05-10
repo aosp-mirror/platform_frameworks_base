@@ -19,10 +19,16 @@ package com.android.systemui.classifier;
 import android.content.res.Resources;
 import android.view.ViewConfiguration;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.statusbar.phone.NotificationTapHelper;
+
+import dagger.Binds;
+import dagger.Module;
+import dagger.Provides;
+import dagger.multibindings.ElementsIntoSet;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -30,23 +36,30 @@ import java.util.Set;
 
 import javax.inject.Named;
 
-import dagger.Binds;
-import dagger.Module;
-import dagger.Provides;
-import dagger.multibindings.ElementsIntoSet;
-
 /** Dagger Module for Falsing. */
-@Module
+@Module(includes = {FalsingStartModule.class})
 public interface FalsingModule {
     String BRIGHT_LINE_GESTURE_CLASSIFERS = "bright_line_gesture_classifiers";
     String SINGLE_TAP_TOUCH_SLOP = "falsing_single_tap_touch_slop";
+    String LONG_TAP_TOUCH_SLOP = "falsing_long_tap_slop";
     String DOUBLE_TAP_TOUCH_SLOP = "falsing_double_tap_touch_slop";
     String DOUBLE_TAP_TIMEOUT_MS = "falsing_double_tap_timeout_ms";
+    String IS_FOLDABLE_DEVICE = "falsing_foldable_device";
 
-    /** */
-    @Binds
+    /** Provides the actual {@link FalsingCollector} if the scene container feature is off. */
+    @Provides
     @SysUISingleton
-    FalsingCollector bindsFalsingCollector(FalsingCollectorImpl impl);
+    static FalsingCollector providesFalsingCollectorLegacy(
+            FalsingCollectorImpl impl,
+            FalsingCollectorNoOp noOp,
+            SceneContainerFlags flags) {
+        return flags.isEnabled() ? noOp : impl;
+    }
+
+    /** Provides the actual {@link FalsingCollector}. */
+    @Binds
+    @FalsingCollectorActual
+    FalsingCollector bindsFalsingCollectorActual(FalsingCollectorImpl impl);
 
     /** */
     @Provides
@@ -80,5 +93,24 @@ public interface FalsingModule {
     @Named(SINGLE_TAP_TOUCH_SLOP)
     static float providesSingleTapTouchSlop(ViewConfiguration viewConfiguration) {
         return viewConfiguration.getScaledTouchSlop();
+    }
+
+    /** */
+    @Provides
+    @Named(LONG_TAP_TOUCH_SLOP)
+    static float providesLongTapTouchSlop(ViewConfiguration viewConfiguration) {
+        return viewConfiguration.getScaledTouchSlop() * 1.25f;
+    }
+
+    /** */
+    @Provides
+    @Named(IS_FOLDABLE_DEVICE)
+    static boolean providesIsFoldableDevice(@Main Resources resources) {
+        try {
+            return resources.getIntArray(
+                    com.android.internal.R.array.config_foldedDeviceStates).length != 0;
+        } catch (Resources.NotFoundException e) {
+            return false;
+        }
     }
 }

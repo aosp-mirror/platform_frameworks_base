@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "LineBreaker"
-
 #include "utils/misc.h"
 #include "utils/Log.h"
 #include "graphics_jni_helpers.h"
@@ -54,13 +51,12 @@ static inline minikin::android::StaticLayoutNative* toNative(jlong ptr) {
 
 // set text and set a number of parameters for creating a layout (width, tabstops, strategy,
 // hyphenFrequency)
-static jlong nInit(JNIEnv* env, jclass /* unused */,
-        jint breakStrategy, jint hyphenationFrequency, jboolean isJustified, jintArray indents) {
+static jlong nInit(JNIEnv* env, jclass /* unused */, jint breakStrategy, jint hyphenationFrequency,
+                   jboolean isJustified, jintArray indents, jboolean useBoundsForWidth) {
     return reinterpret_cast<jlong>(new minikin::android::StaticLayoutNative(
             static_cast<minikin::BreakStrategy>(breakStrategy),
-            static_cast<minikin::HyphenationFrequency>(hyphenationFrequency),
-            isJustified,
-            jintArrayToFloatVector(env, indents)));
+            static_cast<minikin::HyphenationFrequency>(hyphenationFrequency), isJustified,
+            jintArrayToFloatVector(env, indents), useBoundsForWidth));
 }
 
 static void nFinish(jlong nativePtr) {
@@ -131,39 +127,44 @@ static jlong nGetReleaseResultFunc(CRITICAL_JNI_PARAMS) {
 }
 
 static const JNINativeMethod gMethods[] = {
-    // Fast Natives
-    {"nInit", "("
-        "I"  // breakStrategy
-        "I"  // hyphenationFrequency
-        "Z"  // isJustified
-        "[I"  // indents
-        ")J", (void*) nInit},
+        // Fast Natives
+        {"nInit",
+         "("
+         "I"   // breakStrategy
+         "I"   // hyphenationFrequency
+         "Z"   // isJustified
+         "[I"  // indents
+         "Z"   // useBoundsForWidth
+         ")J",
+         (void*)nInit},
 
-    // Critical Natives
-    {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},
+        // Critical Natives
+        {"nGetReleaseFunc", "()J", (void*)nGetReleaseFunc},
 
-    // Regular JNI
-    {"nComputeLineBreaks", "("
-        "J"  // nativePtr
-        "[C"  // text
-        "J"  // MeasuredParagraph ptr.
-        "I"  // length
-        "F"  // firstWidth
-        "I"  // firstWidthLineCount
-        "F"  // restWidth
-        "[F"  // variableTabStops
-        "F"  // defaultTabStop
-        "I"  // indentsOffset
-        ")J", (void*) nComputeLineBreaks},
+        // Regular JNI
+        {"nComputeLineBreaks",
+         "("
+         "J"   // nativePtr
+         "[C"  // text
+         "J"   // MeasuredParagraph ptr.
+         "I"   // length
+         "F"   // firstWidth
+         "I"   // firstWidthLineCount
+         "F"   // restWidth
+         "[F"  // variableTabStops
+         "F"   // defaultTabStop
+         "I"   // indentsOffset
+         ")J",
+         (void*)nComputeLineBreaks},
 
-    // Result accessors, CriticalNatives
-    {"nGetLineCount", "(J)I", (void*)nGetLineCount},
-    {"nGetLineBreakOffset", "(JI)I", (void*)nGetLineBreakOffset},
-    {"nGetLineWidth", "(JI)F", (void*)nGetLineWidth},
-    {"nGetLineAscent", "(JI)F", (void*)nGetLineAscent},
-    {"nGetLineDescent", "(JI)F", (void*)nGetLineDescent},
-    {"nGetLineFlag", "(JI)I", (void*)nGetLineFlag},
-    {"nGetReleaseResultFunc", "()J", (void*)nGetReleaseResultFunc},
+        // Result accessors, CriticalNatives
+        {"nGetLineCount", "(J)I", (void*)nGetLineCount},
+        {"nGetLineBreakOffset", "(JI)I", (void*)nGetLineBreakOffset},
+        {"nGetLineWidth", "(JI)F", (void*)nGetLineWidth},
+        {"nGetLineAscent", "(JI)F", (void*)nGetLineAscent},
+        {"nGetLineDescent", "(JI)F", (void*)nGetLineDescent},
+        {"nGetLineFlag", "(JI)I", (void*)nGetLineFlag},
+        {"nGetReleaseResultFunc", "()J", (void*)nGetReleaseResultFunc},
 };
 
 int register_android_graphics_text_LineBreaker(JNIEnv* env) {

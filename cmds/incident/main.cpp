@@ -83,8 +83,8 @@ StatusListener::onReportSectionStatus(int32_t section, int32_t status)
 Status
 StatusListener::onReportServiceStatus(const String16& service, int32_t status)
 {
-    fprintf(stderr, "service '%s' status %d\n", String8(service).string(), status);
-    ALOGD("service '%s' status %d\n", String8(service).string(), status);
+    fprintf(stderr, "service '%s' status %d\n", String8(service).c_str(), status);
+    ALOGD("service '%s' status %d\n", String8(service).c_str(), status);
     return Status::ok();
 }
 
@@ -384,7 +384,7 @@ main(int argc, char** argv)
         status = service->reportIncidentToStream(args, listener, std::move(writeEnd));
 
         if (!status.isOk()) {
-            fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().string());
+            fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().c_str());
             return 1;
         }
 
@@ -396,14 +396,14 @@ main(int argc, char** argv)
         sp<StatusListener> listener(new StatusListener());
         status = service->reportIncidentToDumpstate(std::move(writeEnd), listener);
         if (!status.isOk()) {
-            fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().string());
+            fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().c_str());
             return 1;
         }
         return listener->getExitCodeOrElse(stream_output(fds[0], STDOUT_FILENO));
     } else {
         status = service->reportIncident(args);
         if (!status.isOk()) {
-            fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().string());
+            fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().c_str());
             return 1;
         } else {
             return 0;

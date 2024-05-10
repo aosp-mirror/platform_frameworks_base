@@ -47,4 +47,14 @@ interface ISystemConfig {
      * @see SystemConfigManager#getEnabledComponentOverrides
      */
     List<ComponentName> getEnabledComponentOverrides(String packageName);
+
+    /**
+     * @see SystemConfigManager#getDefaultVrComponents
+     */
+    List<ComponentName> getDefaultVrComponents();
+
+    /**
+     * @see SystemConfigManager#getPreventUserDisablePackages
+     */
+    List<String> getPreventUserDisablePackages();
 }

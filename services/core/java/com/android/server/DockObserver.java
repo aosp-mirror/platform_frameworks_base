@@ -19,9 +19,9 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
+import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -36,6 +36,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ExtconUEventObserver.ExtconInfo;
 
 import java.io.FileDescriptor;
@@ -69,10 +70,11 @@ final class DockObserver extends SystemService {
 
     private boolean mUpdatesStopped;
 
-    private final boolean mKeepDreamingWhenUndocking;
+    private final boolean mKeepDreamingWhenUnplugging;
     private final boolean mAllowTheaterModeWakeFromDock;
 
     private final List<ExtconStateConfig> mExtconStateConfigs;
+    private DeviceProvisionedObserver mDeviceProvisionedObserver;
 
     static final class ExtconStateProvider {
         private final Map<String, String> mState;
@@ -110,7 +112,7 @@ final class DockObserver extends SystemService {
                 Slog.w(TAG, "No state file found at: " + stateFilePath);
                 return new ExtconStateProvider(new HashMap<>());
             } catch (Exception e) {
-                Slog.e(TAG, "" , e);
+                Slog.e(TAG, "", e);
                 return new ExtconStateProvider(new HashMap<>());
             }
         }
@@ -136,7 +138,7 @@ final class DockObserver extends SystemService {
 
     private static List<ExtconStateConfig> loadExtconStateConfigs(Context context) {
         String[] rows = context.getResources().getStringArray(
-            com.android.internal.R.array.config_dockExtconStateMapping);
+                com.android.internal.R.array.config_dockExtconStateMapping);
         try {
             ArrayList<ExtconStateConfig> configs = new ArrayList<>();
             for (String row : rows) {
@@ -165,8 +167,9 @@ final class DockObserver extends SystemService {
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mAllowTheaterModeWakeFromDock = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromDock);
-        mKeepDreamingWhenUndocking = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_keepDreamingWhenUndocking);
+        mKeepDreamingWhenUnplugging = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_keepDreamingWhenUnplugging);
+        mDeviceProvisionedObserver = new DeviceProvisionedObserver(mHandler);
 
         mExtconStateConfigs = loadExtconStateConfigs(context);
 
@@ -192,6 +195,8 @@ final class DockObserver extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(TAG, new BinderService());
+        // Logs dock state after setDockStateFromProviderLocked sets mReportedDockState
+        FrameworkStatsLog.write(FrameworkStatsLog.DOCK_STATE_CHANGED, mReportedDockState);
     }
 
     @Override
@@ -199,12 +204,16 @@ final class DockObserver extends SystemService {
         if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             synchronized (mLock) {
                 mSystemReady = true;
-
-                // don't bother broadcasting undocked here
-                if (mReportedDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                    updateLocked();
-                }
+                mDeviceProvisionedObserver.onSystemReady();
+                updateIfDockedLocked();
             }
+        }
+    }
+
+    private void updateIfDockedLocked() {
+        // don't bother broadcasting undocked here
+        if (mReportedDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+            updateLocked();
         }
     }
 
@@ -230,7 +239,7 @@ final class DockObserver extends SystemService {
     }
 
     private boolean allowWakeFromDock() {
-        if (mKeepDreamingWhenUndocking) {
+        if (mKeepDreamingWhenUnplugging) {
             return false;
         }
         return (mAllowTheaterModeWakeFromDock
@@ -249,11 +258,9 @@ final class DockObserver extends SystemService {
                     + mReportedDockState);
             final int previousDockState = mPreviousDockState;
             mPreviousDockState = mReportedDockState;
-
             // Skip the dock intent if not yet provisioned.
             final ContentResolver cr = getContext().getContentResolver();
-            if (Settings.Global.getInt(cr,
-                    Settings.Global.DEVICE_PROVISIONED, 0) == 0) {
+            if (!mDeviceProvisionedObserver.isDeviceProvisioned()) {
                 Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
                 return;
             }
@@ -298,10 +305,16 @@ final class DockObserver extends SystemService {
                     if (soundPath != null) {
                         final Uri soundUri = Uri.parse("file://" + soundPath);
                         if (soundUri != null) {
-                            final Ringtone sfx = RingtoneManager.getRingtone(
-                                    getContext(), soundUri);
+                            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                    .build();
+                            final Ringtone sfx = new Ringtone.Builder(getContext(),
+                                    Ringtone.MEDIA_SOUND, audioAttributes)
+                                    .setUri(soundUri)
+                                    .setPreferBuiltinDevice()
+                                    .build();
                             if (sfx != null) {
-                                sfx.setStreamType(AudioManager.STREAM_SYSTEM);
                                 sfx.play();
                             }
                         }
@@ -416,6 +429,50 @@ final class DockObserver extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    private final class DeviceProvisionedObserver extends ContentObserver {
+        private boolean mRegistered;
+
+        public DeviceProvisionedObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            synchronized (mLock) {
+                updateRegistration();
+                if (isDeviceProvisioned()) {
+                    // Send the dock broadcast if device is docked after provisioning.
+                    updateIfDockedLocked();
+                }
+            }
+        }
+
+        void onSystemReady() {
+            updateRegistration();
+        }
+
+        private void updateRegistration() {
+            boolean register = !isDeviceProvisioned();
+            if (register == mRegistered) {
+                return;
+            }
+            final ContentResolver resolver = getContext().getContentResolver();
+            if (register) {
+                resolver.registerContentObserver(
+                        Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
+                        false, this);
+            } else {
+                resolver.unregisterContentObserver(this);
+            }
+            mRegistered = register;
+        }
+
+        boolean isDeviceProvisioned() {
+            return Settings.Global.getInt(getContext().getContentResolver(),
+                    Settings.Global.DEVICE_PROVISIONED, 0) != 0;
         }
     }
 }

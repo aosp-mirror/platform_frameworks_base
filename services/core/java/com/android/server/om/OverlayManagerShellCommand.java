@@ -16,6 +16,8 @@
 
 package com.android.server.om;
 
+import static com.android.internal.content.om.OverlayConfig.PARTITION_ORDER_FILE_PATH;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -29,14 +31,26 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Binder;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.TypedValue;
+import android.util.Xml;
 
+import com.android.modules.utils.TypedXmlPullParser;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,6 +65,10 @@ import java.util.regex.Pattern;
 final class OverlayManagerShellCommand extends ShellCommand {
     private final Context mContext;
     private final IOverlayManager mInterface;
+    private static final Map<String, Integer> TYPE_MAP = Map.of(
+            "color", TypedValue.TYPE_FIRST_COLOR_INT,
+            "string", TypedValue.TYPE_STRING,
+            "drawable", -1);
 
     OverlayManagerShellCommand(@NonNull final Context ctx, @NonNull final IOverlayManager iom) {
         mContext = ctx;
@@ -79,6 +97,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return runLookup();
                 case "fabricate":
                     return runFabricate();
+                case "partition-order":
+                    return runPartitionOrder();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -126,10 +146,14 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    applying the current configuration and enabled overlays.");
         out.println("    For a more fine-grained alternative, use 'idmap2 lookup'.");
         out.println("  fabricate [--user USER_ID] [--target-name OVERLAYABLE] --target PACKAGE");
-        out.println("            --name NAME PACKAGE:TYPE/NAME ENCODED-TYPE-ID ENCODED-VALUE");
+        out.println("            --name NAME [--file FILE] ");
+        out.println("            PACKAGE:TYPE/NAME ENCODED-TYPE-ID/TYPE-NAME ENCODED-VALUE");
         out.println("    Create an overlay from a single resource. Caller must be root. Example:");
         out.println("      fabricate --target android --name LighterGray \\");
         out.println("                android:color/lighter_gray 0x1c 0xffeeeeee");
+        out.println("  partition-order");
+        out.println("    Print the partition order from overlay config and how this order");
+        out.println("    got established, by default or by " + PARTITION_ORDER_FILE_PATH);
     }
 
     private int runList() throws RemoteException {
@@ -230,6 +254,14 @@ final class OverlayManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runPartitionOrder() throws RemoteException {
+        final PrintWriter out = getOutPrintWriter();
+        out.println("Partition order (low to high priority): " + mInterface.getPartitionOrder());
+        out.println("Established by " + (mInterface.isDefaultPartitionOrder() ? "default"
+                : PARTITION_ORDER_FILE_PATH));
+        return 0;
+    }
+
     private int runFabricate() throws RemoteException {
         final PrintWriter err = getErrPrintWriter();
         if (Binder.getCallingUid() != Process.ROOT_UID) {
@@ -241,7 +273,9 @@ final class OverlayManagerShellCommand extends ShellCommand {
         String targetPackage = "";
         String targetOverlayable = "";
         String name = "";
+        String filename = null;
         String opt;
+        String config = null;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
                 case "--user":
@@ -255,6 +289,12 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     break;
                 case "--name":
                     name = getNextArgRequired();
+                    break;
+                case "--file":
+                    filename = getNextArgRequired();
+                    break;
+                case "--config":
+                    config = getNextArgRequired();
                     break;
                 default:
                     err.println("Error: Unknown option: " + opt);
@@ -271,39 +311,131 @@ final class OverlayManagerShellCommand extends ShellCommand {
             err.println("Error: Missing required arg '--target'");
             return 1;
         }
-
-        final String resourceName = getNextArgRequired();
-        final String typeStr = getNextArgRequired();
-        final int type;
-        if (typeStr.startsWith("0x")) {
-            type = Integer.parseUnsignedInt(typeStr.substring(2), 16);
-        } else {
-            type = Integer.parseUnsignedInt(typeStr);
-        }
-        final String dataStr = getNextArgRequired();
-        final int data;
-        if (dataStr.startsWith("0x")) {
-            data = Integer.parseUnsignedInt(dataStr.substring(2), 16);
-        } else {
-            data = Integer.parseUnsignedInt(dataStr);
-        }
-
-        final PackageManager pm = mContext.getPackageManager();
-        if (pm == null) {
-            err.println("Error: failed to get package manager");
+        if (filename != null && getRemainingArgsCount() > 0) {
+            err.println(
+                    "Error: When passing --file don't pass resource name, type, and value as well");
             return 1;
         }
-
         final String overlayPackageName = "com.android.shell";
-        final FabricatedOverlay overlay = new FabricatedOverlay.Builder(
-                overlayPackageName, name, targetPackage)
-                .setTargetOverlayable(targetOverlayable)
-                .setResourceValue(resourceName, type, data)
-                .build();
+        FabricatedOverlay overlay = new FabricatedOverlay(name, targetPackage);
+        overlay.setTargetOverlayable(targetOverlayable);
+        overlay.setOwningPackage(overlayPackageName);
+        if (filename != null) {
+            int result = addOverlayValuesFromXml(overlay, targetPackage, filename);
+            if (result != 0) {
+                return result;
+            }
+        } else {
+            final String resourceName = getNextArgRequired();
+            final String typeStr = getNextArgRequired();
+            final String strData = String.join(" ", peekRemainingArgs());
+            if (addOverlayValue(overlay, resourceName, typeStr, strData, config) != 0) {
+                return 1;
+            }
+        }
 
         mInterface.commit(new OverlayManagerTransaction.Builder()
-                .registerFabricatedOverlay(overlay)
-                .build());
+                .registerFabricatedOverlay(overlay).build());
+        return 0;
+    }
+
+    private int addOverlayValuesFromXml(
+            FabricatedOverlay overlay, String targetPackage, String filename) {
+        final PrintWriter err = getErrPrintWriter();
+        File file = new File(filename);
+        if (!file.exists()) {
+            err.println("Error: File does not exist");
+            return 1;
+        }
+        if (!file.canRead()) {
+            err.println("Error: File is unreadable");
+            return 1;
+        }
+        try (FileInputStream fis = new FileInputStream(file)) {
+            TypedXmlPullParser parser = Xml.resolvePullParser(fis);
+            int type;
+            while ((type = parser.next()) != XmlPullParser.START_TAG
+                    && type != XmlPullParser.END_DOCUMENT) {
+                continue;
+            }
+            parser.require(XmlPullParser.START_TAG, null, "overlay");
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (type == XmlPullParser.START_TAG) {
+                    String tagName = parser.getName();
+                    if (!tagName.equals("item")) {
+                        err.println(TextUtils.formatSimple("Error: Unexpected tag: %s at line %d",
+                                tagName, parser.getLineNumber()));
+                    } else if (!parser.isEmptyElementTag()) {
+                        err.println("Error: item tag must be empty");
+                        return 1;
+                    } else {
+                        String target = parser.getAttributeValue(null, "target");
+                        if (TextUtils.isEmpty(target)) {
+                            err.println(
+                                    "Error: target name missing at line " + parser.getLineNumber());
+                            return 1;
+                        }
+                        int index = target.indexOf('/');
+                        if (index < 0) {
+                            err.println("Error: target malformed, missing '/' at line "
+                                    + parser.getLineNumber());
+                            return 1;
+                        }
+                        String overlayType = target.substring(0, index);
+                        String value = parser.getAttributeValue(null, "value");
+                        if (TextUtils.isEmpty(value)) {
+                            err.println("Error: value missing at line " + parser.getLineNumber());
+                            return 1;
+                        }
+                        String config = parser.getAttributeValue(null, "config");
+                        if (addOverlayValue(overlay, targetPackage + ':' + target,
+                                  overlayType, value, config) != 0) {
+                            return 1;
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+            return 1;
+        }
+        return 0;
+    }
+
+    private int addOverlayValue(FabricatedOverlay overlay, String resourceName, String typeString,
+                                String valueString, String configuration) {
+        final int type;
+        typeString = typeString.toLowerCase(Locale.getDefault());
+        if (TYPE_MAP.containsKey(typeString)) {
+            type = TYPE_MAP.get(typeString);
+        } else {
+            if (typeString.startsWith("0x")) {
+                type = Integer.parseUnsignedInt(typeString.substring(2), 16);
+            } else {
+                type = Integer.parseUnsignedInt(typeString);
+            }
+        }
+        if (type == TypedValue.TYPE_STRING) {
+            overlay.setResourceValue(resourceName, type, valueString, configuration);
+        } else if (type < 0) {
+            ParcelFileDescriptor pfd =  openFileForSystem(valueString, "r");
+            if (valueString.endsWith(".9.png")) {
+                overlay.setNinePatchResourceValue(resourceName, pfd, configuration);
+            } else {
+                overlay.setResourceValue(resourceName, pfd, configuration);
+            }
+        } else {
+            final int intData;
+            if (valueString.startsWith("0x")) {
+                intData = Integer.parseUnsignedInt(valueString.substring(2), 16);
+            } else {
+                intData = Integer.parseUnsignedInt(valueString);
+            }
+            overlay.setResourceValue(resourceName, type, intData, configuration);
+        }
         return 0;
     }
 

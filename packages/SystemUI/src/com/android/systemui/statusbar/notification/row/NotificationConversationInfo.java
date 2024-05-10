@@ -25,7 +25,7 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_ANYONE;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT;
 
-import static com.android.systemui.animation.Interpolators.FAST_OUT_SLOW_IN;
+import static com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -48,6 +48,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.transition.ChangeBounds;
@@ -64,10 +65,10 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -118,6 +119,8 @@ public class NotificationConversationInfo extends LinearLayout implements
     private NotificationGuts mGutsContainer;
     private OnConversationSettingsClickListener mOnConversationSettingsClickListener;
 
+    private UserManager mUm;
+
     @VisibleForTesting
     boolean mSkipPost = false;
     private int mActualHeight;
@@ -154,8 +157,10 @@ public class NotificationConversationInfo extends LinearLayout implements
         // If the user selected Priority and the previous selection was not priority, show a
         // People Tile add request.
         if (mSelectedAction == ACTION_FAVORITE && getPriority() != mSelectedAction) {
-            mShadeController.animateCollapsePanels();
-            mPeopleSpaceWidgetManager.requestPinAppWidget(mShortcutInfo, new Bundle());
+            mShadeController.animateCollapseShade();
+            if (mUm.isSameProfileGroup(UserHandle.USER_SYSTEM, mSbn.getNormalizedUserId())) {
+                mPeopleSpaceWidgetManager.requestPinAppWidget(mShortcutInfo, new Bundle());
+            }
         }
         mGutsContainer.closeControls(v, /* save= */ true);
     };
@@ -188,6 +193,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     public void bindNotification(
             ShortcutManager shortcutManager,
             PackageManager pm,
+            UserManager um,
             PeopleSpaceWidgetManager peopleSpaceWidgetManager,
             INotificationManager iNotificationManager,
             OnUserInteractionCallback onUserInteractionCallback,
@@ -211,6 +217,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mEntry = entry;
         mSbn = entry.getSbn();
         mPm = pm;
+        mUm = um;
         mAppName = mPackageName;
         mOnSettingsClickListener = onSettingsClick;
         mNotificationChannel = notificationChannel;
@@ -329,10 +336,11 @@ public class NotificationConversationInfo extends LinearLayout implements
         Drawable person =  mIconFactory.getBaseIconDrawable(mShortcutInfo);
         if (person == null) {
             person = mContext.getDrawable(R.drawable.ic_person).mutate();
-            TypedArray ta = mContext.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
-            int colorAccent = ta.getColor(0, 0);
+            TypedArray ta = mContext.obtainStyledAttributes(
+                    new int[]{com.android.internal.R.attr.materialColorPrimary});
+            int colorPrimary = ta.getColor(0, 0);
             ta.recycle();
-            person.setTint(colorAccent);
+            person.setTint(colorPrimary);
         }
         ImageView image = findViewById(R.id.conversation_icon);
         image.setImageDrawable(person);

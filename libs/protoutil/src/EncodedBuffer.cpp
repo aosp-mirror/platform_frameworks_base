@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <unistd.h>
 
 #include <android/util/EncodedBuffer.h>
 #include <android/util/protobuf.h>
@@ -25,7 +26,8 @@
 namespace android {
 namespace util {
 
-const size_t BUFFER_SIZE = 8 * 1024; // 8 KB
+constexpr size_t BUFFER_SIZE = 8 * 1024; // 8 KB
+const size_t kPageSize = getpagesize();
 
 EncodedBuffer::Pointer::Pointer() : Pointer(BUFFER_SIZE)
 {
@@ -92,7 +94,7 @@ EncodedBuffer::EncodedBuffer(size_t chunkSize)
 {
     // Align chunkSize to memory page size
     chunkSize = chunkSize == 0 ? BUFFER_SIZE : chunkSize;
-    mChunkSize = (chunkSize / PAGE_SIZE + ((chunkSize % PAGE_SIZE == 0) ? 0 : 1)) * PAGE_SIZE;
+    mChunkSize = (chunkSize + (kPageSize - 1)) & ~(kPageSize - 1);
     mWp = Pointer(mChunkSize);
     mEp = Pointer(mChunkSize);
 }

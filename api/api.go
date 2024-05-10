@@ -15,7 +15,9 @@
 package api
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/google/blueprint/proptools"
 
@@ -28,8 +30,10 @@ const art = "art.module.public.api"
 const conscrypt = "conscrypt.module.public.api"
 const i18n = "i18n.module.public.api"
 const virtualization = "framework-virtualization"
+const location = "framework-location"
 
 var core_libraries_modules = []string{art, conscrypt, i18n}
+
 // List of modules that are not yet updatable, and hence they can still compile
 // against hidden APIs. These modules are filtered out when building the
 // updatable-framework-module-impl (because updatable-framework-module-impl is
@@ -38,7 +42,7 @@ var core_libraries_modules = []string{art, conscrypt, i18n}
 // APIs.
 // In addition, the modules in this list are allowed to contribute to test APIs
 // stubs.
-var non_updatable_modules = []string{virtualization}
+var non_updatable_modules = []string{virtualization, location}
 
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
@@ -59,6 +63,7 @@ type CombinedApisProperties struct {
 
 type CombinedApis struct {
 	android.ModuleBase
+	android.DefaultableModuleBase
 
 	properties CombinedApisProperties
 }
@@ -69,11 +74,50 @@ func init() {
 
 func registerBuildComponents(ctx android.RegistrationContext) {
 	ctx.RegisterModuleType("combined_apis", combinedApisModuleFactory)
+	ctx.RegisterModuleType("combined_apis_defaults", CombinedApisModuleDefaultsFactory)
 }
 
 var PrepareForCombinedApisTest = android.FixtureRegisterWithContext(registerBuildComponents)
 
+func (a *CombinedApis) apiFingerprintStubDeps() []string {
+	ret := []string{}
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs.system")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.Bootclasspath, "", ".stubs.module_lib")...,
+	)
+	ret = append(
+		ret,
+		transformArray(a.properties.System_server_classpath, "", ".stubs.system_server")...,
+	)
+	return ret
+}
+
+func (a *CombinedApis) DepsMutator(ctx android.BottomUpMutatorContext) {
+	ctx.AddDependency(ctx.Module(), nil, a.apiFingerprintStubDeps()...)
+}
+
 func (a *CombinedApis) GenerateAndroidBuildActions(ctx android.ModuleContext) {
+	ctx.WalkDeps(func(child, parent android.Module) bool {
+		if _, ok := child.(java.AndroidLibraryDependency); ok && child.Name() != "framework-res" {
+			// Stubs of BCP and SSCP libraries should not have any dependencies on apps
+			// This check ensures that we do not run into circular dependencies when UNBUNDLED_BUILD_TARGET_SDK_WITH_API_FINGERPRINT=true
+			ctx.ModuleErrorf(
+				"Module %s is not a valid dependency of the stub library %s\n."+
+					"If this dependency has been added via `libs` of java_sdk_library, please move it to `impl_only_libs`\n",
+				child.Name(), parent.Name())
+			return false // error detected
+		}
+		return true
+	})
+
 }
 
 type genruleProps struct {
@@ -87,16 +131,26 @@ type genruleProps struct {
 }
 
 type libraryProps struct {
-	Name        *string
-	Sdk_version *string
-	Static_libs []string
-	Visibility  []string
+	Name            *string
+	Sdk_version     *string
+	Static_libs     []string
+	Visibility      []string
+	Defaults        []string
+	Is_stubs_module *bool
 }
 
 type fgProps struct {
 	Name       *string
 	Srcs       []string
 	Visibility []string
+}
+
+type defaultsProps struct {
+	Name                *string
+	Api_surface         *string
+	Api_contributions   []string
+	Defaults_visibility []string
+	Previous_api        *string
 }
 
 // Struct to pass parameters for the various merged [current|removed].txt file modules we create.
@@ -115,59 +169,63 @@ type MergedTxtDefinition struct {
 	Scope string
 }
 
-func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
+func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition, stubsTypeSuffix string, doDist bool) {
 	metalavaCmd := "$(location metalava)"
 	// Silence reflection warnings. See b/168689341
 	metalavaCmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
-	metalavaCmd += " --quiet --no-banner --format=v2 "
+	metalavaCmd += " --quiet merge-signatures --format=v2 "
 
 	filename := txt.TxtFilename
 	if txt.Scope != "public" {
 		filename = txt.Scope + "-" + filename
 	}
+	moduleName := ctx.ModuleName() + stubsTypeSuffix + filename
+
 	props := genruleProps{}
-	props.Name = proptools.StringPtr(ctx.ModuleName() + "-" + filename)
+	props.Name = proptools.StringPtr(moduleName)
 	props.Tools = []string{"metalava"}
 	props.Out = []string{filename}
-	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --api $(out)")
+	props.Cmd = proptools.StringPtr(metalavaCmd + "$(in) --out $(out)")
 	props.Srcs = append([]string{txt.BaseTxt}, createSrcs(txt.Modules, txt.ModuleTag)...)
-	props.Dists = []android.Dist{
-		{
-			Targets: []string{"droidcore"},
-			Dir:     proptools.StringPtr("api"),
-			Dest:    proptools.StringPtr(filename),
-		},
-		{
-			Targets: []string{"api_txt", "sdk"},
-			Dir:     proptools.StringPtr("apistubs/android/" + txt.Scope + "/api"),
-			Dest:    proptools.StringPtr(txt.DistFilename),
-		},
+	if doDist {
+		props.Dists = []android.Dist{
+			{
+				Targets: []string{"droidcore"},
+				Dir:     proptools.StringPtr("api"),
+				Dest:    proptools.StringPtr(filename),
+			},
+			{
+				Targets: []string{"api_txt", "sdk"},
+				Dir:     proptools.StringPtr("apistubs/android/" + txt.Scope + "/api"),
+				Dest:    proptools.StringPtr(txt.DistFilename),
+			},
+		}
 	}
 	props.Visibility = []string{"//visibility:public"}
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
 func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, system_server_modules []string) {
-	for _, i := range []struct{
+	for _, i := range []struct {
 		name    string
 		tag     string
 		modules []string
 	}{
 		{
-			name: "all-modules-public-annotations",
-			tag:  "{.public.annotations.zip}",
+			name:    "all-modules-public-annotations",
+			tag:     "{.public.annotations.zip}",
 			modules: modules,
 		}, {
-			name: "all-modules-system-annotations",
-			tag:  "{.system.annotations.zip}",
+			name:    "all-modules-system-annotations",
+			tag:     "{.system.annotations.zip}",
 			modules: modules,
 		}, {
-			name: "all-modules-module-lib-annotations",
-			tag:  "{.module-lib.annotations.zip}",
+			name:    "all-modules-module-lib-annotations",
+			tag:     "{.module-lib.annotations.zip}",
 			modules: modules,
 		}, {
-			name: "all-modules-system-server-annotations",
-			tag:  "{.system-server.annotations.zip}",
+			name:    "all-modules-system-server-annotations",
+			tag:     "{.system-server.annotations.zip}",
 			modules: system_server_modules,
 		},
 	} {
@@ -178,61 +236,23 @@ func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, sys
 	}
 }
 
-func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
-	// For the filtered api versions, we prune all APIs except art module's APIs. because
-	// 1) ART apis are available by default to all modules, while other module-to-module deps are
-	//    explicit and probably receive more scrutiny anyway
-	// 2) The number of ART/libcore APIs is large, so not linting them would create a large gap
-	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
-	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
-	//    difficult to achieve.
-	modules = remove(modules, art)
-
-	for _, i := range []struct{
-		name string
-		out  string
-		in   string
-	}{
-		{
-			// We shouldn't need public-filtered or system-filtered.
-			// public-filtered is currently used to lint things that
-			// use the module sdk or the system server sdk, but those
-			// should be switched over to module-filtered and
-			// system-server-filtered, and then public-filtered can
-			// be removed.
-			name: "api-versions-xml-public-filtered",
-			out:  "api-versions-public-filtered.xml",
-			in:   ":api_versions_public{.api_versions.xml}",
-		}, {
-			name: "api-versions-xml-module-lib-filtered",
-			out:  "api-versions-module-lib-filtered.xml",
-			in:   ":api_versions_module_lib{.api_versions.xml}",
-		}, {
-			name: "api-versions-xml-system-server-filtered",
-			out:  "api-versions-system-server-filtered.xml",
-			in:   ":api_versions_system_server{.api_versions.xml}",
-		},
-	} {
-		props := genruleProps{}
-		props.Name = proptools.StringPtr(i.name)
-		props.Out = []string{i.out}
-		// Note: order matters: first parameter is the full api-versions.xml
-		// after that the stubs files in any order
-		// stubs files are all modules that export API surfaces EXCEPT ART
-		props.Srcs = append([]string{i.in}, createSrcs(modules, ".stubs{.jar}")...)
-		props.Tools = []string{"api_versions_trimmer"}
-		props.Cmd = proptools.StringPtr("$(location api_versions_trimmer) $(out) $(in)")
-		props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
-		ctx.CreateModule(genrule.GenRuleFactory, &props)
-	}
-}
-
 func createMergedPublicStubs(ctx android.LoadHookContext, modules []string) {
 	props := libraryProps{}
 	props.Name = proptools.StringPtr("all-modules-public-stubs")
 	props.Static_libs = transformArray(modules, "", ".stubs")
 	props.Sdk_version = proptools.StringPtr("module_current")
 	props.Visibility = []string{"//frameworks/base"}
+	props.Is_stubs_module = proptools.BoolPtr(true)
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func createMergedPublicExportableStubs(ctx android.LoadHookContext, modules []string) {
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("all-modules-public-stubs-exportable")
+	props.Static_libs = transformArray(modules, "", ".stubs.exportable")
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	props.Is_stubs_module = proptools.BoolPtr(true)
 	ctx.CreateModule(java.LibraryFactory, &props)
 }
 
@@ -245,6 +265,7 @@ func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
 		props.Static_libs = transformArray(updatable_modules, "", ".stubs.system")
 		props.Sdk_version = proptools.StringPtr("module_current")
 		props.Visibility = []string{"//frameworks/base"}
+		props.Is_stubs_module = proptools.BoolPtr(true)
 		ctx.CreateModule(java.LibraryFactory, &props)
 	}
 	// Now merge all-updatable-modules-system-stubs and stubs from non-updatable modules
@@ -256,6 +277,33 @@ func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
 		props.Static_libs = append(props.Static_libs, "all-updatable-modules-system-stubs")
 		props.Sdk_version = proptools.StringPtr("module_current")
 		props.Visibility = []string{"//frameworks/base"}
+		props.Is_stubs_module = proptools.BoolPtr(true)
+		ctx.CreateModule(java.LibraryFactory, &props)
+	}
+}
+
+func createMergedSystemExportableStubs(ctx android.LoadHookContext, modules []string) {
+	// First create the all-updatable-modules-system-stubs
+	{
+		updatable_modules := removeAll(modules, non_updatable_modules)
+		props := libraryProps{}
+		props.Name = proptools.StringPtr("all-updatable-modules-system-stubs-exportable")
+		props.Static_libs = transformArray(updatable_modules, "", ".stubs.exportable.system")
+		props.Sdk_version = proptools.StringPtr("module_current")
+		props.Visibility = []string{"//frameworks/base"}
+		props.Is_stubs_module = proptools.BoolPtr(true)
+		ctx.CreateModule(java.LibraryFactory, &props)
+	}
+	// Now merge all-updatable-modules-system-stubs and stubs from non-updatable modules
+	// into all-modules-system-stubs.
+	{
+		props := libraryProps{}
+		props.Name = proptools.StringPtr("all-modules-system-stubs-exportable")
+		props.Static_libs = transformArray(non_updatable_modules, "", ".stubs.exportable.system")
+		props.Static_libs = append(props.Static_libs, "all-updatable-modules-system-stubs-exportable")
+		props.Sdk_version = proptools.StringPtr("module_current")
+		props.Visibility = []string{"//frameworks/base"}
+		props.Is_stubs_module = proptools.BoolPtr(true)
 		ctx.CreateModule(java.LibraryFactory, &props)
 	}
 }
@@ -266,6 +314,17 @@ func createMergedTestStubsForNonUpdatableModules(ctx android.LoadHookContext) {
 	props.Static_libs = transformArray(non_updatable_modules, "", ".stubs.test")
 	props.Sdk_version = proptools.StringPtr("module_current")
 	props.Visibility = []string{"//frameworks/base"}
+	props.Is_stubs_module = proptools.BoolPtr(true)
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func createMergedTestExportableStubsForNonUpdatableModules(ctx android.LoadHookContext) {
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("all-non-updatable-modules-test-stubs-exportable")
+	props.Static_libs = transformArray(non_updatable_modules, "", ".stubs.exportable.test")
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	props.Is_stubs_module = proptools.BoolPtr(true)
 	ctx.CreateModule(java.LibraryFactory, &props)
 }
 
@@ -299,14 +358,51 @@ func createMergedFrameworkImpl(ctx android.LoadHookContext, modules []string) {
 	}
 }
 
-func createMergedFrameworkModuleLibStubs(ctx android.LoadHookContext, modules []string) {
-	// The user of this module compiles against the "core" SDK, so remove core libraries to avoid dupes.
+func createMergedFrameworkModuleLibExportableStubs(ctx android.LoadHookContext, modules []string) {
+	// The user of this module compiles against the "core" SDK and against non-updatable modules,
+	// so remove to avoid dupes.
 	modules = removeAll(modules, core_libraries_modules)
+	modules = removeAll(modules, non_updatable_modules)
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("framework-updatable-stubs-module_libs_api-exportable")
+	props.Static_libs = transformArray(modules, "", ".stubs.exportable.module_lib")
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	props.Is_stubs_module = proptools.BoolPtr(true)
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func createMergedFrameworkModuleLibStubs(ctx android.LoadHookContext, modules []string) {
+	// The user of this module compiles against the "core" SDK and against non-updatable modules,
+	// so remove to avoid dupes.
+	modules = removeAll(modules, core_libraries_modules)
+	modules = removeAll(modules, non_updatable_modules)
 	props := libraryProps{}
 	props.Name = proptools.StringPtr("framework-updatable-stubs-module_libs_api")
 	props.Static_libs = transformArray(modules, "", ".stubs.module_lib")
 	props.Sdk_version = proptools.StringPtr("module_current")
 	props.Visibility = []string{"//frameworks/base"}
+	props.Is_stubs_module = proptools.BoolPtr(true)
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func createMergedFrameworkSystemServerExportableStubs(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
+	// The user of this module compiles against the "core" SDK and against non-updatable bootclasspathModules,
+	// so remove to avoid dupes.
+	bootclasspathModules := removeAll(bootclasspath, core_libraries_modules)
+	bootclasspathModules = removeAll(bootclasspath, non_updatable_modules)
+	modules := append(
+		// Include all the module-lib APIs from the bootclasspath libraries.
+		transformArray(bootclasspathModules, "", ".stubs.exportable.module_lib"),
+		// Then add all the system-server APIs from the service-* libraries.
+		transformArray(system_server_classpath, "", ".stubs.exportable.system_server")...,
+	)
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("framework-updatable-stubs-system_server_api-exportable")
+	props.Static_libs = modules
+	props.Sdk_version = proptools.StringPtr("system_server_current")
+	props.Visibility = []string{"//frameworks/base"}
+	props.Is_stubs_module = proptools.BoolPtr(true)
 	ctx.CreateModule(java.LibraryFactory, &props)
 }
 
@@ -318,7 +414,7 @@ func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules []str
 	ctx.CreateModule(android.FileGroupFactory, &props)
 }
 
-func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
+func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string, baseTxtModulePrefix, stubsTypeSuffix string, doDist bool) {
 	var textFiles []MergedTxtDefinition
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
@@ -327,7 +423,7 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename:  f,
 			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-" + f,
+			BaseTxt:      ":" + baseTxtModulePrefix + f,
 			Modules:      bootclasspath,
 			ModuleTag:    "{.public" + tagSuffix[i],
 			Scope:        "public",
@@ -335,7 +431,7 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename:  f,
 			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-system-" + f,
+			BaseTxt:      ":" + baseTxtModulePrefix + "system-" + f,
 			Modules:      bootclasspath,
 			ModuleTag:    "{.system" + tagSuffix[i],
 			Scope:        "system",
@@ -343,7 +439,7 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename:  f,
 			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-module-lib-" + f,
+			BaseTxt:      ":" + baseTxtModulePrefix + "module-lib-" + f,
 			Modules:      bootclasspath,
 			ModuleTag:    "{.module-lib" + tagSuffix[i],
 			Scope:        "module-lib",
@@ -351,14 +447,87 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename:  f,
 			DistFilename: distFilename[i],
-			BaseTxt:      ":non-updatable-system-server-" + f,
+			BaseTxt:      ":" + baseTxtModulePrefix + "system-server-" + f,
 			Modules:      system_server_classpath,
 			ModuleTag:    "{.system-server" + tagSuffix[i],
 			Scope:        "system-server",
 		})
 	}
 	for _, txt := range textFiles {
-		createMergedTxt(ctx, txt)
+		createMergedTxt(ctx, txt, stubsTypeSuffix, doDist)
+	}
+}
+
+func createApiContributionDefaults(ctx android.LoadHookContext, modules []string) {
+	defaultsSdkKinds := []android.SdkKind{
+		android.SdkPublic, android.SdkSystem, android.SdkModule,
+	}
+	for _, sdkKind := range defaultsSdkKinds {
+		props := defaultsProps{}
+		props.Name = proptools.StringPtr(
+			sdkKind.DefaultJavaLibraryName() + "_contributions")
+		if sdkKind == android.SdkModule {
+			props.Name = proptools.StringPtr(
+				sdkKind.DefaultJavaLibraryName() + "_contributions_full")
+		}
+		props.Api_surface = proptools.StringPtr(sdkKind.String())
+		apiSuffix := ""
+		if sdkKind != android.SdkPublic {
+			apiSuffix = "." + strings.ReplaceAll(sdkKind.String(), "-", "_")
+		}
+		props.Api_contributions = transformArray(
+			modules, "", fmt.Sprintf(".stubs.source%s.api.contribution", apiSuffix))
+		props.Defaults_visibility = []string{"//visibility:public"}
+		props.Previous_api = proptools.StringPtr(":android.api.public.latest")
+		ctx.CreateModule(java.DefaultsFactory, &props)
+	}
+}
+
+func createFullApiLibraries(ctx android.LoadHookContext) {
+	javaLibraryNames := []string{
+		"android_stubs_current",
+		"android_system_stubs_current",
+		"android_test_stubs_current",
+		"android_test_frameworks_core_stubs_current",
+		"android_module_lib_stubs_current",
+		"android_system_server_stubs_current",
+	}
+
+	for _, libraryName := range javaLibraryNames {
+		props := libraryProps{}
+		props.Name = proptools.StringPtr(libraryName)
+		staticLib := libraryName + ".from-source"
+		if ctx.Config().BuildFromTextStub() {
+			staticLib = libraryName + ".from-text"
+		}
+		props.Static_libs = []string{staticLib}
+		props.Defaults = []string{"android.jar_defaults"}
+		props.Visibility = []string{"//visibility:public"}
+		props.Is_stubs_module = proptools.BoolPtr(true)
+
+		ctx.CreateModule(java.LibraryFactory, &props)
+	}
+}
+
+func createFullExportableApiLibraries(ctx android.LoadHookContext) {
+	javaLibraryNames := []string{
+		"android_stubs_current_exportable",
+		"android_system_stubs_current_exportable",
+		"android_test_stubs_current_exportable",
+		"android_module_lib_stubs_current_exportable",
+		"android_system_server_stubs_current_exportable",
+	}
+
+	for _, libraryName := range javaLibraryNames {
+		props := libraryProps{}
+		props.Name = proptools.StringPtr(libraryName)
+		staticLib := libraryName + ".from-source"
+		props.Static_libs = []string{staticLib}
+		props.Defaults = []string{"android.jar_defaults"}
+		props.Visibility = []string{"//visibility:public"}
+		props.Is_stubs_module = proptools.BoolPtr(true)
+
+		ctx.CreateModule(java.LibraryFactory, &props)
 	}
 }
 
@@ -369,7 +538,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 		bootclasspath = append(bootclasspath, a.properties.Conditional_bootclasspath...)
 		sort.Strings(bootclasspath)
 	}
-	createMergedTxts(ctx, bootclasspath, system_server_classpath)
+	createMergedTxts(ctx, bootclasspath, system_server_classpath, "non-updatable-", "-", false)
+	createMergedTxts(ctx, bootclasspath, system_server_classpath, "non-updatable-exportable-", "-exportable-", true)
 
 	createMergedPublicStubs(ctx, bootclasspath)
 	createMergedSystemStubs(ctx, bootclasspath)
@@ -377,17 +547,28 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedFrameworkModuleLibStubs(ctx, bootclasspath)
 	createMergedFrameworkImpl(ctx, bootclasspath)
 
+	createMergedPublicExportableStubs(ctx, bootclasspath)
+	createMergedSystemExportableStubs(ctx, bootclasspath)
+	createMergedTestExportableStubsForNonUpdatableModules(ctx)
+	createMergedFrameworkModuleLibExportableStubs(ctx, bootclasspath)
+	createMergedFrameworkSystemServerExportableStubs(ctx, bootclasspath, system_server_classpath)
+
 	createMergedAnnotationsFilegroups(ctx, bootclasspath, system_server_classpath)
 
-	createFilteredApiVersions(ctx, bootclasspath)
-
 	createPublicStubsSourceFilegroup(ctx, bootclasspath)
+
+	createApiContributionDefaults(ctx, bootclasspath)
+
+	createFullApiLibraries(ctx)
+
+	createFullExportableApiLibraries(ctx)
 }
 
 func combinedApisModuleFactory() android.Module {
 	module := &CombinedApis{}
 	module.AddProperties(&module.properties)
 	android.InitAndroidModule(module)
+	android.InitDefaultableModule(module)
 	android.AddLoadHook(module, func(ctx android.LoadHookContext) { module.createInternalModules(ctx) })
 	return module
 }
@@ -423,4 +604,17 @@ func remove(s []string, v string) []string {
 		}
 	}
 	return s2
+}
+
+// Defaults
+type CombinedApisModuleDefaults struct {
+	android.ModuleBase
+	android.DefaultsModuleBase
+}
+
+func CombinedApisModuleDefaultsFactory() android.Module {
+	module := &CombinedApisModuleDefaults{}
+	module.AddProperties(&CombinedApisProperties{})
+	android.InitDefaultsModule(module)
+	return module
 }

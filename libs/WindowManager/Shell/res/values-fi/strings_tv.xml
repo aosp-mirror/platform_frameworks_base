@@ -24,7 +24,7 @@
     <string name="pip_move" msgid="158770205886688553">"Siirrä"</string>
     <string name="pip_expand" msgid="1051966011679297308">"Laajenna"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"Tiivistä"</string>
-    <string name="pip_edu_text" msgid="3672999496647508701">" Asetukset: paina "<annotation icon="home_icon">"ALOITUSNÄYTTÖPAINIKETTA"</annotation>" kahdesti"</string>
+    <string name="pip_edu_text" msgid="7930546669915337998">"Asetukset: paina "<annotation icon="home_icon">"ALOITUSNÄYTTÖPAINIKETTA"</annotation>" kahdesti"</string>
     <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Kuva kuvassa ‑valikko."</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Siirrä vasemmalle"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Siirrä oikealle"</string>

@@ -16,47 +16,88 @@
 
 package com.android.systemui.settings
 
+import android.app.IActivityManager
+import android.app.IUserSwitchObserver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.os.Handler
+import android.os.IRemoteCallback
 import android.os.UserHandle
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.TruthJUnit.assume
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.concurrent.Executor
 
+
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(Parameterized::class)
 class UserTrackerImplTest : SysuiTestCase() {
+
+    companion object {
+
+        @JvmStatic
+        @Parameterized.Parameters
+        fun isBackgroundUserTrackerEnabled(): Iterable<Boolean> = listOf(true, false)
+    }
 
     @Mock
     private lateinit var context: Context
+
     @Mock
     private lateinit var userManager: UserManager
+
+    @Mock
+    private lateinit var iActivityManager: IActivityManager
+
+    @Mock
+    private lateinit var userSwitchingReply: IRemoteCallback
+
     @Mock(stubOnly = true)
     private lateinit var dumpManager: DumpManager
+
     @Mock(stubOnly = true)
     private lateinit var handler: Handler
 
+    @Parameterized.Parameter
+    @JvmField
+    var isBackgroundUserTrackerEnabled: Boolean = false
+
+    private val testScope = TestScope()
+    private val testDispatcher = StandardTestDispatcher(testScope.testScheduler)
     private val executor = Executor(Runnable::run)
+    private val featureFlags = FakeFeatureFlagsClassic()
+
     private lateinit var tracker: UserTrackerImpl
 
     @Before
@@ -76,58 +117,79 @@ class UserTrackerImplTest : SysuiTestCase() {
             listOf(info)
         }
 
-        tracker = UserTrackerImpl(context, userManager, dumpManager, handler)
+        featureFlags.set(Flags.USER_TRACKER_BACKGROUND_CALLBACKS, isBackgroundUserTrackerEnabled)
+        tracker =
+                UserTrackerImpl(
+                        context,
+                        { featureFlags },
+                        userManager,
+                        iActivityManager,
+                        dumpManager,
+                        testScope.backgroundScope,
+                        testDispatcher,
+                        handler,
+                )
     }
 
     @Test
-    fun testNotInitialized() {
+    fun testNotInitialized() = testScope.runTest {
         assertThat(tracker.initialized).isFalse()
     }
 
     @Test(expected = IllegalStateException::class)
-    fun testGetUserIdBeforeInitThrowsException() {
+    fun testGetUserIdBeforeInitThrowsException() = testScope.runTest {
         tracker.userId
     }
 
     @Test(expected = IllegalStateException::class)
-    fun testGetUserHandleBeforeInitThrowsException() {
+    fun testGetUserHandleBeforeInitThrowsException() = testScope.runTest {
         tracker.userHandle
     }
 
     @Test(expected = IllegalStateException::class)
-    fun testGetUserContextBeforeInitThrowsException() {
+    fun testGetUserContextBeforeInitThrowsException() = testScope.runTest {
         tracker.userContext
     }
 
     @Test(expected = IllegalStateException::class)
-    fun testGetUserContentResolverBeforeInitThrowsException() {
+    fun testGetUserContentResolverBeforeInitThrowsException() = testScope.runTest {
         tracker.userContentResolver
     }
 
     @Test(expected = IllegalStateException::class)
-    fun testGetUserProfilesBeforeInitThrowsException() {
+    fun testGetUserProfilesBeforeInitThrowsException() = testScope.runTest {
         tracker.userProfiles
     }
 
     @Test
-    fun testInitialize() {
+    fun testInitialize() = testScope.runTest {
         tracker.initialize(0)
 
         assertThat(tracker.initialized).isTrue()
     }
 
     @Test
-    fun testReceiverRegisteredOnInitialize() {
+    fun testReceiverRegisteredOnInitialize() = testScope.runTest {
         tracker.initialize(0)
 
         val captor = ArgumentCaptor.forClass(IntentFilter::class.java)
 
-        verify(context).registerReceiverForAllUsers(
-                eq(tracker), capture(captor), isNull(), eq(handler))
+        verify(context)
+                .registerReceiverForAllUsers(eq(tracker), capture(captor), isNull(), eq(handler))
+        with(captor.value) {
+            assertThat(countActions()).isEqualTo(7)
+            assertThat(hasAction(Intent.ACTION_LOCALE_CHANGED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_USER_INFO_CHANGED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_ADDED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_REMOVED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)).isTrue()
+        }
     }
 
     @Test
-    fun testInitialValuesSet() {
+    fun testInitialValuesSet() = testScope.runTest {
         val testID = 4
         tracker.initialize(testID)
 
@@ -144,12 +206,16 @@ class UserTrackerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testUserSwitch() {
+    fun testUserSwitch() = testScope.runTest {
         tracker.initialize(0)
         val newID = 5
 
-        val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, newID)
-        tracker.onReceive(context, intent)
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onBeforeUserSwitching(newID)
+        captor.value.onUserSwitching(newID, userSwitchingReply)
+        runCurrent()
+        verify(userSwitchingReply).sendResult(any())
 
         verify(userManager).getProfiles(newID)
 
@@ -164,7 +230,7 @@ class UserTrackerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testManagedProfileAvailable() {
+    fun testManagedProfileAvailable() = testScope.runTest {
         tracker.initialize(0)
         val profileID = tracker.userId + 10
 
@@ -189,7 +255,8 @@ class UserTrackerImplTest : SysuiTestCase() {
         assertThat(tracker.userProfiles.map { it.id }).containsExactly(tracker.userId, profileID)
     }
 
-    fun testManagedProfileUnavailable() {
+    @Test
+    fun testManagedProfileUnavailable() = testScope.runTest {
         tracker.initialize(0)
         val profileID = tracker.userId + 10
 
@@ -214,7 +281,8 @@ class UserTrackerImplTest : SysuiTestCase() {
         assertThat(tracker.userProfiles.map { it.id }).containsExactly(tracker.userId, profileID)
     }
 
-    fun testManagedProfileStartedAndRemoved() {
+    @Test
+    fun testManagedProfileStartedAndRemoved() = testScope.runTest {
         tracker.initialize(0)
         val profileID = tracker.userId + 10
 
@@ -251,7 +319,7 @@ class UserTrackerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCallbackNotCalledOnAdd() {
+    fun testCallbackNotCalledOnAdd() = testScope.runTest {
         tracker.initialize(0)
         val callback = TestCallback()
 
@@ -262,15 +330,71 @@ class UserTrackerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCallbackCalledOnUserChanged() {
+    fun testCallbackCalledOnUserChanging() = testScope.runTest {
         tracker.initialize(0)
         val callback = TestCallback()
         tracker.addCallback(callback, executor)
 
         val newID = 5
 
-        val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, newID)
-        tracker.onReceive(context, intent)
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onBeforeUserSwitching(newID)
+        captor.value.onUserSwitching(newID, userSwitchingReply)
+        runCurrent()
+
+        verify(userSwitchingReply).sendResult(any())
+        assertThat(callback.calledOnUserChanging).isEqualTo(1)
+        assertThat(callback.lastUser).isEqualTo(newID)
+        assertThat(callback.lastUserContext?.userId).isEqualTo(newID)
+    }
+
+    @Test
+    fun testAsyncCallbackWaitsUserToChange() = testScope.runTest {
+        // Skip this test for CountDownLatch variation. The problem is that there would be a
+        // deadlock if the callbacks processing runs on the same thread as the callback (which
+        // is blocked by the latch). Before the change it works because the callbacks are
+        // processed on a binder thread which is always distinct.
+        // This is the issue that this feature addresses.
+        assume().that(isBackgroundUserTrackerEnabled).isTrue()
+
+        tracker.initialize(0)
+        val callback = TestCallback()
+        val callbackExecutor = FakeExecutor(FakeSystemClock())
+        tracker.addCallback(callback, callbackExecutor)
+
+        val newID = 5
+
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onBeforeUserSwitching(newID)
+        captor.value.onUserSwitching(newID, userSwitchingReply)
+
+        assertThat(callback.calledOnUserChanging).isEqualTo(0)
+        verify(userSwitchingReply, never()).sendResult(any())
+
+        FakeExecutor.exhaustExecutors(callbackExecutor)
+        runCurrent()
+        FakeExecutor.exhaustExecutors(callbackExecutor)
+        runCurrent()
+
+        assertThat(callback.calledOnUserChanging).isEqualTo(1)
+        verify(userSwitchingReply).sendResult(any())
+    }
+
+    @Test
+    fun testCallbackCalledOnUserChanged() = testScope.runTest {
+        tracker.initialize(0)
+        val callback = TestCallback()
+        tracker.addCallback(callback, executor)
+
+        val newID = 5
+
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onBeforeUserSwitching(newID)
+        captor.value.onUserSwitchComplete(newID)
+        runCurrent()
 
         assertThat(callback.calledOnUserChanged).isEqualTo(1)
         assertThat(callback.lastUser).isEqualTo(newID)
@@ -280,7 +404,7 @@ class UserTrackerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCallbackCalledOnProfileChanged() {
+    fun testCallbackCalledOnUserInfoChanged() = testScope.runTest {
         tracker.initialize(0)
         val callback = TestCallback()
         tracker.addCallback(callback, executor)
@@ -300,7 +424,7 @@ class UserTrackerImplTest : SysuiTestCase() {
             listOf(info, infoProfile)
         }
 
-        val intent = Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
+        val intent = Intent(Intent.ACTION_USER_INFO_CHANGED)
                 .putExtra(Intent.EXTRA_USER, UserHandle.of(profileID))
 
         tracker.onReceive(context, intent)
@@ -311,7 +435,7 @@ class UserTrackerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCallbackRemoved() {
+    fun testCallbackRemoved() = testScope.runTest {
         tracker.initialize(0)
         val newID = 5
         val profileID = newID + 10
@@ -320,24 +444,36 @@ class UserTrackerImplTest : SysuiTestCase() {
         tracker.addCallback(callback, executor)
         tracker.removeCallback(callback)
 
-        val intent = Intent(Intent.ACTION_USER_SWITCHED).putExtra(Intent.EXTRA_USER_HANDLE, 5)
-        tracker.onReceive(context, intent)
+        val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+        verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+        captor.value.onUserSwitching(newID, userSwitchingReply)
+        runCurrent()
+        verify(userSwitchingReply).sendResult(any())
+        captor.value.onUserSwitchComplete(newID)
 
         val intentProfiles = Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
                 .putExtra(Intent.EXTRA_USER, UserHandle.of(profileID))
 
         tracker.onReceive(context, intentProfiles)
 
+        assertThat(callback.calledOnUserChanging).isEqualTo(0)
         assertThat(callback.calledOnUserChanged).isEqualTo(0)
         assertThat(callback.calledOnProfilesChanged).isEqualTo(0)
     }
 
     private class TestCallback : UserTracker.Callback {
+        var calledOnUserChanging = 0
         var calledOnUserChanged = 0
         var calledOnProfilesChanged = 0
         var lastUser: Int? = null
         var lastUserContext: Context? = null
         var lastUserProfiles = emptyList<UserInfo>()
+
+        override fun onUserChanging(newUser: Int, userContext: Context) {
+            calledOnUserChanging++
+            lastUser = newUser
+            lastUserContext = userContext
+        }
 
         override fun onUserChanged(newUser: Int, userContext: Context) {
             calledOnUserChanged++

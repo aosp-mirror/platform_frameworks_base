@@ -16,9 +16,11 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.provider.Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT;
 
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
+import static com.android.systemui.wallet.util.WalletCardUtilsKt.getPaymentCards;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -40,7 +42,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -49,6 +51,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -61,6 +64,8 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Quick access wallet **/
 public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
+
+    public static final String TILE_SPEC = "wallet";
 
     private static final String TAG = "QuickAccessWalletTile";
     private static final String FEATURE_CHROME_OS = "org.chromium.arc";
@@ -81,6 +86,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
     @Inject
     public QuickAccessWalletTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -92,7 +98,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
             PackageManager packageManager,
             SecureSettings secureSettings,
             QuickAccessWalletController quickAccessWalletController) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = quickAccessWalletController;
         mKeyguardStateController = keyguardStateController;
@@ -205,7 +211,7 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
         public void onWalletCardsRetrieved(@NonNull GetWalletCardsResponse response) {
             Log.i(TAG, "Successfully retrieved wallet cards.");
             mIsWalletUpdating = false;
-            List<WalletCard> cards = response.getWalletCards();
+            List<WalletCard> cards = getPaymentCards(response.getWalletCards());
             if (cards.isEmpty()) {
                 Log.d(TAG, "No wallet cards exist.");
                 mCardViewDrawable = null;
@@ -221,7 +227,12 @@ public class QuickAccessWalletTile extends QSTileImpl<QSTile.State> {
                 return;
             }
             mSelectedCard = cards.get(selectedIndex);
-            mCardViewDrawable = mSelectedCard.getCardImage().loadDrawable(mContext);
+            android.graphics.drawable.Icon cardImageIcon = mSelectedCard.getCardImage();
+            if (cardImageIcon.getType() == TYPE_URI) {
+                mCardViewDrawable = null;
+            } else {
+                mCardViewDrawable = mSelectedCard.getCardImage().loadDrawable(mContext);
+            }
             refreshState();
         }
 

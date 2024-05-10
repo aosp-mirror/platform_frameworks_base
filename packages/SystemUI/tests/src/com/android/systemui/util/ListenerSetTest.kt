@@ -16,43 +16,128 @@
 
 package com.android.systemui.util
 
-import android.test.suitebuilder.annotation.SmallTest
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class ListenerSetTest : SysuiTestCase() {
+open class ListenerSetTest : SysuiTestCase() {
 
-    var runnableSet: ListenerSet<Runnable> = ListenerSet()
+    private val runnableSet: IListenerSet<Runnable> = makeRunnableListenerSet()
 
-    @Before
-    fun setup() {
-        runnableSet = ListenerSet()
-    }
+    open fun makeRunnableListenerSet(): IListenerSet<Runnable> = ListenerSet()
 
     @Test
     fun addIfAbsent_doesNotDoubleAdd() {
         // setup & preconditions
         val runnable1 = Runnable { }
         val runnable2 = Runnable { }
-        assertThat(runnableSet.toList()).isEmpty()
+        assertThat(runnableSet).isEmpty()
 
         // Test that an element can be added
         assertThat(runnableSet.addIfAbsent(runnable1)).isTrue()
-        assertThat(runnableSet.toList()).containsExactly(runnable1)
+        assertThat(runnableSet).containsExactly(runnable1)
 
         // Test that a second element can be added
         assertThat(runnableSet.addIfAbsent(runnable2)).isTrue()
-        assertThat(runnableSet.toList()).containsExactly(runnable1, runnable2)
+        assertThat(runnableSet).containsExactly(runnable1, runnable2)
 
         // Test that re-adding the first element does nothing and returns false
         assertThat(runnableSet.addIfAbsent(runnable1)).isFalse()
-        assertThat(runnableSet.toList()).containsExactly(runnable1, runnable2)
+        assertThat(runnableSet).containsExactly(runnable1, runnable2)
+    }
+
+    @Test
+    fun isEmpty_changes() {
+        val runnable = Runnable { }
+        assertThat(runnableSet).isEmpty()
+        assertThat(runnableSet.isEmpty()).isTrue()
+        assertThat(runnableSet.isNotEmpty()).isFalse()
+
+        assertThat(runnableSet.addIfAbsent(runnable)).isTrue()
+        assertThat(runnableSet).isNotEmpty()
+        assertThat(runnableSet.isEmpty()).isFalse()
+        assertThat(runnableSet.isNotEmpty()).isTrue()
+
+        assertThat(runnableSet.remove(runnable)).isTrue()
+        assertThat(runnableSet).isEmpty()
+        assertThat(runnableSet.isEmpty()).isTrue()
+        assertThat(runnableSet.isNotEmpty()).isFalse()
+    }
+
+    @Test
+    fun size_changes() {
+        assertThat(runnableSet).isEmpty()
+        assertThat(runnableSet.size).isEqualTo(0)
+
+        assertThat(runnableSet.addIfAbsent(Runnable { })).isTrue()
+        assertThat(runnableSet.size).isEqualTo(1)
+
+        assertThat(runnableSet.addIfAbsent(Runnable { })).isTrue()
+        assertThat(runnableSet.size).isEqualTo(2)
+    }
+
+    @Test
+    fun contains_worksAsExpected() {
+        val runnable1 = Runnable { }
+        val runnable2 = Runnable { }
+        assertThat(runnableSet).isEmpty()
+        assertThat(runnable1 in runnableSet).isFalse()
+        assertThat(runnable2 in runnableSet).isFalse()
+        assertThat(runnableSet).doesNotContain(runnable1)
+        assertThat(runnableSet).doesNotContain(runnable2)
+
+        assertThat(runnableSet.addIfAbsent(runnable1)).isTrue()
+        assertThat(runnable1 in runnableSet).isTrue()
+        assertThat(runnable2 in runnableSet).isFalse()
+        assertThat(runnableSet).contains(runnable1)
+        assertThat(runnableSet).doesNotContain(runnable2)
+
+        assertThat(runnableSet.addIfAbsent(runnable2)).isTrue()
+        assertThat(runnable1 in runnableSet).isTrue()
+        assertThat(runnable2 in runnableSet).isTrue()
+        assertThat(runnableSet).contains(runnable1)
+        assertThat(runnableSet).contains(runnable2)
+
+        assertThat(runnableSet.remove(runnable1)).isTrue()
+        assertThat(runnable1 in runnableSet).isFalse()
+        assertThat(runnable2 in runnableSet).isTrue()
+        assertThat(runnableSet).doesNotContain(runnable1)
+        assertThat(runnableSet).contains(runnable2)
+    }
+
+    @Test
+    fun containsAll_worksAsExpected() {
+        val runnable1 = Runnable { }
+        val runnable2 = Runnable { }
+
+        assertThat(runnableSet).isEmpty()
+        assertThat(runnableSet.containsAll(listOf())).isTrue()
+        assertThat(runnableSet.containsAll(listOf(runnable1))).isFalse()
+        assertThat(runnableSet.containsAll(listOf(runnable2))).isFalse()
+        assertThat(runnableSet.containsAll(listOf(runnable1, runnable2))).isFalse()
+
+        assertThat(runnableSet.addIfAbsent(runnable1)).isTrue()
+        assertThat(runnableSet.containsAll(listOf())).isTrue()
+        assertThat(runnableSet.containsAll(listOf(runnable1))).isTrue()
+        assertThat(runnableSet.containsAll(listOf(runnable2))).isFalse()
+        assertThat(runnableSet.containsAll(listOf(runnable1, runnable2))).isFalse()
+
+        assertThat(runnableSet.addIfAbsent(runnable2)).isTrue()
+        assertThat(runnableSet.containsAll(listOf())).isTrue()
+        assertThat(runnableSet.containsAll(listOf(runnable1))).isTrue()
+        assertThat(runnableSet.containsAll(listOf(runnable2))).isTrue()
+        assertThat(runnableSet.containsAll(listOf(runnable1, runnable2))).isTrue()
+
+        assertThat(runnableSet.remove(runnable1)).isTrue()
+        assertThat(runnableSet.containsAll(listOf())).isTrue()
+        assertThat(runnableSet.containsAll(listOf(runnable1))).isFalse()
+        assertThat(runnableSet.containsAll(listOf(runnable2))).isTrue()
+        assertThat(runnableSet.containsAll(listOf(runnable1, runnable2))).isFalse()
     }
 
     @Test
@@ -60,22 +145,22 @@ class ListenerSetTest : SysuiTestCase() {
         // setup and preconditions
         val runnable1 = Runnable { }
         val runnable2 = Runnable { }
-        assertThat(runnableSet.toList()).isEmpty()
+        assertThat(runnableSet).isEmpty()
         runnableSet.addIfAbsent(runnable1)
         runnableSet.addIfAbsent(runnable2)
-        assertThat(runnableSet.toList()).containsExactly(runnable1, runnable2)
+        assertThat(runnableSet).containsExactly(runnable1, runnable2)
 
         // Test that removing the first runnable only removes that one runnable
         assertThat(runnableSet.remove(runnable1)).isTrue()
-        assertThat(runnableSet.toList()).containsExactly(runnable2)
+        assertThat(runnableSet).containsExactly(runnable2)
 
         // Test that removing a non-present runnable does not error
         assertThat(runnableSet.remove(runnable1)).isFalse()
-        assertThat(runnableSet.toList()).containsExactly(runnable2)
+        assertThat(runnableSet).containsExactly(runnable2)
 
         // Test that removing the other runnable succeeds
         assertThat(runnableSet.remove(runnable2)).isTrue()
-        assertThat(runnableSet.toList()).isEmpty()
+        assertThat(runnableSet).isEmpty()
     }
 
     @Test
@@ -92,17 +177,17 @@ class ListenerSetTest : SysuiTestCase() {
         val runnable2 = Runnable {
             runnablesCalled.add(2)
         }
-        assertThat(runnableSet.toList()).isEmpty()
+        assertThat(runnableSet).isEmpty()
         runnableSet.addIfAbsent(runnable1)
         runnableSet.addIfAbsent(runnable2)
-        assertThat(runnableSet.toList()).containsExactly(runnable1, runnable2)
+        assertThat(runnableSet).containsExactly(runnable1, runnable2)
 
         // Test that both runnables are called and 1 was removed
         for (runnable in runnableSet) {
             runnable.run()
         }
         assertThat(runnablesCalled).containsExactly(1, 2)
-        assertThat(runnableSet.toList()).containsExactly(runnable2)
+        assertThat(runnableSet).containsExactly(runnable2)
     }
 
     @Test
@@ -120,16 +205,16 @@ class ListenerSetTest : SysuiTestCase() {
         val runnable2 = Runnable {
             runnablesCalled.add(2)
         }
-        assertThat(runnableSet.toList()).isEmpty()
+        assertThat(runnableSet).isEmpty()
         runnableSet.addIfAbsent(runnable1)
         runnableSet.addIfAbsent(runnable2)
-        assertThat(runnableSet.toList()).containsExactly(runnable1, runnable2)
+        assertThat(runnableSet).containsExactly(runnable1, runnable2)
 
         // Test that both original runnables are called and 99 was added but not called
         for (runnable in runnableSet) {
             runnable.run()
         }
         assertThat(runnablesCalled).containsExactly(1, 2)
-        assertThat(runnableSet.toList()).containsExactly(runnable1, runnable2, runnable99)
+        assertThat(runnableSet).containsExactly(runnable1, runnable2, runnable99)
     }
 }

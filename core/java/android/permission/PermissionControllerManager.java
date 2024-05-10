@@ -40,6 +40,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Process;
@@ -81,8 +82,8 @@ import java.util.function.IntConsumer;
 public final class PermissionControllerManager {
     private static final String TAG = PermissionControllerManager.class.getSimpleName();
 
-    private static final long REQUEST_TIMEOUT_MILLIS = 60000;
-    private static final long UNBIND_TIMEOUT_MILLIS = 10000;
+    private static final long REQUEST_TIMEOUT_MILLIS = 60000L * Build.HW_TIMEOUT_MULTIPLIER;
+    private static final long UNBIND_TIMEOUT_MILLIS = 10000L * Build.HW_TIMEOUT_MULTIPLIER;
     private static final int CHUNK_SIZE = 4 * 1024;
 
     private static final Object sLock = new Object();
@@ -701,6 +702,8 @@ public final class PermissionControllerManager {
         }, executor);
     }
 
+    // TODO(b/272129940): Remove this API and device profile role description when we drop T
+    //  support.
     /**
      * Gets the description of the privileges associated with the given device profiles
      *
@@ -708,8 +711,11 @@ public final class PermissionControllerManager {
      * @param executor Executor on which to invoke the callback
      * @param callback Callback to receive the result
      *
+     * @deprecated Device profile privilege descriptions have been bundled in CDM APK since T.
+     *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void getPrivilegesDescriptionStringForProfile(
             @NonNull String profileName,
@@ -758,13 +764,14 @@ public final class PermissionControllerManager {
      * inactive.
      *
      * @param packageName The package which became inactive
-     *
+     * @param deviceId The device ID refers either the primary device i.e. the phone or
+     *                 a virtual device. See {@link Context#DEVICE_ID_DEFAULT}
      * @hide
      */
     @RequiresPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
-    public void notifyOneTimePermissionSessionTimeout(@NonNull String packageName) {
-        mRemoteService.run(
-                service -> service.notifyOneTimePermissionSessionTimeout(packageName));
+    public void notifyOneTimePermissionSessionTimeout(@NonNull String packageName, int deviceId) {
+        mRemoteService.run(service -> service.notifyOneTimePermissionSessionTimeout(
+                packageName, deviceId));
     }
 
     /**
@@ -924,12 +931,14 @@ public final class PermissionControllerManager {
             @NonNull List<String> permissions) {
         mRemoteService.postAsync(service -> {
             AndroidFuture<Void> callback = new AndroidFuture<>();
-            service.revokeSelfPermissionsOnKill(packageName, permissions, callback);
+            service.revokeSelfPermissionsOnKill(packageName, permissions, mContext.getDeviceId(),
+                    callback);
             return callback;
         }).whenComplete((result, err) -> {
             if (err != null) {
                 Log.e(TAG, "Failed to self revoke " + String.join(",", permissions)
-                        + " for package " + packageName, err);
+                        + " for package " + packageName + ", and device " + mContext.getDeviceId(),
+                        err);
             }
         });
     }

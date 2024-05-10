@@ -13,13 +13,22 @@ android_test {
     libs: [
         "android.test.runner",
         "android.test.base",
+        "android.test.mock",
     ],
     static_libs: [
-        "mockito-target-minus-junit4",
+        "mockito-target-inline-minus-junit4",
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "android-ex-camera2",
-        "testng"
+        "android.media.playback.flags-aconfig-java",
+        "flag-junit",
+        "testables",
+        "testng",
+        "truth",
+    ],
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
     ],
     platform_apis: true,
 }

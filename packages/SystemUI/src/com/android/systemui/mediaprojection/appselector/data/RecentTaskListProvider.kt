@@ -16,19 +16,19 @@
 
 package com.android.systemui.mediaprojection.appselector.data
 
-import android.app.ActivityManager
 import android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.recents.RecentTasks
 import com.android.wm.shell.util.GroupedRecentTaskInfo
 import java.util.Optional
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Executor
 
 interface RecentTaskListProvider {
     /** Loads recent tasks, the returned task list is from the most-recent to least-recent order */
@@ -40,24 +40,32 @@ class ShellRecentTaskListProvider
 constructor(
     @Background private val coroutineDispatcher: CoroutineDispatcher,
     @Background private val backgroundExecutor: Executor,
-    private val recentTasks: Optional<RecentTasks>
+    private val recentTasks: Optional<RecentTasks>,
+    private val userTracker: UserTracker
 ) : RecentTaskListProvider {
 
     private val recents by lazy { recentTasks.getOrNull() }
 
     override suspend fun loadRecentTasks(): List<RecentTask> =
         withContext(coroutineDispatcher) {
-            val rawRecentTasks: List<GroupedRecentTaskInfo> = recents?.getTasks() ?: emptyList()
-
-            rawRecentTasks
+            val groupedTasks: List<GroupedRecentTaskInfo> = recents?.getTasks() ?: emptyList()
+            // Note: the returned task list is from the most-recent to least-recent order.
+            // The last foreground task is at index 1, because at index 0 will be our app selector.
+            val foregroundGroup = groupedTasks.elementAtOrNull(1)
+            val foregroundTaskId1 = foregroundGroup?.taskInfo1?.taskId
+            val foregroundTaskId2 = foregroundGroup?.taskInfo2?.taskId
+            val foregroundTaskIds = listOfNotNull(foregroundTaskId1, foregroundTaskId2)
+            groupedTasks
                 .flatMap { listOfNotNull(it.taskInfo1, it.taskInfo2) }
                 .map {
                     RecentTask(
                         it.taskId,
+                        it.displayId,
                         it.userId,
                         it.topActivity,
                         it.baseIntent?.component,
-                        it.taskDescription?.backgroundColor
+                        it.taskDescription?.backgroundColor,
+                        isForegroundTask = it.taskId in foregroundTaskIds
                     )
                 }
         }
@@ -67,7 +75,7 @@ constructor(
             getRecentTasks(
                 Integer.MAX_VALUE,
                 RECENT_IGNORE_UNAVAILABLE,
-                ActivityManager.getCurrentUser(),
+                userTracker.userId,
                 backgroundExecutor
             ) { tasks ->
                 continuation.resume(tasks)

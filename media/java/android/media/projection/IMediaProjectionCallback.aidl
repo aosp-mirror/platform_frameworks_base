@@ -19,4 +19,6 @@ package android.media.projection;
 /** {@hide} */
 oneway interface IMediaProjectionCallback {
     void onStop();
+    void onCapturedContentResize(int width, int height);
+    void onCapturedContentVisibilityChanged(boolean isVisible);
 }

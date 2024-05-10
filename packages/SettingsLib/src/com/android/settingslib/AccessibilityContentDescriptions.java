@@ -22,8 +22,11 @@ package com.android.settingslib;
 public class AccessibilityContentDescriptions {
 
     private AccessibilityContentDescriptions() {}
+
+    public static final int PHONE_SIGNAL_STRENGTH_NONE = R.string.accessibility_no_phone;
+
     public static final int[] PHONE_SIGNAL_STRENGTH = {
-        R.string.accessibility_no_phone,
+        PHONE_SIGNAL_STRENGTH_NONE,
         R.string.accessibility_phone_one_bar,
         R.string.accessibility_phone_two_bars,
         R.string.accessibility_phone_three_bars,
@@ -47,6 +50,7 @@ public class AccessibilityContentDescriptions {
     };
 
     public static final int WIFI_NO_CONNECTION = R.string.accessibility_no_wifi;
+    public static final int WIFI_OTHER_DEVICE_CONNECTION = R.string.accessibility_wifi_other_device;
 
     public static final int NO_CALLING = R.string.accessibility_no_calling;
 

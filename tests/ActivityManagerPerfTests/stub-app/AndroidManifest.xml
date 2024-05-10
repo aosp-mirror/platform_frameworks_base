@@ -19,6 +19,12 @@
      package="com.android.stubs.am">
 
     <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
+    <queries>
+        <intent>
+            <action android:name="com.android.stubs.am.ACTION_BROADCAST_TEST"/>
+        </intent>
+    </queries>
+
     <application android:label="Android TestCase">
         <provider android:authorities="@string/authority"
              android:name=".TestContentProvider"

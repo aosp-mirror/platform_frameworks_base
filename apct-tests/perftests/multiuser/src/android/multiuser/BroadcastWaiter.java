@@ -23,8 +23,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.internal.util.FunctionalUtils;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -42,7 +45,6 @@ public class BroadcastWaiter implements Closeable {
     private final int mTimeoutInSecond;
     private final Set<String> mActions;
 
-    private final Set<String> mActionReceivedForUser = new HashSet<>();
     private final List<BroadcastReceiver> mBroadcastReceivers = new ArrayList<>();
 
     private final Map<String, Semaphore> mSemaphoresMap = new ConcurrentHashMap<>();
@@ -72,11 +74,11 @@ public class BroadcastWaiter implements Closeable {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (action.equals(intent.getAction())) {
-                    final int userId = getSendingUserId();
+                    final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                            getSendingUserId());
                     final String data = intent.getDataString();
                     Log.d(mTag, "Received " + action + " for user " + userId
                             + (!TextUtils.isEmpty(data) ? " with " + data : ""));
-                    mActionReceivedForUser.add(action + userId);
                     getSemaphore(action, userId).release();
                 }
             }
@@ -91,11 +93,7 @@ public class BroadcastWaiter implements Closeable {
         mBroadcastReceivers.forEach(mContext::unregisterReceiver);
     }
 
-    public boolean hasActionBeenReceivedForUser(String action, int userId) {
-        return mActionReceivedForUser.contains(action + userId);
-    }
-
-    public boolean waitActionForUser(String action, int userId) {
+    private boolean waitActionForUser(String action, int userId) {
         Log.d(mTag, "#waitActionForUser(action: " + action + ", userId: " + userId + ")");
 
         if (!mActions.contains(action)) {
@@ -103,20 +101,36 @@ public class BroadcastWaiter implements Closeable {
             return false;
         }
 
+        final long startTime = SystemClock.elapsedRealtime();
         try {
-            if (!getSemaphore(action, userId).tryAcquire(1, mTimeoutInSecond, SECONDS)) {
-                Log.e(mTag, action + " broadcast wasn't received for user " + userId);
+            final boolean doneBeforeTimeout = getSemaphore(action, userId)
+                    .tryAcquire(1, mTimeoutInSecond, SECONDS);
+            if (!doneBeforeTimeout) {
+                Log.e(mTag, action + " broadcast wasn't received for user " + userId
+                        + " in " + mTimeoutInSecond + " seconds");
                 return false;
             }
         } catch (InterruptedException e) {
             Log.e(mTag, "Interrupted while waiting " + action + " for user " + userId);
             return false;
         }
+        final long elapsedTime = SystemClock.elapsedRealtime() - startTime;
+        Log.d(mTag, action + " broadcast received for user " + userId
+                + " in " + elapsedTime + " ms");
         return true;
     }
 
-    public boolean waitActionForUserIfNotReceivedYet(String action, int userId) {
-        return hasActionBeenReceivedForUser(action, userId)
-                || waitActionForUser(action, userId);
+    public String runThenWaitForBroadcasts(int userId, FunctionalUtils.ThrowingRunnable runnable,
+            String... actions) {
+        for (String action : actions) {
+            getSemaphore(action, userId).drainPermits();
+        }
+        runnable.run();
+        for (String action : actions) {
+            if (!waitActionForUser(action, userId)) {
+                return action;
+            }
+        }
+        return null;
     }
 }

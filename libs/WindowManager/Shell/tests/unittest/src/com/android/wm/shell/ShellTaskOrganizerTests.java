@@ -16,13 +16,13 @@
 
 package com.android.wm.shell;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+import static android.app.AppCompatTaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -34,8 +34,6 @@ import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIO
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
@@ -44,11 +42,8 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.TaskInfo;
-import android.app.WindowConfiguration;
 import android.content.LocusId;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
@@ -61,8 +56,6 @@ import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
 import android.window.WindowContainerToken;
-import android.window.WindowContainerTransaction;
-import android.window.WindowContainerTransaction.Change;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -366,7 +359,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     public void testOnSizeCompatActivityChanged() {
         final RunningTaskInfo taskInfo1 = createTaskInfo(12, WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.topActivityInSizeCompat = false;
+        taskInfo1.appCompatTaskInfo.topActivityInSizeCompat = false;
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         mOrganizer.onTaskAppeared(taskInfo1, null);
@@ -379,7 +372,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.topActivityInSizeCompat = true;
+        taskInfo2.appCompatTaskInfo.topActivityInSizeCompat = true;
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verify(mCompatUI).onCompatInfoChanged(taskInfo2, taskListener);
@@ -389,7 +382,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.topActivityInSizeCompat = true;
+        taskInfo3.appCompatTaskInfo.topActivityInSizeCompat = true;
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
         verify(mCompatUI).onCompatInfoChanged(taskInfo3, null /* taskListener */);
@@ -403,7 +396,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     public void testOnEligibleForLetterboxEducationActivityChanged() {
         final RunningTaskInfo taskInfo1 = createTaskInfo(12, WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.topActivityEligibleForLetterboxEducation = false;
+        taskInfo1.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = false;
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         mOrganizer.onTaskAppeared(taskInfo1, null);
@@ -418,7 +411,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, WINDOWING_MODE_FULLSCREEN);
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.topActivityEligibleForLetterboxEducation = true;
+        taskInfo2.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = true;
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verify(mCompatUI).onCompatInfoChanged(taskInfo2, taskListener);
@@ -428,7 +421,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, WINDOWING_MODE_FULLSCREEN);
         taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.topActivityEligibleForLetterboxEducation = true;
+        taskInfo3.appCompatTaskInfo.topActivityEligibleForLetterboxEducation = true;
         taskInfo3.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo3);
         verify(mCompatUI).onCompatInfoChanged(taskInfo3, null /* taskListener */);
@@ -442,7 +435,7 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
     public void testOnCameraCompatActivityChanged() {
         final RunningTaskInfo taskInfo1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN);
         taskInfo1.displayId = DEFAULT_DISPLAY;
-        taskInfo1.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
+        taskInfo1.appCompatTaskInfo.cameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
         final TrackingTaskListener taskListener = new TrackingTaskListener();
         mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
         mOrganizer.onTaskAppeared(taskInfo1, null);
@@ -456,7 +449,8 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
-        taskInfo2.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+        taskInfo2.appCompatTaskInfo.cameraCompatControlState =
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
         taskInfo2.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verify(mCompatUI).onCompatInfoChanged(taskInfo2, taskListener);
@@ -467,7 +461,8 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo3 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo3.displayId = taskInfo1.displayId;
-        taskInfo3.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+        taskInfo3.appCompatTaskInfo.cameraCompatControlState =
+                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
         taskInfo3.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo3);
         verify(mCompatUI).onCompatInfoChanged(taskInfo3, taskListener);
@@ -478,8 +473,9 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo4 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo4.displayId = taskInfo1.displayId;
-        taskInfo4.topActivityInSizeCompat = true;
-        taskInfo4.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
+        taskInfo4.appCompatTaskInfo.topActivityInSizeCompat = true;
+        taskInfo4.appCompatTaskInfo.cameraCompatControlState =
+                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
         taskInfo4.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo4);
         verify(mCompatUI).onCompatInfoChanged(taskInfo4, taskListener);
@@ -489,7 +485,8 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo5 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo5.displayId = taskInfo1.displayId;
-        taskInfo5.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
+        taskInfo5.appCompatTaskInfo.cameraCompatControlState =
+                CAMERA_COMPAT_CONTROL_DISMISSED;
         taskInfo5.isVisible = true;
         mOrganizer.onTaskInfoChanged(taskInfo5);
         verify(mCompatUI).onCompatInfoChanged(taskInfo5, null /* taskListener */);
@@ -499,7 +496,8 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         final RunningTaskInfo taskInfo6 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo6.displayId = taskInfo1.displayId;
-        taskInfo6.cameraCompatControlState = TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+        taskInfo6.appCompatTaskInfo.cameraCompatControlState =
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
         taskInfo6.isVisible = false;
         mOrganizer.onTaskInfoChanged(taskInfo6);
         verify(mCompatUI).onCompatInfoChanged(taskInfo6, null /* taskListener */);
@@ -638,130 +636,10 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         verify(mTaskOrganizerController).restartTaskTopActivityProcessIfVisible(task1.token);
     }
 
-    @Test
-    public void testPrepareClearBoundsForStandardTasks() {
-        MockToken token1 = new MockToken();
-        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_UNDEFINED, token1);
-        mOrganizer.onTaskAppeared(task1, null);
-
-        MockToken token2 = new MockToken();
-        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_UNDEFINED, token2);
-        mOrganizer.onTaskAppeared(task2, null);
-
-        MockToken otherDisplayToken = new MockToken();
-        RunningTaskInfo otherDisplayTask = createTaskInfo(3, WINDOWING_MODE_UNDEFINED,
-                otherDisplayToken);
-        otherDisplayTask.displayId = 2;
-        mOrganizer.onTaskAppeared(otherDisplayTask, null);
-
-        WindowContainerTransaction wct = mOrganizer.prepareClearBoundsForStandardTasks(1);
-
-        assertEquals(wct.getChanges().size(), 2);
-        Change boundsChange1 = wct.getChanges().get(token1.binder());
-        assertNotNull(boundsChange1);
-        assertNotEquals(
-                (boundsChange1.getWindowSetMask() & WindowConfiguration.WINDOW_CONFIG_BOUNDS), 0);
-        assertTrue(boundsChange1.getConfiguration().windowConfiguration.getBounds().isEmpty());
-
-        Change boundsChange2 = wct.getChanges().get(token2.binder());
-        assertNotNull(boundsChange2);
-        assertNotEquals(
-                (boundsChange2.getWindowSetMask() & WindowConfiguration.WINDOW_CONFIG_BOUNDS), 0);
-        assertTrue(boundsChange2.getConfiguration().windowConfiguration.getBounds().isEmpty());
-    }
-
-    @Test
-    public void testPrepareClearBoundsForStandardTasks_onlyClearActivityTypeStandard() {
-        MockToken token1 = new MockToken();
-        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_UNDEFINED, token1);
-        mOrganizer.onTaskAppeared(task1, null);
-
-        MockToken token2 = new MockToken();
-        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_UNDEFINED, token2);
-        task2.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_HOME);
-        mOrganizer.onTaskAppeared(task2, null);
-
-        WindowContainerTransaction wct = mOrganizer.prepareClearBoundsForStandardTasks(1);
-
-        // Only clear bounds for task1
-        assertEquals(1, wct.getChanges().size());
-        assertNotNull(wct.getChanges().get(token1.binder()));
-    }
-
-    @Test
-    public void testPrepareClearFreeformForStandardTasks() {
-        MockToken token1 = new MockToken();
-        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_FREEFORM, token1);
-        mOrganizer.onTaskAppeared(task1, null);
-
-        MockToken token2 = new MockToken();
-        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_MULTI_WINDOW, token2);
-        mOrganizer.onTaskAppeared(task2, null);
-
-        MockToken otherDisplayToken = new MockToken();
-        RunningTaskInfo otherDisplayTask = createTaskInfo(3, WINDOWING_MODE_FREEFORM,
-                otherDisplayToken);
-        otherDisplayTask.displayId = 2;
-        mOrganizer.onTaskAppeared(otherDisplayTask, null);
-
-        WindowContainerTransaction wct = mOrganizer.prepareClearFreeformForStandardTasks(1);
-
-        // Only task with freeform windowing mode and the right display should be updated
-        assertEquals(wct.getChanges().size(), 1);
-        Change wmModeChange1 = wct.getChanges().get(token1.binder());
-        assertNotNull(wmModeChange1);
-        assertEquals(wmModeChange1.getWindowingMode(), WINDOWING_MODE_UNDEFINED);
-    }
-
-    @Test
-    public void testPrepareClearFreeformForStandardTasks_onlyClearActivityTypeStandard() {
-        MockToken token1 = new MockToken();
-        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_FREEFORM, token1);
-        mOrganizer.onTaskAppeared(task1, null);
-
-        MockToken token2 = new MockToken();
-        RunningTaskInfo task2 = createTaskInfo(2, WINDOWING_MODE_FREEFORM, token2);
-        task2.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_HOME);
-        mOrganizer.onTaskAppeared(task2, null);
-
-        WindowContainerTransaction wct = mOrganizer.prepareClearFreeformForStandardTasks(1);
-
-        // Only clear freeform for task1
-        assertEquals(1, wct.getChanges().size());
-        assertNotNull(wct.getChanges().get(token1.binder()));
-    }
-
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         return taskInfo;
-    }
-
-    private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode, MockToken token) {
-        RunningTaskInfo taskInfo = createTaskInfo(taskId, windowingMode);
-        taskInfo.displayId = 1;
-        taskInfo.token = token.token();
-        taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_STANDARD);
-        return taskInfo;
-    }
-
-    private static class MockToken {
-        private final WindowContainerToken mToken;
-        private final IBinder mBinder;
-
-        MockToken() {
-            mToken = mock(WindowContainerToken.class);
-            mBinder = mock(IBinder.class);
-            when(mToken.asBinder()).thenReturn(mBinder);
-        }
-
-        WindowContainerToken token() {
-            return mToken;
-        }
-
-        IBinder binder() {
-            return mBinder;
-        }
     }
 }

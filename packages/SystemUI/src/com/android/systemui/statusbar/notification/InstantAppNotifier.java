@@ -29,7 +29,6 @@ import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.SynchronousUserSwitchObserver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -50,9 +49,11 @@ import android.util.Pair;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.NotificationChannels;
@@ -66,12 +67,15 @@ import javax.inject.Inject;
  * splitted screen.
  */
 @SysUISingleton
-public class InstantAppNotifier extends CoreStartable
-        implements CommandQueue.Callbacks, KeyguardStateController.Callback {
+public class InstantAppNotifier
+        implements CoreStartable, CommandQueue.Callbacks, KeyguardStateController.Callback {
     private static final String TAG = "InstantAppNotifier";
     public static final int NUM_TASKS_FOR_INSTANT_APP_INFO = 5;
 
+    private final Context mContext;
     private final Handler mHandler = new Handler();
+    private final UserTracker mUserTracker;
+    private final Executor mMainExecutor;
     private final Executor mUiBgExecutor;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
     private final CommandQueue mCommandQueue;
@@ -81,10 +85,14 @@ public class InstantAppNotifier extends CoreStartable
     public InstantAppNotifier(
             Context context,
             CommandQueue commandQueue,
+            UserTracker userTracker,
+            @Main Executor mainExecutor,
             @UiBackground Executor uiBgExecutor,
             KeyguardStateController keyguardStateController) {
-        super(context);
+        mContext = context;
         mCommandQueue = commandQueue;
+        mUserTracker = userTracker;
+        mMainExecutor = mainExecutor;
         mUiBgExecutor = uiBgExecutor;
         mKeyguardStateController = keyguardStateController;
     }
@@ -92,11 +100,7 @@ public class InstantAppNotifier extends CoreStartable
     @Override
     public void start() {
         // listen for user / profile change.
-        try {
-            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchListener, TAG);
-        } catch (RemoteException e) {
-            // Ignore
-        }
+        mUserTracker.addCallback(mUserSwitchListener, mMainExecutor);
 
         mCommandQueue.addCallback(this);
         mKeyguardStateController.addCallback(this);
@@ -128,13 +132,10 @@ public class InstantAppNotifier extends CoreStartable
         updateForegroundInstantApps();
     }
 
-    private final SynchronousUserSwitchObserver mUserSwitchListener =
-            new SynchronousUserSwitchObserver() {
+    private final UserTracker.Callback mUserSwitchListener =
+            new UserTracker.Callback() {
                 @Override
-                public void onUserSwitching(int newUserId) throws RemoteException {}
-
-                @Override
-                public void onUserSwitchComplete(int newUserId) throws RemoteException {
+                public void onUserChanged(int newUser, Context userContext) {
                     mHandler.post(
                             () -> {
                                 updateForegroundInstantApps();

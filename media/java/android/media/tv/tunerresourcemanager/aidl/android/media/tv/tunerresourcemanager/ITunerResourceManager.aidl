@@ -20,6 +20,7 @@ import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
+import android.media.tv.tunerresourcemanager.TunerDemuxInfo;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
@@ -130,6 +131,17 @@ interface ITunerResourceManager {
     void updateCasInfo(in int casSystemId, in int maxSessionNum);
 
     /*
+     * Updates the available Demux resources information on the current device.
+     *
+     * <p><strong>Note:</strong> This update must happen before the first
+     * {@link #requestDemux(TunerDemux,int[])} and {@link #releaseDemux(int, int)}
+     * call.
+     *
+     * @param infos an array of the available {@link TunerDemux} information.
+     */
+    void setDemuxInfoList(in TunerDemuxInfo[] infos);
+
+    /*
      * Updates the available Lnb resource information on the current device.
      *
      * <p><strong>Note:</strong> This update must happen before the first
@@ -140,19 +152,29 @@ interface ITunerResourceManager {
     void setLnbInfoList(in int[] lnbIds);
 
     /*
-     * This API is used by the Tuner framework to request an available frontend from the TunerHAL.
+     * This API is used by the Tuner framework to request a frontend from the TunerHAL.
      *
-     * <p>There are three possible scenarios:
+     * <p>There are two cases:
      * <ul>
-     * <li>If there is frontend available, the API would send the id back.
-     *
-     * <li>If no Frontend is available but the current request info can show higher priority than
-     * other uses of Frontend, the API will send
+     * <li>If the desiredId is not {@link TunerFrontendRequest#DEFAULT_DESIRED_ID}
+     * <li><li>If the desired frontend with the given frontendType is available, the API would send
+     * the id back.
+     * <li><li>If the desired frontend with the given frontendType is in use but the current request
+     * info can show higher priority than other uses of Frontend, the API will send
      * {@link IResourcesReclaimListener#onReclaimResources()} to the {@link Tuner}. Tuner would
      * handle the resource reclaim on the holder of lower priority and notify the holder of its
      * resource loss.
+     * <li><li>If no frontend can be granted, the API would return false.
+     * <ul>
      *
-     * <li>If no frontend can be granted, the API would return false.
+     * <li>If the desiredId is {@link TunerFrontendRequest#DEFAULT_DESIRED_ID}
+     * <li><li>If there is frontend available, the API would send the id back.
+     * <li><li>If no Frontend is available but the current request info can show higher priority
+     * than other uses of Frontend, the API will send
+     * {@link IResourcesReclaimListener#onReclaimResources()} to the {@link Tuner}. Tuner would
+     * handle the resource reclaim on the holder of lower priority and notify the holder of its
+     * resource loss.
+     * <li><li>If no frontend can be granted, the API would return false.
      * <ul>
      *
      * <p><strong>Note:</strong> {@link #setFrontendInfoList(TunerFrontendInfo[])} must be called

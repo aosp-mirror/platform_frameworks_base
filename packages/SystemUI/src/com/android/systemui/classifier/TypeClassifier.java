@@ -17,9 +17,11 @@
 package com.android.systemui.classifier;
 
 
+import static com.android.systemui.classifier.Classifier.ALTERNATE_BOUNCER_SWIPE;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
 import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
+import static com.android.systemui.classifier.Classifier.MEDIA_SEEKBAR;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN;
 import static com.android.systemui.classifier.Classifier.PULSE_EXPAND;
@@ -46,8 +48,7 @@ public class TypeClassifier extends FalsingClassifier {
     Result calculateFalsingResult(
             @Classifier.InteractionType int interactionType,
             double historyBelief, double historyConfidence) {
-        if (interactionType == Classifier.UDFPS_AUTHENTICATION
-                || interactionType == Classifier.LOCK_ICON) {
+        if (interactionType == Classifier.UDFPS_AUTHENTICATION) {
             return Result.passed(0);
         }
 
@@ -68,9 +69,12 @@ public class TypeClassifier extends FalsingClassifier {
                 // A more sophisticated thing to do here would be to look at the size of the
                 // vertical change relative to the screen size. _Some_ amount of vertical
                 // change should be expected.
+                wrongDirection = vertical;
+                break;
             case NOTIFICATION_DISMISS:
                 wrongDirection = vertical;
                 break;
+            case ALTERNATE_BOUNCER_SWIPE:
             case UNLOCK:
             case BOUNCER_UNLOCK:
                 wrongDirection = !vertical || !up;
@@ -92,6 +96,10 @@ public class TypeClassifier extends FalsingClassifier {
                 break;
             case QS_SWIPE_NESTED:
                 wrongDirection = !vertical;
+                break;
+            case MEDIA_SEEKBAR:
+                confidence = 0;
+                wrongDirection = vertical;
                 break;
             default:
                 wrongDirection = true;

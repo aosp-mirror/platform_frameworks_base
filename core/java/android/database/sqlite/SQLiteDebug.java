@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -23,7 +24,6 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Printer;
-
 import java.util.ArrayList;
 
 /**
@@ -173,16 +173,26 @@ public final class SQLiteDebug {
         @UnsupportedAppUsage
         public int lookaside;
 
-        /** statement cache stats: hits/misses/cachesize */
-        public String cache;
+        /** @hide */
+        final public int cacheHits;
+        /** @hide */
+        final public int cacheMisses;
+        /** @hide */
+        final public int cacheSize;
 
-        public DbStats(String dbName, long pageCount, long pageSize, int lookaside,
-            int hits, int misses, int cachesize) {
+        /** true if connection specific stats or whole connection pool if false */
+        public final boolean arePoolStats;
+
+        public DbStats(@NonNull String dbName, long pageCount, long pageSize, int lookaside,
+                int hits, int misses, int cachesize, boolean arePoolStats) {
             this.dbName = dbName;
             this.pageSize = pageSize / 1024;
             dbSize = (pageCount * pageSize) / 1024;
             this.lookaside = lookaside;
-            this.cache = hits + "/" + misses + "/" + cachesize;
+            this.cacheHits = hits;
+            this.cacheMisses = misses;
+            this.cacheSize = cachesize;
+            this.arePoolStats = arePoolStats;
         }
     }
 

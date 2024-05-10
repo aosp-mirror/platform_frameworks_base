@@ -16,7 +16,10 @@
 
 package android.hardware.camera2;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.hardware.camera2.utils.HashCodeHelpers;
 
 import java.util.concurrent.Executor;
 
@@ -198,6 +201,41 @@ public abstract class CameraExtensionSession implements AutoCloseable {
                 @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
             // default empty implementation
         }
+
+        /**
+         * This method is called when image capture processing is ongoing between
+         * {@link #onCaptureProcessStarted} and the processed still capture frame returning
+         * to the client surface.
+         *
+         * <p>The value included in the arguments provides clients with an estimate
+         * of the post-processing progress which could take significantly more time
+         * relative to the rest of the {@link #capture} sequence.</p>
+         *
+         * <p>The callback will be triggered only by extensions that return {@code true}
+         * from calls
+         * {@link CameraExtensionCharacteristics#isCaptureProcessProgressAvailable}.</p>
+         *
+         * <p>If support for this callback is present, then clients will be notified at least once
+         * with progress value 100.</p>
+         *
+         * <p>The callback will be triggered only for still capture requests {@link #capture} and
+         * is not supported for repeating requests {@link #setRepeatingRequest}.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param session The session received during
+         *                {@link StateCallback#onConfigured(CameraExtensionSession)}
+         * @param request The request that was given to the CameraDevice
+         * @param progress Value between 0 and 100 (inclusive) indicating the current
+         *                post-processing progress
+         *
+         * @see CameraExtensionCharacteristics#isCaptureProcessProgressAvailable
+         *
+         */
+        public void onCaptureProcessProgressed(@NonNull CameraExtensionSession session,
+                @NonNull CaptureRequest request, @IntRange(from = 0, to = 100) int progress) {
+            // default empty implementation
+        }
     }
 
     /**
@@ -270,10 +308,15 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * The rest of the settings included in the request will be entirely overridden by
      * the device-specific extension. </p>
      *
-     * <p>The {@link CaptureRequest.Builder#addTarget} supports only one
+     * <p> If {@link CameraExtensionCharacteristics#isPostviewAvailable} returns
+     * false, the {@link CaptureRequest.Builder#addTarget} will support only one
      * ImageFormat.YUV_420_888 or ImageFormat.JPEG target surface. {@link CaptureRequest}
-     * arguments that include further targets will cause
-     * IllegalArgumentException to be thrown. </p>
+     * arguments that include further targets will cause IllegalArgumentException to be thrown.
+     * If postview is available, {@link CaptureRequest.Builder#addTarget} will support up to two
+     * ImageFormat.YUV_420_888 or ImageFormat.JPEG target surfaces for the still capture and
+     * postview. IllegalArgumentException will be thrown if a postview target is added without
+     * a still capture target, if more than two target surfaces are added, or if the surface
+     * formats for postview and capture are not equivalent.
      *
      * <p>Starting with Android {@link android.os.Build.VERSION_CODES#TIRAMISU} single capture
      * requests will also support the preview {@link android.graphics.ImageFormat#PRIVATE} target
@@ -384,6 +427,80 @@ public abstract class CameraExtensionSession implements AutoCloseable {
      * @see #setRepeatingRequest
      */
     public void stopRepeating() throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
+     * Realtime calculated still {@link #capture} latency.
+     *
+     * @see #getRealtimeStillCaptureLatency()
+     */
+    public final static class StillCaptureLatency {
+        private final long mCaptureLatency, mProcessingLatency;
+
+        public StillCaptureLatency(long captureLatency, long processingLatency) {
+            mCaptureLatency = captureLatency;
+            mProcessingLatency = processingLatency;
+        }
+        /**
+         * Return the capture latency from
+         * {@link ExtensionCaptureCallback#onCaptureStarted} until
+         * {@link ExtensionCaptureCallback#onCaptureProcessStarted}.
+         *
+         * @return The realtime capture latency in milliseconds.
+         */
+        public long getCaptureLatency() {
+            return mCaptureLatency;
+        }
+
+        /**
+         * Return the estimated post-processing latency from
+         * {@link ExtensionCaptureCallback#onCaptureProcessStarted} until the processed frame
+         * returns to the client.
+         *
+         * @return returns post-processing latency in milliseconds
+         */
+        public long getProcessingLatency() {
+            return mProcessingLatency;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            StillCaptureLatency latency = (StillCaptureLatency) o;
+
+            if (mCaptureLatency != latency.mCaptureLatency) return false;
+            if (mProcessingLatency != latency.mProcessingLatency) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return HashCodeHelpers.hashCode(mCaptureLatency, mProcessingLatency);
+        }
+
+        @Override
+        public String toString() {
+            return "StillCaptureLatency(processingLatency:" + mProcessingLatency +
+                    ", captureLatency: " + mCaptureLatency + ")";
+        }
+    }
+
+    /**
+     * Return the realtime still {@link #capture} latency.
+     *
+     * <p>The estimations will take into account the current environment conditions, the camera
+     * state and will include the time spent processing the multi-frame capture request along with
+     * any additional time for encoding of the processed buffer if necessary.</p>
+     *
+     * @return The realtime still capture latency,
+     * or {@code null} if the estimation is not supported.
+     */
+    @Nullable
+    public StillCaptureLatency getRealtimeStillCaptureLatency() throws CameraAccessException {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 

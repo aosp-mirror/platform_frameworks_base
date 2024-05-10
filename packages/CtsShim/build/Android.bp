@@ -43,6 +43,9 @@ android_app {
 
     compile_multilib: "both",
     jni_libs: ["libshim_jni"],
+    // Explicitly uncompress native libs rather than letting the build system doing it and destroy the
+    // v2/v3 signature.
+    use_embedded_native_libs: true,
 
     uses_libs: ["android.test.runner"],
 
@@ -124,6 +127,9 @@ android_app {
 
     compile_multilib: "both",
     jni_libs: ["libshim_jni"],
+    // Explicitly uncompress native libs rather than letting the build system doing it and destroy the
+    // v2/v3 signature.
+    use_embedded_native_libs: true,
 
     uses_libs: ["android.test.runner"],
 }
@@ -201,4 +207,23 @@ android_app {
         "com.android.apex.cts.shim.v3",
     ],
     min_sdk_version: "24",
+}
+
+//##########################################################
+// Variant: Add apk to an apex
+android_app {
+    name: "CtsShimAddApkToApex",
+    sdk_version: "current",
+    srcs: ["shim_add_apk_to_apex/src/android/addapktoapex/app/AddApkToApexDeviceActivity.java"],
+    optimize: {
+        enabled: false,
+    },
+    dex_preopt: {
+        enabled: false,
+    },
+    manifest: "shim_add_apk_to_apex/AndroidManifestAddApkToApex.xml",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v2_add_apk_to_apex",
+    ],
 }

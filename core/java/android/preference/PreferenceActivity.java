@@ -578,7 +578,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (savedInstanceState != null) {
             // We are restarting from a previous saved state; used that to
             // initialize, instead of starting fresh.
-            ArrayList<Header> headers = savedInstanceState.getParcelableArrayList(HEADERS_TAG);
+            ArrayList<Header> headers = savedInstanceState.getParcelableArrayList(HEADERS_TAG, android.preference.PreferenceActivity.Header.class);
             if (headers != null) {
                 mHeaders.addAll(headers);
                 int curHeader = savedInstanceState.getInt(CUR_HEADER_TAG,

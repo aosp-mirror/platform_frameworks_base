@@ -55,7 +55,6 @@ import android.os.Parcelable;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.view.DragEvent;
-import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -98,6 +97,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     private static final String TEST_PACKAGE = "com.test.package";
 
     private TestDragDropController mTarget;
+    private WindowProcessController mProcess;
     private WindowState mWindow;
     private IBinder mToken;
 
@@ -137,10 +137,9 @@ public class DragDropControllerTests extends WindowTestsBase {
      * Creates a window state which can be used as a drop target.
      */
     private WindowState createDropTargetWindow(String name, int ownerId) {
-        final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
-        final Task rootTask = createTask(mDisplayContent);
-        final Task task = createTaskInRootTask(rootTask, ownerId);
-        task.addChild(activity, 0);
+        final Task task = new TaskBuilder(mSupervisor).setUserId(ownerId).build();
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task)
+                .setUseProcess(mProcess).build();
 
         // Use a new TestIWindow so we don't collect events for other windows
         final WindowState window = createWindow(
@@ -167,6 +166,8 @@ public class DragDropControllerTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mTarget = new TestDragDropController(mWm, mWm.mH.getLooper());
+        mProcess = mSystemServicesTestRule.addProcess(TEST_PACKAGE, "testProc",
+                TEST_PID, TEST_UID);
         mWindow = createDropTargetWindow("Drag test window", 0);
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
         when(mWm.mInputManager.transferTouchFocus(any(InputChannel.class),
@@ -221,8 +222,6 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testPrivateInterceptGlobalDragDropFlagChecksPermission() {
-        spyOn(mWm.mContext);
-
         DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
         attrs.privateFlags |= PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
@@ -323,10 +322,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testValidateAppActivityArguments() {
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = getTestSession();
         try {
             session.validateAndResolveDragMimeTypeExtras(
                     createClipDataForActivity(mock(PendingIntent.class), null), TEST_UID, TEST_PID,
@@ -364,10 +360,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateAppShortcutArguments() {
         doReturn(PERMISSION_GRANTED).when(mWm.mContext)
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = createTestSession(mAtm);
         try {
             session.validateAndResolveDragMimeTypeExtras(
                     createClipDataForShortcut(null, "test_shortcut_id", mock(UserHandle.class)),
@@ -398,10 +391,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateProfileAppShortcutArguments_notCallingUid() {
         doReturn(PERMISSION_GRANTED).when(mWm.mContext)
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
-        final Session session = Mockito.spy(new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        }));
+        final Session session = createTestSession(mAtm);
         final ShortcutServiceInternal shortcutService = mock(ShortcutServiceInternal.class);
         final Intent[] shortcutIntents = new Intent[1];
         shortcutIntents[0] = new Intent();
@@ -443,10 +433,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateAppTaskArguments() {
         doReturn(PERMISSION_GRANTED).when(mWm.mContext)
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = createTestSession(mAtm);
         try {
             final ClipData clipData = new ClipData(
                     new ClipDescription("drag", new String[] { MIMETYPE_APPLICATION_TASK }),
@@ -462,10 +449,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testValidateFlags() {
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = getTestSession();
         try {
             session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
             fail("Expected failure without permission");
@@ -478,10 +462,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void testValidateFlagsWithPermission() {
         doReturn(PERMISSION_GRANTED).when(mWm.mContext)
                 .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
-        final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
-            @Override
-            public void onAnimatorScaleChanged(float scale) {}
-        });
+        final Session session = createTestSession(mAtm);
         try {
             session.validateDragFlags(View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
             // Expected pass
@@ -571,7 +552,8 @@ public class DragDropControllerTests extends WindowTestsBase {
 
             assertTrue(mWm.mInputManager.transferTouchFocus(new InputChannel(),
                     new InputChannel(), true /* isDragDrop */));
-            mToken = mTarget.performDrag(0, 0, mWindow.mClient, flag, surface, 0, 0, 0, 0, 0, data);
+            mToken = mTarget.performDrag(TEST_PID, 0, mWindow.mClient,
+                    flag, surface, 0, 0, 0, 0, 0, 0, 0, data);
             assertNotNull(mToken);
 
             r.run();
@@ -593,7 +575,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     private void startA11yDrag(int flags, ClipData data, Runnable r) {
         mToken = mTarget.performDrag(0, 0, mWindow.mClient,
-                flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, data);
+                flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, 0, 0, data);
         assertNotNull(mToken);
         r.run();
     }

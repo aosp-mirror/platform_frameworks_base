@@ -1,6 +1,7 @@
 set noparent
-file:platform/packages/modules/Connectivity:master:/OWNERS_core_networking
+file:platform/packages/modules/Connectivity:main:/OWNERS_core_networking
 
 jsharkey@android.com
 sudheersai@google.com
 yamasani@google.com
+suprabh@google.com

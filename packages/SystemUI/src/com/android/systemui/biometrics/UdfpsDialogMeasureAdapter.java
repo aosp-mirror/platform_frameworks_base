@@ -35,7 +35,7 @@ import android.view.WindowMetrics;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 /**
  * Adapter that remeasures an auth dialog view to ensure that it matches the location of a physical
@@ -63,7 +63,7 @@ public class UdfpsDialogMeasureAdapter {
     }
 
     @NonNull
-    AuthDialog.LayoutParams onMeasureInternal(
+    public AuthDialog.LayoutParams onMeasureInternal(
             int width, int height, @NonNull AuthDialog.LayoutParams layoutParams,
             float scaleFactor) {
 
@@ -86,7 +86,7 @@ public class UdfpsDialogMeasureAdapter {
      * too cleanly support this case. So, let's have the onLayout code translate the sensor location
      * instead.
      */
-    int getBottomSpacerHeight() {
+    public int getBottomSpacerHeight() {
         return mBottomSpacerHeight;
     }
 

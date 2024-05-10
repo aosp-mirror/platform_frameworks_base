@@ -45,7 +45,7 @@ public class BlockedAppStreamingActivity extends AlertActivity {
 
         Intent intent = getIntent();
         CharSequence appLabel = null;
-        ActivityInfo activityInfo = intent.getParcelableExtra(EXTRA_BLOCKED_ACTIVITY_INFO);
+        ActivityInfo activityInfo = intent.getParcelableExtra(EXTRA_BLOCKED_ACTIVITY_INFO, android.content.pm.ActivityInfo.class);
         if (activityInfo != null) {
             appLabel = activityInfo.loadLabel(getPackageManager());
         }
@@ -63,7 +63,7 @@ public class BlockedAppStreamingActivity extends AlertActivity {
                 mAlertParams.mTitle =
                         getString(R.string.app_streaming_blocked_title_for_permission_dialog);
                 mAlertParams.mMessage =
-                        getString(R.string.app_streaming_blocked_message, streamedDeviceName);
+                        getString(R.string.app_streaming_blocked_message_for_permission_request);
             } else if (TextUtils.equals(activityInfo.packageName, BLOCKED_COMPONENT_PLAYSTORE)) {
                 mAlertParams.mTitle =
                         getString(R.string.app_streaming_blocked_title_for_playstore_dialog);

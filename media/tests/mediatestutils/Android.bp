@@ -1,0 +1,53 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// TODO audio build defaults
+java_library {
+    name: "mediatestutils_host",
+    host_supported: true,
+    srcs: [
+        "java/com/android/media/mediatestutils/CancelAllFuturesRule.java",
+    ],
+    static_libs: [
+        "junit",
+    ],
+    visibility: [
+        ":__subpackages__",
+    ],
+}
+
+java_library {
+    name: "mediatestutils",
+    srcs: [
+        "java/com/android/media/mediatestutils/TestUtils.java",
+    ],
+    static_libs: [
+        "androidx.concurrent_concurrent-futures",
+        "guava",
+        "mediatestutils_host",
+    ],
+    visibility: [
+        "//cts/tests/tests/media:__subpackages__",
+        ":__subpackages__",
+    ],
+}
+
+java_test_host {
+    name: "mediatestutilshosttests",
+    srcs: ["javatests/**/*.java"],
+    static_libs: [
+        "mediatestutils_host",
+        "junit",
+        "truth",
+    ],
+    test_suites: ["general-tests"],
+    test_options: {
+        unit_test: true,
+    },
+}

@@ -57,4 +57,8 @@ class TestFoldStateProvider : FoldStateProvider {
     fun sendHingeAngleUpdate(angle: Float) {
         listeners.forEach { it.onHingeAngleUpdate(angle) }
     }
+
+    fun sendUnfoldedScreenAvailable() {
+        listeners.forEach { it.onUnfoldedScreenAvailable() }
+    }
 }

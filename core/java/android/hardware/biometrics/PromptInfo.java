@@ -33,6 +33,7 @@ public class PromptInfo implements Parcelable {
     @NonNull private CharSequence mTitle;
     private boolean mUseDefaultTitle;
     @Nullable private CharSequence mSubtitle;
+    private boolean mUseDefaultSubtitle;
     @Nullable private CharSequence mDescription;
     @Nullable private CharSequence mDeviceCredentialTitle;
     @Nullable private CharSequence mDeviceCredentialSubtitle;
@@ -47,6 +48,7 @@ public class PromptInfo implements Parcelable {
     private boolean mAllowBackgroundAuthentication;
     private boolean mIgnoreEnrollmentState;
     private boolean mIsForLegacyFingerprintManager = false;
+    private boolean mShowEmergencyCallButton = false;
 
     public PromptInfo() {
 
@@ -56,6 +58,7 @@ public class PromptInfo implements Parcelable {
         mTitle = in.readCharSequence();
         mUseDefaultTitle = in.readBoolean();
         mSubtitle = in.readCharSequence();
+        mUseDefaultSubtitle = in.readBoolean();
         mDescription = in.readCharSequence();
         mDeviceCredentialTitle = in.readCharSequence();
         mDeviceCredentialSubtitle = in.readCharSequence();
@@ -70,6 +73,7 @@ public class PromptInfo implements Parcelable {
         mAllowBackgroundAuthentication = in.readBoolean();
         mIgnoreEnrollmentState = in.readBoolean();
         mIsForLegacyFingerprintManager = in.readBoolean();
+        mShowEmergencyCallButton = in.readBoolean();
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -94,6 +98,7 @@ public class PromptInfo implements Parcelable {
         dest.writeCharSequence(mTitle);
         dest.writeBoolean(mUseDefaultTitle);
         dest.writeCharSequence(mSubtitle);
+        dest.writeBoolean(mUseDefaultSubtitle);
         dest.writeCharSequence(mDescription);
         dest.writeCharSequence(mDeviceCredentialTitle);
         dest.writeCharSequence(mDeviceCredentialSubtitle);
@@ -108,8 +113,10 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mAllowBackgroundAuthentication);
         dest.writeBoolean(mIgnoreEnrollmentState);
         dest.writeBoolean(mIsForLegacyFingerprintManager);
+        dest.writeBoolean(mShowEmergencyCallButton);
     }
 
+    // LINT.IfChange
     public boolean containsTestConfigurations() {
         if (mIsForLegacyFingerprintManager
                 && mAllowedSensorIds.size() == 1
@@ -119,6 +126,10 @@ public class PromptInfo implements Parcelable {
             return true;
         } else if (mAllowBackgroundAuthentication) {
             return true;
+        } else if (mIsForLegacyFingerprintManager) {
+            return true;
+        } else if (mIgnoreEnrollmentState) {
+            return true;
         }
         return false;
     }
@@ -127,6 +138,8 @@ public class PromptInfo implements Parcelable {
         if (mDisallowBiometricsIfPolicyExists) {
             return true;
         } else if (mUseDefaultTitle) {
+            return true;
+        } else if (mUseDefaultSubtitle) {
             return true;
         } else if (mDeviceCredentialTitle != null) {
             return true;
@@ -139,6 +152,7 @@ public class PromptInfo implements Parcelable {
         }
         return false;
     }
+    // LINT.ThenChange(frameworks/base/core/java/android/hardware/biometrics/BiometricPrompt.java)
 
     // Setters
 
@@ -152,6 +166,10 @@ public class PromptInfo implements Parcelable {
 
     public void setSubtitle(CharSequence subtitle) {
         mSubtitle = subtitle;
+    }
+
+    public void setUseDefaultSubtitle(boolean useDefaultSubtitle) {
+        mUseDefaultSubtitle = useDefaultSubtitle;
     }
 
     public void setDescription(CharSequence description) {
@@ -213,6 +231,10 @@ public class PromptInfo implements Parcelable {
         mAllowedSensorIds.add(sensorId);
     }
 
+    public void setShowEmergencyCallButton(boolean showEmergencyCallButton) {
+        mShowEmergencyCallButton = showEmergencyCallButton;
+    }
+
     // Getters
 
     public CharSequence getTitle() {
@@ -225,6 +247,10 @@ public class PromptInfo implements Parcelable {
 
     public CharSequence getSubtitle() {
         return mSubtitle;
+    }
+
+    public boolean isUseDefaultSubtitle() {
+        return mUseDefaultSubtitle;
     }
 
     public CharSequence getDescription() {
@@ -289,5 +315,9 @@ public class PromptInfo implements Parcelable {
 
     public boolean isForLegacyFingerprintManager() {
         return mIsForLegacyFingerprintManager;
+    }
+
+    public boolean isShowEmergencyCallButton() {
+        return mShowEmergencyCallButton;
     }
 }

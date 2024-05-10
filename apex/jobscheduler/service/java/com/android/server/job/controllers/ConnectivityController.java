@@ -18,15 +18,24 @@ package com.android.server.job.controllers;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TEMPORARILY_NOT_METERED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.Flags.FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER;
+import static com.android.server.job.Flags.relaxPrefetchConnectivityConstraintOnlyOnCharger;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.job.JobInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.INetworkPolicyListener;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkPolicyManager;
@@ -35,6 +44,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.telephony.CellSignalStrength;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyCallback;
@@ -42,18 +52,19 @@ import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.DataUnit;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Pools;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
@@ -82,6 +93,8 @@ public final class ConnectivityController extends RestrictingController implemen
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
+    public static final long UNKNOWN_TIME = -1L;
+
     // The networking stack has a hard limit so we can't make this configurable.
     private static final int MAX_NETWORK_CALLBACKS = 125;
     /**
@@ -97,6 +110,12 @@ public final class ConnectivityController extends RestrictingController implemen
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
                     | ConnectivityManager.BLOCKED_REASON_DOZE);
+    private static final int UNBYPASSABLE_UI_BLOCKED_REASONS =
+            ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
+                    | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
+                    | ConnectivityManager.BLOCKED_REASON_DOZE
+                    | ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER
+                    | ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED);
     private static final int UNBYPASSABLE_FOREGROUND_BLOCKED_REASONS =
             ~(ConnectivityManager.BLOCKED_REASON_APP_STANDBY
                     | ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER
@@ -104,8 +123,30 @@ public final class ConnectivityController extends RestrictingController implemen
                     | ConnectivityManager.BLOCKED_METERED_REASON_DATA_SAVER
                     | ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRICTED);
 
+    @VisibleForTesting
+    static final int TRANSPORT_AFFINITY_UNDEFINED = 0;
+    @VisibleForTesting
+    static final int TRANSPORT_AFFINITY_PREFER = 1;
+    @VisibleForTesting
+    static final int TRANSPORT_AFFINITY_AVOID = 2;
+    /**
+     * Set of affinities to different network transports. If a given network has multiple
+     * transports, the avoided ones take priority --- a network with an avoided transport
+     * should be avoided if possible, even if the network has preferred transports as well.
+     */
+    @VisibleForTesting
+    static final SparseIntArray sNetworkTransportAffinities = new SparseIntArray();
+    static {
+        sNetworkTransportAffinities.put(TRANSPORT_CELLULAR, TRANSPORT_AFFINITY_AVOID);
+        sNetworkTransportAffinities.put(TRANSPORT_WIFI, TRANSPORT_AFFINITY_PREFER);
+        sNetworkTransportAffinities.put(TRANSPORT_ETHERNET, TRANSPORT_AFFINITY_PREFER);
+    }
+
+    private final CcConfig mCcConfig;
     private final ConnectivityManager mConnManager;
+    private final NetworkPolicyManager mNetPolicyManager;
     private final NetworkPolicyManagerInternal mNetPolicyManagerInternal;
+    private final FlexibilityController mFlexibilityController;
 
     /** List of tracked jobs keyed by source UID. */
     @GuardedBy("mLock")
@@ -123,7 +164,7 @@ public final class ConnectivityController extends RestrictingController implemen
      * latest capabilities to avoid unnecessary calls into ConnectivityManager.
      */
     @GuardedBy("mLock")
-    private final ArrayMap<Network, NetworkCapabilities> mAvailableNetworks = new ArrayMap<>();
+    private final ArrayMap<Network, CachedNetworkMetadata> mAvailableNetworks = new ArrayMap<>();
 
     private final SparseArray<UidDefaultNetworkCallback> mCurrentDefaultNetworkCallbacks =
             new SparseArray<>();
@@ -147,11 +188,13 @@ public final class ConnectivityController extends RestrictingController implemen
             //   2. Waiting connectivity jobs would be ready with connectivity
             //   3. An existing network satisfies a waiting connectivity job's requirements
             //   4. TOP proc state
-            //   5. Existence of treat-as-EJ EJs (not just requested EJs)
-            //   6. FGS proc state
-            //   7. EJ enqueue time
-            //   8. Any other important job priorities/proc states
-            //   9. Enqueue time
+            //   5. Existence of treat-as-UI UIJs (not just requested UIJs)
+            //   6. Existence of treat-as-EJ EJs (not just requested EJs)
+            //   7. FGS proc state
+            //   8. UIJ enqueue time
+            //   9. EJ enqueue time
+            //   10. Any other important job priorities/proc states
+            //   11. Enqueue time
             // TODO: maybe consider number of jobs
             // TODO: consider IMPORTANT_WHILE_FOREGROUND bit
             final int runningPriority = prioritizeExistenceOver(0,
@@ -179,8 +222,13 @@ public final class ConnectivityController extends RestrictingController implemen
             if (topPriority != 0) {
                 return topPriority;
             }
-            // They're either both TOP or both not TOP. Prioritize the app that has runnable EJs
+            // They're either both TOP or both not TOP. Prioritize the app that has runnable UIJs
             // pending.
+            final int uijPriority = prioritizeExistenceOver(0, us1.numUIJs, us2.numUIJs);
+            if (uijPriority != 0) {
+                return uijPriority;
+            }
+            // Still equivalent. Prioritize the app that has runnable EJs pending.
             final int ejPriority = prioritizeExistenceOver(0, us1.numEJs, us2.numEJs);
             if (ejPriority != 0) {
                 return ejPriority;
@@ -192,6 +240,12 @@ public final class ConnectivityController extends RestrictingController implemen
                     us1.baseBias, us2.baseBias);
             if (fgsPriority != 0) {
                 return fgsPriority;
+            }
+            // Order them by UIJ enqueue time to help provide low UIJ latency.
+            if (us1.earliestUIJEnqueueTime < us2.earliestUIJEnqueueTime) {
+                return -1;
+            } else if (us1.earliestUIJEnqueueTime > us2.earliestUIJEnqueueTime) {
+                return 1;
             }
             // Order them by EJ enqueue time to help provide low EJ latency.
             if (us1.earliestEJEnqueueTime < us2.earliestEJEnqueueTime) {
@@ -219,6 +273,8 @@ public final class ConnectivityController extends RestrictingController implemen
      */
     private final List<UidStats> mSortedStats = new ArrayList<>();
     @GuardedBy("mLock")
+    private final SparseBooleanArray mBackgroundMeteredAllowed = new SparseBooleanArray();
+    @GuardedBy("mLock")
     private long mLastCallbackAdjustmentTimeElapsed;
     @GuardedBy("mLock")
     private final SparseArray<CellSignalStrengthCallback> mSignalStrengths = new SparseArray<>();
@@ -228,20 +284,33 @@ public final class ConnectivityController extends RestrictingController implemen
 
     private static final int MSG_ADJUST_CALLBACKS = 0;
     private static final int MSG_UPDATE_ALL_TRACKED_JOBS = 1;
+    private static final int MSG_DATA_SAVER_TOGGLED = 2;
+    private static final int MSG_UID_POLICIES_CHANGED = 3;
 
     private final Handler mHandler;
 
-    public ConnectivityController(JobSchedulerService service) {
+    public ConnectivityController(JobSchedulerService service,
+            @NonNull FlexibilityController flexibilityController) {
         super(service);
-        mHandler = new CcHandler(mContext.getMainLooper());
+        mHandler = new CcHandler(AppSchedulingModuleThread.get().getLooper());
+        mCcConfig = new CcConfig();
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
+        mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
         mNetPolicyManagerInternal = LocalServices.getService(NetworkPolicyManagerInternal.class);
+        mFlexibilityController = flexibilityController;
 
         // We're interested in all network changes; internally we match these
         // network changes against the active network for each UID with jobs.
         final NetworkRequest request = new NetworkRequest.Builder().clearCapabilities().build();
         mConnManager.registerNetworkCallback(request, mNetworkCallback);
+
+        mNetPolicyManager.registerListener(mNetPolicyListener);
+
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            // For now, we don't have network affinities on watches.
+            sNetworkTransportAffinities.clear();
+        }
     }
 
     @GuardedBy("mLock")
@@ -287,8 +356,7 @@ public final class ConnectivityController extends RestrictingController implemen
 
     @GuardedBy("mLock")
     @Override
-    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob) {
         if (jobStatus.clearTrackingController(JobStatus.TRACKING_CONNECTIVITY)) {
             ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUid());
             if (jobs != null) {
@@ -350,7 +418,9 @@ public final class ConnectivityController extends RestrictingController implemen
         synchronized (mLock) {
             for (int i = 0; i < mAvailableNetworks.size(); ++i) {
                 final Network network = mAvailableNetworks.keyAt(i);
-                final NetworkCapabilities capabilities = mAvailableNetworks.valueAt(i);
+                final CachedNetworkMetadata metadata = mAvailableNetworks.valueAt(i);
+                final NetworkCapabilities capabilities =
+                        metadata == null ? null : metadata.networkCapabilities;
                 final boolean satisfied = isSatisfied(job, network, capabilities, mConstants);
                 if (DEBUG) {
                     Slog.v(TAG, "isNetworkAvailable(" + job + ") with network " + network
@@ -411,7 +481,7 @@ public final class ConnectivityController extends RestrictingController implemen
         final UidStats uidStats =
                 getUidStats(jobStatus.getSourceUid(), jobStatus.getSourcePackageName(), true);
 
-        if (jobStatus.shouldTreatAsExpeditedJob()) {
+        if (jobStatus.shouldTreatAsExpeditedJob() || jobStatus.shouldTreatAsUserInitiatedJob()) {
             if (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)) {
                 // Don't request a direct hole through any of the firewalls. Instead, mark the
                 // constraint as satisfied if the network is available, and the job will get
@@ -421,7 +491,9 @@ public final class ConnectivityController extends RestrictingController implemen
             }
             // Don't need to update constraint here if the network goes away. We'll do that as part
             // of regular processing when we're notified about the drop.
-        } else if (jobStatus.isRequestedExpeditedJob()
+        } else if (((jobStatus.isRequestedExpeditedJob() && !jobStatus.shouldTreatAsExpeditedJob())
+                || (jobStatus.getJob().isUserInitiated()
+                        && !jobStatus.shouldTreatAsUserInitiatedJob()))
                 && jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)) {
             // Make sure we don't accidentally keep the constraint as satisfied if the job went
             // from being expedited-ready to not-expeditable.
@@ -505,6 +577,7 @@ public final class ConnectivityController extends RestrictingController implemen
             // All packages in the UID have been removed. It's safe to remove things based on
             // UID alone.
             mTrackedJobs.delete(uid);
+            mBackgroundMeteredAllowed.delete(uid);
             UidStats uidStats = mUidStats.removeReturnOld(uid);
             unregisterDefaultNetworkCallbackLocked(uid, sElapsedRealtimeClock.millis());
             mSortedStats.remove(uidStats);
@@ -522,6 +595,12 @@ public final class ConnectivityController extends RestrictingController implemen
                 unregisterDefaultNetworkCallbackLocked(uidStats.uid, nowElapsed);
                 mSortedStats.remove(uidStats);
                 mUidStats.removeAt(u);
+            }
+        }
+        for (int u = mBackgroundMeteredAllowed.size() - 1; u >= 0; --u) {
+            final int uid = mBackgroundMeteredAllowed.keyAt(u);
+            if (UserHandle.getUserId(uid) == userId) {
+                mBackgroundMeteredAllowed.removeAt(u);
             }
         }
         postAdjustCallbacks();
@@ -542,6 +621,48 @@ public final class ConnectivityController extends RestrictingController implemen
     public void onBatteryStateChangedLocked() {
         // Update job bookkeeping out of band to avoid blocking broadcast progress.
         mHandler.sendEmptyMessage(MSG_UPDATE_ALL_TRACKED_JOBS);
+    }
+
+    @Override
+    public void prepareForUpdatedConstantsLocked() {
+        mCcConfig.mShouldReprocessNetworkCapabilities = false;
+        mCcConfig.mFlexIsEnabled = mFlexibilityController.isEnabled();
+    }
+
+    @Override
+    public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
+            @NonNull String key) {
+        mCcConfig.processConstantLocked(properties, key);
+    }
+
+    @Override
+    public void onConstantsUpdatedLocked() {
+        if (mCcConfig.mShouldReprocessNetworkCapabilities
+                || (mFlexibilityController.isEnabled() != mCcConfig.mFlexIsEnabled)) {
+            AppSchedulingModuleThread.getHandler().post(() -> {
+                boolean flexAffinitiesChanged = false;
+                boolean flexAffinitiesSatisfied = false;
+                synchronized (mLock) {
+                    for (int i = 0; i < mAvailableNetworks.size(); ++i) {
+                        CachedNetworkMetadata metadata = mAvailableNetworks.valueAt(i);
+                        if (metadata == null) {
+                            continue;
+                        }
+                        if (updateTransportAffinitySatisfaction(metadata)) {
+                            // Something changed. Update jobs.
+                            flexAffinitiesChanged = true;
+                        }
+                        flexAffinitiesSatisfied |= metadata.satisfiesTransportAffinities;
+                    }
+                    if (flexAffinitiesChanged) {
+                        mFlexibilityController.setConstraintSatisfied(
+                                JobStatus.CONSTRAINT_CONNECTIVITY,
+                                flexAffinitiesSatisfied, sElapsedRealtimeClock.millis());
+                        updateAllTrackedJobsLocked(false);
+                    }
+                }
+            });
+        }
     }
 
     private boolean isUsable(NetworkCapabilities capabilities) {
@@ -568,9 +689,8 @@ public final class ConnectivityController extends RestrictingController implemen
             // If we don't know the bandwidth, all we can do is hope the job finishes the minimum
             // chunk in time.
             if (bandwidthDown > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((minimumChunkBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidthDown) / 8));
+                final long estimatedMillis =
+                        calculateTransferTimeMs(minimumChunkBytes, bandwidthDown);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish the minimum chunk before the timeout, we'd be insane!
                     Slog.w(TAG, "Minimum chunk " + minimumChunkBytes + " bytes over "
@@ -583,9 +703,8 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidthUp = capabilities.getLinkUpstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidthUp > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((minimumChunkBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidthUp) / 8));
+                final long estimatedMillis =
+                        calculateTransferTimeMs(minimumChunkBytes, bandwidthUp);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish the minimum chunk before the timeout, we'd be insane!
                     Slog.w(TAG, "Minimum chunk " + minimumChunkBytes + " bytes over " + bandwidthUp
@@ -613,9 +732,7 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidth = capabilities.getLinkDownstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidth > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((downloadBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                final long estimatedMillis = calculateTransferTimeMs(downloadBytes, bandwidth);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish before the timeout, we'd be insane!
                     Slog.w(TAG, "Estimated " + downloadBytes + " download bytes over " + bandwidth
@@ -631,9 +748,7 @@ public final class ConnectivityController extends RestrictingController implemen
             final long bandwidth = capabilities.getLinkUpstreamBandwidthKbps();
             // If we don't know the bandwidth, all we can do is hope the job finishes in time.
             if (bandwidth > 0) {
-                // Divide by 8 to convert bits to bytes.
-                final long estimatedMillis = ((uploadBytes * DateUtils.SECOND_IN_MILLIS)
-                        / (DataUnit.KIBIBYTES.toBytes(bandwidth) / 8));
+                final long estimatedMillis = calculateTransferTimeMs(uploadBytes, bandwidth);
                 if (estimatedMillis > maxJobExecutionTimeMs) {
                     // If we'd never finish before the timeout, we'd be insane!
                     Slog.w(TAG, "Estimated " + uploadBytes + " upload bytes over " + bandwidth
@@ -645,6 +760,130 @@ public final class ConnectivityController extends RestrictingController implemen
         }
 
         return false;
+    }
+
+    private boolean isMeteredAllowed(@NonNull JobStatus jobStatus,
+            @NonNull NetworkCapabilities networkCapabilities) {
+        // Network isn't metered. Usage is allowed. The rest of this method doesn't apply.
+        if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
+                || networkCapabilities.hasCapability(NET_CAPABILITY_TEMPORARILY_NOT_METERED)) {
+            return true;
+        }
+
+        final int uid = jobStatus.getSourceUid();
+        final int procState = mService.getUidProcState(uid);
+        final int capabilities = mService.getUidCapabilities(uid);
+        // Jobs don't raise the proc state to anything better than IMPORTANT_FOREGROUND.
+        // If the app is in a better state, see if it has the capability to use the metered network.
+        final boolean currentStateAllows = procState != ActivityManager.PROCESS_STATE_UNKNOWN
+                && procState < ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                && NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground(
+                        procState, capabilities);
+        if (DEBUG) {
+            Slog.d(TAG, "UID " + uid
+                    + " current state allows metered network=" + currentStateAllows
+                    + " procState=" + ActivityManager.procStateToString(procState)
+                    + " capabilities=" + ActivityManager.getCapabilitiesSummary(capabilities));
+        }
+        if (currentStateAllows) {
+            return true;
+        }
+
+        if ((jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
+            final int expectedProcState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+            final int mergedCapabilities = capabilities
+                    | NetworkPolicyManager.getDefaultProcessNetworkCapabilities(expectedProcState);
+            final boolean wouldBeAllowed =
+                    NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground(
+                            expectedProcState, mergedCapabilities);
+            if (DEBUG) {
+                Slog.d(TAG, "UID " + uid
+                        + " willBeForeground flag allows metered network=" + wouldBeAllowed
+                        + " capabilities="
+                        + ActivityManager.getCapabilitiesSummary(mergedCapabilities));
+            }
+            if (wouldBeAllowed) {
+                return true;
+            }
+        }
+
+        if (jobStatus.shouldTreatAsUserInitiatedJob()) {
+            // Since the job is initiated by the user and will be visible to the user, it
+            // should be able to run on metered networks, similar to FGS.
+            // With user-initiated jobs, JobScheduler will request that the process
+            // run at IMPORTANT_FOREGROUND process state
+            // and get the USER_RESTRICTED_NETWORK process capability.
+            final int expectedProcState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            final int mergedCapabilities = capabilities
+                    | ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK
+                    | NetworkPolicyManager.getDefaultProcessNetworkCapabilities(expectedProcState);
+            final boolean wouldBeAllowed =
+                    NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground(
+                            expectedProcState, mergedCapabilities);
+            if (DEBUG) {
+                Slog.d(TAG, "UID " + uid
+                        + " UI job state allows metered network=" + wouldBeAllowed
+                        + " capabilities=" + mergedCapabilities);
+            }
+            if (wouldBeAllowed) {
+                return true;
+            }
+        }
+
+        if (mBackgroundMeteredAllowed.indexOfKey(uid) >= 0) {
+            return mBackgroundMeteredAllowed.get(uid);
+        }
+
+        final boolean allowed =
+                mNetPolicyManager.getRestrictBackgroundStatus(uid)
+                        != ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
+        if (DEBUG) {
+            Slog.d(TAG, "UID " + uid + " allowed in data saver=" + allowed);
+        }
+        mBackgroundMeteredAllowed.put(uid, allowed);
+        return allowed;
+    }
+
+    /**
+     * Return the estimated amount of time this job will be transferring data,
+     * based on the current network speed.
+     */
+    public long getEstimatedTransferTimeMs(JobStatus jobStatus) {
+        final long downloadBytes = jobStatus.getEstimatedNetworkDownloadBytes();
+        final long uploadBytes = jobStatus.getEstimatedNetworkUploadBytes();
+        if (downloadBytes == JobInfo.NETWORK_BYTES_UNKNOWN
+                && uploadBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
+            return UNKNOWN_TIME;
+        }
+        if (jobStatus.network == null) {
+            // This job doesn't have a network assigned.
+            return UNKNOWN_TIME;
+        }
+        NetworkCapabilities capabilities = getNetworkCapabilities(jobStatus.network);
+        if (capabilities == null) {
+            return UNKNOWN_TIME;
+        }
+        final long estimatedDownloadTimeMs = calculateTransferTimeMs(downloadBytes,
+                capabilities.getLinkDownstreamBandwidthKbps());
+        final long estimatedUploadTimeMs = calculateTransferTimeMs(uploadBytes,
+                capabilities.getLinkUpstreamBandwidthKbps());
+        if (estimatedDownloadTimeMs == UNKNOWN_TIME) {
+            return estimatedUploadTimeMs;
+        } else if (estimatedUploadTimeMs == UNKNOWN_TIME) {
+            return estimatedDownloadTimeMs;
+        }
+        return estimatedDownloadTimeMs + estimatedUploadTimeMs;
+    }
+
+    @VisibleForTesting
+    static long calculateTransferTimeMs(long transferBytes, long bandwidthKbps) {
+        if (transferBytes == JobInfo.NETWORK_BYTES_UNKNOWN || bandwidthKbps <= 0) {
+            return UNKNOWN_TIME;
+        }
+        return (transferBytes * DateUtils.SECOND_IN_MILLIS)
+                // Multiply by 1000 to convert kilobits to bits.
+                // Divide by 8 to convert bits to bytes.
+                / (bandwidthKbps * 1000 / 8);
     }
 
     private static boolean isCongestionDelayed(JobStatus jobStatus, Network network,
@@ -668,7 +907,7 @@ public final class ConnectivityController extends RestrictingController implemen
         if (!constants.CONN_USE_CELL_SIGNAL_STRENGTH) {
             return true;
         }
-        if (!capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+        if (!capabilities.hasTransport(TRANSPORT_CELLULAR)) {
             return true;
         }
         if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
@@ -768,6 +1007,13 @@ public final class ConnectivityController extends RestrictingController implemen
             // Need to at least know the estimated download bytes for a prefetch job.
             return false;
         }
+        if (relaxPrefetchConnectivityConstraintOnlyOnCharger()) {
+            // Since the constraint relaxation isn't required by the job, only do it when the
+            // device is charging and the battery level is above the "low battery" threshold.
+            if (!mService.isBatteryCharging() || !mService.isBatteryNotLow()) {
+                return false;
+            }
+        }
 
         // See if we match after relaxing any unmetered request
         final NetworkCapabilities.Builder builder =
@@ -798,6 +1044,12 @@ public final class ConnectivityController extends RestrictingController implemen
         // First, are we insane?
         if (isInsane(jobStatus, network, capabilities, constants)) return false;
 
+        // User-initiated jobs might make NetworkPolicyManager open up network access for
+        // the whole UID. If network access is opened up just because of UI jobs, we want
+        // to make sure that non-UI jobs don't run during that time,
+        // so make sure the job can make use of the metered network at this time.
+        if (!isMeteredAllowed(jobStatus, capabilities)) return false;
+
         // Second, is the network congested?
         if (isCongestionDelayed(jobStatus, network, capabilities, constants)) return false;
 
@@ -810,6 +1062,68 @@ public final class ConnectivityController extends RestrictingController implemen
         if (isRelaxedSatisfied(jobStatus, network, capabilities, constants)) return true;
 
         return false;
+    }
+
+    /**
+     * Updates {@link CachedNetworkMetadata#satisfiesTransportAffinities} in the given
+     * {@link CachedNetworkMetadata} object.
+     * @return true if the satisfaction changed
+     */
+    private boolean updateTransportAffinitySatisfaction(
+            @NonNull CachedNetworkMetadata cachedNetworkMetadata) {
+        final boolean satisfiesAffinities =
+                satisfiesTransportAffinities(cachedNetworkMetadata.networkCapabilities);
+        if (cachedNetworkMetadata.satisfiesTransportAffinities != satisfiesAffinities) {
+            cachedNetworkMetadata.satisfiesTransportAffinities = satisfiesAffinities;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean satisfiesTransportAffinities(@Nullable NetworkCapabilities capabilities) {
+        if (!mFlexibilityController.isEnabled()) {
+            return true;
+        }
+        if (capabilities == null) {
+            Slog.wtf(TAG, "Network constraint satisfied with null capabilities");
+            return !mCcConfig.AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+        }
+
+        if (sNetworkTransportAffinities.size() == 0) {
+            return !mCcConfig.AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+        }
+
+        final int[] transports = capabilities.getTransportTypes();
+        if (transports.length == 0) {
+            return !mCcConfig.AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+        }
+
+        for (int t : transports) {
+            int affinity = sNetworkTransportAffinities.get(t, TRANSPORT_AFFINITY_UNDEFINED);
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "satisfiesTransportAffinities transport=" + t + " aff=" + affinity);
+            }
+            switch (affinity) {
+                case TRANSPORT_AFFINITY_UNDEFINED:
+                    if (mCcConfig.AVOID_UNDEFINED_TRANSPORT_AFFINITY) {
+                        // Avoided transports take precedence.
+                        // Return as soon as we encounter a transport to avoid.
+                        return false;
+                    }
+                    break;
+                case TRANSPORT_AFFINITY_PREFER:
+                    // Nothing to do here. We like this transport.
+                    break;
+                case TRANSPORT_AFFINITY_AVOID:
+                    // Avoided transports take precedence.
+                    // Return as soon as we encounter a transport to avoid.
+                    return false;
+            }
+        }
+
+        // Didn't see any transport to avoid.
+        return true;
     }
 
     @GuardedBy("mLock")
@@ -897,10 +1211,12 @@ public final class ConnectivityController extends RestrictingController implemen
             if (us.lastUpdatedElapsed + MIN_STATS_UPDATE_INTERVAL_MS < nowElapsed) {
                 us.earliestEnqueueTime = Long.MAX_VALUE;
                 us.earliestEJEnqueueTime = Long.MAX_VALUE;
+                us.earliestUIJEnqueueTime = Long.MAX_VALUE;
                 us.numReadyWithConnectivity = 0;
                 us.numRequestedNetworkAvailable = 0;
                 us.numRegular = 0;
                 us.numEJs = 0;
+                us.numUIJs = 0;
 
                 for (int j = 0; j < jobs.size(); ++j) {
                     JobStatus job = jobs.valueAt(j);
@@ -917,10 +1233,15 @@ public final class ConnectivityController extends RestrictingController implemen
                         if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                             us.earliestEJEnqueueTime =
                                     Math.min(us.earliestEJEnqueueTime, job.enqueueTime);
+                        } else if (job.shouldTreatAsUserInitiatedJob()) {
+                            us.earliestUIJEnqueueTime =
+                                    Math.min(us.earliestUIJEnqueueTime, job.enqueueTime);
                         }
                     }
                     if (job.shouldTreatAsExpeditedJob() || job.startedAsExpeditedJob) {
                         us.numEJs++;
+                    } else if (job.shouldTreatAsUserInitiatedJob()) {
+                        us.numUIJs++;
                     } else {
                         us.numRegular++;
                     }
@@ -989,6 +1310,12 @@ public final class ConnectivityController extends RestrictingController implemen
 
     @Nullable
     private NetworkCapabilities getNetworkCapabilities(@Nullable Network network) {
+        final CachedNetworkMetadata metadata = getNetworkMetadata(network);
+        return metadata == null ? null : metadata.networkCapabilities;
+    }
+
+    @Nullable
+    private CachedNetworkMetadata getNetworkMetadata(@Nullable Network network) {
         if (network == null) {
             return null;
         }
@@ -1021,6 +1348,11 @@ public final class ConnectivityController extends RestrictingController implemen
                 Slog.d(TAG, "Using FG bypass for " + jobStatus.getSourceUid());
             }
             unbypassableBlockedReasons = UNBYPASSABLE_FOREGROUND_BLOCKED_REASONS;
+        } else if (jobStatus.shouldTreatAsUserInitiatedJob()) {
+            if (DEBUG) {
+                Slog.d(TAG, "Using UI bypass for " + jobStatus.getSourceUid());
+            }
+            unbypassableBlockedReasons = UNBYPASSABLE_UI_BLOCKED_REASONS;
         } else if (jobStatus.shouldTreatAsExpeditedJob() || jobStatus.startedAsExpeditedJob) {
             if (DEBUG) {
                 Slog.d(TAG, "Using EJ bypass for " + jobStatus.getSourceUid());
@@ -1046,17 +1378,56 @@ public final class ConnectivityController extends RestrictingController implemen
             return updateConstraintsSatisfied(jobStatus, nowElapsed, null, null);
         }
         final Network network = getNetworkLocked(jobStatus);
-        final NetworkCapabilities capabilities = getNetworkCapabilities(network);
-        return updateConstraintsSatisfied(jobStatus, nowElapsed, network, capabilities);
+        final CachedNetworkMetadata networkMetadata = getNetworkMetadata(network);
+        return updateConstraintsSatisfied(jobStatus, nowElapsed, network, networkMetadata);
     }
 
     private boolean updateConstraintsSatisfied(JobStatus jobStatus, final long nowElapsed,
-            Network network, NetworkCapabilities capabilities) {
+            Network network, @Nullable CachedNetworkMetadata networkMetadata) {
         // TODO: consider matching against non-default networks
 
+        final NetworkCapabilities capabilities =
+                networkMetadata == null ? null : networkMetadata.networkCapabilities;
         final boolean satisfied = isSatisfied(jobStatus, network, capabilities, mConstants);
 
+        if (!satisfied && jobStatus.network != null
+                && mService.isCurrentlyRunningLocked(jobStatus)
+                && isSatisfied(jobStatus, jobStatus.network,
+                        getNetworkCapabilities(jobStatus.network), mConstants)) {
+            // A new network became available for a currently running job
+            // (and most likely became the default network for the app),
+            // but it doesn't yet satisfy the requested constraints and the old network
+            // is still available and satisfies the constraints. Don't change the network
+            // given to the job for now and let it keep running. We will re-evaluate when
+            // the capabilities or connection state of either network change.
+            if (DEBUG) {
+                Slog.i(TAG, "Not reassigning network from " + jobStatus.network
+                        + " to " + network + " for running job " + jobStatus);
+            }
+            return false;
+        }
+
         final boolean changed = jobStatus.setConnectivityConstraintSatisfied(nowElapsed, satisfied);
+
+        jobStatus.setTransportAffinitiesSatisfied(satisfied && networkMetadata != null
+                && networkMetadata.satisfiesTransportAffinities);
+        if (jobStatus.canApplyTransportAffinities()) {
+            // Only modify the flex constraint if the job actually needs it.
+            jobStatus.setFlexibilityConstraintSatisfied(nowElapsed,
+                    mFlexibilityController.isFlexibilitySatisfiedLocked(jobStatus));
+        }
+
+        // Try to handle network transitions in a reasonable manner. See the lengthy note inside
+        // UidDefaultNetworkCallback for more details.
+        if (!changed && satisfied && jobStatus.network != null
+                && mService.isCurrentlyRunningLocked(jobStatus)) {
+            // The job's connectivity constraint continues to be satisfied even though the network
+            // has changed.
+            // Inform the job of the new network so that it can attempt to switch over. This is the
+            // ideal behavior for certain transitions such as going from a metered network to an
+            // unmetered network.
+            mStateChangedListener.onNetworkChanged(jobStatus, network);
+        }
 
         // Pass along the evaluated network for job to use; prevents race
         // conditions as default routes change over time, and opens the door to
@@ -1142,7 +1513,6 @@ public final class ConnectivityController extends RestrictingController implemen
             final JobStatus js = jobs.valueAt(i);
 
             final Network net = getNetworkLocked(js);
-            final NetworkCapabilities netCap = getNetworkCapabilities(net);
             final boolean match = (filterNetwork == null
                     || Objects.equals(filterNetwork, net));
 
@@ -1150,7 +1520,7 @@ public final class ConnectivityController extends RestrictingController implemen
             // job hasn't yet been evaluated against the currently
             // active network; typically when we just lost a network.
             if (match || !Objects.equals(js.network, net)) {
-                changed |= updateConstraintsSatisfied(js, nowElapsed, net, netCap);
+                changed |= updateConstraintsSatisfied(js, nowElapsed, net, getNetworkMetadata(net));
             }
         }
         return changed;
@@ -1192,9 +1562,19 @@ public final class ConnectivityController extends RestrictingController implemen
                 Slog.v(TAG, "onCapabilitiesChanged: " + network);
             }
             synchronized (mLock) {
-                final NetworkCapabilities oldCaps = mAvailableNetworks.put(network, capabilities);
-                if (oldCaps != null) {
-                    maybeUnregisterSignalStrengthCallbackLocked(oldCaps);
+                CachedNetworkMetadata cnm = mAvailableNetworks.get(network);
+                if (cnm == null) {
+                    cnm = new CachedNetworkMetadata();
+                    mAvailableNetworks.put(network, cnm);
+                } else {
+                    final NetworkCapabilities oldCaps = cnm.networkCapabilities;
+                    if (oldCaps != null) {
+                        maybeUnregisterSignalStrengthCallbackLocked(oldCaps);
+                    }
+                }
+                cnm.networkCapabilities = capabilities;
+                if (updateTransportAffinitySatisfaction(cnm)) {
+                    maybeUpdateFlexConstraintLocked(cnm);
                 }
                 maybeRegisterSignalStrengthCallbackLocked(capabilities);
                 updateTrackedJobsLocked(-1, network);
@@ -1208,9 +1588,14 @@ public final class ConnectivityController extends RestrictingController implemen
                 Slog.v(TAG, "onLost: " + network);
             }
             synchronized (mLock) {
-                final NetworkCapabilities capabilities = mAvailableNetworks.remove(network);
-                if (capabilities != null) {
-                    maybeUnregisterSignalStrengthCallbackLocked(capabilities);
+                final CachedNetworkMetadata cnm = mAvailableNetworks.remove(network);
+                if (cnm != null) {
+                    if (cnm.networkCapabilities != null) {
+                        maybeUnregisterSignalStrengthCallbackLocked(cnm.networkCapabilities);
+                    }
+                    if (cnm.satisfiesTransportAffinities) {
+                        maybeUpdateFlexConstraintLocked(null);
+                    }
                 }
                 for (int u = 0; u < mCurrentDefaultNetworkCallbacks.size(); ++u) {
                     UidDefaultNetworkCallback callback = mCurrentDefaultNetworkCallbacks.valueAt(u);
@@ -1226,7 +1611,7 @@ public final class ConnectivityController extends RestrictingController implemen
         @GuardedBy("mLock")
         private void maybeRegisterSignalStrengthCallbackLocked(
                 @NonNull NetworkCapabilities capabilities) {
-            if (!capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            if (!capabilities.hasTransport(TRANSPORT_CELLULAR)) {
                 return;
             }
             TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
@@ -1238,7 +1623,7 @@ public final class ConnectivityController extends RestrictingController implemen
                 TelephonyManager idTm = telephonyManager.createForSubscriptionId(subId);
                 CellSignalStrengthCallback callback = new CellSignalStrengthCallback();
                 idTm.registerTelephonyCallback(
-                        JobSchedulerBackgroundThread.getExecutor(), callback);
+                        AppSchedulingModuleThread.getExecutor(), callback);
                 mSignalStrengths.put(subId, callback);
 
                 final SignalStrength signalStrength = idTm.getSignalStrength();
@@ -1251,14 +1636,17 @@ public final class ConnectivityController extends RestrictingController implemen
         @GuardedBy("mLock")
         private void maybeUnregisterSignalStrengthCallbackLocked(
                 @NonNull NetworkCapabilities capabilities) {
-            if (!capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            if (!capabilities.hasTransport(TRANSPORT_CELLULAR)) {
                 return;
             }
             ArraySet<Integer> activeIds = new ArraySet<>();
             for (int i = 0, size = mAvailableNetworks.size(); i < size; ++i) {
-                NetworkCapabilities nc = mAvailableNetworks.valueAt(i);
-                if (nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    activeIds.addAll(nc.getSubscriptionIds());
+                final CachedNetworkMetadata metadata = mAvailableNetworks.valueAt(i);
+                if (metadata == null || metadata.networkCapabilities == null) {
+                    continue;
+                }
+                if (metadata.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+                    activeIds.addAll(metadata.networkCapabilities.getSubscriptionIds());
                 }
             }
             if (DEBUG) {
@@ -1278,6 +1666,57 @@ public final class ConnectivityController extends RestrictingController implemen
                     Slog.wtf(TAG, "Callback for sub " + subId + " didn't exist?!?!");
                 }
             }
+        }
+
+        /**
+         * Maybe call {@link FlexibilityController#setConstraintSatisfied(int, boolean, long)}
+         * if the network affinity state has changed.
+         */
+        @GuardedBy("mLock")
+        private void maybeUpdateFlexConstraintLocked(
+                @Nullable CachedNetworkMetadata cachedNetworkMetadata) {
+            if (cachedNetworkMetadata != null
+                    && cachedNetworkMetadata.satisfiesTransportAffinities) {
+                mFlexibilityController.setConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY,
+                        true, sElapsedRealtimeClock.millis());
+            } else {
+                // This network doesn't satisfy transport affinities. Check if any other
+                // available networks do satisfy the affinities before saying that the
+                // transport affinity is no longer satisfied for flex.
+                boolean isTransportAffinitySatisfied = false;
+                for (int i = mAvailableNetworks.size() - 1; i >= 0; --i) {
+                    final CachedNetworkMetadata cnm = mAvailableNetworks.valueAt(i);
+                    if (cnm != null && cnm.satisfiesTransportAffinities) {
+                        isTransportAffinitySatisfied = true;
+                        break;
+                    }
+                }
+                if (!isTransportAffinitySatisfied) {
+                    mFlexibilityController.setConstraintSatisfied(
+                            JobStatus.CONSTRAINT_CONNECTIVITY, false,
+                            sElapsedRealtimeClock.millis());
+                }
+            }
+        }
+    };
+
+    private final INetworkPolicyListener mNetPolicyListener = new NetworkPolicyManager.Listener() {
+        @Override
+        public void onRestrictBackgroundChanged(boolean restrictBackground) {
+            if (DEBUG) {
+                Slog.v(TAG, "onRestrictBackgroundChanged: " + restrictBackground);
+            }
+            mHandler.obtainMessage(MSG_DATA_SAVER_TOGGLED).sendToTarget();
+        }
+
+        @Override
+        public void onUidPoliciesChanged(int uid, int uidPolicies) {
+            if (DEBUG) {
+                Slog.v(TAG, "onUidPoliciesChanged: " + uid);
+            }
+            mHandler.obtainMessage(MSG_UID_POLICIES_CHANGED,
+                    uid, mNetPolicyManager.getRestrictBackgroundStatus(uid))
+                    .sendToTarget();
         }
     };
 
@@ -1302,8 +1741,81 @@ public final class ConnectivityController extends RestrictingController implemen
                             updateAllTrackedJobsLocked(allowThrottle);
                         }
                         break;
+
+                    case MSG_DATA_SAVER_TOGGLED:
+                        removeMessages(MSG_DATA_SAVER_TOGGLED);
+                        synchronized (mLock) {
+                            mBackgroundMeteredAllowed.clear();
+                            updateTrackedJobsLocked(-1, null);
+                        }
+                        break;
+
+                    case MSG_UID_POLICIES_CHANGED:
+                        final int uid = msg.arg1;
+                        final boolean newAllowed =
+                                msg.arg2 != ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
+                        synchronized (mLock) {
+                            final boolean oldAllowed = mBackgroundMeteredAllowed.get(uid);
+                            if (oldAllowed != newAllowed) {
+                                mBackgroundMeteredAllowed.put(uid, newAllowed);
+                                updateTrackedJobsLocked(uid, null);
+                            }
+                        }
+                        break;
                 }
             }
+        }
+    }
+
+    @VisibleForTesting
+    class CcConfig {
+        private boolean mFlexIsEnabled =
+                FlexibilityController.FcConfig.DEFAULT_APPLIED_CONSTRAINTS != 0;
+        private boolean mShouldReprocessNetworkCapabilities = false;
+
+        /**
+         * Prefix to use with all constant keys in order to "sub-namespace" the keys.
+         * "conn_" is used for legacy reasons.
+         */
+        private static final String CC_CONFIG_PREFIX = "conn_";
+
+        @VisibleForTesting
+        static final String KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY =
+                CC_CONFIG_PREFIX + "avoid_undefined_transport_affinity";
+
+        private static final boolean DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY = false;
+
+        /**
+         * If true, will avoid network transports that don't have an explicitly defined affinity.
+         */
+        public boolean AVOID_UNDEFINED_TRANSPORT_AFFINITY =
+                DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY;
+
+        @GuardedBy("mLock")
+        public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
+                @NonNull String key) {
+            switch (key) {
+                case KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY:
+                    final boolean avoid = properties.getBoolean(key,
+                            DEFAULT_AVOID_UNDEFINED_TRANSPORT_AFFINITY);
+                    if (AVOID_UNDEFINED_TRANSPORT_AFFINITY != avoid) {
+                        AVOID_UNDEFINED_TRANSPORT_AFFINITY = avoid;
+                        mShouldReprocessNetworkCapabilities = true;
+                    }
+                    break;
+            }
+        }
+
+        private void dump(IndentingPrintWriter pw) {
+            pw.println();
+            pw.print(ConnectivityController.class.getSimpleName());
+            pw.println(":");
+            pw.increaseIndent();
+
+            pw.print(KEY_AVOID_UNDEFINED_TRANSPORT_AFFINITY,
+                    AVOID_UNDEFINED_TRANSPORT_AFFINITY).println();
+
+            pw.decreaseIndent();
         }
     }
 
@@ -1351,8 +1863,8 @@ public final class ConnectivityController extends RestrictingController implemen
         // the onBlockedStatusChanged() call, we re-evaluate the job, but keep it running
         // (assuming the new network satisfies constraints). The app continues to use the old
         // network (if they use the network object provided through JobParameters.getNetwork())
-        // because we don't notify them of the default network change. If the old network no
-        // longer satisfies requested constraints, then we have a problem. Depending on the order
+        // because we don't notify them of the default network change. If the old network later
+        // stops satisfying requested constraints, then we have a problem. Depending on the order
         // of calls, if the per-UID callback gets notified of the network change before the
         // general callback gets notified of the capabilities change, then the job's network
         // object will point to the new network and we won't stop the job, even though we told it
@@ -1410,6 +1922,18 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     }
 
+    private static class CachedNetworkMetadata {
+        public NetworkCapabilities networkCapabilities;
+        public boolean satisfiesTransportAffinities;
+
+        public String toString() {
+            return "CNM{"
+                    + networkCapabilities.toString()
+                    + ", satisfiesTransportAffinities=" + satisfiesTransportAffinities
+                    + "}";
+        }
+    }
+
     private static class UidStats {
         public final int uid;
         public int baseBias;
@@ -1418,8 +1942,10 @@ public final class ConnectivityController extends RestrictingController implemen
         public int numRequestedNetworkAvailable;
         public int numEJs;
         public int numRegular;
+        public int numUIJs;
         public long earliestEnqueueTime;
         public long earliestEJEnqueueTime;
+        public long earliestUIJEnqueueTime;
         public long lastUpdatedElapsed;
 
         private UidStats(int uid) {
@@ -1437,6 +1963,7 @@ public final class ConnectivityController extends RestrictingController implemen
             pw.print("#reg", numRegular);
             pw.print("earliestEnqueue", earliestEnqueueTime);
             pw.print("earliestEJEnqueue", earliestEJEnqueueTime);
+            pw.print("earliestUIJEnqueue", earliestUIJEnqueueTime);
             pw.print("updated=");
             TimeUtils.formatDuration(lastUpdatedElapsed - nowElapsed, pw);
             pw.println("}");
@@ -1470,11 +1997,30 @@ public final class ConnectivityController extends RestrictingController implemen
         }
     }
 
+    @VisibleForTesting
+    @NonNull
+    CcConfig getCcConfig() {
+        return mCcConfig;
+    }
+
+    @Override
+    public void dumpConstants(IndentingPrintWriter pw) {
+        mCcConfig.dump(pw);
+    }
+
     @GuardedBy("mLock")
     @Override
     public void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate) {
         final long nowElapsed = sElapsedRealtimeClock.millis();
+
+        pw.println("Aconfig flags:");
+        pw.increaseIndent();
+        pw.print(FLAG_RELAX_PREFETCH_CONNECTIVITY_CONSTRAINT_ONLY_ON_CHARGER,
+                relaxPrefetchConnectivityConstraintOnlyOnCharger());
+        pw.println();
+        pw.decreaseIndent();
+        pw.println();
 
         if (mRequestedWhitelistJobs.size() > 0) {
             pw.print("Requested standby exceptions:");
@@ -1514,6 +2060,12 @@ public final class ConnectivityController extends RestrictingController implemen
             pw.println("No cached signal strengths");
         }
         pw.println();
+
+        if (mBackgroundMeteredAllowed.size() > 0) {
+            pw.print("Background metered allowed: ");
+            pw.println(mBackgroundMeteredAllowed);
+            pw.println();
+        }
 
         pw.println("Current default network callbacks:");
         pw.increaseIndent();

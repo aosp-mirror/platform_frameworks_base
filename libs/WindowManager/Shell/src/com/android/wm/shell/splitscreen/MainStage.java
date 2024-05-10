@@ -16,9 +16,6 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
-
 import android.content.Context;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -27,6 +24,9 @@ import android.window.WindowContainerTransaction;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
+
+import java.util.Optional;
 
 /**
  * Main stage for split-screen mode. When split-screen is active all standard activity types launch
@@ -34,15 +34,14 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  * @see StageCoordinator
  */
 class MainStage extends StageTaskListener {
-    private static final String TAG = MainStage.class.getSimpleName();
-
     private boolean mIsActive = false;
 
     MainStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider) {
+            SurfaceSession surfaceSession, IconProvider iconProvider,
+            Optional<WindowDecorViewModel> windowDecorViewModel) {
         super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession,
-                iconProvider);
+                iconProvider, windowDecorViewModel);
     }
 
     boolean isActive() {
@@ -52,15 +51,8 @@ class MainStage extends StageTaskListener {
     void activate(WindowContainerTransaction wct, boolean includingTopTask) {
         if (mIsActive) return;
 
-        final WindowContainerToken rootToken = mRootTaskInfo.token;
         if (includingTopTask) {
-            wct.reparentTasks(
-                    null /* currentParent */,
-                    rootToken,
-                    CONTROLLED_WINDOWING_MODES,
-                    CONTROLLED_ACTIVITY_TYPES,
-                    true /* onTop */,
-                    true /* reparentTopOnly */);
+            reparentTopTask(wct);
         }
 
         mIsActive = true;

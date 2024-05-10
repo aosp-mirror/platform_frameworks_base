@@ -20,6 +20,8 @@
 #define CHATTY ALOGD
 #define LOG_TAG "audioplay"
 
+#include <binder/IServiceManager.h>
+
 #include "audioplay.h"
 
 #include <string.h>
@@ -316,8 +318,13 @@ public:
         : Thread(false),
           mExampleAudioData(exampleAudioData),
           mExampleAudioLength(exampleAudioLength) {}
+
 private:
     virtual bool threadLoop() {
+        if (defaultServiceManager()->checkService(String16("audio")) == nullptr) {
+            ALOGW("Audio service is not ready yet, ignore creating playback engine");
+            return false;
+        }
         audioplay::create(mExampleAudioData, mExampleAudioLength);
         // Exit immediately
         return false;
@@ -334,6 +341,11 @@ class AudioAnimationCallbacks : public android::BootAnimation::Callbacks {
 public:
     void init(const Vector<Animation::Part>& parts) override {
         const Animation::Part* partWithAudio = nullptr;
+
+        if (!playSoundsAllowed()) {
+            return;
+        }
+
         for (const Animation::Part& part : parts) {
             if (part.audioData != nullptr) {
                 partWithAudio = &part;
@@ -401,14 +413,14 @@ bool create(const uint8_t* exampleClipBuf, int exampleClipBufSize) {
 }
 
 bool playClip(const uint8_t* buf, int size) {
-    // Parse the WAV header
-    const ChunkFormat* chunkFormat;
-    if (!parseClipBuf(buf, size, &chunkFormat, &nextBuffer, &nextSize)) {
+    if (!hasPlayer()) {
+        ALOGE("cannot play clip %p without a player", buf);
         return false;
     }
 
-    if (!hasPlayer()) {
-        ALOGD("cannot play clip %p without a player", buf);
+    // Parse the WAV header
+    const ChunkFormat* chunkFormat;
+    if (!parseClipBuf(buf, size, &chunkFormat, &nextBuffer, &nextSize)) {
         return false;
     }
 
@@ -433,11 +445,9 @@ bool playClip(const uint8_t* buf, int size) {
 void setPlaying(bool isPlaying) {
     if (!hasPlayer()) return;
 
-    SLresult result;
-
     if (nullptr != bqPlayerPlay) {
         // set the player's state
-        result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay,
+        (*bqPlayerPlay)->SetPlayState(bqPlayerPlay,
             isPlaying ? SL_PLAYSTATE_PLAYING : SL_PLAYSTATE_STOPPED);
     }
 

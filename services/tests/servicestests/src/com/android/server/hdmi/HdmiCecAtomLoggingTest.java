@@ -19,15 +19,17 @@ import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.PATH_RELATIONSHIP_ANCESTOR;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Binder;
@@ -55,7 +58,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 /**
@@ -68,7 +70,6 @@ public class HdmiCecAtomLoggingTest {
     private HdmiCecAtomWriter mHdmiCecAtomWriterSpy;
     private HdmiControlService mHdmiControlServiceSpy;
     private HdmiCecController mHdmiCecController;
-    private HdmiCecLocalDevicePlayback mHdmiCecLocalDevicePlayback;
     private HdmiMhlControllerStub mHdmiMhlControllerStub;
     private FakeNativeWrapper mNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
@@ -77,8 +78,9 @@ public class HdmiCecAtomLoggingTest {
     private Context mContextSpy;
     private TestLooper mTestLooper = new TestLooper();
     private int mPhysicalAddress = 0x1110;
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private HdmiPortInfo[] mHdmiPortInfo;
+    private HdmiEarcController mHdmiEarcController;
+    private FakeEarcNativeWrapper mEarcNativeWrapper;
 
     @Before
     public void setUp() throws RemoteException {
@@ -89,12 +91,14 @@ public class HdmiCecAtomLoggingTest {
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()));
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy,
+                Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
         doReturn(mHdmiCecAtomWriterSpy).when(mHdmiControlServiceSpy).getAtomWriter();
-
         HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContextSpy);
         doReturn(hdmiCecConfig).when(mHdmiControlServiceSpy).getHdmiCecConfig();
 
@@ -116,21 +120,26 @@ public class HdmiCecAtomLoggingTest {
         mHdmiCecNetwork = new HdmiCecNetwork(mHdmiControlServiceSpy,
                 mHdmiCecController, mHdmiMhlControllerStub);
         mHdmiControlServiceSpy.setHdmiCecNetwork(mHdmiCecNetwork);
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
+
+        mEarcNativeWrapper = new FakeEarcNativeWrapper();
+        mHdmiEarcController = HdmiEarcController.createWithNativeWrapper(
+                mHdmiControlServiceSpy, mEarcNativeWrapper);
+        mHdmiControlServiceSpy.setEarcController(mHdmiEarcController);
 
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
         hdmiPortInfos[0] =
-                new HdmiPortInfo(1, HdmiPortInfo.PORT_OUTPUT, 0x0000, true, false, false);
+                new HdmiPortInfo.Builder(1, HdmiPortInfo.PORT_OUTPUT, 0x0000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .build();
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
-
-        mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlServiceSpy);
-        mHdmiCecLocalDevicePlayback.init();
-        mLocalDevices.add(mHdmiCecLocalDevicePlayback);
 
         mHdmiControlServiceSpy.initService();
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
-        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mTestLooper.dispatchAll();
@@ -300,5 +309,61 @@ public class HdmiCecAtomLoggingTest {
                         HdmiStatsEnums.USER_CONTROL_PRESSED_COMMAND_UNKNOWN,
                         HdmiCecAtomWriter.FEATURE_ABORT_OPCODE_UNKNOWN,
                         HdmiStatsEnums.FEATURE_ABORT_REASON_UNKNOWN);
+    }
+
+    @Test
+    public void testDsmStatusChanged_toggleDsmStatus_ArcSupported_writesAtom() {
+        doReturn(true).when(mHdmiControlServiceSpy).isArcSupported();
+        mHdmiControlServiceSpy.setSoundbarMode(HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .dsmStatusChanged(eq(true), eq(true),
+                        eq(HdmiStatsEnums.LOG_REASON_DSM_SETTING_TOGGLED));
+    }
+
+    @Test
+    public void testDsmStatusChanged_toggleDsmStatus_ArcNotSupported_writesAtom() {
+        doReturn(false).when(mHdmiControlServiceSpy).isArcSupported();
+        mHdmiControlServiceSpy.setSoundbarMode(HdmiControlManager.SOUNDBAR_MODE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .dsmStatusChanged(eq(false), eq(true),
+                        eq(HdmiStatsEnums.LOG_REASON_DSM_SETTING_TOGGLED));
+    }
+
+    @Test
+    public void testDsmStatusChanged_onWakeUp_ArcSupported_writesAtom_logReasonWake() {
+        mHdmiControlServiceSpy.setSoundbarMode(HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        Mockito.clearInvocations(mHdmiCecAtomWriterSpy);
+
+        doReturn(true).when(mHdmiControlServiceSpy).isArcSupported();
+        mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .dsmStatusChanged(eq(true), eq(false),
+                        eq(HdmiStatsEnums.LOG_REASON_DSM_WAKE));
+        verify(mHdmiCecAtomWriterSpy, never())
+                .dsmStatusChanged(anyBoolean(), anyBoolean(),
+                        eq(HdmiStatsEnums.LOG_REASON_DSM_SETTING_TOGGLED));
+    }
+
+    @Test
+    public void testDsmStatusChanged_onWakeUp_ArcNotSupported_writesAtom_logReasonWake() {
+        mHdmiControlServiceSpy.setSoundbarMode(HdmiControlManager.SOUNDBAR_MODE_DISABLED);
+        Mockito.clearInvocations(mHdmiCecAtomWriterSpy);
+
+        doReturn(false).when(mHdmiControlServiceSpy).isArcSupported();
+        mHdmiControlServiceSpy.onWakeUp(WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .dsmStatusChanged(eq(false), eq(false),
+                        eq(HdmiStatsEnums.LOG_REASON_DSM_WAKE));
+        verify(mHdmiCecAtomWriterSpy, never())
+                .dsmStatusChanged(anyBoolean(), anyBoolean(),
+                        eq(HdmiStatsEnums.LOG_REASON_DSM_SETTING_TOGGLED));
     }
 }

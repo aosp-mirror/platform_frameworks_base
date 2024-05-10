@@ -43,6 +43,7 @@ import android.annotation.StyleableRes;
 import android.annotation.XmlRes;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.loader.ResourcesLoader;
@@ -53,6 +54,7 @@ import android.graphics.drawable.Drawable.ConstantState;
 import android.graphics.drawable.DrawableInflater;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -132,6 +134,11 @@ public class Resources {
     private static final Object sSync = new Object();
     private final Object mUpdateLock = new Object();
 
+    /**
+     * Controls whether we should preload resources during zygote init.
+     */
+    private static final boolean PRELOAD_RESOURCES = true;
+
     // Used by BridgeResources in layoutlib
     @UnsupportedAppUsage
     static Resources mSystem = null;
@@ -173,6 +180,7 @@ public class Resources {
      * mThemeRefNextFlushSize is reached.
      */
     private static final int MIN_THEME_REFS_FLUSH_SIZE = 32;
+    private static final int MAX_THEME_REFS_FLUSH_SIZE = 512;
     private int mThemeRefsNextFlushSize = MIN_THEME_REFS_FLUSH_SIZE;
 
     private int mBaseApkAssetsSize;
@@ -364,10 +372,10 @@ public class Resources {
 
         // Rebase the ThemeImpls using the new ResourcesImpl.
         synchronized (mThemeRefs) {
+            cleanupThemeReferences();
             final int count = mThemeRefs.size();
             for (int i = 0; i < count; i++) {
-                WeakReference<Theme> weakThemeRef = mThemeRefs.get(i);
-                Theme theme = weakThemeRef != null ? weakThemeRef.get() : null;
+                Theme theme = mThemeRefs.get(i).get();
                 if (theme != null) {
                     theme.rebase(mResourcesImpl);
                 }
@@ -2001,6 +2009,27 @@ public class Resources {
 
         private int mHashCode = 0;
 
+        private int findValue(int resId, boolean force) {
+            for (int i = 0; i < mCount; ++i) {
+                if (mResId[i] == resId && mForce[i] == force) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private void moveToLast(int index) {
+            if (index < 0 || index >= mCount - 1) {
+                return;
+            }
+            final int id = mResId[index];
+            final boolean force = mForce[index];
+            System.arraycopy(mResId, index + 1, mResId, index, mCount - index - 1);
+            mResId[mCount - 1] = id;
+            System.arraycopy(mForce, index + 1, mForce, index, mCount - index - 1);
+            mForce[mCount - 1] = force;
+        }
+
         public void append(int resId, boolean force) {
             if (mResId == null) {
                 mResId = new int[4];
@@ -2010,11 +2039,18 @@ public class Resources {
                 mForce = new boolean[4];
             }
 
-            mResId = GrowingArrayUtils.append(mResId, mCount, resId);
-            mForce = GrowingArrayUtils.append(mForce, mCount, force);
-            mCount++;
-
-            mHashCode = 31 * (31 * mHashCode + resId) + (force ? 1 : 0);
+            // Some apps tend to keep adding same resources over and over, let's protect from it.
+            // Note: the order still matters, as the values that come later override the earlier
+            //  ones.
+            final int index = findValue(resId, force);
+            if (index >= 0) {
+                moveToLast(index);
+            } else {
+                mResId = GrowingArrayUtils.append(mResId, mCount, resId);
+                mForce = GrowingArrayUtils.append(mForce, mCount, force);
+                mCount++;
+                mHashCode = 31 * (31 * mHashCode + resId) + (force ? 1 : 0);
+            }
         }
 
         /**
@@ -2073,6 +2109,19 @@ public class Resources {
         }
     }
 
+    static int nextPowerOf2(int number) {
+        return number < 2 ? 2 : 1 >> ((int) (Math.log(number - 1) / Math.log(2)) + 1);
+    }
+
+    private void cleanupThemeReferences() {
+        // Clean up references to garbage collected themes
+        if (mThemeRefs.size() > mThemeRefsNextFlushSize) {
+            mThemeRefs.removeIf(ref -> ref.refersTo(null));
+            mThemeRefsNextFlushSize = Math.min(Math.max(MIN_THEME_REFS_FLUSH_SIZE,
+                    nextPowerOf2(mThemeRefs.size())), MAX_THEME_REFS_FLUSH_SIZE);
+        }
+    }
+
     /**
      * Generate a new Theme object for this set of Resources.  It initially
      * starts out empty.
@@ -2083,14 +2132,8 @@ public class Resources {
         Theme theme = new Theme();
         theme.setImpl(mResourcesImpl.newThemeImpl());
         synchronized (mThemeRefs) {
+            cleanupThemeReferences();
             mThemeRefs.add(new WeakReference<>(theme));
-
-            // Clean up references to garbage collected themes
-            if (mThemeRefs.size() > mThemeRefsNextFlushSize) {
-                mThemeRefs.removeIf(ref -> ref.refersTo(null));
-                mThemeRefsNextFlushSize = Math.max(MIN_THEME_REFS_FLUSH_SIZE,
-                        2 * mThemeRefs.size());
-            }
         }
         return theme;
     }
@@ -2159,17 +2202,18 @@ public class Resources {
     }
 
     /**
-     * Return the current display metrics that are in effect for this resource
+     * Returns the current display metrics that are in effect for this resource
      * object. The returned object should be treated as read-only.
      *
      * <p>Note that the reported value may be different than the window this application is
      * interested in.</p>
      *
-     * <p>Best practices are to obtain metrics from {@link WindowManager#getCurrentWindowMetrics()}
-     * for window bounds, {@link Display#getRealMetrics(DisplayMetrics)} for display bounds and
-     * obtain density from {@link Configuration#densityDpi}. The value obtained from this API may be
-     * wrong if the {@link Resources} is from the context which is different than the window is
-     * attached such as {@link Application#getResources()}.
+     * <p>The best practices is to obtain metrics from
+     * {@link WindowManager#getCurrentWindowMetrics()} for window bounds. The value obtained from
+     * this API may be wrong if {@link Context#getResources()} is not from a {@code UiContext}.
+     * For example, use the {@link DisplayMetrics} obtained from {@link Application#getResources()}
+     * to build {@link android.app.Activity} UI elements especially when the
+     * {@link android.app.Activity} is in the multi-window mode or on the secondary {@link Display}.
      * <p/>
      *
      * @return The resource's current display metrics.
@@ -2205,6 +2249,11 @@ public class Resources {
     /** @hide */
     public Configuration[] getSizeConfigurations() {
         return mResourcesImpl.getSizeConfigurations();
+    }
+
+    /** @hide */
+    public Configuration[] getSizeAndUiModeConfigurations() {
+        return mResourcesImpl.getSizeAndUiModeConfigurations();
     }
 
     /**
@@ -2659,6 +2708,98 @@ public class Resources {
                 loader.unregisterOnProvidersChangedCallback(this);
             }
         }
+    }
+
+    /**
+     * Load in commonly used resources, so they can be shared across processes.
+     *
+     * These tend to be a few Kbytes, but are frequently in the 20-40K range, and occasionally even
+     * larger.
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static void preloadResources() {
+        try {
+            final Resources sysRes = Resources.getSystem();
+            sysRes.startPreloading();
+            if (PRELOAD_RESOURCES) {
+                Log.i(TAG, "Preloading resources...");
+
+                long startTime = SystemClock.uptimeMillis();
+                TypedArray ar = sysRes.obtainTypedArray(
+                        com.android.internal.R.array.preloaded_drawables);
+                int numberOfEntries = preloadDrawables(sysRes, ar);
+                ar.recycle();
+                Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
+                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
+
+                startTime = SystemClock.uptimeMillis();
+                ar = sysRes.obtainTypedArray(
+                        com.android.internal.R.array.preloaded_color_state_lists);
+                numberOfEntries = preloadColorStateLists(sysRes, ar);
+                ar.recycle();
+                Log.i(TAG, "...preloaded " + numberOfEntries + " resources in "
+                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
+
+                if (sysRes.getBoolean(
+                        com.android.internal.R.bool.config_freeformWindowManagement)) {
+                    startTime = SystemClock.uptimeMillis();
+                    ar = sysRes.obtainTypedArray(
+                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
+                    numberOfEntries = preloadDrawables(sysRes, ar);
+                    ar.recycle();
+                    Log.i(TAG, "...preloaded " + numberOfEntries + " resource in "
+                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
+                }
+            }
+            sysRes.finishPreloading();
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Failure preloading resources", e);
+        }
+    }
+
+    private static int preloadColorStateLists(Resources resources, TypedArray ar) {
+        final int numberOfEntries = ar.length();
+        for (int i = 0; i < numberOfEntries; i++) {
+            int id = ar.getResourceId(i, 0);
+
+            if (id != 0) {
+                if (resources.getColorStateList(id, null) == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to find preloaded color resource #0x"
+                                    + Integer.toHexString(id)
+                                    + " (" + ar.getString(i) + ")");
+                }
+            }
+        }
+        return numberOfEntries;
+    }
+
+    private static int preloadDrawables(Resources resources, TypedArray ar) {
+        final int numberOfEntries = ar.length();
+        for (int i = 0; i < numberOfEntries; i++) {
+            int id = ar.getResourceId(i, 0);
+
+            if (id != 0) {
+                if (resources.getDrawable(id, null) == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to find preloaded drawable resource #0x"
+                                    + Integer.toHexString(id)
+                                    + " (" + ar.getString(i) + ")");
+                }
+            }
+        }
+        return numberOfEntries;
+    }
+
+    /**
+     * Clear the cache when the framework resources packages is changed.
+     * @hide
+     */
+    @VisibleForTesting
+    public static void resetPreloadDrawableStateCache() {
+        ResourcesImpl.resetDrawableStateCache();
+        preloadResources();
     }
 
     /** @hide */

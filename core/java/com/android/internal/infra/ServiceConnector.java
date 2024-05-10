@@ -745,6 +745,10 @@ public interface ServiceConnector<I extends IInterface> {
             boolean mAsync = false;
             private String mDebugName;
             {
+                // The timeout handler must be set before any calls to set timeouts on the
+                // AndroidFuture, to ensure they are posted on the proper thread.
+                setTimeoutHandler(getJobHandler());
+
                 long requestTimeout = getRequestTimeoutMs();
                 if (requestTimeout > 0) {
                     orTimeout(requestTimeout, TimeUnit.MILLISECONDS);

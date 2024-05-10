@@ -25,11 +25,13 @@ import android.content.ContextWrapper;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvInputService;
+import android.media.tv.tuner.filter.Filter;
 import android.media.tv.tuner.frontend.FrontendSettings;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerCiCamRequest;
+import android.media.tv.tunerresourcemanager.TunerDemuxInfo;
 import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
 import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
@@ -806,20 +808,137 @@ public class TunerResourceManagerServiceTest {
     @Test
     public void requestDemuxTest() {
         // Register client
-        ResourceClientProfile profile = resourceClientProfile("0" /*sessionId*/,
+        ResourceClientProfile profile0 = resourceClientProfile("0" /*sessionId*/,
                 TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
-        int[] clientId = new int[1];
+        ResourceClientProfile profile1 = resourceClientProfile("1" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientId0 = new int[1];
         mTunerResourceManagerService.registerClientProfileInternal(
-                profile, null /*listener*/, clientId);
-        assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+                profile0, null /*listener*/, clientId0);
+        assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
 
-        int[] demuxHandle = new int[1];
-        TunerDemuxRequest request = new TunerDemuxRequest();
-        request.clientId = clientId[0];
-        assertThat(mTunerResourceManagerService.requestDemuxInternal(request, demuxHandle))
+        TunerDemuxInfo[] infos = new TunerDemuxInfo[3];
+        infos[0] = tunerDemuxInfo(0 /* handle */, Filter.TYPE_TS | Filter.TYPE_IP);
+        infos[1] = tunerDemuxInfo(1 /* handle */, Filter.TYPE_TLV);
+        infos[2] = tunerDemuxInfo(2 /* handle */, Filter.TYPE_TS);
+        mTunerResourceManagerService.setDemuxInfoListInternal(infos);
+
+        int[] demuxHandle0 = new int[1];
+        // first with undefined type (should be the first one with least # of caps)
+        TunerDemuxRequest request = tunerDemuxRequest(clientId0[0], Filter.TYPE_UNDEFINED);
+        assertThat(mTunerResourceManagerService.requestDemuxInternal(request, demuxHandle0))
                 .isTrue();
-        assertThat(mTunerResourceManagerService.getResourceIdFromHandle(demuxHandle[0]))
+        assertThat(demuxHandle0[0]).isEqualTo(1);
+        DemuxResource dr = mTunerResourceManagerService.getDemuxResource(demuxHandle0[0]);
+        mTunerResourceManagerService.releaseDemuxInternal(dr);
+
+        // now with non-supported type (ALP)
+        request.desiredFilterTypes = Filter.TYPE_ALP;
+        demuxHandle0[0] = -1;
+        assertThat(mTunerResourceManagerService.requestDemuxInternal(request, demuxHandle0))
+                .isFalse();
+        assertThat(demuxHandle0[0]).isEqualTo(-1);
+
+        // now with TS (should be the one with least # of caps that supports TS)
+        request.desiredFilterTypes = Filter.TYPE_TS;
+        assertThat(mTunerResourceManagerService.requestDemuxInternal(request, demuxHandle0))
+                .isTrue();
+        assertThat(demuxHandle0[0]).isEqualTo(2);
+
+        // request for another TS
+        int[] clientId1 = new int[1];
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile1, null /*listener*/, clientId1);
+        assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        int[] demuxHandle1 = new int[1];
+        TunerDemuxRequest request1 = tunerDemuxRequest(clientId1[0], Filter.TYPE_TS);
+        assertThat(mTunerResourceManagerService.requestDemuxInternal(request1, demuxHandle1))
+                .isTrue();
+        assertThat(demuxHandle1[0]).isEqualTo(0);
+        assertThat(mTunerResourceManagerService.getResourceIdFromHandle(demuxHandle1[0]))
                 .isEqualTo(0);
+
+        // release demuxes
+        dr = mTunerResourceManagerService.getDemuxResource(demuxHandle0[0]);
+        mTunerResourceManagerService.releaseDemuxInternal(dr);
+        dr = mTunerResourceManagerService.getDemuxResource(demuxHandle1[0]);
+        mTunerResourceManagerService.releaseDemuxInternal(dr);
+    }
+
+    @Test
+    public void requestDemuxTest_ResourceReclaim() {
+        // Register clients
+        ResourceClientProfile profile0 = resourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        ResourceClientProfile profile1 = resourceClientProfile("1" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_SCAN);
+        ResourceClientProfile profile2 = resourceClientProfile("2" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_SCAN);
+        int[] clientId0 = new int[1];
+        int[] clientId1 = new int[1];
+        int[] clientId2 = new int[1];
+        TestResourcesReclaimListener listener0 = new TestResourcesReclaimListener();
+        TestResourcesReclaimListener listener1 = new TestResourcesReclaimListener();
+        TestResourcesReclaimListener listener2 = new TestResourcesReclaimListener();
+
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile0, listener0, clientId0);
+        assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile1, listener1, clientId1);
+        assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile2, listener2, clientId1);
+        assertThat(clientId2[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        // Init demux resources.
+        TunerDemuxInfo[] infos = new TunerDemuxInfo[2];
+        infos[0] = tunerDemuxInfo(0 /*handle*/, Filter.TYPE_TS | Filter.TYPE_IP);
+        infos[1] = tunerDemuxInfo(1 /*handle*/, Filter.TYPE_TS);
+        mTunerResourceManagerService.setDemuxInfoListInternal(infos);
+
+        // let clientId0(prio:100) request for IP - should succeed
+        TunerDemuxRequest request0 = tunerDemuxRequest(clientId0[0], Filter.TYPE_IP);
+        int[] demuxHandle0 = new int[1];
+        assertThat(mTunerResourceManagerService
+                .requestDemuxInternal(request0, demuxHandle0)).isTrue();
+        assertThat(demuxHandle0[0]).isEqualTo(0);
+
+        // let clientId1(prio:50) request for IP - should fail
+        TunerDemuxRequest request1 = tunerDemuxRequest(clientId1[0], Filter.TYPE_IP);
+        int[] demuxHandle1 = new int[1];
+        demuxHandle1[0] = -1;
+        assertThat(mTunerResourceManagerService
+                .requestDemuxInternal(request1, demuxHandle1)).isFalse();
+        assertThat(listener0.isReclaimed()).isFalse();
+        assertThat(demuxHandle1[0]).isEqualTo(-1);
+
+        // let clientId1(prio:50) request for TS - should succeed
+        request1.desiredFilterTypes = Filter.TYPE_TS;
+        assertThat(mTunerResourceManagerService
+                .requestDemuxInternal(request1, demuxHandle1)).isTrue();
+        assertThat(demuxHandle1[0]).isEqualTo(1);
+        assertThat(listener0.isReclaimed()).isFalse();
+
+        // now release demux for the clientId0 (higher priority) and request demux
+        DemuxResource dr = mTunerResourceManagerService.getDemuxResource(demuxHandle0[0]);
+        mTunerResourceManagerService.releaseDemuxInternal(dr);
+
+        // let clientId2(prio:50) request for TS - should succeed
+        TunerDemuxRequest request2 = tunerDemuxRequest(clientId2[0], Filter.TYPE_TS);
+        int[] demuxHandle2 = new int[1];
+        assertThat(mTunerResourceManagerService
+                .requestDemuxInternal(request2, demuxHandle2)).isTrue();
+        assertThat(demuxHandle2[0]).isEqualTo(0);
+        assertThat(listener1.isReclaimed()).isFalse();
+
+        // let clientId0(prio:100) request for TS - should reclaim from clientId2
+        // , who has the smaller caps
+        request0.desiredFilterTypes = Filter.TYPE_TS;
+        assertThat(mTunerResourceManagerService
+                .requestDemuxInternal(request0, demuxHandle0)).isTrue();
+        assertThat(listener1.isReclaimed()).isFalse();
+        assertThat(listener2.isReclaimed()).isTrue();
     }
 
     @Test
@@ -1186,6 +1305,20 @@ public class TunerResourceManagerServiceTest {
         TunerCiCamRequest request = new TunerCiCamRequest();
         request.clientId = clientId;
         request.ciCamId = ciCamId;
+        return request;
+    }
+
+    private TunerDemuxInfo tunerDemuxInfo(int handle, int supportedFilterTypes) {
+        TunerDemuxInfo info = new TunerDemuxInfo();
+        info.handle = handle;
+        info.filterTypes = supportedFilterTypes;
+        return info;
+    }
+
+    private TunerDemuxRequest tunerDemuxRequest(int clientId, int desiredFilterTypes) {
+        TunerDemuxRequest request = new TunerDemuxRequest();
+        request.clientId = clientId;
+        request.desiredFilterTypes = desiredFilterTypes;
         return request;
     }
 }

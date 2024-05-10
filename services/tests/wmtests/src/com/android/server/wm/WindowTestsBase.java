@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -26,7 +27,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Process.SYSTEM_UID;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
@@ -48,6 +48,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -59,6 +60,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.IntDef;
@@ -66,37 +68,47 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.MergedConfiguration;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
+import android.view.IWindowSessionCallback;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
+import android.view.inputmethod.ImeTracker;
+import android.window.ClientWindowFrames;
 import android.window.ITransitionPlayer;
+import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskFragmentOrganizer;
@@ -105,6 +117,7 @@ import android.window.TransitionRequestInfo;
 
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 import org.junit.After;
@@ -113,6 +126,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.Description;
 import org.mockito.Mockito;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -138,9 +152,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
     ActivityTaskManagerService mAtm;
     RootWindowContainer mRootWindowContainer;
     ActivityTaskSupervisor mSupervisor;
+    ClientLifecycleManager mClientLifecycleManager;
     WindowManagerService mWm;
     private final IWindow mIWindow = new TestIWindow();
-    private Session mMockSession;
+    private Session mTestSession;
+    private boolean mUseFakeSettingsProvider;
 
     DisplayInfo mDisplayInfo = new DisplayInfo();
     DisplayContent mDefaultDisplay;
@@ -154,7 +170,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     DisplayContent mDisplayContent;
 
-    // The following fields are only available depending on the usage of annotation UseTestDisplay.
+    // The following fields are only available depending on the usage of annotation UseTestDisplay
+    // and UseCommonWindows.
     WindowState mWallpaperWindow;
     WindowState mImeWindow;
     WindowState mImeDialogWindow;
@@ -187,6 +204,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     private static boolean sOverridesCheckedTestDisplay;
 
+    private boolean mOriginalPerDisplayFocusEnabled;
+
     @BeforeClass
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
@@ -197,7 +216,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mAtm = mSystemServicesTestRule.getActivityTaskManagerService();
         mSupervisor = mAtm.mTaskSupervisor;
         mRootWindowContainer = mAtm.mRootWindowContainer;
+        mClientLifecycleManager = mAtm.getLifecycleManager();
         mWm = mSystemServicesTestRule.getWindowManagerService();
+        mOriginalPerDisplayFocusEnabled = mWm.mPerDisplayFocusEnabled;
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
         mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
@@ -208,8 +229,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         displayPolicy.finishWindowsDrawn();
         displayPolicy.finishScreenTurningOn();
 
+        final InsetsPolicy insetsPolicy = mDefaultDisplay.getInsetsPolicy();
+        suppressInsetsAnimation(insetsPolicy.getTransientControlTarget());
+        suppressInsetsAnimation(insetsPolicy.getPermanentControlTarget());
+
         mTransaction = mSystemServicesTestRule.mTransaction;
-        mMockSession = mock(Session.class);
 
         mContext.getSystemService(DisplayManager.class)
                 .getDisplay(Display.DEFAULT_DISPLAY).getDisplayInfo(mDisplayInfo);
@@ -217,14 +241,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Only create an additional test display for annotated test class/method because it may
         // significantly increase the execution time.
         final Description description = mSystemServicesTestRule.getDescription();
-        UseTestDisplay testDisplayAnnotation = description.getAnnotation(UseTestDisplay.class);
-        if (testDisplayAnnotation == null) {
-            testDisplayAnnotation = description.getTestClass().getAnnotation(UseTestDisplay.class);
-        }
-        if (testDisplayAnnotation != null) {
-            createTestDisplay(testDisplayAnnotation);
+        final UseTestDisplay useTestDisplay = getAnnotation(description, UseTestDisplay.class);
+        if (useTestDisplay != null) {
+            createTestDisplay(useTestDisplay);
         } else {
             mDisplayContent = mDefaultDisplay;
+            final SetupWindows setupWindows = getAnnotation(description, SetupWindows.class);
+            if (setupWindows != null) {
+                addCommonWindows(setupWindows.addAllCommonWindows(), setupWindows.addWindows());
+            }
         }
 
         // Ensure letterbox aspect ratio is not overridden on any device target.
@@ -253,20 +278,31 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // device form factors.
         mAtm.mWindowManager.mLetterboxConfiguration
                 .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(false);
+        // Ensure aspect ratio for al apps isn't overridden on any device target.
+        // {@link com.android.internal.R.bool
+        // .config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled}, may be set on
+        // some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration
+                .setIsDisplayAspectRatioEnabledForFixedOrientationLetterbox(false);
 
         checkDeviceSpecificOverridesNotApplied();
     }
 
+    /**
+     * The test doesn't create real SurfaceControls, but mocked ones. This prevents the target from
+     * controlling them, or it will cause {@link NullPointerException}.
+     */
+    static void suppressInsetsAnimation(InsetsControlTarget target) {
+        spyOn(target);
+        Mockito.doNothing().when(target).notifyInsetsControlChanged();
+    }
+
     @After
     public void tearDown() throws Exception {
-        // Revert back to device overrides.
-        mAtm.mWindowManager.mLetterboxConfiguration.resetFixedOrientationLetterboxAspectRatio();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetLetterboxVerticalPositionMultiplier();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetIsHorizontalReachabilityEnabled();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
-        mAtm.mWindowManager.mLetterboxConfiguration
-                .resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+        if (mUseFakeSettingsProvider) {
+            FakeSettingsProvider.clearSettingsProvider();
+        }
+        mWm.mPerDisplayFocusEnabled = mOriginalPerDisplayFocusEnabled;
     }
 
     /**
@@ -293,10 +329,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
     private void createTestDisplay(UseTestDisplay annotation) {
         beforeCreateTestDisplay();
         mDisplayContent = createNewDisplayWithImeSupport(DISPLAY_IME_POLICY_LOCAL);
+        addCommonWindows(annotation.addAllCommonWindows(), annotation.addWindows());
+        mDisplayContent.getDisplayPolicy().setRemoteInsetsControllerControlsSystemBars(false);
 
-        final boolean addAll = annotation.addAllCommonWindows();
-        final @CommonTypes int[] requestedWindows = annotation.addWindows();
+        // Adding a display will cause freezing the display. Make sure to wait until it's
+        // unfrozen to not run into race conditions with the tests.
+        waitUntilHandlersIdle();
+    }
 
+    private void addCommonWindows(boolean addAll, @CommonTypes int[] requestedWindows) {
         if (addAll || ArrayUtils.contains(requestedWindows, W_WALLPAPER)) {
             mWallpaperWindow = createCommonWindow(null, TYPE_WALLPAPER, "wallpaperWindow");
         }
@@ -315,6 +356,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
                     LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             mStatusBarWindow.mAttrs.setFitInsetsTypes(0);
+            final IBinder owner = new Binder();
+            mStatusBarWindow.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars()),
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
+            };
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {
             mNotificationShadeWindow = createCommonWindow(null, TYPE_NOTIFICATION_SHADE,
@@ -330,9 +377,18 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
             mNavBarWindow.mAttrs.privateFlags |=
                     WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
-            for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
-                mNavBarWindow.mAttrs.paramsForRotation[rot] =
-                        getNavBarLayoutParamsForRotation(rot);
+            final IBinder owner = new Binder();
+            mNavBarWindow.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars()),
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
+                    new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
+            };
+            // If the navigation bar cannot move then it is always at the bottom.
+            if (mDisplayContent.getDisplayPolicy().navigationBarCanMove()) {
+                for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+                    mNavBarWindow.mAttrs.paramsForRotation[rot] =
+                            getNavBarLayoutParamsForRotation(rot, owner);
+                }
             }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_DOCK_DIVIDER)) {
@@ -353,15 +409,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mChildAppWindowBelow = createCommonWindow(mAppWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
                     "mChildAppWindowBelow");
         }
-
-        mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(false);
-
-        // Adding a display will cause freezing the display. Make sure to wait until it's
-        // unfrozen to not run into race conditions with the tests.
-        waitUntilHandlersIdle();
     }
 
-    private WindowManager.LayoutParams getNavBarLayoutParamsForRotation(int rotation) {
+    private WindowManager.LayoutParams getNavBarLayoutParamsForRotation(
+            int rotation, IBinder owner) {
         int width = WindowManager.LayoutParams.MATCH_PARENT;
         int height = WindowManager.LayoutParams.MATCH_PARENT;
         int gravity = Gravity.BOTTOM;
@@ -389,11 +440,27 @@ class WindowTestsBase extends SystemServiceTestsBase {
         lp.privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        lp.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
+        };
         return lp;
     }
 
     void beforeCreateTestDisplay() {
         // Called before display is created.
+    }
+
+    /** Avoid writing values to real Settings. */
+    ContentResolver useFakeSettingsProvider() {
+        mUseFakeSettingsProvider = true;
+        FakeSettingsProvider.clearSettingsProvider();
+        final FakeSettingsProvider provider = new FakeSettingsProvider();
+        // SystemServicesTestRule#setUpSystemCore has called spyOn for the ContentResolver.
+        final ContentResolver resolver = mContext.getContentResolver();
+        doReturn(provider.getIContentProvider()).when(resolver).acquireProvider(Settings.AUTHORITY);
+        return resolver;
     }
 
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
@@ -422,17 +489,85 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     WindowState createNavBarWithProvidedInsets(DisplayContent dc) {
         final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, dc, "navbar");
+        final Binder owner = new Binder();
         navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR, Insets.of(0, 0, 0, NAV_BAR_HEIGHT))
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars())
+                        .setInsetsSize(Insets.of(0, 0, 0, NAV_BAR_HEIGHT))
         };
         dc.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
         return navbar;
+    }
+
+    WindowState createStatusBarWithProvidedInsets(DisplayContent dc) {
+        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, dc, "statusBar");
+        final Binder owner = new Binder();
+        statusBar.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars())
+                        .setInsetsSize(Insets.of(0, STATUS_BAR_HEIGHT, 0, 0))
+        };
+        statusBar.mAttrs.setFitInsetsTypes(0);
+        dc.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
+        return statusBar;
+    }
+
+    Session getTestSession() {
+        if (mTestSession != null) {
+            return mTestSession;
+        }
+        mTestSession = createTestSession(mAtm);
+        return mTestSession;
+    }
+
+    private Session getTestSession(WindowToken token) {
+        final ActivityRecord r = token.asActivityRecord();
+        if (r == null || r.app == null) {
+            return getTestSession();
+        }
+        // If the activity has a process, let the window session belonging to activity use the
+        // process of the activity.
+        int pid = r.app.getPid();
+        if (pid == 0) {
+            // See SystemServicesTestRule#addProcess, pid 0 isn't added to the map. So generate
+            // a non-zero pid to initialize it.
+            final int numPid = mAtm.mProcessMap.getPidMap().size();
+            pid = numPid > 0 ? mAtm.mProcessMap.getPidMap().keyAt(numPid - 1) + 1 : 1;
+            r.app.setPid(pid);
+            mAtm.mProcessMap.put(pid, r.app);
+        } else {
+            final WindowState win = mRootWindowContainer.getWindow(w -> w.getProcess() == r.app);
+            if (win != null) {
+                // Reuse the same Session if there is a window uses the same process.
+                return win.mSession;
+            }
+        }
+        return createTestSession(mAtm, pid, r.getUid());
+    }
+
+    static Session createTestSession(ActivityTaskManagerService atms) {
+        return createTestSession(atms, WindowManagerService.MY_PID, WindowManagerService.MY_UID);
+    }
+
+    static Session createTestSession(ActivityTaskManagerService atms, int pid, int uid) {
+        if (atms.mProcessMap.getProcess(pid) == null) {
+            SystemServicesTestRule.addProcess(atms, "testPkg", "testProc", pid, uid);
+        }
+        return new Session(atms.mWindowManager, new IWindowSessionCallback.Stub() {
+            @Override
+            public void onAnimatorScaleChanged(float scale) {
+            }
+        }, pid, uid);
     }
 
     WindowState createAppWindow(Task task, int type, String name) {
         final ActivityRecord activity = createNonAttachedActivityRecord(task.getDisplayContent());
         task.addChild(activity, 0);
         return createWindow(null, type, activity, name);
+    }
+
+    WindowState createDreamWindow(WindowState parent, int type, String name) {
+        final WindowToken token = createWindowToken(
+                mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM, type);
+        return createWindow(parent, type, token, name);
     }
 
     // TODO: Move these calls to a builder?
@@ -502,7 +637,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
             int ownerId, boolean ownerCanAddInternalSystemWindow, IWindow iwindow) {
         return createWindow(parent, type, token, name, ownerId, UserHandle.getUserId(ownerId),
-                ownerCanAddInternalSystemWindow, mWm, mMockSession, iwindow,
+                ownerCanAddInternalSystemWindow, mWm, getTestSession(token), iwindow,
                 mSystemServicesTestRule.getPowerManagerWrapper());
     }
 
@@ -541,6 +676,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         for (WindowState win : windows) {
             win.mWinAnimator.mDrawState = HAS_DRAWN;
         }
+    }
+
+    static void makeLastConfigReportedToClient(WindowState w, boolean visible) {
+        w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
+                new MergedConfiguration(), true /* useLatestConfig */, visible);
     }
 
     /**
@@ -632,7 +772,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     Task createTaskInRootTask(Task rootTask, int userId) {
         final Task task = new TaskBuilder(rootTask.mTaskSupervisor)
                 .setUserId(userId)
-                .setParentTaskFragment(rootTask)
+                .setParentTask(rootTask)
                 .build();
         return task;
     }
@@ -715,36 +855,44 @@ class WindowTestsBase extends SystemServiceTestsBase {
         activity.onDisplayChanged(dc);
         activity.setOccludesParent(true);
         activity.setVisible(true);
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
     }
 
     /**
-     * Creates a {@link TaskFragment} and attach it to the {@code parentTask}.
+     * Creates a {@link TaskFragment} with {@link ActivityRecord}, and attaches it to the
+     * {@code parentTask}.
      *
-     * @param parentTask the {@link Task} this TaskFragment is going to be attached
-     * @param createEmbeddedTask Sets to {@code true} to create an embedded Task for this
-     *                           TaskFragment. Otherwise, create a {@link ActivityRecord}.
-     * @return the created TaskFragment
+     * @param parentTask the {@link Task} this {@link TaskFragment} is going to be attached.
+     * @return the created {@link TaskFragment}
      */
-    static TaskFragment createTaskFragmentWithParentTask(@NonNull Task parentTask,
-            boolean createEmbeddedTask) {
-        final TaskFragmentBuilder builder = new TaskFragmentBuilder(parentTask.mAtmService)
-                .setParentTask(parentTask);
-        if (createEmbeddedTask) {
-            builder.createEmbeddedTask();
-        } else {
-            builder.createActivityCount(1);
-        }
-        return builder.build();
-    }
-
-    static TaskFragment createTaskFragmentWithEmbeddedActivity(@NonNull Task parentTask,
-            TaskFragmentOrganizer organizer) {
+    static TaskFragment createTaskFragmentWithActivity(@NonNull Task parentTask) {
         return new TaskFragmentBuilder(parentTask.mAtmService)
                 .setParentTask(parentTask)
                 .createActivityCount(1)
-                .setOrganizer(organizer)
                 .build();
+    }
+
+    /**
+     * Creates an embedded {@link TaskFragment} organized by {@code organizer} with
+     * {@link ActivityRecord}, and attaches it to the {@code parentTask}.
+     *
+     * @param parentTask the {@link Task} this {@link TaskFragment} is going to be attached.
+     * @param organizer  the {@link TaskFragmentOrganizer} this {@link TaskFragment} is going to be
+     *                   organized by.
+     * @return the created {@link TaskFragment}
+     */
+    static TaskFragment createTaskFragmentWithEmbeddedActivity(@NonNull Task parentTask,
+            @NonNull TaskFragmentOrganizer organizer) {
+        final IBinder fragmentToken = new Binder();
+        final TaskFragment taskFragment = new TaskFragmentBuilder(parentTask.mAtmService)
+                .setParentTask(parentTask)
+                .createActivityCount(1)
+                .setOrganizer(organizer)
+                .setFragmentToken(fragmentToken)
+                .build();
+        parentTask.mAtmService.mWindowOrganizerController.mLaunchTaskFragments
+                .put(fragmentToken, taskFragment);
+        return taskFragment;
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
@@ -793,7 +941,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     TestWindowState createWindowState(WindowManager.LayoutParams attrs, WindowToken token) {
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
-        return new TestWindowState(mWm, mMockSession, mIWindow, attrs, token);
+        return new TestWindowState(mWm, getTestSession(), mIWindow, attrs, token);
     }
 
     /** Creates a {@link DisplayContent} as parts of simulate display info for test. */
@@ -805,6 +953,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
+        displayInfo.state = Display.STATE_ON;
         displayInfo.ownerUid = SYSTEM_UID;
         return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_FALLBACK_DISPLAY, overrideSettings);
     }
@@ -822,22 +971,28 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void showInsets(int i, boolean b) throws RemoteException {
+            public void showInsets(int i, boolean b, @Nullable ImeTracker.Token t)
+                    throws RemoteException {
             }
 
             @Override
-            public void hideInsets(int i, boolean b) throws RemoteException {
+            public void hideInsets(int i, boolean b, @Nullable ImeTracker.Token t)
+                    throws RemoteException {
             }
 
             @Override
             public void topFocusedWindowChanged(ComponentName component,
-                    InsetsVisibilities requestedVisibilities) {
+                    int requestedVisibleTypes) {
             }
         };
     }
 
     BLASTSyncEngine createTestBLASTSyncEngine() {
-        return new BLASTSyncEngine(mWm) {
+        return createTestBLASTSyncEngine(mWm.mH);
+    }
+
+    BLASTSyncEngine createTestBLASTSyncEngine(Handler handler) {
+        return new BLASTSyncEngine(mWm, handler) {
             @Override
             void scheduleTimeout(SyncGroup s, long timeoutMs) {
                 // Disable timeout.
@@ -853,6 +1008,38 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return testPlayer;
     }
 
+    /** Overrides the behavior of config_reverseDefaultRotation for the given display. */
+    void setReverseDefaultRotation(DisplayContent dc, boolean reverse) {
+        final DisplayRotation displayRotation = dc.getDisplayRotation();
+        if (!Mockito.mockingDetails(displayRotation).isSpy()) {
+            spyOn(displayRotation);
+        }
+        doAnswer(invocation -> {
+            invocation.callRealMethod();
+            final int w = invocation.getArgument(0);
+            final int h = invocation.getArgument(1);
+            if (w > h) {
+                if (reverse) {
+                    displayRotation.mPortraitRotation = Surface.ROTATION_90;
+                    displayRotation.mUpsideDownRotation = Surface.ROTATION_270;
+                } else {
+                    displayRotation.mPortraitRotation = Surface.ROTATION_270;
+                    displayRotation.mUpsideDownRotation = Surface.ROTATION_90;
+                }
+            } else {
+                if (reverse) {
+                    displayRotation.mLandscapeRotation = Surface.ROTATION_270;
+                    displayRotation.mSeascapeRotation = Surface.ROTATION_90;
+                } else {
+                    displayRotation.mLandscapeRotation = Surface.ROTATION_90;
+                    displayRotation.mSeascapeRotation = Surface.ROTATION_270;
+                }
+            }
+            return null;
+        }).when(displayRotation).configure(anyInt(), anyInt());
+        displayRotation.configure(dc.mBaseDisplayWidth, dc.mBaseDisplayHeight);
+    }
+
     /**
      * Avoids rotating screen disturbed by some conditions. It is usually used for the default
      * display that is not the instance of {@link TestDisplayContent} (it bypasses the conditions).
@@ -860,9 +1047,27 @@ class WindowTestsBase extends SystemServiceTestsBase {
      * @see DisplayRotation#updateRotationUnchecked
      */
     void unblockDisplayRotation(DisplayContent dc) {
+        dc.mOpeningApps.clear();
+        mWm.mAppsFreezingScreen = 0;
         mWm.stopFreezingDisplayLocked();
         // The rotation animation won't actually play, it needs to be cleared manually.
         dc.setRotationAnimation(null);
+    }
+
+    static void resizeDisplay(DisplayContent displayContent, int width, int height) {
+        displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity,
+                displayContent.mBaseDisplayPhysicalXDpi, displayContent.mBaseDisplayPhysicalYDpi);
+        displayContent.getDisplayRotation().configure(width, height);
+        final Configuration c = new Configuration();
+        displayContent.computeScreenConfiguration(c);
+        displayContent.onRequestedOverrideConfigurationChanged(c);
+    }
+
+    /** Used for the tests that assume the display is portrait by default. */
+    static void makeDisplayPortrait(DisplayContent displayContent) {
+        if (displayContent.mBaseDisplayHeight <= displayContent.mBaseDisplayWidth) {
+            resizeDisplay(displayContent, 500, 1000);
+        }
     }
 
     // The window definition for UseTestDisplay#addWindows. The test can declare to add only
@@ -896,11 +1101,21 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     /**
+     * The annotation to provide common windows on default display. This is mutually exclusive
+     * with {@link UseTestDisplay}.
+     */
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface SetupWindows {
+        boolean addAllCommonWindows() default false;
+        @CommonTypes int[] addWindows() default {};
+    }
+
+    /**
      * The annotation for class and method (higher priority) to create a non-default display that
      * will be assigned to {@link #mDisplayContent}. It is used if the test needs
      * <ul>
      * <li>Pure empty display.</li>
-     * <li>Configured common windows.</li>
      * <li>Independent and customizable orientation.</li>
      * <li>Cross display operation.</li>
      * </ul>
@@ -913,6 +1128,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
     @interface UseTestDisplay {
         boolean addAllCommonWindows() default false;
         @CommonTypes int[] addWindows() default {};
+    }
+
+    static <T extends Annotation> T getAnnotation(Description desc, Class<T> type) {
+        final T annotation = desc.getAnnotation(type);
+        if (annotation != null) return annotation;
+        return desc.getTestClass().getAnnotation(type);
     }
 
     /** Creates and adds a {@link TestDisplayContent} to supervisor at the given position. */
@@ -928,8 +1149,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Mocks the behavior of taking a snapshot. */
     void mockSurfaceFreezerSnapshot(SurfaceFreezer surfaceFreezer) {
-        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                mock(SurfaceControl.ScreenshotHardwareBuffer.class);
+        final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
+                mock(ScreenCapture.ScreenshotHardwareBuffer.class);
         final HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
         spyOn(surfaceFreezer);
         doReturn(screenshotBuffer).when(surfaceFreezer)
@@ -965,6 +1186,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mCreateTask = false;
         private Task mParentTask;
         private int mActivityFlags;
+        private int mActivityTheme;
         private int mLaunchMode;
         private int mResizeMode = RESIZE_MODE_RESIZEABLE;
         private float mMaxAspectRatio;
@@ -981,7 +1203,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mOnTop = false;
         private ActivityInfo.WindowLayout mWindowLayout;
         private boolean mVisible = true;
-        private ActivityOptions mLaunchIntoPipOpts;
+        private String mRequiredDisplayCategory;
+        private ActivityOptions mActivityOpts;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -1009,6 +1232,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         ActivityBuilder setTask(Task task) {
             mTask = task;
+            return this;
+        }
+
+        ActivityBuilder setActivityTheme(int theme) {
+            mActivityTheme = theme;
+            // Use the real package of test so it can get a valid context for theme.
+            mComponent = ComponentName.createRelative(mService.mContext.getPackageName(),
+                    DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
             return this;
         }
 
@@ -1117,8 +1348,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        ActivityBuilder setLaunchIntoPipActivityOptions(ActivityOptions opts) {
-            mLaunchIntoPipOpts = opts;
+        ActivityBuilder setActivityOptions(ActivityOptions opts) {
+            mActivityOpts = opts;
+            return this;
+        }
+
+        ActivityBuilder setRequiredDisplayCategory(String requiredDisplayCategory) {
+            mRequiredDisplayCategory = requiredDisplayCategory;
             return this;
         }
 
@@ -1156,6 +1392,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mTargetActivity != null) {
                 aInfo.targetActivity = mTargetActivity;
             }
+            if (mActivityTheme != 0) {
+                aInfo.theme = mActivityTheme;
+            }
             aInfo.flags |= mActivityFlags;
             aInfo.launchMode = mLaunchMode;
             aInfo.resizeMode = mResizeMode;
@@ -1166,6 +1405,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             aInfo.configChanges |= mConfigChanges;
             aInfo.taskAffinity = mAffinity;
             aInfo.windowLayout = mWindowLayout;
+            if (mRequiredDisplayCategory != null) {
+                aInfo.requiredDisplayCategory = mRequiredDisplayCategory;
+            }
 
             if (mCreateTask) {
                 mTask = new TaskBuilder(mService.mTaskSupervisor)
@@ -1173,7 +1415,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         // Apply the root activity info and intent
                         .setActivityInfo(aInfo)
                         .setIntent(intent)
-                        .setParentTaskFragment(mParentTask).build();
+                        .setParentTask(mParentTask).build();
             } else if (mTask == null && mParentTask != null && DisplayContent.alwaysCreateRootTask(
                     mParentTask.getWindowingMode(), mParentTask.getActivityType())) {
                 // The parent task can be the task root.
@@ -1181,8 +1423,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             ActivityOptions options = null;
-            if (mLaunchIntoPipOpts != null) {
-                options = mLaunchIntoPipOpts;
+            if (mActivityOpts != null) {
+                options = mActivityOpts;
             } else if (mLaunchTaskBehind) {
                 options = ActivityOptions.makeTaskLaunchBehind();
             }
@@ -1205,7 +1447,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     mTask.moveToFront("createActivity");
                 }
                 if (mVisible) {
-                    activity.mVisibleRequested = true;
+                    activity.setVisibleRequested(true);
                     activity.setVisible(true);
                 }
             }
@@ -1230,7 +1472,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private final ActivityTaskManagerService mAtm;
         private Task mParentTask;
         private boolean mCreateParentTask;
-        private boolean mCreateEmbeddedTask;
         private int mCreateActivityCount = 0;
         @Nullable
         private TaskFragmentOrganizer mOrganizer;
@@ -1248,12 +1489,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         TaskFragmentBuilder setParentTask(Task task) {
             mParentTask = task;
-            return this;
-        }
-
-        /** Creates a child embedded Task and its Activity */
-        TaskFragmentBuilder createEmbeddedTask() {
-            mCreateEmbeddedTask = true;
             return this;
         }
 
@@ -1287,12 +1522,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
             if (mParentTask != null) {
                 mParentTask.addChild(taskFragment, POSITION_TOP);
-            }
-            if (mCreateEmbeddedTask) {
-                new TaskBuilder(mAtm.mTaskSupervisor)
-                        .setParentTaskFragment(taskFragment)
-                        .setCreateActivity(true)
-                        .build();
             }
             while (mCreateActivityCount > 0) {
                 final ActivityRecord activity = new ActivityBuilder(mAtm).build();
@@ -1332,7 +1561,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private IVoiceInteractionSession mVoiceSession;
 
         private boolean mCreateParentTask = false;
-        private TaskFragment mParentTaskFragment;
+        private Task mParentTask;
 
         private boolean mCreateActivity = false;
         private boolean mCreatedByOrganizer = false;
@@ -1417,8 +1646,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        TaskBuilder setParentTaskFragment(TaskFragment parentTaskFragment) {
-            mParentTaskFragment = parentTaskFragment;
+        TaskBuilder setParentTask(Task parentTask) {
+            mParentTask = parentTask;
             return this;
         }
 
@@ -1436,13 +1665,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
             SystemServicesTestRule.checkHoldsLock(mSupervisor.mService.mGlobalLock);
 
             // Create parent task.
-            if (mParentTaskFragment == null && mCreateParentTask) {
-                mParentTaskFragment = mTaskDisplayArea.createRootTask(
+            if (mParentTask == null && mCreateParentTask) {
+                mParentTask = mTaskDisplayArea.createRootTask(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
             }
-            if (mParentTaskFragment != null
-                    && !Mockito.mockingDetails(mParentTaskFragment).isSpy()) {
-                spyOn(mParentTaskFragment);
+            if (mParentTask != null && !Mockito.mockingDetails(mParentTask).isSpy()) {
+                spyOn(mParentTask);
             }
 
             // Create task.
@@ -1470,15 +1698,13 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     .setVoiceSession(mVoiceSession)
                     .setCreatedByOrganizer(mCreatedByOrganizer);
             final Task task;
-            if (mParentTaskFragment == null) {
+            if (mParentTask == null) {
                 task = builder.setActivityType(mActivityType)
                         .setParent(mTaskDisplayArea)
                         .build();
             } else {
-                task = builder.setParent(mParentTaskFragment).build();
-                if (mParentTaskFragment.asTask() != null) {
-                    mParentTaskFragment.asTask().moveToFront("build-task");
-                }
+                task = builder.setParent(mParentTask).build();
+                mParentTask.moveToFront("build-task");
             }
             spyOn(task);
             task.mUserId = mUserId;
@@ -1532,21 +1758,20 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         @Override
-        public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
+        public void addStartingWindow(StartingWindowInfo info) {
             synchronized (mWMService.mGlobalLock) {
                 final ActivityRecord activity = mWMService.mRoot.getActivityRecord(
-                        appToken);
+                        info.appToken);
                 IWindow iWindow = mock(IWindow.class);
                 doReturn(mock(IBinder.class)).when(iWindow).asBinder();
                 final WindowState window = WindowTestsBase.createWindow(null,
                         TYPE_APPLICATION_STARTING, activity,
                         "Starting window", 0 /* ownerId */, 0 /* userId*/,
-                        false /* internalWindows */, mWMService, mock(Session.class),
-                        iWindow,
+                        false /* internalWindows */, mWMService, createTestSession(mAtm), iWindow,
                         mPowerManagerWrapper);
                 activity.mStartingWindow = window;
-                mAppWindowMap.put(appToken, window);
-                mTaskAppMap.put(info.taskInfo.taskId, appToken);
+                mAppWindowMap.put(info.appToken, window);
+                mTaskAppMap.put(info.taskInfo.taskId, info.appToken);
             }
             if (mRunnableWhenAddingSplashScreen != null) {
                 mRunnableWhenAddingSplashScreen.run();
@@ -1692,6 +1917,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
+    static class TestTransitionController extends TransitionController {
+        TestTransitionController(ActivityTaskManagerService atms) {
+            super(atms);
+            doReturn(this).when(atms).getTransitionController();
+            mSnapshotController = mock(SnapshotController.class);
+            mTransitionTracer = mock(TransitionTracer.class);
+        }
+    }
+
     static class TestTransitionPlayer extends ITransitionPlayer.Stub {
         final TransitionController mController;
         final WindowOrganizerController mOrganizer;
@@ -1727,7 +1961,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         void startTransition() {
-            mOrganizer.startTransition(mLastRequest.getType(), mLastTransit, null);
+            mOrganizer.startTransition(mLastTransit.getToken(), null);
         }
 
         void onTransactionReady(SurfaceControl.Transaction t) {

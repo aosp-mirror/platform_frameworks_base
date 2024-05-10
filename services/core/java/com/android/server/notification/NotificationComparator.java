@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.telecom.TelecomManager;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.NotificationMessagingUtil;
 
 import java.util.Comparator;
@@ -33,18 +34,23 @@ import java.util.Objects;
 /**
  * Sorts notifications individually into attention-relevant order.
  */
-public class NotificationComparator
-        implements Comparator<NotificationRecord> {
+class NotificationComparator implements Comparator<NotificationRecord> {
 
     private final Context mContext;
     private final NotificationMessagingUtil mMessagingUtil;
     private String mDefaultPhoneApp;
 
+    /**
+     * Lock that must be held during a sort() call that uses this {@link Comparator}, AND to make
+     * any changes to the state of this object that could affect the results of {@link #compare}.
+     */
+    public final Object mStateLock = new Object();
+
     public NotificationComparator(Context context) {
         mContext = context;
         mContext.registerReceiver(mPhoneAppBroadcastReceiver,
                 new IntentFilter(TelecomManager.ACTION_DEFAULT_DIALER_CHANGED));
-        mMessagingUtil = new NotificationMessagingUtil(mContext);
+        mMessagingUtil = new NotificationMessagingUtil(mContext, mStateLock);
     }
 
     @Override
@@ -135,12 +141,6 @@ public class NotificationComparator
             return -1 * Integer.compare(leftPriority, rightPriority);
         }
 
-        final boolean leftInterruptive = left.isInterruptive();
-        final boolean rightInterruptive = right.isInterruptive();
-        if (leftInterruptive != rightInterruptive) {
-            return -1 * Boolean.compare(leftInterruptive, rightInterruptive);
-        }
-
         // then break ties by time, most recent first
         return -1 * Long.compare(left.getRankingTimeMs(), right.getRankingTimeMs());
     }
@@ -159,7 +159,7 @@ public class NotificationComparator
         if (isCallStyle(record)) {
             return true;
         }
-        if (!isOngoing(record)) {
+        if (!record.getNotification().isFgsOrUij()) {
             return false;
         }
         return isCallCategory(record) || isMediaNotification(record);
@@ -193,11 +193,6 @@ public class NotificationComparator
         return false;
     }
 
-    private boolean isOngoing(NotificationRecord record) {
-        final int ongoingFlags = Notification.FLAG_FOREGROUND_SERVICE;
-        return (record.getNotification().flags & ongoingFlags) != 0;
-    }
-
     private boolean isMediaNotification(NotificationRecord record) {
         return record.getNotification().isMediaNotification();
     }
@@ -223,8 +218,13 @@ public class NotificationComparator
     private final BroadcastReceiver mPhoneAppBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mDefaultPhoneApp =
-                    intent.getStringExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME);
+            BackgroundThread.getExecutor().execute(() -> {
+                synchronized (mStateLock) {
+                    mDefaultPhoneApp =
+                            intent.getStringExtra(
+                                    TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME);
+                }
+            });
         }
     };
 }

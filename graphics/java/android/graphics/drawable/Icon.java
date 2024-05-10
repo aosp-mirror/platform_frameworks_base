@@ -24,9 +24,12 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.IUriGrantsManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -35,6 +38,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BlendMode;
 import android.graphics.PorterDuff;
+import android.graphics.RecordingCanvas;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -43,9 +47,12 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.RequiresPermission;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -55,6 +62,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -70,6 +79,7 @@ import java.util.Objects;
 
 public final class Icon implements Parcelable {
     private static final String TAG = "Icon";
+    private static final boolean DEBUG = false;
 
     /**
      * An icon that was created using {@link Icon#createWithBitmap(Bitmap)}.
@@ -108,6 +118,7 @@ public final class Icon implements Parcelable {
      */
     @IntDef({TYPE_BITMAP, TYPE_RESOURCE, TYPE_DATA, TYPE_URI, TYPE_ADAPTIVE_BITMAP,
             TYPE_URI_ADAPTIVE_BITMAP})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface IconType {
     }
 
@@ -361,15 +372,52 @@ public final class Icon implements Parcelable {
     }
 
     /**
+     * Resizes image if size too large for Canvas to draw
+     * @param bitmap Bitmap to be resized if size > {@link RecordingCanvas.MAX_BITMAP_SIZE}
+     * @return resized bitmap
+     */
+    private Bitmap fixMaxBitmapSize(Bitmap bitmap) {
+        if (bitmap != null && bitmap.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
+            int bytesPerPixel = bitmap.getRowBytes() / bitmap.getWidth();
+            int maxNumPixels = RecordingCanvas.MAX_BITMAP_SIZE / bytesPerPixel;
+            float aspRatio = (float) bitmap.getWidth() / (float) bitmap.getHeight();
+            int newHeight = (int) Math.sqrt(maxNumPixels / aspRatio);
+            int newWidth = (int) (newHeight * aspRatio);
+
+            if (DEBUG) {
+                Log.d(TAG,
+                        "Image size too large: " + bitmap.getByteCount() + ". Resizing bitmap to: "
+                                + newWidth + " " + newHeight);
+            }
+
+            return scaleDownIfNecessary(bitmap, newWidth, newHeight);
+        }
+        return bitmap;
+    }
+
+    /**
+     * Resizes BitmapDrawable if size too large for Canvas to draw
+     * @param drawable Drawable to be resized if size > {@link RecordingCanvas.MAX_BITMAP_SIZE}
+     * @return resized Drawable
+     */
+    private Drawable fixMaxBitmapSize(Resources res, Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap scaledBmp = fixMaxBitmapSize(((BitmapDrawable) drawable).getBitmap());
+            return new BitmapDrawable(res, scaledBmp);
+        }
+        return drawable;
+    }
+
+    /**
      * Do the heavy lifting of loading the drawable, but stop short of applying any tint.
      */
     private Drawable loadDrawableInner(Context context) {
         switch (mType) {
             case TYPE_BITMAP:
-                return new BitmapDrawable(context.getResources(), getBitmap());
+                return new BitmapDrawable(context.getResources(), fixMaxBitmapSize(getBitmap()));
             case TYPE_ADAPTIVE_BITMAP:
                 return new AdaptiveIconDrawable(null,
-                    new BitmapDrawable(context.getResources(), getBitmap()));
+                    new BitmapDrawable(context.getResources(), fixMaxBitmapSize(getBitmap())));
             case TYPE_RESOURCE:
                 if (getResources() == null) {
                     // figure out where to load resources from
@@ -400,7 +448,8 @@ public final class Icon implements Parcelable {
                     }
                 }
                 try {
-                    return getResources().getDrawable(getResId(), context.getTheme());
+                    return fixMaxBitmapSize(getResources(),
+                            getResources().getDrawable(getResId(), context.getTheme()));
                 } catch (RuntimeException e) {
                     Log.e(TAG, String.format("Unable to load resource 0x%08x from pkg=%s",
                                     getResId(),
@@ -409,21 +458,21 @@ public final class Icon implements Parcelable {
                 }
                 break;
             case TYPE_DATA:
-                return new BitmapDrawable(context.getResources(),
-                    BitmapFactory.decodeByteArray(getDataBytes(), getDataOffset(), getDataLength())
-                );
+                return new BitmapDrawable(context.getResources(), fixMaxBitmapSize(
+                        BitmapFactory.decodeByteArray(getDataBytes(), getDataOffset(),
+                                getDataLength())));
             case TYPE_URI:
                 InputStream is = getUriInputStream(context);
                 if (is != null) {
                     return new BitmapDrawable(context.getResources(),
-                            BitmapFactory.decodeStream(is));
+                            fixMaxBitmapSize(BitmapFactory.decodeStream(is)));
                 }
                 break;
             case TYPE_URI_ADAPTIVE_BITMAP:
                 is = getUriInputStream(context);
                 if (is != null) {
                     return new AdaptiveIconDrawable(null, new BitmapDrawable(context.getResources(),
-                            BitmapFactory.decodeStream(is)));
+                            fixMaxBitmapSize(BitmapFactory.decodeStream(is))));
                 }
                 break;
         }
@@ -485,6 +534,46 @@ public final class Icon implements Parcelable {
                                     userId),
                             e);
                 }
+            }
+        }
+        return loadDrawable(context);
+    }
+
+    /**
+     * Load a drawable, but in the case of URI types, it will check if the passed uid has a grant
+     * to load the resource. The check will be performed using the permissions of the passed uid,
+     * and not those of the caller.
+     * <p>
+     * This should be called for {@link Icon} objects that come from a not trusted source and may
+     * contain a URI.
+     *
+     * After the check, if passed, {@link #loadDrawable} will be called. If failed, this will
+     * return {@code null}.
+     *
+     * @see #loadDrawable
+     *
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    public Drawable loadDrawableCheckingUriGrant(
+            Context context,
+            IUriGrantsManager iugm,
+            int callingUid,
+            String packageName
+    ) {
+        if (getType() == TYPE_URI || getType() == TYPE_URI_ADAPTIVE_BITMAP) {
+            try {
+                iugm.checkGrantUriPermission_ignoreNonSystem(
+                        callingUid,
+                        packageName,
+                        ContentProvider.getUriWithoutUserId(getUri()),
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        ContentProvider.getUserIdFromUri(getUri())
+                );
+            } catch (SecurityException | RemoteException e) {
+                Log.e(TAG, "Failed to get URI permission for: " + getUri(), e);
+                return null;
             }
         }
         return loadDrawable(context);

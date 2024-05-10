@@ -20,10 +20,12 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.ActivityOptions
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -31,34 +33,31 @@ import android.view.ViewStub
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
-import android.widget.Toast
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.ComponentActivity
+import androidx.annotation.VisibleForTesting
 import androidx.viewpager2.widget.ViewPager2
 import com.android.systemui.Prefs
-import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.res.R
 import com.android.systemui.controls.TooltipManager
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.ui.ControlsActivity
-import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.settings.CurrentUserTracker
+import com.android.systemui.settings.UserTracker
 import java.text.Collator
 import java.util.concurrent.Executor
-import java.util.function.Consumer
 import javax.inject.Inject
 
-class ControlsFavoritingActivity @Inject constructor(
+open class ControlsFavoritingActivity @Inject constructor(
     @Main private val executor: Executor,
     private val controller: ControlsControllerImpl,
-    private val listingController: ControlsListingController,
-    private val broadcastDispatcher: BroadcastDispatcher,
-    private val uiController: ControlsUiController
+    private val userTracker: UserTracker,
 ) : ComponentActivity() {
 
     companion object {
+        private const val DEBUG = false
         private const val TAG = "ControlsFavoritingActivity"
 
         // If provided and no structure is available, use as the title
@@ -67,7 +66,10 @@ class ControlsFavoritingActivity @Inject constructor(
         // If provided, show this structure page first
         const val EXTRA_STRUCTURE = "extra_structure"
         const val EXTRA_SINGLE_STRUCTURE = "extra_single_structure"
-        internal const val EXTRA_FROM_PROVIDER_SELECTOR = "extra_from_provider_selector"
+        const val EXTRA_SOURCE = "extra_source"
+        const val EXTRA_SOURCE_UNDEFINED: Byte = 0
+        const val EXTRA_SOURCE_VALUE_FROM_PROVIDER_SELECTOR: Byte = 1
+        const val EXTRA_SOURCE_VALUE_FROM_EDITING: Byte = 2
         private const val TOOLTIP_PREFS_KEY = Prefs.Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT
         private const val TOOLTIP_MAX_SHOWN = 2
     }
@@ -75,7 +77,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private var component: ComponentName? = null
     private var appName: CharSequence? = null
     private var structureExtra: CharSequence? = null
-    private var fromProviderSelector = false
+    private var openSource = EXTRA_SOURCE_UNDEFINED
 
     private lateinit var structurePager: ViewPager2
     private lateinit var statusText: TextView
@@ -84,36 +86,39 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var pageIndicator: ManagementPageIndicator
     private var mTooltipManager: TooltipManager? = null
     private lateinit var doneButton: View
-    private lateinit var otherAppsButton: View
+    private lateinit var rearrangeButton: Button
     private var listOfStructures = emptyList<StructureContainer>()
 
     private lateinit var comparator: Comparator<StructureContainer>
     private var cancelLoadRunnable: Runnable? = null
     private var isPagerLoaded = false
 
-    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+    private val fromProviderSelector: Boolean
+        get() = openSource == EXTRA_SOURCE_VALUE_FROM_PROVIDER_SELECTOR
+    private val fromEditing: Boolean
+        get() = openSource == EXTRA_SOURCE_VALUE_FROM_EDITING
+    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = controller.currentUserId
 
-        override fun onUserSwitched(newUserId: Int) {
-            if (newUserId != startingUser) {
-                stopTracking()
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            if (newUser != startingUser) {
+                userTracker.removeCallback(this)
                 finish()
             }
         }
     }
 
-    private val listingCallback = object : ControlsListingController.ControlsListingCallback {
-
-        override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
-            if (serviceInfos.size > 1) {
-                otherAppsButton.post {
-                    otherAppsButton.visibility = View.VISIBLE
-                }
-            }
+    private val mOnBackInvokedCallback = OnBackInvokedCallback {
+        if (DEBUG) {
+            Log.d(TAG, "Predictive Back dispatcher called mOnBackInvokedCallback")
         }
+        onBackPressed()
     }
 
     override fun onBackPressed() {
+        if (fromEditing) {
+            animateExitAndFinish()
+        }
         if (!fromProviderSelector) {
             openControlsOrigin()
         }
@@ -128,7 +133,7 @@ class ControlsFavoritingActivity @Inject constructor(
         appName = intent.getCharSequenceExtra(EXTRA_APP)
         structureExtra = intent.getCharSequenceExtra(EXTRA_STRUCTURE)
         component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
-        fromProviderSelector = intent.getBooleanExtra(EXTRA_FROM_PROVIDER_SELECTOR, false)
+        openSource = intent.getByteExtra(EXTRA_SOURCE, EXTRA_SOURCE_UNDEFINED)
 
         bindViews()
     }
@@ -137,14 +142,19 @@ class ControlsFavoritingActivity @Inject constructor(
         override fun onFirstChange() {
             doneButton.isEnabled = true
         }
+
+        override fun onChange() {
+            val structure: StructureContainer = listOfStructures[structurePager.currentItem]
+            rearrangeButton.isEnabled = structure.model.favorites.isNotEmpty()
+        }
     }
 
     private fun loadControls() {
-        component?.let {
+        component?.let { componentName ->
             statusText.text = resources.getText(com.android.internal.R.string.loading)
             val emptyZoneString = resources.getText(
                     R.string.controls_favorite_other_zone_header)
-            controller.loadForComponent(it, Consumer { data ->
+            controller.loadForComponent(componentName, { data ->
                 val allControls = data.allControls
                 val favoriteKeys = data.favoritesIds
                 val error = data.errorOnLoad
@@ -164,7 +174,7 @@ class ControlsFavoritingActivity @Inject constructor(
                 }
 
                 executor.execute {
-                    structurePager.adapter = StructureAdapter(listOfStructures)
+                    structurePager.adapter = StructureAdapter(listOfStructures, userTracker.userId)
                     structurePager.setCurrentItem(structureIndex)
                     if (error) {
                         statusText.text = resources.getString(R.string.controls_favorite_load_error,
@@ -183,7 +193,7 @@ class ControlsFavoritingActivity @Inject constructor(
 
                         ControlsAnimations.enterAnimation(pageIndicator).apply {
                             addListener(object : AnimatorListenerAdapter() {
-                                override fun onAnimationEnd(animation: Animator?) {
+                                override fun onAnimationEnd(animation: Animator) {
                                     // Position the tooltip if necessary after animations are complete
                                     // so we can get the position on screen. The tooltip is not
                                     // rooted in the layout root.
@@ -202,7 +212,7 @@ class ControlsFavoritingActivity @Inject constructor(
                         ControlsAnimations.enterAnimation(structurePager).start()
                     }
                 }
-            }, Consumer { runnable -> cancelLoadRunnable = runnable })
+            }, { runnable -> cancelLoadRunnable = runnable })
         }
     }
 
@@ -210,7 +220,7 @@ class ControlsFavoritingActivity @Inject constructor(
         structurePager.alpha = 0.0f
         pageIndicator.alpha = 0.0f
         structurePager.apply {
-            adapter = StructureAdapter(emptyList())
+            adapter = StructureAdapter(emptyList(), userTracker.userId)
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
@@ -235,7 +245,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private fun bindViews() {
         setContentView(R.layout.controls_management)
 
-        getLifecycle().addObserver(
+        lifecycle.addObserver(
             ControlsAnimations.observerForAnimations(
                 requireViewById<ViewGroup>(R.id.controls_management_root),
                 window,
@@ -288,7 +298,8 @@ class ControlsFavoritingActivity @Inject constructor(
         bindButtons()
     }
 
-    private fun animateExitAndFinish() {
+    @VisibleForTesting
+    internal open fun animateExitAndFinish() {
         val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         ControlsAnimations.exitAnimation(
                 rootView,
@@ -301,22 +312,30 @@ class ControlsFavoritingActivity @Inject constructor(
     }
 
     private fun bindButtons() {
-        otherAppsButton = requireViewById<Button>(R.id.other_apps).apply {
+        rearrangeButton = requireViewById<Button>(R.id.rearrange).apply {
+            text = if (fromEditing) {
+                getString(R.string.controls_favorite_back_to_editing)
+            } else {
+                getString(R.string.controls_favorite_rearrange_button)
+            }
+            isEnabled = false
+            visibility = View.VISIBLE
             setOnClickListener {
-                if (doneButton.isEnabled) {
-                    // The user has made changes
-                    Toast.makeText(
-                            applicationContext,
-                            R.string.controls_favorite_toast_no_changes,
-                            Toast.LENGTH_SHORT
-                            ).show()
-                }
+                if (component == null) return@setOnClickListener
+                saveFavorites()
                 startActivity(
-                    Intent(context, ControlsProviderSelectorActivity::class.java),
+                    Intent(context, ControlsEditingActivity::class.java).also {
+                        it.putExtra(Intent.EXTRA_COMPONENT_NAME, component)
+                        it.putExtra(ControlsEditingActivity.EXTRA_APP, appName)
+                        it.putExtra(ControlsEditingActivity.EXTRA_FROM_FAVORITING, true)
+                        it.putExtra(
+                            ControlsEditingActivity.EXTRA_STRUCTURE,
+                            listOfStructures[structurePager.currentItem].structureName,
+                        )
+                    },
                     ActivityOptions
                         .makeSceneTransitionAnimation(this@ControlsFavoritingActivity).toBundle()
                 )
-                animateExitAndFinish()
             }
         }
 
@@ -324,15 +343,19 @@ class ControlsFavoritingActivity @Inject constructor(
             isEnabled = false
             setOnClickListener {
                 if (component == null) return@setOnClickListener
-                listOfStructures.forEach {
-                    val favoritesForStorage = it.model.favorites
-                    controller.replaceFavoritesForStructure(
-                        StructureInfo(component!!, it.structureName, favoritesForStorage)
-                    )
-                }
+                saveFavorites()
                 animateExitAndFinish()
                 openControlsOrigin()
             }
+        }
+    }
+
+    private fun saveFavorites() {
+        listOfStructures.forEach {
+            val favoritesForStorage = it.model.favorites
+            controller.replaceFavoritesForStructure(
+                StructureInfo(component!!, it.structureName, favoritesForStorage)
+            )
         }
     }
 
@@ -346,13 +369,18 @@ class ControlsFavoritingActivity @Inject constructor(
     override fun onPause() {
         super.onPause()
         mTooltipManager?.hide(false)
-    }
+   }
 
     override fun onStart() {
         super.onStart()
 
-        listingController.addCallback(listingCallback)
-        currentUserTracker.startTracking()
+        userTracker.addCallback(userTrackerCallback, executor)
+
+        if (DEBUG) {
+            Log.d(TAG, "Registered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback)
     }
 
     override fun onResume() {
@@ -365,13 +393,18 @@ class ControlsFavoritingActivity @Inject constructor(
             loadControls()
             isPagerLoaded = true
         }
-    }
+   }
 
     override fun onStop() {
         super.onStop()
 
-        listingController.removeCallback(listingCallback)
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
+
+        if (DEBUG) {
+            Log.d(TAG, "Unregistered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.unregisterOnBackInvokedCallback(
+                mOnBackInvokedCallback)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

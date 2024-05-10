@@ -28,6 +28,20 @@ license {
     ],
 }
 
+aconfig_declarations {
+    name: "hwui_flags",
+    package: "com.android.graphics.hwui.flags",
+    container: "system",
+    srcs: [
+        "aconfig/hwui_flags.aconfig",
+    ],
+}
+
+cc_aconfig_library {
+    name: "hwui_flags_cc_lib",
+    aconfig_declarations: "hwui_flags",
+}
+
 cc_defaults {
     name: "hwui_defaults",
     defaults: [
@@ -44,7 +58,7 @@ cc_defaults {
         "-DEGL_EGLEXT_PROTOTYPES",
         "-DGL_GLEXT_PROTOTYPES",
         "-DATRACE_TAG=ATRACE_TAG_VIEW",
-        "-DLOG_TAG=\"OpenGLRenderer\"",
+        "-DLOG_TAG=\"HWUI\"",
         "-Wall",
         "-Wthread-safety",
         "-Wno-unused-parameter",
@@ -55,6 +69,10 @@ cc_defaults {
         // GCC false-positives on this warning, and since we -Werror that's
         // a problem
         "-Wno-free-nonheap-object",
+
+        // Do not de-optimise cold code paths in AFDO.
+        // Some code paths might be infrequently executed but critical to latency.
+        "-fno-profile-sample-accurate",
     ],
 
     include_dirs: [
@@ -62,18 +80,9 @@ cc_defaults {
         "external/skia/src/core",
     ],
 
-    product_variables: {
-        eng: {
-            lto: {
-                never: true,
-            },
-        },
-    },
-
     target: {
         android: {
             include_dirs: [
-                "external/skia/src/effects",
                 "external/skia/src/image",
                 "external/skia/src/utils",
                 "external/skia/src/gpu",
@@ -95,6 +104,7 @@ cc_defaults {
     name: "hwui_static_deps",
     defaults: [
         "android.hardware.graphics.common-ndk_shared",
+        "android.hardware.graphics.composer3-ndk_shared",
     ],
     shared_libs: [
         "libbase",
@@ -110,7 +120,6 @@ cc_defaults {
         android: {
             shared_libs: [
                 "android.hardware.graphics.common@1.2",
-                "android.hardware.graphics.composer3-V1-ndk",
                 "liblog",
                 "libcutils",
                 "libutils",
@@ -126,6 +135,9 @@ cc_defaults {
                 "libandroidfw",
                 "libcrypto",
                 "libsync",
+                "libui",
+                "aconfig_text_flags_c_lib",
+                "server_configurable_flags",
             ],
             static_libs: [
                 "libEGL_blobCache",
@@ -135,6 +147,7 @@ cc_defaults {
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
                 "libtonemap",
+                "hwui_flags_cc_lib",
             ],
         },
         host: {
@@ -212,15 +225,6 @@ filegroup {
         "apex/java/**/*.java",
     ],
     path: "apex/java",
-}
-
-java_api_contribution {
-    name: "framework-graphics-public-stubs",
-    api_surface: "public",
-    api_file: "api/current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
 }
 
 // ------------------------
@@ -333,11 +337,14 @@ cc_defaults {
         "jni/android_graphics_Matrix.cpp",
         "jni/android_graphics_Picture.cpp",
         "jni/android_graphics_DisplayListCanvas.cpp",
+        "jni/android_graphics_Mesh.cpp",
         "jni/android_graphics_RenderNode.cpp",
         "jni/android_nio_utils.cpp",
         "jni/android_util_PathParser.cpp",
 
         "jni/Bitmap.cpp",
+        "jni/BufferUtils.cpp",
+        "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",
         "jni/ByteBufferStreamAdaptor.cpp",
         "jni/Camera.cpp",
@@ -346,9 +353,11 @@ cc_defaults {
         "jni/CreateJavaOutputStreamAdaptor.cpp",
         "jni/FontFamily.cpp",
         "jni/FontUtils.cpp",
+        "jni/Gainmap.cpp",
         "jni/Graphics.cpp",
         "jni/ImageDecoder.cpp",
         "jni/Interpolator.cpp",
+        "jni/MeshSpecification.cpp",
         "jni/MaskFilter.cpp",
         "jni/NinePatch.cpp",
         "jni/NinePatchPeeker.cpp",
@@ -356,9 +365,11 @@ cc_defaults {
         "jni/PaintFilter.cpp",
         "jni/Path.cpp",
         "jni/PathEffect.cpp",
+        "jni/PathIterator.cpp",
         "jni/PathMeasure.cpp",
         "jni/Picture.cpp",
         "jni/Region.cpp",
+        "jni/ScopedParcel.cpp",
         "jni/Shader.cpp",
         "jni/RenderEffect.cpp",
         "jni/Typeface.cpp",
@@ -369,27 +380,30 @@ cc_defaults {
         "jni/text/LineBreaker.cpp",
         "jni/text/MeasuredText.cpp",
         "jni/text/TextShaper.cpp",
+        "jni/text/GraphemeBreak.cpp",
     ],
 
-    header_libs: ["android_graphics_jni_headers"],
+    header_libs: [
+        "android_graphics_jni_headers",
+        "libnativewindow_headers",
+    ],
 
     include_dirs: [
         "external/skia/include/private",
         "external/skia/src/codec",
         "external/skia/src/core",
-        "external/skia/src/effects",
-        "external/skia/src/image",
-        "external/skia/src/images",
     ],
 
     shared_libs: [
         "libbase",
         "libcutils",
         "libharfbuzz_ng",
+        "libimage_io",
+        "libjpeg",
+        "libultrahdr",
         "liblog",
         "libminikin",
         "libz",
-        "libjpeg",
     ],
 
     static_libs: [
@@ -403,6 +417,7 @@ cc_defaults {
                 "jni/AnimatedImageDrawable.cpp",
                 "jni/android_graphics_TextureLayer.cpp",
                 "jni/android_graphics_HardwareRenderer.cpp",
+                "jni/android_graphics_HardwareBufferRenderer.cpp",
                 "jni/BitmapRegionDecoder.cpp",
                 "jni/GIFMovie.cpp",
                 "jni/GraphicsStatsService.cpp",
@@ -498,6 +513,8 @@ cc_defaults {
         "canvas/CanvasOpBuffer.cpp",
         "canvas/CanvasOpRasterizer.cpp",
         "effects/StretchEffect.cpp",
+        "effects/GainmapRenderer.cpp",
+        "pipeline/skia/BackdropFilterDrawable.cpp",
         "pipeline/skia/HolePunch.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",
@@ -520,15 +537,19 @@ cc_defaults {
         "utils/Blur.cpp",
         "utils/Color.cpp",
         "utils/LinearAllocator.cpp",
+        "utils/TypefaceUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",
         "Animator.cpp",
         "AnimatorManager.cpp",
         "CanvasTransform.cpp",
         "DamageAccumulator.cpp",
+        "Gainmap.cpp",
         "Interpolator.cpp",
         "LightingInfo.cpp",
         "Matrix.cpp",
+        "Mesh.cpp",
+        "MemoryPolicy.cpp",
         "PathParser.cpp",
         "Properties.cpp",
         "PropertyValuesAnimatorSet.cpp",
@@ -539,6 +560,7 @@ cc_defaults {
         "RootRenderNode.cpp",
         "SkiaCanvas.cpp",
         "SkiaInterpolator.cpp",
+        "Tonemapper.cpp",
         "VectorDrawable.cpp",
     ],
 
@@ -577,6 +599,7 @@ cc_defaults {
                 "renderthread/VulkanSurface.cpp",
                 "renderthread/RenderProxy.cpp",
                 "renderthread/RenderThread.cpp",
+                "renderthread/HintSessionWrapper.cpp",
                 "service/GraphicsStatsService.cpp",
                 "thread/CommonPool.cpp",
                 "utils/GLUtils.cpp",
@@ -676,11 +699,13 @@ cc_test {
     ],
 
     static_libs: [
+        "libflagtest",
         "libgmock",
         "libhwui_static",
     ],
     shared_libs: [
         "libmemunreachable",
+        "server_configurable_flags",
     ],
     srcs: [
         "tests/unit/main.cpp",
@@ -696,6 +721,7 @@ cc_test {
         "tests/unit/EglManagerTests.cpp",
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
+        "tests/unit/HintSessionWrapperTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
         "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",
@@ -719,8 +745,12 @@ cc_test {
         "tests/unit/TestUtilsTests.cpp",
         "tests/unit/ThreadBaseTests.cpp",
         "tests/unit/TypefaceTests.cpp",
+        "tests/unit/UnderlineTest.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
+    ],
+    data: [
+        ":hwuimicro",
     ],
 }
 

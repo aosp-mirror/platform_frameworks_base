@@ -38,6 +38,7 @@ import java.nio.file.Files;
  * This provides the number of bytes/chars read/written in foreground/background for each uid.
  * The file contains a monotonically increasing count of bytes/chars for a single boot.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class StoragedUidIoStatsReader {
 
     private static final String TAG = StoragedUidIoStatsReader.class.getSimpleName();
@@ -73,8 +74,21 @@ public class StoragedUidIoStatsReader {
      *
      * @param callback The callback to invoke for each line of the proc file.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public void readAbsolute(Callback callback) {
         final int oldMask = StrictMode.allowThreadDiskReadsMask();
+        try {
+            readAbsoluteInternal(callback);
+        } finally {
+            StrictMode.setThreadPolicyMask(oldMask);
+        }
+    }
+
+    public void readAbsolute$ravenwood(Callback callback) {
+        readAbsoluteInternal(callback);
+    }
+
+    private void readAbsoluteInternal(Callback callback) {
         File file = new File(sUidIoFile);
         try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
@@ -106,8 +120,6 @@ public class StoragedUidIoStatsReader {
             }
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read " + sUidIoFile + ": " + e.getMessage());
-        } finally {
-            StrictMode.setThreadPolicyMask(oldMask);
         }
     }
 }

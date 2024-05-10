@@ -33,13 +33,5 @@ void SkiaProfileRenderer::drawRects(const float* rects, int count, const SkPaint
     }
 }
 
-uint32_t SkiaProfileRenderer::getViewportWidth() {
-    return mCanvas->imageInfo().width();
-}
-
-uint32_t SkiaProfileRenderer::getViewportHeight() {
-    return mCanvas->imageInfo().height();
-}
-
 } /* namespace uirenderer */
 } /* namespace android */

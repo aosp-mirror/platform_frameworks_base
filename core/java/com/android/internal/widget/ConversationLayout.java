@@ -149,6 +149,7 @@ public class ConversationLayout extends FrameLayout
     private View mAppNameDivider;
     private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
     private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
+    private boolean mPrecomputedTextEnabled = false;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -383,30 +384,81 @@ public class ConversationLayout extends FrameLayout
         updateContentEndPaddings();
     }
 
-    @RemotableViewMethod
+    /**
+     * Set conversation data
+     * @param extras Bundle contains conversation data
+     */
+    @RemotableViewMethod(asyncImpl = "setDataAsync")
     public void setData(Bundle extras) {
+        bind(parseMessagingData(extras, /* usePrecomputedText= */ false));
+    }
+
+    @NonNull
+    private MessagingData parseMessagingData(Bundle extras, boolean usePrecomputedText) {
         Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
-        List<Notification.MessagingStyle.Message> newMessages
-                = Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
+        List<Notification.MessagingStyle.Message> newMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(messages);
         Parcelable[] histMessages = extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
-        List<Notification.MessagingStyle.Message> newHistoricMessages
-                = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
+        List<Notification.MessagingStyle.Message> newHistoricMessages =
+                Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
 
         // mUser now set (would be nice to avoid the side effect but WHATEVER)
-        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON));
-
+        final Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON, Person.class);
         // Append remote input history to newMessages (again, side effect is lame but WHATEVS)
         RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+                extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+                        RemoteInputHistoryItem.class);
         addRemoteInputHistoryToMessages(newMessages, history);
 
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
-        // bind it, baby
-        bind(newMessages, newHistoricMessages, showSpinner);
-
         int unreadCount = extras.getInt(Notification.EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
-        setUnreadCount(unreadCount);
+
+        final List<MessagingMessage> newMessagingMessages =
+                createMessages(newMessages, /* isHistoric= */false, usePrecomputedText);
+        final List<MessagingMessage> newHistoricMessagingMessages =
+                createMessages(newHistoricMessages, /* isHistoric= */true, usePrecomputedText);
+
+        return new MessagingData(user, showSpinner, unreadCount,
+                newHistoricMessagingMessages, newMessagingMessages);
+    }
+
+    /**
+     * RemotableViewMethod's asyncImpl of {@link #setData(Bundle)}.
+     * This should be called on a background thread, and returns a Runnable which is then must be
+     * called on the main thread to complete the operation and set text.
+     * @param extras Bundle contains conversation data
+     * @hide
+     */
+    @NonNull
+    public Runnable setDataAsync(Bundle extras) {
+        if (!mPrecomputedTextEnabled) {
+            return () -> setData(extras);
+        }
+
+        final MessagingData messagingData =
+                parseMessagingData(extras, /* usePrecomputedText= */ true);
+
+        return () -> {
+            finalizeInflate(messagingData.getHistoricMessagingMessages());
+            finalizeInflate(messagingData.getNewMessagingMessages());
+
+            bind(messagingData);
+        };
+    }
+
+    /**
+     * enable/disable precomputed text usage
+     * @hide
+     */
+    public void setPrecomputedTextEnabled(boolean precomputedTextEnabled) {
+        mPrecomputedTextEnabled = precomputedTextEnabled;
+    }
+
+    private void finalizeInflate(List<MessagingMessage> historicMessagingMessages) {
+        for (MessagingMessage messagingMessage : historicMessagingMessages) {
+            messagingMessage.finalizeInflate();
+        }
     }
 
     @Override
@@ -436,15 +488,12 @@ public class ConversationLayout extends FrameLayout
         }
     }
 
-    private void bind(List<Notification.MessagingStyle.Message> newMessages,
-            List<Notification.MessagingStyle.Message> newHistoricMessages,
-            boolean showSpinner) {
-        // convert MessagingStyle.Message to MessagingMessage, re-using ones from a previous binding
-        // if they exist
-        List<MessagingMessage> historicMessages = createMessages(newHistoricMessages,
-                true /* isHistoric */);
-        List<MessagingMessage> messages = createMessages(newMessages, false /* isHistoric */);
+    private void bind(MessagingData messagingData) {
+        setUser(messagingData.getUser());
+        setUnreadCount(messagingData.getUnreadCount());
 
+        List<MessagingMessage> messages = messagingData.getNewMessagingMessages();
+        List<MessagingMessage> historicMessages = messagingData.getHistoricMessagingMessages();
         // Copy our groups, before they get clobbered
         ArrayList<MessagingGroup> oldGroups = new ArrayList<>(mGroups);
 
@@ -457,7 +506,7 @@ public class ConversationLayout extends FrameLayout
 
         // Let's now create the views and reorder them accordingly
         //   side-effect: updates mGroups, mAddedGroups
-        createGroupViews(groups, senders, showSpinner);
+        createGroupViews(groups, senders, messagingData.getShowSpinner());
 
         // Let's first check which groups were removed altogether and remove them in one animation
         removeGroups(oldGroups);
@@ -559,7 +608,7 @@ public class ConversationLayout extends FrameLayout
 
             // When collapsed, we're displaying the image message in a dedicated container
             // on the right of the layout instead of inline. Let's add the isolated image there
-            MessagingGroup messagingGroup = mGroups.get(mGroups.size() -1);
+            MessagingGroup messagingGroup = mGroups.get(mGroups.size() - 1);
             MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
             if (isolatedMessage != null) {
                 newMessage = isolatedMessage.getView();
@@ -957,15 +1006,17 @@ public class ConversationLayout extends FrameLayout
      * @param newMessages the messages to parse.
      */
     private List<MessagingMessage> createMessages(
-            List<Notification.MessagingStyle.Message> newMessages, boolean historic) {
+            List<Notification.MessagingStyle.Message> newMessages, boolean isHistoric,
+            boolean usePrecomputedText) {
         List<MessagingMessage> result = new ArrayList<>();
         for (int i = 0; i < newMessages.size(); i++) {
             Notification.MessagingStyle.Message m = newMessages.get(i);
             MessagingMessage message = findAndRemoveMatchingMessage(m);
             if (message == null) {
-                message = MessagingMessage.createMessage(this, m, mImageResolver);
+                message = MessagingMessage.createMessage(this, m,
+                        mImageResolver, usePrecomputedText);
             }
-            message.setIsHistoric(historic);
+            message.setIsHistoric(isHistoric);
             result.add(message);
         }
         return result;
@@ -1014,7 +1065,7 @@ public class ConversationLayout extends FrameLayout
             }
             if (visibleChildren > 0 && group.getVisibility() == GONE) {
                 group.setVisibility(VISIBLE);
-            } else if (visibleChildren == 0 && group.getVisibility() != GONE)   {
+            } else if (visibleChildren == 0 && group.getVisibility() != GONE) {
                 group.setVisibility(GONE);
             }
         }
@@ -1231,7 +1282,7 @@ public class ConversationLayout extends FrameLayout
         public boolean onTouchEvent(MotionEvent event) {
             float x = event.getX();
             float y = event.getY();
-            for (TouchDelegate delegate: mDelegates) {
+            for (TouchDelegate delegate : mDelegates) {
                 event.setLocation(x, y);
                 if (delegate.onTouchEvent(event)) {
                     return true;

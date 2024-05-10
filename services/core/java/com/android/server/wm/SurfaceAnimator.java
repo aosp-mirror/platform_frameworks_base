@@ -49,7 +49,8 @@ import java.util.function.Supplier;
  * {@link AnimationAdapter}. When the animation is done animating, our callback to finish the
  * animation will be invoked, at which we reparent the children back to the original parent.
  */
-class SurfaceAnimator {
+@VisibleForTesting
+public class SurfaceAnimator {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SurfaceAnimator" : TAG_WM;
 
@@ -565,6 +566,11 @@ class SurfaceAnimator {
     public static final int ANIMATION_TYPE_STARTING_REVEAL = 1 << 7;
 
     /**
+     * Animation when a back gesture animation is applied to a window container.
+     * @hide
+     */
+    public static final int ANIMATION_TYPE_PREDICT_BACK = 1 << 8;
+    /**
      * Bitmask to include all animation types. This is NOT an {@link AnimationType}
      * @hide
      */
@@ -583,7 +589,8 @@ class SurfaceAnimator {
             ANIMATION_TYPE_WINDOW_ANIMATION,
             ANIMATION_TYPE_INSETS_CONTROL,
             ANIMATION_TYPE_TOKEN_TRANSFORM,
-            ANIMATION_TYPE_STARTING_REVEAL
+            ANIMATION_TYPE_STARTING_REVEAL,
+            ANIMATION_TYPE_PREDICT_BACK
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface AnimationType {}
@@ -602,6 +609,7 @@ class SurfaceAnimator {
             case ANIMATION_TYPE_INSETS_CONTROL: return "insets_animation";
             case ANIMATION_TYPE_TOKEN_TRANSFORM: return "token_transform";
             case ANIMATION_TYPE_STARTING_REVEAL: return "starting_reveal";
+            case ANIMATION_TYPE_PREDICT_BACK: return "predict_back";
             default: return "unknown type:" + type;
         }
     }
@@ -610,7 +618,8 @@ class SurfaceAnimator {
      * Callback to be passed into {@link AnimationAdapter#startAnimation} to be invoked by the
      * component that is running the animation when the animation is finished.
      */
-    interface OnAnimationFinishedCallback {
+    @VisibleForTesting
+    public interface OnAnimationFinishedCallback {
         void onAnimationFinished(@AnimationType int type, AnimationAdapter anim);
     }
 

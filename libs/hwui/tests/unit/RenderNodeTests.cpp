@@ -231,8 +231,7 @@ TEST(RenderNode, multiTreeValidity) {
 }
 
 TEST(RenderNode, releasedCallback) {
-    int functor = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+    int functor = TestUtils::createMockFunctor();
 
     auto node = TestUtils::createNode(0, 0, 200, 400, [&](RenderProperties& props, Canvas& canvas) {
         canvas.drawWebViewFunctor(functor);
@@ -274,7 +273,7 @@ RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory, 0, 0));
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
@@ -310,7 +309,7 @@ RENDERTHREAD_TEST(DISABLED_RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
             });
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory, 0, 0));
     canvasContext->setSurface(nullptr);
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *canvasContext.get());
     DamageAccumulator damageAccumulator;
@@ -331,4 +330,32 @@ RENDERTHREAD_TEST(DISABLED_RenderNode, prepareTree_HwLayer_AVD_enqueueDamage) {
     EXPECT_EQ(rootNode.get(), info.layerUpdateQueue->entries().at(0).renderNode.get());
     EXPECT_EQ(uirenderer::Rect(0, 0, 200, 400), info.layerUpdateQueue->entries().at(0).damage);
     canvasContext->destroy();
+}
+
+TEST(RenderNode, hasNoFill) {
+    auto rootNode =
+            TestUtils::createNode(0, 0, 200, 400, [](RenderProperties& props, Canvas& canvas) {
+                Paint paint;
+                paint.setStyle(SkPaint::Style::kStroke_Style);
+                canvas.drawRect(10, 10, 100, 100, paint);
+            });
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(rootNode);
+
+    EXPECT_FALSE(rootNode.get()->getDisplayList().hasFill());
+    EXPECT_FALSE(rootNode.get()->getDisplayList().hasText());
+}
+
+TEST(RenderNode, hasFill) {
+    auto rootNode =
+            TestUtils::createNode(0, 0, 200, 400, [](RenderProperties& props, Canvas& canvas) {
+                Paint paint;
+                paint.setStyle(SkPaint::kStrokeAndFill_Style);
+                canvas.drawRect(10, 10, 100, 100, paint);
+            });
+
+    TestUtils::syncHierarchyPropertiesAndDisplayList(rootNode);
+
+    EXPECT_TRUE(rootNode.get()->getDisplayList().hasFill());
+    EXPECT_FALSE(rootNode.get()->getDisplayList().hasText());
 }

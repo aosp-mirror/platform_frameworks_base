@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.content.pm.UserPackage;
 import android.content.pm.overlay.OverlayPaths;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -30,6 +31,7 @@ import com.android.server.utils.WatchedArraySet;
 import java.util.Collections;
 import java.util.Map;
 
+/** @hide */
 class PackageUserStateDefault implements PackageUserStateInternal {
 
     @Override
@@ -72,6 +74,11 @@ class PackageUserStateDefault implements PackageUserStateInternal {
 
     @Override
     public long getCeDataInode() {
+        return 0;
+    }
+
+    @Override
+    public long getDeDataInode() {
         return 0;
     }
 
@@ -128,6 +135,11 @@ class PackageUserStateDefault implements PackageUserStateInternal {
         return false;
     }
 
+    @Override
+    public boolean isQuarantined() {
+        return false;
+    }
+
     @Nullable
     @Override
     public String getSplashScreenTheme() {
@@ -135,7 +147,12 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     }
 
     @Override
-    public long getFirstInstallTime() {
+    public @PackageManager.UserMinAspectRatio int getMinAspectRatio() {
+        return PackageManager.USER_MIN_ASPECT_RATIO_UNSET;
+    }
+
+    @Override
+    public long getFirstInstallTimeMillis() {
         return 0;
     }
 
@@ -157,7 +174,7 @@ class PackageUserStateDefault implements PackageUserStateInternal {
 
     @Nullable
     @Override
-    public WatchedArrayMap<String, SuspendParams> getSuspendParams() {
+    public WatchedArrayMap<UserPackage, SuspendParams> getSuspendParams() {
         return null;
     }
 
@@ -178,5 +195,16 @@ class PackageUserStateDefault implements PackageUserStateInternal {
     public Pair<String, Integer> getOverrideLabelIconForComponent(
             @NonNull ComponentName componentName) {
         return null;
+    }
+
+    @Nullable
+    @Override
+    public ArchiveState getArchiveState() {
+        return null;
+    }
+
+    @Override
+    public boolean dataExists() {
+        return true;
     }
 }

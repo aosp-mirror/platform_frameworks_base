@@ -16,14 +16,11 @@
 
 package com.android.server.firewall;
 
-import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Process;
-import android.os.RemoteException;
-import android.util.Slog;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -37,22 +34,12 @@ class SenderFilter {
     private static final String VAL_SYSTEM_OR_SIGNATURE = "system|signature";
     private static final String VAL_USER_ID = "userId";
 
-    static boolean isPrivilegedApp(int callerUid, int callerPid) {
+    static boolean isPrivilegedApp(PackageManagerInternal pmi, int callerUid, int callerPid) {
         if (callerUid == Process.SYSTEM_UID || callerUid == 0 ||
                 callerPid == Process.myPid() || callerPid == 0) {
             return true;
         }
-
-        IPackageManager pm = AppGlobals.getPackageManager();
-        try {
-            return (pm.getPrivateFlagsForUid(callerUid) & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
-                    != 0;
-        } catch (RemoteException ex) {
-            Slog.e(IntentFirewall.TAG, "Remote exception while retrieving uid flags",
-                    ex);
-        }
-
-        return false;
+        return pmi.isUidPrivileged(callerUid);
     }
 
     public static final FilterFactory FACTORY = new FilterFactory("sender") {
@@ -89,7 +76,7 @@ class SenderFilter {
         @Override
         public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
                 int callerUid, int callerPid, String resolvedType, int receivingUid) {
-            return isPrivilegedApp(callerUid, callerPid);
+            return isPrivilegedApp(ifw.getPackageManager(), callerUid, callerPid);
         }
     };
 
@@ -97,8 +84,8 @@ class SenderFilter {
         @Override
         public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
                 int callerUid, int callerPid, String resolvedType, int receivingUid) {
-            return isPrivilegedApp(callerUid, callerPid) ||
-                    ifw.signaturesMatch(callerUid, receivingUid);
+            return isPrivilegedApp(ifw.getPackageManager(), callerUid, callerPid)
+                    || ifw.signaturesMatch(callerUid, receivingUid);
         }
     };
 

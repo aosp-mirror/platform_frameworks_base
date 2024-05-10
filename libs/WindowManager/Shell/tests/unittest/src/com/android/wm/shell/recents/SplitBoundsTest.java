@@ -1,5 +1,7 @@
 package com.android.wm.shell.recents;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -44,21 +46,21 @@ public class SplitBoundsTest extends ShellTestCase {
     @Test
     public void testVerticalStacked() {
         SplitBounds ssb = new SplitBounds(mTopRect, mBottomRect,
-                TASK_ID_1, TASK_ID_2);
+                TASK_ID_1, TASK_ID_2, SNAP_TO_50_50);
         assertTrue(ssb.appsStackedVertically);
     }
 
     @Test
     public void testHorizontalStacked() {
         SplitBounds ssb = new SplitBounds(mLeftRect, mRightRect,
-                TASK_ID_1, TASK_ID_2);
+                TASK_ID_1, TASK_ID_2, SNAP_TO_50_50);
         assertFalse(ssb.appsStackedVertically);
     }
 
     @Test
     public void testHorizontalDividerBounds() {
         SplitBounds ssb = new SplitBounds(mTopRect, mBottomRect,
-                TASK_ID_1, TASK_ID_2);
+                TASK_ID_1, TASK_ID_2, SNAP_TO_50_50);
         Rect dividerBounds = ssb.visualDividerBounds;
         assertEquals(0, dividerBounds.left);
         assertEquals(DEVICE_LENGTH / 2 - DIVIDER_SIZE / 2, dividerBounds.top);
@@ -69,7 +71,7 @@ public class SplitBoundsTest extends ShellTestCase {
     @Test
     public void testVerticalDividerBounds() {
         SplitBounds ssb = new SplitBounds(mLeftRect, mRightRect,
-                TASK_ID_1, TASK_ID_2);
+                TASK_ID_1, TASK_ID_2, SNAP_TO_50_50);
         Rect dividerBounds = ssb.visualDividerBounds;
         assertEquals(DEVICE_WIDTH / 2 - DIVIDER_SIZE / 2, dividerBounds.left);
         assertEquals(0, dividerBounds.top);
@@ -80,7 +82,7 @@ public class SplitBoundsTest extends ShellTestCase {
     @Test
     public void testEqualVerticalTaskPercent() {
         SplitBounds ssb = new SplitBounds(mTopRect, mBottomRect,
-                TASK_ID_1, TASK_ID_2);
+                TASK_ID_1, TASK_ID_2, SNAP_TO_50_50);
         float topPercentSpaceTaken = (float) (DEVICE_LENGTH / 2 - DIVIDER_SIZE / 2) / DEVICE_LENGTH;
         assertEquals(topPercentSpaceTaken, ssb.topTaskPercent, 0.01);
     }
@@ -88,7 +90,7 @@ public class SplitBoundsTest extends ShellTestCase {
     @Test
     public void testEqualHorizontalTaskPercent() {
         SplitBounds ssb = new SplitBounds(mLeftRect, mRightRect,
-                TASK_ID_1, TASK_ID_2);
+                TASK_ID_1, TASK_ID_2, SNAP_TO_50_50);
         float leftPercentSpaceTaken = (float) (DEVICE_WIDTH / 2 - DIVIDER_SIZE / 2) / DEVICE_WIDTH;
         assertEquals(leftPercentSpaceTaken, ssb.leftTaskPercent, 0.01);
     }

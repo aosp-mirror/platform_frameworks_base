@@ -23,8 +23,6 @@ namespace android {
 
 static_assert(sizeof(SkMatrix) == 40, "Unexpected sizeof(SkMatrix), "
         "update size in Matrix.java#NATIVE_ALLOCATION_SIZE and here");
-static_assert(SK_SCALAR_IS_FLOAT, "SK_SCALAR_IS_FLOAT is false, "
-        "only float scalar is supported");
 
 class SkMatrixGlue {
 public:

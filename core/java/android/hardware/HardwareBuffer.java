@@ -16,12 +16,14 @@
 
 package android.hardware;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.GraphicBuffer;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -40,7 +42,7 @@ import java.lang.annotation.RetentionPolicy;
  * HardwareBuffer wraps a native <code>AHardwareBuffer</code> object, which is a low-level object
  * representing a memory buffer accessible by various hardware units. HardwareBuffer allows sharing
  * buffers across different application processes. In particular, HardwareBuffers may be mappable
- * to memory accessibly to various hardware systems, such as the GPU, a sensor or context hub, or
+ * to memory accessible to various hardware systems, such as the GPU, a sensor or context hub, or
  * other auxiliary processing units.
  *
  * For more information, see the NDK documentation for <code>AHardwareBuffer</code>.
@@ -64,6 +66,10 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             DS_FP32UI8,
             S_UI8,
             YCBCR_P010,
+            R_8,
+            R_16_UINT,
+            RG_1616_UINT,
+            RGBA_10101010,
     })
     public @interface Format {
     }
@@ -104,7 +110,19 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
      * little-endian value, with the lower 6 bits set to zero.
      */
-    public static final int YCBCR_P010 = 0x36;
+    public static final int YCBCR_P010    = 0x36;
+    /** Format: 8 bits red */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
+    public static final int R_8           = 0x38;
+    /** Format: 16 bits red */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
+    public static final int R_16_UINT     = 0x39;
+    /** Format: 16 bits each red, green */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
+    public static final int RG_1616_UINT  = 0x3a;
+    /** Format: 10 bits each red, green, blue, alpha */
+    @FlaggedApi(com.android.graphics.hwui.flags.Flags.FLAG_REQUESTED_FORMATS_V)
+    public static final int RGBA_10101010 = 0x3b;
 
     // Note: do not rename, this field is used by native code
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -320,6 +338,15 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /**
      * Returns the system-wide unique id for this buffer
      *
+     * This can be useful as a cache key for associating additional objects with
+     * a given HardwareBuffer, such as associating an imported EGLImage with
+     * the target HardwareBuffer when processing a stream of buffers from
+     * ImageReader.
+     *
+     * This can also be useful for doing cross-process buffer caching. As sending
+     * a HardwareBuffer over Binder is slower than sending a long, this can be
+     * used as reliable cache key after an initial handshake that passes the
+     * HardwareBuffers themselves to later be referred to using only the id.
      */
     public long getId() {
         checkClosed("id");
@@ -390,11 +417,14 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final @android.annotation.NonNull Parcelable.Creator<HardwareBuffer> CREATOR =
             new Parcelable.Creator<HardwareBuffer>() {
         public HardwareBuffer createFromParcel(Parcel in) {
+            if (in == null) {
+                throw new NullPointerException("null passed to createFromParcel");
+            }
             long nativeObject = nReadHardwareBufferFromParcel(in);
             if (nativeObject != 0) {
                 return new HardwareBuffer(nativeObject);
             }
-            return null;
+            throw new BadParcelableException("Failed to read hardware buffer");
         }
 
         public HardwareBuffer[] newArray(int size) {

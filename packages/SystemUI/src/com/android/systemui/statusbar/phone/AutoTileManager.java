@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
@@ -27,13 +28,16 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
+import com.android.systemui.dagger.NightDisplayListenerModule;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
-import com.android.systemui.qs.SettingObserver;
+import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.DataSaverController;
@@ -47,6 +51,7 @@ import com.android.systemui.util.UserAwareController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 import javax.inject.Named;
@@ -73,14 +78,15 @@ public class AutoTileManager implements UserAwareController {
     private final String mSafetySpec;
 
     protected final Context mContext;
-    protected final QSTileHost mHost;
+    protected final QSHost mHost;
     protected final Handler mHandler;
     protected final SecureSettings mSecureSettings;
     protected final AutoAddTracker mAutoTracker;
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
     private final ManagedProfileController mManagedProfileController;
-    private final NightDisplayListener mNightDisplayListener;
+    private final NightDisplayListenerModule.Builder mNightDisplayListenerBuilder;
+    private NightDisplayListener mNightDisplayListener;
     private final CastController mCastController;
     private final DeviceControlsController mDeviceControlsController;
     private final WalletController mWalletController;
@@ -90,13 +96,13 @@ public class AutoTileManager implements UserAwareController {
     private final ArrayList<AutoAddSetting> mAutoAddSettingList = new ArrayList<>();
 
     public AutoTileManager(Context context, AutoAddTracker.Builder autoAddTrackerBuilder,
-            QSTileHost host,
+            QSHost host,
             @Background Handler handler,
             SecureSettings secureSettings,
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
-            NightDisplayListener nightDisplayListener,
+            NightDisplayListenerModule.Builder nightDisplayListenerBuilder,
             CastController castController,
             ReduceBrightColorsController reduceBrightColorsController,
             DeviceControlsController deviceControlsController,
@@ -112,7 +118,7 @@ public class AutoTileManager implements UserAwareController {
         mHotspotController = hotspotController;
         mDataSaverController = dataSaverController;
         mManagedProfileController = managedProfileController;
-        mNightDisplayListener = nightDisplayListener;
+        mNightDisplayListenerBuilder = nightDisplayListenerBuilder;
         mCastController = castController;
         mReduceBrightColorsController = reduceBrightColorsController;
         mIsReduceBrightColorsAvailable = isReduceBrightColorsAvailable;
@@ -137,6 +143,7 @@ public class AutoTileManager implements UserAwareController {
      * Init method must be called after construction to start listening
      */
     public void init() {
+        QSPipelineFlagsRepository.Utils.assertInLegacyMode();
         if (mInitialized) {
             Log.w(TAG, "Trying to re-initialize");
             return;
@@ -154,9 +161,11 @@ public class AutoTileManager implements UserAwareController {
         if (!mAutoTracker.isAdded(SAVER)) {
             mDataSaverController.addCallback(mDataSaverListener);
         }
-        if (!mAutoTracker.isAdded(WORK)) {
-            mManagedProfileController.addCallback(mProfileCallback);
-        }
+        mManagedProfileController.addCallback(mProfileCallback);
+
+        mNightDisplayListener = mNightDisplayListenerBuilder
+                .setUser(mCurrentUser.getIdentifier())
+                .build();
         if (!mAutoTracker.isAdded(NIGHT)
                 && ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             mNightDisplayListener.setCallback(mNightDisplayCallback);
@@ -167,9 +176,10 @@ public class AutoTileManager implements UserAwareController {
         if (!mAutoTracker.isAdded(BRIGHTNESS) && mIsReduceBrightColorsAvailable) {
             mReduceBrightColorsController.addCallback(mReduceBrightColorsCallback);
         }
-        if (!mAutoTracker.isAdded(DEVICE_CONTROLS)) {
-            mDeviceControlsController.setCallback(mDeviceControlsCallback);
-        }
+        // We always want this callback, because if the feature stops being supported,
+        // we want to remove the tile from AutoAddTracker. That way it will be re-added when the
+        // feature is reenabled (similar to work tile).
+        mDeviceControlsController.setCallback(mDeviceControlsCallback);
         if (!mAutoTracker.isAdded(WALLET)) {
             initWalletController();
         }
@@ -192,7 +202,8 @@ public class AutoTileManager implements UserAwareController {
         mHotspotController.removeCallback(mHotspotCallback);
         mDataSaverController.removeCallback(mDataSaverListener);
         mManagedProfileController.removeCallback(mProfileCallback);
-        if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
+        if (ColorDisplayManager.isNightDisplayAvailable(mContext)
+                && mNightDisplayListener != null) {
             mNightDisplayListener.setCallback(null);
         }
         if (mIsReduceBrightColorsAvailable) {
@@ -275,18 +286,19 @@ public class AutoTileManager implements UserAwareController {
         return mCurrentUser.getIdentifier();
     }
 
-    public void unmarkTileAsAutoAdded(String tabSpec) {
-        mAutoTracker.setTileRemoved(tabSpec);
-    }
-
     private final ManagedProfileController.Callback mProfileCallback =
             new ManagedProfileController.Callback() {
                 @Override
                 public void onManagedProfileChanged() {
-                    if (mAutoTracker.isAdded(WORK)) return;
                     if (mManagedProfileController.hasActiveProfile()) {
-                        mHost.addTile(WORK);
+                        if (mAutoTracker.isAdded(WORK)) return;
+                        final int position = mAutoTracker.getRestoredTilePosition(WORK);
+                        mHost.addTile(WORK, position);
                         mAutoTracker.setTileAdded(WORK);
+                    } else {
+                        if (!mAutoTracker.isAdded(WORK)) return;
+                        mHost.removeTile(WORK);
+                        mAutoTracker.setTileRemoved(WORK);
                     }
                 }
 
@@ -324,13 +336,29 @@ public class AutoTileManager implements UserAwareController {
         @Override
         public void onControlsUpdate(@Nullable Integer position) {
             if (mAutoTracker.isAdded(DEVICE_CONTROLS)) return;
-            if (position != null) {
+            if (position != null && !hasTile(DEVICE_CONTROLS)) {
                 mHost.addTile(DEVICE_CONTROLS, position);
+                mAutoTracker.setTileAdded(DEVICE_CONTROLS);
             }
-            mAutoTracker.setTileAdded(DEVICE_CONTROLS);
             mHandler.post(() -> mDeviceControlsController.removeCallback());
         }
+
+        @Override
+        public void removeControlsAutoTracker() {
+            mAutoTracker.setTileRemoved(DEVICE_CONTROLS);
+        }
     };
+
+    private boolean hasTile(String tileSpec) {
+        if (tileSpec == null) return false;
+        Collection<QSTile> tiles = mHost.getTiles();
+        for (QSTile tile : tiles) {
+            if (tileSpec.equals(tile.getTileSpec())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void initWalletController() {
         if (mAutoTracker.isAdded(WALLET)) return;
@@ -429,14 +457,14 @@ public class AutoTileManager implements UserAwareController {
                 initSafetyTile();
             } else if (!isSafetyCenterEnabled && mAutoTracker.isAdded(mSafetySpec)) {
                 mHost.removeTile(mSafetySpec);
-                mHost.unmarkTileAsAutoAdded(mSafetySpec);
+                mAutoTracker.setTileRemoved(mSafetySpec);
             }
         }
     };
 
     @VisibleForTesting
-    protected SettingObserver getSecureSettingForKey(String key) {
-        for (SettingObserver s : mAutoAddSettingList) {
+    protected UserSettingObserver getSecureSettingForKey(String key) {
+        for (UserSettingObserver s : mAutoAddSettingList) {
             if (Objects.equals(key, s.getKey())) {
                 return s;
             }
@@ -450,7 +478,7 @@ public class AutoTileManager implements UserAwareController {
      * When the setting changes to a value different from 0, if the tile has not been auto added
      * before, it will be added and the listener will be stopped.
      */
-    private class AutoAddSetting extends SettingObserver {
+    private class AutoAddSetting extends UserSettingObserver {
         private final String mSpec;
 
         AutoAddSetting(

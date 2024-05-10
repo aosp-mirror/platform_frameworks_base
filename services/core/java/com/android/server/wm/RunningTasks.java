@@ -24,16 +24,14 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
 
-import com.android.internal.util.function.pooled.PooledConsumer;
-import com.android.internal.util.function.pooled.PooledLambda;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Class for resolving the set of running tasks in the system.
  */
-class RunningTasks {
+class RunningTasks implements Consumer<Task> {
 
     static final int FLAG_FILTER_ONLY_VISIBLE_RECENTS = 1;
     static final int FLAG_ALLOWED = 1 << 1;
@@ -58,7 +56,7 @@ class RunningTasks {
     private boolean mKeepIntentExtra;
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, int flags, RecentTasks recentTasks,
-            WindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
+            WindowContainer<?> root, int callingUid, ArraySet<Integer> profileIds) {
         // Return early if there are no tasks to fetch
         if (maxNum <= 0) {
             return;
@@ -131,13 +129,11 @@ class RunningTasks {
     }
 
     private void processTaskInWindowContainer(WindowContainer wc) {
-        final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
-                PooledLambda.__(Task.class));
-        wc.forAllLeafTasks(c, true);
-        c.recycle();
+        wc.forAllLeafTasks(this, true /* traverseTopToBottom */);
     }
 
-    private void processTask(Task task) {
+    @Override
+    public void accept(Task task) {
         if (task.getTopNonFinishingActivity() == null) {
             // Skip if there are no activities in the task
             return;

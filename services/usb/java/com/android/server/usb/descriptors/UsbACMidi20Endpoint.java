@@ -62,6 +62,9 @@ public final class UsbACMidi20Endpoint extends UsbACEndpoint {
                 + " Length: " + getLength());
         canvas.openList();
         canvas.writeListItem("" + getNumGroupTerminals() + " Group Terminals.");
+        for (int i = 0; i < getNumGroupTerminals(); i++) {
+            canvas.writeListItem("Group Terminal " + i + ": " + mBlockIds[i]);
+        }
         canvas.closeList();
     }
 }

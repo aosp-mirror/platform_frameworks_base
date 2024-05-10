@@ -15,6 +15,7 @@
   ~ limitations under the License
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/bubble_manage_menu_bg"
@@ -25,7 +26,8 @@
         android:id="@+id/bubble_manage_menu_dismiss_container"
         android:background="@drawable/bubble_manage_menu_row"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bubble_menu_item_height"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/bubble_menu_item_height"
         android:gravity="center_vertical"
         android:paddingStart="@dimen/bubble_menu_padding"
         android:paddingEnd="@dimen/bubble_menu_padding"
@@ -41,6 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault"
             android:text="@string/bubble_dismiss_text" />
 
@@ -50,7 +53,8 @@
         android:id="@+id/bubble_manage_menu_dont_bubble_container"
         android:background="@drawable/bubble_manage_menu_row"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bubble_menu_item_height"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/bubble_menu_item_height"
         android:gravity="center_vertical"
         android:paddingStart="@dimen/bubble_menu_padding"
         android:paddingEnd="@dimen/bubble_menu_padding"
@@ -66,6 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault"
             android:text="@string/bubbles_dont_bubble_conversation" />
 
@@ -75,7 +80,8 @@
         android:id="@+id/bubble_manage_menu_settings_container"
         android:background="@drawable/bubble_manage_menu_row"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bubble_menu_item_height"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/bubble_menu_item_height"
         android:gravity="center_vertical"
         android:paddingStart="@dimen/bubble_menu_padding"
         android:paddingEnd="@dimen/bubble_menu_padding"
@@ -92,6 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault" />
 
     </LinearLayout>

@@ -15,10 +15,10 @@
 -->
 
 <com.android.soundpicker.CheckedListItem xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:background="?android:attr/selectableItemBackground"
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:gravity="center_vertical"
+     android:background="?android:attr/selectableItemBackground"
     >
 
     <CheckedTextView

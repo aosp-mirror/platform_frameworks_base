@@ -16,14 +16,18 @@
 
 #pragma once
 
-#include <SkSurface.h>
+#include <SkColorSpace.h>
 #include <SkDocument.h>
 #include <SkMultiPictureDocument.h>
+#include <SkSurface.h>
+
 #include "Lighting.h"
 #include "hwui/AnimatedImageDrawable.h"
 #include "renderthread/CanvasContext.h"
+#include "renderthread/HardwareBufferRenderParams.h"
 #include "renderthread/IRenderPipeline.h"
 
+class SkFILEWStream;
 class SkPictureRecorder;
 struct SkSharingSerialContext;
 
@@ -71,14 +75,26 @@ public:
         mCaptureMode = callback ? CaptureMode::CallbackAPI : CaptureMode::None;
     }
 
+    virtual void setHardwareBuffer(AHardwareBuffer* buffer) override;
+    bool hasHardwareBuffer() override { return mHardwareBuffer != nullptr; }
+
+    void setTargetSdrHdrRatio(float ratio) override;
+
 protected:
+    sk_sp<SkSurface> getBufferSkSurface(
+            const renderthread::HardwareBufferRenderParams& bufferParams);
     void dumpResourceCacheUsage() const;
 
     renderthread::RenderThread& mRenderThread;
 
+    AHardwareBuffer* mHardwareBuffer = nullptr;
+    sk_sp<SkSurface> mBufferSurface = nullptr;
+    sk_sp<SkColorSpace> mBufferColorSpace = nullptr;
+
     ColorMode mColorMode = ColorMode::Default;
     SkColorType mSurfaceColorType;
     sk_sp<SkColorSpace> mSurfaceColorSpace;
+    float mTargetSdrHdrRatio = 1.f;
 
     bool isCapturingSkp() const { return mCaptureMode != CaptureMode::None; }
 

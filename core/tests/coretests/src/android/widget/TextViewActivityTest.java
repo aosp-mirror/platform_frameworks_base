@@ -67,9 +67,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.Until;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.Spannable;
@@ -95,6 +92,9 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.Suppress;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.Until;
 
 import com.android.frameworks.coretests.R;
 

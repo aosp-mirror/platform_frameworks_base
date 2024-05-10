@@ -18,6 +18,10 @@
 #include "HardwareBitmapUploader.h"
 #include "Properties.h"
 #ifdef __ANDROID__  // Layoutlib does not support render thread
+#include <private/android/AHardwareBufferHelpers.h>
+#include <ui/GraphicBuffer.h>
+#include <ui/GraphicBufferMapper.h>
+
 #include "renderthread/RenderProxy.h"
 #endif
 #include "utils/Color.h"
@@ -34,13 +38,53 @@
 #include <binder/IServiceManager.h>
 #endif
 
+#include <Gainmap.h>
 #include <SkCanvas.h>
-#include <SkImagePriv.h>
-#include <SkWebpEncoder.h>
+#include <SkColor.h>
+#include <SkEncodedImageFormat.h>
 #include <SkHighContrastFilter.h>
+#include <SkImage.h>
+#include <SkImageAndroid.h>
+#include <SkImagePriv.h>
+#include <SkJpegGainmapEncoder.h>
+#include <SkPixmap.h>
+#include <SkRect.h>
+#include <SkStream.h>
+#include <SkJpegEncoder.h>
+#include <SkPngEncoder.h>
+#include <SkWebpEncoder.h>
+
 #include <limits>
 
 namespace android {
+
+#ifdef __ANDROID__
+static uint64_t AHardwareBuffer_getAllocationSize(AHardwareBuffer* aHardwareBuffer) {
+    GraphicBuffer* buffer = AHardwareBuffer_to_GraphicBuffer(aHardwareBuffer);
+    auto& mapper = GraphicBufferMapper::get();
+    uint64_t size = 0;
+    auto err = mapper.getAllocationSize(buffer->handle, &size);
+    if (err == OK) {
+        if (size > 0) {
+            return size;
+        } else {
+            ALOGW("Mapper returned size = 0 for buffer format: 0x%x size: %d x %d", buffer->format,
+                  buffer->width, buffer->height);
+            // Fall-through to estimate
+        }
+    }
+
+    // Estimation time!
+    // Stride could be = 0 if it's ill-defined (eg, compressed buffer), in which case we use the
+    // width of the buffer instead
+    size = std::max(buffer->width, buffer->stride) * buffer->height;
+    // Require bpp to be at least 1. This is too low for many formats, but it's better than 0
+    // Also while we could make increasingly better estimates, the reality is that mapper@4
+    // should be common enough at this point that we won't ever hit this anyway
+    size *= std::max(1u, bytesPerPixel(buffer->format));
+    return size;
+}
+#endif
 
 bool Bitmap::computeAllocationSize(size_t rowBytes, int height, size_t* size) {
     return 0 <= height && height <= std::numeric_limits<size_t>::max() &&
@@ -252,9 +296,11 @@ Bitmap::Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes
         , mPalette(palette)
         , mPaletteGenerationId(getGenerationID()) {
     mPixelStorage.hardware.buffer = buffer;
+    mPixelStorage.hardware.size = AHardwareBuffer_getAllocationSize(buffer);
     AHardwareBuffer_acquire(buffer);
     setImmutable();  // HW bitmaps are always immutable
-    mImage = SkImage::MakeFromAHardwareBuffer(buffer, mInfo.alphaType(), mInfo.refColorSpace());
+    mImage = SkImages::DeferredFromAHardwareBuffer(buffer, mInfo.alphaType(),
+                                                   mInfo.refColorSpace());
 }
 #endif
 
@@ -308,6 +354,10 @@ size_t Bitmap::getAllocationByteCount() const {
             return mPixelStorage.heap.size;
         case PixelStorageType::Ashmem:
             return mPixelStorage.ashmem.size;
+#ifdef __ANDROID__
+        case PixelStorageType::Hardware:
+            return mPixelStorage.hardware.size;
+#endif
         default:
             return rowBytes() * height();
     }
@@ -361,7 +411,12 @@ sk_sp<SkImage> Bitmap::makeImage() {
         // Note we don't cache in this case, because the raster image holds a pointer to this Bitmap
         // internally and ~Bitmap won't be invoked.
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
+#ifdef __ANDROID__
+        // pinnable images are only supported with the Ganesh GPU backend compiled in.
+        image = SkImages::PinnableRasterFromBitmap(skiaBitmap);
+#else
         image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
+#endif
     }
     return image;
 }
@@ -450,6 +505,23 @@ BitmapPalette Bitmap::computePalette(const SkImageInfo& info, const void* addr, 
 }
 
 bool Bitmap::compress(JavaCompressFormat format, int32_t quality, SkWStream* stream) {
+#ifdef __ANDROID__  // TODO: This isn't built for host for some reason?
+    if (hasGainmap() && format == JavaCompressFormat::Jpeg) {
+        SkBitmap baseBitmap = getSkBitmap();
+        SkBitmap gainmapBitmap = gainmap()->bitmap->getSkBitmap();
+        if (gainmapBitmap.colorType() == SkColorType::kAlpha_8_SkColorType) {
+            SkBitmap greyGainmap;
+            auto greyInfo = gainmapBitmap.info().makeColorType(SkColorType::kGray_8_SkColorType);
+            greyGainmap.setInfo(greyInfo, gainmapBitmap.rowBytes());
+            greyGainmap.setPixelRef(sk_ref_sp(gainmapBitmap.pixelRef()), 0, 0);
+            gainmapBitmap = std::move(greyGainmap);
+        }
+        SkJpegEncoder::Options options{.fQuality = quality};
+        return SkJpegGainmapEncoder::EncodeHDRGM(stream, baseBitmap.pixmap(), options,
+                                                 gainmapBitmap.pixmap(), options, gainmap()->info);
+    }
+#endif
+
     SkBitmap skbitmap;
     getSkBitmap(&skbitmap);
     return compress(skbitmap, format, quality, stream);
@@ -465,17 +537,25 @@ bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
         return false;
     }
 
-    SkEncodedImageFormat fm;
     switch (format) {
-        case JavaCompressFormat::Jpeg:
-            fm = SkEncodedImageFormat::kJPEG;
-            break;
+        case JavaCompressFormat::Jpeg: {
+            SkJpegEncoder::Options options;
+            options.fQuality = quality;
+            return SkJpegEncoder::Encode(stream, bitmap.pixmap(), options);
+        }
         case JavaCompressFormat::Png:
-            fm = SkEncodedImageFormat::kPNG;
-            break;
-        case JavaCompressFormat::Webp:
-            fm = SkEncodedImageFormat::kWEBP;
-            break;
+            return SkPngEncoder::Encode(stream, bitmap.pixmap(), {});
+        case JavaCompressFormat::Webp: {
+            SkWebpEncoder::Options options;
+            if (quality >= 100) {
+                options.fCompression = SkWebpEncoder::Compression::kLossless;
+                options.fQuality = 75; // This is effort to compress
+            } else {
+                options.fCompression = SkWebpEncoder::Compression::kLossy;
+                options.fQuality = quality;
+            }
+            return SkWebpEncoder::Encode(stream, bitmap.pixmap(), options);
+        }
         case JavaCompressFormat::WebpLossy:
         case JavaCompressFormat::WebpLossless: {
             SkWebpEncoder::Options options;
@@ -485,7 +565,15 @@ bool Bitmap::compress(const SkBitmap& bitmap, JavaCompressFormat format,
             return SkWebpEncoder::Encode(stream, bitmap.pixmap(), options);
         }
     }
-
-    return SkEncodeImage(stream, bitmap, fm, quality);
 }
+
+sp<uirenderer::Gainmap> Bitmap::gainmap() const {
+    LOG_ALWAYS_FATAL_IF(!hasGainmap(), "Bitmap doesn't have a gainmap");
+    return mGainmap;
+}
+
+void Bitmap::setGainmap(sp<uirenderer::Gainmap>&& gainmap) {
+    mGainmap = std::move(gainmap);
+}
+
 }  // namespace android

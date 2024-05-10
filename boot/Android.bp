@@ -29,6 +29,7 @@ soong_config_module_type {
     config_namespace: "AUTO",
     bool_variables: [
         "car_bootclasspath_fragment",
+        "release_crashrecovery_module",
     ],
     properties: [
         "fragments",
@@ -76,8 +77,20 @@ custom_platform_bootclasspath {
             module: "com.android.btservices-bootclasspath-fragment",
         },
         {
+            apex: "com.android.configinfrastructure",
+            module: "com.android.configinfrastructure-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.conscrypt",
             module: "com.android.conscrypt-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.devicelock",
+            module: "com.android.devicelock-bootclasspath-fragment",
+        },
+        {
+            apex: "com.android.healthfitness",
+            module: "com.android.healthfitness-bootclasspath-fragment",
         },
         {
             apex: "com.android.i18n",
@@ -143,6 +156,15 @@ custom_platform_bootclasspath {
                 },
             ],
         },
+        release_crashrecovery_module: {
+            fragments: [
+                // only used when crashrecovery is enabled
+                {
+                    apex: "com.android.crashrecovery",
+                    module: "com.android.crashrecovery-bootclasspath-fragment",
+                },
+            ],
+        },
     },
 
     // Additional information needed by hidden api processing.
@@ -190,6 +212,13 @@ custom_platform_bootclasspath {
     required: [
         "platform-systemserverclasspath",
     ],
+}
+
+genrule { // This module exists to make the srcjar output available to Make.
+    name: "platform-bootclasspath.srcjar",
+    srcs: [":platform-bootclasspath{.srcjar}"],
+    out: ["platform-bootclasspath.srcjar"],
+    cmd: "cp $(in) $(out)",
 }
 
 platform_systemserverclasspath {

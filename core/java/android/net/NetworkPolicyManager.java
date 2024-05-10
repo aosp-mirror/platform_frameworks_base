@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.procStateToString;
 import static android.content.pm.PackageManager.GET_SIGNATURES;
 
@@ -169,6 +171,8 @@ public class NetworkPolicyManager {
     public static final String FIREWALL_CHAIN_NAME_RESTRICTED = "restricted";
     /** @hide */
     public static final String FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY = "low_power_standby";
+    /** @hide */
+    public static final String FIREWALL_CHAIN_NAME_BACKGROUND = "background";
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
@@ -178,6 +182,9 @@ public class NetworkPolicyManager {
 
     /** @hide */
     public static final int TOP_THRESHOLD_STATE = ActivityManager.PROCESS_STATE_BOUND_TOP;
+
+    /** @hide */
+    public static final int BACKGROUND_THRESHOLD_STATE = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
@@ -263,6 +270,16 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST = 1 << 6;
+
+    /**
+     * Flag to indicate that the app is exempt from always-on background network restrictions.
+     * Note that this is explicitly different to the flag NOT_FOREGROUND which is used to grant
+     * shared exception to apps from power restrictions like doze, battery saver and app-standby.
+     *
+     * @hide
+     */
+    public static final int ALLOWED_REASON_NOT_IN_BACKGROUND = 1 << 7;
+
     /**
      * Flag to indicate that app is exempt from certain metered network restrictions because user
      * explicitly exempted it.
@@ -475,8 +492,8 @@ public class NetworkPolicyManager {
      *
      * @param uid The UID whose status needs to be checked.
      * @return {@link ConnectivityManager#RESTRICT_BACKGROUND_STATUS_DISABLED},
-     *         {@link ConnectivityManager##RESTRICT_BACKGROUND_STATUS_ENABLED},
-     *         or {@link ConnectivityManager##RESTRICT_BACKGROUND_STATUS_WHITELISTED} to denote
+     *         {@link ConnectivityManager#RESTRICT_BACKGROUND_STATUS_ENABLED},
+     *         or {@link ConnectivityManager#RESTRICT_BACKGROUND_STATUS_WHITELISTED} to denote
      *         the current status of the UID.
      * @hide
      */
@@ -769,6 +786,28 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Returns the default network capabilities
+     * ({@link ActivityManager#PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
+     * ActivityManager.PROCESS_CAPABILITY_*}) of the specified process state.
+     * This <b>DOES NOT</b> return all default process capabilities for a proc state.
+     * @hide
+     */
+    public static int getDefaultProcessNetworkCapabilities(int procState) {
+        switch (procState) {
+            case ActivityManager.PROCESS_STATE_PERSISTENT:
+            case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
+            case ActivityManager.PROCESS_STATE_TOP:
+            case ActivityManager.PROCESS_STATE_BOUND_TOP:
+            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
+            case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                return ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
+                        | ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
+            default:
+                return ActivityManager.PROCESS_CAPABILITY_NONE;
+        }
+    }
+
+    /**
      * Returns true if {@param procState} is considered foreground and as such will be allowed
      * to access network when the device is idle or in battery saver mode. Otherwise, false.
      * @hide
@@ -783,8 +822,11 @@ public class NetworkPolicyManager {
     /** @hide */
     public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(
             int procState, @ProcessCapability int capability) {
+        if (procState == PROCESS_STATE_UNKNOWN) {
+            return false;
+        }
         return procState <= FOREGROUND_THRESHOLD_STATE
-                || (capability & ActivityManager.PROCESS_CAPABILITY_NETWORK) != 0;
+                || (capability & ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0;
     }
 
     /** @hide */
@@ -796,6 +838,21 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * This is currently only used as an implementation detail for
+     * {@link com.android.server.net.NetworkPolicyManagerService}.
+     * Only put here to be together with other isProcStateAllowed* methods.
+     *
+     * @hide
+     */
+    public static boolean isProcStateAllowedNetworkWhileBackground(@Nullable UidState uidState) {
+        if (uidState == null) {
+            return false;
+        }
+        return uidState.procState < BACKGROUND_THRESHOLD_STATE
+                || (uidState.capability & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0;
+    }
+
+    /**
      * Returns true if {@param procState} is considered foreground and as such will be allowed
      * to access network when the device is in data saver mode. Otherwise, false.
      * @hide
@@ -804,13 +861,21 @@ public class NetworkPolicyManager {
         if (uidState == null) {
             return false;
         }
-        return isProcStateAllowedWhileOnRestrictBackground(uidState.procState);
+        return isProcStateAllowedWhileOnRestrictBackground(uidState.procState, uidState.capability);
     }
 
     /** @hide */
-    public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
-        // Data saver and bg policy restrictions will only take procstate into account.
-        return procState <= FOREGROUND_THRESHOLD_STATE;
+    public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState,
+            @ProcessCapability int capabilities) {
+        if (procState == PROCESS_STATE_UNKNOWN) {
+            return false;
+        }
+        return procState <= FOREGROUND_THRESHOLD_STATE
+                // This is meant to be a user-initiated job, and therefore gets similar network
+                // access to FGS.
+                || (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                        && (capabilities
+                              & ActivityManager.PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0);
     }
 
     /** @hide */

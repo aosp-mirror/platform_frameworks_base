@@ -26,6 +26,7 @@ import android.view.ViewRootImpl
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -56,6 +57,7 @@ class WallpaperControllerTest : SysuiTestCase() {
     private lateinit var viewRootImpl: ViewRootImpl
     @Mock
     private lateinit var windowToken: IBinder
+    private val wallpaperRepository = FakeWallpaperRepository()
 
     @JvmField
     @Rule
@@ -69,7 +71,7 @@ class WallpaperControllerTest : SysuiTestCase() {
         `when`(root.windowToken).thenReturn(windowToken)
         `when`(root.isAttachedToWindow).thenReturn(true)
 
-        wallaperController = WallpaperController(wallpaperManager)
+        wallaperController = WallpaperController(wallpaperManager, wallpaperRepository)
 
         wallaperController.rootView = root
     }
@@ -90,9 +92,9 @@ class WallpaperControllerTest : SysuiTestCase() {
 
     @Test
     fun setUnfoldTransitionZoom_defaultUnfoldTransitionIsDisabled_doesNotUpdateWallpaperZoom() {
-        wallaperController.onWallpaperInfoUpdated(createWallpaperInfo(
+        wallpaperRepository.wallpaperInfo.value = createWallpaperInfo(
             useDefaultTransition = false
-        ))
+        )
 
         wallaperController.setUnfoldTransitionZoom(0.5f)
 

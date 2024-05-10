@@ -354,6 +354,7 @@ public final class VcnCellUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
     }
 
     /** @hide */
+    @Override
     public Map<Integer, Integer> getCapabilitiesMatchCriteria() {
         return Collections.unmodifiableMap(new HashMap<>(mCapabilitiesMatchCriteria));
     }

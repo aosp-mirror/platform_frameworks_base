@@ -20,9 +20,12 @@ package android.hardware.display;
 import static android.hardware.display.DisplayManager.EventsMask;
 import static android.view.Display.HdrCapabilities.HdrType;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.app.ActivityThread;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -30,18 +33,23 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.ColorSpace;
 import android.graphics.Point;
+import android.hardware.OverlayProperties;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.media.projection.IMediaProjection;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
+import android.sysprop.DisplayProperties;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -52,11 +60,12 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Manager communication with the display manager service on behalf of
@@ -66,7 +75,15 @@ import java.util.concurrent.Executor;
  */
 public final class DisplayManagerGlobal {
     private static final String TAG = "DisplayManager";
-    private static final boolean DEBUG = false;
+
+    private static final String EXTRA_LOGGING_PACKAGE_NAME =
+            DisplayProperties.debug_vri_package().orElse(null);
+    private static String sCurrentPackageName = ActivityThread.currentPackageName();
+    private static boolean sExtraDisplayListenerLogging = initExtraLogging();
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayManager DEBUG && adb reboot'
+    private static final boolean DEBUG = DisplayManager.DEBUG || sExtraDisplayListenerLogging;
 
     // True if display info and display ids should be cached.
     //
@@ -78,11 +95,14 @@ public final class DisplayManagerGlobal {
     // orientation change before the display info cache has actually been invalidated.
     private static final boolean USE_CACHE = false;
 
-    @IntDef(prefix = {"SWITCHING_TYPE_"}, value = {
+    @IntDef(prefix = {"EVENT_DISPLAY_"}, flag = true, value = {
             EVENT_DISPLAY_ADDED,
             EVENT_DISPLAY_CHANGED,
             EVENT_DISPLAY_REMOVED,
-            EVENT_DISPLAY_BRIGHTNESS_CHANGED
+            EVENT_DISPLAY_BRIGHTNESS_CHANGED,
+            EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED,
+            EVENT_DISPLAY_CONNECTED,
+            EVENT_DISPLAY_DISCONNECTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisplayEvent {}
@@ -91,6 +111,9 @@ public final class DisplayManagerGlobal {
     public static final int EVENT_DISPLAY_CHANGED = 2;
     public static final int EVENT_DISPLAY_REMOVED = 3;
     public static final int EVENT_DISPLAY_BRIGHTNESS_CHANGED = 4;
+    public static final int EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED = 5;
+    public static final int EVENT_DISPLAY_CONNECTED = 6;
+    public static final int EVENT_DISPLAY_DISCONNECTED = 7;
 
     @UnsupportedAppUsage
     private static DisplayManagerGlobal sInstance;
@@ -105,10 +128,12 @@ public final class DisplayManagerGlobal {
 
     private DisplayManagerCallback mCallback;
     private @EventsMask long mRegisteredEventsMask = 0;
-    private final ArrayList<DisplayListenerDelegate> mDisplayListeners = new ArrayList<>();
+    private final CopyOnWriteArrayList<DisplayListenerDelegate> mDisplayListeners =
+            new CopyOnWriteArrayList<>();
 
     private final SparseArray<DisplayInfo> mDisplayInfoCache = new SparseArray<>();
     private final ColorSpace mWideColorSpace;
+    private final OverlayProperties mOverlayProperties;
     private int[] mDisplayIdCache;
 
     private int mWifiDisplayScanNestCount;
@@ -116,10 +141,13 @@ public final class DisplayManagerGlobal {
     @VisibleForTesting
     public DisplayManagerGlobal(IDisplayManager dm) {
         mDm = dm;
+        initExtraLogging();
+
         try {
             mWideColorSpace =
                     ColorSpace.get(
                             ColorSpace.Named.values()[mDm.getPreferredWideGamutColorSpaceId()]);
+            mOverlayProperties = mDm.getOverlaySupport();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -206,6 +234,16 @@ public final class DisplayManagerGlobal {
      */
     @UnsupportedAppUsage
     public int[] getDisplayIds() {
+        return getDisplayIds(/* includeDisabled= */ false);
+    }
+
+    /**
+     * Gets all currently valid logical display ids.
+     *
+     * @param includeDisabled True if the returned list of displays includes disabled displays.
+     * @return An array containing all display ids.
+     */
+    public int[] getDisplayIds(boolean includeDisabled) {
         try {
             synchronized (mLock) {
                 if (USE_CACHE) {
@@ -214,7 +252,7 @@ public final class DisplayManagerGlobal {
                     }
                 }
 
-                int[] displayIds = mDm.getDisplayIds();
+                int[] displayIds = mDm.getDisplayIds(includeDisabled);
                 if (USE_CACHE) {
                     mDisplayIdCache = displayIds;
                 }
@@ -296,9 +334,26 @@ public final class DisplayManagerGlobal {
      * If null, listener will use the handler for the current thread, and if still null,
      * the handler for the main thread.
      * If that is still null, a runtime exception will be thrown.
+     * @param packageName of the calling package.
      */
     public void registerDisplayListener(@NonNull DisplayListener listener,
-            @Nullable Handler handler, @EventsMask long eventsMask) {
+            @Nullable Handler handler, @EventsMask long eventsMask, String packageName) {
+        Looper looper = getLooperForHandler(handler);
+        Handler springBoard = new Handler(looper);
+        registerDisplayListener(listener, new HandlerExecutor(springBoard), eventsMask,
+                packageName);
+    }
+
+    /**
+     * Register a listener for display-related changes.
+     *
+     * @param listener The listener that will be called when display changes occur.
+     * @param executor Executor for the thread that will be receiving the callbacks. Cannot be null.
+     * @param eventsMask Mask of events to be listened to.
+     * @param packageName of the calling package.
+     */
+    public void registerDisplayListener(@NonNull DisplayListener listener,
+            @NonNull Executor executor, @EventsMask long eventsMask, String packageName) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
@@ -307,22 +362,32 @@ public final class DisplayManagerGlobal {
             throw new IllegalArgumentException("The set of events to listen to must not be empty.");
         }
 
+        if (extraLogging()) {
+            Slog.i(TAG, "Registering Display Listener: "
+                    + Long.toBinaryString(eventsMask) + ", packageName: " + packageName);
+        }
+
         synchronized (mLock) {
             int index = findDisplayListenerLocked(listener);
             if (index < 0) {
-                Looper looper = getLooperForHandler(handler);
-                mDisplayListeners.add(new DisplayListenerDelegate(listener, looper, eventsMask));
+                mDisplayListeners.add(new DisplayListenerDelegate(listener, executor, eventsMask,
+                        packageName));
                 registerCallbackIfNeededLocked();
             } else {
                 mDisplayListeners.get(index).setEventsMask(eventsMask);
             }
             updateCallbackIfNeededLocked();
+            maybeLogAllDisplayListeners();
         }
     }
 
     public void unregisterDisplayListener(DisplayListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
+        }
+
+        if (extraLogging()) {
+            Slog.i(TAG, "Unregistering Display Listener: " + listener);
         }
 
         synchronized (mLock) {
@@ -334,6 +399,30 @@ public final class DisplayManagerGlobal {
                 updateCallbackIfNeededLocked();
             }
         }
+        maybeLogAllDisplayListeners();
+    }
+
+    private void maybeLogAllDisplayListeners() {
+        if (!extraLogging()) {
+            return;
+        }
+
+        Slog.i(TAG, "Currently Registered Display Listeners:");
+        for (int i = 0; i < mDisplayListeners.size(); i++) {
+            Slog.i(TAG, i + ": " + mDisplayListeners.get(i));
+        }
+    }
+
+    /**
+     * Called when there is a display-related window configuration change. Reroutes the event from
+     * WindowManager to make sure the {@link Display} fields are up-to-date in the last callback.
+     * @param displayId the logical display that was changed.
+     */
+    public void handleDisplayChangeFromWindowManager(int displayId) {
+        // There can be racing condition between DMS and WMS callbacks, so force triggering the
+        // listener to make sure the client can get the onDisplayChanged callback even if
+        // DisplayInfo is not changed (Display read from both DisplayInfo and WindowConfiguration).
+        handleDisplayEvent(displayId, EVENT_DISPLAY_CHANGED, true /* forceUpdate */);
     }
 
     private static Looper getLooperForHandler(@Nullable Handler handler) {
@@ -381,6 +470,9 @@ public final class DisplayManagerGlobal {
 
     private void updateCallbackIfNeededLocked() {
         int mask = calculateEventsMaskLocked();
+        if (DEBUG) {
+            Log.d(TAG, "Mask for listener: " + mask);
+        }
         if (mask != mRegisteredEventsMask) {
             try {
                 mDm.registerCallbackWithEventMask(mCallback, mask);
@@ -391,7 +483,8 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    private void handleDisplayEvent(int displayId, @DisplayEvent int event) {
+    private void handleDisplayEvent(int displayId, @DisplayEvent int event, boolean forceUpdate) {
+        final DisplayInfo info;
         synchronized (mLock) {
             if (USE_CACHE) {
                 mDisplayInfoCache.remove(displayId);
@@ -401,11 +494,7 @@ public final class DisplayManagerGlobal {
                 }
             }
 
-            final int numListeners = mDisplayListeners.size();
-            DisplayInfo info = getDisplayInfo(displayId);
-            for (int i = 0; i < numListeners; i++) {
-                mDisplayListeners.get(i).sendDisplayEvent(displayId, event, info);
-            }
+            info = getDisplayInfoLocked(displayId);
             if (event == EVENT_DISPLAY_CHANGED && mDispatchNativeCallbacks) {
                 // Choreographer only supports a single display, so only dispatch refresh rate
                 // changes for the default display.
@@ -421,6 +510,38 @@ public final class DisplayManagerGlobal {
                     }
                 }
             }
+        }
+        // Accepting an Executor means the listener may be synchronously invoked, so we must
+        // not be holding mLock when we do so
+        for (DisplayListenerDelegate listener : mDisplayListeners) {
+            listener.sendDisplayEvent(displayId, event, info, forceUpdate);
+        }
+    }
+
+    /**
+     * Enable a connected display that is currently disabled.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public void enableConnectedDisplay(int displayId) {
+        try {
+            mDm.enableConnectedDisplay(displayId);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error trying to enable external display", ex);
+        }
+    }
+
+
+    /**
+     * Disable a connected display that is currently enabled.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public void disableConnectedDisplay(int displayId) {
+        try {
+            mDm.disableConnectedDisplay(displayId);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Error trying to enable external display", ex);
         }
     }
 
@@ -576,6 +697,20 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Overrides HDR modes for a display device.
+     *
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_SURFACE_FLINGER)
+    public void overrideHdrTypes(int displayId, int[] modes) {
+        try {
+            mDm.overrideHdrTypes(displayId, modes);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+
     public void requestColorMode(int displayId, int colorMode) {
         try {
             mDm.requestColorMode(displayId, colorMode);
@@ -586,7 +721,7 @@ public final class DisplayManagerGlobal {
 
     public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
             @NonNull VirtualDisplayConfig virtualDisplayConfig, VirtualDisplay.Callback callback,
-            @Nullable Executor executor, @Nullable Context windowContext) {
+            @Nullable Executor executor) {
         VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, executor);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
@@ -596,7 +731,7 @@ public final class DisplayManagerGlobal {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
-        return createVirtualDisplayWrapper(virtualDisplayConfig, windowContext, callbackWrapper,
+        return createVirtualDisplayWrapper(virtualDisplayConfig, callbackWrapper,
                 displayId);
     }
 
@@ -606,7 +741,7 @@ public final class DisplayManagerGlobal {
      */
     @Nullable
     public VirtualDisplay createVirtualDisplayWrapper(VirtualDisplayConfig virtualDisplayConfig,
-            Context windowContext, IVirtualDisplayCallback callbackWrapper, int displayId) {
+            IVirtualDisplayCallback callbackWrapper, int displayId) {
         if (displayId < 0) {
             Log.e(TAG, "Could not create virtual display: " + virtualDisplayConfig.getName());
             return null;
@@ -623,7 +758,7 @@ public final class DisplayManagerGlobal {
             return null;
         }
         return new VirtualDisplay(this, display, callbackWrapper,
-                virtualDisplayConfig.getSurface(), windowContext);
+                virtualDisplayConfig.getSurface());
     }
 
     public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {
@@ -707,6 +842,15 @@ public final class DisplayManagerGlobal {
      */
     public ColorSpace getPreferredWideGamutColorSpace() {
         return mWideColorSpace;
+    }
+
+    /**
+     * Gets the overlay properties for all displays.
+     *
+     * @hide
+     */
+    public OverlayProperties getOverlaySupport() {
+        return mOverlayProperties;
     }
 
     /**
@@ -940,6 +1084,52 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Sets the {@link HdrConversionMode} for the device.
+     */
+    public void setHdrConversionMode(@NonNull HdrConversionMode hdrConversionMode) {
+        try {
+            mDm.setHdrConversionMode(hdrConversionMode);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the {@link HdrConversionMode} of the device, which is set by the user.
+     * The HDR conversion mode chosen by user is returned irrespective of whether HDR conversion
+     * is disabled by an app.
+     */
+    public HdrConversionMode getHdrConversionModeSetting() {
+        try {
+            return mDm.getHdrConversionModeSetting();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the {@link HdrConversionMode} of the device.
+     */
+    public HdrConversionMode getHdrConversionMode() {
+        try {
+            return mDm.getHdrConversionMode();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the HDR output types supported by the device.
+     */
+    public @HdrType int[] getSupportedHdrOutputTypes() {
+        try {
+            return mDm.getSupportedHdrOutputTypes();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * When enabled the app requested display resolution and refresh rate is always selected
      * in DisplayModeDirector regardless of user settings and policies for low brightness, low
      * battery etc.
@@ -996,66 +1186,121 @@ public final class DisplayManagerGlobal {
         @Override
         public void onDisplayEvent(int displayId, @DisplayEvent int event) {
             if (DEBUG) {
-                Log.d(TAG, "onDisplayEvent: displayId=" + displayId + ", event=" + event);
+                Log.d(TAG, "onDisplayEvent: displayId=" + displayId + ", event=" + eventToString(
+                        event));
             }
-            handleDisplayEvent(displayId, event);
+            handleDisplayEvent(displayId, event, false /* forceUpdate */);
         }
     }
 
-    private static final class DisplayListenerDelegate extends Handler {
+    private static final class DisplayListenerDelegate {
         public final DisplayListener mListener;
         public volatile long mEventsMask;
 
         private final DisplayInfo mDisplayInfo = new DisplayInfo();
+        private final Executor mExecutor;
+        private AtomicLong mGenerationId = new AtomicLong(1);
+        private final String mPackageName;
 
-        DisplayListenerDelegate(DisplayListener listener, @NonNull Looper looper,
-                @EventsMask long eventsMask) {
-            super(looper, null, true /*async*/);
+        DisplayListenerDelegate(DisplayListener listener, @NonNull Executor executor,
+                @EventsMask long eventsMask, String packageName) {
+            mExecutor = executor;
             mListener = listener;
             mEventsMask = eventsMask;
+            mPackageName = packageName;
         }
 
-        public void sendDisplayEvent(int displayId, @DisplayEvent int event, DisplayInfo info) {
-            Message msg = obtainMessage(event, displayId, 0, info);
-            sendMessage(msg);
+        void sendDisplayEvent(int displayId, @DisplayEvent int event, @Nullable DisplayInfo info,
+                boolean forceUpdate) {
+            if (extraLogging()) {
+                Slog.i(TAG, "Sending Display Event: " + eventToString(event));
+            }
+            long generationId = mGenerationId.get();
+            mExecutor.execute(() -> {
+                // If the generation id's don't match we were canceled
+                if (generationId == mGenerationId.get()) {
+                    handleDisplayEventInner(displayId, event, info, forceUpdate);
+                }
+            });
         }
 
-        public void clearEvents() {
-            removeCallbacksAndMessages(null);
+        void clearEvents() {
+            mGenerationId.incrementAndGet();
         }
 
-        public void setEventsMask(@EventsMask long newEventsMask) {
+        void setEventsMask(@EventsMask long newEventsMask) {
             mEventsMask = newEventsMask;
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
+        private void handleDisplayEventInner(int displayId, @DisplayEvent int event,
+                @Nullable DisplayInfo info, boolean forceUpdate) {
+            if (extraLogging()) {
+                Slog.i(TAG, "DLD(" + eventToString(event)
+                        + ", display=" + displayId
+                        + ", mEventsMask=" + Long.toBinaryString(mEventsMask)
+                        + ", mPackageName=" + mPackageName
+                        + ", displayInfo=" + info
+                        + ", listener=" + mListener.getClass() + ")");
+            }
+            if (DEBUG) {
+                Trace.beginSection(
+                        TextUtils.trimToSize(
+                                "DLD(" + eventToString(event)
+                                + ", display=" + displayId
+                                + ", listener=" + mListener.getClass() + ")", 127));
+            }
+            switch (event) {
                 case EVENT_DISPLAY_ADDED:
                     if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_ADDED) != 0) {
-                        mListener.onDisplayAdded(msg.arg1);
+                        mListener.onDisplayAdded(displayId);
                     }
                     break;
                 case EVENT_DISPLAY_CHANGED:
                     if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CHANGED) != 0) {
-                        DisplayInfo newInfo = (DisplayInfo) msg.obj;
-                        if (newInfo != null && !newInfo.equals(mDisplayInfo)) {
-                            mDisplayInfo.copyFrom(newInfo);
-                            mListener.onDisplayChanged(msg.arg1);
+                        if (info != null && (forceUpdate || !info.equals(mDisplayInfo))) {
+                            if (extraLogging()) {
+                                Slog.i(TAG, "Sending onDisplayChanged: Display Changed. Info: "
+                                        + info);
+                            }
+                            mDisplayInfo.copyFrom(info);
+                            mListener.onDisplayChanged(displayId);
                         }
                     }
                     break;
                 case EVENT_DISPLAY_BRIGHTNESS_CHANGED:
                     if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS) != 0) {
-                        mListener.onDisplayChanged(msg.arg1);
+                        mListener.onDisplayChanged(displayId);
                     }
                     break;
                 case EVENT_DISPLAY_REMOVED:
                     if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_REMOVED) != 0) {
-                        mListener.onDisplayRemoved(msg.arg1);
+                        mListener.onDisplayRemoved(displayId);
+                    }
+                    break;
+                case EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:
+                    if ((mEventsMask & DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED) != 0) {
+                        mListener.onDisplayChanged(displayId);
+                    }
+                    break;
+                case EVENT_DISPLAY_CONNECTED:
+                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                        mListener.onDisplayConnected(displayId);
+                    }
+                    break;
+                case EVENT_DISPLAY_DISCONNECTED:
+                    if ((mEventsMask & DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED) != 0) {
+                        mListener.onDisplayDisconnected(displayId);
                     }
                     break;
             }
+            if (DEBUG) {
+                Trace.endSection();
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "mask: {" + mEventsMask + "}, for " + mListener.getClass();
         }
     }
 
@@ -1161,5 +1406,39 @@ public final class DisplayManagerGlobal {
             mDispatchNativeCallbacks = false;
             updateCallbackIfNeededLocked();
         }
+    }
+
+    private static String eventToString(@DisplayEvent int event) {
+        switch (event) {
+            case EVENT_DISPLAY_ADDED:
+                return "ADDED";
+            case EVENT_DISPLAY_CHANGED:
+                return "CHANGED";
+            case EVENT_DISPLAY_REMOVED:
+                return "REMOVED";
+            case EVENT_DISPLAY_BRIGHTNESS_CHANGED:
+                return "BRIGHTNESS_CHANGED";
+            case EVENT_DISPLAY_HDR_SDR_RATIO_CHANGED:
+                return "HDR_SDR_RATIO_CHANGED";
+            case EVENT_DISPLAY_CONNECTED:
+                return "EVENT_DISPLAY_CONNECTED";
+            case EVENT_DISPLAY_DISCONNECTED:
+                return "EVENT_DISPLAY_DISCONNECTED";
+        }
+        return "UNKNOWN";
+    }
+
+
+    private static boolean initExtraLogging() {
+        if (sCurrentPackageName == null) {
+            sCurrentPackageName = ActivityThread.currentPackageName();
+            sExtraDisplayListenerLogging = !TextUtils.isEmpty(EXTRA_LOGGING_PACKAGE_NAME)
+                    && EXTRA_LOGGING_PACKAGE_NAME.equals(sCurrentPackageName);
+        }
+        return sExtraDisplayListenerLogging;
+    }
+
+    private static boolean extraLogging() {
+        return sExtraDisplayListenerLogging;
     }
 }

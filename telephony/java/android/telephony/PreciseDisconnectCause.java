@@ -235,6 +235,23 @@ public final class PreciseDisconnectCause {
     /** Call failed/dropped because of a network detach. */
     public static final int NETWORK_DETACH                                   = 261;
 
+    /**
+     * Dialing emergency calls is currently unavailable.
+     * The call should be redialed on the other subscription silently.
+     * If there is no other subscription available, the call may be redialed
+     * on this subscription again.
+     * @hide
+     */
+    public static final int EMERGENCY_TEMP_FAILURE                           = 325;
+    /**
+     * Dialing emergency calls is currently unavailable.
+     * The call should be redialed on the other subscription silently.
+     * Even if there is no other subscription available, the call should not
+     * be redialed on this subscription again.
+     * @hide
+     */
+    public static final int EMERGENCY_PERM_FAILURE                           = 326;
+
     /** Mobile station (MS) is locked until next power cycle. */
     public static final int CDMA_LOCKED_UNTIL_POWER_CYCLE                    = 1000;
     /** Drop call. */

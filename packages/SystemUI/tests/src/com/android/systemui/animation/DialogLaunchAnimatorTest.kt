@@ -12,11 +12,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.DecorView
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertNotNull
@@ -24,6 +26,7 @@ import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,7 +70,7 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertTrue(dialog.isShowing)
 
         // The dialog is now fullscreen.
-        val window = dialog.window
+        val window = checkNotNull(dialog.window)
         val decorView = window.decorView as DecorView
         assertEquals(MATCH_PARENT, window.attributes.width)
         assertEquals(MATCH_PARENT, window.attributes.height)
@@ -169,14 +172,15 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         // Important: the power menu animation relies on this behavior to know when to animate (see
         // http://ag/16774605).
         val dialog = runOnMainThreadAndWaitForIdleSync { TestDialog(context) }
-        dialog.window.setWindowAnimations(0)
-        assertEquals(0, dialog.window.attributes.windowAnimations)
+        val window = checkNotNull(dialog.window)
+        window.setWindowAnimations(0)
+        assertEquals(0, window.attributes.windowAnimations)
 
         val touchSurface = createTouchSurface()
         runOnMainThreadAndWaitForIdleSync {
             dialogLaunchAnimator.showFromView(dialog, touchSurface)
         }
-        assertNotEquals(0, dialog.window.attributes.windowAnimations)
+        assertNotEquals(0, window.attributes.windowAnimations)
     }
 
     @Test
@@ -205,29 +209,102 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         verify(interactionJankMonitor).end(InteractionJankMonitor.CUJ_USER_DIALOG_OPEN)
     }
 
+    @Test
+    fun testAnimationDoesNotChangeLaunchableViewVisibility_viewVisible() {
+        val touchSurface = createTouchSurface()
+
+        // View is VISIBLE when starting the animation.
+        runOnMainThreadAndWaitForIdleSync { touchSurface.visibility = View.VISIBLE }
+
+        // View is invisible while the dialog is shown.
+        val dialog = showDialogFromView(touchSurface)
+        assertThat(touchSurface.visibility).isEqualTo(View.INVISIBLE)
+
+        // View is visible again when the dialog is dismissed.
+        runOnMainThreadAndWaitForIdleSync { dialog.dismiss() }
+        assertThat(touchSurface.visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun testAnimationDoesNotChangeLaunchableViewVisibility_viewInvisible() {
+        val touchSurface = createTouchSurface()
+
+        // View is INVISIBLE when starting the animation.
+        runOnMainThreadAndWaitForIdleSync { touchSurface.visibility = View.INVISIBLE }
+
+        // View is INVISIBLE while the dialog is shown.
+        val dialog = showDialogFromView(touchSurface)
+        assertThat(touchSurface.visibility).isEqualTo(View.INVISIBLE)
+
+        // View is invisible like it was before showing the dialog.
+        runOnMainThreadAndWaitForIdleSync { dialog.dismiss() }
+        assertThat(touchSurface.visibility).isEqualTo(View.INVISIBLE)
+    }
+
+    @Test
+    fun testAnimationDoesNotChangeLaunchableViewVisibility_viewVisibleThenGone() {
+        val touchSurface = createTouchSurface()
+
+        // View is VISIBLE when starting the animation.
+        runOnMainThreadAndWaitForIdleSync { touchSurface.visibility = View.VISIBLE }
+
+        // View is INVISIBLE while the dialog is shown.
+        val dialog = showDialogFromView(touchSurface)
+        assertThat(touchSurface.visibility).isEqualTo(View.INVISIBLE)
+
+        // Some external call makes the View GONE. It remains INVISIBLE while the dialog is shown,
+        // as all visibility changes should be blocked.
+        runOnMainThreadAndWaitForIdleSync { touchSurface.visibility = View.GONE }
+        assertThat(touchSurface.visibility).isEqualTo(View.INVISIBLE)
+
+        // View is restored to GONE once the dialog is dismissed.
+        runOnMainThreadAndWaitForIdleSync { dialog.dismiss() }
+        assertThat(touchSurface.visibility).isEqualTo(View.GONE)
+    }
+
+    @Test
+    fun creatingControllerFromNormalViewThrows() {
+        assertThrows(IllegalArgumentException::class.java) {
+            DialogLaunchAnimator.Controller.fromView(FrameLayout(mContext))
+        }
+    }
+
+    @Test
+    fun showFromDialogDoesNotCrashWhenShownFromRandomDialog() {
+        val dialog = createDialogAndShowFromDialog(animateFrom = TestDialog(context))
+        dialog.dismiss()
+    }
+
     private fun createAndShowDialog(
         animator: DialogLaunchAnimator = dialogLaunchAnimator,
     ): TestDialog {
         val touchSurface = createTouchSurface()
-        return runOnMainThreadAndWaitForIdleSync {
-            val dialog = TestDialog(context)
-            animator.showFromView(dialog, touchSurface)
-            dialog
-        }
+        return showDialogFromView(touchSurface, animator)
     }
 
     private fun createTouchSurface(): View {
         return runOnMainThreadAndWaitForIdleSync {
             val touchSurfaceRoot = LinearLayout(context)
-            val touchSurface = View(context)
+            val touchSurface = TouchSurfaceView(context)
             touchSurfaceRoot.addView(touchSurface)
 
             // We need to attach the root to the window manager otherwise the exit animation will
-            // be skipped
+            // be skipped.
             ViewUtils.attachView(touchSurfaceRoot)
             attachedViews.add(touchSurfaceRoot)
 
             touchSurface
+        }
+    }
+
+    private fun showDialogFromView(
+        touchSurface: View,
+        animator: DialogLaunchAnimator = dialogLaunchAnimator,
+    ): TestDialog {
+        return runOnMainThreadAndWaitForIdleSync {
+            val dialog = TestDialog(context)
+            animator.showFromView(dialog, touchSurface)
+            dialog
         }
     }
 
@@ -248,6 +325,22 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         return result
     }
 
+    private class TouchSurfaceView(context: Context) : FrameLayout(context), LaunchableView {
+        private val delegate =
+            LaunchableViewDelegate(
+                this,
+                superSetVisibility = { super.setVisibility(it) },
+            )
+
+        override fun setShouldBlockVisibilityChanges(block: Boolean) {
+            delegate.setShouldBlockVisibilityChanges(block)
+        }
+
+        override fun setVisibility(visibility: Int) {
+            delegate.setVisibility(visibility)
+        }
+    }
+
     private class TestDialog(context: Context) : Dialog(context) {
         companion object {
             const val DIALOG_WIDTH = 100
@@ -259,13 +352,14 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
         init {
             // We need to set the window type for dialogs shown by SysUI, otherwise WM will throw.
-            window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
+            checkNotNull(window).setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
         }
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             setContentView(contentView)
 
+            val window = checkNotNull(window)
             window.setLayout(DIALOG_WIDTH, DIALOG_HEIGHT)
             window.setBackgroundDrawable(windowBackground)
         }

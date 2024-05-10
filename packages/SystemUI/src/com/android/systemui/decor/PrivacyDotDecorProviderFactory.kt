@@ -23,7 +23,7 @@ import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import javax.inject.Inject
@@ -33,7 +33,7 @@ import javax.inject.Inject
  * of the privacy dot views are controlled by the PrivacyDotViewController.
  */
 @SysUISingleton
-class PrivacyDotDecorProviderFactory @Inject constructor(
+open class PrivacyDotDecorProviderFactory @Inject constructor(
     @Main private val res: Resources
 ) : DecorProviderFactory() {
 

@@ -1,6 +1,42 @@
 {
   "presubmit": [
     {
+      "file_patterns": [
+        "[^/]*(Vibrator|Vibration)[^/]*\\.java",
+        "vibrator/.*"
+      ],
+      "name": "FrameworksVibratorCoreTests",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
+      "file_patterns": [
+        "[^/]*(Vibrator|Vibration)[^/]*\\.java",
+        "vibrator/.*"
+      ],
+      "name": "FrameworksVibratorServicesTests",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
+      "file_patterns": [
+        "[^/]*(Vibrator|Vibration)[^/]*\\.java",
+        "vibrator/.*"
+      ],
+      "name": "CtsVibratorTestCases",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
       "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "BugreportManagerTestCases",
       "options": [
@@ -52,10 +88,18 @@
       ],
       "name": "FrameworksServicesTests",
       "options": [
-        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
-        { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
-        { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
+        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" }
       ]
+    },
+    {
+      "file_patterns": [
+        "BatteryStats[^/]*\\.java",
+        "BatteryUsageStats[^/]*\\.java",
+        "PowerComponents\\.java",
+        "PowerMonitor[^/]*\\.java",
+        "[^/]*BatteryConsumer[^/]*\\.java"
+      ],
+      "name": "PowerStatsTests"
     },
     {
       "file_patterns": [
@@ -85,6 +129,15 @@
           "include-filter": "android.os.cts.SharedMemoryTest"
         }
       ]
+    },
+    {
+      "file_patterns": ["Environment[^/]*\\.java"],
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.os.EnvironmentTest"
+        }
+      ]
     }
   ],
   "postsubmit": [
@@ -99,6 +152,12 @@
     {
       "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "ShellTests"
+    }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "CtsOsTestCasesRavenwood",
+      "host": true
     }
   ]
 }

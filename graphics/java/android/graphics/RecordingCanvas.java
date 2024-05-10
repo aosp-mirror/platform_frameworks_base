@@ -276,9 +276,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     @CriticalNative
     private static native void nResetDisplayListCanvas(long canvas, long node,
             int width, int height);
-    @CriticalNative
     private static native int nGetMaximumTextureWidth();
-    @CriticalNative
     private static native int nGetMaximumTextureHeight();
     @CriticalNative
     private static native void nEnableZ(long renderer, boolean enableZ);

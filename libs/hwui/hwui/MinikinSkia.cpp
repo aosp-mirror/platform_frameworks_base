@@ -16,10 +16,13 @@
 
 #include "MinikinSkia.h"
 
-#include <SkFontDescriptor.h>
 #include <SkFont.h>
+#include <SkFontDescriptor.h>
 #include <SkFontMetrics.h>
 #include <SkFontMgr.h>
+#include <SkRect.h>
+#include <SkScalar.h>
+#include <SkStream.h>
 #include <SkTypeface.h>
 #include <log/log.h>
 
@@ -27,6 +30,7 @@
 #include <minikin/MinikinExtent.h>
 #include <minikin/MinikinPaint.h>
 #include <minikin/MinikinRect.h>
+#include <utils/TypefaceUtils.h>
 
 namespace android {
 
@@ -139,7 +143,7 @@ std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
         skVariation[i].value = SkFloatToScalar(variations[i].value);
     }
     args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
-    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm = android::FreeTypeFontMgr();
     sk_sp<SkTypeface> face(fm->makeFromStream(std::move(stream), args));
 
     return std::make_shared<MinikinFontSkia>(std::move(face), mSourceId, mFontData, mFontSize,

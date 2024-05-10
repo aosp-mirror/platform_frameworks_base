@@ -19,3 +19,20 @@ java_binary_host {
         "ow2-asm-tree",
     ],
 }
+
+java_library_host {
+   name: "lockedregioncodeinjection_input",
+   manifest: "test/manifest.txt",
+   srcs: ["test/*/*.java"],
+   static_libs: [
+        "guava",
+        "ow2-asm",
+        "ow2-asm-analysis",
+        "ow2-asm-commons",
+        "ow2-asm-tree",
+        "hamcrest-library",
+        "hamcrest",
+        "platform-test-annotations",
+        "junit",
+    ],
+}

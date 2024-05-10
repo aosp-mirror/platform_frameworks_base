@@ -19,14 +19,14 @@ package com.android.systemui.statusbar.phone.userswitcher
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import com.android.systemui.R
+import com.android.systemui.res.R
+import com.android.systemui.animation.view.LaunchableLinearLayout
 
 class StatusBarUserSwitcherContainer(
     context: Context?,
     attrs: AttributeSet?
-) : LinearLayout(context, attrs) {
+) : LaunchableLinearLayout(context, attrs) {
     lateinit var text: TextView
         private set
     lateinit var avatar: ImageView
@@ -34,7 +34,7 @@ class StatusBarUserSwitcherContainer(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        text = findViewById(R.id.current_user_name)
-        avatar = findViewById(R.id.current_user_avatar)
+        text = requireViewById(R.id.current_user_name)
+        avatar = requireViewById(R.id.current_user_avatar)
     }
 }

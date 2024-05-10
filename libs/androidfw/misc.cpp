@@ -21,12 +21,17 @@
 //
 #include <androidfw/misc.h>
 
-#include <sys/stat.h>
-#include <cstring>
-#include <errno.h>
-#include <cstdio>
+#include "android-base/logging.h"
 
-using namespace android;
+#ifdef __linux__
+#include <sys/statvfs.h>
+#include <sys/vfs.h>
+#endif  // __linux__
+
+#include <cstring>
+#include <cstdio>
+#include <errno.h>
+#include <sys/stat.h>
 
 namespace android {
 
@@ -41,8 +46,7 @@ FileType getFileType(const char* fileName)
         if (errno == ENOENT || errno == ENOTDIR)
             return kFileTypeNonexistent;
         else {
-            fprintf(stderr, "getFileType got errno=%d on '%s'\n",
-                errno, fileName);
+            PLOG(ERROR) << "getFileType(): stat(" << fileName << ") failed";
             return kFileTypeUnknown;
         }
     } else {
@@ -81,5 +85,33 @@ time_t getFileModDate(const char* fileName)
 
     return sb.st_mtime;
 }
+
+#ifndef __linux__
+// No need to implement these on the host, the functions only matter on a device.
+bool isReadonlyFilesystem(const char*) {
+    return false;
+}
+bool isReadonlyFilesystem(int) {
+    return false;
+}
+#else   // __linux__
+bool isReadonlyFilesystem(const char* path) {
+    struct statfs sfs;
+    if (::statfs(path, &sfs)) {
+        PLOG(ERROR) << "isReadonlyFilesystem(): statfs(" << path << ") failed";
+        return false;
+    }
+    return (sfs.f_flags & ST_RDONLY) != 0;
+}
+
+bool isReadonlyFilesystem(int fd) {
+    struct statfs sfs;
+    if (::fstatfs(fd, &sfs)) {
+        PLOG(ERROR) << "isReadonlyFilesystem(): fstatfs(" << fd << ") failed";
+        return false;
+    }
+    return (sfs.f_flags & ST_RDONLY) != 0;
+}
+#endif  // __linux__
 
 }; // namespace android

@@ -17,6 +17,7 @@
 #include "RenderThread.h"
 
 #include <GrContextOptions.h>
+#include <include/gpu/ganesh/gl/GrGLDirectContext.h>
 #include <android-base/properties.h>
 #include <dlfcn.h>
 #include <gl/GrGLInterface.h>
@@ -133,10 +134,23 @@ void RenderThread::frameCallback(int64_t vsyncId, int64_t frameDeadline, int64_t
     if (timeLord().vsyncReceived(frameTimeNanos, frameTimeNanos, vsyncId, frameDeadline,
                                  frameInterval) &&
         !mFrameCallbackTaskPending) {
-        ATRACE_NAME("queue mFrameCallbackTask");
         mFrameCallbackTaskPending = true;
-        nsecs_t runAt = (frameTimeNanos + mDispatchFrameDelay);
-        queue().postAt(runAt, [=]() { dispatchFrameCallbacks(); });
+
+        using SteadyClock = std::chrono::steady_clock;
+        using Nanos = std::chrono::nanoseconds;
+        using toNsecs_t = std::chrono::duration<nsecs_t, std::nano>;
+        using toFloatMillis = std::chrono::duration<float, std::milli>;
+
+        const auto frameTimeTimePoint = SteadyClock::time_point(Nanos(frameTimeNanos));
+        const auto deadlineTimePoint = SteadyClock::time_point(Nanos(frameDeadline));
+
+        const auto timeUntilDeadline = deadlineTimePoint - frameTimeTimePoint;
+        const auto runAt = (frameTimeTimePoint + (timeUntilDeadline / 4));
+
+        ATRACE_FORMAT("queue mFrameCallbackTask to run after %.2fms",
+                      toFloatMillis(runAt - SteadyClock::now()).count());
+        queue().postAt(toNsecs_t(runAt.time_since_epoch()).count(),
+                       [this]() { dispatchFrameCallbacks(); });
     }
 }
 
@@ -251,13 +265,12 @@ void RenderThread::initThreadLocals() {
     mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
     mVkManager = VulkanManager::getInstance();
-    mCacheManager = new CacheManager();
+    mCacheManager = new CacheManager(*this);
 }
 
 void RenderThread::setupFrameInterval() {
     nsecs_t frameIntervalNanos = DeviceInfo::getVsyncPeriod();
     mTimeLord.setFrameInterval(frameIntervalNanos);
-    mDispatchFrameDelay = static_cast<nsecs_t>(frameIntervalNanos * .25f);
 }
 
 void RenderThread::requireGlContext() {
@@ -266,7 +279,7 @@ void RenderThread::requireGlContext() {
     }
     mEglManager->initialize();
 
-    sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
+    sk_sp<const GrGLInterface> glInterface = GrGLMakeNativeInterface();
     LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
     GrContextOptions options;
@@ -274,7 +287,7 @@ void RenderThread::requireGlContext() {
     auto glesVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
     auto size = glesVersion ? strlen(glesVersion) : -1;
     cacheManager().configureContext(&options, glesVersion, size);
-    sk_sp<GrDirectContext> grContext(GrDirectContext::MakeGL(std::move(glInterface), options));
+    sk_sp<GrDirectContext> grContext(GrDirectContexts::MakeGL(std::move(glInterface), options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     setGrContext(grContext);
 }
@@ -345,7 +358,15 @@ void RenderThread::dumpGraphicsMemory(int fd, bool includeProfileData) {
 
     String8 cachesOutput;
     mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
-    dprintf(fd, "\nPipeline=%s\n%s\n", pipelineToString(), cachesOutput.string());
+    dprintf(fd, "\nPipeline=%s\n%s", pipelineToString(), cachesOutput.c_str());
+    for (auto&& context : mCacheManager->mCanvasContexts) {
+        context->visitAllRenderNodes([&](const RenderNode& node) {
+            if (node.isTextureView()) {
+                dprintf(fd, "TextureView: %dx%d\n", node.getWidth(), node.getHeight());
+            }
+        });
+    }
+    dprintf(fd, "\n");
 }
 
 void RenderThread::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
@@ -453,6 +474,8 @@ bool RenderThread::threadLoop() {
             // next vsync (oops), so none of the callbacks are run.
             requestVsync();
         }
+
+        mCacheManager->onThreadIdle();
     }
 
     return false;
@@ -500,6 +523,16 @@ void RenderThread::preload() {
         requireVkContext();
     }
     HardwareBitmapUploader::initialize();
+}
+
+void RenderThread::trimMemory(TrimLevel level) {
+    ATRACE_CALL();
+    cacheManager().trimMemory(level);
+}
+
+void RenderThread::trimCaches(CacheTrimLevel level) {
+    ATRACE_CALL();
+    cacheManager().trimCaches(level);
 }
 
 } /* namespace renderthread */

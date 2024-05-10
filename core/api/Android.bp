@@ -13,7 +13,10 @@
 // limitations under the License.
 
 package {
-    default_visibility: ["//visibility:private"],
+    default_visibility: [
+        "//frameworks/base",
+        "//frameworks/base/api",
+    ],
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -27,31 +30,38 @@ package {
 filegroup {
     name: "non-updatable-current.txt",
     srcs: ["current.txt"],
-    visibility: ["//frameworks/base/api"],
 }
 
 filegroup {
     name: "non-updatable-removed.txt",
     srcs: ["removed.txt"],
-    visibility: ["//frameworks/base/api"],
+}
+
+filegroup {
+    name: "non-updatable-lint-baseline.txt",
+    srcs: ["lint-baseline.txt"],
 }
 
 filegroup {
     name: "non-updatable-system-current.txt",
     srcs: ["system-current.txt"],
-    visibility: ["//frameworks/base/api"],
 }
 
 filegroup {
     name: "non-updatable-system-removed.txt",
     srcs: ["system-removed.txt"],
-    visibility: ["//frameworks/base/api"],
+}
+
+filegroup {
+    name: "non-updatable-system-lint-baseline.txt",
+    srcs: ["system-lint-baseline.txt"],
 }
 
 filegroup {
     name: "non-updatable-module-lib-current.txt",
     srcs: ["module-lib-current.txt"],
     visibility: [
+        "//frameworks/base",
         "//frameworks/base/api",
         "//cts/tests/signature/api",
     ],
@@ -61,7 +71,79 @@ filegroup {
     name: "non-updatable-module-lib-removed.txt",
     srcs: ["module-lib-removed.txt"],
     visibility: [
+        "//frameworks/base",
         "//frameworks/base/api",
         "//cts/tests/signature/api",
     ],
+}
+
+filegroup {
+    name: "non-updatable-module-lib-lint-baseline.txt",
+    srcs: ["module-lib-lint-baseline.txt"],
+}
+
+filegroup {
+    name: "non-updatable-test-current.txt",
+    srcs: ["test-current.txt"],
+}
+
+filegroup {
+    name: "non-updatable-test-removed.txt",
+    srcs: ["test-removed.txt"],
+}
+
+filegroup {
+    name: "non-updatable-test-lint-baseline.txt",
+    srcs: ["test-lint-baseline.txt"],
+}
+
+// Exportable stub artifacts
+filegroup {
+    name: "non-updatable-exportable-current.txt",
+    srcs: [":api-stubs-docs-non-updatable{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-removed.txt",
+    srcs: [":api-stubs-docs-non-updatable{.exportable.removed-api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-system-current.txt",
+    srcs: [":system-api-stubs-docs-non-updatable{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-system-removed.txt",
+    srcs: [":system-api-stubs-docs-non-updatable{.exportable.removed-api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-module-lib-current.txt",
+    srcs: [":module-lib-api-stubs-docs-non-updatable{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-module-lib-removed.txt",
+    srcs: [":module-lib-api-stubs-docs-non-updatable{.exportable.removed-api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-test-current.txt",
+    srcs: [":test-api-stubs-docs-non-updatable{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-test-removed.txt",
+    srcs: [":test-api-stubs-docs-non-updatable{.exportable.removed-api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-system-server-current.txt",
+    srcs: [":services-non-updatable-stubs{.exportable.api.txt}"],
+}
+
+filegroup {
+    name: "non-updatable-exportable-system-server-removed.txt",
+    srcs: [":services-non-updatable-stubs{.exportable.removed-api.txt}"],
 }

@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import static com.android.text.flags.Flags.FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +30,11 @@ import android.content.res.AssetManager;
 import android.graphics.fonts.FontCustomizationParser;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
+import android.graphics.text.PositionedGlyphs;
+import android.graphics.text.TextRunShaper;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.text.FontConfig;
 import android.util.ArrayMap;
 
@@ -37,6 +44,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParserException;
@@ -64,6 +72,8 @@ public class TypefaceSystemFallbackTest {
         "b3em.ttf",  // Supports "a","b","c". The width of "b" is 3em,  others are 1em.
         "c3em.ttf",  // Supports "a","b","c". The width of "c" is 3em,  others are 1em.
         "all2em.ttf",  // Supports "a,","b","c". All of them have the same width of 2em.
+        "fallback.ttf",  // SUpports all small alphabets.
+        "fallback_capital.ttf",  // SUpports all capital alphabets.
         "no_coverage.ttf",  // This font doesn't support any characters.
     };
     private static final String TEST_FONTS_XML;
@@ -102,6 +112,10 @@ public class TypefaceSystemFallbackTest {
         paint.setTypeface(new Typeface.Builder(am, "fonts/all2em.ttf").build());
         GLYPH_2EM_WIDTH = paint.measureText("a");
     }
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {
@@ -165,7 +179,10 @@ public class TypefaceSystemFallbackTest {
 
         Map<String, File> updatableFontMap = new HashMap<>();
         for (File file : new File(TEST_UPDATABLE_FONT_DIR).listFiles()) {
-            updatableFontMap.put(file.getName(), file);
+            final String fileName = file.getName();
+            final int periodIndex = fileName.lastIndexOf(".");
+            final String psName = fileName.substring(0, periodIndex);
+            updatableFontMap.put(psName, file);
         }
 
         FontConfig fontConfig;
@@ -710,6 +727,47 @@ public class TypefaceSystemFallbackTest {
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
     }
 
+    private String getFontName(Paint paint, String text) {
+        PositionedGlyphs glyphs = TextRunShaper.shapeTextRun(
+                text, 0, text.length(), 0, text.length(), 0f, 0f, false, paint);
+        assertEquals(1, glyphs.glyphCount());
+        return glyphs.getFont(0).getFile().getName();
+    }
+
+    @Test
+    public void testBuildSystemFallback__Customization_new_named_familyList() {
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>fallback_capital.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+        final String oemXml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<fonts-modification version='1'>"
+                + "  <family-list customizationType='new-named-family' name='google-sans'>"
+                + "    <family>"
+                + "      <font weight='400' style='normal'>b3em.ttf</font>"
+                + "    </family>"
+                + "    <family>"
+                + "      <font weight='400' style='normal'>fallback.ttf</font>"
+                + "    </family>"
+                + "  </family-list>"
+                + "</fonts-modification>";
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(xml, oemXml, fontMap, fallbackMap);
+
+        final Paint paint = new Paint();
+
+        Typeface testTypeface = fontMap.get("google-sans");
+        assertNotNull(testTypeface);
+        paint.setTypeface(testTypeface);
+        assertEquals("b3em.ttf", getFontName(paint, "a"));
+        assertEquals("fallback.ttf", getFontName(paint, "x"));
+        assertEquals("fallback_capital.ttf", getFontName(paint, "A"));
+    }
+
     @Test
     public void testBuildSystemFallback__Customization_new_named_family_override() {
         final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
@@ -829,6 +887,130 @@ public class TypefaceSystemFallbackTest {
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
     }
 
+    private static void assertA3emFontIsUsed(Typeface typeface) {
+        final Paint paint = new Paint();
+        assertNotNull(typeface);
+        paint.setTypeface(typeface);
+        assertTrue("a3em font must be used", GLYPH_3EM_WIDTH == paint.measureText("a")
+                && GLYPH_1EM_WIDTH == paint.measureText("b")
+                && GLYPH_1EM_WIDTH == paint.measureText("c"));
+    }
+
+    private static void assertB3emFontIsUsed(Typeface typeface) {
+        final Paint paint = new Paint();
+        assertNotNull(typeface);
+        paint.setTypeface(typeface);
+        assertTrue("b3em font must be used", GLYPH_1EM_WIDTH == paint.measureText("a")
+                && GLYPH_3EM_WIDTH == paint.measureText("b")
+                && GLYPH_1EM_WIDTH == paint.measureText("c"));
+    }
+
+    private static String getBaseXml(String font, String lang) {
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
+                + "  </family>"
+                + "  <family name='named-family'>"
+                + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
+                + "  </family>"
+                + "  <family lang='%s'>"
+                + "    <font weight='400' style='normal'>%s</font>"
+                + "  </family>"
+                + "</familyset>";
+        return String.format(xml, lang, font);
+    }
+
+    private static String getCustomizationXml(String font, String op, String lang) {
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<fonts-modification version='1'>"
+                + "  <family customizationType='new-locale-family' operation='%s' lang='%s'>"
+                + "    <font weight='400' style='normal' fallbackFor='named-family'>%s</font>"
+                + "  </family>"
+                + "</fonts-modification>";
+        return String.format(xml, op, lang, font);
+    }
+
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
+    @Test
+    public void testBuildSystemFallback__Customization_locale_prepend() {
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(
+                getBaseXml("a3em.ttf", "ja-JP"),
+                getCustomizationXml("b3em.ttf", "prepend", "ja-JP"),
+                fontMap, fallbackMap);
+        Typeface typeface = fontMap.get("named-family");
+
+        // operation "prepend" places font before the original font, thus b3em is used.
+        assertB3emFontIsUsed(typeface);
+    }
+
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
+    @Test
+    public void testBuildSystemFallback__Customization_locale_replace() {
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(
+                getBaseXml("a3em.ttf", "ja-JP"),
+                getCustomizationXml("b3em.ttf", "replace", "ja-JP"),
+                fontMap, fallbackMap);
+        Typeface typeface = fontMap.get("named-family");
+
+        // operation "replace" removes the original font, thus b3em font is used.
+        assertB3emFontIsUsed(typeface);
+    }
+
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
+    @Test
+    public void testBuildSystemFallback__Customization_locale_append() {
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(
+                getBaseXml("a3em.ttf", "ja-JP"),
+                getCustomizationXml("b3em.ttf", "append", "ja-JP"),
+                fontMap, fallbackMap);
+        Typeface typeface = fontMap.get("named-family");
+
+        // operation "append" comes next to the original font, so the original "a3em" is used.
+        assertA3emFontIsUsed(typeface);
+    }
+
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
+    @Test
+    public void testBuildSystemFallback__Customization_locale_ScriptMismatch() {
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(
+                getBaseXml("a3em.ttf", "ja-JP"),
+                getCustomizationXml("b3em.ttf", "replace", "ko-KR"),
+                fontMap, fallbackMap);
+        Typeface typeface = fontMap.get("named-family");
+
+        // Since the script doesn't match, the customization is ignored.
+        assertA3emFontIsUsed(typeface);
+    }
+
+    @RequiresFlagsEnabled(FLAG_VENDOR_CUSTOM_LOCALE_FALLBACK)
+    @Test
+    public void testBuildSystemFallback__Customization_locale_SubscriptMatch() {
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(
+                getBaseXml("a3em.ttf", "ja-JP"),
+                getCustomizationXml("b3em.ttf", "replace", "ko-Hani-KR"),
+                fontMap, fallbackMap);
+        Typeface typeface = fontMap.get("named-family");
+
+        // Hani script is supported by Japanese, Jpan.
+        assertB3emFontIsUsed(typeface);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testBuildSystemFallback__Customization_new_named_family_no_name_exception() {
         final String oemXml = "<?xml version='1.0' encoding='UTF-8'?>"
@@ -853,7 +1035,6 @@ public class TypefaceSystemFallbackTest {
                 + "</fonts-modification>";
         readFontCustomization(oemXml);
     }
-
 
     @Test
     public void testBuildSystemFallback_UpdatableFont() {

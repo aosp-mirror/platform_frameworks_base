@@ -67,6 +67,8 @@ class FakeSecurityController(
 
     override fun getDeviceOwnerType(admin: ComponentName?): Int = 0
 
+    override fun isFinancedDevice(): Boolean = false
+
     override fun isNetworkLoggingEnabled(): Boolean = fakeState.isNetworkLoggingEnabled
 
     override fun isVpnEnabled(): Boolean = fakeState.isVpnEnabled
@@ -74,6 +76,8 @@ class FakeSecurityController(
     override fun isVpnRestricted(): Boolean = fakeState.isVpnRestricted
 
     override fun isVpnBranded(): Boolean = fakeState.isVpnBranded
+
+    override fun isVpnValidated(): Boolean = fakeState.isVpnValidated
 
     override fun getPrimaryVpnName(): String? = fakeState.primaryVpnName
 
@@ -108,6 +112,7 @@ class FakeSecurityController(
         var isVpnEnabled: Boolean = false,
         var isVpnRestricted: Boolean = false,
         var isVpnBranded: Boolean = false,
+        var isVpnValidated: Boolean = false,
         var primaryVpnName: String? = null,
         var workProfileVpnName: String? = null,
         var hasCACertInCurrentUser: Boolean = false,

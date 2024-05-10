@@ -16,7 +16,8 @@
 
 package com.android.keyguard;
 
-import android.content.res.ColorStateList;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
+
 import android.content.res.Resources;
 import android.os.UserHandle;
 import android.text.Editable;
@@ -27,7 +28,6 @@ import android.text.method.TextKeyListener;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
-import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -39,10 +39,12 @@ import android.widget.TextView.OnEditorActionListener;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.settingslib.Utils;
-import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
+import com.android.systemui.statusbar.policy.DevicePostureController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.List;
@@ -50,9 +52,10 @@ import java.util.List;
 public class KeyguardPasswordViewController
         extends KeyguardAbsKeyInputViewController<KeyguardPasswordView> {
 
-    private static final int DELAY_MILLIS_TO_REEVALUATE_IME_SWITCH_ICON = 500;  // 500ms
-
     private final KeyguardSecurityCallback mKeyguardSecurityCallback;
+    private final DevicePostureController mPostureController;
+    private final DevicePostureController.Callback mPostureCallback = posture ->
+            mView.onDevicePostureChanged(posture);
     private final InputMethodManager mInputMethodManager;
     private final DelayableExecutor mMainExecutor;
     private final KeyguardViewController mKeyguardViewController;
@@ -62,15 +65,23 @@ public class KeyguardPasswordViewController
     private boolean mPaused;
 
     private final OnEditorActionListener mOnEditorActionListener = (v, actionId, event) -> {
-        // Check if this was the result of hitting the enter key
+        // Check if this was the result of hitting the IME done action
         final boolean isSoftImeEvent = event == null
                 && (actionId == EditorInfo.IME_NULL
                 || actionId == EditorInfo.IME_ACTION_DONE
                 || actionId == EditorInfo.IME_ACTION_NEXT);
-        final boolean isKeyboardEnterKey = event != null
-                && KeyEvent.isConfirmKey(event.getKeyCode())
-                && event.getAction() == KeyEvent.ACTION_DOWN;
-        if (isSoftImeEvent || isKeyboardEnterKey) {
+        if (isSoftImeEvent) {
+            verifyPasswordAndUnlock();
+            return true;
+        }
+        return false;
+    };
+
+    private final View.OnKeyListener mKeyListener = (v, keyCode, keyEvent) -> {
+        final boolean isKeyboardEnterKey = keyEvent != null
+                && KeyEvent.isConfirmKey(keyCode)
+                && keyEvent.getAction() == KeyEvent.ACTION_UP;
+        if (isKeyboardEnterKey) {
             verifyPasswordAndUnlock();
             return true;
         }
@@ -95,18 +106,6 @@ public class KeyguardPasswordViewController
         }
     };
 
-    @Override
-    public void reloadColors() {
-        super.reloadColors();
-        int textColor = Utils.getColorAttr(mView.getContext(),
-                android.R.attr.textColorPrimary).getDefaultColor();
-        mPasswordEntry.setTextColor(textColor);
-        mPasswordEntry.setHighlightColor(textColor);
-        mPasswordEntry.setBackgroundTintList(ColorStateList.valueOf(textColor));
-        mPasswordEntry.setForegroundTintList(ColorStateList.valueOf(textColor));
-        mSwitchImeButton.setImageTintList(ColorStateList.valueOf(textColor));
-    }
-
     protected KeyguardPasswordViewController(KeyguardPasswordView view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             SecurityMode securityMode,
@@ -119,14 +118,21 @@ public class KeyguardPasswordViewController
             @Main DelayableExecutor mainExecutor,
             @Main Resources resources,
             FalsingCollector falsingCollector,
-            KeyguardViewController keyguardViewController) {
+            KeyguardViewController keyguardViewController,
+            DevicePostureController postureController,
+            FeatureFlags featureFlags,
+            SelectedUserInteractor selectedUserInteractor) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController);
+                emergencyButtonController, featureFlags, selectedUserInteractor);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
+        mPostureController = postureController;
         mMainExecutor = mainExecutor;
         mKeyguardViewController = keyguardViewController;
+        if (featureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)) {
+            view.setIsLockScreenLandscapeEnabled();
+        }
         mShowImeAtScreenOn = resources.getBoolean(R.bool.kg_show_ime_at_screen_on);
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
         mSwitchImeButton = mView.findViewById(R.id.switch_ime_button);
@@ -135,18 +141,23 @@ public class KeyguardPasswordViewController
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
-        mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
+        mPasswordEntry.setTextOperationUser(
+                UserHandle.of(mSelectedUserInteractor.getSelectedUserId()));
         mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
+        mView.onDevicePostureChanged(mPostureController.getDevicePosture());
+
+        mPostureController.addCallback(mPostureCallback);
+
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
         mPasswordEntry.setOnEditorActionListener(mOnEditorActionListener);
+        mPasswordEntry.setOnKeyListener(mKeyListener);
         mPasswordEntry.addTextChangedListener(mTextWatcher);
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(v -> mKeyguardSecurityCallback.userActivity());
-
         mSwitchImeButton.setOnClickListener(v -> {
             mKeyguardSecurityCallback.userActivity(); // Leave the screen on a bit longer
             // Do not show auxiliary subtypes in password lock screen.
@@ -164,19 +175,13 @@ public class KeyguardPasswordViewController
 
         // If there's more than one IME, enable the IME switcher button
         updateSwitchImeButton();
-
-        // When we the current user is switching, InputMethodManagerService sometimes has not
-        // switched internal state yet here. As a quick workaround, we check the keyboard state
-        // again.
-        // TODO: Remove this workaround by ensuring such a race condition never happens.
-        mMainExecutor.executeDelayed(
-                this::updateSwitchImeButton, DELAY_MILLIS_TO_REEVALUATE_IME_SWITCH_ICON);
     }
 
     @Override
     protected void onViewDetached() {
         super.onViewDetached();
         mPasswordEntry.setOnEditorActionListener(null);
+        mPostureController.removeCallback(mPostureCallback);
     }
 
     @Override
@@ -186,8 +191,9 @@ public class KeyguardPasswordViewController
 
     @Override
     void resetState() {
-        mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
-        mMessageAreaController.setMessage("");
+        mPasswordEntry.setTextOperationUser(
+                UserHandle.of(mSelectedUserInteractor.getSelectedUserId()));
+        mMessageAreaController.setMessage(getInitialMessageResId());
         final boolean wasDisabled = mPasswordEntry.isEnabled();
         mView.setPasswordEntryEnabled(true);
         mView.setPasswordEntryInputEnabled(true);
@@ -207,7 +213,6 @@ public class KeyguardPasswordViewController
         if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
             showInput();
         }
-        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_password);
     }
 
     private void showInput() {
@@ -215,12 +220,9 @@ public class KeyguardPasswordViewController
             return;
         }
 
-        mView.post(() -> {
-            if (mView.isShown()) {
-                mPasswordEntry.requestFocus();
-                mPasswordEntry.getWindowInsetsController().show(WindowInsets.Type.ime());
-            }
-        });
+        if (mView.isShown()) {
+            mView.showKeyboard();
+        }
     }
 
     @Override
@@ -242,16 +244,12 @@ public class KeyguardPasswordViewController
                 super.onPause();
             });
         }
-        if (mPasswordEntry.isAttachedToWindow()) {
-            mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
-        }
+        mView.hideKeyboard();
     }
 
     @Override
     public void onStartingToHide() {
-        if (mPasswordEntry.isAttachedToWindow()) {
-            mPasswordEntry.getWindowInsetsController().hide(WindowInsets.Type.ime());
-        }
+        mView.hideKeyboard();
     }
 
     private void updateSwitchImeButton() {
@@ -286,7 +284,8 @@ public class KeyguardPasswordViewController
     private boolean hasMultipleEnabledIMEsOrSubtypes(InputMethodManager imm,
             final boolean shouldIncludeAuxiliarySubtypes) {
         final List<InputMethodInfo> enabledImis =
-                imm.getEnabledInputMethodListAsUser(KeyguardUpdateMonitor.getCurrentUser());
+                imm.getEnabledInputMethodListAsUser(
+                        UserHandle.of(mSelectedUserInteractor.getSelectedUserId()));
 
         // Number of the filtered IMEs
         int filteredImisCount = 0;
@@ -323,5 +322,10 @@ public class KeyguardPasswordViewController
                 // imm.getEnabledInputMethodSubtypeList(null, false) will return the current IME's
                 //enabled input method subtype (The current IME should be LatinIME.)
                 || imm.getEnabledInputMethodSubtypeList(null, false).size() > 1;
+    }
+
+    @Override
+    protected int getInitialMessageResId() {
+        return R.string.keyguard_enter_your_password;
     }
 }

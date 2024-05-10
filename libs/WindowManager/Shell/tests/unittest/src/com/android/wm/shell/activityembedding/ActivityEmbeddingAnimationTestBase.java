@@ -47,6 +47,7 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
 
     @Mock
     ShellInit mShellInit;
+
     @Mock
     Transitions mTransitions;
     @Mock
@@ -56,13 +57,12 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
     @Mock
     SurfaceControl.Transaction mFinishTransaction;
     @Mock
-    Transitions.TransitionFinishCallback mFinishCallback;
-    @Mock
     Animator mAnimator;
 
     ActivityEmbeddingController mController;
     ActivityEmbeddingAnimationRunner mAnimRunner;
     ActivityEmbeddingAnimationSpec mAnimSpec;
+    Transitions.TransitionFinishCallback mFinishCallback;
 
     @CallSuper
     @Before
@@ -75,15 +75,19 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
         assertNotNull(mAnimRunner);
         mAnimSpec = mAnimRunner.mAnimationSpec;
         assertNotNull(mAnimSpec);
+        mFinishCallback = (wct) -> {};
         spyOn(mController);
         spyOn(mAnimRunner);
         spyOn(mAnimSpec);
+        spyOn(mFinishCallback);
     }
 
     /** Creates a mock {@link TransitionInfo.Change}. */
-    static TransitionInfo.Change createChange() {
-        return new TransitionInfo.Change(mock(WindowContainerToken.class),
+    static TransitionInfo.Change createChange(@TransitionInfo.ChangeFlags int flags) {
+        TransitionInfo.Change c = new TransitionInfo.Change(mock(WindowContainerToken.class),
                 mock(SurfaceControl.class));
+        c.setFlags(flags);
+        return c;
     }
 
     /**
@@ -92,8 +96,7 @@ abstract class ActivityEmbeddingAnimationTestBase extends ShellTestCase {
      */
     static TransitionInfo.Change createEmbeddedChange(@NonNull Rect startBounds,
             @NonNull Rect endBounds, @NonNull Rect taskBounds) {
-        final TransitionInfo.Change change = createChange();
-        change.setFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+        final TransitionInfo.Change change = createChange(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
         change.setStartAbsBounds(startBounds);
         change.setEndAbsBounds(endBounds);
         if (taskBounds.width() == startBounds.width()

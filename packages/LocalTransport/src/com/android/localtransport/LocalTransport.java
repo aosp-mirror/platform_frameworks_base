@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
+import android.app.backup.BackupManagerMonitor;
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.BackupTransport;
 import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
@@ -27,6 +29,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -34,6 +37,9 @@ import android.system.StructStat;
 import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Log;
+
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
 
 import libcore.io.IoUtils;
 
@@ -44,6 +50,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -100,6 +107,7 @@ public class LocalTransport extends BackupTransport {
     private FileInputStream mCurFullRestoreStream;
     private byte[] mFullRestoreBuffer;
     private final LocalTransportParameters mParameters;
+    private final BackupManagerMonitor mMonitor = new TestBackupManagerMonitor();
 
     private void makeDataDirs() {
         mDataDir = mContext.getFilesDir();
@@ -122,6 +130,12 @@ public class LocalTransport extends BackupTransport {
         return mParameters;
     }
 
+
+    @UsesReflection({
+            // As the runtime class name is used to generate the returned name, and the returned
+            // name may be used used with reflection, generate the necessary keep rules.
+            @KeepTarget(instanceOfClassConstant = LocalTransport.class)
+    })
     @Override
     public String name() {
         return new ComponentName(mContext, this.getClass()).flattenToShortString();
@@ -886,5 +900,43 @@ public class LocalTransport extends BackupTransport {
     @Override
     public long getBackupQuota(String packageName, boolean isFullBackup) {
         return isFullBackup ? FULL_BACKUP_SIZE_QUOTA : KEY_VALUE_BACKUP_SIZE_QUOTA;
+    }
+
+    @Override
+    public BackupManagerMonitor getBackupManagerMonitor() {
+        return mMonitor;
+    }
+
+    private class TestBackupManagerMonitor extends BackupManagerMonitor {
+        @Override
+        public void onEvent(Bundle event) {
+            if (event == null || !mParameters.logAgentResults()) {
+                return;
+            }
+
+            if (event.getInt(BackupManagerMonitor.EXTRA_LOG_EVENT_ID)
+                    == BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS) {
+                Log.i(TAG, "agent_logging_results {");
+                ArrayList<DataTypeResult> results = event.getParcelableArrayList(
+                        BackupManagerMonitor.EXTRA_LOG_AGENT_LOGGING_RESULTS,
+                        DataTypeResult.class);
+                for (DataTypeResult result : results) {
+                    Log.i(TAG, "\tdataType: " + result.getDataType());
+                    Log.i(TAG, "\tsuccessCount: " + result.getSuccessCount());
+                    Log.i(TAG, "\tfailCount: " + result.getFailCount());
+                    Log.i(TAG, "\tmetadataHash: " + Arrays.toString(result.getMetadataHash()));
+
+                    if (!result.getErrors().isEmpty()) {
+                        Log.i(TAG, "\terrors {");
+                        for (String error : result.getErrors().keySet()) {
+                            Log.i(TAG, "\t\t" + error + ": " + result.getErrors().get(error));
+                        }
+                        Log.i(TAG, "\t}");
+                    }
+
+                    Log.i(TAG, "}");
+                }
+            }
+        }
     }
 }

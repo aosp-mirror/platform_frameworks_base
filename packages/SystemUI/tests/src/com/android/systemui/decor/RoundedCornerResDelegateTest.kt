@@ -23,13 +23,12 @@ import android.util.Size
 import androidx.annotation.DrawableRes
 import androidx.test.filters.SmallTest
 import com.android.internal.R as InternalR
-import com.android.systemui.R as SystemUIR
-import com.android.systemui.tests.R
+import com.android.systemui.res.R as SystemUIR
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.tests.R
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
@@ -49,7 +48,7 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
     @Test
     fun testTopAndBottomRoundedCornerExist() {
         setupResources(radius = 5)
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        roundedCornerResDelegate = RoundedCornerResDelegateImpl(mContext.resources, null)
         assertEquals(true, roundedCornerResDelegate.hasTop)
         assertEquals(true, roundedCornerResDelegate.hasBottom)
     }
@@ -57,7 +56,7 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
     @Test
     fun testTopRoundedCornerExist() {
         setupResources(radiusTop = 10)
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        roundedCornerResDelegate = RoundedCornerResDelegateImpl(mContext.resources, null)
         assertEquals(true, roundedCornerResDelegate.hasTop)
         assertEquals(false, roundedCornerResDelegate.hasBottom)
     }
@@ -65,7 +64,7 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
     @Test
     fun testBottomRoundedCornerExist() {
         setupResources(radiusBottom = 15)
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        roundedCornerResDelegate = RoundedCornerResDelegateImpl(mContext.resources, null)
         assertEquals(false, roundedCornerResDelegate.hasTop)
         assertEquals(true, roundedCornerResDelegate.hasBottom)
     }
@@ -76,7 +75,7 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
                 roundedTopDrawable = getTestsDrawable(R.drawable.rounded3px),
                 roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
 
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        roundedCornerResDelegate = RoundedCornerResDelegateImpl(mContext.resources, null)
 
         assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
@@ -97,40 +96,16 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
                 roundedTopDrawable = getTestsDrawable(R.drawable.rounded3px),
                 roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
 
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        roundedCornerResDelegate = RoundedCornerResDelegateImpl(mContext.resources, null)
 
         assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
 
-        setupResources(radius = 100,
-                roundedTopDrawable = getTestsDrawable(R.drawable.rounded4px),
-                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded5px))
-
+        roundedCornerResDelegate.physicalPixelDisplaySizeRatio = 2f
         roundedCornerResDelegate.updateDisplayUniqueId(null, 1)
 
-        assertEquals(Size(4, 4), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(5, 5), roundedCornerResDelegate.bottomRoundedSize)
-    }
-
-    @Test
-    fun testUpdateTuningSizeFactor() {
-        setupResources(radius = 100,
-                roundedTopDrawable = getTestsDrawable(R.drawable.rounded3px),
-                roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
-
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
-
-        val factor = 5
-        roundedCornerResDelegate.tuningSizeFactor = factor
-        val length = (factor * mContext.resources.displayMetrics.density).toInt()
-
-        assertEquals(Size(length, length), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(length, length), roundedCornerResDelegate.bottomRoundedSize)
-
-        roundedCornerResDelegate.tuningSizeFactor = null
-
-        assertEquals(Size(3, 3), roundedCornerResDelegate.topRoundedSize)
-        assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
+        assertEquals(Size(6, 6), roundedCornerResDelegate.topRoundedSize)
+        assertEquals(Size(8, 8), roundedCornerResDelegate.bottomRoundedSize)
     }
 
     @Test
@@ -139,7 +114,7 @@ class RoundedCornerResDelegateTest : SysuiTestCase() {
                 roundedTopDrawable = getTestsDrawable(R.drawable.rounded4px),
                 roundedBottomDrawable = getTestsDrawable(R.drawable.rounded4px))
 
-        roundedCornerResDelegate = RoundedCornerResDelegate(mContext.resources, null)
+        roundedCornerResDelegate = RoundedCornerResDelegateImpl(mContext.resources, null)
         assertEquals(Size(4, 4), roundedCornerResDelegate.topRoundedSize)
         assertEquals(Size(4, 4), roundedCornerResDelegate.bottomRoundedSize)
 

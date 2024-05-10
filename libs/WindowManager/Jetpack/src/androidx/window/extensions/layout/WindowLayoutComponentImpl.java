@@ -25,7 +25,7 @@ import static androidx.window.util.ExtensionHelper.rotateRectToDisplayRotation;
 import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.app.Activity;
-import android.app.ActivityClient;
+import android.app.ActivityThread;
 import android.app.Application;
 import android.app.WindowConfiguration;
 import android.content.ComponentCallbacks;
@@ -35,15 +35,16 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.ArrayMap;
-import android.window.WindowContext;
+import android.util.Log;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiContext;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.common.RawFoldingFeatureProducer;
+import androidx.window.extensions.core.util.function.Consumer;
 import androidx.window.util.DataProducer;
 
 import java.util.ArrayList;
@@ -51,7 +52,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Reference implementation of androidx.window.extensions.layout OEM interface for use with
@@ -62,30 +62,37 @@ import java.util.function.Consumer;
  * Please refer to {@link androidx.window.sidecar.SampleSidecarImpl} instead.
  */
 public class WindowLayoutComponentImpl implements WindowLayoutComponent {
-    private static final String TAG = "SampleExtension";
+    private static final String TAG = WindowLayoutComponentImpl.class.getSimpleName();
 
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private final Map<Context, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
             new ArrayMap<>();
 
+    @GuardedBy("mLock")
     private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
+    @GuardedBy("mLock")
     private final List<CommonFoldingFeature> mLastReportedFoldingFeatures = new ArrayList<>();
 
-    private final Map<IBinder, WindowContextConfigListener> mWindowContextConfigListeners =
+    @GuardedBy("mLock")
+    private final Map<IBinder, ConfigurationChangeListener> mConfigurationChangeListeners =
             new ArrayMap<>();
 
-    public WindowLayoutComponentImpl(@NonNull Context context) {
+    @GuardedBy("mLock")
+    private final Map<java.util.function.Consumer<WindowLayoutInfo>, Consumer<WindowLayoutInfo>>
+            mJavaToExtConsumers = new ArrayMap<>();
+
+    private final RawConfigurationChangedListener mRawConfigurationChangedListener =
+            new RawConfigurationChangedListener();
+
+    public WindowLayoutComponentImpl(@NonNull Context context,
+            @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
-        RawFoldingFeatureProducer foldingFeatureProducer = new RawFoldingFeatureProducer(context);
-        mFoldingFeatureProducer = new DeviceStateManagerFoldingFeatureProducer(context,
-                foldingFeatureProducer);
+        mFoldingFeatureProducer = foldingFeatureProducer;
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
-    }
-
-    /** Registers to listen to {@link CommonFoldingFeature} changes */
-    public void addFoldingStateChangedCallback(Consumer<List<CommonFoldingFeature>> consumer) {
-        mFoldingFeatureProducer.addDataChangedCallback(consumer);
     }
 
     /**
@@ -96,39 +103,68 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      */
     @Override
     public void addWindowLayoutInfoListener(@NonNull Activity activity,
-            @NonNull Consumer<WindowLayoutInfo> consumer) {
-        addWindowLayoutInfoListener((Context) activity, consumer);
+            @NonNull java.util.function.Consumer<WindowLayoutInfo> consumer) {
+        final Consumer<WindowLayoutInfo> extConsumer = consumer::accept;
+        synchronized (mLock) {
+            mJavaToExtConsumers.put(consumer, extConsumer);
+            updateListenerRegistrations();
+        }
+        addWindowLayoutInfoListener(activity, extConsumer);
     }
 
     /**
-     * Similar to {@link #addWindowLayoutInfoListener(Activity, Consumer)}, but takes a UI Context
-     * as a parameter.
+     * Similar to {@link #addWindowLayoutInfoListener(Activity, java.util.function.Consumer)}, but
+     * takes a UI Context as a parameter.
+     *
+     * Jetpack {@link androidx.window.layout.ExtensionWindowLayoutInfoBackend} makes sure all
+     * consumers related to the same {@link Context} gets updated {@link WindowLayoutInfo}
+     * together. However only the first registered consumer of a {@link Context} will actually
+     * invoke {@link #addWindowLayoutInfoListener(Context, Consumer)}.
+     * Here we enforce that {@link #addWindowLayoutInfoListener(Context, Consumer)} can only be
+     * called once for each {@link Context}.
      */
-    // TODO(b/204073440): Add @Override to hook the API in WM extensions library.
+    @Override
     public void addWindowLayoutInfoListener(@NonNull @UiContext Context context,
             @NonNull Consumer<WindowLayoutInfo> consumer) {
-        if (mWindowLayoutChangeListeners.containsKey(context)
-                || mWindowLayoutChangeListeners.containsValue(consumer)) {
-            // Early return if the listener or consumer has been registered.
-            return;
-        }
-        if (!context.isUiContext()) {
-            throw new IllegalArgumentException("Context must be a UI Context, which should be"
-                    + " an Activity or a WindowContext");
-        }
-        mFoldingFeatureProducer.getData((features) -> {
-            // Get the WindowLayoutInfo from the activity and pass the value to the layoutConsumer.
-            WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
-            consumer.accept(newWindowLayout);
-        });
-        mWindowLayoutChangeListeners.put(context, consumer);
+        synchronized (mLock) {
+            if (mWindowLayoutChangeListeners.containsKey(context)
+                    // In theory this method can be called on the same consumer with different
+                    // context.
+                    || mWindowLayoutChangeListeners.containsValue(consumer)) {
+                return;
+            }
+            if (!context.isUiContext()) {
+                throw new IllegalArgumentException("Context must be a UI Context, which should be"
+                        + " an Activity, WindowContext or InputMethodService");
+            }
+            mFoldingFeatureProducer.getData((features) -> {
+                WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, features);
+                consumer.accept(newWindowLayout);
+            });
+            mWindowLayoutChangeListeners.put(context, consumer);
 
-        if (context instanceof WindowContext) {
             final IBinder windowContextToken = context.getWindowContextToken();
-            final WindowContextConfigListener listener =
-                    new WindowContextConfigListener(windowContextToken);
-            context.registerComponentCallbacks(listener);
-            mWindowContextConfigListeners.put(windowContextToken, listener);
+            if (windowContextToken != null) {
+                // We register component callbacks for window contexts. For activity contexts, they
+                // will receive callbacks from NotifyOnConfigurationChanged instead.
+                final ConfigurationChangeListener listener =
+                        new ConfigurationChangeListener(windowContextToken);
+                context.registerComponentCallbacks(listener);
+                mConfigurationChangeListeners.put(windowContextToken, listener);
+            }
+        }
+    }
+
+    @Override
+    public void removeWindowLayoutInfoListener(
+            @NonNull java.util.function.Consumer<WindowLayoutInfo> consumer) {
+        final Consumer<WindowLayoutInfo> extConsumer;
+        synchronized (mLock) {
+            extConsumer = mJavaToExtConsumers.remove(consumer);
+            updateListenerRegistrations();
+        }
+        if (extConsumer != null) {
+            removeWindowLayoutInfoListener(extConsumer);
         }
     }
 
@@ -139,36 +175,47 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      */
     @Override
     public void removeWindowLayoutInfoListener(@NonNull Consumer<WindowLayoutInfo> consumer) {
-        for (Context context : mWindowLayoutChangeListeners.keySet()) {
-            if (!mWindowLayoutChangeListeners.get(context).equals(consumer)) {
-                continue;
-            }
-            if (context instanceof WindowContext) {
+        synchronized (mLock) {
+            for (Context context : mWindowLayoutChangeListeners.keySet()) {
+                if (!mWindowLayoutChangeListeners.get(context).equals(consumer)) {
+                    continue;
+                }
                 final IBinder token = context.getWindowContextToken();
-                context.unregisterComponentCallbacks(mWindowContextConfigListeners.get(token));
-                mWindowContextConfigListeners.remove(token);
+                if (token != null) {
+                    context.unregisterComponentCallbacks(mConfigurationChangeListeners.get(token));
+                    mConfigurationChangeListeners.remove(token);
+                }
+                break;
             }
-            break;
+            mWindowLayoutChangeListeners.values().remove(consumer);
         }
-        mWindowLayoutChangeListeners.values().remove(consumer);
     }
 
+    @GuardedBy("mLock")
+    private void updateListenerRegistrations() {
+        ActivityThread currentThread = ActivityThread.currentActivityThread();
+        if (mJavaToExtConsumers.isEmpty()) {
+            currentThread.removeConfigurationChangedListener(mRawConfigurationChangedListener);
+        } else {
+            currentThread.addConfigurationChangedListener(Runnable::run,
+                    mRawConfigurationChangedListener);
+        }
+    }
+
+    @GuardedBy("mLock")
     @NonNull
-    Set<Context> getContextsListeningForLayoutChanges() {
+    private Set<Context> getContextsListeningForLayoutChanges() {
         return mWindowLayoutChangeListeners.keySet();
     }
 
+    @GuardedBy("mLock")
     private boolean isListeningForLayoutChanges(IBinder token) {
-        for (Context context: getContextsListeningForLayoutChanges()) {
+        for (Context context : getContextsListeningForLayoutChanges()) {
             if (token.equals(Context.getToken(context))) {
                 return true;
             }
         }
         return false;
-    }
-
-    protected boolean hasListeners() {
-        return !mWindowLayoutChangeListeners.isEmpty();
     }
 
     /**
@@ -194,21 +241,26 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     }
 
     private void onDisplayFeaturesChanged(List<CommonFoldingFeature> storedFeatures) {
-        mLastReportedFoldingFeatures.clear();
-        mLastReportedFoldingFeatures.addAll(storedFeatures);
-        for (Context context : getContextsListeningForLayoutChanges()) {
-            // Get the WindowLayoutInfo from the activity and pass the value to the layoutConsumer.
-            Consumer<WindowLayoutInfo> layoutConsumer = mWindowLayoutChangeListeners.get(context);
-            WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, storedFeatures);
-            layoutConsumer.accept(newWindowLayout);
+        synchronized (mLock) {
+            mLastReportedFoldingFeatures.clear();
+            mLastReportedFoldingFeatures.addAll(storedFeatures);
+            for (Context context : getContextsListeningForLayoutChanges()) {
+                // Get the WindowLayoutInfo from the activity and pass the value to the
+                // layoutConsumer.
+                Consumer<WindowLayoutInfo> layoutConsumer = mWindowLayoutChangeListeners.get(
+                        context);
+                WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(context, storedFeatures);
+                layoutConsumer.accept(newWindowLayout);
+            }
         }
     }
 
     /**
      * Translates the {@link DisplayFeature} into a {@link WindowLayoutInfo} when a
      * valid state is found.
+     *
      * @param context a proxy for the {@link android.view.Window} that contains the
-     * {@link DisplayFeature}.
+     *                {@link DisplayFeature}.
      */
     private WindowLayoutInfo getWindowLayoutInfo(@NonNull @UiContext Context context,
             List<CommonFoldingFeature> storedFeatures) {
@@ -220,15 +272,18 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * Gets the current {@link WindowLayoutInfo} computed with passed {@link WindowConfiguration}.
      *
      * @return current {@link WindowLayoutInfo} on the default display. Returns
-     *   empty {@link WindowLayoutInfo} on secondary displays.
+     * empty {@link WindowLayoutInfo} on secondary displays.
      */
     @NonNull
     public WindowLayoutInfo getCurrentWindowLayoutInfo(int displayId,
             @NonNull WindowConfiguration windowConfiguration) {
-        return getWindowLayoutInfo(displayId, windowConfiguration, mLastReportedFoldingFeatures);
+        synchronized (mLock) {
+            return getWindowLayoutInfo(displayId, windowConfiguration,
+                    mLastReportedFoldingFeatures);
+        }
     }
 
-    /** @see #getWindowLayoutInfo(Context, List)  */
+    /** @see #getWindowLayoutInfo(Context, List) */
     private WindowLayoutInfo getWindowLayoutInfo(int displayId,
             @NonNull WindowConfiguration windowConfiguration,
             List<CommonFoldingFeature> storedFeatures) {
@@ -251,8 +306,9 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * {@link IllegalArgumentException} since this can cause negative UI effects down stream.
      *
      * @param context a proxy for the {@link android.view.Window} that contains the
-     * {@link DisplayFeature}.
-     * are within the {@link android.view.Window} of the {@link Activity}
+     *                {@link DisplayFeature}.
+     * @return a {@link List}  of {@link DisplayFeature}s that are within the
+     * {@link android.view.Window} of the {@link Activity}
      */
     private List<DisplayFeature> getDisplayFeatures(
             @NonNull @UiContext Context context, List<CommonFoldingFeature> storedFeatures) {
@@ -273,26 +329,58 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             return features;
         }
 
+        // We will transform the feature bounds to the Activity window, so using the rotation
+        // from the same source (WindowConfiguration) to make sure they are synchronized.
+        final int rotation = windowConfiguration.getDisplayRotation();
+
         for (CommonFoldingFeature baseFeature : storedFeatures) {
             Integer state = convertToExtensionState(baseFeature.getState());
             if (state == null) {
                 continue;
             }
             Rect featureRect = baseFeature.getRect();
-            rotateRectToDisplayRotation(displayId, featureRect);
+            rotateRectToDisplayRotation(displayId, rotation, featureRect);
             transformToWindowSpaceRect(windowConfiguration, featureRect);
 
-            if (!isZero(featureRect)) {
+            if (isZero(featureRect)) {
                 // TODO(b/228641877): Remove guarding when fixed.
-                features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+                continue;
             }
+            if (featureRect.left != 0 && featureRect.top != 0) {
+                Log.wtf(TAG, "Bounding rectangle must start at the top or "
+                        + "left of the window. BaseFeatureRect: " + baseFeature.getRect()
+                        + ", FeatureRect: " + featureRect
+                        + ", WindowConfiguration: " + windowConfiguration);
+                continue;
+
+            }
+            if (featureRect.left == 0
+                    && featureRect.width() != windowConfiguration.getBounds().width()) {
+                Log.wtf(TAG, "Horizontal FoldingFeature must have full width."
+                        + " BaseFeatureRect: " + baseFeature.getRect()
+                        + ", FeatureRect: " + featureRect
+                        + ", WindowConfiguration: " + windowConfiguration);
+                continue;
+            }
+            if (featureRect.top == 0
+                    && featureRect.height() != windowConfiguration.getBounds().height()) {
+                Log.wtf(TAG, "Vertical FoldingFeature must have full height."
+                        + " BaseFeatureRect: " + baseFeature.getRect()
+                        + ", FeatureRect: " + featureRect
+                        + ", WindowConfiguration: " + windowConfiguration);
+                continue;
+            }
+            features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
         }
         return features;
     }
 
     /**
-     * Checks whether display features should be reported for the activity.
+     * Calculates if the display features should be reported for the UI Context. The calculation
+     * uses the task information because that is accurate for Activities in ActivityEmbedding mode.
      * TODO(b/238948678): Support reporting display features in all windowing modes.
+     *
+     * @return true if the display features should be reported for the UI Context, false otherwise.
      */
     private boolean shouldReportDisplayFeatures(@NonNull @UiContext Context context) {
         int displayId = context.getDisplay().getDisplayId();
@@ -300,27 +388,14 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             // Display features are not supported on secondary displays.
             return false;
         }
-        final int windowingMode;
-        if (context instanceof Activity) {
-            windowingMode = ActivityClient.getInstance().getTaskWindowingMode(
-                    context.getActivityToken());
-        } else {
-            // TODO(b/242674941): use task windowing mode for window context that associates with
-            //  activity.
-            windowingMode = context.getResources().getConfiguration().windowConfiguration
-                    .getWindowingMode();
-        }
-        if (windowingMode == -1) {
-            // If we cannot determine the task windowing mode for any reason, it is likely that we
-            // won't be able to determine its position correctly as well. DisplayFeatures' bounds
-            // in this case can't be computed correctly, so we should skip.
-            return false;
-        }
-        // It is recommended not to report any display features in multi-window mode, since it
-        // won't be possible to synchronize the display feature positions with window movement.
-        return !WindowConfiguration.inMultiWindowMode(windowingMode);
+
+        // We do not report folding features for Activities in PiP because the bounds are
+        // not updated fast enough and the window is too small for the UI to adapt.
+        return context.getResources().getConfiguration().windowConfiguration
+                .getWindowingMode() != WindowConfiguration.WINDOWING_MODE_PINNED;
     }
 
+    @GuardedBy("mLock")
     private void onDisplayFeaturesChangedIfListening(@NonNull IBinder token) {
         if (isListeningForLayoutChanges(token)) {
             mFoldingFeatureProducer.getData(
@@ -332,29 +407,46 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
             super.onActivityCreated(activity, savedInstanceState);
-            onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            }
         }
 
         @Override
         public void onActivityConfigurationChanged(Activity activity) {
             super.onActivityConfigurationChanged(activity);
-            onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(activity.getActivityToken());
+            }
         }
     }
 
-    private final class WindowContextConfigListener implements ComponentCallbacks {
+    private final class RawConfigurationChangedListener implements
+            java.util.function.Consumer<IBinder> {
+        @Override
+        public void accept(IBinder activityToken) {
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(activityToken);
+            }
+        }
+    }
+
+    private final class ConfigurationChangeListener implements ComponentCallbacks {
         final IBinder mToken;
 
-        WindowContextConfigListener(IBinder token) {
+        ConfigurationChangeListener(IBinder token) {
             mToken = token;
         }
 
         @Override
         public void onConfigurationChanged(@NonNull Configuration newConfig) {
-            onDisplayFeaturesChangedIfListening(mToken);
+            synchronized (mLock) {
+                onDisplayFeaturesChangedIfListening(mToken);
+            }
         }
 
         @Override
-        public void onLowMemory() {}
+        public void onLowMemory() {
+        }
     }
 }

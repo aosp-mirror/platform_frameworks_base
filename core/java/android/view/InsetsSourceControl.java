@@ -22,13 +22,14 @@ import static android.view.InsetsSourceControlProto.LEASH;
 import static android.view.InsetsSourceControlProto.POSITION;
 import static android.view.InsetsSourceControlProto.TYPE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
-import android.view.InsetsState.InternalInsetsType;
+import android.view.WindowInsets.Type.InsetsType;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -40,7 +41,8 @@ import java.util.function.Consumer;
  */
 public class InsetsSourceControl implements Parcelable {
 
-    private final @InternalInsetsType int mType;
+    private final int mId;
+    private final @InsetsType int mType;
     private final @Nullable SurfaceControl mLeash;
     private final boolean mInitiallyVisible;
     private final Point mSurfacePosition;
@@ -52,8 +54,9 @@ public class InsetsSourceControl implements Parcelable {
     private boolean mSkipAnimationOnce;
     private int mParcelableFlags;
 
-    public InsetsSourceControl(@InternalInsetsType int type, @Nullable SurfaceControl leash,
+    public InsetsSourceControl(int id, @InsetsType int type, @Nullable SurfaceControl leash,
             boolean initiallyVisible, Point surfacePosition, Insets insetsHint) {
+        mId = id;
         mType = type;
         mLeash = leash;
         mInitiallyVisible = initiallyVisible;
@@ -62,6 +65,7 @@ public class InsetsSourceControl implements Parcelable {
     }
 
     public InsetsSourceControl(InsetsSourceControl other) {
+        mId = other.mId;
         mType = other.mType;
         if (other.mLeash != null) {
             mLeash = new SurfaceControl(other.mLeash, "InsetsSourceControl");
@@ -75,12 +79,17 @@ public class InsetsSourceControl implements Parcelable {
     }
 
     public InsetsSourceControl(Parcel in) {
+        mId = in.readInt();
         mType = in.readInt();
         mLeash = in.readTypedObject(SurfaceControl.CREATOR);
         mInitiallyVisible = in.readBoolean();
         mSurfacePosition = in.readTypedObject(Point.CREATOR);
         mInsetsHint = in.readTypedObject(Insets.CREATOR);
         mSkipAnimationOnce = in.readBoolean();
+    }
+
+    public int getId() {
+        return mId;
     }
 
     public int getType() {
@@ -153,6 +162,7 @@ public class InsetsSourceControl implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mId);
         dest.writeInt(mType);
         dest.writeTypedObject(mLeash, mParcelableFlags);
         dest.writeBoolean(mInitiallyVisible);
@@ -177,7 +187,8 @@ public class InsetsSourceControl implements Parcelable {
         }
         final InsetsSourceControl that = (InsetsSourceControl) o;
         final SurfaceControl thatLeash = that.mLeash;
-        return mType == that.mType
+        return mId == that.mId
+                && mType == that.mType
                 && ((mLeash == thatLeash)
                         || (mLeash != null && thatLeash != null && mLeash.isSameSurface(thatLeash)))
                 && mInitiallyVisible == that.mInitiallyVisible
@@ -188,22 +199,25 @@ public class InsetsSourceControl implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mLeash, mInitiallyVisible, mSurfacePosition, mInsetsHint,
+        return Objects.hash(mId, mType, mLeash, mInitiallyVisible, mSurfacePosition, mInsetsHint,
                 mSkipAnimationOnce);
     }
 
     @Override
     public String toString() {
-        return "InsetsSourceControl: {"
-                + "type=" + InsetsState.typeToString(mType)
-                + ", mSurfacePosition=" + mSurfacePosition
-                + ", mInsetsHint=" + mInsetsHint
+        return "InsetsSourceControl: {" + Integer.toHexString(mId)
+                + " mType=" + WindowInsets.Type.toString(mType)
+                + (mInitiallyVisible ? " initiallyVisible" : "")
+                + " mSurfacePosition=" + mSurfacePosition
+                + " mInsetsHint=" + mInsetsHint
+                + (mSkipAnimationOnce ? " skipAnimationOnce" : "")
                 + "}";
     }
 
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
-        pw.print("InsetsSourceControl type="); pw.print(InsetsState.typeToString(mType));
+        pw.print("InsetsSourceControl mId="); pw.print(Integer.toHexString(mId));
+        pw.print(" mType="); pw.print(WindowInsets.Type.toString(mType));
         pw.print(" mLeash="); pw.print(mLeash);
         pw.print(" mInitiallyVisible="); pw.print(mInitiallyVisible);
         pw.print(" mSurfacePosition="); pw.print(mSurfacePosition);
@@ -212,8 +226,7 @@ public class InsetsSourceControl implements Parcelable {
         pw.println();
     }
 
-    public static final @android.annotation.NonNull Creator<InsetsSourceControl> CREATOR
-            = new Creator<InsetsSourceControl>() {
+    public static final @NonNull Creator<InsetsSourceControl> CREATOR = new Creator<>() {
         public InsetsSourceControl createFromParcel(Parcel in) {
             return new InsetsSourceControl(in);
         }
@@ -231,7 +244,7 @@ public class InsetsSourceControl implements Parcelable {
      */
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        proto.write(TYPE, InsetsState.typeToString(mType));
+        proto.write(TYPE, WindowInsets.Type.toString(mType));
 
         final long surfaceToken = proto.start(POSITION);
         proto.write(X, mSurfacePosition.x);
@@ -242,5 +255,53 @@ public class InsetsSourceControl implements Parcelable {
             mLeash.dumpDebug(proto, LEASH);
         }
         proto.end(token);
+    }
+
+    /**
+     * Used to obtain the array from the argument of a binder call. In this way, the length of the
+     * array can be dynamic.
+     */
+    public static class Array implements Parcelable {
+
+        private @Nullable InsetsSourceControl[] mControls;
+
+        public Array() {
+        }
+
+        public Array(Parcel in) {
+            readFromParcel(in);
+        }
+
+        public void set(@Nullable InsetsSourceControl[] controls) {
+            mControls = controls;
+        }
+
+        public @Nullable InsetsSourceControl[] get() {
+            return mControls;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public void readFromParcel(Parcel in) {
+            mControls = in.createTypedArray(InsetsSourceControl.CREATOR);
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeTypedArray(mControls, flags);
+        }
+
+        public static final @NonNull Creator<Array> CREATOR = new Creator<>() {
+            public Array createFromParcel(Parcel in) {
+                return new Array(in);
+            }
+
+            public Array[] newArray(int size) {
+                return new Array[size];
+            }
+        };
     }
 }

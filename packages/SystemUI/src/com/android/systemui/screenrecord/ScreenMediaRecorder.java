@@ -51,9 +51,10 @@ import android.util.Size;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import com.android.systemui.media.MediaProjectionCaptureTarget;
-import java.io.File;
+import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
+
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -321,7 +322,7 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
     /**
      * Store recorded video
      */
-    protected SavedRecording save() throws IOException {
+    protected SavedRecording save() throws IOException, IllegalStateException {
         String fileName = new SimpleDateFormat("'screen-'yyyyMMdd-HHmmss'.mp4'")
                 .format(new Date());
 

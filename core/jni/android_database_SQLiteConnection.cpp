@@ -91,15 +91,14 @@ struct SQLiteConnection {
 // Called each time a statement begins execution, when tracing is enabled.
 static void sqliteTraceCallback(void *data, const char *sql) {
     SQLiteConnection* connection = static_cast<SQLiteConnection*>(data);
-    ALOG(LOG_VERBOSE, SQLITE_TRACE_TAG, "%s: \"%s\"\n",
-            connection->label.string(), sql);
+    ALOG(LOG_VERBOSE, SQLITE_TRACE_TAG, "%s: \"%s\"\n", connection->label.c_str(), sql);
 }
 
 // Called each time a statement finishes execution, when profiling is enabled.
 static void sqliteProfileCallback(void *data, const char *sql, sqlite3_uint64 tm) {
     SQLiteConnection* connection = static_cast<SQLiteConnection*>(data);
-    ALOG(LOG_VERBOSE, SQLITE_PROFILE_TAG, "%s: \"%s\" took %0.3f ms\n",
-            connection->label.string(), sql, tm * 0.000001f);
+    ALOG(LOG_VERBOSE, SQLITE_PROFILE_TAG, "%s: \"%s\" took %0.3f ms\n", connection->label.c_str(),
+         sql, tm * 0.000001f);
 }
 
 // Called after each SQLite VM instruction when cancelation is enabled.
@@ -130,7 +129,7 @@ static jlong nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFla
     env->ReleaseStringUTFChars(labelStr, labelChars);
 
     sqlite3* db;
-    int err = sqlite3_open_v2(path.string(), &db, sqliteFlags, NULL);
+    int err = sqlite3_open_v2(path.c_str(), &db, sqliteFlags, NULL);
     if (err != SQLITE_OK) {
         throw_sqlite3_exception_errcode(env, err, "Could not open database");
         return 0;
@@ -180,7 +179,7 @@ static jlong nativeOpen(JNIEnv* env, jclass clazz, jstring pathStr, jint openFla
         sqlite3_profile(db, &sqliteProfileCallback, connection);
     }
 
-    ALOGV("Opened connection %p with label '%s'", db, label.string());
+    ALOGV("Opened connection %p with label '%s'", db, label.c_str());
     return reinterpret_cast<jlong>(connection);
 }
 
@@ -760,7 +759,7 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
     if (status) {
         String8 msg;
         msg.appendFormat("Failed to clear the cursor window, status=%d", status);
-        throw_sqlite3_exception(env, connection->db, msg.string());
+        throw_sqlite3_exception(env, connection->db, msg.c_str());
         return 0;
     }
 
@@ -770,7 +769,7 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
         String8 msg;
         msg.appendFormat("Failed to set the cursor window column count to %d, status=%d",
                 numColumns, status);
-        throw_sqlite3_exception(env, connection->db, msg.string());
+        throw_sqlite3_exception(env, connection->db, msg.c_str());
         return 0;
     }
 
@@ -845,7 +844,7 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
         String8 msg;
         msg.appendFormat("Row too big to fit into CursorWindow requiredPos=%d, totalRows=%d",
                 requiredPos, totalRows);
-        throw_sqlite3_exception(env, SQLITE_TOOBIG, NULL, msg.string());
+        throw_sqlite3_exception(env, SQLITE_TOOBIG, NULL, msg.c_str());
         return 0;
     }
 
@@ -880,6 +879,20 @@ static void nativeResetCancel(JNIEnv* env, jobject clazz, jlong connectionPtr,
     }
 }
 
+static jint nativeLastInsertRowId(JNIEnv* env, jclass, jlong connectionPtr) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+    return sqlite3_last_insert_rowid(connection->db);
+}
+
+static jlong nativeChanges(JNIEnv* env, jclass, jlong connectionPtr) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+    return sqlite3_changes64(connection->db);
+}
+
+static jlong nativeTotalChanges(JNIEnv* env, jclass, jlong connectionPtr) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+    return sqlite3_total_changes64(connection->db);
+}
 
 static const JNINativeMethod sMethods[] =
 {
@@ -938,6 +951,10 @@ static const JNINativeMethod sMethods[] =
             (void*)nativeCancel },
     { "nativeResetCancel", "(JZ)V",
             (void*)nativeResetCancel },
+
+    { "nativeLastInsertRowId", "(J)I", (void*) nativeLastInsertRowId },
+    { "nativeChanges", "(J)J", (void*) nativeChanges },
+    { "nativeTotalChanges", "(J)J", (void*) nativeTotalChanges },
 };
 
 int register_android_database_SQLiteConnection(JNIEnv *env)

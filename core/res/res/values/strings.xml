@@ -46,6 +46,9 @@
     <!-- Displayed when the user dialed an MMI code whose function
          could not be performed. This will be displayed in a toast. -->
     <string name="mmiError">Connection problem or invalid MMI code.</string>
+    <!-- Displayed when the user dialed an MMI code whose function could not be performed because
+         the feature is not supported on the current mobile network. -->
+    <string name="mmiErrorNotSupported">Feature not supported.</string>
     <!-- Displayed when the user dialed an MMI code whose function
          could not be performed because FDN is enabled. This will be displayed in a toast. -->
     <string name="mmiFdnError">Operation is restricted to fixed dialing numbers only.</string>
@@ -202,6 +205,11 @@
     <!-- Displayed to tell the user that they cannot change the caller ID setting. -->
     <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
 
+    <!-- Notification title to tell the user that auto data switch has occurred. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="auto_data_switch_title">Switched data to <xliff:g id="carrierDisplay" example="Verizon">%s</xliff:g></string>
+    <!-- Notification content to tell the user that auto data switch can be disabled at settings. [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="auto_data_switch_content">You can change this anytime in Settings</string>
+
     <!-- Notification title to tell the user that data service is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="RestrictedOnDataTitle">No mobile data service</string>
     <!-- Notification title to tell the user that emergency calling is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
@@ -319,6 +327,7 @@
         <item>@string/wfcSpnFormat_wifi_calling_wo_hyphen</item>
         <item>@string/wfcSpnFormat_vowifi</item>
         <item>@string/wfcSpnFormat_spn_wifi_calling_vo_hyphen</item>
+        <item>@string/wfcSpnFormat_wifi_call</item>
     </string-array>
 
     <!-- Spn during Wi-Fi Calling: "<operator>" -->
@@ -345,6 +354,8 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen">WiFi Calling</string>
     <!-- Spn during Wi-Fi Calling: "VoWifi" -->
     <string name="wfcSpnFormat_vowifi">VoWifi</string>
+    <!-- Spn during Wi_Fi Calling: "WiFi Call" (without hyphen).  This string is shown in the call banner for calls which take place over a WiFi network. -->
+    <string name="wfcSpnFormat_wifi_call">WiFi Call</string>
 
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
@@ -548,6 +559,16 @@
     <!-- Title for the button that turns work profile on. To be used in a notification
         [CHAR LIMIT=NONE] -->
     <string name="personal_apps_suspended_turn_profile_on">Turn on</string>
+    <!-- Notification title. This notification lets the user know that they will be unable to
+     receive phone calls or texts until the work profile is turned on. [CHAR LIMIT=40] -->
+    <string name="work_profile_telephony_paused_title">Calls and messages are off</string>
+    <!-- Notification text. This notification lets the user know that they will be unable to
+     receive phone calls or texts until the work profile is turned on. [CHAR LIMIT=NONE] -->
+    <string name="work_profile_telephony_paused_text">You have paused work apps.
+        You won\'t receive phone calls or text messages.</string>
+    <!-- Label for notification button. This button lets the user turn the work profile on.
+         [CHAR LIMIT=15]  -->
+    <string name="work_profile_telephony_paused_turn_on_button">Unpause work apps</string>
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
@@ -741,9 +762,6 @@
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">New notification</string>
 
-    <!-- Text shown when viewing channel settings for notifications related to the virtual keyboard -->
-    <string name="notification_channel_virtual_keyboard">Virtual keyboard</string>
-
     <!-- Text shown when viewing channel settings for notifications related to the hardware keyboard -->
     <string name="notification_channel_physical_keyboard">Physical keyboard</string>
 
@@ -808,6 +826,9 @@
          security policy. [CHAR_LIMIT=NONE]-->
     <string name="notification_channel_accessibility_security_policy">Accessibility usage</string>
 
+    <!-- Text shown when viewing channel settings for notifications related to displays -->
+    <string name="notification_channel_display">Display</string>
+
     <!-- Label for foreground service notification when one app is running.
     [CHAR LIMIT=NONE BACKUP_MESSAGE_ID=6826789589341671842] -->
     <string name="foreground_service_app_in_background"><xliff:g id="app_name">%1$s</xliff:g> is
@@ -842,6 +863,12 @@
 
     <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
     <string name="managed_profile_label">Switch to work profile</string>
+
+    <!-- "Switch" is a verb; it means to change user profile by switching to an app in the personal profile. -->
+    <string name="user_owner_app_label">Switch to personal <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+
+    <!-- "Switch" is a verb; it means to change user profile by switching to an app in the work profile. -->
+    <string name="managed_profile_app_label">Switch to work <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_contacts">Contacts</string>
@@ -959,6 +986,11 @@
     <string name="capability_title_canTakeScreenshot">Take screenshot</string>
     <!-- Description for the capability of an accessibility service to take screenshot. [CHAR LIMIT=NONE] -->
     <string name="capability_desc_canTakeScreenshot">Can take a screenshot of the display.</string>
+
+    <!-- Dream -->
+
+    <!-- The title to use when a dream is opened in preview mode. [CHAR LIMIT=NONE] -->
+    <string name="dream_preview_title">Preview, <xliff:g id="dream_name" example="Clock">%1$s</xliff:g></string>
 
     <!--  Permissions -->
 
@@ -1117,6 +1149,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_systemAlertWindow">This app can appear on top of other apps or other parts of the screen. This may interfere with normal app usage and change the way that other apps appear.</string>
 
+    <!-- Title of hide overlay windows permission, which allows an app to hide overlay windows from other apps. -->
+    <string name="permlab_hideOverlayWindows">hide other apps overlays</string>
+    <!-- Description of hide overlay windows permission, which allows an app to prevent overlays from being drawn on top of it. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_hideOverlayWindows">This app can request that the system hides overlays originating from apps from being shown on top of it.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_runInBackground">run in the background</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1126,6 +1163,16 @@
     <string name="permlab_useDataInBackground">use data in the background</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_useDataInBackground">This app can use data in the background. This may increase data usage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_schedule_exact_alarm">Schedule precisely timed actions</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_schedule_exact_alarm">This app can schedule work to happen at a desired time in the future. This also means that the app can run when you\u2019re not actively using the device.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_use_exact_alarm">Schedule alarms or event reminders</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_use_exact_alarm">This app can schedule actions like alarms and reminders to notify you at a desired time in the future.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_persistentActivity">make app always run</string>
@@ -1139,6 +1186,71 @@
     <string name="permlab_foregroundService">run foreground service</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_foregroundService">Allows the app to make use of foreground services.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceCamera">run foreground service with the type \"camera\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceCamera">Allows the app to make use of foreground services with the type \"camera\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceConnectedDevice">run foreground service with the type \"connectedDevice\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceConnectedDevice">Allows the app to make use of foreground services with the type \"connectedDevice\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceDataSync">run foreground service with the type \"dataSync\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceDataSync">Allows the app to make use of foreground services with the type \"dataSync\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceLocation">run foreground service with the type \"location\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceLocation">Allows the app to make use of foreground services with the type \"location\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceMediaPlayback">run foreground service with the type \"mediaPlayback\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceMediaPlayback">Allows the app to make use of foreground services with the type \"mediaPlayback\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceMediaProjection">run foreground service with the type \"mediaProjection\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceMediaProjection">Allows the app to make use of foreground services with the type \"mediaProjection\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceMicrophone">run foreground service with the type \"microphone\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceMicrophone">Allows the app to make use of foreground services with the type \"microphone\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServicePhoneCall">run foreground service with the type \"phoneCall\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServicePhoneCall">Allows the app to make use of foreground services with the type \"phoneCall\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceHealth">run foreground service with the type \"health\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceHealth">Allows the app to make use of foreground services with the type \"health\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceRemoteMessaging">run foreground service with the type \"remoteMessaging\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceRemoteMessaging">Allows the app to make use of foreground services with the type \"remoteMessaging\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceSystemExempted">run foreground service with the type \"systemExempted\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceSystemExempted">Allows the app to make use of foreground services with the type \"systemExempted\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceFileManagement">run foreground service with the type \"fileManagement\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceFileManagement">Allows the app to make use of foreground services with the type \"fileManagement\"</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_foregroundServiceSpecialUse">run foreground service with the type \"specialUse\"</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_foregroundServiceSpecialUse">Allows the app to make use of foreground services with the type \"specialUse\"</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getPackageSize">measure app storage space</string>
@@ -1300,6 +1412,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permdesc_recordBackgroundAudio">This app can record audio using the microphone at any time.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_detectScreenCapture">detect screen captures of app windows</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
+    <string name="permdesc_detectScreenCapture">This app will get notified when a screenshot is taken while the app is in use.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_sim_communication">send commands to the SIM</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1330,6 +1447,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permdesc_cameraOpenCloseListener">This app can receive callbacks when any camera device is being opened (by what application) or closed.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_cameraHeadlessSystemUser">Allow an application or service to access camera as Headless System User.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_cameraHeadlessSystemUser">This app can access camera as Headless System User.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1344,7 +1466,8 @@
       without your intervention. This may result in unexpected charges or calls.
       Note that this doesn\'t allow the app to call emergency numbers.
       Malicious apps may cost you money by making calls without your
-      confirmation.</string>
+      confirmation, or dial carrier codes which cause incoming calls to be
+      automatically forwarded to another number.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessImsCallService">access IMS call service</string>
@@ -1596,6 +1719,12 @@
       with Near Field Communication (NFC) tags, cards, and readers.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_nfcTransactionEvent">Secure Element transaction event</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_nfcTransactionEvent">Allows the app to receive information about
+      transactions happening on a Secure Element.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_disableKeyguard">disable your screen lock</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_disableKeyguard">Allows the app to disable the
@@ -1617,6 +1746,11 @@
     <string name="permlab_postNotification">show notifications</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permdesc_postNotification">Allows the app to show notifications</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_turnScreenOn">turn on the screen</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_turnScreenOn">Allows the app to turn on the screen.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permlab_useBiometric">use biometric hardware</string>
@@ -1669,6 +1803,8 @@
     <string name="biometric_error_user_canceled">Authentication canceled</string>
     <!-- Message shown by the biometric dialog when biometric is not recognized -->
     <string name="biometric_not_recognized">Not recognized</string>
+    <!-- Message shown by the biometric dialog when face is not recognized [CHAR LIMIT=50] -->
+    <string name="biometric_face_not_recognized">Face not recognized</string>
     <!-- Message shown when biometric authentication has been canceled [CHAR LIMIT=50] -->
     <string name="biometric_error_canceled">Authentication canceled</string>
     <!-- Message returned to applications if BiometricPrompt setAllowDeviceCredentials is enabled but no pin, pattern, or password is set. [CHAR LIMIT=NONE] -->
@@ -1709,6 +1845,8 @@
     <string name="fingerprint_error_not_match">Fingerprint not recognized</string>
     <!-- Message shown when UDFPS fails to match -->
     <string name="fingerprint_udfps_error_not_match">Fingerprint not recognized</string>
+    <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
+    <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
 
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
@@ -1765,22 +1903,22 @@
     <!-- Content description which should be used for the fingerprint icon. -->
     <string name="fingerprint_icon_content_description">Fingerprint icon</string>
 
+    <!-- Notification name shown when the system requires the user to set up device unlock. [CHAR LIMIT=NONE] -->
+    <string name="device_unlock_notification_name">Device unlock</string>
+    <!-- Notification title shown when the system suggests the user to set up another way to unlock. [CHAR LIMIT=NONE] -->
+    <string name="alternative_unlock_setup_notification_title">Try another way to unlock</string>
+    <!-- Notification content shown when the system suggests the user to enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="alternative_face_setup_notification_content">Use Face Unlock when your fingerprint isn\'t recognized, like when your fingers are wet</string>
+    <!-- Notification content shown when the system suggests the user to enroll their fingerprint. [CHAR LIMIT=NONE] -->
+    <string name="alternative_fp_setup_notification_content">Use Fingerprint Unlock when your face isn\'t recognized, like when there\'s not enough light</string>
     <!-- Notification name shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_name">Face Unlock</string>
     <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_title">Issue with Face Unlock</string>
     <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
     <string name="face_recalibrate_notification_content">Tap to delete your face model, then add your face again</string>
-    <!-- Title of a notification that directs the user to set up Face Unlock by enrolling their face. [CHAR LIMIT=NONE] -->
-    <string name="face_setup_notification_title">Set up Face Unlock</string>
-    <!-- Contents of a notification that directs the user to set up face unlock by enrolling their face. [CHAR LIMIT=NONE] -->
-    <string name="face_setup_notification_content">Unlock your phone by looking at it</string>
     <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=NONE] -->
     <string name="face_sensor_privacy_enabled">To use Face Unlock, turn on <b>Camera access</b> in Settings > Privacy</string>
-    <!-- Title of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
-    <string name="fingerprint_setup_notification_title">Set up more ways to unlock</string>
-    <!-- Contents of a notification that directs the user to enroll a fingerprint. [CHAR LIMIT=NONE] -->
-    <string name="fingerprint_setup_notification_content">Tap to add a fingerprint</string>
 
     <!-- Notification name shown when the system requires the user to re-calibrate their fingerprint. [CHAR LIMIT=NONE] -->
     <string name="fingerprint_recalibrate_notification_name">Fingerprint Unlock</string>
@@ -1857,8 +1995,8 @@
     <string name="face_error_user_canceled">Face Unlock canceled by user</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=90] -->
-    <string name="face_error_lockout_permanent">Too many attempts. Face Unlock disabled.</string>
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=100] -->
+    <string name="face_error_lockout_permanent">Too many attempts. Face Unlock unavailable.</string>
     <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=90] -->
     <string name="face_error_lockout_screen_lock">Too many attempts. Enter screen lock instead.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
@@ -1925,6 +2063,11 @@
     <string name="permlab_readMediaImages">read image files from shared storage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
     <string name="permdesc_readMediaImages">Allows the app to read image files from your shared storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permlab_readVisualUserSelect">read user selected image and video files from shared storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permdesc_readVisualUserSelect">Allows the app to read image and video files that you select from your shared storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can write to. [CHAR LIMIT=none] -->
     <string name="permlab_sdcardWrite">modify or delete the contents of your shared storage</string>
@@ -2062,6 +2205,11 @@
     <string name="permlab_highSamplingRateSensors">access sensor data at a high sampling rate</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
     <string name="permdesc_highSamplingRateSensors">Allows the app to sample sensor data at a rate greater than 200 Hz</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_updatePackagesWithoutUserAction">update app without user action</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
+    <string name="permdesc_updatePackagesWithoutUserAction">Allows the holder to update the app it previously installed without user action</string>
 
     <!-- Policy administration -->
 
@@ -2727,229 +2875,8 @@
     <!-- Message in a javascript dialog asking if the user wishes to leave the current page -->
     <string name="js_dialog_before_unload"><xliff:g id="message">%s</xliff:g>\n\nAre you sure you want to navigate away from this page?</string>
 
-    <!-- Title of the WebView save password dialog.  If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. -->
-    <string name="save_password_label">Confirm</string>
-
-    <!-- Toast for double-tap -->
-    <string name="double_tap_toast">Tip: Double-tap to zoom in and out.</string>
-
-    <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form, and the user has configured an AutoFill profile [CHAR-LIMIT=8] -->
-    <string name="autofill_this_form">Autofill</string>
-    <!-- Text to show in the auto complete drop down list on a text view when the WebView can auto fill the entire form but the user has not configured an AutoFill profile [CHAR-LIMIT=19] -->
-    <string name="setup_autofill">Set up Autofill</string>
-
     <!-- Title of fullscreen autofill window, including the name of which autofill service it is using [CHAR-LIMIT=NONE] -->
     <string name="autofill_window_title">Autofill with <xliff:g id="serviceName" example="MyPass">%1$s</xliff:g></string>
-
-    <!-- String used to separate FirstName and LastName when writing out a local name
-         e.g. John<separator>Smith [CHAR-LIMIT=NONE]-->
-    <string name="autofill_address_name_separator">\u0020</string>
-    <!-- Format string for displaying a name. $1 is First Name, $2 is autofill_address_name_separator, $3 is Last Name.
-         e.g. (John)( )(Smith) -->
-    <string name="autofill_address_summary_name_format">$1$2$3</string>
-
-    <!-- String used to separate Name and Address Line 1
-         e.g. John Smith<separator>123 Main Street [CHAR-LIMIT=NONE]-->
-    <string name="autofill_address_summary_separator">,\u0020</string>
-    <!-- Format string for displaying a name and address summary. $1 is the Full Name, $2 is autofill_address_summary_separator, $3 is the Address
-         e.g. (John Smith)(, )(123 Main Street) -->
-    <string name="autofill_address_summary_format">$1$2$3</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_attention_ignored_re">attention|attn</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_region_ignored_re">province|region|other<!-- es -->|provincia<!-- pt-BR, pt-PT -->|bairro|suburb</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_company_re">company|business|organization|organisation|department<!-- de-DE -->|firma|firmenname<!-- es -->|empresa<!-- fr-FR -->|societe|société<!-- it-IT -->|ragione.?sociale<!-- ja-JP -->|会社<!-- ru -->|название.?компании<!-- zh-CN -->|单位|公司</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_address_line_1_re">address.?line|address1|addr1|street<!-- de-DE -->|strasse|straße|hausnummer|housenumber<!-- en-GB -->|house.?name<!-- es -->|direccion|dirección<!-- fr-FR -->|adresse<!-- it-IT -->|indirizzo<!-- ja-JP -->|住所1<!-- pt-BR, pt-PT -->|morada|endereço<!-- ru -->|Адрес<!-- zh-CN -->|地址</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_address_line_1_label_re">address<!-- fr-FR -->|adresse<!-- it-IT -->|indirizzo<!-- ja-JP -->|住所<!-- zh-CN -->|地址</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_address_line_2_re">address.?line2|address2|addr2|street|suite|unit<!-- de-DE -->|adresszusatz|ergänzende.?angaben<!-- es -->|direccion2|colonia|adicional<!-- fr-FR -->|addresssuppl|complementnom|appartement<!-- it-IT -->|indirizzo2<!-- ja-JP -->|住所2</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_address_line_3_re">address.?line3|address3|addr3|street|line3<!-- es -->|municipio<!-- fr-FR -->|batiment|residence<!-- it-IT -->|indirizzo3</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_country_re">country|location<!-- ja-JP -->|国<!-- zh-CN -->|国家</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_zip_code_re">zip|postal|post code|pcode|^1z$<!-- de-DE -->|postleitzahl<!-- es -->|cp<!-- fr-FR -->|cdp<!-- it-IT -->|cap<!-- ja-JP -->|郵便番号<!-- pt-BR, pt-PT -->|codigo|codpos|cep<!-- ru -->|Почтовый.?Индекс<!--zh-CN -->|邮政编码|邮编<!-- zh-TW -->|郵遞區號</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_zip_4_re">zip|^-$|post2<!-- pt-BR, pt-PT -->|codpos2</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_city_re">city|town<!-- de-DE -->|ort|stadt<!-- en-AU -->|suburb<!-- es -->|ciudad|provincia|localidad|poblacion<!-- fr-FR -->|ville|commune<!-- it-IT -->|localita<!-- ja-JP -->|市区町村<!-- pt-BR, pt-PT -->|cidade<!-- ru -->|Город<!-- zh-CN -->|市<!-- zh-TW -->|分區</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_state_re">state|county|region|province<!-- de-DE -->|land<!-- en-UK -->|county|principality<!-- ja-JP -->|都道府県<!-- pt-BR, pt-PT -->|estado|provincia<!-- ru -->|область<!-- zh-CN -->|省<!-- zh-TW -->|地區</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_address_type_same_as_re">same as</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_address_type_use_my_re">use my</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_billing_designator_re">bill</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_shipping_designator_re">ship</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_email_re">e.?mail<!-- ja-JP -->|メールアドレス<!-- ru -->|Электронной.?Почты<!-- zh-CN -->|邮件|邮箱<!-- zh-TW -->|電郵地址</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_username_re">user.?name|user.?id<!-- de-DE -->|vollständiger.?name<!-- zh-CN -->|用户名</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_name_re">^name|full.?name|your.?name|customer.?name|firstandlastname<!-- es -->|nombre.*y.*apellidos<!-- fr-FR -->|^nom<!-- ja-JP -->|お名前|氏名<!-- pt-BR, pt-PT -->|^nome<!-- zh-CN -->|姓名</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_name_specific_re">^name<!-- fr-FR -->|^nom<!-- pt-BR, pt-PT -->|^nome</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-
-    <string name="autofill_first_name_re">irst.*name|initials|fname|first$<!-- de-DE -->|vorname<!-- es -->|nombre<!-- fr-FR -->|forename|prénom|prenom<!-- ja-JP -->|名<!-- pt-BR, pt-PT -->|nome<!-- ru -->|Имя</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_middle_initial_re">middle.*initial|m\\.i\\.|mi$</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_middle_name_re">middle.*name|mname|middle$<!-- es -->|apellido.?materno|lastlastname</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_last_name_re">last.*name|lname|surname|last$<!-- de-DE -->|nachname<!-- es -->|apellidos<!-- fr-FR -->|famille|^nom<!-- it-IT -->|cognome<!-- ja-JP -->|姓<!-- pt-BR, pt-PT -->|morada|apelidos|surename|sobrenome<!-- ru -->|Фамилия</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_re">phone<!-- de-DE -->|telefonnummer<!-- es -->|telefono|teléfono<!-- fr-FR -->|telfixe<!-- ja-JP -->|電話<!-- pt-BR, pt-PT -->|telefone|telemovel<!-- ru -->|телефон<!-- zh-CN -->|电话</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_area_code_re">area.*code|acode|area</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_prefix_re">prefix<!-- fr-FR -->|preselection<!-- pt-BR, pt-PT -->|ddd</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_suffix_re">suffix</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_extension_re">ext<!-- pt-BR, pt-PT -->|ramal</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_name_on_card_re">card.?holder|name.?on.?card|ccname|owner<!-- de-DE -->|karteninhaber<!-- es -->|nombre.*tarjeta<!-- fr-FR -->|nom.*carte<!-- it-IT -->|nome.*cart<!-- ja-JP -->|名前<!-- ru -->|Имя.*карты<!-- zh-CN -->|信用卡开户名|开户名|持卡人姓名<!-- zh-TW -->|持卡人姓名</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_name_on_card_contextual_re">name</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_card_cvc_re">verification|card identification|cvn|security code|cvv code|cvc</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_card_number_re">number|card.?#|card.?no|ccnum<!-- de-DE -->|nummer<!-- es -->|credito|numero|número<!-- fr-FR -->|numéro<!-- ja-JP -->|カード番号<!-- ru -->|Номер.*карты<!-- zh-CN -->|信用卡号|信用卡号码<!-- zh-TW -->|信用卡卡號</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_expiration_month_re">expir|exp.*month|exp.*date|ccmonth<!-- de-DE -->|gueltig|gültig|monat<!-- es -->|fecha<!-- fr-FR -->|date.*exp<!-- it-IT -->|scadenza<!-- ja-JP -->|有効期限<!-- pt-BR, pt-PT -->|validade<!-- ru -->|Срок действия карты<!-- zh-CN -->|月</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_expiration_date_re">exp|^/|year<!-- de-DE -->|ablaufdatum|gueltig|gültig|yahr<!-- es -->|fecha<!-- it-IT -->|scadenza<!-- ja-JP -->|有効期限<!-- pt-BR, pt-PT -->|validade<!-- ru -->|Срок действия карты<!-- zh-CN -->|年|有效期</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_card_ignored_re">^card</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_fax_re">fax<!-- fr-FR -->|télécopie|telecopie<!-- ja-JP -->|ファックス<!-- ru -->|факс<!-- zh-CN -->|传真<!-- zh-TW -->|傳真</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_country_code_re">country.*code|ccode|_cc</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_area_code_notext_re">^\\($</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_prefix_separator_re">^-$|^\\)$</string>
-
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_suffix_separator_re">^-$</string>
-
-    <!-- Label in a web form for "Province" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_province">Province</string>
-
-    <!-- Label in a web form for "Postal code" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_postal_code">Postal code</string>
-
-    <!-- Label in a web form for "State" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_state">State</string>
-
-    <!-- Label in a web form for "ZIP code" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_zip_code">ZIP code</string>
-
-    <!-- Label in a web form for "County" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_county">County</string>
-
-    <!-- Label in a web form for "Island" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_island">Island</string>
-
-    <!-- Label in a web form for "District" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_district">District</string>
-
-    <!-- Label in a web form for "Department" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_department">Department</string>
-
-    <!-- Label in a web form for "Prefecture" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_prefecture">Prefecture</string>
-
-    <!-- Label in a web form for "Parish" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_parish">Parish</string>
-
-    <!-- Label in a web form for "Area" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_area">Area</string>
-
-    <!-- Label in a web form for "Emirate" [CHAR-LIMIT=NONE]  -->
-    <string name="autofill_emirate">Emirate</string>
-
-
-    <!-- Title of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
-    <string name="permlab_readHistoryBookmarks">read your Web bookmarks and history</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
-    <string name="permdesc_readHistoryBookmarks">Allows the app to read the
-     history of all URLs that the Browser has visited, and all of the Browser\'s
-     bookmarks. Note: this permission may not be enforced by third-party
-     browsers or other  applications with web browsing capabilities.</string>
-    <!-- Title of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
-
-    <string name="permlab_writeHistoryBookmarks">write web bookmarks and history</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
-    <string name="permdesc_writeHistoryBookmarks" product="tablet">Allows the
-        app to modify the Browser\'s history or bookmarks stored on your tablet.
-        This may allow the app to erase or modify Browser data.  Note: this
-        permission may note be enforced by third-party browsers or other
-        applications with web browsing capabilities.</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
-    <string name="permdesc_writeHistoryBookmarks" product="tv">Allows the
-        app to modify the Browser\'s history or bookmarks stored on your Android TV device.
-        This may allow the app to erase or modify Browser data.  Note: this
-        permission may note be enforced by third-party browsers or other
-        applications with web browsing capabilities.</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
-    <string name="permdesc_writeHistoryBookmarks" product="default">Allows the
-        app to modify the Browser\'s history or bookmarks stored on your phone.
-        This may allow the app to erase or modify Browser data.  Note:
-        this permission may note be enforced by third-party browsers or other
-        applications with web browsing capabilities.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
     they want to allow the application to do this. -->
@@ -2968,44 +2895,8 @@
     <string name="permdesc_addVoicemail">Allows the app to add messages
       to your voicemail inbox.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
-    <string name="permlab_writeGeolocationPermissions">modify Browser geolocation permissions</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. -->
-    <string name="permdesc_writeGeolocationPermissions">Allows the app to modify the
-        Browser\'s geolocation permissions. Malicious apps
-        may use this to allow sending location information to arbitrary web sites.</string>
-
-    <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Text in the save password dialog, asking if the browser should remember a password. -->
-    <string name="save_password_message">Do you want the browser to remember this password?</string>
-    <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying not to remember this password. -->
-    <string name="save_password_notnow">Not now</string>
-    <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying to remember this password. -->
-    <string name="save_password_remember">Remember</string>
-    <!-- Button in the save password dialog, saying never to remember this password. This should be short. Should be "Never for this site". But it is too long, use "Never" instead -->
-    <string name="save_password_never">Never</string>
-
-    <!-- Displayed to the user when they do not have permission to open a particular web page. -->
-    <string name="open_permission_deny">You don\'t have permission to open this page.</string>
-
-    <!-- Displayed to the user to confirm that they have copied text from a web page to the clipboard. -->
-    <string name="text_copied">Text copied to clipboard.</string>
-
-    <!-- Displayed to the user to inform them that an app has accessed clipboard data (pasted as in "copy and paste") that was copied from another app [CHAR LIMIT=50] -->
-    <string name="pasted_from_app"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted from <xliff:g id="source_app_name" example="Chrome">%2$s</xliff:g></string>
-
     <!-- Displayed to the user to inform them that an app has accessed clipboard data (pasted as in "copy and paste") [CHAR LIMIT=50] -->
     <string name="pasted_from_clipboard"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted from your clipboard</string>
-
-    <!-- Displayed to the user to inform them that an app has accessed text from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
-    <string name="pasted_text"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted text you copied</string>
-
-    <!-- Displayed to the user to inform them that an app has accessed an image from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
-    <string name="pasted_image"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted an image you copied</string>
-
-    <!-- Displayed to the user to inform them that an app has accessed content from clipboard (pasted as in "copy and paste") [CHAR LIMIT=50] -->
-    <string name="pasted_content"><xliff:g id="pasting_app_name" example="Gmail">%1$s</xliff:g> pasted content you copied</string>
 
     <!-- Menu item displayed at the end of a menu to allow users to see another page worth of menu items. This is shown on any app's menu as long as the app has too many items in the menu.-->
     <string name="more_item_label">More</string>
@@ -3362,6 +3253,13 @@
     <!-- Default not selected text used by accessibility for an element that can be selected or unselected. [CHAR LIMIT=NONE] -->
     <string name="not_selected">not selected</string>
 
+    <!-- Default label text used by accessibility for ratingbars. [CHAR LIMIT=NONE] -->
+    <string name ="rating_label">{ rating, plural,
+        =1 {One star out of {max}}
+        other {# stars out of {max}}
+    }
+    </string>
+
     <!-- Default state description for indeterminate progressbar. [CHAR LIMIT=NONE] -->
     <string name="in_progress">in progress</string>
 
@@ -3536,18 +3434,12 @@
     <string name="android_start_title" product="device">Device is starting\u2026</string>
 
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog when doing an fstrim. -->
-    <string name="android_upgrading_fstrim">Optimizing storage.</string>
 
     <!-- [CHAR LIMIT=40] Title of notification that is shown when finishing a system update. -->
     <string name="android_upgrading_notification_title" product="default">Finishing system update\u2026</string>
 
     <!-- [CHAR LIMIT=40] Toast that is shown when an app is still upgrading. -->
     <string name="app_upgrading_toast"><xliff:g id="application">%1$s</xliff:g> is upgrading\u2026</string>
-
-    <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk that is optimized. -->
-    <string name="android_upgrading_apk">Optimizing app
-        <xliff:g id="number" example="123">%1$d</xliff:g> of
-        <xliff:g id="number" example="123">%2$d</xliff:g>.</string>
 
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk pre boot broadcast -->
     <string name="android_preparing_apk">Preparing <xliff:g id="appname">%1$s</xliff:g>.</string>
@@ -3839,6 +3731,8 @@
     <string name="usb_tether_notification_title">USB tethering turned on</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MIDI mode.  This is the title -->
     <string name="usb_midi_notification_title">MIDI via USB turned on</string>
+    <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in UVC mode.  This is the title -->
+    <string name="usb_uvc_notification_title">Device connected as Webcam</string>
     <!-- USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title -->
     <string name="usb_accessory_notification_title">USB accessory connected</string>
     <!-- See USB_PREFERENCES. This is the message. -->
@@ -3914,10 +3808,12 @@
          keyboard is connected -->
     <string name="show_ime">Keep it on screen while physical keyboard is active</string>
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=30] -->
-    <string name="hardware">Show virtual keyboard</string>
+    <string name="hardware">Use on-screen keyboard</string>
 
-    <!-- Title of the notification to prompt the user to configure physical keyboard settings. -->
-    <string name="select_keyboard_layout_notification_title">Configure physical keyboard</string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="select_keyboard_layout_notification_title">Configure <xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g></string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings when multiple keyboards connected. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="select_multiple_keyboards_layout_notification_title">Configure physical keyboards</string>
     <!-- Message of the notification to prompt the user to configure physical keyboard settings
          where the user can associate language with physical keyboard layout. -->
     <string name="select_keyboard_layout_notification_message">Tap to select language and layout</string>
@@ -4722,6 +4618,17 @@
        "Raise volume above recommended level?\n\nListening at high volume for long periods may damage your hearing."
     </string>
 
+    <!-- Message shown in dialog when user goes over a multiple of 100% of the safe weekly dose -->
+    <string name="csd_dose_reached_warning" product="default">
+        "Keep listening at a high volume?\n\nHeadphone volume has been high for longer than recommended, which can damage your hearing"
+    </string>
+
+    <!-- Message shown in dialog when user is momentarily listening to unsafely loud content
+    over headphones -->
+    <string name="csd_momentary_exposure_warning" product="default">
+        "Loud sound detected\n\nHeadphone volume has been higher than recommended, which can damage your hearing"
+    </string>
+
     <!-- Dialog title for dialog shown when the accessibility shortcut is activated, and we want
      to confirm that the user understands what's going to happen-->
     <string name="accessibility_shortcut_warning_dialog_title">Use Accessibility Shortcut?</string>
@@ -4794,6 +4701,13 @@
     <string name="accessibility_dialog_button_allow">Allow</string>
     <!-- String for the deny button in accessibility permission dialog. [CHAR LIMIT=10] -->
     <string name="accessibility_dialog_button_deny">Deny</string>
+    <!-- String for the uninstall button in accessibility permission dialog. -->
+    <string name="accessibility_dialog_button_uninstall">Uninstall</string>
+    <!-- Warning shown when user input has been blocked due to another app overlaying screen
+         content. Since we don't know what the app is showing on top of the input target, we
+         can't verify user consent. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_dialog_touch_filtered_warning">An app is obscuring the permission
+        request so your response cannot be verified.</string>
 
     <!-- Title for accessibility select shortcut menu dialog. [CHAR LIMIT=100] -->
     <string name="accessibility_select_shortcut_menu_title">Tap a feature to start using it:</string>
@@ -4831,17 +4745,20 @@
 
     <!-- Title of Color Inversion feature shown in the warning dialog about the accessibility
     shortcut. -->
-    <string name="color_inversion_feature_name">Color Inversion</string>
+    <string name="color_inversion_feature_name">Color inversion</string>
 
     <!-- Title of Color Correction feature, which is mostly used to help users who are colorblind,
      shown in the warning dialog about the accessibility shortcut. -->
-    <string name="color_correction_feature_name">Color Correction</string>
+    <string name="color_correction_feature_name">Color correction</string>
 
     <!-- Title of One Handed Mode feature, shown in the system gestures of the accessibility shortcut. [CHAR LIMIT=none] -->
     <string name="one_handed_mode_feature_name">One-Handed mode</string>
 
     <!-- Title of Reduce Brightness feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
     <string name="reduce_bright_colors_feature_name">Extra dim</string>
+
+    <!-- Title of hearing aids feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
+    <string name="hearing_aids_feature_name">Hearing devices</string>
 
     <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
@@ -4850,8 +4767,7 @@
     <string name="accessibility_shortcut_disabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned off.</string>
 
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
-    <string name="accessibility_shortcut_spoken_feedback">Press and hold both volume keys for three seconds to use
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g></string>
+    <string name="accessibility_shortcut_spoken_feedback">Release the volume keys. To turn on <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>, press and hold both volume keys again for 3 seconds.</string>
 
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
     <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the accessibility button:</string>
@@ -5139,6 +5055,14 @@
     <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
     <string name="immersive_cling_positive">Got it</string>
 
+    <!-- Text on a toast shown after the system rotates the screen for camera app
+         compatibility. [CHAR LIMIT=NONE] -->
+    <string name="display_rotation_camera_compat_toast_after_rotation">Rotate for a better view</string>
+
+    <!-- Text on a toast shown when a camera view is started within the app that may not be able
+         to display the camera preview correctly while in multi-window. [CHAR LIMIT=NONE] -->
+    <string name="display_rotation_camera_compat_toast_in_multi_window">Open <xliff:g id="name" example="MyApp">%s</xliff:g> in full screen for a better view</string>
+
     <!-- Label for button to confirm chosen date or time [CHAR LIMIT=30] -->
     <string name="done_label">Done</string>
     <!--
@@ -5173,6 +5097,20 @@
     <string name="managed_profile_label_badge">Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
     <string name="managed_profile_label_badge_2">2nd Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
     <string name="managed_profile_label_badge_3">3rd Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+
+    <!--
+        Used to wrap a label for content description for a Clone profile, e.g. "Clone Messenger"
+        instead of Messenger when the Messenger app is cloned.
+        [CHAR LIMIT=20]
+    -->
+    <string name="clone_profile_label_badge">Clone <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
+
+    <!--
+        Used to wrap a label for content description for a Private profile, e.g. "Private Messenger"
+        instead of Messenger when the Messenger app is installed in Private Profile.
+        [CHAR LIMIT=20]
+    -->
+    <string name="private_profile_label_badge">Private <xliff:g id="label" example="Messenger">%1$s</xliff:g></string>
 
     <!-- DO NOT TRANSLATE -->
     <string name="time_placeholder">--</string>
@@ -5314,6 +5252,13 @@
     <!-- Zen mode - name of default automatic calendar time-based rule that is triggered every night (when sleeping). [CHAR LIMIT=40] -->
     <string name="zen_mode_default_every_night_name">Sleeping</string>
 
+    <!-- Zen mode - Trigger description of the rule, indicating which app owns it. [CHAR_LIMIT=100] -->
+    <string name="zen_mode_implicit_trigger_description">Managed by <xliff:g id="app_name">%1$s</xliff:g></string>
+    <!-- Zen mode - Condition summary when a rule is activated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
+    <string name="zen_mode_implicit_activated">On</string>
+    <!-- Zen mode - Condition summary when a rule is deactivated due to a call to setInterruptionFilter(). [CHAR_LIMIT=NONE] -->
+    <string name="zen_mode_implicit_deactivated">Off</string>
+
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by"><xliff:g id="third_party">%1$s</xliff:g> is muting some sounds</string>
 
@@ -5423,6 +5368,11 @@
     <string name="language_picker_section_suggested">Suggested</string>
     <!-- "List section subheader for the language picker, containing a list of suggested regions available for that language [CHAR LIMIT=30] -->
     <string name="language_picker_regions_section_suggested">Suggested</string>
+
+    <!-- List section subheader for the language picker, containing a list of suggested languages determined by the default region [CHAR LIMIT=30] -->
+    <string name="language_picker_section_suggested_bilingual">Suggested languages</string>
+    <!-- List section subheader for the language picker, containing a list of suggested regions determined by the default region [CHAR LIMIT=30] -->
+    <string name="region_picker_section_suggested_bilingual">Suggested regions</string>
     <!-- List section subheader for the language picker, containing a list of all languages available [CHAR LIMIT=30] -->
     <string name="language_picker_section_all">All languages</string>
     <!-- List section subheader for the region picker, containing a list of all regions supported for the selected language.
@@ -5444,11 +5394,11 @@
     <string name="app_suspended_unsuspend_message">Unpause app</string>
 
     <!-- Title of a dialog. This text is confirming that the user wants to turn on access to their work apps, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=30] -->
-    <string name="work_mode_off_title">Turn on work apps?</string>
-    <!-- Text in a dialog. This text is confirming that the user wants to turn on access to their work apps and notifications, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_off_message">Get access to your work apps and notifications</string>
-    <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_turn_on">Turn on</string>
+    <string name="work_mode_off_title">Unpause work apps?</string>
+    <!-- Title for button to unpause on work profile. [CHAR LIMIT=NONE] -->
+    <string name="work_mode_turn_on">Unpause</string>
+    <!-- Title for button to launch the personal safety app to make an emergency call    -->
+    <string name="work_mode_emergency_call_button">Emergency</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>
@@ -5460,7 +5410,7 @@
     <!-- Title of the dialog shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
     <!-- Title of the dialog shown when the permissioncontroller is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
-    <string name="app_streaming_blocked_title_for_permission_dialog">Permission needed</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog">Permission request suppressed</string>
     <!-- Title of the dialog shown when the camera permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_title_for_camera_dialog">Camera unavailable</string>
     <!-- Title of the dialog shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
@@ -5481,11 +5431,17 @@
     <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
-    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your Android TV device first.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your tablet first.</string>
+    <!-- Message shown when a runtime permission request is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message_for_permission_request" product="default">This app is requesting additional permissions, but permissions can’t be granted in a streaming session. Grant the permission on your phone first.</string>
+    <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv">This app is requesting additional security. Try on your Android TV device instead.</string>
-    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet">This app is requesting additional security. Try on your tablet instead.</string>
-    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default">This app is requesting additional security. Try on your phone instead.</string>
     <!-- Message shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your Android TV device instead.</string>
@@ -5495,9 +5451,12 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your phone instead.</string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
-    <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>
+    <string name="deprecated_target_sdk_message">This app was built for an older version of Android. It might not work properly and doesn\'t include the latest security and privacy protections. Check for an update, or contact the app\'s developer.</string>
     <!-- Title for button to see application detail in app store which it came from - it may allow user to update to newer version. [CHAR LIMIT=50] -->
     <string name="deprecated_target_sdk_app_store">Check for update</string>
+
+    <!-- Message displayed in dialog when app is 32 bit on a 64 bit system. [CHAR LIMIT=NONE] -->
+    <string name="deprecated_abi_message">This app isn\'t compatible with the latest version of Android. Check for an update or contact the app\'s developer.</string>
 
     <!-- Notification title shown when new SMS/MMS is received while the device is locked [CHAR LIMIT=NONE] -->
     <string name="new_sms_notification_title">You have new messages</string>
@@ -5631,7 +5590,7 @@
     <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
          in an autofill service, and the service knows what the activity represents, and it represents 3 types of
          data (for example, username, password and credit card info) [CHAR LIMIT=NONE] -->
-    <string name="autofill_update_title_with_3types">Update these items in <b><xliff:g id="label" example="MyPass">%4$s</xliff:g></b>: <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g> ?</string>
+    <string name="autofill_update_title_with_3types">Update these items in <b><xliff:g id="label" example="MyPass">%4$s</xliff:g></b>: <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g>?</string>
 
     <!-- Label for the autofill save button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_yes">Save</string>
@@ -5735,32 +5694,6 @@
     <!-- Title for the harmful app warning dialog. [CHAR LIMIT=40] -->
     <string name="harmful_app_warning_title">Harmful app detected</string>
 
-    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=NONE] -->
-    <string name="log_access_confirmation_title">Allow <xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> to access all device logs?</string>
-    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=40] -->
-    <string name="log_access_confirmation_allow">Allow one-time access</string>
-    <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
-    <string name="log_access_confirmation_deny">Don\u2019t allow</string>
-
-    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body" product="default">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.
-    </string>
-
-    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body" product="tv">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.\n\nLearn more at g.co/android/devicelogs.
-    </string>
-
-    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
-    <string name="log_access_confirmation_learn_more" product="default" translatable="false">&lt;a href="https://support.google.com/android?p=system_logs#topic=7313011"&gt;Learn more&lt;/a&gt;</string>
-
-    <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
-    <string name="log_access_confirmation_learn_more" product="tv" translatable="false"></string>
-
-    <!-- Privacy notice do not show [CHAR LIMIT=20] -->
-    <string name="log_access_do_not_show_again">Don\u2019t show again</string>
-
     <!-- Text describing a permission request for one app to show another app's
          slices [CHAR LIMIT=NONE] -->
     <string name="slices_permission_request"><xliff:g id="app" example="Example App">%1$s</xliff:g> wants to show <xliff:g id="app_2" example="Other Example App">%2$s</xliff:g> slices</string>
@@ -5838,9 +5771,9 @@
     <!-- The user visible name of the notification channel for the routine mode battery saver fyi notification [CHAR_LIMIT=80]-->
     <string name="dynamic_mode_notification_channel_name">Routine Mode info notification</string>
     <!-- Title of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
-    <string name="dynamic_mode_notification_title">Battery may run out before usual charge</string>
+    <string name="dynamic_mode_notification_title">Battery Saver turned on</string>
     <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
-    <string name="dynamic_mode_notification_summary">Battery Saver activated to extend battery life</string>
+    <string name="dynamic_mode_notification_summary">Reducing battery usage to extend battery life</string>
 
     <!-- Battery saver strings -->
     <!-- The user visible name of the notification channel for battery saver notifications [CHAR_LIMIT=80] -->
@@ -6007,24 +5940,39 @@
     <string name="resolver_cant_access_personal_apps_explanation">This content can\u2019t be opened with personal apps</string>
 
     <!-- Error message. This text lets the user know that they need to turn on work apps in order to share or open content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
-    <string name="resolver_turn_on_work_apps">Work profile is paused</string>
-    <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
-    <string name="resolver_switch_on_work">Tap to turn on</string>
+    <string name="resolver_turn_on_work_apps">Work apps are paused</string>
+    <!-- Button text. This button unpauses a user's work apps and data. [CHAR LIMIT=NONE] -->
+    <string name="resolver_switch_on_work">Unpause</string>
 
     <!-- Error message. This text lets the user know that their current work apps don't support the specific content. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_work_apps_available">No work apps</string>
 
     <!-- Error message. This text lets the user know that their current personal apps don't support the specific content. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_personal_apps_available">No personal apps</string>
-
+    <!-- Dialog title. User must choose to open content in a cross-profile app or cancel. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_open_work">Open work <xliff:g id="app" example="YouTube">%s</xliff:g>?</string>
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
-    <string name="miniresolver_open_in_personal">Open <xliff:g id="app" example="YouTube">%s</xliff:g> in your personal profile?</string>
+    <string name="miniresolver_open_in_personal">Open in personal <xliff:g id="app" example="YouTube">%s</xliff:g>?</string>
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
-    <string name="miniresolver_open_in_work">Open <xliff:g id="app" example="YouTube">%s</xliff:g> in your work profile?</string>
+    <string name="miniresolver_open_in_work">Open in work <xliff:g id="app" example="YouTube">%s</xliff:g>?</string>
+    <!-- Dialog title. User must place the phone call in the other profile, or cancel. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_call_in_work">Call from work app?</string>
+    <!-- Dialog title. User much choose between opening content in a cross-profile app or cancelling. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_switch_to_work">Switch to work app?</string>
+    <!-- Dialog text.  Shown when the user is unable to make a phone call from a personal app due to restrictions set
+         by their organization, and so must switch to a work app or cancel. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_call_information">Your organization only allows you to make calls from work apps</string>
+    <!-- Dialog text.  Shown when the user is unable to send a text message from a personal app due to restrictions set
+         by their organization, and so must switch to a work app or cancel. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_sms_information">Your organization only allows you to send messages from work apps</string>
     <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_personal_browser">Use personal browser</string>
     <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_work_browser">Use work browser</string>
+    <!-- Button option. Action to place a phone call. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_call">Call</string>
+    <!-- Button option. Action to open an app in the work profile. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_switch">Switch</string>
 
     <!-- Icc depersonalization related strings -->
     <!-- Label text for PIN entry widget on SIM Network Depersonalization panel [CHAR LIMIT=none] -->
@@ -6328,7 +6276,91 @@ ul.</string>
     <string name="vdm_camera_access_denied" product="tablet">Can’t access the tablet’s camera from your <xliff:g id="device" example="Chromebook">%1$s</xliff:g></string>
     <!-- Error message indicating the user cannot access secure content when running on a virtual device. [CHAR LIMIT=NONE] -->
     <string name="vdm_secure_window">This can’t be accessed while streaming. Try on your phone instead.</string>
+    <!-- Error message indicating the user cannot view picture-in-picture when running on a virtual device. [CHAR LIMIT=NONE] -->
+    <string name="vdm_pip_blocked">Can’t view picture-in-picture while streaming</string>
 
     <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
     <string name="system_locale_title">System default</string>
+
+    <!-- Display content to tell the user the sim card name and number-->
+    <string name="default_card_name">CARD <xliff:g id="cardNumber" example="1">%d</xliff:g></string>
+
+    <!-- Strings for CompanionDeviceManager -->
+    <!-- Title of Watch profile permission, which allows a companion app to manage watches. [CHAR LIMIT=NONE] -->
+    <string name="permlab_companionProfileWatch">Companion Watch profile permission to manage watches</string>
+    <!-- Description of Watch profile permission, which allows a companion app to manage watches. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_companionProfileWatch">Allows a companion app to manage watches.</string>
+    <!-- Title of observing device presence permission, which allows a companion app to observe the presence of the associated devices. [CHAR LIMIT=NONE] -->
+    <string name="permlab_observeCompanionDevicePresence">Observe companion device presence</string>
+    <!-- Description of observing device presence permission, which allows a companion app to observe the presence of the associated devices. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_observeCompanionDevicePresence">Allows a companion app to observe companion device presence when the devices are nearby or far-away.</string>
+    <!-- Title of delivering companion messages permission, which allows a companion app to deliver messages to other devices. [CHAR LIMIT=NONE] -->
+    <string name="permlab_deliverCompanionMessages">Deliver companion messages</string>
+    <!-- Description of delivering companion messages permission, which allows a companion app to deliver messages to other devices. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_deliverCompanionMessages">Allows a companion app to deliver companion messages to other devices.</string>
+    <!-- Title of start foreground services from background permission [CHAR LIMIT=NONE] -->
+    <string name="permlab_startForegroundServicesFromBackground">Start foreground services from background</string>
+    <!-- Description of start foreground services from background permission [CHAR LIMIT=NONE] -->
+    <string name="permdesc_startForegroundServicesFromBackground">Allows a companion app to start foreground services from background.</string>
+    <!-- Toast message that is shown when the user unmutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
+    <string name="mic_access_on_toast">Microphone is available</string>
+    <!-- Toast message that is shown when the user mutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
+    <string name="mic_access_off_toast">Microphone is blocked</string>
+
+    <!-- Title of connected display unavailable notifications. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_unavailable_notification_title">Can\'t mirror to display</string>
+    <!-- Content of connected display unavailable notification. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_unavailable_notification_content">Use a different cable and try again</string>
+    <!-- Content of connected display unavailable due to thermals notification. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_thermally_unavailable_notification_content">Your device is too warm and can\'t mirror to the display until it cools down</string>
+
+    <!-- Name of concurrent display notifications. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_name">Dual screen</string>
+    <!-- Title of concurrent display active notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_active_title">Dual screen is on</string>
+    <!-- Content of concurrent display active notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_active_content"><xliff:g id="app_name" example="Camera app">%1$s</xliff:g> is using both displays to show content</string>
+    <!-- Title of concurrent display thermal notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_thermal_title">Device is too warm</string>
+    <!-- Content of concurrent display thermal notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_thermal_content">Dual Screen is unavailable because your phone is getting too warm</string>
+    <!-- Title of concurrent display power saver notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_power_save_title">Dual Screen is unavailable</string>
+    <!-- Content of concurrent display power saver notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_power_save_content">Dual Screen is unavailable because Battery Saver is on. You can turn this off in Settings.</string>
+    <!-- Text of power saver notification settings button. [CHAR LIMIT=NONE] -->
+    <string name="device_state_notification_settings_button">Go to Settings</string>
+    <!-- Text of device state notification turn off button. [CHAR LIMIT=NONE] -->
+    <string name="device_state_notification_turn_off_button">Turn off</string>
+
+    <!-- Notification title when a keyboard has been configured [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="keyboard_layout_notification_selected_title"><xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g> configured</string>
+    <!-- Notification message shown when one layout was configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_one_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when two layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_two_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="German">%2$s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when three layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_three_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="German">%2$s</xliff:g>, <xliff:g id="layout_3" example="French">%3$s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when more than three layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_more_than_three_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="English (US)">%2$s</xliff:g>, <xliff:g id="layout_3" example="French">%3$s</xliff:g>\u2026 Tap to change.</string>
+    <!-- Notification title when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="keyboard_layout_notification_multiple_selected_title">Physical keyboards configured</string>
+    <!-- Notification message when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_multiple_selected_message">Tap to view keyboards</string>
+
+    <!-- Private profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_private">Private</string>
+    <!-- Clone profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_clone">Clone</string>
+    <!-- Work profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work">Work</string>
+    <!-- 2nd Work profile label on a screen in case a device has more than one work profiles. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work_2">Work 2</string>
+    <!-- 3rd Work profile label on a screen in case a device has more than two work profiles. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work_3">Work 3</string>
+    <!-- Test profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20]  -->
+    <string name="profile_label_test">Test</string>
+    <!-- Communal profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_communal">Communal</string>
+
 </resources>

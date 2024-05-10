@@ -20,7 +20,6 @@ import android.app.ActivityThread;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.security.keymint.ErrorCode;
 import android.security.GateKeeper;
-import android.security.KeyStore;
 import android.security.KeyStoreException;
 import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
@@ -40,7 +39,6 @@ import java.security.InvalidKeyException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Assorted utility methods for implementing crypto operations on top of KeyStore.
@@ -50,7 +48,6 @@ import java.util.Random;
 abstract class KeyStoreCryptoOperationUtils {
 
     private static volatile SecureRandom sRng;
-    private static final Random sRandom = new Random();
 
     private KeyStoreCryptoOperationUtils() {}
 
@@ -133,15 +130,10 @@ abstract class KeyStoreCryptoOperationUtils {
 
     /**
      * Returns the exception to be thrown by the {@code Cipher.init} method of the crypto operation
-     * in response to {@code KeyStore.begin} operation or {@code null} if the {@code init} method
-     * should succeed.
+     * in response to a failed {code IKeystoreSecurityLevel#createOperation()}.
      */
     public static GeneralSecurityException getExceptionForCipherInit(
             AndroidKeyStoreKey key, KeyStoreException e) {
-        if (e.getErrorCode() == KeyStore.NO_ERROR) {
-            return null;
-        }
-
         // Cipher-specific cases
         switch (e.getErrorCode()) {
             case KeymasterDefs.KM_ERROR_INVALID_NONCE:
@@ -213,7 +205,7 @@ abstract class KeyStoreCryptoOperationUtils {
         } else {
             // Keystore won't give us an operation challenge if the operation doesn't
             // need user authorization. So we make our own.
-            return sRandom.nextLong();
+            return getRng().nextLong();
         }
     }
 }

@@ -16,10 +16,10 @@
 
 #include "Link.h"
 
-#include <android-base/file.h>
-
-#include "AppInfo.h"
+#include "Diagnostics.h"
 #include "LoadedApk.h"
+#include "android-base/file.h"
+#include "android-base/stringprintf.h"
 #include "test/Test.h"
 
 using testing::Eq;
@@ -86,7 +86,8 @@ TEST_F(LinkTest, KeepRawXmlStrings) {
   // Check that the raw string index has been set to the correct string pool entry
   int32_t raw_index = tree.getAttributeValueStringID(0);
   ASSERT_THAT(raw_index, Ne(-1));
-  EXPECT_THAT(util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)), Eq("007"));
+  EXPECT_THAT(android::util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)),
+              Eq("007"));
 }
 
 TEST_F(LinkTest, NoCompressAssets) {
@@ -409,7 +410,7 @@ struct SourceXML {
 
 static void BuildApk(const std::vector<SourceXML>& source_files, const std::string& apk_path,
                      LinkCommandBuilder&& link_args, CommandTestFixture* fixture,
-                     IDiagnostics* diag) {
+                     android::IDiagnostics* diag) {
   TemporaryDir res_dir;
   TemporaryDir compiled_res_dir;
   for (auto& source_file : source_files) {
@@ -422,7 +423,7 @@ static void BuildApk(const std::vector<SourceXML>& source_files, const std::stri
 
 static void BuildSDK(const std::vector<SourceXML>& source_files, const std::string& apk_path,
                      const std::string& java_root_path, CommandTestFixture* fixture,
-                     IDiagnostics* diag) {
+                     android::IDiagnostics* diag) {
   auto android_manifest = ManifestBuilder(fixture).SetPackageName("android").Build();
 
   auto android_link_args = LinkCommandBuilder(fixture)
@@ -434,13 +435,13 @@ static void BuildSDK(const std::vector<SourceXML>& source_files, const std::stri
 }
 
 static void BuildNonFinalizedSDK(const std::string& apk_path, const std::string& java_path,
-                                 CommandTestFixture* fixture, IDiagnostics* diag) {
+                                 CommandTestFixture* fixture, android::IDiagnostics* diag) {
   const std::string android_values =
       R"(<resources>
           <public type="attr" name="finalized_res" id="0x01010001"/>
 
-          <!-- S staged attributes (support staged resources in the same type id) -->
-          <staging-public-group type="attr" first-id="0x01010050">
+          <!-- S staged attributes (Not support staged resources in the same type id) -->
+          <staging-public-group type="attr" first-id="0x01fc0050">
             <public name="staged_s_res" />
           </staging-public-group>
 
@@ -470,7 +471,7 @@ static void BuildNonFinalizedSDK(const std::string& apk_path, const std::string&
 }
 
 static void BuildFinalizedSDK(const std::string& apk_path, const std::string& java_path,
-                              CommandTestFixture* fixture, IDiagnostics* diag) {
+                              CommandTestFixture* fixture, android::IDiagnostics* diag) {
   const std::string android_values =
       R"(<resources>
           <public type="attr" name="finalized_res" id="0x01010001"/>
@@ -478,8 +479,8 @@ static void BuildFinalizedSDK(const std::string& apk_path, const std::string& ja
           <public type="attr" name="staged_s2_res" id="0x01010003"/>
           <public type="string" name="staged_s_string" id="0x01020000"/>
 
-          <!-- S staged attributes (support staged resources in the same type id) -->
-          <staging-public-group-final type="attr" first-id="0x01010050">
+          <!-- S staged attributes (Not support staged resources in the same type id) -->
+          <staging-public-group-final type="attr" first-id="0x01fc0050">
             <public name="staged_s_res" />
           </staging-public-group-final>
 
@@ -510,7 +511,7 @@ static void BuildFinalizedSDK(const std::string& apk_path, const std::string& ja
 
 static void BuildAppAgainstSDK(const std::string& apk_path, const std::string& java_path,
                                const std::string& sdk_path, CommandTestFixture* fixture,
-                               IDiagnostics* diag) {
+                               android::IDiagnostics* diag) {
   const std::string app_values =
       R"(<resources xmlns:android="http://schemas.android.com/apk/res/android">
            <attr name="bar" />
@@ -549,7 +550,7 @@ TEST_F(LinkTest, StagedAndroidApi) {
   EXPECT_THAT(android_r_contents, HasSubstr("public static final int finalized_res=0x01010001;"));
   EXPECT_THAT(
       android_r_contents,
-      HasSubstr("public static final int staged_s_res; static { staged_s_res=0x01010050; }"));
+      HasSubstr("public static final int staged_s_res; static { staged_s_res=0x01fc0050; }"));
   EXPECT_THAT(
       android_r_contents,
       HasSubstr("public static final int staged_s_string; static { staged_s_string=0x01fd0080; }"));
@@ -573,7 +574,7 @@ TEST_F(LinkTest, StagedAndroidApi) {
   android::AssetManager2 am;
   auto android_asset = android::ApkAssets::Load(android_apk);
   ASSERT_THAT(android_asset, NotNull());
-  ASSERT_TRUE(am.SetApkAssets({android_asset.get()}));
+  ASSERT_TRUE(am.SetApkAssets({android_asset}));
 
   auto result = am.GetResourceId("android:attr/finalized_res");
   ASSERT_TRUE(result.has_value());
@@ -581,7 +582,7 @@ TEST_F(LinkTest, StagedAndroidApi) {
 
   result = am.GetResourceId("android:attr/staged_s_res");
   ASSERT_TRUE(result.has_value());
-  EXPECT_THAT(*result, Eq(0x01010050));
+  EXPECT_THAT(*result, Eq(0x01fc0050));
 
   result = am.GetResourceId("android:string/staged_s_string");
   ASSERT_TRUE(result.has_value());
@@ -629,7 +630,7 @@ TEST_F(LinkTest, FinalizedAndroidApi) {
   auto app_against_non_final = android::ApkAssets::Load(app_apk);
   ASSERT_THAT(android_asset, NotNull());
   ASSERT_THAT(app_against_non_final, NotNull());
-  ASSERT_TRUE(am.SetApkAssets({android_asset.get(), app_against_non_final.get()}));
+  ASSERT_TRUE(am.SetApkAssets({android_asset, app_against_non_final}));
 
   auto result = am.GetResourceId("android:attr/finalized_res");
   ASSERT_TRUE(result.has_value());
@@ -665,7 +666,7 @@ TEST_F(LinkTest, FinalizedAndroidApi) {
 
   auto app_against_final = android::ApkAssets::Load(app_apk_respin);
   ASSERT_THAT(app_against_final, NotNull());
-  ASSERT_TRUE(am.SetApkAssets({android_asset.get(), app_against_final.get()}));
+  ASSERT_TRUE(am.SetApkAssets({android_asset, app_against_final}));
 
   {
     auto style = am.GetBag(0x7f020000);
@@ -781,6 +782,431 @@ TEST_F(LinkTest, MacroSubstitution) {
 
   EXPECT_THAT(xml_attrs[1].compiled_value.get(), IsNull());
   EXPECT_THAT(xml_attrs[1].value, Eq("Hello World!"));
+}
+
+TEST_F(LinkTest, LocaleConfigVerification) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+
+  // Normal case
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/locales_config.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string localeconfig_manifest = GetTestPath("localeconfig_manifest.xml");
+  WriteFile(localeconfig_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/locales_config">
+      </application>
+    </manifest>)"));
+
+  const std::string out_apk = GetTestPath("out.apk");
+
+  auto link_args = LinkCommandBuilder(this)
+                       .SetManifestFile(localeconfig_manifest)
+                       .AddCompiledResDir(compiled_files_dir, &diag)
+                       .Build(out_apk);
+  ASSERT_TRUE(Link(link_args, &diag));
+
+  // Empty locale list
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/empty_locales_config.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string empty_localeconfig_manifest = GetTestPath("empty_localeconfig_manifest.xml");
+  WriteFile(empty_localeconfig_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/empty_locales_config">
+      </application>
+    </manifest>)"));
+
+  auto link1_args = LinkCommandBuilder(this)
+                        .SetManifestFile(empty_localeconfig_manifest)
+                        .AddCompiledResDir(compiled_files_dir, &diag)
+                        .Build(out_apk);
+  ASSERT_TRUE(Link(link1_args, &diag));
+}
+
+TEST_F(LinkTest, LocaleConfigVerificationExternalSymbol) {
+  StdErrDiagnostics diag;
+  const std::string base_files_dir = GetTestPath("base");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/locales_config.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          base_files_dir, &diag));
+  const std::string base_apk = GetTestPath("base.apk");
+  std::vector<std::string> link_args = {
+      "--manifest",
+      GetDefaultManifest("com.aapt2.app"),
+      "-o",
+      base_apk,
+  };
+  ASSERT_TRUE(Link(link_args, base_files_dir, &diag));
+
+  const std::string localeconfig_manifest = GetTestPath("localeconfig_manifest.xml");
+  const std::string out_apk = GetTestPath("out.apk");
+  WriteFile(localeconfig_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/locales_config">
+      </application>
+    </manifest>)"));
+  link_args = LinkCommandBuilder(this)
+                  .SetManifestFile(localeconfig_manifest)
+                  .AddParameter("-I", base_apk)
+                  .Build(out_apk);
+  ASSERT_TRUE(Link(link_args, &diag));
+}
+
+TEST_F(LinkTest, LocaleConfigWrongTag) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+
+  // Invalid element: locale1-config
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/wrong_locale_config.xml"), R"(
+    <locale1-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale1-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string locale1config_manifest = GetTestPath("locale1config_manifest.xml");
+  WriteFile(locale1config_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/wrong_locale_config">
+      </application>
+    </manifest>)"));
+
+  const std::string out_apk = GetTestPath("out.apk");
+  auto link_args = LinkCommandBuilder(this)
+                       .SetManifestFile(locale1config_manifest)
+                       .AddCompiledResDir(compiled_files_dir, &diag)
+                       .Build(out_apk);
+  ASSERT_FALSE(Link(link_args, &diag));
+
+  // Invalid element: locale1
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/wrong_locale.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale1 android:name="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string locale1_manifest = GetTestPath("locale1_manifest.xml");
+  WriteFile(locale1_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/wrong_locale">
+      </application>
+    </manifest>)"));
+
+  auto link1_args = LinkCommandBuilder(this)
+                        .SetManifestFile(locale1_manifest)
+                        .AddCompiledResDir(compiled_files_dir, &diag)
+                        .Build(out_apk);
+  ASSERT_FALSE(Link(link1_args, &diag));
+
+  // Invalid attribute: android:name1
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/wrong_attribute.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name1="en-US"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string wrong_attribute_manifest = GetTestPath("wrong_attribute_manifest.xml");
+  WriteFile(wrong_attribute_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/wrong_attribute">
+      </application>
+    </manifest>)"));
+
+  auto link2_args = LinkCommandBuilder(this)
+                        .SetManifestFile(wrong_attribute_manifest)
+                        .AddCompiledResDir(compiled_files_dir, &diag)
+                        .Build(out_apk);
+  ASSERT_FALSE(Link(link2_args, &diag));
+}
+
+TEST_F(LinkTest, LocaleConfigWrongLocaleFormat) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+
+  // Invalid locale: en-U
+  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/wrong_locale.xml"), R"(
+    <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+      <locale android:name="en-U"/>
+      <locale android:name="pt"/>
+      <locale android:name="es-419"/>
+      <locale android:name="zh-Hans-SG"/>
+    </locale-config>)",
+                          compiled_files_dir, &diag));
+
+  const std::string wrong_locale_manifest = GetTestPath("wrong_locale_manifest.xml");
+  WriteFile(wrong_locale_manifest, android::base::StringPrintf(R"(
+    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.aapt2.app">
+
+      <application
+        android:localeConfig="@xml/wrong_locale">
+      </application>
+    </manifest>)"));
+
+  const std::string out_apk = GetTestPath("out.apk");
+  auto link_args = LinkCommandBuilder(this)
+                       .SetManifestFile(wrong_locale_manifest)
+                       .AddCompiledResDir(compiled_files_dir, &diag)
+                       .Build(out_apk);
+  ASSERT_FALSE(Link(link_args, &diag));
+}
+
+static void BuildSDKWithFeatureFlagAttr(const std::string& apk_path, const std::string& java_path,
+                                        CommandTestFixture* fixture, android::IDiagnostics* diag) {
+  const std::string android_values =
+      R"(<resources>
+          <staging-public-group type="attr" first-id="0x01fe0063">
+            <public name="featureFlag" />
+          </staging-public-group>
+          <attr name="featureFlag" format="string" />
+         </resources>)";
+
+  SourceXML source_xml{.res_file_path = "/res/values/values.xml", .file_contents = android_values};
+  BuildSDK({source_xml}, apk_path, java_path, fixture, diag);
+}
+
+TEST_F(LinkTest, FeatureFlagDisabled_SdkAtMostUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_UPSIDE_DOWN_CAKE);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  const std::string app_java = GetTestPath("app-java");
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--java", app_java)
+                           .AddParameter("--feature-flags", "flag=false");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be removed if flag is disabled
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, IsNull());
+
+  // Code for the permission should be generated even if the element is removed
+  const std::string manifest_java = app_java + "/com/example/app/Manifest.java";
+  std::string manifest_java_contents;
+  ASSERT_TRUE(android::base::ReadFileToString(manifest_java, &manifest_java_contents));
+  EXPECT_THAT(manifest_java_contents, HasSubstr(" public static final String FOO=\"FOO\";"));
+}
+
+TEST_F(LinkTest, FeatureFlagEnabled_SdkAtMostUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_UPSIDE_DOWN_CAKE);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=true");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be kept if flag is enabled
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, NotNull());
+}
+
+TEST_F(LinkTest, FeatureFlagWithNoValue_SdkAtMostUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_UPSIDE_DOWN_CAKE);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=");
+
+  // Flags must have values if <= UDC
+  const std::string app_apk = GetTestPath("app.apk");
+  ASSERT_FALSE(Link(app_link_args.Build(app_apk), &diag));
+}
+
+TEST_F(LinkTest, FeatureFlagDisabled_SdkAfterUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_CUR_DEVELOPMENT);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=false");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be kept if > UDC, regardless of flag value
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, NotNull());
+}
+
+TEST_F(LinkTest, FeatureFlagEnabled_SdkAfterUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_CUR_DEVELOPMENT);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=true");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be kept if > UDC, regardless of flag value
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, NotNull());
+}
+
+TEST_F(LinkTest, FeatureFlagWithNoValue_SdkAfterUDC) {
+  StdErrDiagnostics diag;
+  const std::string android_apk = GetTestPath("android.apk");
+  const std::string android_java = GetTestPath("android-java");
+  BuildSDKWithFeatureFlagAttr(android_apk, android_java, this, &diag);
+
+  const std::string manifest_contents = android::base::StringPrintf(
+      R"(<uses-sdk android:minSdkVersion="%d" />"
+          <permission android:name="FOO" android:featureFlag="flag" />)",
+      SDK_CUR_DEVELOPMENT);
+  auto app_manifest = ManifestBuilder(this)
+                          .SetPackageName("com.example.app")
+                          .AddContents(manifest_contents)
+                          .Build();
+
+  auto app_link_args = LinkCommandBuilder(this)
+                           .SetManifestFile(app_manifest)
+                           .AddParameter("-I", android_apk)
+                           .AddParameter("--feature-flags", "flag=");
+
+  const std::string app_apk = GetTestPath("app.apk");
+  BuildApk({}, app_apk, std::move(app_link_args), this, &diag);
+
+  // Permission element should be kept if > UDC, regardless of flag value
+  auto apk = LoadedApk::LoadApkFromPath(app_apk, &diag);
+  ASSERT_THAT(apk, NotNull());
+  auto apk_manifest = apk->GetManifest();
+  ASSERT_THAT(apk_manifest, NotNull());
+  auto root = apk_manifest->root.get();
+  ASSERT_THAT(root, NotNull());
+  auto maybe_removed = root->FindChild({}, "permission");
+  ASSERT_THAT(maybe_removed, NotNull());
 }
 
 }  // namespace aapt

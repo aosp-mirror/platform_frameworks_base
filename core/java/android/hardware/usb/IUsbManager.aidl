@@ -18,6 +18,7 @@ package android.hardware.usb;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.hardware.usb.IDisplayPortAltModeInfoListener;
 import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
@@ -79,8 +80,21 @@ interface IUsbManager
     /* Returns true if the caller has permission to access the device. */
     boolean hasDevicePermission(in UsbDevice device, String packageName);
 
+    /* Returns true if the given package/pid/uid has permission to access the device. */
+    @EnforcePermission("MANAGE_USB")
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USB)")
+    boolean hasDevicePermissionWithIdentity(in UsbDevice device, String packageName,
+            int pid, int uid);
+
     /* Returns true if the caller has permission to access the accessory. */
     boolean hasAccessoryPermission(in UsbAccessory accessory);
+
+    /* Returns true if the given pid/uid has permission to access the accessory. */
+    @EnforcePermission("MANAGE_USB")
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USB)")
+    boolean hasAccessoryPermissionWithIdentity(in UsbAccessory accessory, int pid, int uid);
 
     /* Requests permission for the given package to access the device.
      * Will display a system dialog to query the user if permission
@@ -96,9 +110,11 @@ interface IUsbManager
             in PendingIntent pi);
 
     /* Grants permission for the given UID to access the device */
+    @EnforcePermission("MANAGE_USB")
     void grantDevicePermission(in UsbDevice device, int uid);
 
     /* Grants permission for the given UID to access the accessory */
+    @EnforcePermission("MANAGE_USB")
     void grantAccessoryPermission(in UsbAccessory accessory, int uid);
 
     /* Returns true if the USB manager has default preferences or permissions for the package */
@@ -111,29 +127,36 @@ interface IUsbManager
     boolean isFunctionEnabled(String function);
 
     /* Sets the current USB function. */
+    @EnforcePermission("MANAGE_USB")
     void setCurrentFunctions(long functions, int operationId);
 
     /* Compatibility version of setCurrentFunctions(long). */
     void setCurrentFunction(String function, boolean usbDataUnlocked, int operationId);
 
     /* Gets the current USB functions. */
+    @EnforcePermission("MANAGE_USB")
     long getCurrentFunctions();
 
     /* Gets the current USB Speed. */
+    @EnforcePermission("MANAGE_USB")
     int getCurrentUsbSpeed();
 
     /* Gets the Gadget Hal Version. */
+    @EnforcePermission("MANAGE_USB")
     int getGadgetHalVersion();
 
     /* Sets the screen unlocked USB function(s), which will be set automatically
      * when the screen is unlocked.
      */
+    @EnforcePermission("MANAGE_USB")
     void setScreenUnlockedFunctions(long functions);
 
     /* Gets the current screen unlocked functions. */
+    @EnforcePermission("MANAGE_USB")
     long getScreenUnlockedFunctions();
 
     /* Resets the USB gadget. */
+    @EnforcePermission("MANAGE_USB")
     void resetUsbGadget();
 
     /* Resets the USB port. */
@@ -146,15 +169,18 @@ interface IUsbManager
     void enableUsbDataWhileDocked(in String portId, int operationId, in IUsbOperationInternal callback);
 
     /* Gets the USB Hal Version. */
+    @EnforcePermission("MANAGE_USB")
     int getUsbHalVersion();
 
     /* Get the functionfs control handle for the given function. Usb
      * descriptors will already be written, and the handle will be
      * ready to use.
      */
+    @EnforcePermission("ACCESS_MTP")
     ParcelFileDescriptor getControlFd(long function);
 
     /* Gets the list of USB ports. */
+    @EnforcePermission("MANAGE_USB")
     List<ParcelableUsbPort> getPorts();
 
     /* Gets the status of the specified USB port. */
@@ -172,5 +198,17 @@ interface IUsbManager
     void enableContaminantDetection(in String portId, boolean enable);
 
     /* Sets USB device connection handler. */
+    @EnforcePermission("MANAGE_USB")
     void setUsbDeviceConnectionHandler(in ComponentName usbDeviceConnectionHandler);
+
+    /* Registers callback for Usb events */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USB)")
+    boolean registerForDisplayPortEvents(IDisplayPortAltModeInfoListener listener);
+
+    /* Unregisters Usb event callback */
+    @JavaPassthrough(annotation=
+            "@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_USB)")
+    void unregisterForDisplayPortEvents(IDisplayPortAltModeInfoListener listener);
+
 }

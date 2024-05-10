@@ -16,10 +16,10 @@
 
 package com.android.dynsystem;
 
-import static android.os.AsyncTask.Status.FINISHED;
-import static android.os.AsyncTask.Status.PENDING;
 import static android.os.AsyncTask.Status.RUNNING;
+import static android.os.image.DynamicSystemClient.ACTION_HIDE_NOTIFICATION;
 import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE;
+import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_KEYGUARD_DISMISSED;
 import static android.os.image.DynamicSystemClient.ACTION_START_INSTALL;
 import static android.os.image.DynamicSystemClient.CAUSE_ERROR_EXCEPTION;
 import static android.os.image.DynamicSystemClient.CAUSE_ERROR_INVALID_URL;
@@ -27,6 +27,8 @@ import static android.os.image.DynamicSystemClient.CAUSE_ERROR_IO;
 import static android.os.image.DynamicSystemClient.CAUSE_INSTALL_CANCELLED;
 import static android.os.image.DynamicSystemClient.CAUSE_INSTALL_COMPLETED;
 import static android.os.image.DynamicSystemClient.CAUSE_NOT_SPECIFIED;
+import static android.os.image.DynamicSystemClient.KEY_ENABLE_WHEN_COMPLETED;
+import static android.os.image.DynamicSystemClient.KEY_ONE_SHOT;
 import static android.os.image.DynamicSystemClient.STATUS_IN_PROGRESS;
 import static android.os.image.DynamicSystemClient.STATUS_IN_USE;
 import static android.os.image.DynamicSystemClient.STATUS_NOT_STARTED;
@@ -77,8 +79,6 @@ public class DynamicSystemInstallationService extends Service
 
     private static final String TAG = "DynamicSystemInstallationService";
 
-    // TODO (b/131866826): This is currently for test only. Will move this to System API.
-    static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
     static final String KEY_DSU_SLOT = "KEY_DSU_SLOT";
     static final String DEFAULT_DSU_SLOT = "dsu";
     static final String KEY_PUBKEY = "KEY_PUBKEY";
@@ -172,6 +172,8 @@ public class DynamicSystemInstallationService extends Service
 
     // This is for testing only now
     private boolean mEnableWhenCompleted;
+    private boolean mOneShot;
+    private boolean mHideNotification;
 
     private InstallationAsyncTask.Progress mInstallTaskProgress;
     private InstallationAsyncTask mInstallTask;
@@ -229,6 +231,10 @@ public class DynamicSystemInstallationService extends Service
             executeRebootToNormalCommand();
         } else if (ACTION_NOTIFY_IF_IN_USE.equals(action)) {
             executeNotifyIfInUseCommand();
+        } else if (ACTION_HIDE_NOTIFICATION.equals(action)) {
+            executeHideNotificationCommand();
+        } else if (ACTION_NOTIFY_KEYGUARD_DISMISSED.equals(action)) {
+            executeNotifyKeyguardDismissed();
         }
 
         return Service.START_NOT_STICKY;
@@ -318,6 +324,7 @@ public class DynamicSystemInstallationService extends Service
         long systemSize = intent.getLongExtra(DynamicSystemClient.KEY_SYSTEM_SIZE, 0);
         long userdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
         mEnableWhenCompleted = intent.getBooleanExtra(KEY_ENABLE_WHEN_COMPLETED, false);
+        mOneShot = intent.getBooleanExtra(KEY_ONE_SHOT, true);
         String dsuSlot = intent.getStringExtra(KEY_DSU_SLOT);
         String publicKey = intent.getStringExtra(KEY_PUBKEY);
 
@@ -384,9 +391,9 @@ public class DynamicSystemInstallationService extends Service
         boolean enabled = false;
 
         if (mInstallTask != null && mInstallTask.isCompleted()) {
-            enabled = mInstallTask.commit();
+            enabled = mInstallTask.commit(mOneShot);
         } else if (isDynamicSystemInstalled()) {
-            enabled = mDynSystem.setEnable(true, true);
+            enabled = mDynSystem.setEnable(true, mOneShot);
         } else {
             Log.e(TAG, "Trying to reboot to AOT while there is no complete installation");
             return;
@@ -412,17 +419,28 @@ public class DynamicSystemInstallationService extends Service
         mDynSystem.remove();
     }
 
+    private boolean isDsuSlotLocked() {
+        // Slot names ending with ".lock" are a customized installation.
+        // We expect the client app to provide custom UI to enter/exit DSU mode.
+        // We will ignore the ACTION_REBOOT_TO_NORMAL command and will not show
+        // notifications in this case.
+        return mDynSystem.getActiveDsuSlot().endsWith(".lock");
+    }
+
     private void executeRebootToNormalCommand() {
         if (!isInDynamicSystem()) {
             Log.e(TAG, "It's already running in normal system.");
             return;
         }
-
+        if (isDsuSlotLocked()) {
+            Log.e(TAG, "Ignore the reboot intent for a locked DSU slot");
+            return;
+        }
         if (!mDynSystem.setEnable(/* enable = */ false, /* oneShot = */ false)) {
             Log.e(TAG, "Failed to disable DynamicSystem.");
 
             // Dismiss status bar and show a toast.
-            sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+            closeSystemDialogs();
             Toast.makeText(this,
                     getString(R.string.toast_failed_to_disable_dynsystem),
                     Toast.LENGTH_LONG).show();
@@ -439,12 +457,16 @@ public class DynamicSystemInstallationService extends Service
     private void executeNotifyIfInUseCommand() {
         switch (getStatus()) {
             case STATUS_IN_USE:
-                startForeground(NOTIFICATION_ID,
-                        buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
+                if (!mHideNotification && !isDsuSlotLocked()) {
+                    startForeground(NOTIFICATION_ID,
+                            buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
+                }
                 break;
             case STATUS_READY:
-                startForeground(NOTIFICATION_ID,
-                        buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
+                if (!mHideNotification && !isDsuSlotLocked()) {
+                    startForeground(NOTIFICATION_ID,
+                            buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
+                }
                 break;
             case STATUS_IN_PROGRESS:
                 break;
@@ -452,6 +474,20 @@ public class DynamicSystemInstallationService extends Service
             default:
                 stopSelf();
         }
+    }
+
+    private void executeHideNotificationCommand() {
+        mHideNotification = true;
+        switch (getStatus()) {
+            case STATUS_IN_USE:
+            case STATUS_READY:
+                stopForeground(STOP_FOREGROUND_REMOVE);
+                break;
+        }
+    }
+
+    private void executeNotifyKeyguardDismissed() {
+        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
     }
 
     private void resetTaskAndStop() {

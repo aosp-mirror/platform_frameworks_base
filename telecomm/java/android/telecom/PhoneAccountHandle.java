@@ -70,6 +70,12 @@ public final class PhoneAccountHandle implements Parcelable {
      *           ID provided does not expose personally identifying information.  A
      *           {@link ConnectionService} should use an opaque token as the
      *           {@link PhoneAccountHandle} identifier.
+     * <p>
+     * Note: Each String field is limited to 256 characters. This check is enforced when
+     *           registering the PhoneAccount via
+     *           {@link TelecomManager#registerPhoneAccount(PhoneAccount)} and will cause an
+     *           {@link IllegalArgumentException} to be thrown if the character field limit is
+     *           over 256.
      */
     public PhoneAccountHandle(
             @NonNull ComponentName componentName,
@@ -88,6 +94,13 @@ public final class PhoneAccountHandle implements Parcelable {
      *           {@link ConnectionService} should use an opaque token as the
      *           {@link PhoneAccountHandle} identifier.
      * @param userHandle The {@link UserHandle} associated with this {@link PhoneAccountHandle}.
+     *
+     * <p>
+     * Note: Each String field is limited to 256 characters. This check is enforced when
+     *           registering the PhoneAccount via
+     *           {@link TelecomManager#registerPhoneAccount(PhoneAccount)} and will cause an
+     *           {@link IllegalArgumentException} to be thrown if the character field limit is
+     *           over 256.
      */
     public PhoneAccountHandle(
             @NonNull ComponentName componentName,

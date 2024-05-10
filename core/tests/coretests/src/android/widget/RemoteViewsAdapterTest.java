@@ -263,7 +263,7 @@ public class RemoteViewsAdapterTest {
 
         @Override
         public IServiceConnection getServiceDispatcher(
-                ServiceConnection conn, Handler handler, int flags) {
+                ServiceConnection conn, Handler handler, long flags) {
             this.conn.set(conn);
             this.handler.set(handler);
             boundCount++;
@@ -352,6 +352,23 @@ public class RemoteViewsAdapterTest {
         @Override
         public boolean isCreated() {
             return false;
+        }
+
+        @Override
+        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems() {
+            RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
+                    new RemoteViews.RemoteCollectionItems.Builder();
+            itemsBuilder.setHasStableIds(hasStableIds())
+                    .setViewTypeCount(getViewTypeCount());
+            try {
+                for (int i = 0; i < mCount; i++) {
+                    itemsBuilder.addItem(getItemId(i), getViewAt(i));
+                }
+            } catch (RemoteException e) {
+                // No-op
+            }
+
+            return itemsBuilder.build();
         }
     }
 

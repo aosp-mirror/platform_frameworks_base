@@ -266,11 +266,10 @@ public class AppDataRollbackHelper {
     }
 
     /**
-     * @return {@code true} iff. {@code userId} is locked on an FBE device.
+     * @return {@code true} iff the credential-encrypted storage for {@code userId} is locked.
      */
     @VisibleForTesting
     public boolean isUserCredentialLocked(int userId) {
-        return StorageManager.isFileEncryptedNativeOrEmulated()
-                && !StorageManager.isUserKeyUnlocked(userId);
+        return StorageManager.isFileEncrypted() && !StorageManager.isCeStorageUnlocked(userId);
     }
 }

@@ -74,17 +74,37 @@ enum : format_type_t {
   FORMAT_DIRECTORY = 3,
 };
 
-Guarded<std::unique_ptr<const ApkAssets>>& ApkAssetsFromLong(jlong ptr) {
-    return *reinterpret_cast<Guarded<std::unique_ptr<const ApkAssets>>*>(ptr);
+Guarded<AssetManager2::ApkAssetsPtr>& ApkAssetsFromLong(jlong ptr) {
+  return *reinterpret_cast<Guarded<AssetManager2::ApkAssetsPtr>*>(ptr);
 }
 
-static jlong CreateGuardedApkAssets(std::unique_ptr<const ApkAssets> assets) {
-    auto guarded_assets = new Guarded<std::unique_ptr<const ApkAssets>>(std::move(assets));
-    return reinterpret_cast<jlong>(guarded_assets);
+static jlong CreateGuardedApkAssets(AssetManager2::ApkAssetsPtr assets) {
+  auto guarded_assets = new Guarded<AssetManager2::ApkAssetsPtr>(std::move(assets));
+  return reinterpret_cast<jlong>(guarded_assets);
 }
 
-static void DeleteGuardedApkAssets(Guarded<std::unique_ptr<const ApkAssets>>& apk_assets) {
-    delete &apk_assets;
+static void DeleteGuardedApkAssets(Guarded<AssetManager2::ApkAssetsPtr>& apk_assets) {
+  apk_assets.safeDelete([&apk_assets](AssetManager2::ApkAssetsPtr* assets) {
+    if (!assets) {
+      ALOGW("ApkAssets: Double delete of native assets object %p, ignored", &apk_assets);
+    } else if (!*assets) {
+      ALOGW("ApkAssets: Empty native assets pointer in native assets object %p", &apk_assets);
+    } else {
+      // |RefBase| increments |StrongCount| for each |sp<>| instance, and |WeakCount| for
+      // both |sp<>| and |wp<>| instances. This means the actual |wp<>| instance count
+      // is |WeakCount - StrongCount|.
+      const auto useCount = (*assets)->getStrongCount();
+      const auto weakCount = (*assets)->getWeakRefs()->getWeakCount() - useCount;
+      if (useCount > 1) {
+        ALOGW("ApkAssets: Deleting an object '%s' with %d > 1 strong and %d weak references",
+              (*assets)->GetDebugName().c_str(), int(useCount), int(weakCount));
+      } else if (weakCount > 0) {
+        ALOGW("ApkAssets: Deleting an ApkAssets object '%s' with %d weak references",
+              (*assets)->GetDebugName().c_str(), int(weakCount));
+      }
+    }
+  });
+  delete &apk_assets;
 }
 
 class LoaderAssetsProvider : public AssetsProvider {
@@ -96,7 +116,7 @@ class LoaderAssetsProvider : public AssetsProvider {
   }
 
   bool ForEachFile(const std::string& /* root_path */,
-                   const std::function<void(const StringPiece&, FileType)>& /* f */) const {
+                   android::base::function_ref<void(StringPiece, FileType)> /* f */) const {
     return true;
   }
 
@@ -209,7 +229,7 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t forma
   ATRACE_NAME(base::StringPrintf("LoadApkAssets(%s)", path.c_str()).c_str());
 
   auto loader_assets = LoaderAssetsProvider::Create(env, assets_provider);
-  std::unique_ptr<ApkAssets> apk_assets;
+  AssetManager2::ApkAssetsPtr apk_assets;
   switch (format) {
     case FORMAT_APK: {
         auto assets = MultiAssetsProvider::Create(std::move(loader_assets),
@@ -269,7 +289,7 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t
   }
 
   auto loader_assets = LoaderAssetsProvider::Create(env, assets_provider);
-  std::unique_ptr<const ApkAssets> apk_assets;
+  AssetManager2::ApkAssetsPtr apk_assets;
   switch (format) {
     case FORMAT_APK: {
         auto assets =
@@ -336,7 +356,7 @@ static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_
   }
 
   auto loader_assets = LoaderAssetsProvider::Create(env, assets_provider);
-  std::unique_ptr<const ApkAssets> apk_assets;
+  AssetManager2::ApkAssetsPtr apk_assets;
   switch (format) {
     case FORMAT_APK: {
         auto assets =
@@ -374,11 +394,17 @@ static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_
 
 static jlong NativeLoadEmpty(JNIEnv* env, jclass /*clazz*/, jint flags, jobject assets_provider) {
   auto apk_assets = ApkAssets::Load(LoaderAssetsProvider::Create(env, assets_provider), flags);
+  if (apk_assets == nullptr) {
+    const std::string error_msg =
+        base::StringPrintf("Failed to load empty assets with provider %p", (void*)assets_provider);
+    jniThrowException(env, "java/io/IOException", error_msg.c_str());
+    return 0;
+  }
   return CreateGuardedApkAssets(std::move(apk_assets));
 }
 
 static void NativeDestroy(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
-    DeleteGuardedApkAssets(ApkAssetsFromLong(ptr));
+  DeleteGuardedApkAssets(ApkAssetsFromLong(ptr));
 }
 
 static jstring NativeGetAssetPath(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
@@ -402,7 +428,7 @@ static jlong NativeGetStringBlock(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) 
     return reinterpret_cast<jlong>(apk_assets->GetLoadedArsc()->GetStringPool());
 }
 
-static jboolean NativeIsUpToDate(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) {
+static jboolean NativeIsUpToDate(jlong ptr) {
     auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
     auto apk_assets = scoped_apk_assets->get();
     return apk_assets->IsUpToDate() ? JNI_TRUE : JNI_FALSE;
@@ -500,24 +526,28 @@ static jboolean NativeDefinesOverlayable(JNIEnv* env, jclass /*clazz*/, jlong pt
 
 // JNI registration.
 static const JNINativeMethod gApkAssetsMethods[] = {
-    {"nativeLoad", "(ILjava/lang/String;ILandroid/content/res/loader/AssetsProvider;)J",
-     (void*)NativeLoad},
-    {"nativeLoadEmpty", "(ILandroid/content/res/loader/AssetsProvider;)J", (void*)NativeLoadEmpty},
-    {"nativeLoadFd",
-     "(ILjava/io/FileDescriptor;Ljava/lang/String;ILandroid/content/res/loader/AssetsProvider;)J",
-     (void*)NativeLoadFromFd},
-    {"nativeLoadFdOffsets",
-     "(ILjava/io/FileDescriptor;Ljava/lang/String;JJILandroid/content/res/loader/AssetsProvider;)J",
-     (void*)NativeLoadFromFdOffset},
-    {"nativeDestroy", "(J)V", (void*)NativeDestroy},
-    {"nativeGetAssetPath", "(J)Ljava/lang/String;", (void*)NativeGetAssetPath},
-    {"nativeGetDebugName", "(J)Ljava/lang/String;", (void*)NativeGetDebugName},
-    {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
-    {"nativeIsUpToDate", "(J)Z", (void*)NativeIsUpToDate},
-    {"nativeOpenXml", "(JLjava/lang/String;)J", (void*)NativeOpenXml},
-    {"nativeGetOverlayableInfo", "(JLjava/lang/String;)Landroid/content/om/OverlayableInfo;",
-     (void*)NativeGetOverlayableInfo},
-    {"nativeDefinesOverlayable", "(J)Z", (void*)NativeDefinesOverlayable},
+        {"nativeLoad", "(ILjava/lang/String;ILandroid/content/res/loader/AssetsProvider;)J",
+         (void*)NativeLoad},
+        {"nativeLoadEmpty", "(ILandroid/content/res/loader/AssetsProvider;)J",
+         (void*)NativeLoadEmpty},
+        {"nativeLoadFd",
+         "(ILjava/io/FileDescriptor;Ljava/lang/String;ILandroid/content/res/loader/"
+         "AssetsProvider;)J",
+         (void*)NativeLoadFromFd},
+        {"nativeLoadFdOffsets",
+         "(ILjava/io/FileDescriptor;Ljava/lang/String;JJILandroid/content/res/loader/"
+         "AssetsProvider;)J",
+         (void*)NativeLoadFromFdOffset},
+        {"nativeDestroy", "(J)V", (void*)NativeDestroy},
+        {"nativeGetAssetPath", "(J)Ljava/lang/String;", (void*)NativeGetAssetPath},
+        {"nativeGetDebugName", "(J)Ljava/lang/String;", (void*)NativeGetDebugName},
+        {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
+        // @CriticalNative
+        {"nativeIsUpToDate", "(J)Z", (void*)NativeIsUpToDate},
+        {"nativeOpenXml", "(JLjava/lang/String;)J", (void*)NativeOpenXml},
+        {"nativeGetOverlayableInfo", "(JLjava/lang/String;)Landroid/content/om/OverlayableInfo;",
+         (void*)NativeGetOverlayableInfo},
+        {"nativeDefinesOverlayable", "(J)Z", (void*)NativeDefinesOverlayable},
 };
 
 int register_android_content_res_ApkAssets(JNIEnv* env) {

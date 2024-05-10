@@ -16,16 +16,16 @@
 
 #pragma once
 
-#include <cutils/compiler.h>
-#include <utils/Macros.h>
-#include <utils/RefBase.h>
-#include <utils/Timers.h>
-
 #include <SkAnimatedImage.h>
 #include <SkCanvas.h>
 #include <SkColorFilter.h>
 #include <SkDrawable.h>
+#include <SkEncodedImageFormat.h>
 #include <SkPicture.h>
+#include <cutils/compiler.h>
+#include <utils/Macros.h>
+#include <utils/RefBase.h>
+#include <utils/Timers.h>
 
 #include <future>
 #include <mutex>
@@ -48,7 +48,8 @@ class AnimatedImageDrawable : public SkDrawable {
 public:
     // bytesUsed includes the approximate sizes of the SkAnimatedImage and the SkPictures in the
     // Snapshots.
-    AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage, size_t bytesUsed);
+    AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage, size_t bytesUsed,
+                          SkEncodedImageFormat format);
 
     /**
      * This updates the internal time and returns true if the image needs
@@ -115,6 +116,7 @@ protected:
 private:
     sk_sp<SkAnimatedImage> mSkAnimatedImage;
     const size_t mBytesUsed;
+    const SkEncodedImageFormat mFormat;
 
     bool mRunning = false;
     bool mStarting = false;
@@ -157,6 +159,9 @@ private:
     Properties mProperties;
 
     std::unique_ptr<OnAnimationEndListener> mEndListener;
+
+    int adjustFrameDuration(int);
+    int currentFrameDuration();
 };
 
 }  // namespace android

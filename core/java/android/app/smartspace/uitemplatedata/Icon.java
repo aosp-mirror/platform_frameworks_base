@@ -171,6 +171,7 @@ public final class Icon implements Parcelable {
          */
         @NonNull
         public Icon build() {
+            mIcon.convertToAshmem();
             return new Icon(mIcon, mContentDescription, mShouldTint);
         }
     }

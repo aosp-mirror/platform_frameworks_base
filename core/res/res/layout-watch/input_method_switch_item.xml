@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/dialog_item"
+              android:layout_width="172dp"
+              android:layout_height="52dp"
+              android:layout_marginStart="10dp"
+              android:layout_marginTop="68dp"
+              android:weightSum="100"
+              android:gravity="center"
+              android:orientation="horizontal" >
+
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5.21"
+                android:background="@android:color/transparent"/>
+
+        <LinearLayout
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="89.58"
+                android:duplicateParentState="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingEnd="6dp"
+                android:paddingStart="6dp"
+                android:background="@drawable/input_method_item_background_selector" >
+
+            <LinearLayout
+                    android:id="@+id/text_layout"
+                    android:layout_width="124dp"
+                    android:layout_height="match_parent"
+                    android:duplicateParentState="true"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical" >
+
+                <TextView
+                        android:id="@+id/text1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:gravity="center_vertical"
+                        android:letterSpacing="0.01"
+                        android:textColor="#FFFFFF"
+                        android:maxLines="1"
+                        android:fontFamily="google-sans-text-medium"
+                        android:textSize="15sp" />
+
+                <TextView
+                        android:id="@+id/text2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:gravity="center_vertical"
+                        android:letterSpacing="0.01"
+                        android:textColor="#CAC5BC"
+                        android:maxLines="1"
+                        android:fontFamily="google-sans-text-medium"
+                        android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <RadioButton
+                    android:id="@+id/radio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="#E6FF7B"
+                    android:clickable="false"
+                    android:duplicateParentState="true"
+                    android:focusable="false"
+                    android:gravity="center"
+                    android:scaleX="1"
+                    android:scaleY="1" />
+
+
+        </LinearLayout>
+
+        <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5.21"
+                android:background="@android:color/transparent"/>
+
+
+</LinearLayout>
+

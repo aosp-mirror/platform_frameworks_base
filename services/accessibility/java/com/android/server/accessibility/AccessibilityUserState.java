@@ -109,7 +109,8 @@ class AccessibilityUserState {
     private boolean mBindInstantServiceAllowed;
     private boolean mIsAudioDescriptionByDefaultRequested;
     private boolean mIsAutoclickEnabled;
-    private boolean mIsDisplayMagnificationEnabled;
+    private boolean mIsMagnificationSingleFingerTripleTapEnabled;
+    private boolean mMagnificationTwoFingerTripleTapEnabled;
     private boolean mIsFilterKeyEventsEnabled;
     private boolean mIsPerformGesturesEnabled;
     private boolean mAccessibilityFocusOnlyInActiveWindow;
@@ -134,6 +135,8 @@ class AccessibilityUserState {
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
+    // Whether the always on magnification feature is enabled.
+    private boolean mAlwaysOnMagnificationEnabled = false;
 
     /** The stroke width of the focus rectangle in pixels */
     private int mFocusStrokeWidth;
@@ -209,7 +212,8 @@ class AccessibilityUserState {
         mRequestMultiFingerGestures = false;
         mRequestTwoFingerPassthrough = false;
         mSendMotionEventsEnabled = false;
-        mIsDisplayMagnificationEnabled = false;
+        mIsMagnificationSingleFingerTripleTapEnabled = false;
+        mMagnificationTwoFingerTripleTapEnabled = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
@@ -217,11 +221,14 @@ class AccessibilityUserState {
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
         mMagnificationFollowTypingEnabled = true;
+        mAlwaysOnMagnificationEnabled = false;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
         if (!mBoundServices.contains(serviceConnection)) {
-            serviceConnection.onAdded();
+            if (!Flags.addWindowTokenWithoutLock()) {
+                serviceConnection.addWindowTokensForAllDisplays();
+            }
             mBoundServices.add(serviceConnection);
             mComponentNameToServiceMap.put(serviceConnection.getComponentName(), serviceConnection);
             mServiceInfoChangeListener.onServiceInfoChangedLocked(this);
@@ -383,18 +390,22 @@ class AccessibilityUserState {
     }
 
     /**
-     * Remove service from crashed service list if users disable it.
+     * Remove the service from the crashed and binding service lists if the user disabled it.
      */
-    void updateCrashedServicesIfNeededLocked() {
+    void removeDisabledServicesFromTemporaryStatesLocked() {
         for (int i = 0, count = mInstalledServices.size(); i < count; i++) {
             final AccessibilityServiceInfo installedService = mInstalledServices.get(i);
             final ComponentName componentName = ComponentName.unflattenFromString(
                     installedService.getId());
 
-            if (mCrashedServices.contains(componentName)
-                    && !mEnabledServices.contains(componentName)) {
-                // Remove it from mCrashedServices since users toggle the switch bar to retry.
+            if (!mEnabledServices.contains(componentName)) {
+                // Remove from mCrashedServices, since users may toggle the on/off switch to retry.
                 mCrashedServices.remove(componentName);
+                // Remove from mBindingServices, since services can get stuck in the binding state
+                // if binding starts but never finishes. If the service later attempts to finish
+                // binding but it is not in the enabled list then it will exit before initializing;
+                // see AccessibilityServiceConnection#initializeService().
+                mBindingServices.remove(componentName);
             }
         }
     }
@@ -403,9 +414,10 @@ class AccessibilityUserState {
         return mBoundServices;
     }
 
-    int getClientStateLocked(boolean isUiAutomationRunning, int traceClientState) {
+    int getClientStateLocked(boolean uiAutomationCanIntrospect,
+            int traceClientState) {
         int clientState = 0;
-        final boolean a11yEnabled = isUiAutomationRunning
+        final boolean a11yEnabled = uiAutomationCanIntrospect
                 || isHandlingAccessibilityEventsLocked();
         if (a11yEnabled) {
             clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
@@ -510,7 +522,7 @@ class AccessibilityUserState {
                 .append(String.valueOf(mRequestTwoFingerPassthrough));
         pw.append(", sendMotionEventsEnabled").append(String.valueOf(mSendMotionEventsEnabled));
         pw.append(", displayMagnificationEnabled=").append(String.valueOf(
-                mIsDisplayMagnificationEnabled));
+                mIsMagnificationSingleFingerTripleTapEnabled));
         pw.append(", autoclickEnabled=").append(String.valueOf(mIsAutoclickEnabled));
         pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveUiTimeout));
         pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveUiTimeout));
@@ -522,6 +534,8 @@ class AccessibilityUserState {
                 .append(String.valueOf(mIsAudioDescriptionByDefaultRequested));
         pw.append(", magnificationFollowTypingEnabled=")
                 .append(String.valueOf(mMagnificationFollowTypingEnabled));
+        pw.append(", alwaysOnMagnificationEnabled=")
+                .append(String.valueOf(mAlwaysOnMagnificationEnabled));
         pw.append("}");
         pw.println();
         pw.append("     shortcut key:{");
@@ -613,12 +627,20 @@ class AccessibilityUserState {
         mIsAutoclickEnabled = enabled;
     }
 
-    public boolean isDisplayMagnificationEnabledLocked() {
-        return mIsDisplayMagnificationEnabled;
+    public boolean isMagnificationSingleFingerTripleTapEnabledLocked() {
+        return mIsMagnificationSingleFingerTripleTapEnabled;
     }
 
-    public void setDisplayMagnificationEnabledLocked(boolean enabled) {
-        mIsDisplayMagnificationEnabled = enabled;
+    public void setMagnificationSingleFingerTripleTapEnabledLocked(boolean enabled) {
+        mIsMagnificationSingleFingerTripleTapEnabled = enabled;
+    }
+
+    public boolean isMagnificationTwoFingerTripleTapEnabledLocked() {
+        return mMagnificationTwoFingerTripleTapEnabled;
+    }
+
+    public void setMagnificationTwoFingerTripleTapEnabledLocked(boolean enabled) {
+        mMagnificationTwoFingerTripleTapEnabled = enabled;
     }
 
     public boolean isFilterKeyEventsEnabledLocked() {
@@ -700,6 +722,14 @@ class AccessibilityUserState {
 
     public boolean isMagnificationFollowTypingEnabled() {
         return mMagnificationFollowTypingEnabled;
+    }
+
+    public void setAlwaysOnMagnificationEnabled(boolean enabled) {
+        mAlwaysOnMagnificationEnabled = enabled;
+    }
+
+    public boolean isAlwaysOnMagnificationEnabled() {
+        return mAlwaysOnMagnificationEnabled;
     }
 
     /**
@@ -997,6 +1027,7 @@ class AccessibilityUserState {
     public void resetServiceDetectsGestures() {
         mServiceDetectsGestures.clear();
     }
+
     public boolean isServiceDetectsGesturesEnabled(int displayId) {
         if (mServiceDetectsGestures.contains(displayId)) {
             return mServiceDetectsGestures.get(displayId);

@@ -51,7 +51,8 @@ final class FinishSequentialEffectStep extends Step {
                 Slog.d(VibrationThread.TAG,
                         "FinishSequentialEffectStep for effect #" + startedStep.currentIndex);
             }
-            conductor.vibratorManagerHooks.noteVibratorOff(conductor.getVibration().uid);
+            conductor.vibratorManagerHooks.noteVibratorOff(
+                    conductor.getVibration().callerInfo.uid);
             Step nextStep = startedStep.nextStep();
             return nextStep == null ? VibrationStepConductor.EMPTY_STEP_LIST
                     : Arrays.asList(nextStep);
@@ -68,6 +69,7 @@ final class FinishSequentialEffectStep extends Step {
 
     @Override
     public void cancelImmediately() {
-        conductor.vibratorManagerHooks.noteVibratorOff(conductor.getVibration().uid);
+        conductor.vibratorManagerHooks.noteVibratorOff(
+                conductor.getVibration().callerInfo.uid);
     }
 }

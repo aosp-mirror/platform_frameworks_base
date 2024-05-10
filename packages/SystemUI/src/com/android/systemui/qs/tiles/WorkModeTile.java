@@ -27,11 +27,12 @@ import android.service.quicksettings.Tile;
 import android.view.View;
 import android.widget.Switch;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -39,6 +40,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
@@ -48,13 +50,18 @@ import javax.inject.Inject;
 /** Quick settings tile: Work profile on/off */
 public class WorkModeTile extends QSTileImpl<BooleanState> implements
         ManagedProfileController.Callback {
-    private final Icon mIcon = ResourceIcon.get(R.drawable.stat_sys_managed_profile_status);
+
+    public static final String TILE_SPEC = "work";
+
+    private final Icon mIcon = ResourceIcon.get(
+            com.android.internal.R.drawable.stat_sys_managed_profile_status);
 
     private final ManagedProfileController mProfileController;
 
     @Inject
     public WorkModeTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -64,7 +71,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             QSLogger qsLogger,
             ManagedProfileController managedProfileController
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mProfileController = managedProfileController;
         mProfileController.observe(getLifecycle(), this);
@@ -91,14 +98,15 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
     }
 
     @Override
+    @MainThread
     public void onManagedProfileChanged() {
         refreshState(mProfileController.isWorkModeEnabled());
     }
 
     @Override
+    @MainThread
     public void onManagedProfileRemoved() {
         mHost.removeTile(getTileSpec());
-        mHost.unmarkTileAsAutoAdded(getTileSpec());
     }
 
     @Override
@@ -114,10 +122,6 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             onManagedProfileRemoved();
         }
 
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
-
         if (arg instanceof Boolean) {
             state.value = (Boolean) arg;
         } else {
@@ -125,15 +129,13 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
         }
 
         state.icon = mIcon;
-        if (state.value) {
-            state.slash.isSlashed = false;
-        } else {
-            state.slash.isSlashed = true;
-        }
         state.label = getTileLabel();
         state.contentDescription = state.label;
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.secondaryLabel = state.value
+                ? ""
+                : mContext.getString(R.string.quick_settings_work_mode_paused_state);
     }
 
     @Override

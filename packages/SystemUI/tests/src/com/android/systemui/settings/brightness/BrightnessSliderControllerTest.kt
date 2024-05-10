@@ -20,6 +20,7 @@ import android.testing.AndroidTestingRunner
 import android.view.MotionEvent
 import android.widget.SeekBar
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
@@ -59,11 +60,14 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     private lateinit var motionEvent: MotionEvent
     @Mock
     private lateinit var listener: ToggleSlider.Listener
+    @Mock
+    private lateinit var mBrightnessSliderHapticPlugin: BrightnessSliderHapticPlugin
 
     @Captor
     private lateinit var seekBarChangeCaptor: ArgumentCaptor<SeekBar.OnSeekBarChangeListener>
     @Mock
     private lateinit var seekBar: SeekBar
+    private val uiEventLogger = UiEventLoggerFake()
     private var mFalsingManager: FalsingManagerFake = FalsingManagerFake()
 
     private lateinit var mController: BrightnessSliderController
@@ -75,7 +79,13 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
         whenever(mirrorController.toggleSlider).thenReturn(mirror)
         whenever(motionEvent.copy()).thenReturn(motionEvent)
 
-        mController = BrightnessSliderController(brightnessSliderView, mFalsingManager)
+        mController =
+            BrightnessSliderController(
+                brightnessSliderView,
+                mFalsingManager,
+                uiEventLogger,
+                mBrightnessSliderHapticPlugin,
+            )
         mController.init()
         mController.setOnChangedListener(listener)
     }
@@ -90,6 +100,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
         mController.onViewAttached()
 
         verify(brightnessSliderView).setOnSeekBarChangeListener(notNull())
+        verify(mBrightnessSliderHapticPlugin).start()
     }
 
     @Test
@@ -99,6 +110,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
 
         verify(brightnessSliderView).setOnSeekBarChangeListener(isNull())
         verify(brightnessSliderView).setOnDispatchTouchEventListener(isNull())
+        verify(mBrightnessSliderHapticPlugin).stop()
     }
 
     @Test
@@ -190,6 +202,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     @Test
     fun testSeekBarTrackingStarted() {
         whenever(brightnessSliderView.value).thenReturn(42)
+        val event = BrightnessSliderEvent.SLIDER_STARTED_TRACKING_TOUCH
 
         mController.onViewAttached()
         mController.setMirrorControllerAndMirror(mirrorController)
@@ -200,11 +213,14 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
         verify(listener).onChanged(eq(true), eq(42), eq(false))
         verify(mirrorController).showMirror()
         verify(mirrorController).setLocationAndSize(brightnessSliderView)
+        assertThat(uiEventLogger.numLogs()).isEqualTo(1)
+        assertThat(uiEventLogger.eventId(0)).isEqualTo(event.id)
     }
 
     @Test
     fun testSeekBarTrackingStopped() {
         whenever(brightnessSliderView.value).thenReturn(23)
+        val event = BrightnessSliderEvent.SLIDER_STOPPED_TRACKING_TOUCH
 
         mController.onViewAttached()
         mController.setMirrorControllerAndMirror(mirrorController)
@@ -214,5 +230,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
 
         verify(listener).onChanged(eq(false), eq(23), eq(true))
         verify(mirrorController).hideMirror()
+        assertThat(uiEventLogger.numLogs()).isEqualTo(1)
+        assertThat(uiEventLogger.eventId(0)).isEqualTo(event.id)
     }
 }

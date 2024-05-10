@@ -40,6 +40,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
@@ -55,7 +56,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.DeviceConfigProxy;
-import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
@@ -362,7 +362,9 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         private static final int MSG_ADD_CALLBACK = 3;
         private static final int MSG_REMOVE_CALLBACK = 4;
 
-        private ArrayList<LocationChangeCallback> mSettingsChangeCallbacks = new ArrayList<>();
+        @GuardedBy("mSettingsChangeCallbacks")
+        private final ArrayList<LocationChangeCallback> mSettingsChangeCallbacks =
+                new ArrayList<>();
 
         H(Looper looper) {
             super(looper);
@@ -378,24 +380,37 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                     locationActiveChanged();
                     break;
                 case MSG_ADD_CALLBACK:
-                    mSettingsChangeCallbacks.add((LocationChangeCallback) msg.obj);
+                    synchronized (mSettingsChangeCallbacks) {
+                        mSettingsChangeCallbacks.add((LocationChangeCallback) msg.obj);
+                    }
                     break;
                 case MSG_REMOVE_CALLBACK:
-                    mSettingsChangeCallbacks.remove((LocationChangeCallback) msg.obj);
+                    synchronized (mSettingsChangeCallbacks) {
+                        mSettingsChangeCallbacks.remove((LocationChangeCallback) msg.obj);
+                    }
                     break;
 
             }
         }
 
         private void locationActiveChanged() {
-            Utils.safeForeach(mSettingsChangeCallbacks,
-                    cb -> cb.onLocationActiveChanged(mAreActiveLocationRequests));
+            synchronized (mSettingsChangeCallbacks) {
+                final int n = mSettingsChangeCallbacks.size();
+                for (int i = 0; i < n; i++) {
+                    mSettingsChangeCallbacks.get(i)
+                            .onLocationActiveChanged(mAreActiveLocationRequests);
+                }
+            }
         }
 
         private void locationSettingsChanged() {
             boolean isEnabled = isLocationEnabled();
-            Utils.safeForeach(mSettingsChangeCallbacks,
-                    cb -> cb.onLocationSettingsChanged(isEnabled));
+            synchronized (mSettingsChangeCallbacks) {
+                final int n = mSettingsChangeCallbacks.size();
+                for (int i = 0; i < n; i++) {
+                    mSettingsChangeCallbacks.get(i).onLocationSettingsChanged(isEnabled);
+                }
+            }
         }
     }
 

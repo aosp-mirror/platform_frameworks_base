@@ -293,4 +293,15 @@ public class ApplicationsStateTest {
 
         assertThat(ApplicationsState.FILTER_MOVIES.filterApp(mEntry)).isFalse();
     }
+
+    @Test
+    public void testPersonalAndWorkFiltersDisplaysCorrectApps() {
+        mEntry.showInPersonalTab = true;
+        assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isTrue();
+        assertThat(ApplicationsState.FILTER_WORK.filterApp(mEntry)).isFalse();
+
+        mEntry.showInPersonalTab = false;
+        assertThat(ApplicationsState.FILTER_PERSONAL.filterApp(mEntry)).isFalse();
+        assertThat(ApplicationsState.FILTER_WORK.filterApp(mEntry)).isTrue();
+    }
 }

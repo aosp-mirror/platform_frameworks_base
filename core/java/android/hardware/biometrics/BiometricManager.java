@@ -23,6 +23,8 @@ import static android.Manifest.permission.WRITE_DEVICE_CONFIG;
 
 import static com.android.internal.util.FrameworkStatsLog.AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_BIOMETRIC_MANAGER_CAN_AUTHENTICATE;
 
+import android.annotation.ElapsedRealtimeLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,6 +32,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -86,6 +89,17 @@ public class BiometricManager {
             BiometricConstants.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED;
 
     /**
+     * Returned from {@link BiometricManager#getLastAuthenticationTime(int)} when no matching
+     * successful authentication has been performed since boot.
+     */
+    @FlaggedApi(Flags.FLAG_LAST_AUTHENTICATION_TIME)
+    public static final long BIOMETRIC_NO_AUTHENTICATION =
+            BiometricConstants.BIOMETRIC_NO_AUTHENTICATION;
+
+    private static final int GET_LAST_AUTH_TIME_ALLOWED_AUTHENTICATORS =
+            Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_STRONG;
+
+    /**
      * @hide
      */
     @IntDef({BIOMETRIC_SUCCESS,
@@ -95,27 +109,6 @@ public class BiometricManager {
             BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED})
     @Retention(RetentionPolicy.SOURCE)
     public @interface BiometricError {}
-
-    /**
-     * Single sensor or unspecified multi-sensor behavior (prefer an explicit choice if the
-     * device is multi-sensor).
-     * @hide
-     */
-    public static final int BIOMETRIC_MULTI_SENSOR_DEFAULT = 0;
-
-    /**
-     * Use face and fingerprint sensors together.
-     * @hide
-     */
-    public static final int BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE = 1;
-
-    /**
-     * @hide
-     */
-    @IntDef({BIOMETRIC_MULTI_SENSOR_DEFAULT,
-            BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface BiometricMultiSensorMode {}
 
     /**
      * Types of authenticators, defined at a level of granularity supported by
@@ -138,6 +131,7 @@ public class BiometricManager {
                 BIOMETRIC_CONVENIENCE,
                 DEVICE_CREDENTIAL,
         })
+        @Retention(RetentionPolicy.SOURCE)
         @interface Types {}
 
         /**
@@ -212,6 +206,26 @@ public class BiometricManager {
          * @see android.security.keystore.KeyGenParameterSpec.Builder
          */
         int DEVICE_CREDENTIAL = 1 << 15;
+
+    }
+
+    /**
+     * @hide
+     * returns a string representation of an authenticator type.
+     */
+    @NonNull public static String authenticatorToStr(@Authenticators.Types int authenticatorType) {
+        switch(authenticatorType) {
+            case Authenticators.BIOMETRIC_STRONG:
+                return "BIOMETRIC_STRONG";
+            case Authenticators.BIOMETRIC_WEAK:
+                return "BIOMETRIC_WEAK";
+            case Authenticators.BIOMETRIC_CONVENIENCE:
+                return "BIOMETRIC_CONVENIENCE";
+            case Authenticators.DEVICE_CREDENTIAL:
+                return "DEVICE_CREDENTIAL";
+            default:
+                return "Unknown authenticator type: " + authenticatorType;
+        }
     }
 
     /**
@@ -538,6 +552,44 @@ public class BiometricManager {
     }
 
     /**
+     * Registers listener for changes to biometric authentication state.
+     * Only sends callbacks for events that occur after the callback has been registered.
+     * @param listener Listener for changes to biometric authentication state
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void registerAuthenticationStateListener(AuthenticationStateListener listener) {
+        if (mService != null) {
+            try {
+                mService.registerAuthenticationStateListener(listener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "registerAuthenticationStateListener(): Service not connected");
+        }
+    }
+
+    /**
+     * Unregisters listener for changes to biometric authentication state.
+     * @param listener Listener for changes to biometric authentication state
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void unregisterAuthenticationStateListener(AuthenticationStateListener listener) {
+        if (mService != null) {
+            try {
+                mService.unregisterAuthenticationStateListener(listener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "unregisterAuthenticationStateListener(): Service not connected");
+        }
+    }
+
+
+    /**
      * Requests all {@link Authenticators.Types#BIOMETRIC_STRONG} sensors to have their
      * authenticatorId invalidated for the specified user. This happens when enrollments have been
      * added on devices with multiple biometric sensors.
@@ -617,6 +669,78 @@ public class BiometricManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * Notifies AuthService that keyguard has been dismissed for the given userId.
+     *
+     * @param userId
+     * @param hardwareAuthToken
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void resetLockout(int userId, byte[] hardwareAuthToken) {
+        if (mService != null) {
+            try {
+                mService.resetLockout(userId, hardwareAuthToken);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+    }
+
+    /**
+     * Gets the last time the user successfully authenticated using one of the given authenticators.
+     * The returned value is time in
+     * {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()} (time since
+     * boot, including sleep).
+     * <p>
+     * {@link BiometricManager#BIOMETRIC_NO_AUTHENTICATION} is returned in the case where there
+     * has been no successful authentication using any of the given authenticators since boot.
+     * <p>
+     * Currently, only {@link Authenticators#DEVICE_CREDENTIAL} and
+     * {@link Authenticators#BIOMETRIC_STRONG} are accepted. {@link IllegalArgumentException} will
+     * be thrown if {@code authenticators} contains other authenticator types.
+     * <p>
+     * Note that this may return successful authentication times even if the device is currently
+     * locked. You may use {@link KeyguardManager#isDeviceLocked()} to determine if the device
+     * is unlocked or not. Additionally, this method may return valid times for an authentication
+     * method that is no longer available. For instance, if the user unlocked the device with a
+     * {@link Authenticators#BIOMETRIC_STRONG} authenticator but then deleted that authenticator
+     * (e.g., fingerprint data), this method will still return the time of that unlock for
+     * {@link Authenticators#BIOMETRIC_STRONG} if it is the most recent successful event. The caveat
+     * is that {@link BiometricManager#BIOMETRIC_NO_AUTHENTICATION} will be returned if the device
+     * no longer has a secure lock screen at all, even if there were successful authentications
+     * performed before the lock screen was made insecure.
+     *
+     * @param authenticators bit field consisting of constants defined in {@link Authenticators}.
+     * @return the time of last authentication or
+     * {@link BiometricManager#BIOMETRIC_NO_AUTHENTICATION}
+     * @throws IllegalArgumentException if {@code authenticators} contains values other than
+     * {@link Authenticators#DEVICE_CREDENTIAL} and {@link Authenticators#BIOMETRIC_STRONG} or is
+     * 0.
+     */
+    @RequiresPermission(USE_BIOMETRIC)
+    @ElapsedRealtimeLong
+    @FlaggedApi(Flags.FLAG_LAST_AUTHENTICATION_TIME)
+    public long getLastAuthenticationTime(
+            @BiometricManager.Authenticators.Types int authenticators) {
+        if (authenticators == 0
+                || (GET_LAST_AUTH_TIME_ALLOWED_AUTHENTICATORS & authenticators) != authenticators) {
+            throw new IllegalArgumentException(
+                    "Only BIOMETRIC_STRONG and DEVICE_CREDENTIAL authenticators may be used.");
+        }
+
+        if (mService != null) {
+            try {
+                return mService.getLastAuthenticationTime(UserHandle.myUserId(), authenticators);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            return BIOMETRIC_NO_AUTHENTICATION;
         }
     }
 }

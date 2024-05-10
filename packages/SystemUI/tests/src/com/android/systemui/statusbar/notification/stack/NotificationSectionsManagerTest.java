@@ -30,7 +30,7 @@ import android.view.ViewGroup;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.KeyguardMediaController;
+import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
@@ -59,6 +59,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private NotificationSectionsFeatureManager mSectionsFeatureManager;
     @Mock private MediaContainerController mMediaContainerController;
+    @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private SectionHeaderController mIncomingHeaderController;
     @Mock private SectionHeaderController mPeopleHeaderController;
     @Mock private SectionHeaderController mAlertingHeaderController;
@@ -89,6 +90,7 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
                         mKeyguardMediaController,
                         mSectionsFeatureManager,
                         mMediaContainerController,
+                        mNotificationRoundnessManager,
                         mIncomingHeaderController,
                         mPeopleHeaderController,
                         mAlertingHeaderController,

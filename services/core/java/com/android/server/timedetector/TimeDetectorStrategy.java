@@ -18,17 +18,20 @@ package com.android.server.timedetector;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
-import android.app.timedetector.GnssTimeSuggestion;
+import android.app.time.TimeCapabilitiesAndConfig;
+import android.app.time.TimeConfiguration;
+import android.app.time.TimeState;
+import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
-import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.timezonedetector.Dumpable;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -67,44 +70,124 @@ public interface TimeDetectorStrategy extends Dumpable {
     /** Used when a time value originated from an externally specified signal. */
     @Origin int ORIGIN_EXTERNAL = 5;
 
+    /** Returns a snapshot of the system clock's state. See {@link TimeState} for details. */
+    @NonNull
+    TimeState getTimeState();
+
+    /**
+     * Sets the system time state. See {@link TimeState} for details. Intended for use during
+     * testing to force the device's state, this bypasses the time detection logic.
+     */
+    void setTimeState(@NonNull TimeState timeState);
+
+    /**
+     * Signals that a user has confirmed the supplied time. If the {@code confirmationTime},
+     * adjusted for elapsed time since it was created (expected to be with {@link
+     * #getTimeState()}), is very close to the clock's current state, then this can be used to
+     * raise the system's confidence in that time. Returns {@code true} if confirmation was
+     * successful (i.e. the time matched), {@code false} otherwise.
+     */
+    boolean confirmTime(@NonNull UnixEpochTime confirmationTime);
+
+    /**
+     * Adds a listener that will be triggered when something changes that could affect the result
+     * of the {@link #getCapabilitiesAndConfig} call for the <em>current user only</em>. This
+     * includes the current user changing. This is exposed so that (indirect) users like SettingsUI
+     * can monitor for changes to data derived from {@link TimeCapabilitiesAndConfig} and update
+     * the UI accordingly.
+     */
+    void addChangeListener(@NonNull StateChangeListener listener);
+
+    /**
+     * Returns a {@link TimeCapabilitiesAndConfig} object for the specified user.
+     *
+     * <p>The strategy is dependent on device state like current user, settings and device config.
+     * These updates are usually handled asynchronously, so callers should expect some delay between
+     * a change being made directly to services like settings and the strategy becoming aware of
+     * them. Changes made via {@link #updateConfiguration} will be visible immediately.
+     *
+     * @param userId the user ID to retrieve the information for
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
+     */
+    TimeCapabilitiesAndConfig getCapabilitiesAndConfig(
+            @UserIdInt int userId, boolean bypassUserPolicyChecks);
+
+    /**
+     * Updates the configuration properties that control a device's time behavior.
+     *
+     * <p>This method returns {@code true} if the configuration was changed, {@code false}
+     * otherwise.
+     *
+     * <p>See {@link #getCapabilitiesAndConfig} for guarantees about visibility of updates to
+     * subsequent calls.
+     *
+     * @param userId the current user ID, supplied to make sure that the asynchronous process
+     *   that happens when users switch is completed when the call is made
+     * @param configuration the configuration changes
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
+     */
+    boolean updateConfiguration(@UserIdInt int userId,
+            @NonNull TimeConfiguration configuration, boolean bypassUserPolicyChecks);
+
     /** Processes the suggested time from telephony sources. */
-    void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
+    void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion suggestion);
 
     /**
      * Processes the suggested manually entered time. Returns {@code false} if the suggestion was
      * invalid, or the device configuration prevented the suggestion being used, {@code true} if the
      * suggestion was accepted. A suggestion that is valid but does not change the time because it
      * matches the current device time is considered accepted.
+     *
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
      */
-    boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
-
-    /** Processes the suggested time from network sources. */
-    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);
-
-    /** Processes the suggested time from gnss sources. */
-    void suggestGnssTime(@NonNull GnssTimeSuggestion timeSuggestion);
-
-    /** Processes the suggested time from external sources. */
-    void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSuggestion);
-
-    /** Returns the configuration that controls time detector behaviour for specified user. */
-    ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
-
-    // Utility methods below are to be moved to a better home when one becomes more obvious.
+    boolean suggestManualTime(@UserIdInt int userId, @NonNull ManualTimeSuggestion suggestion,
+            boolean bypassUserPolicyChecks);
 
     /**
-     * Adjusts the supplied time value by applying the difference between the reference time
-     * supplied and the reference time associated with the time.
+     * Processes the suggested network time. The suggestion may not be used to set the device's time
+     * depending on device configuration and user settings, but can replace previous network
+     * suggestions received. See also
+     * {@link #addNetworkTimeUpdateListener(StateChangeListener)} and
+     * {@link #getLatestNetworkSuggestion()}.
      */
-    static long getTimeAt(@NonNull TimestampedValue<Long> timeValue, long referenceClockMillisNow) {
-        return (referenceClockMillisNow - timeValue.getReferenceTimeMillis())
-                + timeValue.getValue();
-    }
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion suggestion);
+
+    /**
+     * Adds a listener that will be notified when a new network time is available. See {@link
+     * #getLatestNetworkSuggestion()}.
+     */
+    void addNetworkTimeUpdateListener(@NonNull StateChangeListener networkSuggestionUpdateListener);
+
+    /**
+     * Returns the latest (accepted) network time suggestion. Returns {@code null} if there isn't
+     * one.
+     */
+    @Nullable
+    NetworkTimeSuggestion getLatestNetworkSuggestion();
+
+    /**
+     * Clears the latest network time suggestion, leaving none. The remaining time signals from
+     * other sources will be reassessed causing the device's time to be updated if config and
+     * settings allow.
+     */
+    void clearLatestNetworkSuggestion();
+
+    /** Processes the suggested time from gnss sources. */
+    void suggestGnssTime(@NonNull GnssTimeSuggestion suggestion);
+
+    /** Processes the suggested time from external sources. */
+    void suggestExternalTime(@NonNull ExternalTimeSuggestion suggestion);
+
+    // Utility methods below are to be moved to a better home when one becomes more obvious.
 
     /**
      * Converts one of the {@code ORIGIN_} constants to a human readable string suitable for config
      * and debug usage. Throws an {@link IllegalArgumentException} if the value is unrecognized.
      */
+    @NonNull
     static String originToString(@Origin int origin) {
         switch (origin) {
             case ORIGIN_MANUAL:

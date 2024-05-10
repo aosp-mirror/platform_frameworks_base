@@ -16,14 +16,16 @@
 #ifndef FRAMEINFO_H_
 #define FRAMEINFO_H_
 
-#include "utils/Macros.h"
-
 #include <cutils/compiler.h>
+#include <memory.h>
 #include <utils/Timers.h>
 
 #include <array>
-#include <memory.h>
+#include <optional>
 #include <string>
+
+#include "SkippedFrameInfo.h"
+#include "utils/Macros.h"
 
 namespace android {
 namespace uirenderer {
@@ -104,6 +106,7 @@ public:
         set(FrameInfoIndex::AnimationStart) = vsyncTime;
         set(FrameInfoIndex::PerformTraversalsStart) = vsyncTime;
         set(FrameInfoIndex::DrawStart) = vsyncTime;
+        set(FrameInfoIndex::FrameStartTime) = vsyncTime;
         set(FrameInfoIndex::FrameDeadline) = frameDeadline;
         set(FrameInfoIndex::FrameInterval) = frameInterval;
         return *this;
@@ -185,8 +188,14 @@ public:
         return mFrameInfo[static_cast<int>(index)];
     }
 
+    void setSkippedFrameReason(SkippedFrameReason reason);
+    inline std::optional<SkippedFrameReason> getSkippedFrameReason() const {
+        return mSkippedFrameReason;
+    }
+
 private:
     int64_t mFrameInfo[static_cast<int>(FrameInfoIndex::NumIndexes)];
+    std::optional<SkippedFrameReason> mSkippedFrameReason;
 };
 
 } /* namespace uirenderer */

@@ -32,7 +32,7 @@ namespace aapt {
 class ReferenceLinkerTransformer : public CloningValueTransformer {
  public:
   ReferenceLinkerTransformer(const CallSite& callsite, IAaptContext* context, SymbolTable* symbols,
-                             StringPool* string_pool, ResourceTable* table,
+                             android::StringPool* string_pool, ResourceTable* table,
                              xml::IPackageDeclStack* decl)
       : CloningValueTransformer(string_pool),
         callsite_(callsite),
@@ -110,7 +110,8 @@ class ReferenceLinker : public IResourceTableConsumer {
 
   // Same as WriteResourceName but omits the 'attr' part.
   static void WriteAttributeName(const Reference& ref, const CallSite& callsite,
-                                 const xml::IPackageDeclStack* decls, DiagMessage* out_msg);
+                                 const xml::IPackageDeclStack* decls,
+                                 android::DiagMessage* out_msg);
 
   // Returns a fully linked version a resource reference.
   //

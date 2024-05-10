@@ -37,17 +37,18 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.res.R;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.tuner.TunerService;
@@ -55,9 +56,7 @@ import com.android.systemui.unfold.FoldAodAnimationController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -82,24 +81,23 @@ public class DozeParameters implements
     private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
     private final Resources mResources;
     private final BatteryController mBatteryController;
-    private final FeatureFlags mFeatureFlags;
     private final ScreenOffAnimationController mScreenOffAnimationController;
+    private final DozeInteractor mDozeInteractor;
     private final FoldAodAnimationController mFoldAodAnimationController;
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
-
-    private final Set<Callback> mCallbacks = new HashSet<>();
+    private final UserTracker mUserTracker;
 
     private boolean mDozeAlwaysOn;
     private boolean mControlScreenOffAnimation;
     private boolean mIsQuickPickupEnabled;
 
-    private boolean mKeyguardShowing;
+    private boolean mKeyguardVisible;
     @VisibleForTesting
     final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onKeyguardVisibilityChanged(boolean showing) {
-                    mKeyguardShowing = showing;
+                public void onKeyguardVisibilityChanged(boolean visible) {
+                    mKeyguardVisible = visible;
                     updateControlScreenOff();
                 }
 
@@ -125,13 +123,14 @@ public class DozeParameters implements
             BatteryController batteryController,
             TunerService tunerService,
             DumpManager dumpManager,
-            FeatureFlags featureFlags,
             ScreenOffAnimationController screenOffAnimationController,
             Optional<SysUIUnfoldComponent> sysUiUnfoldComponent,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            UserTracker userTracker,
+            DozeInteractor dozeInteractor) {
         mResources = resources;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mAlwaysOnPolicy = alwaysOnDisplayPolicy;
@@ -141,9 +140,10 @@ public class DozeParameters implements
         mControlScreenOffAnimation = !getDisplayNeedsBlanking();
         mPowerManager = powerManager;
         mPowerManager.setDozeAfterScreenOff(!mControlScreenOffAnimation);
-        mFeatureFlags = featureFlags;
         mScreenOffAnimationController = screenOffAnimationController;
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
+        mUserTracker = userTracker;
+        mDozeInteractor = dozeInteractor;
 
         keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         tunerService.addTunable(
@@ -162,11 +162,18 @@ public class DozeParameters implements
 
         SettingsObserver quickPickupSettingsObserver = new SettingsObserver(context, handler);
         quickPickupSettingsObserver.observe();
+
+        batteryController.addCallback(new BatteryStateChangeCallback() {
+                @Override
+                public void onPowerSaveChanged(boolean isPowerSave) {
+                    dispatchAlwaysOnEvent();
+                }
+            });
     }
 
     private void updateQuickPickupEnabled() {
         mIsQuickPickupEnabled =
-                mAmbientDisplayConfiguration.quickPickupSensorEnabled(UserHandle.USER_CURRENT);
+                mAmbientDisplayConfiguration.quickPickupSensorEnabled(mUserTracker.getUserId());
     }
 
     public boolean getDisplayStateSupported() {
@@ -293,20 +300,17 @@ public class DozeParameters implements
     public void updateControlScreenOff() {
         if (!getDisplayNeedsBlanking()) {
             final boolean controlScreenOff =
-                    getAlwaysOn() && (mKeyguardShowing || shouldControlUnlockedScreenOff());
+                    getAlwaysOn() && (mKeyguardVisible || shouldControlUnlockedScreenOff());
             setControlScreenOffAnimation(controlScreenOff);
         }
     }
 
     /**
      * Whether we're capable of controlling the screen off animation if we want to. This isn't
-     * possible if AOD isn't even enabled or if the flag is disabled, or if the display needs
-     * blanking.
+     * possible if AOD isn't even enabled or if the display needs blanking.
      */
     public boolean canControlUnlockedScreenOff() {
-        return getAlwaysOn()
-                && mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)
-                && !getDisplayNeedsBlanking();
+        return getAlwaysOn() && !getDisplayNeedsBlanking();
     }
 
     /**
@@ -348,7 +352,7 @@ public class DozeParameters implements
     }
 
     private boolean willAnimateFromLockScreenToAod() {
-        return getAlwaysOn() && mKeyguardShowing;
+        return shouldControlScreenOff() && mKeyguardVisible;
     }
 
     private boolean getBoolean(String propName, int resId) {
@@ -402,32 +406,15 @@ public class DozeParameters implements
         return mResources.getStringArray(R.array.doze_brightness_sensor_name_posture_mapping);
     }
 
-    /**
-     * Callback to listen for DozeParameter changes.
-     */
-    public void addCallback(Callback callback) {
-        mCallbacks.add(callback);
-    }
-
-    /**
-     * Remove callback that listens for DozeParameter changes.
-     */
-    public void removeCallback(Callback callback) {
-        mCallbacks.remove(callback);
-    }
-
     @Override
     public void onTuningChanged(String key, String newValue) {
-        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(mUserTracker.getUserId());
 
         if (key.equals(Settings.Secure.DOZE_ALWAYS_ON)) {
             updateControlScreenOff();
         }
 
-        for (Callback callback : mCallbacks) {
-            callback.onAlwaysOnChange();
-        }
-        mScreenOffAnimationController.onAlwaysOnChanged(getAlwaysOn());
+        dispatchAlwaysOnEvent();
     }
 
     @Override
@@ -463,6 +450,12 @@ public class DozeParameters implements
         pw.print("isQuickPickupEnabled(): "); pw.println(isQuickPickupEnabled());
     }
 
+    private void dispatchAlwaysOnEvent() {
+        mScreenOffAnimationController.onAlwaysOnChanged(getAlwaysOn());
+        mDozeInteractor.setAodAvailable(getAlwaysOn());
+
+    }
+
     private boolean getPostureSpecificBool(
             int[] postureMapping,
             boolean defaultSensorBool,
@@ -475,13 +468,6 @@ public class DozeParameters implements
         }
 
         return bool;
-    }
-
-    interface Callback {
-        /**
-         * Invoked when the value of getAlwaysOn may have changed.
-         */
-        void onAlwaysOnChange();
     }
 
     private final class SettingsObserver extends ContentObserver {

@@ -33,6 +33,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class BatteryConsumer {
 
     private static final String TAG = "BatteryConsumer";
@@ -132,7 +133,7 @@ public abstract class BatteryConsumer {
     @IntDef(prefix = {"POWER_MODEL_"}, value = {
             POWER_MODEL_UNDEFINED,
             POWER_MODEL_POWER_PROFILE,
-            POWER_MODEL_MEASURED_ENERGY,
+            POWER_MODEL_ENERGY_CONSUMPTION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PowerModel {
@@ -150,9 +151,9 @@ public abstract class BatteryConsumer {
     public static final int POWER_MODEL_POWER_PROFILE = 1;
 
     /**
-     * Power model that is based on energy consumption measured by on-device power monitors.
+     * Power model that is based on energy consumption stats provided by PowerStats HAL.
      */
-    public static final int POWER_MODEL_MEASURED_ENERGY = 2;
+    public static final int POWER_MODEL_ENERGY_CONSUMPTION = 2;
 
     /**
      * Identifiers of consumed power aggregations.
@@ -239,7 +240,7 @@ public abstract class BatteryConsumer {
             new Dimensions(POWER_COMPONENT_ANY, PROCESS_STATE_ANY);
 
     /**
-     * Identifies power attribution dimensions that are captured by an data element of
+     * Identifies power attribution dimensions that are captured by a data element of
      * a BatteryConsumer. These Keys are used to access those values and to set them using
      * Builders.  See for example {@link #getConsumedPower(Key)}.
      *
@@ -469,12 +470,27 @@ public abstract class BatteryConsumer {
      */
     public static String powerModelToString(@BatteryConsumer.PowerModel int powerModel) {
         switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
-                return "measured energy";
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
+                return "energy consumption";
             case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
                 return "power profile";
             default:
                 return "";
+        }
+    }
+
+    /**
+     * Returns the equivalent PowerModel enum for the specified power model.
+     * {@see BatteryUsageStatsAtomsProto.BatteryConsumerData.PowerComponentUsage.PowerModel}
+     */
+    public static int powerModelToProtoEnum(@BatteryConsumer.PowerModel int powerModel) {
+        switch (powerModel) {
+            case BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION:
+                return BatteryUsageStatsAtomsProto.PowerComponentModel.MEASURED_ENERGY;
+            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
+                return BatteryUsageStatsAtomsProto.PowerComponentModel.POWER_PROFILE;
+            default:
+                return BatteryUsageStatsAtomsProto.PowerComponentModel.UNDEFINED;
         }
     }
 
@@ -667,6 +683,7 @@ public abstract class BatteryConsumer {
 
     static class BatteryConsumerDataLayout {
         private static final Key[] KEY_ARRAY = new Key[0];
+        public static final int POWER_MODEL_NOT_INCLUDED = -1;
         public final String[] customPowerComponentNames;
         public final int customPowerComponentCount;
         public final boolean powerModelsIncluded;
@@ -698,7 +715,9 @@ public abstract class BatteryConsumer {
                 // Declare the Key for the power component, ignoring other dimensions.
                 perComponentKeys.add(
                         new Key(componentId, PROCESS_STATE_ANY,
-                                powerModelsIncluded ? columnIndex++ : -1,  // power model
+                                powerModelsIncluded
+                                        ? columnIndex++
+                                        : POWER_MODEL_NOT_INCLUDED,  // power model
                                 columnIndex++,      // power
                                 columnIndex++       // usage duration
                         ));
@@ -721,7 +740,9 @@ public abstract class BatteryConsumer {
 
                             perComponentKeys.add(
                                     new Key(componentId, processState,
-                                            powerModelsIncluded ? columnIndex++ : -1, // power model
+                                            powerModelsIncluded
+                                                    ? columnIndex++
+                                                    : POWER_MODEL_NOT_INCLUDED, // power model
                                             columnIndex++,      // power
                                             columnIndex++       // usage duration
                                     ));
@@ -780,11 +801,12 @@ public abstract class BatteryConsumer {
         protected final BatteryConsumer.BatteryConsumerData mData;
         protected final PowerComponents.Builder mPowerComponentsBuilder;
 
-        public BaseBuilder(BatteryConsumer.BatteryConsumerData data, int consumerType) {
+        public BaseBuilder(BatteryConsumer.BatteryConsumerData data, int consumerType,
+                double minConsumedPowerThreshold) {
             mData = data;
             data.putLong(COLUMN_INDEX_BATTERY_CONSUMER_TYPE, consumerType);
 
-            mPowerComponentsBuilder = new PowerComponents.Builder(data);
+            mPowerComponentsBuilder = new PowerComponents.Builder(data, minConsumedPowerThreshold);
         }
 
         @Nullable
@@ -827,8 +849,24 @@ public abstract class BatteryConsumer {
 
         @SuppressWarnings("unchecked")
         @NonNull
+        public T addConsumedPower(@PowerComponent int componentId, double componentPower,
+                @PowerModel int powerModel) {
+            mPowerComponentsBuilder.addConsumedPower(getKey(componentId, PROCESS_STATE_UNSPECIFIED),
+                    componentPower, powerModel);
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
         public T setConsumedPower(Key key, double componentPower, @PowerModel int powerModel) {
             mPowerComponentsBuilder.setConsumedPower(key, componentPower, powerModel);
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
+        public T addConsumedPower(Key key, double componentPower, @PowerModel int powerModel) {
+            mPowerComponentsBuilder.addConsumedPower(key, componentPower, powerModel);
             return (T) this;
         }
 

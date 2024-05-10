@@ -21,10 +21,11 @@ import static com.google.common.truth.Truth.assertThat;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.LayoutInflater;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -46,6 +47,13 @@ public class KeyguardStatusBarViewTest extends SysuiTestCase {
                     (KeyguardStatusBarView) LayoutInflater.from(mContext)
                             .inflate(R.layout.keyguard_status_bar, null);
         });
+    }
+
+    @Test
+    public void userSwitcherChip_defaultVisibilityIsGone() {
+        assertThat(mKeyguardStatusBarView.findViewById(
+                R.id.user_switcher_container).getVisibility()).isEqualTo(
+                View.GONE);
     }
 
     @Test

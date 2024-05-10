@@ -263,29 +263,35 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
             rssnrThresholds = sRssnrThresholds;
             rsrpOnly = false;
         } else {
-            mParametersUseForLevel = cc.getInt(
-                    CarrierConfigManager.KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT);
-            if (DBG) {
-                Rlog.i(LOG_TAG, "Using signal strength level: " + mParametersUseForLevel);
+            if (ss != null && ss.isUsingNonTerrestrialNetwork()) {
+                if (DBG) log("updateLevel: from NTN_LTE");
+                mParametersUseForLevel = cc.getInt(
+                        CarrierConfigManager.KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT);
+                rsrpThresholds = cc.getIntArray(
+                        CarrierConfigManager.KEY_NTN_LTE_RSRP_THRESHOLDS_INT_ARRAY);
+                rsrqThresholds = cc.getIntArray(
+                        CarrierConfigManager.KEY_NTN_LTE_RSRQ_THRESHOLDS_INT_ARRAY);
+                rssnrThresholds = cc.getIntArray(
+                        CarrierConfigManager.KEY_NTN_LTE_RSSNR_THRESHOLDS_INT_ARRAY);
+            } else {
+                mParametersUseForLevel = cc.getInt(
+                        CarrierConfigManager.KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT);
+                rsrpThresholds = cc.getIntArray(
+                        CarrierConfigManager.KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY);
+                rsrqThresholds = cc.getIntArray(
+                        CarrierConfigManager.KEY_LTE_RSRQ_THRESHOLDS_INT_ARRAY);
+                rssnrThresholds = cc.getIntArray(
+                        CarrierConfigManager.KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY);
             }
-            rsrpThresholds = cc.getIntArray(
-                    CarrierConfigManager.KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY);
             if (rsrpThresholds == null) rsrpThresholds = sRsrpThresholds;
-            if (DBG) {
-                Rlog.i(LOG_TAG, "Applying LTE RSRP Thresholds: "
-                        + Arrays.toString(rsrpThresholds));
-            }
-            rsrqThresholds = cc.getIntArray(
-                    CarrierConfigManager.KEY_LTE_RSRQ_THRESHOLDS_INT_ARRAY);
             if (rsrqThresholds == null) rsrqThresholds = sRsrqThresholds;
-            if (DBG) {
-                Rlog.i(LOG_TAG, "Applying LTE RSRQ Thresholds: "
-                        + Arrays.toString(rsrqThresholds));
-            }
-            rssnrThresholds = cc.getIntArray(
-                    CarrierConfigManager.KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY);
             if (rssnrThresholds == null) rssnrThresholds = sRssnrThresholds;
             if (DBG) {
+                Rlog.i(LOG_TAG, "Using signal strength level: " + mParametersUseForLevel);
+                Rlog.i(LOG_TAG, "Applying LTE RSRP Thresholds: "
+                        + Arrays.toString(rsrpThresholds));
+                Rlog.i(LOG_TAG, "Applying LTE RSRQ Thresholds: "
+                        + Arrays.toString(rsrqThresholds));
                 Rlog.i(LOG_TAG, "Applying LTE RSSNR Thresholds: "
                         + Arrays.toString(rssnrThresholds));
             }

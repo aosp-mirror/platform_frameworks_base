@@ -31,16 +31,21 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.internal.logging.testing.UiEventLoggerFake
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.media.taptotransfer.common.MediaTttLogger
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.temporarydisplay.TemporaryViewUiEventLogger
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.systemui.util.view.ViewUtil
+import com.android.systemui.util.wakelock.WakeLockFake
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -48,6 +53,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -63,25 +69,40 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var applicationInfo: ApplicationInfo
     @Mock
-    private lateinit var logger: MediaTttLogger
+    private lateinit var logger: MediaTttReceiverLogger
     @Mock
     private lateinit var accessibilityManager: AccessibilityManager
     @Mock
     private lateinit var configurationController: ConfigurationController
     @Mock
+    private lateinit var dumpManager: DumpManager
+    @Mock
+    private lateinit var mediaTttFlags: MediaTttFlags
+    @Mock
     private lateinit var powerManager: PowerManager
+    @Mock
+    private lateinit var viewUtil: ViewUtil
     @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var commandQueue: CommandQueue
+    @Mock
+    private lateinit var rippleController: MediaTttReceiverRippleController
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
     private lateinit var fakeAppIconDrawable: Drawable
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var receiverUiEventLogger: MediaTttReceiverUiEventLogger
+    private lateinit var temporaryViewUiEventLogger: TemporaryViewUiEventLogger
+    private lateinit var fakeClock: FakeSystemClock
+    private lateinit var fakeExecutor: FakeExecutor
+    private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
+    private lateinit var fakeWakeLock: WakeLockFake
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(mediaTttFlags.isMediaTttEnabled()).thenReturn(true)
+        whenever(mediaTttFlags.isMediaTttReceiverSuccessRippleEnabled()).thenReturn(true)
 
         fakeAppIconDrawable = context.getDrawable(R.drawable.ic_cake)!!
         whenever(packageManager.getApplicationIcon(PACKAGE_NAME)).thenReturn(fakeAppIconDrawable)
@@ -91,8 +112,47 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         )).thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
 
+        fakeClock = FakeSystemClock()
+        fakeExecutor = FakeExecutor(fakeClock)
+
         uiEventLoggerFake = UiEventLoggerFake()
         receiverUiEventLogger = MediaTttReceiverUiEventLogger(uiEventLoggerFake)
+        temporaryViewUiEventLogger = TemporaryViewUiEventLogger(uiEventLoggerFake)
+
+        fakeWakeLock = WakeLockFake()
+        fakeWakeLockBuilder = WakeLockFake.Builder(context)
+        fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
+
+        controllerReceiver = FakeMediaTttChipControllerReceiver(
+            commandQueue,
+            context,
+            logger,
+            windowManager,
+            fakeExecutor,
+            accessibilityManager,
+            configurationController,
+            dumpManager,
+            powerManager,
+            Handler.getMain(),
+            mediaTttFlags,
+            receiverUiEventLogger,
+            viewUtil,
+            fakeWakeLockBuilder,
+            fakeClock,
+            rippleController,
+            temporaryViewUiEventLogger,
+        )
+        controllerReceiver.start()
+
+        val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
+        verify(commandQueue).addCallback(callbackCaptor.capture())
+        commandQueueCallback = callbackCaptor.value!!
+    }
+
+    @Test
+    fun commandQueueCallback_flagOff_noCallbackAdded() {
+        reset(commandQueue)
+        whenever(mediaTttFlags.isMediaTttEnabled()).thenReturn(false)
 
         controllerReceiver = MediaTttChipControllerReceiver(
             commandQueue,
@@ -102,14 +162,20 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             FakeExecutor(FakeSystemClock()),
             accessibilityManager,
             configurationController,
+            dumpManager,
             powerManager,
             Handler.getMain(),
-            receiverUiEventLogger
+            mediaTttFlags,
+            receiverUiEventLogger,
+            viewUtil,
+            fakeWakeLockBuilder,
+            fakeClock,
+            rippleController,
+            temporaryViewUiEventLogger,
         )
+        controllerReceiver.start()
 
-        val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
-        verify(commandQueue).addCallback(callbackCaptor.capture())
-        commandQueueCallback = callbackCaptor.value!!
+        verify(commandQueue, never()).addCallback(any())
     }
 
     @Test
@@ -126,6 +192,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
             MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_CLOSE_TO_SENDER.id
         )
+        assertThat(uiEventLoggerFake.logs[0].instanceId).isNotNull()
     }
 
     @Test
@@ -141,6 +208,39 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
             MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_FAR_FROM_SENDER.id
         )
+        assertThat(uiEventLoggerFake.logs[0].instanceId).isNotNull()
+    }
+
+    @Test
+    fun commandQueueCallback_transferToReceiverSucceeded_noChipShown() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+                routeInfo,
+                null,
+                null
+        )
+
+        verify(windowManager, never()).addView(any(), any())
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+                MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_TRANSFER_TO_RECEIVER_SUCCEEDED.id
+        )
+        assertThat(uiEventLoggerFake.logs[0].instanceId).isNotNull()
+    }
+
+    @Test
+    fun commandQueueCallback_transferToReceiverFailed_noChipShown() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+                routeInfo,
+                null,
+                null
+        )
+
+        verify(windowManager, never()).addView(any(), any())
+        assertThat(uiEventLoggerFake.eventId(0)).isEqualTo(
+                MediaTttReceiverUiEvents.MEDIA_TTT_RECEIVER_TRANSFER_TO_RECEIVER_FAILED.id
+        )
+        assertThat(uiEventLoggerFake.logs[0].instanceId).isNotNull()
     }
 
     @Test
@@ -165,6 +265,100 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     }
 
     @Test
+    fun commandQueueCallback_closeThenSucceeded_chipShownThenHidden() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            routeInfo,
+            null,
+            null
+        )
+
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null,
+            null
+        )
+
+        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
+        verify(windowManager).addView(viewCaptor.capture(), any())
+        verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun commandQueueCallback_closeThenSucceeded_sameViewInstanceId() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            routeInfo,
+            null,
+            null
+        )
+
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null,
+            null
+        )
+
+        assertThat(uiEventLoggerFake[0].instanceId).isEqualTo(uiEventLoggerFake[1].instanceId)
+    }
+
+    @Test
+    fun commandQueueCallback_closeThenFailed_chipShownThenHidden() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            routeInfo,
+            null,
+            null
+        )
+
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+            StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+            routeInfo,
+            null,
+            null
+        )
+
+        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
+        verify(windowManager).addView(viewCaptor.capture(), any())
+        verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun commandQueueCallback_closeThenFar_wakeLockAcquiredThenReleased() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+                routeInfo,
+                null,
+                null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isTrue()
+
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+                routeInfo,
+                null,
+                null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isFalse()
+    }
+
+    @Test
+    fun commandQueueCallback_closeThenFar_wakeLockNeverAcquired() {
+        commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
+                StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+                routeInfo,
+                null,
+                null
+        )
+
+        assertThat(fakeWakeLock.isHeld).isFalse()
+    }
+
+    @Test
     fun receivesNewStateFromCommandQueue_isLogged() {
         commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
@@ -179,12 +373,22 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Test
     fun updateView_noOverrides_usesInfoFromAppIcon() {
         controllerReceiver.displayView(
-            ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appNameOverride = null)
+            ChipReceiverInfo(
+                routeInfo,
+                appIconDrawableOverride = null,
+                appNameOverride = null,
+                id = "id",
+                instanceId = InstanceId.fakeInstanceId(0),
+            )
         )
 
         val view = getChipView()
         assertThat(view.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
-        assertThat(view.getAppIconView().contentDescription).isEqualTo(APP_NAME)
+        assertThat(view.getAppIconView().contentDescription)
+            .isEqualTo(context.getString(
+                R.string.media_transfer_receiver_content_description_with_app_name,
+                APP_NAME,
+            ))
     }
 
     @Test
@@ -192,7 +396,13 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val drawableOverride = context.getDrawable(R.drawable.ic_celebration)!!
 
         controllerReceiver.displayView(
-            ChipReceiverInfo(routeInfo, drawableOverride, appNameOverride = null)
+            ChipReceiverInfo(
+                routeInfo,
+                drawableOverride,
+                appNameOverride = null,
+                id = "id",
+                instanceId = InstanceId.fakeInstanceId(0),
+            )
         )
 
         val view = getChipView()
@@ -204,7 +414,13 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val appNameOverride = "Sweet New App"
 
         controllerReceiver.displayView(
-            ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appNameOverride)
+            ChipReceiverInfo(
+                routeInfo,
+                appIconDrawableOverride = null,
+                appNameOverride,
+                id = "id",
+                instanceId = InstanceId.fakeInstanceId(0),
+            )
         )
 
         val view = getChipView()
@@ -212,35 +428,27 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     }
 
     @Test
-    fun updateView_isAppIcon_usesAppIconSize() {
+    fun updateView_isAppIcon_usesAppIconPadding() {
         controllerReceiver.displayView(getChipReceiverInfo(packageName = PACKAGE_NAME))
+
         val chipView = getChipView()
-
-        chipView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-
-        val expectedSize =
-            context.resources.getDimensionPixelSize(R.dimen.media_ttt_icon_size_receiver)
-        assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
-        assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
+        assertThat(chipView.getAppIconView().paddingLeft).isEqualTo(0)
+        assertThat(chipView.getAppIconView().paddingRight).isEqualTo(0)
+        assertThat(chipView.getAppIconView().paddingTop).isEqualTo(0)
+        assertThat(chipView.getAppIconView().paddingBottom).isEqualTo(0)
     }
 
     @Test
-    fun updateView_notAppIcon_usesGenericIconSize() {
+    fun updateView_notAppIcon_usesGenericIconPadding() {
         controllerReceiver.displayView(getChipReceiverInfo(packageName = null))
+
         val chipView = getChipView()
-
-        chipView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        )
-
-        val expectedSize =
-            context.resources.getDimensionPixelSize(R.dimen.media_ttt_generic_icon_size_receiver)
-        assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
-        assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
+        val expectedPadding =
+            context.resources.getDimensionPixelSize(R.dimen.media_ttt_generic_icon_padding)
+        assertThat(chipView.getAppIconView().paddingLeft).isEqualTo(expectedPadding)
+        assertThat(chipView.getAppIconView().paddingRight).isEqualTo(expectedPadding)
+        assertThat(chipView.getAppIconView().paddingTop).isEqualTo(expectedPadding)
+        assertThat(chipView.getAppIconView().paddingBottom).isEqualTo(expectedPadding)
     }
 
     @Test
@@ -266,7 +474,13 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             .addFeature("feature")
             .setClientPackageName(packageName)
             .build()
-        return ChipReceiverInfo(routeInfo, null, null)
+        return ChipReceiverInfo(
+            routeInfo,
+            null,
+            null,
+            id = "id",
+            instanceId = InstanceId.fakeInstanceId(0),
+        )
     }
 
     private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)

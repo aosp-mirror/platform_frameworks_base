@@ -76,15 +76,16 @@ public final class CertXml {
      * and returns the certificate path including the chosen certificate if it is valid.
      *
      * @param trustedRoot the trusted root certificate
+     * @param validationDate use null for current time
      * @return the certificate path including the chosen certificate if the certificate is valid
      * @throws CertValidationException if the chosen certificate cannot be validated based on the
      *                                 trusted root certificate
      */
-    public CertPath getRandomEndpointCert(X509Certificate trustedRoot)
-            throws CertValidationException {
+    public CertPath getRandomEndpointCert(X509Certificate trustedRoot,
+            @Nullable Date validationDate)throws CertValidationException {
         return getEndpointCert(
                 new SecureRandom().nextInt(this.endpointCerts.size()),
-                /*validationDate=*/ null,
+                validationDate,
                 trustedRoot);
     }
 

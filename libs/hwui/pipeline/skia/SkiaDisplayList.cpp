@@ -23,6 +23,7 @@
 #else
 #include "DamageAccumulator.h"
 #endif
+#include "TreeInfo.h"
 #include "VectorDrawable.h"
 #ifdef __ANDROID__
 #include "renderthread/CanvasContext.h"
@@ -65,6 +66,12 @@ void SkiaDisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) 
     }
 }
 
+void SkiaDisplayList::visit(std::function<void(const RenderNode&)> func) const {
+    for (auto& child : mChildNodes) {
+        child.getRenderNode()->visit(func);
+    }
+}
+
 static bool intersects(const SkISize screenSize, const Matrix4& mat, const SkRect& bounds) {
     Vector3 points[] = { Vector3 {bounds.fLeft, bounds.fTop, 0},
                          Vector3 {bounds.fRight, bounds.fTop, 0},
@@ -102,6 +109,12 @@ bool SkiaDisplayList::prepareListAndChildren(
         info.prepareTextures = false;
         info.canvasContext.unpinImages();
     }
+
+    auto grContext = info.canvasContext.getGrContext();
+    for (auto mesh : mMeshes) {
+        mesh->updateSkMesh(grContext);
+    }
+
 #endif
 
     bool hasBackwardProjectedNodesHere = false;
@@ -168,6 +181,7 @@ void SkiaDisplayList::reset() {
 
     mDisplayList.reset();
 
+    mMeshes.clear();
     mMutableImages.clear();
     mVectorDrawables.clear();
     mAnimatedImages.clear();

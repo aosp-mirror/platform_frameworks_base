@@ -38,11 +38,11 @@ import androidx.annotation.WorkerThread;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -56,7 +56,11 @@ import javax.inject.Inject;
 
 
 /**
+ * @deprecated Don't use this class to listen to Secure Settings. Use {@code SecureSettings} instead
+ * or {@code SettingsObserver} to be able to specify the handler.
+ * This class will interact with SecureSettings using the main looper.
  */
+@Deprecated
 @SysUISingleton
 public class TunerServiceImpl extends TunerService {
 
@@ -68,7 +72,7 @@ public class TunerServiceImpl extends TunerService {
     // Things that use the tunable infrastructure but are now real user settings and
     // shouldn't be reset with tuner settings.
     private static final String[] RESET_EXCEPTION_LIST = new String[] {
-            QSTileHost.TILES_SETTING,
+            QSHost.TILES_SETTING,
             Settings.Secure.DOZE_ALWAYS_ON,
             Settings.Secure.MEDIA_CONTROLS_RESUME,
             Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION

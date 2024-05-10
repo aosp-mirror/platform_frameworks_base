@@ -40,14 +40,18 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 
+import android.app.ActivityOptions;
 import android.app.WaitResult;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Binder;
 import android.os.ConditionVariable;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
@@ -197,6 +201,33 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         verify(taskChangeNotifier, never()).notifyActivityDismissingDockedRootTask();
     }
 
+    /** Verifies that the activity can be destroying after removing task. */
+    @Test
+    public void testRemoveTask() {
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity1.setVisible(false);
+        activity1.finishing = true;
+        activity1.setState(ActivityRecord.State.STOPPING, "test");
+        activity1.addToStopping(false /* scheduleIdle */, false /* idleDelayed */, "test");
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity2.setState(ActivityRecord.State.RESUMED, "test");
+        // The state can happen from ActivityRecord#makeInvisible.
+        activity2.addToStopping(false /* scheduleIdle */, false /* idleDelayed */, "test");
+        mSupervisor.removeTask(activity1.getTask(), true /* killProcess */,
+                true /* removeFromRecents */, "testRemoveTask");
+        mSupervisor.removeTask(activity2.getTask(), true /* killProcess */,
+                true /* removeFromRecents */, "testRemoveTask");
+
+        assertEquals(ActivityRecord.State.DESTROYING, activity2.getState());
+        assertEquals(ActivityRecord.State.STOPPING, activity1.getState());
+        assertTrue(mSupervisor.mStoppingActivities.contains(activity1));
+        // Assume that it is called by scheduleIdle from addToStopping. And because
+        // mStoppingActivities remembers the finishing activity, it can continue to destroy.
+        mSupervisor.processStoppingAndFinishingActivities(null /* launchedActivity */,
+                false /* processPausingActivities */, "test");
+        assertEquals(ActivityRecord.State.DESTROYING, activity1.getState());
+    }
+
     /** Ensures that the calling package name passed to client complies with package visibility. */
     @Test
     public void testFilteredReferred() {
@@ -245,6 +276,19 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
     }
 
     /**
+     * Ensures it updates recent tasks order when the last resumed activity changed.
+     */
+    @Test
+    public void testUpdateRecentTasksForTopResumed() {
+        spyOn(mSupervisor.mRecentTasks);
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity.getTask();
+
+        mAtm.setLastResumedActivityUncheckLocked(activity, "test");
+        verify(mSupervisor.mRecentTasks).add(eq(task));
+    }
+
+    /**
      * Ensures that a trusted display can launch arbitrary activity and an untrusted display can't.
      */
     @Test
@@ -279,7 +323,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW).build();
         final ActivityRecord activity1 = new ActivityBuilder(mAtm)
                 .setTask(task1).setUid(ActivityBuilder.DEFAULT_FAKE_UID + 1).build();
-        task1.setResumedActivity(activity1, "test");
+        activity1.setState(ActivityRecord.State.RESUMED, "test");
 
         final ActivityRecord activity2 = new TaskBuilder(mSupervisor)
                 .setWindowingMode(WINDOWING_MODE_MULTI_WINDOW)
@@ -307,5 +351,41 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         mSupervisor.onUserUnlocked(0);
         waitHandlerIdle(mAtm.mH);
         verify(mRootWindowContainer, timeout(TIMEOUT_MS)).startHomeOnEmptyDisplays("userUnlocked");
+    }
+
+    /** Verifies that launch from recents sets the launch cookie on the activity. */
+    @Test
+    public void testStartActivityFromRecents_withLaunchCookie() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+
+        IBinder launchCookie = new Binder("test_launch_cookie");
+        ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchCookie(launchCookie);
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options.toBundle());
+
+        doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
+                anyInt(), any());
+
+        mSupervisor.startActivityFromRecents(-1, -1, activity.getRootTaskId(), safeOptions);
+
+        assertThat(activity.mLaunchCookie).isEqualTo(launchCookie);
+        verify(mAtm).moveTaskToFrontLocked(any(), eq(null), anyInt(), anyInt(), eq(safeOptions));
+    }
+
+    /** Verifies that launch from recents doesn't set the launch cookie on the activity. */
+    @Test
+    public void testStartActivityFromRecents_withoutLaunchCookie() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(
+                ActivityOptions.makeBasic().toBundle());
+
+        doNothing().when(mSupervisor.mService).moveTaskToFrontLocked(eq(null), eq(null), anyInt(),
+                anyInt(), any());
+
+        mSupervisor.startActivityFromRecents(-1, -1, activity.getRootTaskId(), safeOptions);
+
+        assertThat(activity.mLaunchCookie).isNull();
+        verify(mAtm).moveTaskToFrontLocked(any(), eq(null), anyInt(), anyInt(), eq(safeOptions));
     }
 }

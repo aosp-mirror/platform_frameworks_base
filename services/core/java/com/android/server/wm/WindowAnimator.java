@@ -30,7 +30,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.content.Context;
 import android.os.Trace;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
@@ -66,12 +65,7 @@ public class WindowAnimator {
     int mBulkUpdateParams = 0;
     Object mLastWindowFreezeSource;
 
-    SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators = new SparseArray<>(2);
     private boolean mInitialized = false;
-
-    // When set to true the animator will go over all windows after an animation frame is posted and
-    // check if some got replaced and can be removed.
-    private boolean mRemoveReplacedWindows = false;
 
     private Choreographer mChoreographer;
 
@@ -102,8 +96,7 @@ public class WindowAnimator {
         mAnimationFrameCallback = frameTimeNs -> {
             synchronized (mService.mGlobalLock) {
                 mAnimationFrameCallbackScheduled = false;
-                final long vsyncId = mChoreographer.getVsyncId();
-                animate(frameTimeNs, vsyncId);
+                animate(frameTimeNs);
                 if (mNotifyWhenNoAnimation && !mLastRootAnimating) {
                     mService.mGlobalLock.notifyAll();
                 }
@@ -111,21 +104,11 @@ public class WindowAnimator {
         };
     }
 
-    void addDisplayLocked(final int displayId) {
-        // Create the DisplayContentsAnimator object by retrieving it if the associated
-        // {@link DisplayContent} exists.
-        getDisplayContentsAnimatorLocked(displayId);
-    }
-
-    void removeDisplayLocked(final int displayId) {
-        mDisplayContentsAnimators.delete(displayId);
-    }
-
     void ready() {
         mInitialized = true;
     }
 
-    private void animate(long frameTimeNs, long vsyncId) {
+    private void animate(long frameTimeNs) {
         if (!mInitialized) {
             return;
         }
@@ -134,6 +117,9 @@ public class WindowAnimator {
         scheduleAnimation();
 
         final RootWindowContainer root = mService.mRoot;
+        final boolean useShellTransition = root.mTransitionController.isShellTransitionsEnabled();
+        final int animationFlags = useShellTransition ? CHILDREN : (TRANSITION | CHILDREN);
+        boolean rootAnimating = false;
         mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
         mBulkUpdateParams = 0;
         root.mOrientationChangeComplete = true;
@@ -142,17 +128,15 @@ public class WindowAnimator {
         }
 
         ProtoLog.i(WM_SHOW_TRANSACTIONS, ">>> OPEN TRANSACTION animate");
-        mService.openSurfaceTransaction();
         try {
             // Remove all deferred displays, tasks, and activities.
             root.handleCompleteDeferredRemoval();
 
             final AccessibilityController accessibilityController =
                     mService.mAccessibilityController;
-            final int numDisplays = mDisplayContentsAnimators.size();
+            final int numDisplays = root.getChildCount();
             for (int i = 0; i < numDisplays; i++) {
-                final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent dc = root.getDisplayContent(displayId);
+                final DisplayContent dc = root.getChildAt(i);
                 // Update animations of all applications, including those associated with
                 // exiting/removed apps.
                 dc.updateWindowsForAnimator();
@@ -160,14 +144,25 @@ public class WindowAnimator {
             }
 
             for (int i = 0; i < numDisplays; i++) {
-                final int displayId = mDisplayContentsAnimators.keyAt(i);
-                final DisplayContent dc = root.getDisplayContent(displayId);
+                final DisplayContent dc = root.getChildAt(i);
 
                 dc.checkAppWindowsReadyToShow();
                 if (accessibilityController.hasCallbacks()) {
-                    accessibilityController.drawMagnifiedRegionBorderIfNeeded(displayId,
+                    accessibilityController.drawMagnifiedRegionBorderIfNeeded(dc.mDisplayId,
                             mTransaction);
                 }
+
+                if (dc.isAnimating(animationFlags, ANIMATION_TYPE_ALL)) {
+                    rootAnimating = true;
+                    if (!dc.mLastContainsRunningSurfaceAnimator) {
+                        dc.mLastContainsRunningSurfaceAnimator = true;
+                        dc.enableHighFrameRate(true);
+                    }
+                } else if (dc.mLastContainsRunningSurfaceAnimator) {
+                    dc.mLastContainsRunningSurfaceAnimator = false;
+                    dc.enableHighFrameRate(false);
+                }
+                mTransaction.merge(dc.getPendingTransaction());
             }
 
             cancelAnimation();
@@ -187,8 +182,6 @@ public class WindowAnimator {
             mService.mWindowPlacerLocked.requestTraversal();
         }
 
-        final boolean rootAnimating = root.isAnimating(TRANSITION | CHILDREN /* flags */,
-                ANIMATION_TYPE_ALL /* typesToCheck */);
         if (rootAnimating && !mLastRootAnimating) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
         }
@@ -198,29 +191,16 @@ public class WindowAnimator {
         }
         mLastRootAnimating = rootAnimating;
 
-        final boolean runningExpensiveAnimations =
-                root.isAnimating(TRANSITION | CHILDREN /* flags */,
-                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_SCREEN_ROTATION
-                                | ANIMATION_TYPE_RECENTS /* typesToCheck */);
-        if (runningExpensiveAnimations && !mRunningExpensiveAnimations) {
-            // Usually app transitions put quite a load onto the system already (with all the things
-            // happening in app), so pause task snapshot persisting to not increase the load.
-            mService.mTaskSnapshotController.setPersisterPaused(true);
-            mTransaction.setEarlyWakeupStart();
-        } else if (!runningExpensiveAnimations && mRunningExpensiveAnimations) {
-            mService.mTaskSnapshotController.setPersisterPaused(false);
-            mTransaction.setEarlyWakeupEnd();
+        // APP_TRANSITION, SCREEN_ROTATION, TYPE_RECENTS are handled by shell transition.
+        if (!useShellTransition) {
+            updateRunningExpensiveAnimationsLegacy();
         }
-        mRunningExpensiveAnimations = runningExpensiveAnimations;
 
-        SurfaceControl.mergeToGlobalTransaction(mTransaction);
-        mService.closeSurfaceTransaction("WindowAnimator");
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "applyTransaction");
+        mTransaction.apply();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        mService.mWindowTracing.logState("WindowAnimator");
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
-
-        if (mRemoveReplacedWindows) {
-            root.removeReplacedWindows();
-            mRemoveReplacedWindows = false;
-        }
 
         mService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         executeAfterPrepareSurfacesRunnables();
@@ -230,6 +210,21 @@ public class WindowAnimator {
                     + " mBulkUpdateParams=" + Integer.toHexString(mBulkUpdateParams)
                     + " hasPendingLayoutChanges=" + hasPendingLayoutChanges);
         }
+    }
+
+    private void updateRunningExpensiveAnimationsLegacy() {
+        final boolean runningExpensiveAnimations =
+                mService.mRoot.isAnimating(TRANSITION | CHILDREN /* flags */,
+                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_SCREEN_ROTATION
+                                | ANIMATION_TYPE_RECENTS /* typesToCheck */);
+        if (runningExpensiveAnimations && !mRunningExpensiveAnimations) {
+            mService.mSnapshotController.setPause(true);
+            mTransaction.setEarlyWakeupStart();
+        } else if (!runningExpensiveAnimations && mRunningExpensiveAnimations) {
+            mService.mSnapshotController.setPause(false);
+            mTransaction.setEarlyWakeupEnd();
+        }
+        mRunningExpensiveAnimations = runningExpensiveAnimations;
     }
 
     private static String bulkUpdateParamsToString(int bulkUpdateParams) {
@@ -246,12 +241,9 @@ public class WindowAnimator {
     public void dumpLocked(PrintWriter pw, String prefix, boolean dumpAll) {
         final String subPrefix = "  " + prefix;
 
-        for (int i = 0; i < mDisplayContentsAnimators.size(); i++) {
-            pw.print(prefix); pw.print("DisplayContentsAnimator #");
-                    pw.print(mDisplayContentsAnimators.keyAt(i));
-                    pw.println(":");
-            final DisplayContent dc =
-                    mService.mRoot.getDisplayContent(mDisplayContentsAnimators.keyAt(i));
+        for (int i = 0; i < mService.mRoot.getChildCount(); i++) {
+            final DisplayContent dc = mService.mRoot.getChildAt(i);
+            pw.print(prefix); pw.print(dc); pw.println(":");
             dc.dumpWindowAnimators(pw, subPrefix);
             pw.println();
         }
@@ -269,27 +261,6 @@ public class WindowAnimator {
         }
     }
 
-    private DisplayContentsAnimator getDisplayContentsAnimatorLocked(int displayId) {
-        if (displayId < 0) {
-            return null;
-        }
-
-        DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.get(displayId);
-
-        // It is possible that this underlying {@link DisplayContent} has been removed. In this
-        // case, we do not want to create an animator associated with it as {link #animate} will
-        // fail.
-        if (displayAnimator == null && mService.mRoot.getDisplayContent(displayId) != null) {
-            displayAnimator = new DisplayContentsAnimator();
-            mDisplayContentsAnimators.put(displayId, displayAnimator);
-        }
-        return displayAnimator;
-    }
-
-    void requestRemovalOfReplacedWindows(WindowState win) {
-        mRemoveReplacedWindows = true;
-    }
-
     void scheduleAnimation() {
         if (!mAnimationFrameCallbackScheduled) {
             mAnimationFrameCallbackScheduled = true;
@@ -302,9 +273,6 @@ public class WindowAnimator {
             mAnimationFrameCallbackScheduled = false;
             mChoreographer.removeFrameCallback(mAnimationFrameCallback);
         }
-    }
-
-    private class DisplayContentsAnimator {
     }
 
     boolean isAnimationScheduled() {

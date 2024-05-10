@@ -33,7 +33,7 @@ import java.util.Set;
 
 /**
  * Wrapper class representing a translation request associated with a {@link android.view.View} to
- * be used by {@link android.service.translation.TranslationService}.
+ * be used by translation service.
  */
 @DataClass(genBuilder = false, genToString = true, genEqualsHashCode = true, genGetters = false,
         genHiddenConstructor = true, genHiddenConstDefs = true)

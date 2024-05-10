@@ -29,7 +29,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.io.PrintWriter;
@@ -136,6 +136,11 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     @Override
     public boolean isFalseTap(@Penalty int penalty) {
         return mInternalFalsingManager.isFalseTap(penalty);
+    }
+
+    @Override
+    public boolean isFalseLongTap(int penalty) {
+        return mInternalFalsingManager.isFalseLongTap(penalty);
     }
 
     @Override

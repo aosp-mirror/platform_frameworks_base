@@ -1,0 +1,16 @@
+{
+    "presubmit": [
+        {
+            "name": "CtsSecurityTestCases",
+            "options": [
+                {
+                    "include-filter": "android.security.cts.FileIntegrityManagerTest"
+                }
+            ],
+            "file_patterns": [
+                "FileIntegrityManager\\.java",
+                "IFileIntegrityService\\.aidl"
+            ]
+        }
+    ]
+}

@@ -35,6 +35,7 @@ import android.media.IAudioService;
 import android.net.IIpConnectivityMetrics;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
@@ -51,12 +52,15 @@ import androidx.annotation.NonNull;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
-import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
+import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -147,6 +151,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        PackageManagerLocal getPackageManagerLocal() {
+            return services.packageManagerLocal;
+        }
+
+        @Override
         PowerManagerInternal getPowerManagerInternal() {
             return services.powerManagerInternal;
         }
@@ -223,6 +232,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
 
         @Override
         AlarmManager getAlarmManager() {return services.alarmManager;}
+
+        @Override
+        AlarmManagerInternal getAlarmManagerInternal() {
+            return services.alarmManagerInternal;
+        }
 
         @Override
         LockPatternUtils newLockPatternUtils() {
@@ -443,7 +457,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         public TransferOwnershipMetadataManager newTransferOwnershipMetadataManager() {
             return new TransferOwnershipMetadataManager(
-                    new TransferOwnershipMetadataManagerTest.MockInjector());
+                    new TransferOwnershipMetadataManagerMockInjector());
         }
 
         @Override
@@ -494,6 +508,14 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         public Context createContextAsUser(UserHandle user) {
             return context;
+        }
+    }
+
+    static class TransferOwnershipMetadataManagerMockInjector extends
+            TransferOwnershipMetadataManager.Injector {
+        @Override
+        public File getOwnerTransferMetadataDir() {
+            return Environment.getExternalStorageDirectory();
         }
     }
 }

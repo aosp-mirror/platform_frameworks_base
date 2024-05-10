@@ -20,13 +20,16 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.le.ScanFilter;
 import android.content.Context;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +39,8 @@ import java.util.Set;
 public class CachedBluetoothDeviceManager {
     private static final String TAG = "CachedBluetoothDeviceManager";
     private static final boolean DEBUG = BluetoothUtils.D;
+
+    @VisibleForTesting static int sLateBondingTimeoutMillis = 5000; // 5s
 
     private Context mContext;
     private final LocalBluetoothManager mBtManager;
@@ -47,11 +52,14 @@ public class CachedBluetoothDeviceManager {
     @VisibleForTesting
     CsipDeviceManager mCsipDeviceManager;
     BluetoothDevice mOngoingSetMemberPair;
+    boolean mIsLateBonding;
+    int mGroupIdOfLateBonding;
 
     public CachedBluetoothDeviceManager(Context context, LocalBluetoothManager localBtManager) {
         mContext = context;
         mBtManager = localBtManager;
-        mHearingAidDeviceManager = new HearingAidDeviceManager(localBtManager, mCachedDevices);
+        mHearingAidDeviceManager = new HearingAidDeviceManager(context, localBtManager,
+                mCachedDevices);
         mCsipDeviceManager = new CsipDeviceManager(localBtManager, mCachedDevices);
     }
 
@@ -108,10 +116,21 @@ public class CachedBluetoothDeviceManager {
     /**
      * Create and return a new {@link CachedBluetoothDevice}. This assumes
      * that {@link #findDevice} has already been called and returned null.
-     * @param device the address of the new Bluetooth device
+     * @param device the new Bluetooth device
      * @return the newly created CachedBluetoothDevice object
      */
     public CachedBluetoothDevice addDevice(BluetoothDevice device) {
+        return addDevice(device, /*leScanFilters=*/null);
+    }
+
+    /**
+     * Create and return a new {@link CachedBluetoothDevice}. This assumes
+     * that {@link #findDevice} has already been called and returned null.
+     * @param device the new Bluetooth device
+     * @param leScanFilters the BLE scan filters which the device matched
+     * @return the newly created CachedBluetoothDevice object
+     */
+    public CachedBluetoothDevice addDevice(BluetoothDevice device, List<ScanFilter> leScanFilters) {
         CachedBluetoothDevice newDevice;
         final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
         synchronized (this) {
@@ -119,7 +138,7 @@ public class CachedBluetoothDeviceManager {
             if (newDevice == null) {
                 newDevice = new CachedBluetoothDevice(mContext, profileManager, device);
                 mCsipDeviceManager.initCsipDeviceIfNeeded(newDevice);
-                mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(newDevice);
+                mHearingAidDeviceManager.initHearingAidDeviceIfNeeded(newDevice, leScanFilters);
                 if (!mCsipDeviceManager.setMemberDeviceIfNeeded(newDevice)
                         && !mHearingAidDeviceManager.setSubDeviceIfNeeded(newDevice)) {
                     mCachedDevices.add(newDevice);
@@ -188,7 +207,6 @@ public class CachedBluetoothDeviceManager {
     /**
      * Updates the Hearing Aid devices; specifically the HiSyncId's. This routine is called when the
      * Hearing Aid Service is connected and the HiSyncId's are now available.
-     * @param LocalBluetoothProfileManager profileManager
      */
     public synchronized void updateHearingAidsDevices() {
         mHearingAidDeviceManager.updateHearingAidsDevices();
@@ -209,6 +227,14 @@ public class CachedBluetoothDeviceManager {
      * @return The name, or if unavailable, the address.
      */
     public String getName(BluetoothDevice device) {
+        if (isOngoingPairByCsip(device)) {
+            CachedBluetoothDevice firstDevice =
+                    mCsipDeviceManager.getFirstMemberDevice(mGroupIdOfLateBonding);
+            if (firstDevice != null && firstDevice.getName() != null) {
+                return firstDevice.getName();
+            }
+        }
+
         CachedBluetoothDevice cachedDevice = findDevice(device);
         if (cachedDevice != null && cachedDevice.getName() != null) {
             return cachedDevice.getName();
@@ -224,8 +250,14 @@ public class CachedBluetoothDeviceManager {
 
     public synchronized void clearNonBondedDevices() {
         clearNonBondedSubDevices();
-        mCachedDevices.removeIf(cachedDevice
-            -> cachedDevice.getBondState() == BluetoothDevice.BOND_NONE);
+        final List<CachedBluetoothDevice> removedCachedDevice = new ArrayList<>();
+        mCachedDevices.stream()
+                .filter(cachedDevice -> cachedDevice.getBondState() == BluetoothDevice.BOND_NONE)
+                .forEach(cachedDevice -> {
+                    cachedDevice.release();
+                    removedCachedDevice.add(cachedDevice);
+                });
+        mCachedDevices.removeAll(removedCachedDevice);
     }
 
     private void clearNonBondedSubDevices() {
@@ -246,6 +278,7 @@ public class CachedBluetoothDeviceManager {
             if (subDevice != null
                     && subDevice.getDevice().getBondState() == BluetoothDevice.BOND_NONE) {
                 // Sub device exists and it is not bonded
+                subDevice.release();
                 cachedDevice.setSubDevice(null);
             }
         }
@@ -295,12 +328,15 @@ public class CachedBluetoothDeviceManager {
                 }
                 if (cachedDevice.getBondState() != BluetoothDevice.BOND_BONDED) {
                     cachedDevice.setJustDiscovered(false);
+                    cachedDevice.release();
                     mCachedDevices.remove(i);
                 }
             }
 
             // To clear the SetMemberPair flag when the Bluetooth is turning off.
             mOngoingSetMemberPair = null;
+            mIsLateBonding = false;
+            mGroupIdOfLateBonding = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         }
     }
 
@@ -310,26 +346,37 @@ public class CachedBluetoothDeviceManager {
             return mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
                 state);
         }
-        if (profileId == BluetoothProfile.CSIP_SET_COORDINATOR) {
+        if (profileId == BluetoothProfile.HEADSET
+                || profileId == BluetoothProfile.A2DP
+                || profileId == BluetoothProfile.LE_AUDIO
+                || profileId == BluetoothProfile.CSIP_SET_COORDINATOR) {
             return mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
                 state);
         }
         return false;
     }
 
+    /** Handles when the device been set as active/inactive. */
+    public synchronized void onActiveDeviceChanged(CachedBluetoothDevice cachedBluetoothDevice) {
+        if (cachedBluetoothDevice.isHearingAidDevice()) {
+            mHearingAidDeviceManager.onActiveDeviceChanged(cachedBluetoothDevice);
+        }
+    }
+
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {
         device.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
         CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(device);
-        final Set<CachedBluetoothDevice> memberDevices = device.getMemberDevice();
+        // Should iterate through the cloned set to avoid ConcurrentModificationException
+        final Set<CachedBluetoothDevice> memberDevices = new HashSet<>(device.getMemberDevice());
         if (!memberDevices.isEmpty()) {
-            // Main device is unpaired, to unpair the member device
+            // Main device is unpaired, also unpair the member devices
             for (CachedBluetoothDevice memberDevice : memberDevices) {
                 memberDevice.unpair();
                 memberDevice.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
                 device.removeMemberDevice(memberDevice);
             }
         } else if (mainDevice != null) {
-            // the member device unpaired, to unpair main device
+            // Member device is unpaired, also unpair the main device
             mainDevice.unpair();
         }
         mainDevice = mHearingAidDeviceManager.findMainDevice(device);
@@ -356,19 +403,99 @@ public class CachedBluetoothDeviceManager {
      * @return {@code true}, if the device should pair automatically; Otherwise, return
      * {@code false}.
      */
-    public synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
+    private synchronized boolean shouldPairByCsip(BluetoothDevice device, int groupId) {
         boolean isOngoingSetMemberPair = mOngoingSetMemberPair != null;
         int bondState = device.getBondState();
-        if (isOngoingSetMemberPair || bondState != BluetoothDevice.BOND_NONE
-                || !mCsipDeviceManager.isExistedGroupId(groupId)) {
-            Log.d(TAG, "isOngoingSetMemberPair: " + isOngoingSetMemberPair
-                    + " , device.getBondState: " + bondState);
+        boolean groupExists = mCsipDeviceManager.isExistedGroupId(groupId);
+        Log.d(TAG,
+                "isOngoingSetMemberPair=" + isOngoingSetMemberPair + ", bondState=" + bondState
+                        + ", groupExists=" + groupExists + ", groupId=" + groupId);
+
+        if (isOngoingSetMemberPair || bondState != BluetoothDevice.BOND_NONE || !groupExists) {
+            return false;
+        }
+        return true;
+    }
+
+    private synchronized boolean checkLateBonding(int groupId) {
+        CachedBluetoothDevice firstDevice = mCsipDeviceManager.getFirstMemberDevice(groupId);
+        if (firstDevice == null) {
+            Log.d(TAG, "No first device in group: " + groupId);
             return false;
         }
 
-        Log.d(TAG, "Bond " + device.getName() + " by CSIP");
+        Timestamp then = firstDevice.getBondTimestamp();
+        if (then == null) {
+            Log.d(TAG, "No bond timestamp");
+            return true;
+        }
+
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        long diff = (now.getTime() - then.getTime());
+        Log.d(TAG, "Time difference to first bonding: " + diff + "ms");
+
+        return diff > sLateBondingTimeoutMillis;
+    }
+
+    /**
+     * Called to check if there is an ongoing bonding for the device and it is late bonding.
+     * If the device is not matching the ongoing bonding device then false will be returned.
+     *
+     * @param device The device to check.
+     */
+    public synchronized boolean isLateBonding(BluetoothDevice device) {
+        if (!isOngoingPairByCsip(device)) {
+            Log.d(TAG, "isLateBonding: pair not ongoing or not matching device");
+            return false;
+        }
+
+        Log.d(TAG, "isLateBonding: " + mIsLateBonding);
+        return mIsLateBonding;
+    }
+
+    /**
+     * Called when we found a set member of a group. The function will check the {@code groupId} if
+     * it exists and the bond state of the device is BOND_NONE, and if there isn't any ongoing pair
+     * , and then pair the device automatically.
+     *
+     * @param device The found device
+     * @param groupId The group id of the found device
+     */
+    public synchronized void pairDeviceByCsip(BluetoothDevice device, int groupId) {
+        if (!shouldPairByCsip(device, groupId)) {
+            return;
+        }
+        Log.d(TAG, "Bond " + device.getAnonymizedAddress() + " groupId=" + groupId + " by CSIP ");
         mOngoingSetMemberPair = device;
-        return true;
+        mIsLateBonding = checkLateBonding(groupId);
+        mGroupIdOfLateBonding = groupId;
+        syncConfigFromMainDevice(device, groupId);
+        if (!device.createBond(BluetoothDevice.TRANSPORT_LE)) {
+            Log.d(TAG, "Bonding could not be started");
+            mOngoingSetMemberPair = null;
+            mIsLateBonding = false;
+            mGroupIdOfLateBonding = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
+        }
+    }
+
+    private void syncConfigFromMainDevice(BluetoothDevice device, int groupId) {
+        if (!isOngoingPairByCsip(device)) {
+            return;
+        }
+        CachedBluetoothDevice memberDevice = findDevice(device);
+        CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(memberDevice);
+        if (mainDevice == null) {
+            mainDevice = mCsipDeviceManager.getCachedDevice(groupId);
+        }
+
+        if (mainDevice == null || mainDevice.equals(memberDevice)) {
+            Log.d(TAG, "no mainDevice");
+            return;
+        }
+
+        // The memberDevice set PhonebookAccessPermission
+        device.setPhonebookAccessPermission(mainDevice.getDevice().getPhonebookAccessPermission());
     }
 
     /**
@@ -384,7 +511,7 @@ public class CachedBluetoothDeviceManager {
      * function, and would not like to update the UI. If not, return {@code false}.
      */
     public synchronized boolean onBondStateChangedIfProcess(BluetoothDevice device, int bondState) {
-        if (mOngoingSetMemberPair == null || !mOngoingSetMemberPair.equals(device)) {
+        if (!isOngoingPairByCsip(device)) {
             return false;
         }
 
@@ -393,6 +520,8 @@ public class CachedBluetoothDeviceManager {
         }
 
         mOngoingSetMemberPair = null;
+        mIsLateBonding = false;
+        mGroupIdOfLateBonding = BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
         if (bondState != BluetoothDevice.BOND_NONE) {
             if (findDevice(device) == null) {
                 final LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
@@ -416,7 +545,7 @@ public class CachedBluetoothDeviceManager {
      * {@code false}.
      */
     public boolean isOngoingPairByCsip(BluetoothDevice device) {
-        return !(mOngoingSetMemberPair == null) && mOngoingSetMemberPair.equals(device);
+        return mOngoingSetMemberPair != null && mOngoingSetMemberPair.equals(device);
     }
 
     private void log(String msg) {

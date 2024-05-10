@@ -18,6 +18,7 @@ package com.android.systemui.doze;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.doze.dagger.DozeScope;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 import javax.inject.Inject;
 
@@ -28,18 +29,21 @@ import javax.inject.Inject;
 public class DozeAuthRemover implements DozeMachine.Part {
 
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final SelectedUserInteractor mSelectedUserInteractor;
 
     @Inject
-    public DozeAuthRemover(KeyguardUpdateMonitor keyguardUpdateMonitor) {
+    public DozeAuthRemover(KeyguardUpdateMonitor keyguardUpdateMonitor,
+            SelectedUserInteractor selectedUserInteractor) {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mSelectedUserInteractor = selectedUserInteractor;
     }
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         if (newState == DozeMachine.State.DOZE || newState == DozeMachine.State.DOZE_AOD) {
-            int currentUser = KeyguardUpdateMonitor.getCurrentUser();
+            int currentUser = mSelectedUserInteractor.getSelectedUserId();
             if (mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(currentUser)) {
-                mKeyguardUpdateMonitor.clearBiometricRecognized();
+                mKeyguardUpdateMonitor.clearFingerprintRecognized();
             }
         }
     }

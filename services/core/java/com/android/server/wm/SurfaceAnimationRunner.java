@@ -45,6 +45,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.window.ScreenCapture;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -61,6 +62,8 @@ import java.util.function.Supplier;
  * Class to run animations without holding the window manager lock.
  */
 class SurfaceAnimationRunner {
+
+    private static final String TAG = SurfaceAnimationRunner.class.getSimpleName();
 
     private final Object mLock = new Object();
 
@@ -185,6 +188,16 @@ class SurfaceAnimationRunner {
                 // We must wait for t to be committed since otherwise the leash doesn't have the
                 // windows we want to screenshot and extend as children.
                 t.addTransactionCommittedListener(mEdgeExtensionExecutor, () -> {
+                    if (!animationLeash.isValid()) {
+                        Log.e(TAG, "Animation leash is not valid");
+                        synchronized (mEdgeExtensionLock) {
+                            mEdgeExtensions.remove(animationLeash);
+                        }
+                        synchronized (mLock) {
+                            mPreProcessingAnimations.remove(animationLeash);
+                        }
+                        return;
+                    }
                     final WindowAnimationSpec animationSpec = a.asWindowAnimationSpec();
 
                     final Transaction edgeExtensionCreationTransaction = new Transaction();
@@ -220,11 +233,11 @@ class SurfaceAnimationRunner {
                 if (!mAnimationStartDeferred && mPreProcessingAnimations.isEmpty()) {
                     mChoreographer.postFrameCallback(this::startAnimations);
                 }
-
-                // Some animations (e.g. move animations) require the initial transform to be
-                // applied immediately.
-                applyTransformation(runningAnim, t, 0 /* currentPlayTime */);
             }
+
+            // Some animations (e.g. move animations) require the initial transform to be
+            // applied immediately.
+            applyTransformation(runningAnim, t, 0 /* currentPlayTime */);
         }
     }
 
@@ -433,23 +446,23 @@ class SurfaceAnimationRunner {
     private void doCreateExtensionSurface(SurfaceControl leash, Rect edgeBounds,
             Rect extensionRect, int xPos, int yPos, String layerName,
             Transaction startTransaction) {
-        SurfaceControl.LayerCaptureArgs captureArgs =
-                new SurfaceControl.LayerCaptureArgs.Builder(leash /* surfaceToExtend */)
+        ScreenCapture.LayerCaptureArgs captureArgs =
+                new ScreenCapture.LayerCaptureArgs.Builder(leash /* surfaceToExtend */)
                         .setSourceCrop(edgeBounds)
                         .setFrameScale(1)
                         .setPixelFormat(PixelFormat.RGBA_8888)
                         .setChildrenOnly(true)
                         .setAllowProtected(true)
+                        .setCaptureSecureLayers(true)
                         .build();
-        final SurfaceControl.ScreenshotHardwareBuffer edgeBuffer =
-                SurfaceControl.captureLayers(captureArgs);
+        final ScreenCapture.ScreenshotHardwareBuffer edgeBuffer =
+                ScreenCapture.captureLayers(captureArgs);
 
         if (edgeBuffer == null) {
             // The leash we are trying to screenshot may have been removed by this point, which is
             // likely the reason for ending up with a null edgeBuffer, in which case we just want to
             // return and do nothing.
-            Log.e("SurfaceAnimationRunner", "Failed to create edge extension - "
-                    + "edge buffer is null");
+            Log.e(TAG, "Failed to create edge extension - edge buffer is null");
             return;
         }
 

@@ -16,6 +16,12 @@
 
 #include "TestSceneBase.h"
 
+#include <SkBitmap.h>
+#include <SkCanvas.h>
+#include <SkPaint.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
+
 class ReadbackFromHardware;
 
 static TestScene::Registrar _SaveLayer(TestScene::Info{

@@ -15,7 +15,7 @@
  */
 package com.android.wm.shell.pip.phone;
 
-import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
+import static com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_NONE;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -24,18 +24,20 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.view.MagnificationSpec;
+import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
+import android.window.ScreenCapture;
 
 import androidx.annotation.BinderThread;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 
 import java.util.ArrayList;
@@ -362,6 +364,15 @@ public class PipAccessibilityInteractionConnection {
         }
 
         @Override
+        public void takeScreenshotOfWindow(int interactionId,
+                ScreenCapture.ScreenCaptureListener listener,
+                IAccessibilityInteractionConnectionCallback callback) throws RemoteException {
+            // AbstractAccessibilityServiceConnection uses the standard
+            // IAccessibilityInteractionConnection for takeScreenshotOfWindow for Pip windows,
+            // so do nothing here.
+        }
+
+        @Override
         public void clearAccessibilityFocus() throws RemoteException {
             // Do nothing
         }
@@ -370,5 +381,11 @@ public class PipAccessibilityInteractionConnection {
         public void notifyOutsideTouch() throws RemoteException {
             // Do nothing
         }
-    }
+
+        @Override
+        public void attachAccessibilityOverlayToWindow(
+                SurfaceControl sc,
+                int interactionId,
+                IAccessibilityInteractionConnectionCallback callback) {}
+}
 }

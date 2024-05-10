@@ -27,6 +27,7 @@ import com.android.wm.shell.bubbles.BubblePositioner;
 
 public class TestableBubblePositioner extends BubblePositioner {
     private int mMaxBubbles;
+    private boolean mIsLargeScreen = false;
 
     public TestableBubblePositioner(Context context,
             WindowManager windowManager) {
@@ -45,5 +46,14 @@ public class TestableBubblePositioner extends BubblePositioner {
     @Override
     public int getMaxBubbles() {
         return mMaxBubbles;
+    }
+
+    public void setIsLargeScreen(boolean isLargeScreen) {
+        mIsLargeScreen = isLargeScreen;
+    }
+
+    @Override
+    public boolean isLargeScreen() {
+        return mIsLargeScreen;
     }
 }

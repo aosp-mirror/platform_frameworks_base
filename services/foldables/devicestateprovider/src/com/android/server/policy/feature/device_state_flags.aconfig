@@ -1,0 +1,17 @@
+package: "com.android.server.policy.feature.flags"
+container: "system"
+
+flag {
+    name: "enable_dual_display_blocking"
+    namespace: "display_manager"
+    description: "Feature flag for dual display blocking"
+    bug: "278667199"
+}
+
+flag {
+    name: "enable_foldables_posture_based_closed_state"
+    namespace: "windowing_frontend"
+    description: "Enables smarter closed device state state for foldable devices"
+    bug: "309792734"
+    is_fixed_read_only: true
+}

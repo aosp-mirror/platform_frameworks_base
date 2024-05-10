@@ -51,13 +51,13 @@ import java.util.function.Function;
  * @hide
  */
 abstract class OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> implements
-        PooledFunction<A, R>, BiFunction<A, B, R>, TriFunction<A, B, C, R>,
+        BiFunction<A, B, R>, TriFunction<A, B, C, R>,
         QuadFunction<A, B, C, D, R>, QuintFunction<A, B, C, D, E, R>,
         HexFunction<A, B, C, D, E, F, R>, HeptFunction<A, B, C, D, E, F, G, R>,
         OctFunction<A, B, C, D, E, F, G, H, R>, NonaFunction<A, B, C, D, E, F, G, H, I, R>,
         DecFunction<A, B, C, D, E, F, G, H, I, J, R>,
         UndecFunction<A, B, C, D, E, F, G, H, I, J, K, R>,
-        PooledConsumer<A>, BiConsumer<A, B>, TriConsumer<A, B, C>, QuadConsumer<A, B, C, D>,
+        BiConsumer<A, B>, TriConsumer<A, B, C>, QuadConsumer<A, B, C, D>,
         QuintConsumer<A, B, C, D, E>, HexConsumer<A, B, C, D, E, F>,
         HeptConsumer<A, B, C, D, E, F, G>, OctConsumer<A, B, C, D, E, F, G, H>,
         NonaConsumer<A, B, C, D, E, F, G, H, I>, DecConsumer<A, B, C, D, E, F, G, H, I, J>,
@@ -73,11 +73,6 @@ abstract class OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> implements
         return invoke(o, o2, null, null, null, null, null, null, null, null, null);
     }
 
-    @Override
-    public R apply(A o) {
-        return invoke(o, null, null, null, null, null, null, null, null, null, null);
-    }
-
     public abstract <V> OmniFunction<A, B, C, D, E, F, G, H, I, J, K, V> andThen(
             Function<? super R, ? extends V> after);
     public abstract OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> negate();
@@ -85,11 +80,6 @@ abstract class OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> implements
     @Override
     public void accept(A o, B o2) {
         invoke(o, o2, null, null, null, null, null, null, null, null, null);
-    }
-
-    @Override
-    public void accept(A o) {
-        invoke(o, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
@@ -129,11 +119,6 @@ abstract class OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> implements
 
     @Override
     public PooledRunnable asRunnable() {
-        return this;
-    }
-
-    @Override
-    public PooledConsumer<A> asConsumer() {
         return this;
     }
 

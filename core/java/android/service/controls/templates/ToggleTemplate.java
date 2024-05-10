@@ -53,7 +53,7 @@ public final class ToggleTemplate extends ControlTemplate {
      */
     ToggleTemplate(Bundle b) {
         super(b);
-        mButton = b.getParcelable(KEY_BUTTON);
+        mButton = b.getParcelable(KEY_BUTTON, android.service.controls.templates.ControlButton.class);
     }
 
     public boolean isChecked() {

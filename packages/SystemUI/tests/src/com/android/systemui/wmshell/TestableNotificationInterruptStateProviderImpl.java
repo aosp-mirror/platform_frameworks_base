@@ -16,28 +16,30 @@
 
 package com.android.systemui.wmshell;
 
-import android.content.ContentResolver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.service.dreams.IDreamManager;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.EventLog;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 public class TestableNotificationInterruptStateProviderImpl
         extends NotificationInterruptStateProviderImpl {
 
     TestableNotificationInterruptStateProviderImpl(
-            ContentResolver contentResolver,
             PowerManager powerManager,
-            IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             StatusBarStateController statusBarStateController,
             KeyguardStateController keyguardStateController,
@@ -46,10 +48,15 @@ public class TestableNotificationInterruptStateProviderImpl
             NotificationInterruptLogger logger,
             Handler mainHandler,
             NotifPipelineFlags flags,
-            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
-        super(contentResolver,
+            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker,
+            DeviceProvisionedController deviceProvisionedController,
+            SystemClock systemClock,
+            GlobalSettings globalSettings,
+            EventLog eventLog) {
+        super(
                 powerManager,
-                dreamManager,
                 ambientDisplayConfiguration,
                 batteryController,
                 statusBarStateController,
@@ -58,7 +65,13 @@ public class TestableNotificationInterruptStateProviderImpl
                 logger,
                 mainHandler,
                 flags,
-                keyguardNotificationVisibilityProvider);
+                keyguardNotificationVisibilityProvider,
+                uiEventLogger,
+                userTracker,
+                deviceProvisionedController,
+                systemClock,
+                globalSettings,
+                eventLog);
         mUseHeadsUp = true;
     }
 }

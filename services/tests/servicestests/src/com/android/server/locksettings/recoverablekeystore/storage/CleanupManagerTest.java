@@ -21,11 +21,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.UserHandle;
 import android.os.UserManager;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -49,7 +47,6 @@ public class CleanupManagerTest {
     private static final long USER_SERIAL_NUMBER = 101L;
     private static final long USER_SERIAL_NUMBER_2 = 202L;
 
-    private Context mContext;
     private CleanupManager mManager;
 
     @Mock private RecoverableKeyStoreDb mDatabase;
@@ -60,8 +57,7 @@ public class CleanupManagerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mContext = InstrumentationRegistry.getTargetContext();
-        mManager = new CleanupManager(mContext, mRecoverySnapshotStorage, mDatabase, mUserManager,
+        mManager = new CleanupManager(mRecoverySnapshotStorage, mDatabase, mUserManager,
                 mApplicationKeyStorage);
     }
 

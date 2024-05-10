@@ -298,6 +298,16 @@ public class StatusBarNotification implements Parcelable {
     }
 
     /**
+     * @hide
+     *
+     * Convenience method to check the notification's flags for
+     * {@link Notification#FLAG_NO_DISMISS}.
+     */
+    public boolean isNonDismissable() {
+        return (notification.flags & Notification.FLAG_NO_DISMISS) != 0;
+    }
+
+    /**
      * Convenience method to check the notification's flags for
      * either {@link Notification#FLAG_ONGOING_EVENT} or
      * {@link Notification#FLAG_NO_CLEAR}.
@@ -500,7 +510,7 @@ public class StatusBarNotification implements Parcelable {
                         template.hashCode());
             }
             ArrayList<Person> people = getNotification().extras.getParcelableArrayList(
-                    Notification.EXTRA_PEOPLE_LIST);
+                    Notification.EXTRA_PEOPLE_LIST, android.app.Person.class);
             if (people != null && !people.isEmpty()) {
                 logMaker.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_PEOPLE, people.size());
             }

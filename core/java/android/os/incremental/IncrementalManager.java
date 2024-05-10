@@ -25,6 +25,9 @@ import android.content.pm.DataLoaderParams;
 import android.content.pm.IPackageLoadingProgressCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.StructStat;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -146,15 +149,29 @@ public final class IncrementalManager {
     @Nullable
     public IncrementalStorage createStorage(@NonNull String path,
             @NonNull IncrementalStorage linkedStorage, @CreateMode int createMode) {
+        int id = -1;
         try {
-            final int id = mService.createLinkedStorage(
+            // Incremental service mounts its newly created storage on top of the supplied path,
+            // ensure that the original mode remains the same after mounting.
+            StructStat st = Os.stat(path);
+            id = mService.createLinkedStorage(
                     path, linkedStorage.getId(), createMode);
             if (id < 0) {
                 return null;
             }
+            Os.chmod(path, st.st_mode & 07777);
             return new IncrementalStorage(mService, id);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (ErrnoException e) {
+            if (id >= 0) {
+                try {
+                    mService.deleteStorage(id);
+                } catch (RemoteException re) {
+                    throw re.rethrowFromSystemServer();
+                }
+            }
+            throw new RuntimeException(e);
         }
     }
 

@@ -19,6 +19,7 @@ package android.media.tv;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
@@ -69,10 +70,40 @@ public final class AdRequest implements Parcelable {
     private final long mEchoInterval;
     private final String mMediaFileType;
     private final Bundle mMetadata;
+    private final Uri mUri;
+
+    /**
+     * The key for video metadata.
+     *
+     * @see #getMetadata()
+     * @hide
+     */
+    public static final String KEY_VIDEO_METADATA = "key_video_metadata";
+
+    /**
+     * The key for audio metadata.
+     *
+     * @see #getMetadata()
+     * @hide
+     */
+    public static final String KEY_AUDIO_METADATA = "key_audio_metadata";
 
     public AdRequest(int id, @RequestType int requestType,
             @Nullable ParcelFileDescriptor fileDescriptor, long startTime, long stopTime,
             long echoInterval, @Nullable String mediaFileType, @NonNull Bundle metadata) {
+        this(id, requestType, fileDescriptor, null, startTime, stopTime, echoInterval,
+                mediaFileType, metadata);
+    }
+
+    public AdRequest(int id, @RequestType int requestType, @Nullable Uri uri, long startTime,
+            long stopTime, long echoInterval, @NonNull Bundle metadata) {
+        this(id, requestType, null, uri, startTime, stopTime, echoInterval, null, metadata);
+    }
+
+    private AdRequest(int id, @RequestType int requestType,
+            @Nullable ParcelFileDescriptor fileDescriptor, @Nullable Uri uri, long startTime,
+            long stopTime, long echoInterval, @Nullable String mediaFileType,
+            @NonNull Bundle metadata) {
         mId = id;
         mRequestType = requestType;
         mFileDescriptor = fileDescriptor;
@@ -81,15 +112,23 @@ public final class AdRequest implements Parcelable {
         mEchoInterval = echoInterval;
         mMediaFileType = mediaFileType;
         mMetadata = metadata;
+        mUri = uri;
     }
 
     private AdRequest(Parcel source) {
         mId = source.readInt();
         mRequestType = source.readInt();
-        if (source.readInt() != 0) {
+        int readInt = source.readInt();
+        if (readInt == 1) {
             mFileDescriptor = ParcelFileDescriptor.CREATOR.createFromParcel(source);
+            mUri = null;
+        } else if (readInt == 2) {
+            String stringUri = source.readString();
+            mUri = stringUri == null ? null : Uri.parse(stringUri);
+            mFileDescriptor = null;
         } else {
             mFileDescriptor = null;
+            mUri = null;
         }
         mStartTime = source.readLong();
         mStopTime = source.readLong();
@@ -117,11 +156,22 @@ public final class AdRequest implements Parcelable {
      * Gets the file descriptor of the AD media.
      *
      * @return The file descriptor of the AD media. Can be {@code null} for
-     *         {@link #REQUEST_TYPE_STOP}
+     *         {@link #REQUEST_TYPE_STOP} or a URI is used.
      */
     @Nullable
     public ParcelFileDescriptor getFileDescriptor() {
         return mFileDescriptor;
+    }
+
+    /**
+     * Gets the URI of the AD media.
+     *
+     * @return The URI of the AD media. Can be {@code null} for {@link #REQUEST_TYPE_STOP} or a file
+     *         descriptor is used.
+     */
+    @Nullable
+    public Uri getUri() {
+        return mUri;
     }
 
     /**
@@ -189,6 +239,10 @@ public final class AdRequest implements Parcelable {
         if (mFileDescriptor != null) {
             dest.writeInt(1);
             mFileDescriptor.writeToParcel(dest, flags);
+        } else if (mUri != null) {
+            dest.writeInt(2);
+            String stringUri = mUri.toString();
+            dest.writeString(stringUri);
         } else {
             dest.writeInt(0);
         }

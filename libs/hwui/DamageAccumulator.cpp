@@ -207,27 +207,6 @@ static void applyTransforms(DirtyStack* frame, DirtyStack* end) {
     }
 }
 
-static void computeTransformImpl(const DirtyStack* frame, const DirtyStack* end,
-                                 Matrix4* outMatrix) {
-  while (frame != end) {
-    switch (frame->type) {
-        case TransformRenderNode:
-            frame->renderNode->applyViewPropertyTransforms(*outMatrix);
-            break;
-        case TransformMatrix4:
-            outMatrix->multiply(*frame->matrix4);
-            break;
-        case TransformNone:
-            // nothing to be done
-            break;
-        default:
-            LOG_ALWAYS_FATAL("Tried to compute transform with an invalid type: %d",
-                             frame->type);
-    }
-    frame = frame->prev;
-  }
-}
-
 void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
     if (frame->pendingDirty.isEmpty()) {
         return;
@@ -239,7 +218,7 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
     }
 
     // Perform clipping
-    if (props.getClipDamageToBounds() && !frame->pendingDirty.isEmpty()) {
+    if (props.getClipDamageToBounds()) {
         if (!frame->pendingDirty.intersect(SkRect::MakeIWH(props.getWidth(), props.getHeight()))) {
             frame->pendingDirty.setEmpty();
         }
@@ -263,6 +242,47 @@ void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
     }
 }
 
+SkRect DamageAccumulator::computeClipAndTransform(const SkRect& bounds, Matrix4* outMatrix) const {
+    const DirtyStack* frame = mHead;
+    Matrix4 transform;
+    SkRect pretransformResult = bounds;
+    while (true) {
+        SkRect currentBounds = pretransformResult;
+        pretransformResult.setEmpty();
+        switch (frame->type) {
+            case TransformRenderNode: {
+                const RenderProperties& props = frame->renderNode->properties();
+                // Perform clipping
+                if (props.getClipDamageToBounds() && !currentBounds.isEmpty()) {
+                    if (!currentBounds.intersect(
+                                SkRect::MakeIWH(props.getWidth(), props.getHeight()))) {
+                        currentBounds.setEmpty();
+                    }
+                }
+
+                // apply all transforms
+                mapRect(props, currentBounds, &pretransformResult);
+                frame->renderNode->applyViewPropertyTransforms(transform);
+            } break;
+            case TransformMatrix4:
+                mapRect(frame->matrix4, currentBounds, &pretransformResult);
+                transform.multiply(*frame->matrix4);
+                break;
+            default:
+                pretransformResult = currentBounds;
+                break;
+        }
+        if (frame->prev == frame) break;
+        frame = frame->prev;
+    }
+    SkRect result;
+    Matrix4 globalToLocal;
+    globalToLocal.loadInverse(transform);
+    mapRect(&globalToLocal, pretransformResult, &result);
+    *outMatrix = transform;
+    return result;
+}
+
 void DamageAccumulator::dirty(float left, float top, float right, float bottom) {
     mHead->pendingDirty.join({left, top, right, bottom});
 }
@@ -282,9 +302,6 @@ void DamageAccumulator::finish(SkRect* totalDirty) {
 
 DamageAccumulator::StretchResult DamageAccumulator::findNearestStretchEffect() const {
     DirtyStack* frame = mHead;
-    const auto& headProperties = mHead->renderNode->properties();
-    float startWidth = headProperties.getWidth();
-    float startHeight = headProperties.getHeight();
     while (frame->prev != frame) {
         if (frame->type == TransformRenderNode) {
             const auto& renderNode = frame->renderNode;
@@ -295,21 +312,16 @@ DamageAccumulator::StretchResult DamageAccumulator::findNearestStretchEffect() c
             const float height = (float) frameRenderNodeProperties.getHeight();
             if (!effect.isEmpty()) {
                 Matrix4 stretchMatrix;
-                computeTransformImpl(mHead, frame, &stretchMatrix);
-                Rect stretchRect = Rect(0.f, 0.f, startWidth, startHeight);
+                computeTransformImpl(frame, &stretchMatrix);
+                Rect stretchRect = Rect(0.f, 0.f, width, height);
                 stretchMatrix.mapRect(stretchRect);
 
                 return StretchResult{
-                    .stretchEffect = &effect,
-                    .childRelativeBounds = SkRect::MakeLTRB(
-                        stretchRect.left,
-                        stretchRect.top,
-                        stretchRect.right,
-                        stretchRect.bottom
-                    ),
-                    .width = width,
-                    .height = height
-                };
+                        .stretchEffect = &effect,
+                        .parentBounds = SkRect::MakeLTRB(stretchRect.left, stretchRect.top,
+                                                         stretchRect.right, stretchRect.bottom),
+                        .width = width,
+                        .height = height};
             }
         }
         frame = frame->prev;

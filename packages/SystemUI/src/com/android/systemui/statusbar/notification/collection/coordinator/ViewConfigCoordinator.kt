@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.Compile
+import com.android.app.tracing.traceSection
 import javax.inject.Inject
 
 /**
@@ -122,8 +123,10 @@ class ViewConfigCoordinator @Inject internal constructor(
 
     private fun updateNotificationsOnUiModeChanged() {
         log { "ViewConfigCoordinator.updateNotificationsOnUiModeChanged()" }
-        mPipeline?.allNotifs?.forEach { entry ->
-            entry.row?.onUiModeChanged()
+        traceSection("updateNotifOnUiModeChanged") {
+            mPipeline?.allNotifs?.forEach { entry ->
+                entry.row?.onUiModeChanged()
+            }
         }
     }
 

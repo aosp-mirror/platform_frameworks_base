@@ -16,7 +16,10 @@
 
 package android.view;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.view.EventLogTags.IMF_IME_ANIM_CANCEL;
+import static android.view.EventLogTags.IMF_IME_ANIM_FINISH;
+import static android.view.EventLogTags.IMF_IME_ANIM_START;
 import static android.view.InsetsAnimationControlImplProto.CURRENT_ALPHA;
 import static android.view.InsetsAnimationControlImplProto.IS_CANCELLED;
 import static android.view.InsetsAnimationControlImplProto.IS_FINISHED;
@@ -30,13 +33,17 @@ import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 import static android.view.InsetsController.LayoutInsetsDuringAnimation;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_FLOATING;
 import static android.view.InsetsState.ISIDE_LEFT;
 import static android.view.InsetsState.ISIDE_RIGHT;
 import static android.view.InsetsState.ISIDE_TOP;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.inputmethod.ImeTracker.DEBUG_IME_VISIBILITY;
+import static android.view.inputmethod.ImeTracker.TOKEN_NONE;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -47,6 +54,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.ArraySet;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -56,8 +64,8 @@ import android.view.InsetsState.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
-import android.view.WindowManager.LayoutParams;
 import android.view.animation.Interpolator;
+import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -68,7 +76,7 @@ import java.util.Objects;
  * Implements {@link WindowInsetsAnimationController}
  * @hide
  */
-@VisibleForTesting
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class InsetsAnimationControlImpl implements InternalInsetsAnimationController,
         InsetsAnimationControlRunner {
 
@@ -96,6 +104,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     /** @see WindowInsetsAnimationController#hasZeroInsetsIme */
     private final boolean mHasZeroInsetsIme;
     private final CompatibilityInfo.Translator mTranslator;
+    @Nullable
+    private final ImeTracker.Token mStatsToken;
     private Insets mCurrentInsets;
     private Insets mPendingInsets;
     private float mPendingFraction;
@@ -114,7 +124,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
             @InsetsType int types, InsetsAnimationControlCallbacks controller, long durationMs,
             Interpolator interpolator, @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
-            CompatibilityInfo.Translator translator) {
+            CompatibilityInfo.Translator translator, @Nullable ImeTracker.Token statsToken) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
@@ -122,26 +132,26 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mController = controller;
         mInitialInsetsState = new InsetsState(state, true /* copySources */);
         if (frame != null) {
-            final SparseIntArray typeSideMap = new SparseIntArray();
-            mCurrentInsets = getInsetsFromState(mInitialInsetsState, frame, null /* typeSideMap */);
+            final SparseIntArray idSideMap = new SparseIntArray();
+            mCurrentInsets = getInsetsFromState(mInitialInsetsState, frame, null /* idSideMap */);
             mHiddenInsets = calculateInsets(mInitialInsetsState, frame, controls, false /* shown */,
-                    null /* typeSideMap */);
+                    null /* idSideMap */);
             mShownInsets = calculateInsets(mInitialInsetsState, frame, controls, true /* shown */,
-                    typeSideMap);
-            mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsInternalType(ITYPE_IME);
+                    idSideMap);
+            mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsType(WindowInsets.Type.ime());
             if (mHasZeroInsetsIme) {
                 // IME has shownInsets of ZERO, and can't map to a side by default.
                 // Map zero insets IME to bottom, making it a special case of bottom insets.
-                typeSideMap.put(ITYPE_IME, ISIDE_BOTTOM);
+                idSideMap.put(ID_IME, ISIDE_BOTTOM);
             }
-            buildSideControlsMap(typeSideMap, mSideControlsMap, controls);
+            buildSideControlsMap(idSideMap, mSideControlsMap, controls);
         } else {
             // Passing a null frame indicates the caller wants to play the insets animation anyway,
             // no matter the source provides insets to the frame or not.
             mCurrentInsets = calculateInsets(mInitialInsetsState, controls, true /* shown */);
             mHiddenInsets = calculateInsets(null, controls, false /* shown */);
             mShownInsets = calculateInsets(null, controls, true /* shown */);
-            mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsInternalType(ITYPE_IME);
+            mHasZeroInsetsIme = mShownInsets.bottom == 0 && controlsType(WindowInsets.Type.ime());
             buildSideControlsMap(mSideControlsMap, controls);
         }
         mPendingInsets = mCurrentInsets;
@@ -152,6 +162,13 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mAnimationType = animationType;
         mLayoutInsetsDuringAnimation = layoutInsetsDuringAnimation;
         mTranslator = translator;
+        mStatsToken = statsToken;
+        if (DEBUG_IME_VISIBILITY && (types & ime()) != 0) {
+            EventLog.writeEvent(IMF_IME_ANIM_START,
+                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
+                    mCurrentAlpha, "Current:" + mCurrentInsets, "Shown:" + mShownInsets,
+                    "Hidden:" + mHiddenInsets);
+        }
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
     }
@@ -213,7 +230,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     public void updateSurfacePosition(SparseArray<InsetsSourceControl> controls) {
         for (int i = controls.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = controls.valueAt(i);
-            final InsetsSourceControl c = mControls.get(control.getType());
+            final InsetsSourceControl c = mControls.get(control.getId());
             if (c == null) {
                 continue;
             }
@@ -225,6 +242,11 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     @Override
     public @AnimationType int getAnimationType() {
         return mAnimationType;
+    }
+
+    @Override
+    public ImeTracker.Token getStatsToken() {
+        return mStatsToken;
     }
 
     @Override
@@ -253,25 +275,21 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         }
     }
 
-    @VisibleForTesting
     /**
      * @return Whether the finish callback of this animation should be invoked.
      */
+    @VisibleForTesting
     public boolean applyChangeInsets(@Nullable InsetsState outState) {
         if (mCancelled) {
             if (DEBUG) Log.d(TAG, "applyChangeInsets canceled");
             return false;
         }
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
-        ArrayList<SurfaceParams> params = new ArrayList<>();
-        updateLeashesForSide(ISIDE_LEFT, offset.left, mPendingInsets.left, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_TOP, offset.top, mPendingInsets.top, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_RIGHT, offset.right, mPendingInsets.right, params, outState,
-                mPendingAlpha);
-        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params, outState,
-                mPendingAlpha);
+        final ArrayList<SurfaceParams> params = new ArrayList<>();
+        updateLeashesForSide(ISIDE_LEFT, offset.left, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_TOP, offset.top, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_RIGHT, offset.right, params, outState, mPendingAlpha);
+        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, params, outState, mPendingAlpha);
 
         mController.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
@@ -305,11 +323,16 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         }
         mShownOnFinish = shown;
         mFinished = true;
-        setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, mPendingAlpha, 1f /* fraction */,
-                true /* allowWhenFinished */);
+        final Insets insets = shown ? mShownInsets : mHiddenInsets;
+        setInsetsAndAlpha(insets, mPendingAlpha, 1f /* fraction */, true /* allowWhenFinished */);
 
         if (DEBUG) Log.d(TAG, "notify control request finished for types: " + mTypes);
         mListener.onFinished(this);
+        if (DEBUG_IME_VISIBILITY && (mTypes & ime()) != 0) {
+            EventLog.writeEvent(IMF_IME_ANIM_FINISH,
+                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
+                    mCurrentAlpha, shown ? 1 : 0, Objects.toString(insets));
+        }
     }
 
     @Override
@@ -330,7 +353,11 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mCancelled = true;
         mListener.onCancelled(mReadyDispatched ? this : null);
         if (DEBUG) Log.d(TAG, "notify Control request cancelled for types: " + mTypes);
-
+        if (DEBUG_IME_VISIBILITY && (mTypes & ime()) != 0) {
+            EventLog.writeEvent(IMF_IME_ANIM_CANCEL,
+                    mStatsToken != null ? mStatsToken.getTag() : TOKEN_NONE, mAnimationType,
+                    Objects.toString(mPendingInsets));
+        }
         releaseLeashes();
     }
 
@@ -368,27 +395,26 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     }
 
     private Insets getInsetsFromState(InsetsState state, Rect frame,
-            @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
+            @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
-                false /* isScreenRound */, false /* alwaysConsumeSystemBars */,
-                LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
+                false /* isScreenRound */, SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode */,
                 0 /* legacyWindowFlags */, 0 /* legacySystemUiFlags */, TYPE_APPLICATION,
-                WINDOWING_MODE_UNDEFINED, typeSideMap).getInsets(mTypes);
+                ACTIVITY_TYPE_UNDEFINED, idSideMap).getInsets(mTypes);
     }
 
     /** Computes the insets relative to the given frame. */
     private Insets calculateInsets(InsetsState state, Rect frame,
             SparseArray<InsetsSourceControl> controls, boolean shown,
-            @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
+            @Nullable @InternalInsetsSide SparseIntArray idSideMap) {
         for (int i = controls.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control  = controls.valueAt(i);
             if (control == null) {
                 // control may be null if it got revoked.
                 continue;
             }
-            state.getSource(control.getType()).setVisible(shown);
+            state.setSourceVisible(control.getId(), shown);
         }
-        return getInsetsFromState(state, frame, typeSideMap);
+        return getInsetsFromState(state, frame, idSideMap);
     }
 
     /** Computes the insets from the insets hints of controls. */
@@ -404,7 +430,8 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 // control may be null if it got revoked.
                 continue;
             }
-            if (state == null || state.getSource(control.getType()).isVisible()) {
+            if (state == null
+                    || state.isSourceOrDefaultVisible(control.getId(), control.getType())) {
                 insets = Insets.max(insets, control.getInsetsHint());
             }
         }
@@ -425,7 +452,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         return alpha >= 1 ? 1 : (alpha <= 0 ? 0 : alpha);
     }
 
-    private void updateLeashesForSide(@InternalInsetsSide int side, int offset, int inset,
+    private void updateLeashesForSide(@InternalInsetsSide int side, int offset,
             ArrayList<SurfaceParams> surfaceParams, @Nullable InsetsState outState, float alpha) {
         final ArraySet<InsetsSourceControl> controls = mSideControlsMap.get(side);
         if (controls == null) {
@@ -434,20 +461,25 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         // TODO: Implement behavior when inset spans over multiple types
         for (int i = controls.size() - 1; i >= 0; i--) {
             final InsetsSourceControl control = controls.valueAt(i);
-            final InsetsSource source = mInitialInsetsState.getSource(control.getType());
+            final InsetsSource source = mInitialInsetsState.peekSource(control.getId());
             final SurfaceControl leash = control.getLeash();
 
             mTmpMatrix.setTranslate(control.getSurfacePosition().x, control.getSurfacePosition().y);
-            mTmpFrame.set(source.getFrame());
+            if (source != null) {
+                mTmpFrame.set(source.getFrame());
+            }
             addTranslationToMatrix(side, offset, mTmpMatrix, mTmpFrame);
 
-            final boolean visible = mHasZeroInsetsIme && side == ISIDE_BOTTOM
-                    ? (mAnimationType == ANIMATION_TYPE_SHOW || !mFinished)
-                    : inset != 0;
+            // The first frame of ANIMATION_TYPE_SHOW should be invisible since it is animated from
+            // the hidden state.
+            final boolean visible = mPendingFraction == 0
+                    ? mAnimationType != ANIMATION_TYPE_SHOW
+                    : !mFinished || mShownOnFinish;
 
-            if (outState != null) {
-                outState.getSource(source.getType()).setVisible(visible);
-                outState.getSource(source.getType()).setFrame(mTmpFrame);
+            if (outState != null && source != null) {
+                outState.addSource(new InsetsSource(source)
+                        .setVisible(visible)
+                        .setFrame(mTmpFrame));
             }
 
             // If the system is controlling the insets source, the leash can be null.
@@ -486,12 +518,12 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         }
     }
 
-    private static void buildSideControlsMap(SparseIntArray typeSideMap,
+    private static void buildSideControlsMap(SparseIntArray idSideMap,
             SparseSetArray<InsetsSourceControl> sideControlsMap,
             SparseArray<InsetsSourceControl> controls) {
-        for (int i = typeSideMap.size() - 1; i >= 0; i--) {
-            final int type = typeSideMap.keyAt(i);
-            final int side = typeSideMap.valueAt(i);
+        for (int i = idSideMap.size() - 1; i >= 0; i--) {
+            final int type = idSideMap.keyAt(i);
+            final int side = idSideMap.valueAt(i);
             final InsetsSourceControl control = controls.get(type);
             if (control == null) {
                 // If the types that we are controlling are less than the types that the system has,
@@ -512,7 +544,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
                 continue;
             }
             @InternalInsetsSide int side = InsetsState.getInsetSide(control.getInsetsHint());
-            if (side == ISIDE_FLOATING && control.getType() == ITYPE_IME) {
+            if (side == ISIDE_FLOATING && control.getType() == WindowInsets.Type.ime()) {
                 side = ISIDE_BOTTOM;
             }
             sideControlsMap.add(side, control);

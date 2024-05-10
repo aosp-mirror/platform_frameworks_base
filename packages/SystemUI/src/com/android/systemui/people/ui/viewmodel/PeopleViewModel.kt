@@ -23,35 +23,32 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.people.PeopleSpaceUtils
 import com.android.systemui.people.PeopleTileViewHelper
 import com.android.systemui.people.data.model.PeopleTileModel
 import com.android.systemui.people.data.repository.PeopleTileRepository
 import com.android.systemui.people.data.repository.PeopleWidgetRepository
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+
+private const val TAG = "PeopleViewModel"
 
 /**
  * Models UI state for the people space, allowing the user to select which conversation should be
  * associated to a new or existing Conversation widget.
  */
 class PeopleViewModel(
-    @Application private val context: Context,
-    private val tileRepository: PeopleTileRepository,
-    private val widgetRepository: PeopleWidgetRepository,
-) : ViewModel() {
     /**
      * The list of the priority tiles/conversations.
      *
      * Important: Even though this is a Flow, the underlying API used to populate this Flow is not
      * reactive and you have to manually call [onTileRefreshRequested] to refresh the tiles.
      */
-    private val _priorityTiles = MutableStateFlow(priorityTiles())
-    val priorityTiles: StateFlow<List<PeopleTileViewModel>> = _priorityTiles.asStateFlow()
+    val priorityTiles: StateFlow<List<PeopleTileViewModel>>,
 
     /**
      * The list of the priority tiles/conversations.
@@ -59,84 +56,29 @@ class PeopleViewModel(
      * Important: Even though this is a Flow, the underlying API used to populate this Flow is not
      * reactive and you have to manually call [onTileRefreshRequested] to refresh the tiles.
      */
-    private val _recentTiles = MutableStateFlow(recentTiles())
-    val recentTiles: StateFlow<List<PeopleTileViewModel>> = _recentTiles.asStateFlow()
+    val recentTiles: StateFlow<List<PeopleTileViewModel>>,
 
     /** The ID of the widget currently being edited/added. */
-    private val _appWidgetId = MutableStateFlow(INVALID_APPWIDGET_ID)
-    val appWidgetId: StateFlow<Int> = _appWidgetId.asStateFlow()
+    val appWidgetId: StateFlow<Int>,
 
     /** The result of this user journey. */
-    private val _result = MutableStateFlow<Result?>(null)
-    val result: StateFlow<Result?> = _result.asStateFlow()
+    val result: StateFlow<Result?>,
 
     /** Refresh the [priorityTiles] and [recentTiles]. */
-    fun onTileRefreshRequested() {
-        _priorityTiles.value = priorityTiles()
-        _recentTiles.value = recentTiles()
-    }
+    val onTileRefreshRequested: () -> Unit,
 
     /** Called when the [appWidgetId] should be changed to [widgetId]. */
-    fun onWidgetIdChanged(widgetId: Int) {
-        _appWidgetId.value = widgetId
-    }
+    val onWidgetIdChanged: (widgetId: Int) -> Unit,
 
     /** Clear [result], setting it to null. */
-    fun clearResult() {
-        _result.value = null
-    }
+    val clearResult: () -> Unit,
 
     /** Called when a tile is clicked. */
-    fun onTileClicked(tile: PeopleTileViewModel) {
-        val widgetId = _appWidgetId.value
-        if (PeopleSpaceUtils.DEBUG) {
-            Log.d(
-                TAG,
-                "Put ${tile.username}'s shortcut ID: ${tile.key.shortcutId} for widget ID $widgetId"
-            )
-        }
-        widgetRepository.setWidgetTile(widgetId, tile.key)
-        _result.value =
-            Result.Success(Intent().apply { putExtra(EXTRA_APPWIDGET_ID, appWidgetId.value) })
-    }
+    val onTileClicked: (tile: PeopleTileViewModel) -> Unit,
 
     /** Called when this user journey is cancelled. */
-    fun onUserJourneyCancelled() {
-        _result.value = Result.Cancelled
-    }
-
-    private fun priorityTiles(): List<PeopleTileViewModel> {
-        return try {
-            tileRepository.priorityTiles().map { it.toViewModel() }
-        } catch (e: Exception) {
-            Log.e(TAG, "Couldn't retrieve priority conversations", e)
-            emptyList()
-        }
-    }
-
-    private fun recentTiles(): List<PeopleTileViewModel> {
-        return try {
-            tileRepository.recentTiles().map { it.toViewModel() }
-        } catch (e: Exception) {
-            Log.e(TAG, "Couldn't retrieve recent conversations", e)
-            emptyList()
-        }
-    }
-
-    private fun PeopleTileModel.toViewModel(): PeopleTileViewModel {
-        val icon =
-            PeopleTileViewHelper.getPersonIconBitmap(
-                context,
-                this,
-                PeopleTileViewHelper.getSizeInDp(
-                    context,
-                    R.dimen.avatar_size_for_medium,
-                    context.resources.displayMetrics.density,
-                )
-            )
-        return PeopleTileViewModel(key, icon, username)
-    }
-
+    val onUserJourneyCancelled: () -> Unit,
+) : ViewModel() {
     /** The Factory that should be used to create a [PeopleViewModel]. */
     class Factory
     @Inject
@@ -153,10 +95,94 @@ class PeopleViewModel(
 
     sealed class Result {
         class Success(val data: Intent) : Result()
+
         object Cancelled : Result()
     }
+}
 
-    companion object {
-        private const val TAG = "PeopleViewModel"
+private fun PeopleViewModel(
+    @Application context: Context,
+    tileRepository: PeopleTileRepository,
+    widgetRepository: PeopleWidgetRepository,
+): PeopleViewModel {
+    fun priorityTiles(): List<PeopleTileViewModel> {
+        return try {
+            tileRepository.priorityTiles().map { it.toViewModel(context) }
+        } catch (e: Exception) {
+            Log.e(TAG, "Couldn't retrieve priority conversations", e)
+            emptyList()
+        }
     }
+
+    fun recentTiles(): List<PeopleTileViewModel> {
+        return try {
+            tileRepository.recentTiles().map { it.toViewModel(context) }
+        } catch (e: Exception) {
+            Log.e(TAG, "Couldn't retrieve recent conversations", e)
+            emptyList()
+        }
+    }
+
+    val priorityTiles = MutableStateFlow(priorityTiles())
+    val recentTiles = MutableStateFlow(recentTiles())
+    val appWidgetId = MutableStateFlow(INVALID_APPWIDGET_ID)
+    val result = MutableStateFlow<PeopleViewModel.Result?>(null)
+
+    fun onTileRefreshRequested() {
+        priorityTiles.value = priorityTiles()
+        recentTiles.value = recentTiles()
+    }
+
+    fun onWidgetIdChanged(widgetId: Int) {
+        appWidgetId.value = widgetId
+    }
+
+    fun clearResult() {
+        result.value = null
+    }
+
+    fun onTileClicked(tile: PeopleTileViewModel) {
+        val widgetId = appWidgetId.value
+        if (PeopleSpaceUtils.DEBUG) {
+            Log.d(
+                TAG,
+                "Put ${tile.username}'s shortcut ID: ${tile.key.shortcutId} for widget ID $widgetId"
+            )
+        }
+        widgetRepository.setWidgetTile(widgetId, tile.key)
+        result.value =
+            PeopleViewModel.Result.Success(
+                Intent().apply { putExtra(EXTRA_APPWIDGET_ID, appWidgetId.value) }
+            )
+    }
+
+    fun onUserJourneyCancelled() {
+        result.value = PeopleViewModel.Result.Cancelled
+    }
+
+    return PeopleViewModel(
+        priorityTiles = priorityTiles.asStateFlow(),
+        recentTiles = recentTiles.asStateFlow(),
+        appWidgetId = appWidgetId.asStateFlow(),
+        result = result.asStateFlow(),
+        onTileRefreshRequested = ::onTileRefreshRequested,
+        onWidgetIdChanged = ::onWidgetIdChanged,
+        clearResult = ::clearResult,
+        onTileClicked = ::onTileClicked,
+        onUserJourneyCancelled = ::onUserJourneyCancelled,
+    )
+}
+
+fun PeopleTileModel.toViewModel(@Application context: Context): PeopleTileViewModel {
+    val icon =
+        PeopleTileViewHelper.getPersonIconBitmap(
+            context,
+            this,
+            PeopleTileViewHelper.getSizeInDp(
+                context,
+                R.dimen.avatar_size_for_medium,
+                context.resources.displayMetrics.density,
+            )
+        )
+    return PeopleTileViewModel(key, icon, username)
 }

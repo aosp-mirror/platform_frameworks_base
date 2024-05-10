@@ -17,7 +17,6 @@
 #pragma once
 
 #include <string>
-#include "SkRRect.h"
 
 namespace android {
 namespace uirenderer {

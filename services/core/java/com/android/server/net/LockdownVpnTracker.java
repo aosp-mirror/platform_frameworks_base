@@ -208,7 +208,7 @@ public class LockdownVpnTracker {
                 //    network is the system default. So, if the VPN  is up and underlying network
                 //    (e.g., wifi) disconnects, CS will inform apps that the VPN's capabilities have
                 //    changed to match the new default network (e.g., cell).
-                mVpn.startLegacyVpnPrivileged(mProfile, network, egressProp);
+                mVpn.startLegacyVpnPrivileged(mProfile);
             } catch (IllegalStateException e) {
                 mAcceptedEgressIface = null;
                 Log.e(TAG, "Failed to start VPN", e);

@@ -197,7 +197,9 @@ public class Surface implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_COMPATIBILITY_"},
-            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE})
+            value = {FRAME_RATE_COMPATIBILITY_DEFAULT, FRAME_RATE_COMPATIBILITY_FIXED_SOURCE,
+                    FRAME_RATE_COMPATIBILITY_EXACT, FRAME_RATE_COMPATIBILITY_NO_VOTE,
+                    FRAME_RATE_COMPATIBILITY_MIN, FRAME_RATE_COMPATIBILITY_GTE})
     public @interface FrameRateCompatibility {}
 
     // From native_window.h. Keep these in sync.
@@ -228,6 +230,26 @@ public class Surface implements Parcelable {
      */
     public static final int FRAME_RATE_COMPATIBILITY_EXACT = 100;
 
+    // From window.h. Keep these in sync.
+    /**
+     * This surface is ignored while choosing the refresh rate.
+     * @hide
+     */
+    public static final int FRAME_RATE_COMPATIBILITY_NO_VOTE = 101;
+
+    // From window.h. Keep these in sync.
+    /**
+     * This surface will vote for the minimum refresh rate.
+     * @hide
+     */
+    public static final int FRAME_RATE_COMPATIBILITY_MIN = 102;
+
+    // From window.h. Keep these in sync.
+    /**
+     * The surface requests a frame rate that is greater than or equal to {@code frameRate}.
+     * @hide
+     */
+    public static final int FRAME_RATE_COMPATIBILITY_GTE = 103;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -247,6 +269,50 @@ public class Surface implements Parcelable {
      * displaying long-running video content.
      */
     public static final int CHANGE_FRAME_RATE_ALWAYS = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"FRAME_RATE_CATEGORY_"},
+            value = {FRAME_RATE_CATEGORY_DEFAULT, FRAME_RATE_CATEGORY_NO_PREFERENCE,
+                    FRAME_RATE_CATEGORY_LOW, FRAME_RATE_CATEGORY_NORMAL, FRAME_RATE_CATEGORY_HIGH})
+    public @interface FrameRateCategory {}
+
+    // From native_window.h or window.h. Keep these in sync.
+    /**
+     * Default value. This value can also be set to return to default behavior, indicating that this
+     * layer has no data for the frame rate.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_DEFAULT = 0;
+
+    /**
+     * The layer will explicitly not influence the frame rate.
+     * This may indicate a frame rate suitable for no animation updates (such as a cursor blinking
+     * or a sporadic update).
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_NO_PREFERENCE = 1;
+
+    /**
+     * Indicates a frame rate suitable for animations that looks fine even if played at a low frame
+     * rate.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_LOW = 2;
+
+    /**
+     * Indicates a middle frame rate suitable for animations that do not require higher frame
+     * rates, or do not benefit from high smoothness. This is normally 60 Hz or close to it.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_NORMAL = 3;
+
+    /**
+     * Indicates a frame rate suitable for animations that require a high frame rate, which may
+     * increase smoothness but may also increase power usage.
+     * @hide
+     */
+    public static final int FRAME_RATE_CATEGORY_HIGH = 4;
 
     /**
      * Create an empty surface, which will later be filled in by readFromParcel().
@@ -972,6 +1038,8 @@ public class Surface implements Parcelable {
      *
      * @throws IllegalArgumentException If <code>frameRate</code>, <code>compatibility</code> or
      * <code>changeFrameRateStrategy</code> are invalid.
+     *
+     * @see #clearFrameRate()
      */
     public void setFrameRate(@FloatRange(from = 0.0) float frameRate,
             @FrameRateCompatibility int compatibility,
@@ -983,7 +1051,33 @@ public class Surface implements Parcelable {
             if (error == -EINVAL) {
                 throw new IllegalArgumentException("Invalid argument to Surface.setFrameRate()");
             } else if (error != 0) {
-                throw new RuntimeException("Failed to set frame rate on Surface");
+                throw new RuntimeException("Failed to set frame rate on Surface. Native error: "
+                        + error);
+            }
+        }
+    }
+
+    /**
+     * Clears the frame rate which was set for this surface.
+     *
+     * <p>This is equivalent to calling {@link #setFrameRate(float, int, int)} using {@code 0} for
+     * {@code frameRate}.
+     * <p>Note that this only has an effect for surfaces presented on the display. If this
+     * surface is consumed by something other than the system compositor, e.g. a media
+     * codec, this call has no effect.</p>
+     *
+     * @see #setFrameRate(float, int, int)
+     */
+    public void clearFrameRate() {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            // The values FRAME_RATE_COMPATIBILITY_DEFAULT and CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS
+            // are ignored because the value of frameRate is 0
+            int error = nativeSetFrameRate(mNativeObject, 0,
+                    FRAME_RATE_COMPATIBILITY_DEFAULT, CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS);
+            if (error != 0) {
+                throw new RuntimeException("Failed to clear the frame rate on Surface. Native error"
+                        + ": " + error);
             }
         }
     }

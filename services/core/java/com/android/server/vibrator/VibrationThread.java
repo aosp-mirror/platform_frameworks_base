@@ -33,12 +33,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-/** Plays a {@link Vibration} in dedicated thread. */
+/** Plays a {@link HalVibration} in dedicated thread. */
 final class VibrationThread extends Thread {
     static final String TAG = "VibrationThread";
     static final boolean DEBUG = false;
 
-    /** Calls into VibratorManager functionality needed for playing a {@link Vibration}. */
+    /** Calls into VibratorManager functionality needed for playing a {@link HalVibration}. */
     interface VibratorManagerHooks {
 
         /**
@@ -161,7 +161,8 @@ final class VibrationThread extends Thread {
             // for this thread.
             // No point doing this in finally, as if there's an exception, this thread will die
             // and be unusable anyway.
-            mVibratorManagerHooks.onVibrationThreadReleased(mExecutingConductor.getVibration().id);
+            mVibratorManagerHooks.onVibrationThreadReleased(
+                    mExecutingConductor.getVibration().id);
             synchronized (mLock) {
                 mLock.notifyAll();
             }
@@ -230,7 +231,8 @@ final class VibrationThread extends Thread {
 
     /** Runs the VibrationThread ensuring that the wake lock is acquired and released. */
     private void runCurrentVibrationWithWakeLock() {
-        WorkSource workSource = new WorkSource(mExecutingConductor.getVibration().uid);
+        WorkSource workSource = new WorkSource(
+                mExecutingConductor.getVibration().callerInfo.uid);
         mWakeLock.setWorkSource(workSource);
         mWakeLock.acquire();
         try {
@@ -251,7 +253,7 @@ final class VibrationThread extends Thread {
      * Called from within runWithWakeLock.
      */
     private void runCurrentVibrationWithWakeLockAndDeathLink() {
-        IBinder vibrationBinderToken = mExecutingConductor.getVibration().token;
+        IBinder vibrationBinderToken = mExecutingConductor.getVibration().callerToken;
         try {
             vibrationBinderToken.linkToDeath(mExecutingConductor, 0);
         } catch (RemoteException e) {
@@ -292,9 +294,6 @@ final class VibrationThread extends Thread {
                 boolean readyToRun = mExecutingConductor.waitUntilNextStepIsDue();
                 // If we waited, don't run the next step, but instead re-evaluate status.
                 if (readyToRun) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Play vibration consuming next step...");
-                    }
                     // Run the step without holding the main lock, to avoid HAL interactions from
                     // blocking the thread.
                     mExecutingConductor.runNextStep();

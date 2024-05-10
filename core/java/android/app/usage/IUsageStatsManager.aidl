@@ -20,9 +20,9 @@ import android.app.PendingIntent;
 import android.app.usage.BroadcastResponseStats;
 import android.app.usage.BroadcastResponseStatsList;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageEventsQuery;
 import android.content.pm.ParceledListSlice;
-
-import java.util.Map;
+import android.os.PersistableBundle;
 
 /**
  * System private API for talking with the UsageStatsManagerService.
@@ -42,19 +42,26 @@ interface IUsageStatsManager {
     UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
     UsageEvents queryEventsForUser(long beginTime, long endTime, int userId, String callingPackage);
     UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
+    UsageEvents queryEventsWithFilter(in UsageEventsQuery query, String callingPackage);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setAppInactive(String packageName, boolean inactive, int userId);
+    boolean isAppStandbyEnabled();
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isAppInactive(String packageName, int userId, String callingPackage);
     void onCarrierPrivilegedAppsChanged();
     void reportChooserSelection(String packageName, int userId, String contentType,
             in String[] annotations, String action);
     int getAppStandbyBucket(String packageName, String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_IDLE_STATE")
     void setAppStandbyBucket(String packageName, int bucket, int userId);
     ParceledListSlice getAppStandbyBuckets(String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_IDLE_STATE")
     void setAppStandbyBuckets(in ParceledListSlice appBuckets, int userId);
     int getAppMinStandbyBucket(String packageName, String callingPackage, int userId);
+    @EnforcePermission("CHANGE_APP_LAUNCH_TIME_ESTIMATE")
     void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime, int userId);
+    @EnforcePermission("CHANGE_APP_LAUNCH_TIME_ESTIMATE")
     void setEstimatedLaunchTimes(in ParceledListSlice appLaunchTimes, int userId);
     void registerAppUsageObserver(int observerId, in String[] packages, long timeLimitMs,
             in PendingIntent callback, String callingPackage);
@@ -71,6 +78,8 @@ interface IUsageStatsManager {
             String callingPackage);
     void reportUsageStop(in IBinder activity, String token, String callingPackage);
     void reportUserInteraction(String packageName, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.REPORT_USAGE_STATS)")
+    void reportUserInteractionWithBundle(String packageName, int userId, in PersistableBundle eventExtras);
     int getUsageSource();
     void forceUsageSourceSettingRead();
     long getLastTimeAnyComponentUsed(String packageName, String callingPackage);
@@ -82,6 +91,8 @@ interface IUsageStatsManager {
             int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)")
     void clearBroadcastEvents(String callingPackage, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
+    boolean isPackageExemptedFromBroadcastResponseStats(String packageName, int userId);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG)")
     String getAppStandbyConstant(String key);
 }

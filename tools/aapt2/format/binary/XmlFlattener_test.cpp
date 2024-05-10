@@ -16,11 +16,10 @@
 
 #include "format/binary/XmlFlattener.h"
 
+#include "androidfw/BigBuffer.h"
 #include "androidfw/ResourceTypes.h"
-
 #include "link/Linkers.h"
 #include "test/Test.h"
-#include "util/BigBuffer.h"
 #include "util/Util.h"
 
 using ::aapt::test::StrEq;
@@ -59,13 +58,13 @@ class XmlFlattenerTest : public ::testing::Test {
                                      const XmlFlattenerOptions& options = {}) {
     using namespace android;  // For NO_ERROR on windows because it is a macro.
 
-    BigBuffer buffer(1024);
+    android::BigBuffer buffer(1024);
     XmlFlattener flattener(&buffer, options);
     if (!flattener.Consume(context_.get(), doc)) {
       return ::testing::AssertionFailure() << "failed to flatten XML Tree";
     }
 
-    std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
+    std::unique_ptr<uint8_t[]> data = android::util::Copy(buffer);
     if (out_tree->setTo(data.get(), buffer.size(), true) != NO_ERROR) {
       return ::testing::AssertionFailure() << "flattened XML is corrupt";
     }

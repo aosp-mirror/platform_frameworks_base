@@ -16,9 +16,10 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -177,6 +178,8 @@ public class KeyCharacterMap implements Parcelable {
     private static final int ACCENT_UMLAUT = '\u00A8';
     private static final int ACCENT_VERTICAL_LINE_ABOVE = '\u02C8';
     private static final int ACCENT_VERTICAL_LINE_BELOW = '\u02CC';
+    private static final int ACCENT_APOSTROPHE = '\'';
+    private static final int ACCENT_QUOTATION_MARK = '"';
 
     /* Legacy dead key display characters used in previous versions of the API.
      * We still support these characters by mapping them to their non-legacy version. */
@@ -204,8 +207,6 @@ public class KeyCharacterMap implements Parcelable {
         addCombining('\u030A', ACCENT_RING_ABOVE);
         addCombining('\u030B', ACCENT_DOUBLE_ACUTE);
         addCombining('\u030C', ACCENT_CARON);
-        addCombining('\u030D', ACCENT_VERTICAL_LINE_ABOVE);
-        //addCombining('\u030E', ACCENT_DOUBLE_VERTICAL_LINE_ABOVE);
         //addCombining('\u030F', ACCENT_DOUBLE_GRAVE);
         //addCombining('\u0310', ACCENT_CANDRABINDU);
         //addCombining('\u0311', ACCENT_INVERTED_BREVE);
@@ -229,11 +230,17 @@ public class KeyCharacterMap implements Parcelable {
         sCombiningToAccent.append('\u0340', ACCENT_GRAVE);
         sCombiningToAccent.append('\u0341', ACCENT_ACUTE);
         sCombiningToAccent.append('\u0343', ACCENT_COMMA_ABOVE);
+        sCombiningToAccent.append('\u030D', ACCENT_APOSTROPHE);
+        sCombiningToAccent.append('\u030E', ACCENT_QUOTATION_MARK);
 
         // One-way legacy mappings to preserve compatibility with older applications.
         sAccentToCombining.append(ACCENT_GRAVE_LEGACY, '\u0300');
         sAccentToCombining.append(ACCENT_CIRCUMFLEX_LEGACY, '\u0302');
         sAccentToCombining.append(ACCENT_TILDE_LEGACY, '\u0303');
+
+        // One-way mappings to use the preferred accent
+        sAccentToCombining.append(ACCENT_APOSTROPHE, '\u0301');
+        sAccentToCombining.append(ACCENT_QUOTATION_MARK, '\u0308');
     }
 
     private static void addCombining(int combining, int accent) {
@@ -303,6 +310,10 @@ public class KeyCharacterMap implements Parcelable {
     private static native KeyCharacterMap nativeObtainEmptyKeyCharacterMap(int deviceId);
     private static native boolean nativeEquals(long ptr1, long ptr2);
 
+    private static native void nativeApplyOverlay(long ptr, String layoutDescriptor,
+            String overlay);
+    private static native int nativeGetMappedKey(long ptr, int scanCode);
+
     private KeyCharacterMap(Parcel in) {
         if (in == null) {
             throw new IllegalArgumentException("parcel must not be null");
@@ -349,7 +360,7 @@ public class KeyCharacterMap implements Parcelable {
      * is missing from the system.
      */
     public static KeyCharacterMap load(int deviceId) {
-        final InputManager im = InputManager.getInstance();
+        final InputManagerGlobal im = InputManagerGlobal.getInstance();
         InputDevice inputDevice = im.getInputDevice(deviceId);
         if (inputDevice == null) {
             inputDevice = im.getInputDevice(VIRTUAL_KEYBOARD);
@@ -359,6 +370,38 @@ public class KeyCharacterMap implements Parcelable {
             }
         }
         return inputDevice.getKeyCharacterMap();
+    }
+
+    /**
+     * Loads the key character map with applied KCM overlay.
+     *
+     * @param layoutDescriptor descriptor of the applied overlay KCM
+     * @param overlay          string describing the overlay KCM
+     * @return The resultant key character map.
+     * @throws {@link UnavailableException} if the key character map
+     *                could not be loaded because it was malformed or the default key character map
+     *                is missing from the system.
+     * @hide
+     */
+    public static KeyCharacterMap load(@NonNull String layoutDescriptor, @NonNull String overlay) {
+        KeyCharacterMap kcm = KeyCharacterMap.load(VIRTUAL_KEYBOARD);
+        kcm.applyOverlay(layoutDescriptor, overlay);
+        return kcm;
+    }
+
+    private void applyOverlay(@NonNull String layoutDescriptor, @NonNull String overlay) {
+        nativeApplyOverlay(mPtr, layoutDescriptor, overlay);
+    }
+
+    /**
+     * Gets the mapped key for the provided scan code. Returns the provided default if no mapping
+     * found in the KeyCharacterMap.
+     *
+     * @hide
+     */
+    public int getMappedKeyOrDefault(int scanCode, int defaultKeyCode) {
+        int keyCode = nativeGetMappedKey(mPtr, scanCode);
+        return keyCode == KeyEvent.KEYCODE_UNKNOWN ? defaultKeyCode : keyCode;
     }
 
     /**
@@ -716,7 +759,7 @@ public class KeyCharacterMap implements Parcelable {
      * @return True if at least one attached keyboard supports the specified key code.
      */
     public static boolean deviceHasKey(int keyCode) {
-        return InputManager.getInstance().deviceHasKeys(new int[] { keyCode })[0];
+        return InputManagerGlobal.getInstance().deviceHasKeys(new int[] { keyCode })[0];
     }
 
     /**
@@ -729,7 +772,7 @@ public class KeyCharacterMap implements Parcelable {
      * at the same index in the key codes array.
      */
     public static boolean[] deviceHasKeys(int[] keyCodes) {
-        return InputManager.getInstance().deviceHasKeys(keyCodes);
+        return InputManagerGlobal.getInstance().deviceHasKeys(keyCodes);
     }
 
     @Override

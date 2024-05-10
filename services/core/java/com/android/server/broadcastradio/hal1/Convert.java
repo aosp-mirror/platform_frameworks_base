@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.Set;
 
 class Convert {
-    private static final String TAG = "BroadcastRadioService.Convert";
+
+    private static final String TAG = "BcRadio1Srv.Convert";
 
     /**
      * Converts string map to an array that's easily accessible by native code.

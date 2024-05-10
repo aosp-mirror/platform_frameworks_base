@@ -80,6 +80,10 @@ cc_test {
         "libgmock",
     ],
 
+    test_suites: [
+        "general-tests",
+    ],
+
     proto: {
         type: "full",
     },

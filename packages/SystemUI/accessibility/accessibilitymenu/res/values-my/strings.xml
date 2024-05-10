@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"အများသုံးနိုင်မှု မီနူး"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"‘အများသုံးနိုင်မှု မီနူး’ တွင် သင့်စက်ပစ္စည်းကို စီမံရန် ကြီးမားသည့်ဖန်သားပြင်မီနူး ပါဝင်သည်။ စက်ပစ္စည်းလော့ခ်ချခြင်း၊ အသံအတိုးအကျယ်နှင့် အလင်းအမှောင် ထိန်းချုပ်ခြင်း၊ ဖန်သားပြင်ဓာတ်ပုံရိုက်ခြင်း စသည်တို့ ပြုလုပ်နိုင်သည်။"</string>
+    <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
+    <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"အများသုံးနိုင်မှု ဆက်တင်များ"</string>
+    <string name="power_label" msgid="7699720321491287839">"ပါဝါခလုတ်"</string>
+    <string name="power_utterance" msgid="7444296686402104807">"ပါဝါ ရွေးစရာများ"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"မကြာသေးမီက အက်ပ်များ"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"လော့ခ်မျက်နှာပြင်"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"အမြန် ဆက်တင်များ"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"အကြောင်းကြားချက်များ"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"ဖန်သားပြင်ဓာတ်ပုံ ရိုက်ရန်"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"အသံချဲ့ခလုတ်"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"အသံတိုးခလုတ်"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"တောက်ပမှု တိုးမြှင့်ရန်"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"တောက်ပမှု လျှော့ချရန်"</string>
+    <string name="previous_button_content_description" msgid="840869171117765966">"ယခင် မျက်နှာပြင်သို့ သွားရန်"</string>
+    <string name="next_button_content_description" msgid="6810058269847364406">"နောက်မျက်နှာပြင်သို့ ဆက်သွားရန်"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"‘အများသုံးနိုင်မှု မီနူး’ တွင် သင့်စက်ပစ္စည်းကို စီမံရန် ကြီးမားသည့်ဖန်သားပြင်မီနူး ပါဝင်သည်။ စက်ပစ္စည်းလော့ခ်ချခြင်း၊ အသံအတိုးအကျယ်နှင့် အလင်းအမှောင် ထိန်းချုပ်ခြင်း၊ ဖန်သားပြင်ဓာတ်ပုံရိုက်ခြင်း စသည်တို့ ပြုလုပ်နိုင်သည်။"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"ကြီးမားသည့်မီနူးဖြင့် စက်ပစ္စည်းကို စီမံနိုင်သည်"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"အများသုံးနိုင်မှု မီနူးဆက်တင်များ"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"ခလုတ်အကြီးများ"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"\'အများသုံးနိုင်မှု မီနူး ခလုတ်များ\' ၏ အရွယ်အစားတိုးရန်"</string>
+    <string name="pref_help_title" msgid="6871558837025010641">"အကူအညီ"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"တောက်ပမှု <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"ဂီတသံ အတိုးအကျယ် <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+</resources>

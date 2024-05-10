@@ -19,6 +19,7 @@ package com.android.server.storage;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ApplicationExitInfo;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -125,10 +126,10 @@ public final class StorageSessionController {
                 connection = new StorageUserConnection(mContext, userId, this);
                 mConnections.put(userId, connection);
             }
-            Slog.i(TAG, "Creating and starting session with id: " + sessionId);
-            connection.startSession(sessionId, deviceFd, vol.getPath().getPath(),
-                    vol.getInternalPath().getPath());
         }
+        Slog.i(TAG, "Creating and starting session with id: " + sessionId);
+        connection.startSession(sessionId, deviceFd, vol.getPath().getPath(),
+                vol.getInternalPath().getPath());
     }
 
     /**
@@ -444,7 +445,7 @@ public final class StorageSessionController {
         IActivityManager am = ActivityManager.getService();
         try {
             am.killApplication(mExternalStorageServicePackageName, mExternalStorageServiceAppId,
-                    userId, "storage_session_controller reset");
+                    userId, "storage_session_controller reset", ApplicationExitInfo.REASON_OTHER);
         } catch (RemoteException e) {
             Slog.i(TAG, "Failed to kill the ExtenalStorageService for user " + userId);
         }

@@ -16,10 +16,13 @@
 
 package android.app.servertransaction;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.app.ClientTransactionHandler;
+import android.content.Context;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.os.IBinder;
 import android.os.Parcel;
 
 import java.util.Objects;
@@ -31,30 +34,38 @@ import java.util.Objects;
 public class ConfigurationChangeItem extends ClientTransactionItem {
 
     private Configuration mConfiguration;
+    private int mDeviceId;
 
     @Override
-    public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void preExecute(@NonNull ClientTransactionHandler client) {
+        CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
         client.updatePendingConfiguration(mConfiguration);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
-        client.handleConfigurationChanged(mConfiguration);
+    public void execute(@NonNull ClientTransactionHandler client,
+            @NonNull PendingTransactionActions pendingActions) {
+        client.handleConfigurationChanged(mConfiguration, mDeviceId);
     }
 
+    @Nullable
+    @Override
+    public Context getContextToUpdate(@NonNull ClientTransactionHandler client) {
+        return ActivityThread.currentApplication();
+    }
 
     // ObjectPoolItem implementation
 
     private ConfigurationChangeItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static ConfigurationChangeItem obtain(Configuration config) {
+    public static ConfigurationChangeItem obtain(@NonNull Configuration config, int deviceId) {
         ConfigurationChangeItem instance = ObjectPool.obtain(ConfigurationChangeItem.class);
         if (instance == null) {
             instance = new ConfigurationChangeItem();
         }
-        instance.mConfiguration = config;
+        instance.mConfiguration = new Configuration(config);
+        instance.mDeviceId = deviceId;
 
         return instance;
     }
@@ -62,6 +73,7 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         mConfiguration = null;
+        mDeviceId = 0;
         ObjectPool.recycle(this);
     }
 
@@ -72,11 +84,13 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedObject(mConfiguration, flags);
+        dest.writeInt(mDeviceId);
     }
 
     /** Read from Parcel. */
     private ConfigurationChangeItem(Parcel in) {
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
+        mDeviceId = in.readInt();
     }
 
     public static final @android.annotation.NonNull Creator<ConfigurationChangeItem> CREATOR =
@@ -99,16 +113,20 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
             return false;
         }
         final ConfigurationChangeItem other = (ConfigurationChangeItem) o;
-        return Objects.equals(mConfiguration, other.mConfiguration);
+        return Objects.equals(mConfiguration, other.mConfiguration)
+                && mDeviceId == other.mDeviceId;
     }
 
     @Override
     public int hashCode() {
-        return mConfiguration.hashCode();
+        int result = 17;
+        result = 31 * result + mDeviceId;
+        result = 31 * result + mConfiguration.hashCode();
+        return result;
     }
 
     @Override
     public String toString() {
-        return "ConfigurationChangeItem{config=" + mConfiguration + "}";
+        return "ConfigurationChangeItem{deviceId=" + mDeviceId + ", config" + mConfiguration + "}";
     }
 }

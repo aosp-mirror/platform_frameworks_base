@@ -20,6 +20,7 @@ import android.content.pm.Checksum;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageInstallObserver2;
+import android.content.pm.PackageInstaller;
 import android.content.IntentSender;
 import android.os.ParcelFileDescriptor;
 
@@ -45,9 +46,14 @@ interface IPackageInstallerSession {
     void commit(in IntentSender statusReceiver, boolean forTransferred);
     void transfer(in String packageName);
     void abandon();
+    void seal();
+    List<String> fetchPackageNames();
 
+    @EnforcePermission("USE_INSTALLER_V2")
     DataLoaderParamsParcel getDataLoaderParams();
+    @EnforcePermission("USE_INSTALLER_V2")
     void addFile(int location, String name, long lengthBytes, in byte[] metadata, in byte[] signature);
+    @EnforcePermission("USE_INSTALLER_V2")
     void removeFile(int location, String name);
 
     boolean isMultiPackage();
@@ -58,4 +64,13 @@ interface IPackageInstallerSession {
 
     boolean isStaged();
     int getInstallFlags();
+
+    void requestUserPreapproval(in PackageInstaller.PreapprovalDetails details, in IntentSender statusReceiver);
+
+    boolean isApplicationEnabledSettingPersistent();
+    boolean isRequestUpdateOwnership();
+
+    ParcelFileDescriptor getAppMetadataFd();
+    ParcelFileDescriptor openWriteAppMetadata();
+    void removeAppMetadata();
 }

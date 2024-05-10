@@ -91,7 +91,8 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
 
         boolean is20TargetOnBefore = mIsCec20 && getTargetDevicePowerStatus(mSource, mTargetAddress,
                 HdmiControlManager.POWER_STATUS_UNKNOWN) == HdmiControlManager.POWER_STATUS_ON;
-        broadcastActiveSource();
+        // Make the device the active source.
+        setAndBroadcastActiveSource();
         // If the device is not an audio system itself, request the connected audio system to
         // turn on.
         if (shouldTurnOnConnectedAudioSystem()) {
@@ -108,9 +109,11 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
                 queryDevicePowerStatus();
             } else if (targetPowerStatus == HdmiControlManager.POWER_STATUS_ON) {
                 if (!is20TargetOnBefore) {
+                    // If the device is still the active source, send the <Active Source> message
+                    // again.
                     // Suppress 2nd <Active Source> message if the target device was already on when
                     // the 1st one was sent.
-                    broadcastActiveSource();
+                    maySendActiveSource();
                 }
                 finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
                 return true;
@@ -121,7 +124,9 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         return true;
     }
 
-    private void broadcastActiveSource() {
+    private void setAndBroadcastActiveSource() {
+        // If the device wasn´t the active source yet,
+        // this makes it the active source and wakes it up.
         mSource.mService.setAndBroadcastActiveSourceFromOneDeviceType(
                 mTargetAddress, getSourcePath(), "OneTouchPlayAction#broadcastActiveSource()");
         // When OneTouchPlay is called, client side should be responsible to send out the intent
@@ -133,6 +138,11 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         }
         mSource.setRoutingPort(Constants.CEC_SWITCH_HOME);
         mSource.setLocalActivePort(Constants.CEC_SWITCH_HOME);
+    }
+
+    private void maySendActiveSource() {
+        // Only send <Active Source> if the device is already the active source at this time.
+        mSource.maySendActiveSource(mTargetAddress);
     }
 
     private void queryDevicePowerStatus() {
@@ -149,7 +159,9 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         if (cmd.getOpcode() == Constants.MESSAGE_REPORT_POWER_STATUS) {
             int status = cmd.getParams()[0];
             if (status == HdmiControlManager.POWER_STATUS_ON) {
-                broadcastActiveSource();
+                // If the device is still the active source, send the <Active Source> message
+                // again.
+                maySendActiveSource();
                 finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
             }
             return true;

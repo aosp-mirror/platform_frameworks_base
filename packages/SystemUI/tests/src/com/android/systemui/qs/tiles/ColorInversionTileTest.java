@@ -32,20 +32,21 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +62,7 @@ public class ColorInversionTileTest extends SysuiTestCase {
     private static final Integer COLOR_INVERSION_ENABLED = 1;
 
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -71,7 +72,7 @@ public class ColorInversionTileTest extends SysuiTestCase {
     @Mock
     private QSLogger mQSLogger;
     @Mock
-    private UiEventLogger mUiEventLogger;
+    private QsEventLogger mUiEventLogger;
     @Mock
     private UserTracker mUserTracker;
 
@@ -87,10 +88,10 @@ public class ColorInversionTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         when(mHost.getContext()).thenReturn(mContext);
-        when(mHost.getUiEventLogger()).thenReturn(mUiEventLogger);
 
         mTile = new ColorInversionTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -103,6 +104,12 @@ public class ColorInversionTileTest extends SysuiTestCase {
         );
 
         mTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

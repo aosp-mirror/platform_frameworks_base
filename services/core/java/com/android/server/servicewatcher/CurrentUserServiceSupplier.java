@@ -37,8 +37,8 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
-import android.permission.PermissionManager;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -253,6 +253,7 @@ public final class CurrentUserServiceSupplier extends BroadcastReceiver implemen
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
+        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(this, UserHandle.ALL, intentFilter, null,
                 FgThread.getHandler());
     }
@@ -293,8 +294,8 @@ public final class CurrentUserServiceSupplier extends BroadcastReceiver implemen
             BoundServiceInfo serviceInfo = new BoundServiceInfo(mIntent.getAction(), resolveInfo);
 
             if (mServicePermission != null) {
-                if (PermissionManager.checkPackageNamePermission(mServicePermission,
-                        service.packageName, serviceInfo.getUserId()) != PERMISSION_GRANTED) {
+                if (mContext.checkPermission(mServicePermission, Process.INVALID_PID,
+                        serviceInfo.mUid) != PERMISSION_GRANTED) {
                     Log.d(TAG, serviceInfo.getComponentName().flattenToShortString()
                             + " disqualified due to not holding " + mCallerPermission);
                     continue;

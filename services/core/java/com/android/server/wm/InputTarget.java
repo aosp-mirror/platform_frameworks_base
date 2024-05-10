@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import android.view.IWindow;
+import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 
 /**
@@ -33,7 +33,7 @@ interface InputTarget {
     int getDisplayId();
 
     /* Client IWindow for the target. */
-    IWindow getIWindow();
+    IBinder getWindowToken();
 
     /* Owning pid of the target. */
     int getPid();
@@ -58,7 +58,6 @@ interface InputTarget {
     boolean canScreenshotIme();
 
     ActivityRecord getActivityRecord();
-    void unfreezeInsetsAfterStartInput();
 
     boolean isInputMethodClientFocus(int uid, int pid);
 

@@ -209,6 +209,11 @@ public class EventsTest extends SysuiTestCase {
                         new int[]{MetricsEvent.POWER_OVERHEAT_ALARM,
                                 MetricsEvent.RESERVED_FOR_LOGBUILDER_HISTOGRAM},
                         Events.VolumeDialogEvent.USB_OVERHEAT_ALARM_DISMISSED},
+                {Events.EVENT_ODI_CAPTIONS_CLICK, null, "writeEvent odi_captions_click", null,
+                        Events.VolumeDialogEvent.VOLUME_DIALOG_ODI_CAPTIONS_CLICKED},
+                {Events.EVENT_ODI_CAPTIONS_TOOLTIP_CLICK, null,
+                        "writeEvent odi_captions_tooltip_click", null,
+                        Events.VolumeDialogEvent.VOLUME_DIALOG_ODI_CAPTIONS_TOOLTIP_CLICKED}
         });
     }
 }

@@ -55,11 +55,15 @@ public class EmergencyNumberUtils {
     public static final String METHOD_NAME_SET_EMERGENCY_NUMBER_OVERRIDE =
             "SET_EMERGENCY_NUMBER_OVERRIDE";
     public static final String METHOD_NAME_SET_EMERGENCY_GESTURE = "SET_EMERGENCY_GESTURE";
+    public static final String METHOD_NAME_SET_EMERGENCY_GESTURE_UI_SHOWING =
+            "SET_EMERGENCY_GESTURE_UI_SHOWING";
     public static final String METHOD_NAME_SET_EMERGENCY_SOUND = "SET_EMERGENCY_SOUND";
     public static final String METHOD_NAME_GET_EMERGENCY_GESTURE_ENABLED = "GET_EMERGENCY_GESTURE";
     public static final String METHOD_NAME_GET_EMERGENCY_GESTURE_SOUND_ENABLED =
             "GET_EMERGENCY_SOUND";
     public static final String EMERGENCY_GESTURE_CALL_NUMBER = "emergency_gesture_call_number";
+    public static final String EMERGENCY_GESTURE_UI_SHOWING_VALUE =
+            "emergency_gesture_ui_showing_value";
     public static final String EMERGENCY_SETTING_VALUE = "emergency_setting_value";
     public static final int EMERGENCY_SETTING_ON = 1;
     public static final int EMERGENCY_SETTING_OFF = 0;

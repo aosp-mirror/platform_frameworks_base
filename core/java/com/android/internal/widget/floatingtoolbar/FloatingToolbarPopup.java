@@ -88,8 +88,7 @@ public interface FloatingToolbarPopup {
             @Nullable PopupWindow.OnDismissListener onDismiss);
 
     /**
-     * Returns {@link RemoteFloatingToolbarPopup} implementation if the system selection toolbar
-     * enabled, otherwise returns {@link LocalFloatingToolbarPopup} implementation.
+     * Returns {@link LocalFloatingToolbarPopup} implementation.
      */
     static FloatingToolbarPopup createInstance(Context context, View parent) {
         return new LocalFloatingToolbarPopup(context, parent);

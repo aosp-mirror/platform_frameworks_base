@@ -18,10 +18,17 @@ package android.wm;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_DELAY_MS;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.metrics.LogMaker;
+import android.metrics.MetricsReader;
 import android.perftests.utils.PerfTestActivity;
 import android.perftests.utils.WindowPerfTestBase;
+import android.util.SparseArray;
 
 import androidx.test.runner.lifecycle.ActivityLifecycleCallback;
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
@@ -31,6 +38,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class WindowManagerPerfTestBase extends WindowPerfTestBase {
@@ -122,6 +130,44 @@ public class WindowManagerPerfTestBase extends WindowPerfTestBase {
                     notifyAll();
                 }
             }
+        }
+    }
+
+    static class TransitionMetricsReader {
+        final MetricsReader mMetricsReader = new MetricsReader();
+
+        static class TransitionMetrics {
+            int mTransitionDelayMs;
+            int mWindowsDrawnDelayMs;
+        }
+
+        TransitionMetrics[] getMetrics() {
+            mMetricsReader.read(0);
+            final ArrayList<LogMaker> logs = new ArrayList<>();
+            final LogMaker logTemplate = new LogMaker(APP_TRANSITION);
+            while (mMetricsReader.hasNext()) {
+                final LogMaker b = mMetricsReader.next();
+                if (logTemplate.isSubsetOf(b)) {
+                    logs.add(b);
+                }
+            }
+
+            final TransitionMetrics[] infoArray = new TransitionMetrics[logs.size()];
+            for (int i = 0; i < infoArray.length; i++) {
+                final LogMaker log = logs.get(i);
+                final SparseArray<Object> data = log.getEntries();
+                final TransitionMetrics info = new TransitionMetrics();
+                infoArray[i] = info;
+                info.mTransitionDelayMs =
+                        (int) data.get(APP_TRANSITION_DELAY_MS, -1);
+                info.mWindowsDrawnDelayMs =
+                        (int) data.get(APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS, -1);
+            }
+            return infoArray;
+        }
+
+        void setCheckpoint() {
+            mMetricsReader.checkpoint();
         }
     }
 }

@@ -20,7 +20,7 @@ import android.content.Context
 import android.text.StaticLayout
 import android.util.AttributeSet
 import android.widget.TextView
-import com.android.systemui.R
+import com.android.systemui.res.R
 
 /**
  * View for showing a date that can toggle between two different formats depending on size.
@@ -64,7 +64,7 @@ class VariableDateView(context: Context, attrs: AttributeSet) : TextView(context
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val availableWidth = MeasureSpec.getSize(widthMeasureSpec) - paddingStart - paddingEnd
         if (MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED && !freezeSwitching) {
-            onMeasureListener?.onMeasureAction(availableWidth)
+            onMeasureListener?.onMeasureAction(availableWidth, widthMeasureSpec)
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
@@ -74,6 +74,6 @@ class VariableDateView(context: Context, attrs: AttributeSet) : TextView(context
     }
 
     interface OnMeasureListener {
-        fun onMeasureAction(availableWidth: Int)
+        fun onMeasureAction(availableWidth: Int, widthMeasureSpec: Int)
     }
 }

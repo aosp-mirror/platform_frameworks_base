@@ -8,79 +8,80 @@ package {
 }
 
 android_library {
-
     name: "SettingsLib",
 
     static_libs: [
-        "androidx.annotation_annotation",
-        "androidx.legacy_legacy-support-v4",
-        "androidx.recyclerview_recyclerview",
-        "androidx.preference_preference",
-        "androidx.appcompat_appcompat",
-        "androidx.lifecycle_lifecycle-runtime",
-        "androidx.mediarouter_mediarouter-nodeps",
-        "com.google.android.material_material",
-        "iconloader",
+        "androidx.localbroadcastmanager_localbroadcastmanager",
+        "androidx.room_room-runtime",
+        "zxing-core",
+        "guava",
 
         "WifiTrackerLibRes",
-        "SettingsLibHelpUtils",
-        "SettingsLibRestrictedLockUtils",
+        "iconloader",
+        "setupdesign",
+
         "SettingsLibActionBarShadow",
+        "SettingsLibActionButtonsPreference",
+        "SettingsLibAdaptiveIcon",
         "SettingsLibAppPreference",
-        "SettingsLibSearchWidget",
-        "SettingsLibSettingsSpinner",
+        "SettingsLibBannerMessagePreference",
+        "SettingsLibBarChartPreference",
+        "SettingsLibButtonPreference",
+        "SettingsLibCollapsingToolbarBaseActivity",
+        "SettingsLibDeviceStateRotationLock",
+        "SettingsLibDisplayUtils",
+        "SettingsLibEmergencyNumber",
+        "SettingsLibEntityHeaderWidgets",
+        "SettingsLibFooterPreference",
+        "SettingsLibHelpUtils",
         "SettingsLibIllustrationPreference",
         "SettingsLibLayoutPreference",
         "SettingsLibMainSwitchPreference",
-        "SettingsLibActionButtonsPreference",
-        "SettingsLibEntityHeaderWidgets",
-        "SettingsLibBarChartPreference",
+        "SettingsLibProfileSelector",
         "SettingsLibProgressBar",
-        "SettingsLibAdaptiveIcon",
-        "SettingsLibRadioButtonPreference",
+        "SettingsLibRestrictedLockUtils",
+        "SettingsLibSearchWidget",
         "SettingsLibSelectorWithWidgetPreference",
-        "SettingsLibDisplayDensityUtils",
-        "SettingsLibUtils",
-        "SettingsLibEmergencyNumber",
-        "SettingsLibTopIntroPreference",
-        "SettingsLibBannerMessagePreference",
-        "SettingsLibFooterPreference",
-        "SettingsLibUsageProgressBarPreference",
-        "SettingsLibCollapsingToolbarBaseActivity",
-        "SettingsLibTwoTargetPreference",
+        "SettingsLibSettingsSpinner",
         "SettingsLibSettingsTransition",
-        "SettingsLibButtonPreference",
-        "SettingsLibDeviceStateRotationLock",
-        "setupdesign",
-        "zxing-core-1.7",
+        "SettingsLibTopIntroPreference",
+        "SettingsLibTwoTargetPreference",
+        "SettingsLibUsageProgressBarPreference",
+        "SettingsLibUtils",
+        "settingslib_flags_lib",
     ],
 
-    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
-    // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
-
+    plugins: ["androidx.room_room-compiler-plugin"],
+    use_resource_processor: true,
     resource_dirs: ["res"],
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
     ],
-
-    min_sdk_version: "29",
-
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 // NOTE: Keep this module in sync with ./common.mk
 java_defaults {
     name: "SettingsLibDefaults",
     static_libs: [
-        "androidx.annotation_annotation",
-        "androidx.lifecycle_lifecycle-common",
-        "androidx.legacy_legacy-support-v4",
-        "androidx.lifecycle_lifecycle-runtime",
-        "androidx.recyclerview_recyclerview",
-        "androidx.preference_preference",
-        "androidx.appcompat_appcompat",
-        "androidx.legacy_legacy-preference-v14",
         "SettingsLib",
     ],
+}
+
+aconfig_declarations {
+    name: "settingslib_media_flags",
+    package: "com.android.settingslib.media.flags",
+    container: "system",
+    srcs: [
+        "aconfig/settingslib_media_flag_declarations.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "settingslib_flags_lib",
+    aconfig_declarations: "settingslib_media_flags",
 }

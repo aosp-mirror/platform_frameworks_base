@@ -16,17 +16,22 @@
 
 package android.telephony;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.carrier.CarrierIdentifier;
+import android.telephony.TelephonyManager.CarrierRestrictionStatus;
+
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -103,12 +108,15 @@ public final class CarrierRestrictionRules implements Parcelable {
     private int mCarrierRestrictionDefault;
     @MultiSimPolicy
     private int mMultiSimPolicy;
+    @CarrierRestrictionStatus
+    private int mCarrierRestrictionStatus;
 
     private CarrierRestrictionRules() {
         mAllowedCarriers = new ArrayList<CarrierIdentifier>();
         mExcludedCarriers = new ArrayList<CarrierIdentifier>();
         mCarrierRestrictionDefault = CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED;
         mMultiSimPolicy = MULTISIM_POLICY_NONE;
+        mCarrierRestrictionStatus = TelephonyManager.CARRIER_RESTRICTION_STATUS_UNKNOWN;
     }
 
     private CarrierRestrictionRules(Parcel in) {
@@ -119,6 +127,7 @@ public final class CarrierRestrictionRules implements Parcelable {
         in.readTypedList(mExcludedCarriers, CarrierIdentifier.CREATOR);
         mCarrierRestrictionDefault = in.readInt();
         mMultiSimPolicy = in.readInt();
+        mCarrierRestrictionStatus = in.readInt();
     }
 
     /**
@@ -276,8 +285,8 @@ public final class CarrierRestrictionRules implements Parcelable {
         if (str.length() != pattern.length()) {
             return false;
         }
-        String lowerCaseStr = str.toLowerCase();
-        String lowerCasePattern = pattern.toLowerCase();
+        String lowerCaseStr = str.toLowerCase(Locale.ROOT);
+        String lowerCasePattern = pattern.toLowerCase(Locale.ROOT);
 
         for (int i = 0; i < lowerCasePattern.length(); i++) {
             if (lowerCasePattern.charAt(i) != lowerCaseStr.charAt(i)
@@ -289,6 +298,25 @@ public final class CarrierRestrictionRules implements Parcelable {
     }
 
     /**
+     * Get the carrier restriction status of the device.
+     * The return value of the API is as follows.
+     * <ul>
+     *      <li>return {@link TelephonyManager#CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER}
+     *      if the caller and the device locked by the network are same</li>
+     *      <li>return {@link TelephonyManager#CARRIER_RESTRICTION_STATUS_RESTRICTED} if the
+     *      caller and the device locked by the network are different</li>
+     *      <li>return {@link TelephonyManager#CARRIER_RESTRICTION_STATUS_NOT_RESTRICTED} if the
+     *      device is not locked</li>
+     *      <li>return {@link TelephonyManager#CARRIER_RESTRICTION_STATUS_UNKNOWN} if the device
+     *      locking state is unavailable or radio does not supports the feature</li>
+     * </ul>
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_RESTRICTION_STATUS)
+    public @CarrierRestrictionStatus int getCarrierRestrictionStatus() {
+        return mCarrierRestrictionStatus;
+    }
+
+    /**
      * {@link Parcelable#writeToParcel}
      */
     @Override
@@ -297,6 +325,7 @@ public final class CarrierRestrictionRules implements Parcelable {
         out.writeTypedList(mExcludedCarriers);
         out.writeInt(mCarrierRestrictionDefault);
         out.writeInt(mMultiSimPolicy);
+        out.writeInt(mCarrierRestrictionStatus);
     }
 
     /**
@@ -396,6 +425,18 @@ public final class CarrierRestrictionRules implements Parcelable {
          */
         public @NonNull Builder setMultiSimPolicy(@MultiSimPolicy int multiSimPolicy) {
             mRules.mMultiSimPolicy = multiSimPolicy;
+            return this;
+        }
+
+        /**
+         * Set the device's carrier restriction status
+         *
+         * @param carrierRestrictionStatus device restriction status
+         * @hide
+         */
+        public @NonNull
+        Builder setCarrierRestrictionStatus(int carrierRestrictionStatus) {
+            mRules.mCarrierRestrictionStatus = carrierRestrictionStatus;
             return this;
         }
     }

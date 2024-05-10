@@ -23,10 +23,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.ILogd;
 import android.os.Looper;
@@ -41,7 +43,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ILogAccessDialogCallback;
-import com.android.internal.app.LogAccessDialogActivity;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -62,6 +63,10 @@ import java.util.function.Supplier;
 public final class LogcatManagerService extends SystemService {
     private static final String TAG = "LogcatManagerService";
     private static final boolean DEBUG = false;
+    private static final String TARGET_PACKAGE_NAME = "com.android.systemui";
+    private static final String TARGET_ACTIVITY_NAME =
+            "com.android.systemui.logcat.LogAccessDialogActivity";
+    public static final String EXTRA_CALLBACK = "EXTRA_CALLBACK";
 
     /** How long to wait for the user to approve/decline before declining automatically */
     @VisibleForTesting
@@ -424,7 +429,6 @@ public final class LogcatManagerService extends SystemService {
     private void processNewLogAccessRequest(LogAccessClient client) {
         boolean isInstrumented = mActivityManagerInternal.getInstrumentationSourceUid(client.mUid)
                 != android.os.Process.INVALID_UID;
-
         // The instrumented apks only run for testing, so we don't check user permission.
         if (isInstrumented) {
             onAccessApprovedForClient(client);
@@ -443,6 +447,7 @@ public final class LogcatManagerService extends SystemService {
                 mClock.get() + PENDING_CONFIRMATION_TIMEOUT_MILLIS);
         final Intent mIntent = createIntent(client);
         mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mIntent.setComponent(new ComponentName(TARGET_PACKAGE_NAME, TARGET_ACTIVITY_NAME));
         mContext.startActivityAsUser(mIntent, UserHandle.SYSTEM);
     }
 
@@ -514,7 +519,15 @@ public final class LogcatManagerService extends SystemService {
             Slog.d(TAG, "Approving log access: " + request);
         }
         try {
-            getLogdService().approve(request.mUid, request.mGid, request.mPid, request.mFd);
+            try {
+                getLogdService().approve(request.mUid, request.mGid, request.mPid, request.mFd);
+            } catch (DeadObjectException e) {
+                // This can happen if logd restarts, so force getting a new connection
+                // to logd and try once more.
+                Slog.w(TAG, "Logd connection no longer valid while approving, trying once more.");
+                mLogdService = null;
+                getLogdService().approve(request.mUid, request.mGid, request.mPid, request.mFd);
+            }
             Integer activeCount = mActiveLogAccessCount.getOrDefault(client, 0);
             mActiveLogAccessCount.put(client, activeCount + 1);
         } catch (RemoteException e) {
@@ -527,7 +540,15 @@ public final class LogcatManagerService extends SystemService {
             Slog.d(TAG, "Declining log access: " + request);
         }
         try {
-            getLogdService().decline(request.mUid, request.mGid, request.mPid, request.mFd);
+            try {
+                getLogdService().decline(request.mUid, request.mGid, request.mPid, request.mFd);
+            } catch (DeadObjectException e) {
+                // This can happen if logd restarts, so force getting a new connection
+                // to logd and try once more.
+                Slog.w(TAG, "Logd connection no longer valid while declining, trying once more.");
+                mLogdService = null;
+                getLogdService().decline(request.mUid, request.mGid, request.mPid, request.mFd);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Fails to call remote functions", e);
         }
@@ -537,13 +558,13 @@ public final class LogcatManagerService extends SystemService {
      * Create the Intent for LogAccessDialogActivity.
      */
     public Intent createIntent(LogAccessClient client) {
-        final Intent intent = new Intent(mContext, LogAccessDialogActivity.class);
+        final Intent intent = new Intent();
 
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         intent.putExtra(Intent.EXTRA_PACKAGE_NAME, client.mPackageName);
         intent.putExtra(Intent.EXTRA_UID, client.mUid);
-        intent.putExtra(LogAccessDialogActivity.EXTRA_CALLBACK, mDialogCallback.asBinder());
+        intent.putExtra(EXTRA_CALLBACK, mDialogCallback.asBinder());
 
         return intent;
     }

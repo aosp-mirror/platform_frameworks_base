@@ -21,33 +21,27 @@ import android.os.VibratorInfo;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
-import android.util.MathUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Adapter that converts step segments that should be handled as PWLEs to ramp segments.
  *
- * <p>Each replaced {@link StepSegment} will be represented by a {@link RampSegment} with same
- * start and end amplitudes/frequencies, which can then be converted to PWLE compositions. This
- * adapter leaves the segments unchanged if the device doesn't have the PWLE composition capability.
+ * <p>Each replaced step will be represented by a ramp with same start and end
+ * amplitudes/frequencies, which can then be converted to PWLE compositions.
+ *
+ * <p>The segments will not be changed if the device doesn't have
+ * {@link IVibrator#CAP_COMPOSE_PWLE_EFFECTS}.
  */
-final class StepToRampAdapter implements VibrationEffectAdapters.SegmentsAdapter<VibratorInfo> {
+final class StepToRampAdapter implements VibrationSegmentsAdapter {
 
     @Override
-    public int apply(List<VibrationEffectSegment> segments, int repeatIndex,
-            VibratorInfo info) {
+    public int adaptToVibrator(VibratorInfo info, List<VibrationEffectSegment> segments,
+            int repeatIndex) {
         if (!info.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
             // The vibrator does not have PWLE capability, so keep the segments unchanged.
             return repeatIndex;
         }
-        convertStepsToRamps(info, segments);
-        repeatIndex = splitLongRampSegments(info, segments, repeatIndex);
-        return repeatIndex;
-    }
-
-    private void convertStepsToRamps(VibratorInfo info, List<VibrationEffectSegment> segments) {
         int segmentCount = segments.size();
         // Convert steps that require frequency control to ramps.
         for (int i = 0; i < segmentCount; i++) {
@@ -68,40 +62,6 @@ final class StepToRampAdapter implements VibrationEffectAdapters.SegmentsAdapter
                 }
             }
         }
-    }
-
-    /**
-     * Split {@link RampSegment} entries that have duration longer than {@link
-     * VibratorInfo#getPwlePrimitiveDurationMax()}.
-     */
-    private int splitLongRampSegments(VibratorInfo info, List<VibrationEffectSegment> segments,
-            int repeatIndex) {
-        int maxDuration = info.getPwlePrimitiveDurationMax();
-        if (maxDuration <= 0) {
-            // No limit set to PWLE primitive duration.
-            return repeatIndex;
-        }
-
-        int segmentCount = segments.size();
-        for (int i = 0; i < segmentCount; i++) {
-            if (!(segments.get(i) instanceof RampSegment)) {
-                continue;
-            }
-            RampSegment ramp = (RampSegment) segments.get(i);
-            int splits = ((int) ramp.getDuration() + maxDuration - 1) / maxDuration;
-            if (splits <= 1) {
-                continue;
-            }
-            segments.remove(i);
-            segments.addAll(i, splitRampSegment(info, ramp, splits));
-            int addedSegments = splits - 1;
-            if (repeatIndex > i) {
-                repeatIndex += addedSegments;
-            }
-            i += addedSegments;
-            segmentCount += addedSegments;
-        }
-
         return repeatIndex;
     }
 
@@ -111,43 +71,14 @@ final class StepToRampAdapter implements VibrationEffectAdapters.SegmentsAdapter
                 frequencyHz, frequencyHz, (int) segment.getDuration());
     }
 
-    private static List<RampSegment> splitRampSegment(VibratorInfo info, RampSegment ramp,
-            int splits) {
-        List<RampSegment> ramps = new ArrayList<>(splits);
-        float startFrequencyHz = fillEmptyFrequency(info, ramp.getStartFrequencyHz());
-        float endFrequencyHz = fillEmptyFrequency(info, ramp.getEndFrequencyHz());
-        long splitDuration = ramp.getDuration() / splits;
-        float previousAmplitude = ramp.getStartAmplitude();
-        float previousFrequency = startFrequencyHz;
-        long accumulatedDuration = 0;
-
-        for (int i = 1; i < splits; i++) {
-            accumulatedDuration += splitDuration;
-            float durationRatio = (float) accumulatedDuration / ramp.getDuration();
-            float interpolatedFrequency =
-                    MathUtils.lerp(startFrequencyHz, endFrequencyHz, durationRatio);
-            float interpolatedAmplitude =
-                    MathUtils.lerp(ramp.getStartAmplitude(), ramp.getEndAmplitude(), durationRatio);
-            RampSegment rampSplit = new RampSegment(
-                    previousAmplitude, interpolatedAmplitude,
-                    previousFrequency, interpolatedFrequency,
-                    (int) splitDuration);
-            ramps.add(rampSplit);
-            previousAmplitude = rampSplit.getEndAmplitude();
-            previousFrequency = rampSplit.getEndFrequencyHz();
-        }
-
-        ramps.add(new RampSegment(previousAmplitude, ramp.getEndAmplitude(), previousFrequency,
-                endFrequencyHz, (int) (ramp.getDuration() - accumulatedDuration)));
-
-        return ramps;
-    }
-
     private static boolean isStep(VibrationEffectSegment segment) {
         return segment instanceof StepSegment;
     }
 
     private static float fillEmptyFrequency(VibratorInfo info, float frequencyHz) {
+        if (Float.isNaN(info.getResonantFrequencyHz())) {
+            return frequencyHz;
+        }
         return frequencyHz == 0 ? info.getResonantFrequencyHz() : frequencyHz;
     }
 }

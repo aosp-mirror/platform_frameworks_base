@@ -46,7 +46,10 @@ cc_defaults {
 
 cc_library_shared {
     name: "libandroid",
-    defaults: ["libandroid_defaults"],
+    defaults: [
+        "libandroid_defaults",
+        "android.hardware.power-ndk_shared",
+    ],
 
     srcs: [
         "activity_manager.cpp",

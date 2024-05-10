@@ -21,8 +21,12 @@ import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED_
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__ENTER_REASON__UNKNOWN_ENTER;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__APP_FINISHED;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__CHILD_TASK_ENTER_PIP;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__DEVICE_FOLDED;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__DRAG_DIVIDER;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__FULLSCREEN_SHORTCUT;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__ENTER_DESKTOP;
+import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RECREATE_SPLIT;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__RETURN_HOME;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__ROOT_TASK_VANISHED;
 import static com.android.internal.util.FrameworkStatsLog.SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED;
@@ -36,8 +40,12 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASO
 import static com.android.wm.shell.splitscreen.SplitScreenController.ENTER_REASON_UNKNOWN;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_APP_FINISHED;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_CHILD_TASK_ENTER_PIP;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DEVICE_FOLDED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DRAG_DIVIDER;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_ENTER_DESKTOP;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_FULLSCREEN_SHORTCUT;
+import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RECREATE_SPLIT;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_ROOT_TASK_VANISHED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_SCREEN_LOCKED;
@@ -180,6 +188,14 @@ public class SplitscreenEventLogger {
                 return SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED;
             case EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP:
                 return SPLITSCREEN_UICHANGED__EXIT_REASON__SCREEN_LOCKED_SHOW_ON_TOP;
+            case EXIT_REASON_CHILD_TASK_ENTER_PIP:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__CHILD_TASK_ENTER_PIP;
+            case EXIT_REASON_RECREATE_SPLIT:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__RECREATE_SPLIT;
+            case EXIT_REASON_FULLSCREEN_SHORTCUT:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__FULLSCREEN_SHORTCUT;
+            case EXIT_REASON_ENTER_DESKTOP:
+                return SPLITSCREEN_UICHANGED__EXIT_REASON__ENTER_DESKTOP;
             case EXIT_REASON_UNKNOWN:
                 // Fall through
             default:

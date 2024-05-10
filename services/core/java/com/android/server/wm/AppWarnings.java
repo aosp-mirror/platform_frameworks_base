@@ -16,20 +16,34 @@
 
 package com.android.server.wm;
 
+import android.annotation.NonNull;
 import android.annotation.UiThread;
+import android.annotation.WorkerThread;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemProperties;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.IoThread;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -37,9 +51,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Manages warning dialogs shown during application lifecycle.
@@ -51,44 +63,37 @@ class AppWarnings {
     public static final int FLAG_HIDE_DISPLAY_SIZE = 0x01;
     public static final int FLAG_HIDE_COMPILE_SDK = 0x02;
     public static final int FLAG_HIDE_DEPRECATED_SDK = 0x04;
+    public static final int FLAG_HIDE_DEPRECATED_ABI = 0x08;
 
-    private final HashMap<String, Integer> mPackageFlags = new HashMap<>();
+    @GuardedBy("mPackageFlags")
+    private final ArrayMap<String, Integer> mPackageFlags = new ArrayMap<>();
 
     private final ActivityTaskManagerService mAtm;
     private final Context mUiContext;
-    private final ConfigHandler mHandler;
+    private final WriteConfigTask mWriteConfigTask;
     private final UiHandler mUiHandler;
     private final AtomicFile mConfigFile;
 
     private UnsupportedDisplaySizeDialog mUnsupportedDisplaySizeDialog;
     private UnsupportedCompileSdkDialog mUnsupportedCompileSdkDialog;
     private DeprecatedTargetSdkVersionDialog mDeprecatedTargetSdkVersionDialog;
+    private DeprecatedAbiDialog mDeprecatedAbiDialog;
 
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
-    private HashSet<ComponentName> mAlwaysShowUnsupportedCompileSdkWarningActivities =
-            new HashSet<>();
+    private final ArraySet<ComponentName> mAlwaysShowUnsupportedCompileSdkWarningActivities =
+            new ArraySet<>();
 
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
     void alwaysShowUnsupportedCompileSdkWarning(ComponentName activity) {
         mAlwaysShowUnsupportedCompileSdkWarningActivities.add(activity);
     }
 
-    /**
-     * Creates a new warning dialog manager.
-     * <p>
-     * <strong>Note:</strong> Must be called from the ActivityManagerService thread.
-     *
-     * @param atm
-     * @param uiContext
-     * @param handler
-     * @param uiHandler
-     * @param systemDir
-     */
+    /** Creates a new warning dialog manager. */
     public AppWarnings(ActivityTaskManagerService atm, Context uiContext, Handler handler,
             Handler uiHandler, File systemDir) {
         mAtm = atm;
         mUiContext = uiContext;
-        mHandler = new ConfigHandler(handler.getLooper());
+        mWriteConfigTask = new WriteConfigTask();
         mUiHandler = new UiHandler(uiHandler.getLooper());
         mConfigFile = new AtomicFile(new File(systemDir, CONFIG_FILE_NAME), "warnings-config");
 
@@ -155,8 +160,45 @@ class AppWarnings {
      * @param r activity record for which the warning may be displayed
      */
     public void showDeprecatedTargetDialogIfNeeded(ActivityRecord r) {
-        if (r.info.applicationInfo.targetSdkVersion < Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT) {
+        // The warning dialog can be disabled for debugging or testing purposes
+        final boolean disableDeprecatedTargetSdkDialog = SystemProperties.getBoolean(
+                "debug.wm.disable_deprecated_target_sdk_dialog", false);
+        if (r.info.applicationInfo.targetSdkVersion < Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT
+                && !disableDeprecatedTargetSdkDialog) {
             mUiHandler.showDeprecatedTargetDialog(r);
+        }
+    }
+
+    /**
+     * Shows the "deprecated abi" warning, if necessary. This can only happen is the device
+     * supports both 64-bit and 32-bit ABIs, and the app only contains 32-bit libraries. The app
+     * cannot be installed if the device only supports 64-bit ABI while the app contains only 32-bit
+     * libraries.
+     *
+     * @param r activity record for which the warning may be displayed
+     */
+    public void showDeprecatedAbiDialogIfNeeded(ActivityRecord r) {
+        final boolean isUsingAbiOverride = (r.info.applicationInfo.privateFlagsExt
+                & ApplicationInfo.PRIVATE_FLAG_EXT_CPU_OVERRIDE) != 0;
+        if (isUsingAbiOverride) {
+            // The abiOverride flag was specified during installation, which means that if the app
+            // is currently running in 32-bit mode, it is intended. Do not show the warning dialog.
+            return;
+        }
+        // The warning dialog can also be disabled for debugging purpose
+        final boolean disableDeprecatedAbiDialog = SystemProperties.getBoolean(
+                "debug.wm.disable_deprecated_abi_dialog", false);
+        if (disableDeprecatedAbiDialog) {
+            return;
+        }
+        final String appPrimaryAbi = r.info.applicationInfo.primaryCpuAbi;
+        final String appSecondaryAbi = r.info.applicationInfo.secondaryCpuAbi;
+        final boolean appContainsOnly32bitLibraries =
+                (appPrimaryAbi != null && appSecondaryAbi == null && !appPrimaryAbi.contains("64"));
+        final boolean is64BitDevice =
+                ArrayUtils.find(Build.SUPPORTED_ABIS, abi -> abi.contains("64")) != null;
+        if (is64BitDevice && appContainsOnly32bitLibraries) {
+            mUiHandler.showDeprecatedAbiDialog(r);
         }
     }
 
@@ -169,6 +211,7 @@ class AppWarnings {
         showUnsupportedCompileSdkDialogIfNeeded(r);
         showUnsupportedDisplaySizeDialogIfNeeded(r);
         showDeprecatedTargetDialogIfNeeded(r);
+        showDeprecatedAbiDialogIfNeeded(r);
     }
 
     /**
@@ -212,8 +255,9 @@ class AppWarnings {
         mUiHandler.hideDialogsForPackage(name);
 
         synchronized (mPackageFlags) {
-            mPackageFlags.remove(name);
-            mHandler.scheduleWrite();
+            if (mPackageFlags.remove(name) != null) {
+                mWriteConfigTask.schedule();
+            }
         }
     }
 
@@ -294,6 +338,27 @@ class AppWarnings {
     }
 
     /**
+     * Shows the "deprecated abi" warning for the given application.
+     * <p>
+     * <strong>Note:</strong> Must be called on the UI thread.
+     *
+     * @param ar record for the activity that triggered the warning
+     */
+    @UiThread
+    private void showDeprecatedAbiDialogUiThread(ActivityRecord ar) {
+        if (mDeprecatedAbiDialog != null) {
+            mDeprecatedAbiDialog.dismiss();
+            mDeprecatedAbiDialog = null;
+        }
+        if (ar != null && !hasPackageFlag(
+                ar.packageName, FLAG_HIDE_DEPRECATED_ABI)) {
+            mDeprecatedAbiDialog = new DeprecatedAbiDialog(
+                    AppWarnings.this, mUiContext, ar.info.applicationInfo);
+            mDeprecatedAbiDialog.show();
+        }
+    }
+
+    /**
      * Dismisses all warnings for the given package.
      * <p>
      * <strong>Note:</strong> Must be called on the UI thread.
@@ -305,23 +370,30 @@ class AppWarnings {
     private void hideDialogsForPackageUiThread(String name) {
         // Hides the "unsupported display" dialog if necessary.
         if (mUnsupportedDisplaySizeDialog != null && (name == null || name.equals(
-                mUnsupportedDisplaySizeDialog.getPackageName()))) {
+                mUnsupportedDisplaySizeDialog.mPackageName))) {
             mUnsupportedDisplaySizeDialog.dismiss();
             mUnsupportedDisplaySizeDialog = null;
         }
 
         // Hides the "unsupported compile SDK" dialog if necessary.
         if (mUnsupportedCompileSdkDialog != null && (name == null || name.equals(
-                mUnsupportedCompileSdkDialog.getPackageName()))) {
+                mUnsupportedCompileSdkDialog.mPackageName))) {
             mUnsupportedCompileSdkDialog.dismiss();
             mUnsupportedCompileSdkDialog = null;
         }
 
         // Hides the "deprecated target sdk version" dialog if necessary.
         if (mDeprecatedTargetSdkVersionDialog != null && (name == null || name.equals(
-                mDeprecatedTargetSdkVersionDialog.getPackageName()))) {
+                mDeprecatedTargetSdkVersionDialog.mPackageName))) {
             mDeprecatedTargetSdkVersionDialog.dismiss();
             mDeprecatedTargetSdkVersionDialog = null;
+        }
+
+        // Hides the "deprecated abi" dialog if necessary.
+        if (mDeprecatedAbiDialog != null && (name == null || name.equals(
+                mDeprecatedAbiDialog.mPackageName))) {
+            mDeprecatedAbiDialog.dismiss();
+            mDeprecatedAbiDialog = null;
         }
     }
 
@@ -353,7 +425,7 @@ class AppWarnings {
                 } else {
                     mPackageFlags.remove(name);
                 }
-                mHandler.scheduleWrite();
+                mWriteConfigTask.schedule();
             }
         }
     }
@@ -376,6 +448,7 @@ class AppWarnings {
         private static final int MSG_SHOW_UNSUPPORTED_COMPILE_SDK_DIALOG = 3;
         private static final int MSG_HIDE_DIALOGS_FOR_PACKAGE = 4;
         private static final int MSG_SHOW_DEPRECATED_TARGET_SDK_DIALOG = 5;
+        private static final int MSG_SHOW_DEPRECATED_ABI_DIALOG = 6;
 
         public UiHandler(Looper looper) {
             super(looper, null, true);
@@ -403,6 +476,10 @@ class AppWarnings {
                     final ActivityRecord ar = (ActivityRecord) msg.obj;
                     showDeprecatedTargetSdkDialogUiThread(ar);
                 } break;
+                case MSG_SHOW_DEPRECATED_ABI_DIALOG: {
+                    final ActivityRecord ar = (ActivityRecord) msg.obj;
+                    showDeprecatedAbiDialogUiThread(ar);
+                } break;
             }
         }
 
@@ -426,51 +503,83 @@ class AppWarnings {
             obtainMessage(MSG_SHOW_DEPRECATED_TARGET_SDK_DIALOG, r).sendToTarget();
         }
 
+        public void showDeprecatedAbiDialog(ActivityRecord r) {
+            removeMessages(MSG_SHOW_DEPRECATED_ABI_DIALOG);
+            obtainMessage(MSG_SHOW_DEPRECATED_ABI_DIALOG, r).sendToTarget();
+        }
+
         public void hideDialogsForPackage(String name) {
             obtainMessage(MSG_HIDE_DIALOGS_FOR_PACKAGE, name).sendToTarget();
         }
     }
 
-    /**
-     * Handles messages on the ActivityTaskManagerService thread.
-     */
-    private final class ConfigHandler extends Handler {
-        private static final int MSG_WRITE = 1;
+    static class BaseDialog {
+        final AppWarnings mManager;
+        final String mPackageName;
+        AlertDialog mDialog;
+        private BroadcastReceiver mCloseReceiver;
 
-        private static final int DELAY_MSG_WRITE = 10000;
-
-        public ConfigHandler(Looper looper) {
-            super(looper, null, true);
+        BaseDialog(AppWarnings manager, String packageName) {
+            mManager = manager;
+            mPackageName = packageName;
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_WRITE:
-                    writeConfigToFileAmsThread();
-                    break;
+        @UiThread
+        void show() {
+            if (mDialog == null) return;
+            if (mCloseReceiver == null) {
+                mCloseReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                            mManager.mUiHandler.hideDialogsForPackage(mPackageName);
+                        }
+                    }
+                };
+                mManager.mUiContext.registerReceiver(mCloseReceiver,
+                        new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+                        Context.RECEIVER_EXPORTED);
             }
+            Slog.w(TAG, "Showing " + getClass().getSimpleName() + " for package " + mPackageName);
+            mDialog.show();
         }
 
-        public void scheduleWrite() {
-            removeMessages(MSG_WRITE);
-            sendEmptyMessageDelayed(MSG_WRITE, DELAY_MSG_WRITE);
+        @UiThread
+        void dismiss() {
+            if (mDialog == null) return;
+            if (mCloseReceiver != null) {
+                mManager.mUiContext.unregisterReceiver(mCloseReceiver);
+                mCloseReceiver = null;
+            }
+            mDialog.dismiss();
+            mDialog = null;
         }
     }
 
-    /**
-     * Writes the configuration file.
-     * <p>
-     * <strong>Note:</strong> Should be called from the ActivityManagerService thread unless you
-     * don't care where you're doing I/O operations. But you <i>do</i> care, don't you?
-     */
-    private void writeConfigToFileAmsThread() {
-        // Create a shallow copy so that we don't have to synchronize on config.
-        final HashMap<String, Integer> packageFlags;
-        synchronized (mPackageFlags) {
-            packageFlags = new HashMap<>(mPackageFlags);
+    private final class WriteConfigTask implements Runnable {
+        private static final long WRITE_CONFIG_DELAY_MS = 10000;
+        final AtomicReference<ArrayMap<String, Integer>> mPendingPackageFlags =
+                new AtomicReference<>();
+
+        @Override
+        public void run() {
+            final ArrayMap<String, Integer> packageFlags = mPendingPackageFlags.getAndSet(null);
+            if (packageFlags != null) {
+                writeConfigToFile(packageFlags);
+            }
         }
 
+        @GuardedBy("mPackageFlags")
+        void schedule() {
+            if (mPendingPackageFlags.getAndSet(new ArrayMap<>(mPackageFlags)) == null) {
+                IoThread.getHandler().postDelayed(this, WRITE_CONFIG_DELAY_MS);
+            }
+        }
+    }
+
+    /** Writes the configuration file. */
+    @WorkerThread
+    private void writeConfigToFile(@NonNull ArrayMap<String, Integer> packageFlags) {
         FileOutputStream fos = null;
         try {
             fos = mConfigFile.startWrite();
@@ -480,9 +589,9 @@ class AppWarnings {
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "packages");
 
-            for (Map.Entry<String, Integer> entry : packageFlags.entrySet()) {
-                String pkg = entry.getKey();
-                int mode = entry.getValue();
+            for (int i = 0; i < packageFlags.size(); i++) {
+                final String pkg = packageFlags.keyAt(i);
+                final int mode = packageFlags.valueAt(i);
                 if (mode == 0) {
                     continue;
                 }

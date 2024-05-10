@@ -58,8 +58,8 @@ import androidx.core.graphics.drawable.IconCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.util.concurrent.Executor;
@@ -78,12 +78,19 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private static final boolean DEBUG = true;
     private static final int HANDLE_BROADCAST_FAILED_DELAY = 3000;
 
-    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+    protected final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
 
     final Context mContext;
     final MediaOutputController mMediaOutputController;
     final BroadcastSender mBroadcastSender;
+
+    /**
+     * Signals whether the dialog should NOT show app-related metadata.
+     *
+     * <p>A metadata-less dialog hides the title, subtitle, and app icon in the header.
+     */
+    private final boolean mIncludePlaybackAndAppMetadata;
 
     @VisibleForTesting
     View mDialogView;
@@ -95,20 +102,26 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private RecyclerView mDevicesRecyclerView;
     private LinearLayout mDeviceListLayout;
     private LinearLayout mCastAppLayout;
+    private LinearLayout mMediaMetadataSectionLayout;
     private Button mDoneButton;
     private Button mStopButton;
     private Button mAppButton;
     private int mListMaxHeight;
     private int mItemHeight;
+    private int mListPaddingTop;
     private WallpaperColors mWallpaperColors;
-    private Executor mExecutor;
     private boolean mShouldLaunchLeBroadcastDialog;
+    private boolean mIsLeBroadcastCallbackRegistered;
+    private boolean mDismissing;
 
     MediaOutputBaseAdapter mAdapter;
 
+    protected Executor mExecutor;
+
     private final ViewTreeObserver.OnGlobalLayoutListener mDeviceListLayoutListener = () -> {
         ViewGroup.LayoutParams params = mDeviceListLayout.getLayoutParams();
-        int totalItemsHeight = mAdapter.getItemCount() * mItemHeight;
+        int totalItemsHeight = mAdapter.getItemCount() * mItemHeight
+                + mListPaddingTop;
         int correctHeight = Math.min(totalItemsHeight, mListMaxHeight);
         // Set max height for list
         if (correctHeight != params.height) {
@@ -204,8 +217,11 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
     }
 
-    public MediaOutputBaseDialog(Context context, BroadcastSender broadcastSender,
-            MediaOutputController mediaOutputController) {
+    public MediaOutputBaseDialog(
+            Context context,
+            BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController,
+            boolean includePlaybackAndAppMetadata) {
         super(context, R.style.Theme_SystemUI_Dialog_Media);
 
         // Save the context that is wrapped with our theme.
@@ -217,7 +233,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 R.dimen.media_output_dialog_list_max_height);
         mItemHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.media_output_dialog_list_item_height);
+        mListPaddingTop = mContext.getResources().getDimensionPixelSize(
+                R.dimen.media_output_dialog_list_padding_top);
         mExecutor = Executors.newSingleThreadExecutor();
+        mIncludePlaybackAndAppMetadata = includePlaybackAndAppMetadata;
     }
 
     @Override
@@ -240,6 +259,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
         mHeaderIcon = mDialogView.requireViewById(R.id.header_icon);
         mDevicesRecyclerView = mDialogView.requireViewById(R.id.list_result);
+        mMediaMetadataSectionLayout = mDialogView.requireViewById(R.id.media_metadata_section);
         mDeviceListLayout = mDialogView.requireViewById(R.id.device_list);
         mDoneButton = mDialogView.requireViewById(R.id.done);
         mStopButton = mDialogView.requireViewById(R.id.stop);
@@ -255,38 +275,44 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDevicesRecyclerView.setLayoutManager(mLayoutManager);
         mDevicesRecyclerView.setAdapter(mAdapter);
         mDevicesRecyclerView.setHasFixedSize(false);
-        // Init header icon
-        mHeaderIcon.setOnClickListener(v -> onHeaderIconClick());
         // Init bottom buttons
         mDoneButton.setOnClickListener(v -> dismiss());
-        mStopButton.setOnClickListener(v -> {
-            mMediaOutputController.releaseSession();
-            dismiss();
-        });
-        mAppButton.setOnClickListener(v -> {
-            mBroadcastSender.closeSystemDialogs();
-            if (mMediaOutputController.getAppLaunchIntent() != null) {
-                mContext.startActivity(mMediaOutputController.getAppLaunchIntent());
-            }
-            dismiss();
-        });
+        mStopButton.setOnClickListener(v -> onStopButtonClick());
+        mAppButton.setOnClickListener(mMediaOutputController::tryToLaunchMediaApplication);
+        mMediaMetadataSectionLayout.setOnClickListener(
+                mMediaOutputController::tryToLaunchMediaApplication);
+
+        mDismissing = false;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void dismiss() {
+        // TODO(287191450): remove this once expensive binder calls are removed from refresh().
+        // Due to these binder calls on the UI thread, calling refresh() during dismissal causes
+        // significant frame drops for the dismissal animation. Since the dialog is going away
+        // anyway, we use this state to turn refresh() into a no-op.
+        mDismissing = true;
+        super.dismiss();
+    }
+
+    @Override
+    public void start() {
         mMediaOutputController.start(this);
-        if(isBroadcastSupported()) {
-            mMediaOutputController.registerLeBroadcastServiceCallBack(mExecutor,
+        if (isBroadcastSupported() && !mIsLeBroadcastCallbackRegistered) {
+            mMediaOutputController.registerLeBroadcastServiceCallback(mExecutor,
                     mBroadcastCallback);
+            mIsLeBroadcastCallbackRegistered = true;
         }
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if(isBroadcastSupported()) {
-            mMediaOutputController.unregisterLeBroadcastServiceCallBack(mBroadcastCallback);
+    public void stop() {
+        // unregister broadcast callback should only depend on profile and registered flag
+        // rather than remote device or broadcast state
+        // otherwise it might have risks of leaking registered callback handle
+        if (mMediaOutputController.isBroadcastSupported() && mIsLeBroadcastCallbackRegistered) {
+            mMediaOutputController.unregisterLeBroadcastServiceCallback(mBroadcastCallback);
+            mIsLeBroadcastCallbackRegistered = false;
         }
         mMediaOutputController.stop();
     }
@@ -297,7 +323,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     }
 
     void refresh(boolean deviceSetChanged) {
-        if (mMediaOutputController.isRefreshing()) {
+        // TODO(287191450): remove binder calls in this method from the UI thread.
+        // If the dialog is going away or is already refreshing, do nothing.
+        if (mDismissing || mMediaOutputController.isRefreshing()) {
             return;
         }
         mMediaOutputController.setRefreshing(true);
@@ -337,7 +365,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             updateDialogBackgroundColor();
             mHeaderIcon.setVisibility(View.GONE);
         }
-        if (appSourceIcon != null) {
+
+        if (!mIncludePlaybackAndAppMetadata) {
+            mAppResourceIcon.setVisibility(View.GONE);
+        } else if (appSourceIcon != null) {
             Icon appIcon = appSourceIcon.toIcon(mContext);
             mAppResourceIcon.setColorFilter(mMediaOutputController.getColorItemContent());
             mAppResourceIcon.setImageIcon(appIcon);
@@ -356,17 +387,24 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
         }
         mAppButton.setText(mMediaOutputController.getAppSourceName());
-        // Update title and subtitle
-        mHeaderTitle.setText(getHeaderText());
-        final CharSequence subTitle = getHeaderSubtitle();
-        if (TextUtils.isEmpty(subTitle)) {
+
+        if (!mIncludePlaybackAndAppMetadata) {
+            mHeaderTitle.setVisibility(View.GONE);
             mHeaderSubtitle.setVisibility(View.GONE);
-            mHeaderTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
         } else {
-            mHeaderSubtitle.setVisibility(View.VISIBLE);
-            mHeaderSubtitle.setText(subTitle);
-            mHeaderTitle.setGravity(Gravity.NO_GRAVITY);
+            // Update title and subtitle
+            mHeaderTitle.setText(getHeaderText());
+            final CharSequence subTitle = getHeaderSubtitle();
+            if (TextUtils.isEmpty(subTitle)) {
+                mHeaderSubtitle.setVisibility(View.GONE);
+                mHeaderTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+            } else {
+                mHeaderSubtitle.setVisibility(View.VISIBLE);
+                mHeaderSubtitle.setText(subTitle);
+                mHeaderTitle.setGravity(Gravity.NO_GRAVITY);
+            }
         }
+
         // Show when remote media session is available or
         //      when the device supports BT LE audio + media is playing
         mStopButton.setVisibility(getStopButtonVisibility());
@@ -382,7 +420,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                     && currentActivePosition < mAdapter.getItemCount()) {
                 mAdapter.notifyItemChanged(currentActivePosition);
             } else {
-                mAdapter.notifyDataSetChanged();
+                mAdapter.updateItems();
             }
         } else {
             mMediaOutputController.setRefreshing(false);
@@ -560,7 +598,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     @Override
     public void dismissDialog() {
-        dismiss();
+        mBroadcastSender.closeSystemDialogs();
     }
 
     void onHeaderIconClick() {

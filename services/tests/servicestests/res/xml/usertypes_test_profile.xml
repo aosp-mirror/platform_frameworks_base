@@ -20,6 +20,7 @@
         icon-badge='@*android:drawable/ic_corp_icon_badge_case'
         badge-plain='garbage'
         badge-no-background='@*android:drawable/ic_corp_badge_no_background'
+        status-bar-icon='@*android:drawable/ic_test_badge_experiment'
         >
         <badge-labels>
             <item res='@*android:string/managed_profile_label_badge' />
@@ -30,6 +31,23 @@
             <item res='@*android:color/profile_badge_2' />
         </badge-colors>
         <default-restrictions no_remove_user='true' no_bluetooth='true' />
+        <user-properties
+            showInLauncher='2020'
+            startWithParent='false'
+            useParentsContacts='false'
+            crossProfileIntentFilterAccessControl='20'
+            crossProfileIntentResolutionStrategy='0'
+            mediaSharedWithParent='true'
+            credentialShareableWithParent='false'
+            authAlwaysRequiredToDisableQuietMode='true'
+            allowStoppingUserWithDelayedLocking='true'
+            showInSettings='23'
+            hideInSettingsInQuietMode='true'
+            inheritDevicePolicy='450'
+            deleteAppWithParent='false'
+            alwaysVisible='true'
+            crossProfileContentSharingStrategy='0'
+        />
     </profile-type>
     <profile-type name='custom.test.1' max-allowed-per-parent='14' />
 

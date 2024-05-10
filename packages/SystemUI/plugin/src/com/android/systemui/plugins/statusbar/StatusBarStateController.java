@@ -50,6 +50,13 @@ public interface StatusBarStateController {
     boolean isPulsing();
 
     /**
+     * Is device dreaming. This method is more inclusive than
+     * {@link android.service.dreams.IDreamManager.isDreaming}, as it will return true during the
+     * dream's wake-up phase.
+     */
+    boolean isDreaming();
+
+    /**
      * Adds a state listener
      */
     void addCallback(StateListener listener);
@@ -105,18 +112,16 @@ public interface StatusBarStateController {
         default void onDozingChanged(boolean isDozing) {}
 
         /**
+         * Callback to be notified when Dreaming changes. Dreaming is stored separately from state.
+         */
+        default void onDreamingChanged(boolean isDreaming) {}
+
+        /**
          * Callback to be notified when the doze amount changes. Useful for animations.
          * Note: this will be called for each animation frame. Please be careful to avoid
          * performance regressions.
          */
         default void onDozeAmountChanged(float linear, float eased) {}
-
-        /**
-         * Callback to be notified when the fullscreen or immersive state changes.
-         *
-         * @param isFullscreen if any of the system bar is hidden by the focused window.
-         */
-        default void onFullscreenStateChanged(boolean isFullscreen) {}
 
         /**
          * Callback to be notified when the pulsing state changes

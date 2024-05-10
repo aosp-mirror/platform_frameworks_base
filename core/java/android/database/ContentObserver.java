@@ -31,11 +31,13 @@ import android.os.UserHandle;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.Executor;
 
 /**
  * Receives call backs for changes to content.
  * Must be implemented by objects which are added to a {@link ContentObservable}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class ContentObserver {
     /**
      * Starting in {@link android.os.Build.VERSION_CODES#R}, there is a new
@@ -49,11 +51,11 @@ public abstract class ContentObserver {
     @ChangeId
     @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
     private static final long ADD_CONTENT_OBSERVER_FLAGS = 150939131L;
-
     private final Object mLock = new Object();
     private Transport mTransport; // guarded by mLock
 
     Handler mHandler;
+    private final Executor mExecutor;
 
     /**
      * Creates a content observer.
@@ -62,6 +64,18 @@ public abstract class ContentObserver {
      */
     public ContentObserver(Handler handler) {
         mHandler = handler;
+        mExecutor = null;
+    }
+
+    /**
+     * @hide
+     * Creates a content observer with an executor.
+     *
+     * @param executor The executor to run {@link #onChange} on, or null if none.
+     * @param unused a second argument to avoid source incompatibility.
+     */
+    public ContentObserver(@Nullable Executor executor, int unused) {
+        mExecutor = executor;
     }
 
     /**
@@ -216,13 +230,22 @@ public abstract class ContentObserver {
         // There are dozens of people relying on the hidden API inside the
         // system UID, so hard-code the old behavior for all of them; for
         // everyone else we gate based on a specific change
-        if (!CompatChanges.isChangeEnabled(ADD_CONTENT_OBSERVER_FLAGS)
+        if (!isChangeEnabledAddContentObserverFlags()
                 || android.os.Process.myUid() == android.os.Process.SYSTEM_UID) {
             // Deliver userId through argument to preserve hidden API behavior
             onChange(selfChange, uris, flags, UserHandle.of(userId));
         } else {
             onChange(selfChange, uris, flags);
         }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean isChangeEnabledAddContentObserverFlags() {
+        return CompatChanges.isChangeEnabled(ADD_CONTENT_OBSERVER_FLAGS);
+    }
+
+    private static boolean isChangeEnabledAddContentObserverFlags$ravenwood() {
+        return true;
     }
 
     /**
@@ -297,12 +320,19 @@ public abstract class ContentObserver {
     /** @hide */
     public final void dispatchChange(boolean selfChange, @NonNull Collection<Uri> uris,
             @NotifyFlags int flags, @UserIdInt int userId) {
-        if (mHandler == null) {
-            onChange(selfChange, uris, flags, userId);
-        } else {
+        if (mExecutor != null) {
+            mExecutor.execute(() -> {
+                onChange(selfChange, uris, flags, userId);
+            });
+        } else if (mHandler != null) {
+            // Supporting Handler directly rather than wrapping in a HandlerExecutor
+            //  avoids introducing a RejectedExecutionException for legacy code when
+            //  the post fails.
             mHandler.post(() -> {
                 onChange(selfChange, uris, flags, userId);
             });
+        } else {
+            onChange(selfChange, uris, flags, userId);
         }
     }
 

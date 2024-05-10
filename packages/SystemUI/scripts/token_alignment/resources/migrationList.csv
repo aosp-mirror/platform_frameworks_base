@@ -1,0 +1,16 @@
+android	material	newDefaultValue	newComment	migrationToken
+colorAccentPrimaryVariant	colorPrimaryContainer			MigTok02
+colorAccentSecondaryVariant	colorSecondaryContainer			MigTok04
+colorAccentTertiary	colorTertiary			MigTok05
+colorAccentTertiaryVariant	colorTertiaryContainer			MigTok06
+colorBackground	colorSurfaceContainer			MigTok07
+colorSurface	colorSurfaceContainer			MigTok08
+colorSurfaceHeader	colorSurfaceContainerHighest			MigTok09
+colorSurfaceHighlight	colorSurfaceBright			MigTok10
+colorSurfaceVariant	colorSurfaceContainerHigh			MigTok11
+textColorOnAccent	colorOnPrimary			MigTok12
+textColorPrimary	colorOnSurface			MigTok13
+textColorPrimaryInverse	colorOnShadeInactive			MigTok14
+textColorSecondary	colorOnSurfaceVariant			MigTok15
+textColorSecondaryInverse	colorOnShadeInactiveVariant			MigTok16
+textColorTertiary	colorOutline			MigTok17

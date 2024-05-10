@@ -1,6 +1,9 @@
 {
   "presubmit": [
     {
+      "name": "CtsMediaBetterTogetherTestCases"
+    },
+    {
       "name": "mediaroutertest"
     },
     {
@@ -12,16 +15,16 @@
       ]
     },
     {
-      "name": "GtsMediaTestCases",
+      "name": "WvtsDeviceTestCases",
       "options" : [
         {
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
-          "include-filter": "com.google.android.media.gts.WidevineGenericOpsTests"
+          "include-filter": "com.google.android.media.wvts.WidevineGenericOpsTests"
         },
         {
-          "include-filter": "com.google.android.media.gts.WidevineH264PlaybackTests"
+          "include-filter": "com.google.android.media.wvts.WidevineH264PlaybackTests"
         }
       ],
       "file_patterns": ["(?i)drm|crypto"]
@@ -34,7 +37,30 @@
         }
       ],
       "file_patterns": ["(?i)drm|crypto"]
+    },
+    {
+      "file_patterns": [
+        "[^/]*(Ringtone)[^/]*\\.java"
+      ],
+      "name": "MediaRingtoneTests",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.LargeTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "file_patterns": [
+        "[^/]*(LoudnessCodec)[^/]*\\.java"
+      ],
+      "name": "LoudnessCodecApiTest",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        }
+      ]
     }
   ]
 }
-

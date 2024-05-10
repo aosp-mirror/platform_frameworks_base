@@ -1,0 +1,55 @@
+<!-- Copyright (C) 2023 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+                 xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector android:height="230dp" android:width="230dp" android:viewportHeight="230"
+                android:viewportWidth="230">
+            <group android:name="_R_G">
+                <group android:name="_R_G_L_0_G" android:translateX="100.621"
+                       android:translateY="102.621">
+                    <path android:name="_R_G_L_0_G_D_0_P_0" android:strokeColor="#ffffff"
+                          android:strokeLineCap="round" android:strokeLineJoin="round"
+                          android:strokeWidth="8" android:strokeAlpha="1" android:trimPathStart="0"
+                          android:trimPathEnd="0" android:trimPathOffset="0"
+                          android:pathData=" M14.38 -93.62 C72.88,-93.62 120.38,-46.12 120.38,12.38 C120.38,70.88 72.88,118.38 14.38,118.38 C-44.12,118.38 -91.62,70.88 -91.62,12.38 C-91.62,-46.12 -44.12,-93.62 14.38,-93.62c "/>
+                </group>
+            </group>
+            <group android:name="time_group"/>
+        </vector>
+    </aapt:attr>
+    <target android:name="_R_G_L_0_G_D_0_P_0">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:propertyName="trimPathEnd" android:duration="350"
+                                android:startOffset="0" android:valueFrom="0" android:valueTo="1"
+                                android:valueType="floatType">
+                    <aapt:attr name="android:interpolator">
+                        <pathInterpolator android:pathData="M 0.0,0.0 c0.6,0 0.4,1 1.0,1.0"/>
+                    </aapt:attr>
+                </objectAnimator>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="time_group">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:propertyName="translateX" android:duration="517"
+                                android:startOffset="0" android:valueFrom="0" android:valueTo="1"
+                                android:valueType="floatType"/>
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

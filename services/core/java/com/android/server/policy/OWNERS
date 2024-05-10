@@ -1,3 +1,6 @@
 include /services/core/java/com/android/server/wm/OWNERS
 include /services/core/java/com/android/server/input/OWNERS
-include /services/core/java/com/android/server/pm/permission/OWNERS
+per-file *AppOp* = file:/services/core/java/com/android/server/pm/permission/OWNERS
+per-file *Permission* = file:/services/core/java/com/android/server/pm/permission/OWNERS
+per-file OWNERS = file:/services/core/java/com/android/server/pm/permission/OWNERS
+per-file TEST_MAPPING = file:/services/core/java/com/android/server/pm/permission/OWNERS

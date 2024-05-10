@@ -31,6 +31,7 @@ import java.util.function.IntFunction;
  * sugar methods for {@link ByteBuffer}. Useful for networking and packet manipulations.
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class BitUtils {
     private BitUtils() {}
 

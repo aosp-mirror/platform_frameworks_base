@@ -117,14 +117,28 @@ TEST_F(IdAssignerTests, FailWhenTypeHasTwoNonStagedIds) {
 }
 
 TEST_F(IdAssignerTests, FailWhenTypeHasTwoNonStagedIdsRegardlessOfStagedId) {
-  auto table = test::ResourceTableBuilder()
-                   .AddSimple("android:attr/foo", ResourceId(0x01050000))
-                   .AddSimple("android:attr/bar", ResourceId(0x01ff0006))
-                   .Add(NewResourceBuilder("android:attr/staged_baz")
-                            .SetId(0x01ff0000)
-                            .SetVisibility({.staged_api = true})
-                            .Build())
-                   .Build();
+  auto table =
+      test::ResourceTableBuilder()
+          .AddSimple("android:attr/foo", ResourceId(0x01050000))
+          .AddSimple("android:attr/bar", ResourceId(0x01ff0006))
+          .Add(NewResourceBuilder("android:attr/staged_baz")
+                   .SetId(0x01ff0000)
+                   .SetVisibility({.staged_api = true, .level = Visibility::Level::kPublic})
+                   .Build())
+          .Build();
+  IdAssigner assigner;
+  ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
+}
+
+TEST_F(IdAssignerTests, FailWhenTypeHaveBothStagedAndNonStagedIds) {
+  auto table =
+      test::ResourceTableBuilder()
+          .AddSimple("android:attr/foo", ResourceId(0x01010000))
+          .Add(NewResourceBuilder("android:bool/staged_baz")
+                   .SetId(0x01010001)
+                   .SetVisibility({.staged_api = true, .level = Visibility::Level::kPublic})
+                   .Build())
+          .Build();
   IdAssigner assigner;
   ASSERT_FALSE(assigner.Consume(context.get(), table.get()));
 }
@@ -191,12 +205,12 @@ TEST_F(IdAssignerTests, ExaustEntryIdsLastIdIsPublic) {
       for (auto& entry : type->entries) {
         if (!entry->id) {
           return ::testing::AssertionFailure()
-                 << "resource " << ResourceNameRef(package->name, type->type, entry->name)
+                 << "resource " << ResourceNameRef(package->name, type->named_type, entry->name)
                  << " has no ID";
         }
         if (!seen_ids.insert(entry->id.value()).second) {
           return ::testing::AssertionFailure()
-                 << "resource " << ResourceNameRef(package->name, type->type, entry->name)
+                 << "resource " << ResourceNameRef(package->name, type->named_type, entry->name)
                  << " has a non-unique ID" << std::hex << entry->id.value() << std::dec;
         }
       }

@@ -16,9 +16,15 @@
 
 package android.window;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.util.ArraySet;
 
@@ -103,18 +109,44 @@ public abstract class DisplayWindowPolicyController {
     }
 
     /**
-     * Returns {@code true} if the given activities can be displayed on this virtual display and
-     * the windowing mode is supported.
+     * @return the custom home component specified for the relevant display, if any.
      */
-    public abstract boolean canContainActivities(@NonNull List<ActivityInfo> activities,
-            @WindowConfiguration.WindowingMode int windowingMode);
+    @Nullable
+    public abstract ComponentName getCustomHomeComponent();
 
     /**
-     * Returns {@code true} if the given new task can be launched on this virtual display.
+     * Returns {@code true} if all of the given activities can be launched on this virtual display
+     * in the configuration defined by the rest of the arguments.
+     *
+     * @see #canContainActivity
+     */
+    public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
+            @WindowConfiguration.WindowingMode int windowingMode) {
+        for (int i = 0; i < activities.size(); i++) {
+            if (!canContainActivity(activities.get(i), windowingMode,
+                    /*launchingFromDisplayId=*/ INVALID_DISPLAY, /*isNewTask=*/ false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns {@code true} if the given activity can be launched on this virtual display in the
+     * configuration defined by the rest of the arguments. If the given intent would be intercepted
+     * by the display owner then this means that the activity cannot be launched.
      */
     public abstract boolean canActivityBeLaunched(@NonNull ActivityInfo activityInfo,
-            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
-            boolean isNewTask);
+            @Nullable Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask);
+
+    /**
+     * Returns {@code true} if the given activity can be launched on this virtual display in the
+     * configuration defined by the rest of the arguments.
+     */
+    protected abstract boolean canContainActivity(@NonNull ActivityInfo activityInfo,
+            @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask);
 
     /**
      * Called when an Activity window is layouted with the new changes where contains the
@@ -126,14 +158,15 @@ public abstract class DisplayWindowPolicyController {
             ActivityInfo activityInfo, int windowFlags, int systemWindowFlags);
 
     /**
-     * Returns {@code true} if the tasks which is on this virtual display can be showed on Recents.
+     * Returns {@code true} if the tasks which is on this virtual display can be showed in the
+     * host device of the recently launched activities list.
      */
-    public abstract boolean canShowTasksInRecents();
+    public abstract boolean canShowTasksInHostDeviceRecents();
 
     /**
      * This is called when the top activity of the display is changed.
      */
-    public void onTopActivityChanged(ComponentName topActivity, int uid) {}
+    public void onTopActivityChanged(ComponentName topActivity, int uid, @UserIdInt int userId) {}
 
     /**
      * This is called when the apps that contains running activities on the display has changed.
@@ -141,6 +174,14 @@ public abstract class DisplayWindowPolicyController {
      * in a process.
      */
     public void onRunningAppsChanged(ArraySet<Integer> runningUids) {}
+
+    /**
+     * This is called when an Activity is entering PIP.
+     * Returns {@code true} if the Activity is allowed to enter PIP.
+     */
+    public boolean isEnteringPipAllowed(int uid) {
+        return isWindowingModeSupported(WINDOWING_MODE_PINNED);
+    }
 
     /** Dump debug data */
     public void dump(String prefix, final PrintWriter pw) {

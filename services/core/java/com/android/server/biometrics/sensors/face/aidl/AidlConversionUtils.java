@@ -38,7 +38,7 @@ import android.util.Slog;
 /**
  * Utilities for converting from hardware to framework-defined AIDL models.
  */
-final class AidlConversionUtils {
+public final class AidlConversionUtils {
 
     private static final String TAG = "AidlConversionUtils";
 

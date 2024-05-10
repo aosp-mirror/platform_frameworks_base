@@ -20,6 +20,7 @@ import android.annotation.IntRange;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.icu.text.CaseMap;
 import android.icu.text.ListFormatter;
+import android.icu.text.NumberingSystem;
 import android.icu.util.ULocale;
 import android.os.LocaleList;
 import android.text.TextUtils;
@@ -170,6 +171,21 @@ public class LocaleHelper {
 
         ListFormatter lfn = ListFormatter.getInstance(dispLocale);
         return lfn.format((Object[]) localeNames);
+    }
+
+    /**
+     * Returns numbering system value of a locale for display in the provided locale.
+     *
+     * @param locale The locale whose key value is displayed.
+     * @param displayLocale The locale in which to display the key value.
+     * @return The string of numbering system.
+     */
+    public static String getDisplayNumberingSystemKeyValue(
+            Locale locale, Locale displayLocale) {
+        ULocale uLocale = new ULocale.Builder()
+                .setUnicodeLocaleKeyword("nu", NumberingSystem.getInstance(locale).getName())
+                .build();
+        return uLocale.getDisplayKeywordValue("numbers", ULocale.forLocale(displayLocale));
     }
 
     /**

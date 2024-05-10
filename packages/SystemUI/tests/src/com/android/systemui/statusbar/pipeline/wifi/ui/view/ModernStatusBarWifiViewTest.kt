@@ -16,33 +16,42 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.ui.view
 
+import android.content.res.ColorStateList
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.lifecycle.InstantTaskExecutorRule
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
+import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
+import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -55,84 +64,54 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     private lateinit var testableLooper: TestableLooper
 
-    @Mock
-    private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
-    @Mock
-    private lateinit var logger: ConnectivityPipelineLogger
-    @Mock
-    private lateinit var connectivityConstants: ConnectivityConstants
-    @Mock
-    private lateinit var wifiConstants: WifiConstants
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+    @Mock private lateinit var connectivityConstants: ConnectivityConstants
+    @Mock private lateinit var wifiConstants: WifiConstants
+    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var interactor: WifiInteractor
-    private lateinit var viewModel: WifiViewModel
+    private lateinit var viewModel: LocationBasedWifiViewModel
     private lateinit var scope: CoroutineScope
-
-    @JvmField @Rule
-    val instantTaskExecutor = InstantTaskExecutorRule()
+    private lateinit var airplaneModeViewModel: AirplaneModeViewModel
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
 
+        airplaneModeRepository = FakeAirplaneModeRepository()
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
-        interactor = WifiInteractor(connectivityRepository, wifiRepository)
         scope = CoroutineScope(Dispatchers.Unconfined)
-        viewModel = WifiViewModel(
-            connectivityConstants,
-            context,
-            logger,
-            interactor,
-            scope,
-            statusBarPipelineFlags,
-            wifiConstants,
-        )
-    }
-
-    @Test
-    fun constructAndBind_hasCorrectSlot() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, "slotName", viewModel, StatusBarLocation.HOME
-        )
-
-        assertThat(view.slot).isEqualTo("slotName")
-    }
-
-    @Test
-    fun getVisibleState_icon_returnsIcon() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
-
-        view.setVisibleState(STATE_ICON, /* animate= */ false)
-
-        assertThat(view.visibleState).isEqualTo(STATE_ICON)
-    }
-
-    @Test
-    fun getVisibleState_dot_returnsDot() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
-
-        view.setVisibleState(STATE_DOT, /* animate= */ false)
-
-        assertThat(view.visibleState).isEqualTo(STATE_DOT)
-    }
-
-    @Test
-    fun getVisibleState_hidden_returnsHidden() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
-
-        view.setVisibleState(STATE_HIDDEN, /* animate= */ false)
-
-        assertThat(view.visibleState).isEqualTo(STATE_HIDDEN)
+        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository, scope)
+        airplaneModeViewModel =
+            AirplaneModeViewModelImpl(
+                AirplaneModeInteractor(
+                    airplaneModeRepository,
+                    connectivityRepository,
+                    FakeMobileConnectionsRepository(),
+                ),
+                tableLogBuffer,
+                scope,
+            )
+        val viewModelCommon =
+            WifiViewModel(
+                airplaneModeViewModel,
+                shouldShowSignalSpacerProvider = { MutableStateFlow(false) },
+                connectivityConstants,
+                context,
+                tableLogBuffer,
+                interactor,
+                scope,
+                wifiConstants,
+            )
+        viewModel =
+            viewModelForLocation(
+                viewModelCommon,
+                StatusBarLocation.HOME,
+            )
     }
 
     // Note: The following tests are more like integration tests, since they stand up a full
@@ -140,9 +119,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun setVisibleState_icon_iconShownDotHidden() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_ICON, /* animate= */ false)
 
@@ -157,16 +134,14 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun setVisibleState_dot_iconHiddenDotShown() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_DOT, /* animate= */ false)
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
 
-        assertThat(view.getIconGroupView().visibility).isEqualTo(View.GONE)
+        assertThat(view.getIconGroupView().visibility).isEqualTo(View.INVISIBLE)
         assertThat(view.getDotView().visibility).isEqualTo(View.VISIBLE)
 
         ViewUtils.detachView(view)
@@ -174,17 +149,43 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun setVisibleState_hidden_iconAndDotHidden() {
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(STATE_HIDDEN, /* animate= */ false)
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
 
-        assertThat(view.getIconGroupView().visibility).isEqualTo(View.GONE)
-        assertThat(view.getDotView().visibility).isEqualTo(View.GONE)
+        assertThat(view.getIconGroupView().visibility).isEqualTo(View.INVISIBLE)
+        assertThat(view.getDotView().visibility).isEqualTo(View.INVISIBLE)
+
+        ViewUtils.detachView(view)
+    }
+
+    /* Regression test for b/296864006. When STATE_HIDDEN we need to ensure the wifi view width
+     * would not break the StatusIconContainer translation calculation. */
+    @Test
+    fun setVisibleState_hidden_keepWidth() {
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
+
+        view.setVisibleState(STATE_ICON, /* animate= */ false)
+
+        // get the view width when it's in visible state
+        ViewUtils.attachView(view)
+        val lp = view.layoutParams
+        lp.width = ViewGroup.LayoutParams.WRAP_CONTENT
+        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        view.layoutParams = lp
+        testableLooper.processAllMessages()
+        val currentWidth = view.width
+
+        view.setVisibleState(STATE_HIDDEN, /* animate= */ false)
+        testableLooper.processAllMessages()
+
+        // the view width when STATE_HIDDEN should be at least the width when STATE_ICON. Because
+        // when STATE_HIDDEN the invisible dot view width might be larger than group view width,
+        // then the wifi view width would be enlarged.
+        assertThat(view.width).isAtLeast(currentWidth)
 
         ViewUtils.detachView(view)
     }
@@ -196,9 +197,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
             WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
         )
 
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
@@ -215,9 +214,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
             WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 2)
         )
 
-        val view = ModernStatusBarWifiView.constructAndBind(
-            context, SLOT_NAME, viewModel, StatusBarLocation.HOME
-        )
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
 
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
@@ -227,8 +224,44 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         ViewUtils.detachView(view)
     }
 
+    @Test
+    fun onDarkChanged_iconHasNewColor() {
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
+        ViewUtils.attachView(view)
+        testableLooper.processAllMessages()
+
+        val color = 0x12345678
+        val contrast = 0x12344321
+        view.onDarkChangedWithContrast(arrayListOf(), color, contrast)
+        testableLooper.processAllMessages()
+
+        assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
+
+        ViewUtils.detachView(view)
+    }
+
+    @Test
+    fun setStaticDrawableColor_iconHasNewColor() {
+        val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
+        ViewUtils.attachView(view)
+        testableLooper.processAllMessages()
+
+        val color = 0x23456789
+        val contrast = 0x12344321
+        view.setStaticDrawableColor(color, contrast)
+        testableLooper.processAllMessages()
+
+        assertThat(view.getIconView().imageTintList).isEqualTo(ColorStateList.valueOf(color))
+
+        ViewUtils.detachView(view)
+    }
+
     private fun View.getIconGroupView(): View {
         return this.requireViewById(R.id.wifi_group)
+    }
+
+    private fun View.getIconView(): ImageView {
+        return this.requireViewById(R.id.wifi_signal)
     }
 
     private fun View.getDotView(): View {

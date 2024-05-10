@@ -16,10 +16,14 @@
 
 package com.android.systemui.dump
 
-import android.util.ArrayMap
 import com.android.systemui.Dumpable
+import com.android.systemui.ProtoDumpable
+import com.android.systemui.dump.DumpsysEntry.DumpableEntry
+import com.android.systemui.dump.DumpsysEntry.LogBufferEntry
+import com.android.systemui.dump.DumpsysEntry.TableLogBufferEntry
 import com.android.systemui.log.LogBuffer
-import java.io.PrintWriter
+import com.android.systemui.log.table.TableLogBuffer
+import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,165 +38,142 @@ import javax.inject.Singleton
  */
 @Singleton
 open class DumpManager @Inject constructor() {
-    private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = ArrayMap()
-    private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = ArrayMap()
+    // NOTE: Using TreeMap ensures that iteration is in a predictable & alphabetical order.
+    private val dumpables: MutableMap<String, DumpableEntry> = TreeMap()
+    private val buffers: MutableMap<String, LogBufferEntry> = TreeMap()
+    private val tableLogBuffers: MutableMap<String, TableLogBufferEntry> = TreeMap()
+
+    /** See [registerCriticalDumpable]. */
+    fun registerCriticalDumpable(module: Dumpable) {
+        registerCriticalDumpable(module::class.java.canonicalName, module)
+    }
 
     /**
-     * Register a dumpable to be called during a bug report. The dumpable will be called during the
-     * CRITICAL section of the bug report, so don't dump an excessive amount of stuff here.
+     * Registers a dumpable to be called during the CRITICAL section of the bug report.
+     *
+     * The CRITICAL section gets very high priority during a dump, but also a very limited amount of
+     * time to do the dumping. So, please don't dump an excessive amount of stuff using CRITICAL.
+     *
+     * See [registerDumpable].
+     */
+    fun registerCriticalDumpable(name: String, module: Dumpable) {
+        registerDumpable(name, module, DumpPriority.CRITICAL)
+    }
+
+    /** See [registerNormalDumpable]. */
+    fun registerNormalDumpable(module: Dumpable) {
+        registerNormalDumpable(module::class.java.canonicalName, module)
+    }
+
+    /**
+     * Registers a dumpable to be called during the NORMAL section of the bug report.
+     *
+     * The NORMAL section gets a lower priority during a dump, but also more time. This should be
+     * used by [LogBuffer] instances, [ProtoDumpable] instances, and any [Dumpable] instances that
+     * dump a lot of information.
+     */
+    fun registerNormalDumpable(name: String, module: Dumpable) {
+        registerDumpable(name, module, DumpPriority.NORMAL)
+    }
+
+    /**
+     * Register a dumpable to be called during a bug report.
      *
      * @param name The name to register the dumpable under. This is typically the qualified class
-     * name of the thing being dumped (getClass().getName()), but can be anything as long as it
-     * doesn't clash with an existing registration.
+     *   name of the thing being dumped (getClass().getName()), but can be anything as long as it
+     *   doesn't clash with an existing registration.
+     * @param priority the priority level of this dumpable, which affects at what point in the bug
+     *   report this gets dump. By default, the dumpable will be called during the CRITICAL section
+     *   of the bug report, so don't dump an excessive amount of stuff here.
+     *
+     * TODO(b/259973758): Replace all calls to this method with calls to [registerCriticalDumpable]
+     *   or [registerNormalDumpable] instead.
      */
     @Synchronized
-    fun registerDumpable(name: String, module: Dumpable) {
+    @JvmOverloads
+    @Deprecated("Use registerCriticalDumpable or registerNormalDumpable instead")
+    fun registerDumpable(
+        name: String,
+        module: Dumpable,
+        priority: DumpPriority = DumpPriority.CRITICAL,
+    ) {
         if (!canAssignToNameLocked(name, module)) {
             throw IllegalArgumentException("'$name' is already registered")
         }
 
-        dumpables[name] = RegisteredDumpable(name, module)
+        dumpables[name] = DumpableEntry(module, name, priority)
     }
 
     /**
-     * Same as the above override, but automatically uses the simple class name as the dumpable
+     * Same as the above override, but automatically uses the canonical class name as the dumpable
      * name.
      */
     @Synchronized
     fun registerDumpable(module: Dumpable) {
-        registerDumpable(module::class.java.simpleName, module)
+        registerDumpable(module::class.java.canonicalName, module)
     }
 
-    /**
-     * Unregisters a previously-registered dumpable.
-     */
+    /** Unregisters a previously-registered dumpable. */
     @Synchronized
     fun unregisterDumpable(name: String) {
         dumpables.remove(name)
     }
 
-    /**
-     * Register a [LogBuffer] to be dumped during a bug report.
-     */
+    /** Register a [LogBuffer] to be dumped during a bug report. */
     @Synchronized
     fun registerBuffer(name: String, buffer: LogBuffer) {
         if (!canAssignToNameLocked(name, buffer)) {
             throw IllegalArgumentException("'$name' is already registered")
         }
-        buffers[name] = RegisteredDumpable(name, buffer)
+
+        buffers[name] = LogBufferEntry(buffer, name)
     }
 
-    /**
-     * Dumps the first dumpable or buffer whose registered name ends with [target]
-     */
+    /** Register a [TableLogBuffer] to be dumped during a bugreport */
     @Synchronized
-    fun dumpTarget(
-        target: String,
-        pw: PrintWriter,
-        args: Array<String>,
-        tailLength: Int
-    ) {
-        for (dumpable in dumpables.values) {
-            if (dumpable.name.endsWith(target)) {
-                dumpDumpable(dumpable, pw, args)
-                return
-            }
+    fun registerTableLogBuffer(name: String, buffer: TableLogBuffer) {
+        if (!canAssignToNameLocked(name, buffer)) {
+            throw IllegalArgumentException("'$name' is already registered")
         }
 
-        for (buffer in buffers.values) {
-            if (buffer.name.endsWith(target)) {
-                dumpBuffer(buffer, pw, tailLength)
-                return
-            }
-        }
+        // All buffers must be priority NORMAL, not CRITICAL, because they often contain a lot of
+        // data.
+        tableLogBuffers[name] = TableLogBufferEntry(buffer, name)
     }
 
-    /**
-     * Dumps all registered dumpables to [pw]
-     */
+    @Synchronized fun getDumpables(): Collection<DumpableEntry> = dumpables.values.toList()
+
+    @Synchronized fun getLogBuffers(): Collection<LogBufferEntry> = buffers.values.toList()
+
     @Synchronized
-    fun dumpDumpables(pw: PrintWriter, args: Array<String>) {
-        for (module in dumpables.values) {
-            dumpDumpable(module, pw, args)
-        }
-    }
-
-    /**
-     * Dumps the names of all registered dumpables (one per line)
-     */
-    @Synchronized
-    fun listDumpables(pw: PrintWriter) {
-        for (module in dumpables.values) {
-            pw.println(module.name)
-        }
-    }
-
-    /**
-     * Dumps all registered [LogBuffer]s to [pw]
-     */
-    @Synchronized
-    fun dumpBuffers(pw: PrintWriter, tailLength: Int) {
-        for (buffer in buffers.values) {
-            dumpBuffer(buffer, pw, tailLength)
-        }
-    }
-
-    /**
-     * Dumps the names of all registered buffers (one per line)
-     */
-    @Synchronized
-    fun listBuffers(pw: PrintWriter) {
-        for (buffer in buffers.values) {
-            pw.println(buffer.name)
-        }
-    }
+    fun getTableLogBuffers(): Collection<TableLogBufferEntry> = tableLogBuffers.values.toList()
 
     @Synchronized
     fun freezeBuffers() {
         for (buffer in buffers.values) {
-            buffer.dumpable.freeze()
+            buffer.buffer.freeze()
         }
     }
 
     @Synchronized
     fun unfreezeBuffers() {
         for (buffer in buffers.values) {
-            buffer.dumpable.unfreeze()
+            buffer.buffer.unfreeze()
         }
     }
 
-    private fun dumpDumpable(
-        dumpable: RegisteredDumpable<Dumpable>,
-        pw: PrintWriter,
-        args: Array<String>
-    ) {
-        pw.println()
-        pw.println("${dumpable.name}:")
-        pw.println("----------------------------------------------------------------------------")
-        dumpable.dumpable.dump(pw, args)
-    }
-
-    private fun dumpBuffer(
-        buffer: RegisteredDumpable<LogBuffer>,
-        pw: PrintWriter,
-        tailLength: Int
-    ) {
-        pw.println()
-        pw.println()
-        pw.println("BUFFER ${buffer.name}:")
-        pw.println("============================================================================")
-        buffer.dumpable.dump(pw, tailLength)
-    }
-
     private fun canAssignToNameLocked(name: String, newDumpable: Any): Boolean {
-        val existingDumpable = dumpables[name]?.dumpable ?: buffers[name]?.dumpable
+        val existingDumpable =
+            dumpables[name]?.dumpable ?: buffers[name]?.buffer ?: tableLogBuffers[name]?.table
         return existingDumpable == null || newDumpable == existingDumpable
     }
 }
 
-private data class RegisteredDumpable<T>(
-    val name: String,
-    val dumpable: T
-)
-
-private const val TAG = "DumpManager"
+/**
+ * The priority level for a given dumpable, which affects at what point in the bug report this gets
+ * dumped.
+ */
+enum class DumpPriority {
+    CRITICAL,
+    NORMAL,
+}

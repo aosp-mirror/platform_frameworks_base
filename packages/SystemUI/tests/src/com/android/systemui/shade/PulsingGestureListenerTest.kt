@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.hardware.display.AmbientDisplayConfiguration
+import android.os.PowerManager
 import android.provider.Settings.Secure.DOZE_DOUBLE_TAP_GESTURE
 import android.provider.Settings.Secure.DOZE_TAP_SCREEN_GESTURE
 import android.testing.AndroidTestingRunner
@@ -26,34 +27,32 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.phone.CentralSurfaces
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.tuner.TunerService.Tunable
 import com.android.systemui.util.mockito.eq
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.anyLong
-import org.mockito.ArgumentMatchers.anyObject
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class PulsingGestureListenerTest : SysuiTestCase() {
-    @Mock
-    private lateinit var view: NotificationShadeWindowView
-    @Mock
-    private lateinit var centralSurfaces: CentralSurfaces
     @Mock
     private lateinit var dockManager: DockManager
     @Mock
@@ -66,7 +65,16 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     private lateinit var dumpManager: DumpManager
     @Mock
     private lateinit var statusBarStateController: StatusBarStateController
+    @Mock
+    private lateinit var shadeLogger: ShadeLogger
+    @Mock
+    private lateinit var userTracker: UserTracker
+    @Mock
+    private lateinit var dozeInteractor: DozeInteractor
+    @Mock
+    private lateinit var screenOffAnimationController: ScreenOffAnimationController
 
+    private lateinit var powerRepository: FakePowerRepository
     private lateinit var tunableCaptor: ArgumentCaptor<Tunable>
     private lateinit var underTest: PulsingGestureListener
 
@@ -74,17 +82,26 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        powerRepository = FakePowerRepository()
+
         underTest = PulsingGestureListener(
-                view,
                 falsingManager,
                 dockManager,
-                centralSurfaces,
+                PowerInteractorFactory.create(
+                    repository = powerRepository,
+                    statusBarStateController = statusBarStateController,
+                    screenOffAnimationController = screenOffAnimationController,
+                ).powerInteractor,
                 ambientDisplayConfiguration,
                 statusBarStateController,
+                shadeLogger,
+                dozeInteractor,
+                userTracker,
                 tunerService,
                 dumpManager
         )
         whenever(dockManager.isDocked).thenReturn(false)
+        whenever(screenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true)
     }
 
     @Test
@@ -103,7 +120,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
         underTest.onSingleTapUp(upEv)
 
         // THEN wake up device if dozing
-        verify(centralSurfaces).wakeUpIfDozing(anyLong(), anyObject(), anyString())
+        assertThat(powerRepository.lastWakeWhy).isNotNull()
+        assertThat(powerRepository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_TAP)
     }
 
     @Test
@@ -122,7 +140,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
         underTest.onDoubleTapEvent(upEv)
 
         // THEN wake up device if dozing
-        verify(centralSurfaces).wakeUpIfDozing(anyLong(), anyObject(), anyString())
+        assertThat(powerRepository.lastWakeWhy).isNotNull()
+        assertThat(powerRepository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_TAP)
     }
 
     @Test
@@ -153,7 +172,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
         underTest.onSingleTapUp(upEv)
 
         // THEN the device doesn't wake up
-        verify(centralSurfaces, never()).wakeUpIfDozing(anyLong(), anyObject(), anyString())
+        assertThat(powerRepository.lastWakeWhy).isNull()
+        assertThat(powerRepository.lastWakeReason).isNull()
     }
 
     @Test
@@ -200,7 +220,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
         underTest.onDoubleTapEvent(upEv)
 
         // THEN the device doesn't wake up
-        verify(centralSurfaces, never()).wakeUpIfDozing(anyLong(), anyObject(), anyString())
+        assertThat(powerRepository.lastWakeWhy).isNull()
+        assertThat(powerRepository.lastWakeReason).isNull()
     }
 
     @Test
@@ -219,7 +240,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
         underTest.onSingleTapUp(upEv)
 
         // THEN the device doesn't wake up
-        verify(centralSurfaces, never()).wakeUpIfDozing(anyLong(), anyObject(), anyString())
+        assertThat(powerRepository.lastWakeWhy).isNull()
+        assertThat(powerRepository.lastWakeReason).isNull()
     }
 
     @Test
@@ -238,7 +260,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
         underTest.onDoubleTapEvent(upEv)
 
         // THEN the device doesn't wake up
-        verify(centralSurfaces, never()).wakeUpIfDozing(anyLong(), anyObject(), anyString())
+        assertThat(powerRepository.lastWakeWhy).isNull()
+        assertThat(powerRepository.lastWakeReason).isNull()
     }
 
     fun updateSettings() {

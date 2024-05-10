@@ -19,8 +19,8 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.thermal.V2_0.TemperatureType;
-import android.hardware.thermal.V2_0.ThrottlingSeverity;
+import android.hardware.thermal.TemperatureType;
+import android.hardware.thermal.ThrottlingSeverity;
 
 import com.android.internal.util.Preconditions;
 
@@ -54,7 +54,8 @@ public final class Temperature implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ThrottlingStatus {}
 
-    /** Keep in sync with hardware/interfaces/thermal/2.0/types.hal */
+    /** Keep in sync with hardware/interfaces/thermal/aidl/android/hardware/thermal
+     * /ThrottlingSeverity.aidl */
     public static final int THROTTLING_NONE = ThrottlingSeverity.NONE;
     public static final int THROTTLING_LIGHT = ThrottlingSeverity.LIGHT;
     public static final int THROTTLING_MODERATE = ThrottlingSeverity.MODERATE;
@@ -75,11 +76,22 @@ public final class Temperature implements Parcelable {
             TYPE_BCL_CURRENT,
             TYPE_BCL_PERCENTAGE,
             TYPE_NPU,
+            TYPE_TPU,
+            TYPE_DISPLAY,
+            TYPE_MODEM,
+            TYPE_SOC,
+            TYPE_WIFI,
+            TYPE_CAMERA,
+            TYPE_FLASHLIGHT,
+            TYPE_SPEAKER,
+            TYPE_AMBIENT,
+            TYPE_POGO
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
-    /** Keep in sync with hardware/interfaces/thermal/2.0/types.hal */
+    /** Keep in sync with hardware/interfaces/thermal/aidl/android/hardware/thermal
+     * /TemperatureType.aidl */
     public static final int TYPE_UNKNOWN = TemperatureType.UNKNOWN;
     public static final int TYPE_CPU = TemperatureType.CPU;
     public static final int TYPE_GPU = TemperatureType.GPU;
@@ -91,6 +103,16 @@ public final class Temperature implements Parcelable {
     public static final int TYPE_BCL_CURRENT = TemperatureType.BCL_CURRENT;
     public static final int TYPE_BCL_PERCENTAGE = TemperatureType.BCL_PERCENTAGE;
     public static final int TYPE_NPU = TemperatureType.NPU;
+    public static final int TYPE_TPU = TemperatureType.TPU;
+    public static final int TYPE_DISPLAY = TemperatureType.DISPLAY;
+    public static final int TYPE_MODEM = TemperatureType.MODEM;
+    public static final int TYPE_SOC = TemperatureType.SOC;
+    public static final int TYPE_WIFI = TemperatureType.WIFI;
+    public static final int TYPE_CAMERA = TemperatureType.CAMERA;
+    public static final int TYPE_FLASHLIGHT = TemperatureType.FLASHLIGHT;
+    public static final int TYPE_SPEAKER = TemperatureType.SPEAKER;
+    public static final int TYPE_AMBIENT = TemperatureType.AMBIENT;
+    public static final int TYPE_POGO = TemperatureType.POGO;
 
     /**
      * Verify a valid Temperature type.
@@ -98,7 +120,7 @@ public final class Temperature implements Parcelable {
      * @return true if a Temperature type is valid otherwise false.
      */
     public static boolean isValidType(@Type int type) {
-        return type >= TYPE_UNKNOWN && type <= TYPE_NPU;
+        return type >= TYPE_UNKNOWN && type <= TYPE_POGO;
     }
 
     /**

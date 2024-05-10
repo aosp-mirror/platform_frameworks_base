@@ -22,6 +22,8 @@ import android.util.AttributeSet;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.topintro.R;
+
 /**
  * The TopIntroPreference shows a text which describe a feature. Gernerally, we expect this
  * preference always shows on the top of screen.

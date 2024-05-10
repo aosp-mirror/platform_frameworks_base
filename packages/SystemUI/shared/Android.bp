@@ -13,6 +13,7 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_system_ui_please_use_a_more_specific_subteam_if_possible_",
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_packages_SystemUI_license"
@@ -34,10 +35,17 @@ java_library {
     srcs: [
         ":statslog-SystemUI-java-gen",
     ],
+    libs: [
+        "androidx.annotation_annotation",
+    ],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 android_library {
     name: "SystemUISharedLib",
+    use_resource_processor: true,
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
@@ -46,22 +54,32 @@ android_library {
         ":wm_shell_util-sources",
     ],
     static_libs: [
+        "BiometricsSharedLib",
         "PluginCoreLib",
         "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUIUnfoldLib",
+        "SystemUISharedLib-Keyguard",
+        "tracinglib",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx.concurrent_concurrent-futures",
-        "gson",
+        "androidx.lifecycle_lifecycle-runtime-ktx",
+        "androidx.lifecycle_lifecycle-viewmodel-ktx",
+        "androidx.recyclerview_recyclerview",
+        "kotlinx_coroutines_android",
+        "kotlinx_coroutines",
         "dagger2",
         "jsr330",
     ],
     resource_dirs: [
         "res",
     ],
-    java_version: "1.8",
     min_sdk_version: "current",
     plugins: ["dagger2-compiler"],
+    kotlincflags: ["-Xjvm-default=all"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_library {
@@ -73,6 +91,9 @@ java_library {
     static_kotlin_stdlib: false,
     java_version: "1.8",
     min_sdk_version: "current",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }
 
 java_library {
@@ -87,6 +108,12 @@ java_library {
     static_libs: [
         "SystemUI-flag-types",
     ],
+    optimize: {
+        proguard_flags_files: ["proguard_flags.flags"],
+    },
     java_version: "1.8",
     min_sdk_version: "current",
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

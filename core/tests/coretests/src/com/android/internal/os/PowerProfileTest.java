@@ -21,22 +21,28 @@ import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
 import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_ON;
 
+import static org.junit.Assert.fail;
+
 import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 import com.android.internal.power.ModemPowerProfile;
 import com.android.internal.util.XmlUtils;
 
-import junit.framework.TestCase;
-
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /*
  * Keep this file in sync with frameworks/base/core/res/res/xml/power_profile_test.xml and
@@ -46,7 +52,11 @@ import org.junit.Test;
  *     atest com.android.internal.os.PowerProfileTest
  */
 @SmallTest
-public class PowerProfileTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = PowerProfile.class)
+public class PowerProfileTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     static final String TAG_TEST_MODEM = "test-modem";
     static final String ATTR_NAME = "name";
@@ -64,18 +74,13 @@ public class PowerProfileTest extends TestCase {
     public void testPowerProfile() {
         mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
 
-        assertEquals(2, mProfile.getNumCpuClusters());
-        assertEquals(4, mProfile.getNumCoresInCpuCluster(0));
-        assertEquals(4, mProfile.getNumCoresInCpuCluster(1));
         assertEquals(5.0, mProfile.getAveragePower(PowerProfile.POWER_CPU_SUSPEND));
         assertEquals(1.11, mProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE));
         assertEquals(2.55, mProfile.getAveragePower(PowerProfile.POWER_CPU_ACTIVE));
-        assertEquals(2.11, mProfile.getAveragePowerForCpuCluster(0));
-        assertEquals(2.22, mProfile.getAveragePowerForCpuCluster(1));
-        assertEquals(3, mProfile.getNumSpeedStepsInCpuCluster(0));
-        assertEquals(30.0, mProfile.getAveragePowerForCpuCore(0, 2));
-        assertEquals(4, mProfile.getNumSpeedStepsInCpuCluster(1));
-        assertEquals(60.0, mProfile.getAveragePowerForCpuCore(1, 3));
+        assertEquals(2.11, mProfile.getAveragePowerForCpuScalingPolicy(0));
+        assertEquals(2.22, mProfile.getAveragePowerForCpuScalingPolicy(3));
+        assertEquals(30.0, mProfile.getAveragePowerForCpuScalingStep(0, 2));
+        assertEquals(60.0, mProfile.getAveragePowerForCpuScalingStep(3, 3));
         assertEquals(3000.0, mProfile.getBatteryCapacity());
         assertEquals(0.5,
                 mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0));
@@ -122,6 +127,23 @@ public class PowerProfileTest extends TestCase {
                 PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT
                         | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
                         | ModemPowerProfile.MODEM_TX_LEVEL_4));
+    }
+    @Test
+    public void testPowerProfile_legacyCpuConfig() {
+        // This power profile has per-cluster data, rather than per-policy
+        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test_cpu_legacy);
+
+        assertEquals(2.11, mProfile.getAveragePowerForCpuScalingPolicy(0));
+        assertEquals(2.22, mProfile.getAveragePowerForCpuScalingPolicy(4));
+        assertEquals(30.0, mProfile.getAveragePowerForCpuScalingStep(0, 2));
+        assertEquals(60.0, mProfile.getAveragePowerForCpuScalingStep(4, 3));
+        assertEquals(3000.0, mProfile.getBatteryCapacity());
+        assertEquals(0.5,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0));
+        assertEquals(100.0,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_ON, 0));
+        assertEquals(800.0,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, 0));
     }
 
     @Test
@@ -515,5 +537,9 @@ public class PowerProfileTest extends TestCase {
         }
         fail("Unanable to find element " + element + " with name " + elementName);
         return null;
+    }
+
+    private void assertEquals(double expected, double actual) {
+        Assert.assertEquals(expected, actual, 0.1);
     }
 }

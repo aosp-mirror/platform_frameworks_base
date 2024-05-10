@@ -53,8 +53,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.rollback.RollbackManagerInternal;
@@ -347,7 +346,7 @@ public class StagingManager {
             // an update, and hence need to restore data for all installed users.
             final int[] installedUsers = PackageStateUtils.queryInstalledUsers(ps, allUsers, true);
 
-            final String seInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
+            final String seInfo = ps.getSeInfo();
             rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(installedUsers),
                     appId, ceDataInode, seInfo, 0 /*token*/);
         }

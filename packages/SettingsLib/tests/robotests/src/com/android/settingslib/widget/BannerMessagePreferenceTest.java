@@ -39,7 +39,9 @@ import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
 import androidx.preference.PreferenceViewHolder;
-import androidx.preference.R;
+
+import com.android.settingslib.testutils.OverpoweredReflectionHelper;
+import com.android.settingslib.widget.preference.banner.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +65,7 @@ public class BannerMessagePreferenceTest {
     private final View.OnClickListener mClickListener = v -> mClickListenerCalled = true;
     private final int mMinimumTargetSize =
             RuntimeEnvironment.application.getResources()
-                    .getDimensionPixelSize(R.dimen.settingslib_preferred_minimum_touch_target);
+                    .getDimensionPixelSize(com.android.settingslib.widget.theme.R.dimen.settingslib_preferred_minimum_touch_target);
 
     private static final int TEST_STRING_RES_ID =
             R.string.accessibility_banner_message_dismiss;
@@ -502,14 +504,18 @@ public class BannerMessagePreferenceTest {
     private void assumeAndroidR() {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 30);
         ReflectionHelpers.setStaticField(Build.VERSION.class, "CODENAME", "R");
-        ReflectionHelpers.setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", false);
+        OverpoweredReflectionHelper
+                .setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", false);
         // Reset view holder to use correct layout.
     }
+
+
 
     private void assumeAndroidS() {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", 31);
         ReflectionHelpers.setStaticField(Build.VERSION.class, "CODENAME", "S");
-        ReflectionHelpers.setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", true);
+        OverpoweredReflectionHelper
+                .setStaticField(BannerMessagePreference.class, "IS_AT_LEAST_S", true);
         // Re-inflate view to update layout.
         setUpViewHolder();
     }

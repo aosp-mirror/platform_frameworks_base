@@ -1,7 +1,6 @@
 set noparent
-toddke@google.com
 zyy@google.com
 patb@google.com
 
 per-file CursorWindow.cpp=omakoto@google.com
-per-file LocaleDataTables.cpp=vichang@google.com,ngeoffray@google.com,nikitai@google.com
+per-file LocaleDataTables.cpp=vichang@google.com,ngeoffray@google.com

@@ -19,26 +19,28 @@ package com.android.systemui.statusbar;
 import android.view.View;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.display.data.repository.DisplayMetricsRepository;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 
 import javax.inject.Inject;
 
 /**
  * Default implementation of QS Translation. This by default does not do much.
+ * This class can be subclassed to allow System UI variants the flexibility to change position of
+ * the Quick Settings frame.
  */
 @SysUISingleton
 public class QsFrameTranslateImpl extends QsFrameTranslateController {
 
     @Inject
-    public QsFrameTranslateImpl(CentralSurfaces centralSurfaces) {
-        super(centralSurfaces);
+    public QsFrameTranslateImpl(DisplayMetricsRepository displayMetricsRepository) {
+        super(displayMetricsRepository);
     }
 
     @Override
-    public void translateQsFrame(View qsFrame, QS qs, float overExpansion,
-            float qsTranslationForFullShadeTransition) {
+    public void translateQsFrame(View qsFrame, QS qs, int bottomInset) {
+        // Empty implementation by default, meant to be overridden by subclasses.
     }
 
     @Override

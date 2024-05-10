@@ -1,0 +1,45 @@
+package {
+    // See: http://go/android-license-faq
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "PowerServiceTests",
+
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    static_libs: [
+        "flag-junit",
+        "frameworks-base-testutils",
+        "platform-compat-test-rules",
+        "platform-test-annotations",
+        "services.core",
+        "servicestests-utils",
+        "testables",
+        "TestParameterInjector",
+    ],
+
+    libs: [
+        "android.test.mock",
+    ],
+
+    defaults: [
+        "modules-utils-testable-device-config-defaults",
+    ],
+
+    platform_apis: true,
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
+
+    certificate: "platform",
+
+    dxflags: ["--multi-dex"],
+
+    optimize: {
+        enabled: false,
+    },
+}

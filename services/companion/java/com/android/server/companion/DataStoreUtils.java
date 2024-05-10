@@ -33,15 +33,24 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileOutputStream;
 
-final class DataStoreUtils {
-    private static final String TAG = "CompanionDevice_DataStoreUtils";
+/**
+ * Util class for CDM data stores
+ */
+public final class DataStoreUtils {
+    private static final String TAG = "CDM_DataStoreUtils";
 
-    static boolean isStartOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
+    /**
+     * Check if the parser pointer is at the start of the tag
+     */
+    public static boolean isStartOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
             throws XmlPullParserException {
         return parser.getEventType() == START_TAG && tag.equals(parser.getName());
     }
 
-    static boolean isEndOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
+    /**
+     * Check if the parser pointer is at the end of the tag
+     */
+    public static boolean isEndOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
             throws XmlPullParserException {
         return parser.getEventType() == END_TAG && tag.equals(parser.getName());
     }
@@ -57,7 +66,7 @@ final class DataStoreUtils {
      * @return an AtomicFile for the user
      */
     @NonNull
-    static AtomicFile createStorageFileForUser(@UserIdInt int userId, String fileName) {
+    public static AtomicFile createStorageFileForUser(@UserIdInt int userId, String fileName) {
         return new AtomicFile(getBaseStorageFileForUser(userId, fileName));
     }
 
@@ -70,7 +79,7 @@ final class DataStoreUtils {
      * Writing to file could fail, for example, if the user has been recently removed and so was
      * their DE (/data/system_de/<user-id>/) directory.
      */
-    static void writeToFileSafely(
+    public static void writeToFileSafely(
             @NonNull AtomicFile file, @NonNull ThrowingConsumer<FileOutputStream> consumer) {
         try {
             file.write(consumer);

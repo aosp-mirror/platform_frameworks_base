@@ -1,3 +1,4 @@
 carmenjackson@google.com
 kevinjeon@google.com
+include platform/development:/tools/winscope/OWNERS
 include platform/external/perfetto:/OWNERS

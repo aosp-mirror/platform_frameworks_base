@@ -28,35 +28,42 @@ interface IActivityRecognitionHardware {
     /**
      * Gets an array of supported activities by hardware.
      */
+    @EnforcePermission("LOCATION_HARDWARE")
     String[] getSupportedActivities();
 
     /**
      * Returns true if the given activity is supported, false otherwise.
      */
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean isActivitySupported(in String activityType);
 
     /**
      * Registers a sink with Hardware Activity-Recognition.
      */
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean registerSink(in IActivityRecognitionHardwareSink sink);
 
     /**
      * Unregisters a sink with Hardware Activity-Recognition.
      */
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean unregisterSink(in IActivityRecognitionHardwareSink sink);
 
     /**
      * Enables tracking of a given activity/event type, if the activity is supported.
      */
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean enableActivityEvent(in String activityType, int eventType, long reportLatencyNs);
 
     /**
      * Disables tracking of a given activity/eventy type.
      */
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean disableActivityEvent(in String activityType, int eventType);
 
     /**
      * Requests hardware for all the activity events detected up to the given point in time.
      */
+    @EnforcePermission("LOCATION_HARDWARE")
     boolean flush();
 }

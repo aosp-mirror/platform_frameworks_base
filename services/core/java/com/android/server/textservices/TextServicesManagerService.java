@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -583,10 +584,17 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 return;
             }
             final SpellCheckerInfo sci = spellCheckerMap.get(sciId);
+            final int uid = Binder.getCallingUid();
+            if (!canCallerAccessSpellChecker(sci, uid, userId)) {
+                if (DBG) {
+                    Slog.d(TAG, "Spell checker " + sci.getId()
+                            + " is not visible to the caller " + uid);
+                }
+                return;
+            }
             HashMap<String, SpellCheckerBindGroup> spellCheckerBindGroups =
                     tsd.mSpellCheckerBindGroups;
             SpellCheckerBindGroup bindGroup = spellCheckerBindGroups.get(sciId);
-            final int uid = Binder.getCallingUid();
             if (bindGroup == null) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
@@ -649,20 +657,28 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     public SpellCheckerInfo[] getEnabledSpellCheckers(@UserIdInt int userId) {
         verifyUser(userId);
 
+        final ArrayList<SpellCheckerInfo> spellCheckerList;
         synchronized (mLock) {
             final TextServicesData tsd = getDataFromCallingUserIdLocked(userId);
             if (tsd == null) return null;
 
-            ArrayList<SpellCheckerInfo> spellCheckerList = tsd.mSpellCheckerList;
-            if (DBG) {
-                Slog.d(TAG, "getEnabledSpellCheckers: " + spellCheckerList.size());
-                for (int i = 0; i < spellCheckerList.size(); ++i) {
-                    Slog.d(TAG,
-                            "EnabledSpellCheckers: " + spellCheckerList.get(i).getPackageName());
-                }
-            }
-            return spellCheckerList.toArray(new SpellCheckerInfo[spellCheckerList.size()]);
+            spellCheckerList = new ArrayList<>(tsd.mSpellCheckerList);
         }
+        int size = spellCheckerList.size();
+        final int callingUid = Binder.getCallingUid();
+        for (int i = size - 1; i >= 0; i--) {
+            if (canCallerAccessSpellChecker(spellCheckerList.get(i), callingUid, userId)) {
+                continue;
+            }
+            if (DBG) {
+                Slog.d(TAG, "Spell checker " + spellCheckerList.get(i).getPackageName()
+                        + " is not visible to the caller " + callingUid);
+            }
+            spellCheckerList.remove(i);
+        }
+
+        return spellCheckerList.isEmpty() ? null
+                : spellCheckerList.toArray(new SpellCheckerInfo[spellCheckerList.size()]);
     }
 
     @Override
@@ -699,6 +715,26 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     "Cross-user interaction requires INTERACT_ACROSS_USERS_FULL. userId=" + userId
                             + " callingUserId=" + callingUserId);
         }
+    }
+
+    /**
+     * Filter the access to spell checkers by rules of the package visibility. Return {@code true}
+     * if the given spell checker is the currently selected one or visible to the caller.
+     *
+     * @param sci The spell checker to check.
+     * @param callingUid The caller that is going to access the spell checker.
+     * @param userId The user id where the spell checker resides.
+     * @return {@code true} if caller is able to access the spell checker.
+     */
+    private boolean canCallerAccessSpellChecker(@NonNull SpellCheckerInfo sci, int callingUid,
+            @UserIdInt int userId) {
+        final SpellCheckerInfo currentSci = getCurrentSpellCheckerForUser(userId);
+        if (currentSci != null && currentSci.getId().equals(sci.getId())) {
+            return true;
+        }
+        final PackageManagerInternal pmInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        return !pmInternal.filterAppAccess(sci.getPackageName(), callingUid, userId);
     }
 
     private void setCurrentSpellCheckerLocked(@Nullable SpellCheckerInfo sci, TextServicesData tsd) {

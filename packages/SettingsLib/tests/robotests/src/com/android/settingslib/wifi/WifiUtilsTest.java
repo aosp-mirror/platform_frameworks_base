@@ -35,6 +35,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
+import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -198,6 +199,25 @@ public class WifiUtilsTest {
         level = WifiUtils.WIFI_PIE.length;
         WifiUtils.getInternetIconResource(level, false /* noInternet*/);
         WifiUtils.getInternetIconResource(level, true /* noInternet*/);
+    }
+
+    @Test
+    public void getHotspotIconResource_deviceTypeUnknown_shouldNotCrash() {
+        WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_UNKNOWN);
+    }
+
+    @Test
+    public void getHotspotIconResource_deviceTypeExists_shouldNotNull() {
+        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_PHONE))
+                .isNotNull();
+        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_TABLET))
+                .isNotNull();
+        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_LAPTOP))
+                .isNotNull();
+        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_WATCH))
+                .isNotNull();
+        assertThat(WifiUtils.getHotspotIconResource(NetworkProviderInfo.DEVICE_TYPE_AUTO))
+                .isNotNull();
     }
 
     @Test

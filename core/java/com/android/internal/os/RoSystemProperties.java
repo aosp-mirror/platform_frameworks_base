@@ -31,6 +31,8 @@ public class RoSystemProperties {
             SystemProperties.getInt("ro.factorytest", 0);
     public static final String CONTROL_PRIVAPP_PERMISSIONS =
             SystemProperties.get("ro.control_privapp_permissions");
+    public static final boolean SUPPORT_ONE_HANDED_MODE =
+            SystemProperties.getBoolean("ro.support_one_handed_mode", /* def= */ false);
 
     // ------ ro.hdmi.* -------- //
     /**
@@ -48,9 +50,15 @@ public class RoSystemProperties {
     public static final boolean CONFIG_SMALL_BATTERY =
             SystemProperties.getBoolean("ro.config.small_battery", false);
 
-    // ------ ro.fw.* ------------ //
-    public static final boolean FW_SYSTEM_USER_SPLIT =
-            SystemProperties.getBoolean("ro.fw.system_user_split", false);
+    /**
+     * Indicates whether the device should run in headless system user mode,
+     *   in which user 0 only runs the system, not a real user.
+     * <p>WARNING about changing this value during an non-wiping update (OTA):
+     *   <li>If this value is modified via an update, the change will have no effect, since an
+     *       already-existing system user cannot change its mode.
+     *   <li>Changing this value during an OTA from a pre-R device is not permitted; attempting to
+     *       do so will corrupt the system user.
+     */
     public static final boolean MULTIUSER_HEADLESS_SYSTEM_USER =
             SystemProperties.getBoolean("ro.fw.mu.headless_system_user", false);
 

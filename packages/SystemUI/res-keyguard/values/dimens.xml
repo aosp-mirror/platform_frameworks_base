@@ -29,9 +29,6 @@
          (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_height">420dp</dimen>
 
-    <!-- Max Height of the sliding KeyguardSecurityContainer
-         (includes 2x keyguard_security_view_top_margin) -->
-
     <!-- pin/password field max height -->
     <dimen name="keyguard_password_height">80dp</dimen>
 
@@ -40,6 +37,9 @@
 
     <!-- Minimum bottom margin under the security view -->
     <dimen name="keyguard_security_view_bottom_margin">60dp</dimen>
+
+    <!-- Margin above the ambient indication container -->
+    <dimen name="ambient_indication_container_margin_top">0dp</dimen>
 
     <dimen name="keyguard_eca_top_margin">18dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
@@ -69,6 +69,10 @@
 
     <!-- The size of the dots in the PIN unlock method. -->
     <dimen name="password_dot_size">9dp</dimen>
+
+    <!-- The size of the shape in the PIN unlock method. -->
+    <dimen name="password_shape_size">30dp</dimen>
+
     <!-- The size of PIN text in the PIN unlock method. -->
     <integer name="scaled_password_text_size">40</integer>
 
@@ -78,7 +82,7 @@
     <!-- The vertical margin between the date and the owner info. -->
 
     <!-- The translation for disappearing security views after having solved them. -->
-    <dimen name="disappear_y_translation">-32dp</dimen>
+    <dimen name="disappear_y_translation">-50dp</dimen>
 
     <!-- Dimens for animation for the Bouncer PIN view -->
     <dimen name="pin_view_trans_y_entry">120dp</dimen>
@@ -91,7 +95,6 @@
     <dimen name="num_pad_key_margin_end">12dp</dimen>
 
     <!-- additional offset for clock switch area items -->
-    <dimen name="clock_padding_start">28dp</dimen>
     <dimen name="below_clock_padding_start">32dp</dimen>
     <dimen name="below_clock_padding_end">16dp</dimen>
     <dimen name="below_clock_padding_start_icons">28dp</dimen>
@@ -101,6 +104,13 @@
          allow it to use the whole screen space, 0.6 will allow it to use just under half of the
          screen. -->
     <item name="half_opened_bouncer_height_ratio" type="dimen" format="float">0.0</item>
+
+    <!-- Proportion of the screen height to use to set the maximum height of the bouncer to when
+     the device is in the DEVICE_POSTURE_HALF_OPENED posture.
+
+     This value is only used when motion layout bouncer is used - when flag
+     landscape.enable_lockscreen (b/293252410) is on -->
+    <item name="motion_layout_half_fold_bouncer_height_ratio" type="dimen" format="float">0.55</item>
 
     <!-- The actual amount of translation that is applied to the security when it animates from one
          side of the screen to the other in one-handed or user switcher mode. Note that it will
@@ -119,10 +129,11 @@
     <dimen name="bouncer_user_switcher_width">248dp</dimen>
     <dimen name="bouncer_user_switcher_popup_header_height">12dp</dimen>
     <dimen name="bouncer_user_switcher_popup_divider_height">4dp</dimen>
+    <dimen name="bouncer_user_switcher_popup_items_divider_height">2dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_vertical">10dp</dimen>
     <dimen name="bouncer_user_switcher_item_padding_horizontal">12dp</dimen>
     <dimen name="bouncer_user_switcher_header_padding_end">44dp</dimen>
-    <dimen name="bouncer_user_switcher_y_trans">0dp</dimen>
+    <dimen name="bouncer_user_switcher_y_trans">80dp</dimen>
 
     <!-- 2 * the margin + size should equal the plus_margin -->
     <dimen name="user_switcher_icon_large_margin">16dp</dimen>
@@ -136,4 +147,21 @@
 
     <!-- Translation y for appear animation -->
     <dimen name="keyguard_host_view_translation_y">80dp</dimen>
+
+    <!-- Attributes for placeholder dots in 6 digit PIN view -->
+    <dimen name="default_dot_diameter">34dp</dimen>
+    <dimen name="default_dot_spacing">0dp</dimen>
+
+    <!-- Weather clock smartspace scaling to apply for the weather clock -->
+    <item name="weather_clock_smartspace_scale" type="dimen" format="float">1.0</item>
+    <dimen name="weather_clock_smartspace_translateX">0dp</dimen>
+    <dimen name="weather_clock_smartspace_translateY">0dp</dimen>
+
+    <!-- Additional length to add to the SFPS sensor length we get from framework so that the length
+     of the progress bar matches the length of the power button  -->
+    <dimen name="sfps_progress_bar_length_extra_padding">12dp</dimen>
+    <!-- Thickness of the progress bar we show for the SFPS based authentication. -->
+    <dimen name="sfps_progress_bar_thickness">6dp</dimen>
+    <!-- Padding from the edge of the screen for the progress bar -->
+    <dimen name="sfps_progress_bar_padding_from_edge">7dp</dimen>
 </resources>

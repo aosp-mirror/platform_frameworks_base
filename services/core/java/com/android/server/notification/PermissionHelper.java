@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
@@ -25,6 +24,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -37,7 +37,6 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -53,13 +52,13 @@ public final class PermissionHelper {
 
     private static final String NOTIFICATION_PERMISSION = Manifest.permission.POST_NOTIFICATIONS;
 
-    private final PermissionManagerServiceInternal mPmi;
+    private final Context mContext;
     private final IPackageManager mPackageManager;
     private final IPermissionManager mPermManager;
 
-    public PermissionHelper(PermissionManagerServiceInternal pmi, IPackageManager packageManager,
+    public PermissionHelper(Context context, IPackageManager packageManager,
             IPermissionManager permManager) {
-        mPmi = pmi;
+        mContext = context;
         mPackageManager = packageManager;
         mPermManager = permManager;
     }
@@ -71,10 +70,34 @@ public final class PermissionHelper {
     public boolean hasPermission(int uid) {
         final long callingId = Binder.clearCallingIdentity();
         try {
-            return mPmi.checkUidPermission(uid, NOTIFICATION_PERMISSION) == PERMISSION_GRANTED;
+            return mContext.checkPermission(NOTIFICATION_PERMISSION, -1, uid) == PERMISSION_GRANTED;
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
+    }
+
+    /**
+     * Returns whether the given app requested the given permission. Must not be called
+     * with a lock held.
+     */
+    public boolean hasRequestedPermission(String permission, String pkg, @UserIdInt int userId) {
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            PackageInfo pi = mPackageManager.getPackageInfo(pkg, GET_PERMISSIONS, userId);
+            if (pi == null || pi.requestedPermissions == null) {
+                return false;
+            }
+            for (String perm : pi.requestedPermissions) {
+                if (permission.equals(perm)) {
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.d(TAG, "Could not reach system server", e);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+        return false;
     }
 
     /**
@@ -169,22 +192,22 @@ public final class PermissionHelper {
                 return;
             }
 
-            boolean currentlyGranted = mPmi.checkPermission(packageName, NOTIFICATION_PERMISSION,
-                    userId) != PackageManager.PERMISSION_DENIED;
+            int uid = mPackageManager.getPackageUid(packageName, 0, userId);
+            boolean currentlyGranted = hasPermission(uid);
             if (grant && !currentlyGranted) {
-                mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId);
+                mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION,
+                        Context.DEVICE_ID_DEFAULT, userId);
             } else if (!grant && currentlyGranted) {
                 mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION,
-                        userId, TAG);
+                        Context.DEVICE_ID_DEFAULT, userId, TAG);
             }
             int flagMask = FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_USER_FIXED;
-            flagMask = userSet || !grant ? flagMask | FLAG_PERMISSION_GRANTED_BY_DEFAULT : flagMask;
             if (userSet) {
-                mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        flagMask, FLAG_PERMISSION_USER_SET, true, userId);
+                mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION, flagMask,
+                        FLAG_PERMISSION_USER_SET, true, Context.DEVICE_ID_DEFAULT, userId);
             } else {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        flagMask, 0, true, userId);
+                        flagMask, 0, true, Context.DEVICE_ID_DEFAULT, userId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);
@@ -212,7 +235,7 @@ public final class PermissionHelper {
         try {
             try {
                 int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        userId);
+                        Context.DEVICE_ID_DEFAULT, userId);
                 return (flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0
                         || (flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0;
             } catch (RemoteException e) {
@@ -229,7 +252,7 @@ public final class PermissionHelper {
         try {
             try {
                 int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        userId);
+                        Context.DEVICE_ID_DEFAULT, userId);
                 return (flags & (PackageManager.FLAG_PERMISSION_USER_SET
                         | PackageManager.FLAG_PERMISSION_USER_FIXED)) != 0;
             } catch (RemoteException e) {
@@ -246,7 +269,7 @@ public final class PermissionHelper {
         try {
             try {
                 int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        userId);
+                        Context.DEVICE_ID_DEFAULT, userId);
                 return (flags & (PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT
                         | PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE)) != 0;
             } catch (RemoteException e) {

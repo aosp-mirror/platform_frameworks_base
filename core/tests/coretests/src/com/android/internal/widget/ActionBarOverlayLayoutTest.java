@@ -168,7 +168,8 @@ public class ActionBarOverlayLayoutTest {
     }
 
     private WindowInsets insetsWith(Insets content, DisplayCutout cutout) {
-        return new WindowInsets(content.toRect(), null, false, false, cutout);
+        return new WindowInsets(WindowInsets.createCompatTypeMap(content.toRect()), null, null,
+                false, 0, 0, cutout, null, null, null, WindowInsets.Type.systemBars(), false);
     }
 
     private ViewGroup createViewGroupWithId(int id) {

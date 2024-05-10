@@ -46,7 +46,9 @@ import com.android.internal.security.VerityUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
+import com.android.text.flags.Flags;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -61,6 +63,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /** A service for managing system fonts. */
 public final class FontManagerService extends IFontManager.Stub {
@@ -69,11 +72,12 @@ public final class FontManagerService extends IFontManager.Stub {
     private static final String FONT_FILES_DIR = "/data/fonts/files";
     private static final String CONFIG_XML_FILE = "/data/fonts/config/config.xml";
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.UPDATE_FONTS)
     @RequiresPermission(Manifest.permission.UPDATE_FONTS)
     @Override
     public FontConfig getFontConfig() {
-        getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
-                "UPDATE_FONTS permission required.");
+        super.getFontConfig_enforcePermission();
+
         return getSystemFontConfig();
     }
 
@@ -135,10 +139,11 @@ public final class FontManagerService extends IFontManager.Stub {
     /** Class to manage FontManagerService's lifecycle. */
     public static final class Lifecycle extends SystemService {
         private final FontManagerService mService;
+        private final CompletableFuture<Void> mServiceStarted = new CompletableFuture<>();
 
         public Lifecycle(@NonNull Context context, boolean safeMode) {
             super(context);
-            mService = new FontManagerService(context, safeMode);
+            mService = new FontManagerService(context, safeMode, mServiceStarted);
         }
 
         @Override
@@ -151,10 +156,19 @@ public final class FontManagerService extends IFontManager.Stub {
                             if (!Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
                                 return null;
                             }
+                            mServiceStarted.join();
                             return mService.getCurrentFontMap();
                         }
                     });
             publishBinderService(Context.FONT_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                // Wait for FontManagerService to start since it will be needed after this point.
+                mServiceStarted.join();
+            }
         }
     }
 
@@ -187,7 +201,7 @@ public final class FontManagerService extends IFontManager.Stub {
 
         @Override
         public void setUpFsverity(String filePath) throws IOException {
-            VerityUtils.setUpFsverity(filePath, /* signature */ (byte[]) null);
+            VerityUtils.setUpFsverity(filePath);
         }
 
         @Override
@@ -218,14 +232,44 @@ public final class FontManagerService extends IFontManager.Stub {
     @Nullable
     private SharedMemory mSerializedFontMap = null;
 
-    private FontManagerService(Context context, boolean safeMode) {
+    private FontManagerService(
+            Context context, boolean safeMode, CompletableFuture<Void> serviceStarted) {
         if (safeMode) {
             Slog.i(TAG, "Entering safe mode. Deleting all font updates.");
             UpdatableFontDir.deleteAllFiles(new File(FONT_FILES_DIR), new File(CONFIG_XML_FILE));
         }
         mContext = context;
         mIsSafeMode = safeMode;
-        initialize();
+
+        if (Flags.useOptimizedBoottimeFontLoading()) {
+            Slog.i(TAG, "Using optimized boot-time font loading.");
+            SystemServerInitThreadPool.submit(() -> {
+                initialize();
+
+                // Set system font map only if there is updatable font directory.
+                // If there is no updatable font directory, `initialize` will have already loaded
+                // the system font map, so there's no need to set the system font map again here.
+                synchronized (mUpdatableFontDirLock) {
+                    if  (mUpdatableFontDir != null) {
+                        setSystemFontMap();
+                    }
+                }
+                serviceStarted.complete(null);
+            }, "FontManagerService_create");
+        } else {
+            Slog.i(TAG, "Not using optimized boot-time font loading.");
+            initialize();
+            setSystemFontMap();
+            serviceStarted.complete(null);
+        }
+    }
+
+    private void setSystemFontMap() {
+        try {
+            Typeface.setSystemFontMap(getCurrentFontMap());
+        } catch (IOException | ErrnoException e) {
+            Slog.w(TAG, "Failed to set system font map of system_server");
+        }
     }
 
     @Nullable
@@ -238,7 +282,7 @@ public final class FontManagerService extends IFontManager.Stub {
         String[] certs = mContext.getResources().getStringArray(
                 R.array.config_fontManagerServiceCerts);
 
-        if (mDebugCertFilePath != null && (Build.IS_USERDEBUG || Build.IS_ENG)) {
+        if (mDebugCertFilePath != null && Build.IS_DEBUGGABLE) {
             String[] tmp = new String[certs.length + 1];
             System.arraycopy(certs, 0, tmp, 0, certs.length);
             tmp[certs.length] = mDebugCertFilePath;
@@ -250,8 +294,8 @@ public final class FontManagerService extends IFontManager.Stub {
     }
 
     /**
-     * Add debug certificate to the cert list. This must be called only on userdebug/eng
-     * build.
+     * Add debug certificate to the cert list. This must be called only on debuggable build.
+     *
      * @param debugCertPath a debug certificate file path
      */
     public void addDebugCertificate(@Nullable String debugCertPath) {
@@ -262,6 +306,11 @@ public final class FontManagerService extends IFontManager.Stub {
         synchronized (mUpdatableFontDirLock) {
             mUpdatableFontDir = createUpdatableFontDir();
             if (mUpdatableFontDir == null) {
+                if (Flags.useOptimizedBoottimeFontLoading()) {
+                    // If fs-verity is not supported, load preinstalled system font map and use it
+                    // for all apps.
+                    Typeface.loadPreinstalledSystemFontMap();
+                }
                 setSerializedFontMap(serializeSystemServerFontMap());
                 return;
             }

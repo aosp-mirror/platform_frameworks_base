@@ -259,7 +259,8 @@ TEST(ResultTests, CascadeError) {
 }
 
 struct NoCopyContainer {
-  uint32_t value;  // NOLINT(misc-non-private-member-variables-in-classes)
+  uint32_t value = 0;  // NOLINT(misc-non-private-member-variables-in-classes)
+  NoCopyContainer() = default;
   NoCopyContainer(const NoCopyContainer&) = delete;
   NoCopyContainer& operator=(const NoCopyContainer&) = delete;
 };
@@ -268,7 +269,7 @@ Result<std::unique_ptr<NoCopyContainer>> CreateNoCopyContainer(bool succeed) {
   if (!succeed) {
     return Error("foo");
   }
-  std::unique_ptr<NoCopyContainer> p(new NoCopyContainer{0U});
+  std::unique_ptr<NoCopyContainer> p(new NoCopyContainer{});
   p->value = 42U;
   return std::move(p);
 }

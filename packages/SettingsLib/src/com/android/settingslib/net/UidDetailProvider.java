@@ -150,6 +150,7 @@ public class UidDetailProvider {
         // otherwise fall back to using packagemanager labels
         final String[] packageNames = pm.getPackagesForUid(uid);
         final int length = packageNames != null ? packageNames.length : 0;
+        String packageName = "";
         try {
             final int userId = UserHandle.getUserId(uid);
             UserHandle userHandle = new UserHandle(userId);
@@ -161,12 +162,13 @@ public class UidDetailProvider {
                     detail.label = info.loadLabel(pm).toString();
                     detail.icon = um.getBadgedIconForUser(info.loadIcon(pm),
                             new UserHandle(userId));
+                    packageName = packageNames[0];
                 }
             } else if (length > 1) {
                 detail.detailLabels = new CharSequence[length];
                 detail.detailContentDescriptions = new CharSequence[length];
                 for (int i = 0; i < length; i++) {
-                    final String packageName = packageNames[i];
+                    packageName = packageNames[i];
                     final PackageInfo packageInfo = pm.getPackageInfo(packageName, 0);
                     final ApplicationInfo appInfo = ipm.getApplicationInfo(packageName,
                             0 /* no flags */, userId);
@@ -183,6 +185,7 @@ public class UidDetailProvider {
                     }
                 }
             }
+            detail.packageName = packageName;
             detail.contentDescription = um.getBadgedLabelForUser(detail.label, userHandle);
         } catch (NameNotFoundException e) {
             Log.w(TAG, "Error while building UI detail for uid "+uid, e);

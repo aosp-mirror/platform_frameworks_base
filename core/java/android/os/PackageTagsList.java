@@ -41,6 +41,7 @@ import java.util.Set;
  */
 @TestApi
 @Immutable
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class PackageTagsList implements Parcelable {
 
     // an empty set value matches any attribution tag (ie, wildcard)

@@ -53,6 +53,11 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
     private static final boolean DEBUG = false;
 
     private static final long NOT_SCHEDULED = -1;
+    /**
+     * The threshold used to consider a new trigger time to be significantly different from the
+     * currently used trigger time.
+     */
+    private static final long SIGNIFICANT_TRIGGER_TIME_CHANGE_THRESHOLD_MS = MINUTE_IN_MILLIS;
 
     /**
      * Internal priority queue for each key's alarm, ordered by the time the alarm should go off.
@@ -146,6 +151,10 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
     @GuardedBy("mLock")
     @ElapsedRealtimeLong
     private long mTriggerTimeElapsed = NOT_SCHEDULED;
+    /** The last time an alarm went off (ie. the last time {@link #onAlarm()} was called}). */
+    @GuardedBy("mLock")
+    @ElapsedRealtimeLong
+    private long mLastFireTimeElapsed;
 
     /**
      * @param alarmTag               The tag to use when scheduling the alarm with AlarmManager.
@@ -279,7 +288,7 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
     /** Sets an alarm with {@link AlarmManager} for the earliest alarm in the queue after now. */
     @GuardedBy("mLock")
     private void setNextAlarmLocked() {
-        setNextAlarmLocked(mInjector.getElapsedRealtime());
+        setNextAlarmLocked(mLastFireTimeElapsed + mMinTimeBetweenAlarmsMs);
     }
 
     /**
@@ -310,8 +319,10 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
         // earlier but not significantly so, then we essentially delay the check for some
         // apps by up to a minute.
         // 3. The alarm is after the current alarm.
+        final long timeShiftThresholdMs =
+                Math.min(SIGNIFICANT_TRIGGER_TIME_CHANGE_THRESHOLD_MS, mMinTimeBetweenAlarmsMs);
         if (mTriggerTimeElapsed == NOT_SCHEDULED
-                || nextTriggerTimeElapsed < mTriggerTimeElapsed - MINUTE_IN_MILLIS
+                || nextTriggerTimeElapsed < mTriggerTimeElapsed - timeShiftThresholdMs
                 || mTriggerTimeElapsed < nextTriggerTimeElapsed) {
             if (DEBUG) {
                 Slog.d(TAG, "Scheduling alarm at " + nextTriggerTimeElapsed
@@ -327,6 +338,7 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
         final ArraySet<K> expired = new ArraySet<>();
         synchronized (mLock) {
             final long nowElapsed = mInjector.getElapsedRealtime();
+            mLastFireTimeElapsed = nowElapsed;
             while (mAlarmPriorityQueue.size() > 0) {
                 final Pair<K, Long> alarm = mAlarmPriorityQueue.peek();
                 if (alarm.second <= nowElapsed) {

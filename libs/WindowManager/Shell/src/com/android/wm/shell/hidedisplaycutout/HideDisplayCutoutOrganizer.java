@@ -117,6 +117,7 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
     @Override
     public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
             @NonNull SurfaceControl leash) {
+        leash.setUnreleasedWarningCallSite("HideDisplayCutoutOrganizer.onDisplayAreaAppeared");
         if (!addDisplayAreaInfoAndLeashToMap(displayAreaInfo, leash)) {
             return;
         }

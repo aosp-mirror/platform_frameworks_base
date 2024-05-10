@@ -16,10 +16,14 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
-import static com.android.server.biometrics.sensors.face.aidl.Sensor.HalSessionCallback;
-
 import android.annotation.NonNull;
+import android.content.Context;
 import android.hardware.biometrics.face.ISession;
+import android.hardware.biometrics.face.V1_0.IBiometricsFace;
+
+import com.android.server.biometrics.sensors.face.hidl.AidlToHidlAdapter;
+
+import java.util.function.Supplier;
 
 /**
  * A holder for an AIDL {@link ISession} with additional metadata about the current user
@@ -31,14 +35,22 @@ public class AidlSession {
     @NonNull
     private final ISession mSession;
     private final int mUserId;
-    @NonNull private final HalSessionCallback mHalSessionCallback;
+    @NonNull private final AidlResponseHandler mAidlResponseHandler;
 
     public AidlSession(int halInterfaceVersion, @NonNull ISession session, int userId,
-            HalSessionCallback halSessionCallback) {
+            AidlResponseHandler aidlResponseHandler) {
         mHalInterfaceVersion = halInterfaceVersion;
         mSession = session;
         mUserId = userId;
-        mHalSessionCallback = halSessionCallback;
+        mAidlResponseHandler = aidlResponseHandler;
+    }
+
+    public AidlSession(Context context, Supplier<IBiometricsFace> session, int userId,
+            AidlResponseHandler aidlResponseHandler) {
+        mSession = new AidlToHidlAdapter(context, session, userId, aidlResponseHandler);
+        mHalInterfaceVersion = 0;
+        mUserId = userId;
+        mAidlResponseHandler = aidlResponseHandler;
     }
 
     /** The underlying {@link ISession}. */
@@ -52,8 +64,8 @@ public class AidlSession {
     }
 
     /** The HAL callback, which should only be used in tests {@See BiometricTestSessionImpl}. */
-    HalSessionCallback getHalSessionCallback() {
-        return mHalSessionCallback;
+    AidlResponseHandler getHalSessionCallback() {
+        return mAidlResponseHandler;
     }
 
     /**
@@ -62,5 +74,12 @@ public class AidlSession {
      */
     public boolean hasContextMethods() {
         return mHalInterfaceVersion >= 2;
+    }
+
+    /**
+     * If this backend implements enroll methods with an {@link android.view.Surface}.
+     */
+    public boolean supportsFaceEnrollOptions() {
+        return mHalInterfaceVersion >= 4;
     }
 }

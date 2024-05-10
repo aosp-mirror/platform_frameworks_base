@@ -31,6 +31,8 @@ import android.widget.TextView;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.usage.R;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

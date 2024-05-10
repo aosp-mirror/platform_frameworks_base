@@ -55,6 +55,15 @@ static void native_setState(jlong nativePtr, jint state, jlong timestamp) {
     counter->setState(state, timestamp);
 }
 
+static void native_setValues(jlong nativePtr, jint state, jlong longArrayContainerNativePtr) {
+    battery::LongArrayMultiStateCounter *counter =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
+    std::vector<uint64_t> *vector =
+            reinterpret_cast<std::vector<uint64_t> *>(longArrayContainerNativePtr);
+
+    counter->setValue(state, *vector);
+}
+
 static void native_updateValues(jlong nativePtr, jlong longArrayContainerNativePtr,
                                 jlong timestamp) {
     battery::LongArrayMultiStateCounter *counter =
@@ -63,6 +72,16 @@ static void native_updateValues(jlong nativePtr, jlong longArrayContainerNativeP
             reinterpret_cast<std::vector<uint64_t> *>(longArrayContainerNativePtr);
 
     counter->updateValue(*vector, timestamp);
+}
+
+static void native_incrementValues(jlong nativePtr, jlong longArrayContainerNativePtr,
+                                   jlong timestamp) {
+    battery::LongArrayMultiStateCounter *counter =
+            reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
+    std::vector<uint64_t> *vector =
+            reinterpret_cast<std::vector<uint64_t> *>(longArrayContainerNativePtr);
+
+    counter->incrementValue(*vector, timestamp);
 }
 
 static void native_addCounts(jlong nativePtr, jlong longArrayContainerNativePtr) {
@@ -88,7 +107,7 @@ static void native_getCounts(jlong nativePtr, jlong longArrayContainerNativePtr,
     *vector = counter->getCount(state);
 }
 
-static jobject native_toString(JNIEnv *env, jobject self, jlong nativePtr) {
+static jobject native_toString(JNIEnv *env, jclass, jlong nativePtr) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
     return env->NewStringUTF(counter->toString().c_str());
@@ -99,66 +118,76 @@ static void throwWriteRE(JNIEnv *env, binder_status_t status) {
     jniThrowRuntimeException(env, "Could not write LongArrayMultiStateCounter to Parcel");
 }
 
-#define THROW_ON_WRITE_ERROR(expr)     \
-    {                                  \
-        binder_status_t status = expr; \
-        if (status != STATUS_OK) {     \
-            throwWriteRE(env, status); \
-        }                              \
+#define THROW_AND_RETURN_ON_WRITE_ERROR(expr) \
+    {                                         \
+        binder_status_t status = expr;        \
+        if (status != STATUS_OK) {            \
+            throwWriteRE(env, status);        \
+            return;                           \
+        }                                     \
     }
 
-static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, jobject jParcel,
+static void native_writeToParcel(JNIEnv *env, jclass, jlong nativePtr, jobject jParcel,
                                  jint flags) {
     battery::LongArrayMultiStateCounter *counter =
             reinterpret_cast<battery::LongArrayMultiStateCounter *>(nativePtr);
     ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     uint16_t stateCount = counter->getStateCount();
-    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), stateCount));
+    THROW_AND_RETURN_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), stateCount));
 
     // LongArrayMultiStateCounter has at least state 0
     const std::vector<uint64_t> &anyState = counter->getCount(0);
-    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), anyState.size()));
+    THROW_AND_RETURN_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), anyState.size()));
 
     for (battery::state_t state = 0; state < stateCount; state++) {
-        THROW_ON_WRITE_ERROR(ndk::AParcel_writeVector(parcel.get(), counter->getCount(state)));
+        THROW_AND_RETURN_ON_WRITE_ERROR(
+                ndk::AParcel_writeVector(parcel.get(), counter->getCount(state)));
     }
 }
 
-static void throwReadRE(JNIEnv *env, binder_status_t status) {
+static void throwReadException(JNIEnv *env, binder_status_t status) {
     ALOGE("Could not read LongArrayMultiStateCounter from Parcel, status = %d", status);
-    jniThrowRuntimeException(env, "Could not read LongArrayMultiStateCounter from Parcel");
+    jniThrowException(env, "android.os.BadParcelableException",
+                      "Could not read LongArrayMultiStateCounter from Parcel");
 }
 
-#define THROW_ON_READ_ERROR(expr)      \
-    {                                  \
-        binder_status_t status = expr; \
-        if (status != STATUS_OK) {     \
-            throwReadRE(env, status);  \
-        }                              \
+#define THROW_AND_RETURN_ON_READ_ERROR(expr) \
+    {                                        \
+        binder_status_t status = expr;       \
+        if (status != STATUS_OK) {           \
+            throwReadException(env, status); \
+            return 0L;                       \
+        }                                    \
     }
 
-static jlong native_initFromParcel(JNIEnv *env, jclass theClass, jobject jParcel) {
+static jlong native_initFromParcel(JNIEnv *env, jclass, jobject jParcel) {
     ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     int32_t stateCount;
-    THROW_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &stateCount));
+    THROW_AND_RETURN_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &stateCount));
+
+    if (stateCount < 0 || stateCount > 0xEFFF) {
+        throwReadException(env, STATUS_INVALID_OPERATION);
+        return 0L;
+    }
 
     int32_t arrayLength;
-    THROW_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &arrayLength));
+    THROW_AND_RETURN_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &arrayLength));
 
-    battery::LongArrayMultiStateCounter *counter =
-            new battery::LongArrayMultiStateCounter(stateCount, std::vector<uint64_t>(arrayLength));
+    auto counter = std::make_unique<battery::LongArrayMultiStateCounter>(stateCount,
+                                                                         std::vector<uint64_t>(
+                                                                                 arrayLength));
 
     std::vector<uint64_t> value;
     value.reserve(arrayLength);
 
     for (battery::state_t state = 0; state < stateCount; state++) {
-        THROW_ON_READ_ERROR(ndk::AParcel_readVector(parcel.get(), &value));
+        THROW_AND_RETURN_ON_READ_ERROR(ndk::AParcel_readVector(parcel.get(), &value));
         counter->setValue(state, value);
     }
 
-    return reinterpret_cast<jlong>(counter);
+    return reinterpret_cast<jlong>(counter.release());
 }
 
 static jint native_getStateCount(jlong nativePtr) {
@@ -190,7 +219,11 @@ static const JNINativeMethod g_LongArrayMultiStateCounter_methods[] = {
         // @CriticalNative
         {"native_setState", "(JIJ)V", (void *)native_setState},
         // @CriticalNative
+        {"native_setValues", "(JIJ)V", (void *)native_setValues},
+        // @CriticalNative
         {"native_updateValues", "(JJJ)V", (void *)native_updateValues},
+        // @CriticalNative
+        {"native_incrementValues", "(JJJ)V", (void *)native_incrementValues},
         // @CriticalNative
         {"native_addCounts", "(JJ)V", (void *)native_addCounts},
         // @CriticalNative
@@ -220,7 +253,7 @@ static jlong native_getReleaseFunc_LongArrayContainer() {
     return reinterpret_cast<jlong>(native_dispose_LongArrayContainer);
 }
 
-static void native_setValues_LongArrayContainer(JNIEnv *env, jobject self, jlong nativePtr,
+static void native_setValues_LongArrayContainer(JNIEnv *env, jclass, jlong nativePtr,
                                                 jlongArray jarray) {
     std::vector<uint64_t> *vector = reinterpret_cast<std::vector<uint64_t> *>(nativePtr);
     ScopedLongArrayRO scopedArray(env, jarray);
@@ -231,13 +264,45 @@ static void native_setValues_LongArrayContainer(JNIEnv *env, jobject self, jlong
     std::copy(array, array + size, vector->data());
 }
 
-static void native_getValues_LongArrayContainer(JNIEnv *env, jobject self, jlong nativePtr,
+static void native_getValues_LongArrayContainer(JNIEnv *env, jclass, jlong nativePtr,
                                                 jlongArray jarray) {
     std::vector<uint64_t> *vector = reinterpret_cast<std::vector<uint64_t> *>(nativePtr);
     ScopedLongArrayRW scopedArray(env, jarray);
 
     // Boundary checks are performed in the Java layer
     std::copy(vector->data(), vector->data() + vector->size(), scopedArray.get());
+}
+
+static jboolean native_combineValues_LongArrayContainer(JNIEnv *env, jclass, jlong nativePtr,
+                                                        jlongArray jarray, jintArray jindexMap) {
+    std::vector<uint64_t> *vector = reinterpret_cast<std::vector<uint64_t> *>(nativePtr);
+    ScopedLongArrayRW scopedArray(env, jarray);
+    ScopedIntArrayRO scopedIndexMap(env, jindexMap);
+
+    const uint64_t *data = vector->data();
+    uint64_t *array = reinterpret_cast<uint64_t *>(scopedArray.get());
+    const uint8_t size = scopedArray.size();
+
+    for (int i = 0; i < size; i++) {
+        array[i] = 0;
+    }
+
+    bool nonZero = false;
+    for (size_t i = 0; i < vector->size(); i++) {
+        jint index = scopedIndexMap[i];
+        if (index < 0 || index >= size) {
+            jniThrowExceptionFmt(env, "java/lang/IndexOutOfBoundsException",
+                                 "Index %d is out of bounds: [0, %d]", index, size - 1);
+            return false;
+        }
+
+        if (data[i] != 0L) {
+            array[index] += data[i];
+            nonZero = true;
+        }
+    }
+
+    return nonZero;
 }
 
 static const JNINativeMethod g_LongArrayContainer_methods[] = {
@@ -249,6 +314,8 @@ static const JNINativeMethod g_LongArrayContainer_methods[] = {
         {"native_setValues", "(J[J)V", (void *)native_setValues_LongArrayContainer},
         // @FastNative
         {"native_getValues", "(J[J)V", (void *)native_getValues_LongArrayContainer},
+        // @FastNative
+        {"native_combineValues", "(J[J[I)Z", (void *)native_combineValues_LongArrayContainer},
 };
 
 int register_com_android_internal_os_LongArrayMultiStateCounter(JNIEnv *env) {

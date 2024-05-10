@@ -1,0 +1,9 @@
+package: "com.android.server.deviceidle"
+container: "system"
+
+flag {
+    name: "disable_wakelocks_in_light_idle"
+    namespace: "backstage_power"
+    description: "Disable wakelocks for background apps while Light Device Idle is active"
+    bug: "299329948"
+}

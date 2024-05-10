@@ -2,6 +2,9 @@
     "presubmit": [
         {
             "name": "CtsBiometricsTestCases"
+        },
+        {
+            "name": "CtsBiometricsHostTestCases"
         }
     ]
 }

@@ -32,6 +32,8 @@ import android.os.UserHandle;
 import android.view.View;
 import android.view.ViewParent;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -133,7 +135,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         if (!row.isPinned()) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        mStatusBarKeyguardViewManager.showGenericBouncer(true /* scrimmed */);
+        mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         mPendingRemoteInputView = clicked;
     }
 
@@ -180,7 +182,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                 }
             };
             mShadeController.postOnShadeExpanded(clickPendingViewRunnable);
-            mShadeController.instantExpandNotificationsPanel();
+            mShadeController.instantExpandShade();
         }
     }
 
@@ -254,16 +256,16 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
 
     @Override
     public boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
-            boolean appRequestedAuth,
+            boolean appRequestedAuth, @Nullable Integer actionIndex,
             NotificationRemoteInputManager.ClickHandler defaultHandler) {
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity || appRequestedAuth) {
-            mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent);
+            mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent, actionIndex);
             final boolean afterKeyguardGone = mActivityIntentHelper
                     .wouldPendingLaunchResolverActivity(pendingIntent,
                             mLockscreenUserManager.getCurrentUserId());
             mActivityStarter.dismissKeyguardThenExecute(() -> {
-                mActionClickLogger.logKeyguardGone(pendingIntent);
+                mActionClickLogger.logKeyguardGone(pendingIntent, actionIndex);
 
                 try {
                     ActivityManager.getService().resumeAppSwitches();

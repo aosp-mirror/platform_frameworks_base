@@ -21,6 +21,8 @@ import static java.util.stream.Collectors.toMap;
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
+import android.os.Binder;
 import android.os.ISystemConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -100,6 +102,22 @@ public class SystemConfigService extends SystemService {
                 }
             }
             return enabledComponent;
+        }
+
+        @Override
+        public List<ComponentName> getDefaultVrComponents() {
+            getContext().enforceCallingOrSelfPermission(Manifest.permission.QUERY_ALL_PACKAGES,
+                    "Caller must hold " + Manifest.permission.QUERY_ALL_PACKAGES);
+            return new ArrayList<>(SystemConfig.getInstance().getDefaultVrComponents());
+        }
+
+        @Override
+        public List<String> getPreventUserDisablePackages() {
+            PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+            return SystemConfig.getInstance().getPreventUserDisablePackages().stream()
+                    .filter(preventUserDisablePackage ->
+                            pmi.canQueryPackage(Binder.getCallingUid(), preventUserDisablePackage))
+                    .collect(toList());
         }
     };
 

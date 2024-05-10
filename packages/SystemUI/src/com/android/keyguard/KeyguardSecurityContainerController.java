@@ -17,7 +17,7 @@
 package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
-import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
@@ -27,20 +27,35 @@ import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_SIM
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_PRIMARY;
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_SECONDARY_USER;
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_WORK_PROFILE;
+import static com.android.keyguard.KeyguardSecurityModel.SecurityMode.SimPin;
+import static com.android.keyguard.KeyguardSecurityModel.SecurityMode.SimPuk;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
+import static com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES;
 
+import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
-import android.hardware.biometrics.BiometricSourceType;
+import android.content.res.Resources;
+import android.hardware.biometrics.BiometricRequestConstants;
+import android.media.AudioManager;
 import android.metrics.LogMaker;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Slog;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
+import android.window.OnBackAnimationCallback;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -51,29 +66,49 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityContainer.BouncerUiEvent;
-import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityContainer.SwipeListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.R;
-import com.android.systemui.biometrics.SidefpsController;
+import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate;
+import com.android.systemui.biometrics.SideFpsController;
+import com.android.systemui.biometrics.SideFpsUiRequestSource;
+import com.android.systemui.biometrics.shared.SideFpsControllerRefactor;
+import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.ViewController;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 
+import dagger.Lazy;
+
+import java.io.File;
+import java.util.Arrays;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
+
+import kotlinx.coroutines.Job;
 
 /** Controller for {@link KeyguardSecurityContainer} */
 @KeyguardBouncerScope
@@ -91,25 +126,60 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final UiEventLogger mUiEventLogger;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
-    private final SecurityCallback mSecurityCallback;
     private final ConfigurationController mConfigurationController;
     private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
     private final UserSwitcherController mUserSwitcherController;
     private final GlobalSettings mGlobalSettings;
     private final FeatureFlags mFeatureFlags;
+    private final SceneContainerFlags mSceneContainerFlags;
     private final SessionTracker mSessionTracker;
-    private final Optional<SidefpsController> mSidefpsController;
+    private final Optional<SideFpsController> mSideFpsController;
+    private final FalsingA11yDelegate mFalsingA11yDelegate;
+    private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    private final BouncerMessageInteractor mBouncerMessageInteractor;
+    private int mTranslationY;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    // Whether the volume keys should be handled by keyguard. If true, then
+    // they will be handled here for specific media types such as music, otherwise
+    // the audio service will bring up the volume dialog.
+    private static final boolean KEYGUARD_MANAGES_VOLUME = false;
 
-    private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
+
+    private final TelephonyManager mTelephonyManager;
+    private final ViewMediatorCallback mViewMediatorCallback;
+    private final AudioManager mAudioManager;
+    private View.OnKeyListener mOnKeyListener = (v, keyCode, event) -> interceptMediaKey(event);
+    private ActivityStarter.OnDismissAction mDismissAction;
+    private Runnable mCancelAction;
+    private boolean mWillRunDismissFromKeyguard;
+
+    private int mLastOrientation;
 
     private SecurityMode mCurrentSecurityMode = SecurityMode.Invalid;
+    private int mCurrentUser = UserHandle.USER_NULL;
     private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
-            () -> showPrimarySecurityScreen(false);
+            new UserSwitcherController.UserSwitchCallback() {
+                @Override
+                public void onUserSwitched() {
+                    if (mCurrentUser == mSelectedUserInteractor.getSelectedUserId()) {
+                        return;
+                    }
+                    mCurrentUser = mSelectedUserInteractor.getSelectedUserId();
+                    showPrimarySecurityScreen(false);
+                    if (mCurrentSecurityMode != SimPin
+                            && mCurrentSecurityMode != SimPuk) {
+                        reinflateViewFlipper((l) -> {
+                        });
+                    }
+                }
+            };
 
     @VisibleForTesting
     final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
         private MotionEvent mTouchDown;
+
         @Override
         public boolean onInterceptTouchEvent(MotionEvent ev) {
             return false;
@@ -144,15 +214,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     };
 
     private KeyguardSecurityCallback mKeyguardSecurityCallback = new KeyguardSecurityCallback() {
-        public void userActivity() {
-            if (mSecurityCallback != null) {
-                mSecurityCallback.userActivity();
-            }
-        }
-
         @Override
         public void onUserInput() {
-            mUpdateMonitor.cancelFaceAuth();
+            mBouncerMessageInteractor.onPrimaryBouncerUserInput();
+            mKeyguardFaceAuthInteractor.onPrimaryBouncerUserInput();
         }
 
         @Override
@@ -163,17 +228,32 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
 
         @Override
-        public void dismiss(boolean authenticated, int targetId,
+        public boolean dismiss(boolean authenticated, int targetId,
                 boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode) {
-            mSecurityCallback.dismiss(authenticated, targetId, bypassSecondaryLockScreen,
-                    expectedSecurityMode);
+            return showNextSecurityScreenOrFinish(
+                    authenticated, targetId, bypassSecondaryLockScreen, expectedSecurityMode);
         }
 
+        @Override
+        public void userActivity() {
+            mViewMediatorCallback.userActivity();
+        }
+
+        @Override
         public boolean isVerifyUnlockOnly() {
             return false;
         }
 
+        @Override
+        public void onAttemptLockoutStart(long seconds) {
+            mBouncerMessageInteractor.onPrimaryAuthLockedOut(seconds);
+        }
+
+        @Override
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
+            if (timeoutMs == 0 && !success) {
+                mBouncerMessageInteractor.onPrimaryAuthIncorrectAttempt();
+            }
             int bouncerSide = SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__DEFAULT;
             if (mView.isSidedSecurityMode()) {
                 bouncerSide = mView.isSecurityLeftAligned()
@@ -192,7 +272,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 ThreadUtils.postOnBackgroundThread(() -> {
                     try {
                         Thread.sleep(5000);
-                    } catch (InterruptedException ignored) { }
+                    } catch (InterruptedException ignored) {
+                    }
                     System.gc();
                     System.runFinalization();
                     System.gc();
@@ -206,35 +287,84 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
                     .setType(success ? MetricsEvent.TYPE_SUCCESS : MetricsEvent.TYPE_FAILURE));
             mUiEventLogger.log(success ? BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS
-                            : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE, getSessionId());
+                    : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE, getSessionId());
         }
 
+        @Override
         public void reset() {
-            mSecurityCallback.reset();
+            mViewMediatorCallback.resetKeyguard();
         }
 
+        @Override
         public void onCancelClicked() {
-            mSecurityCallback.onCancelClicked();
+            mViewMediatorCallback.onCancelClicked();
+        }
+
+        /**
+         * Authentication has happened and it's time to dismiss keyguard. This function
+         * should clean up and inform KeyguardViewMediator.
+         *
+         * @param targetUserId a user that needs to be the foreground user at the dismissal
+         *                    completion.
+         */
+        @Override
+        public void finish(int targetUserId) {
+            if (!mFeatureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+                // If there's a pending runnable because the user interacted with a widget
+                // and we're leaving keyguard, then run it.
+                boolean deferKeyguardDone = false;
+                mWillRunDismissFromKeyguard = false;
+                if (mDismissAction != null) {
+                    deferKeyguardDone = mDismissAction.onDismiss();
+                    mWillRunDismissFromKeyguard = mDismissAction.willRunAnimationOnKeyguard();
+                    mDismissAction = null;
+                    mCancelAction = null;
+                }
+                if (mViewMediatorCallback != null) {
+                    if (deferKeyguardDone) {
+                        mViewMediatorCallback.keyguardDonePending(targetUserId);
+                    } else {
+                        mViewMediatorCallback.keyguardDone(targetUserId);
+                    }
+                }
+            }
+
+            if (mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                mKeyguardTransitionInteractor.startDismissKeyguardTransition();
+            }
+        }
+
+        @Override
+        public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
+            mViewMediatorCallback.setNeedsInput(needsInput);
+        }
+
+        @Override
+        public void showCurrentSecurityScreen() {
+            showPrimarySecurityScreen(false);
         }
     };
 
-
-    private SwipeListener mSwipeListener = new SwipeListener() {
+    private final SwipeListener mSwipeListener = new SwipeListener() {
         @Override
         public void onSwipeUp() {
-            if (!mUpdateMonitor.isFaceDetectionRunning()) {
-                mUpdateMonitor.requestFaceAuth(true, FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER);
+            if (mKeyguardFaceAuthInteractor.canFaceAuthRun()) {
                 mKeyguardSecurityCallback.userActivity();
-                showMessage(null, null);
             }
-            if (mUpdateMonitor.isFaceEnrolled()) {
+            mKeyguardFaceAuthInteractor.onSwipeUpOnBouncer();
+            if (mKeyguardFaceAuthInteractor.isFaceAuthEnabledAndEnrolled()) {
                 mUpdateMonitor.requestActiveUnlock(
-                        ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.UNLOCK_INTENT,
+                        ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                         "swipeUpOnBouncer");
             }
         }
+
+        @Override
+        public void onSwipeDown() {
+            mViewMediatorCallback.onBouncerSwipeDown();
+        }
     };
-    private ConfigurationController.ConfigurationListener mConfigurationListener =
+    private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
                 @Override
                 public void onThemeChanged() {
@@ -245,30 +375,67 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 public void onUiModeChanged() {
                     reloadColors();
                 }
-            };
-    private boolean mBouncerVisible = false;
-    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
-            new KeyguardUpdateMonitorCallback() {
+
                 @Override
-                public void onDevicePolicyManagerStateChanged() {
-                    showPrimarySecurityScreen(false);
+                public void onDensityOrFontScaleChanged() {
+                    KeyguardSecurityContainerController.this
+                            .onDensityOrFontScaleOrOrientationChanged();
                 }
 
                 @Override
-                public void onBiometricRunningStateChanged(boolean running,
-                        BiometricSourceType biometricSourceType) {
-                    if (biometricSourceType == FINGERPRINT) {
-                        updateSideFpsVisibility();
+                public void onOrientationChanged(int orientation) {
+                    if (mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE)
+                            && getResources().getBoolean(R.bool.update_bouncer_constraints)) {
+                        boolean useSplitBouncer = orientation == ORIENTATION_LANDSCAPE;
+                        mSecurityViewFlipperController.updateConstraints(useSplitBouncer);
+                    }
+                }
+            };
+    private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onTrustGrantedForCurrentUser(
+                        boolean dismissKeyguard,
+                        boolean newlyUnlocked,
+                        TrustGrantFlags flags,
+                        String message
+                ) {
+                    if (dismissKeyguard) {
+                        if (!mView.isVisibleToUser()) {
+                            // The trust agent dismissed the keyguard without the user proving
+                            // that they are present (by swiping up to show the bouncer). That's
+                            // fine if the user proved presence via some other way to the trust
+                            // agent.
+                            Log.i(TAG, "TrustAgent dismissed Keyguard.");
+                        }
+                        mKeyguardSecurityCallback.dismiss(
+                                false /* authenticated */,
+                                mSelectedUserInteractor.getSelectedUserId(),
+                                /* bypassSecondaryLockScreen */ false,
+                                SecurityMode.Invalid
+                        );
+                    } else {
+                        if (flags.isInitiatedByUser() || flags.dismissKeyguardRequested()) {
+                            mViewMediatorCallback.playTrustedSound();
+                        }
                     }
                 }
 
                 @Override
-                public void onStrongAuthStateChanged(int userId) {
-                    updateSideFpsVisibility();
+                public void onDevicePolicyManagerStateChanged() {
+                    showPrimarySecurityScreen(false);
                 }
             };
+    private final SelectedUserInteractor mSelectedUserInteractor;
+    private final Provider<DeviceEntryInteractor> mDeviceEntryInteractor;
+    private final Provider<JavaAdapter> mJavaAdapter;
+    private final DeviceProvisionedController mDeviceProvisionedController;
+    private final Lazy<PrimaryBouncerInteractor> mPrimaryBouncerInteractor;
+    @Nullable
+    private Job mSceneTransitionCollectionJob;
 
-    private KeyguardSecurityContainerController(KeyguardSecurityContainer view,
+    @Inject
+    public KeyguardSecurityContainerController(KeyguardSecurityContainer view,
             AdminSecondaryLockScreenController.Factory adminSecondaryLockScreenControllerFactory,
             LockPatternUtils lockPatternUtils,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -276,24 +443,38 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             MetricsLogger metricsLogger,
             UiEventLogger uiEventLogger,
             KeyguardStateController keyguardStateController,
-            SecurityCallback securityCallback,
             KeyguardSecurityViewFlipperController securityViewFlipperController,
             ConfigurationController configurationController,
             FalsingCollector falsingCollector,
             FalsingManager falsingManager,
             UserSwitcherController userSwitcherController,
             FeatureFlags featureFlags,
+            SceneContainerFlags sceneContainerFlags,
             GlobalSettings globalSettings,
             SessionTracker sessionTracker,
-            Optional<SidefpsController> sidefpsController) {
+            Optional<SideFpsController> sideFpsController,
+            FalsingA11yDelegate falsingA11yDelegate,
+            TelephonyManager telephonyManager,
+            ViewMediatorCallback viewMediatorCallback,
+            AudioManager audioManager,
+            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            BouncerMessageInteractor bouncerMessageInteractor,
+            Provider<JavaAdapter> javaAdapter,
+            SelectedUserInteractor selectedUserInteractor,
+            DeviceProvisionedController deviceProvisionedController,
+            FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
+            KeyguardTransitionInteractor keyguardTransitionInteractor,
+            Lazy<PrimaryBouncerInteractor> primaryBouncerInteractor,
+            Provider<DeviceEntryInteractor> deviceEntryInteractor
+    ) {
         super(view);
+        view.setAccessibilityDelegate(faceAuthAccessibilityDelegate);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
         mSecurityModel = keyguardSecurityModel;
         mMetricsLogger = metricsLogger;
         mUiEventLogger = uiEventLogger;
         mKeyguardStateController = keyguardStateController;
-        mSecurityCallback = securityCallback;
         mSecurityViewFlipperController = securityViewFlipperController;
         mAdminSecondaryLockScreenController = adminSecondaryLockScreenControllerFactory.create(
                 mKeyguardSecurityCallback);
@@ -303,14 +484,33 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mFalsingManager = falsingManager;
         mUserSwitcherController = userSwitcherController;
         mFeatureFlags = featureFlags;
+        mSceneContainerFlags = sceneContainerFlags;
         mGlobalSettings = globalSettings;
         mSessionTracker = sessionTracker;
-        mSidefpsController = sidefpsController;
+        if (SideFpsControllerRefactor.isEnabled()) {
+            mSideFpsController = Optional.empty();
+        } else {
+            mSideFpsController = sideFpsController;
+        }
+        mFalsingA11yDelegate = falsingA11yDelegate;
+        mTelephonyManager = telephonyManager;
+        mViewMediatorCallback = viewMediatorCallback;
+        mAudioManager = audioManager;
+        mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
+        mBouncerMessageInteractor = bouncerMessageInteractor;
+        mSelectedUserInteractor = selectedUserInteractor;
+        mDeviceEntryInteractor = deviceEntryInteractor;
+        mJavaAdapter = javaAdapter;
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mPrimaryBouncerInteractor = primaryBouncerInteractor;
     }
 
     @Override
     public void onInit() {
         mSecurityViewFlipperController.init();
+        updateResources();
+        configureMode();
     }
 
     @Override
@@ -320,6 +520,30 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.addMotionEventListener(mGlobalTouchListener);
         mConfigurationController.addCallback(mConfigurationListener);
         mUserSwitcherController.addUserSwitchCallback(mUserSwitchCallback);
+        mView.setViewMediatorCallback(mViewMediatorCallback);
+        // Update ViewMediator with the current input method requirements
+        mViewMediatorCallback.setNeedsInput(needsInput());
+        mView.setOnKeyListener(mOnKeyListener);
+
+        showPrimarySecurityScreen(false);
+
+        if (mSceneContainerFlags.isEnabled()) {
+            // When the scene framework says that the lockscreen has been dismissed, dismiss the
+            // keyguard here, revealing the underlying app or launcher:
+            mSceneTransitionCollectionJob = mJavaAdapter.get().alwaysCollectFlow(
+                    mDeviceEntryInteractor.get().isDeviceEntered(),
+                    isDeviceEntered -> {
+                    if (isDeviceEntered) {
+                        final int selectedUserId = mSelectedUserInteractor.getSelectedUserId();
+                        showNextSecurityScreenOrFinish(
+                            /* authenticated= */ true,
+                            selectedUserId,
+                            /* bypassSecondaryLockScreen= */ true,
+                            mSecurityModel.getSecurityMode(selectedUserId));
+                    }
+                }
+            );
+        }
     }
 
     @Override
@@ -328,64 +552,126 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mConfigurationController.removeCallback(mConfigurationListener);
         mView.removeMotionEventListener(mGlobalTouchListener);
         mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
+
+        if (mSceneTransitionCollectionJob != null) {
+            mSceneTransitionCollectionJob.cancel(null);
+            mSceneTransitionCollectionJob = null;
+        }
     }
 
-    /** */
+    /**  */
     public void onPause() {
+        if (DEBUG) {
+            Log.d(TAG, String.format("screen off, instance %s at %s",
+                    Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
+        }
+        showPrimarySecurityScreen(true);
         mAdminSecondaryLockScreenController.hide();
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().onPause();
+            getCurrentSecurityController(controller -> controller.onPause());
         }
         mView.onPause();
-        // It might happen that onStartingToHide is not called when the device is locked while on
-        // bouncer.
-        setBouncerVisible(false);
+        mView.clearFocus();
     }
 
-    private void updateSideFpsVisibility() {
-        if (!mSidefpsController.isPresent()) {
+    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
+    /**
+     * Shows and hides the side finger print sensor animation.
+     *
+     * @param isVisible sets whether we show or hide the side fps animation
+     */
+    public void updateSideFpsVisibility(boolean isVisible) {
+        SideFpsControllerRefactor.assertInLegacyMode();
+        if (!mSideFpsController.isPresent()) {
             return;
         }
-        if (mBouncerVisible
-                && getResources().getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
-                && mUpdateMonitor.isFingerprintDetectionRunning()
-                && !mUpdateMonitor.userNeedsStrongAuth()) {
-            mSidefpsController.get().show();
+
+        if (isVisible) {
+            mSideFpsController.get().show(
+                    SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                    BiometricRequestConstants.REASON_AUTH_KEYGUARD
+            );
         } else {
-            mSidefpsController.get().hide();
+            mSideFpsController.get().hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
         }
     }
 
     /**
      * Shows the primary security screen for the user. This will be either the multi-selector
      * or the user's security method.
+     *
      * @param turningOff true if the device is being turned off
      */
     public void showPrimarySecurityScreen(boolean turningOff) {
+        if (DEBUG) Log.d(TAG, "show()");
         SecurityMode securityMode = whitelistIpcs(() -> mSecurityModel.getSecurityMode(
-                KeyguardUpdateMonitor.getCurrentUser()));
+                mSelectedUserInteractor.getSelectedUserId()));
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
         showSecurityScreen(securityMode);
     }
 
+    /**
+     * Show a string explaining why the security view needs to be solved.
+     *
+     * @param reason a flag indicating which string should be shown, see
+     *               {@link KeyguardSecurityView#PROMPT_REASON_NONE},
+     *               {@link KeyguardSecurityView#PROMPT_REASON_RESTART},
+     *               {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}, and
+     *               {@link KeyguardSecurityView#PROMPT_REASON_PREPARE_FOR_UPDATE}.
+     */
     @Override
     public void showPromptReason(int reason) {
         if (mCurrentSecurityMode != SecurityMode.None) {
             if (reason != PROMPT_REASON_NONE) {
                 Log.i(TAG, "Strong auth required, reason: " + reason);
             }
-            getCurrentSecurityController().showPromptReason(reason);
+            getCurrentSecurityController(controller -> controller.showPromptReason(reason));
         }
     }
 
-    public void showMessage(CharSequence message, ColorStateList colorState) {
+    /** Set message of bouncer title. */
+    public void showMessage(CharSequence message, ColorStateList colorState, boolean animated) {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().showMessage(message, colorState);
+            getCurrentSecurityController(
+                    controller -> controller.showMessage(message, colorState, animated));
         }
     }
 
-    public SecurityMode getCurrentSecurityMode() {
-        return mCurrentSecurityMode;
+    /**
+     * Sets an action to run when keyguard finishes.
+     *
+     * @param action callback to be invoked when keyguard disappear animation completes.
+     */
+    public void setOnDismissAction(ActivityStarter.OnDismissAction action, Runnable cancelAction) {
+        if (mFeatureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+            return;
+        }
+        if (mCancelAction != null) {
+            mCancelAction.run();
+        }
+        mDismissAction = action;
+        mCancelAction = cancelAction;
+    }
+
+    /**
+     * @return whether dismiss action or cancel action has been set.
+     */
+    public boolean hasDismissActions() {
+        return mDismissAction != null || mCancelAction != null;
+    }
+
+    /**
+     * @return will the dismissal run from the keyguard layout (instead of from bouncer)
+     */
+    public boolean willRunDismissFromKeyguard() {
+        return mWillRunDismissFromKeyguard;
+    }
+
+    /**
+     * Remove any dismiss action or cancel action that was set.
+     */
+    public void cancelDismissAction() {
+        setOnDismissAction(null, null);
     }
 
     /**
@@ -397,17 +683,73 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mKeyguardSecurityCallback.dismiss(authenticated, targetUserId, expectedSecurityMode);
     }
 
+    /**
+     * Dismisses the keyguard by going to the next screen or making it gone.
+     *
+     * @param targetUserId a user that needs to be the foreground user at the dismissal completion.
+     * @return True if the keyguard is done.
+     */
+    public boolean dismiss(int targetUserId) {
+        return mKeyguardSecurityCallback.dismiss(false, targetUserId, false,
+                getCurrentSecurityMode());
+    }
+
+    public SecurityMode getCurrentSecurityMode() {
+        return mCurrentSecurityMode;
+    }
+
+    /**
+     * @return the top of the corresponding view.
+     */
+    public int getTop() {
+        int top = mView.getTop();
+        // The password view has an extra top padding that should be ignored.
+        if (getCurrentSecurityMode() == SecurityMode.Password) {
+            View messageArea = mView.findViewById(R.id.keyguard_message_area);
+            top += messageArea.getTop();
+        }
+        return top;
+    }
+
+    /** Set true if the view can be interacted with */
+    public void setInteractable(boolean isInteractable) {
+        mView.setInteractable(isInteractable);
+    }
+
+    /**
+     * Dismiss keyguard due to a user unlock event.
+     */
+    public void finish(int currentUser) {
+        mKeyguardSecurityCallback.finish(currentUser);
+    }
+
+    /**
+     * @return the text of the KeyguardMessageArea.
+     */
+    public CharSequence getTitle() {
+        return mView.getTitle();
+    }
+
+    /**
+     * Resets the state of the views.
+     */
     public void reset() {
         mView.reset();
         mSecurityViewFlipperController.reset();
     }
 
-    public CharSequence getTitle() {
-        return mView.getTitle();
+    /** Prepares views in the bouncer before starting appear animation. */
+    public void prepareToShow() {
+        View bouncerUserSwitcher = mView.findViewById(R.id.keyguard_bouncer_user_switcher);
+        if (bouncerUserSwitcher != null) {
+            bouncerUserSwitcher.setAlpha(0f);
+        }
     }
 
     @Override
     public void onResume(int reason) {
+        if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
+        mView.requestFocus();
         if (mCurrentSecurityMode != SecurityMode.None) {
             int state = SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN;
             if (mView.isSidedSecurityMode()) {
@@ -417,61 +759,98 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, state);
 
-            getCurrentSecurityController().onResume(reason);
-            updateSideFpsVisibility();
+
+            getCurrentSecurityController(controller -> controller.onResume(reason));
         }
         mView.onResume(
-                mSecurityModel.getSecurityMode(KeyguardUpdateMonitor.getCurrentUser()),
-                mKeyguardStateController.isFaceAuthEnabled());
+                mSecurityModel.getSecurityMode(mSelectedUserInteractor.getSelectedUserId()),
+                mKeyguardStateController.isFaceEnrolledAndEnabled());
+    }
+
+    /** Sets an initial message that would override the default message */
+    public void setInitialMessage() {
+        CharSequence customMessage = mViewMediatorCallback.consumeCustomMessage();
+        if (!TextUtils.isEmpty(customMessage)) {
+            showMessage(customMessage, /* colorState= */ null, /* animated= */ false);
+            return;
+        }
+        showPromptReason(mViewMediatorCallback.getBouncerPromptReason());
+    }
+
+    /**
+     * Show the bouncer and start appear animations.
+     */
+    public void appear() {
+        // We might still be collapsed and the view didn't have time to layout yet or still
+        // be small, let's wait on the predraw to do the animation in that case.
+        mView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        mView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        startAppearAnimation();
+                        return true;
+                    }
+                });
+        mView.requestLayout();
     }
 
     public void startAppearAnimation() {
         if (mCurrentSecurityMode != SecurityMode.None) {
             mView.startAppearAnimation(mCurrentSecurityMode);
-            getCurrentSecurityController().startAppearAnimation();
+            getCurrentSecurityController(controller -> controller.startAppearAnimation());
         }
+    }
+
+    /** Set the alpha of the security container view */
+    public void setAlpha(float alpha) {
+        mView.setAlpha(alpha);
     }
 
     public boolean startDisappearAnimation(Runnable onFinishRunnable) {
         if (mCurrentSecurityMode != SecurityMode.None) {
             mView.startDisappearAnimation(mCurrentSecurityMode);
-            return getCurrentSecurityController().startDisappearAnimation(onFinishRunnable);
+            getCurrentSecurityController(
+                    controller -> {
+                        boolean didRunAnimation = controller.startDisappearAnimation(
+                                onFinishRunnable);
+                        if (!didRunAnimation && onFinishRunnable != null) {
+                            onFinishRunnable.run();
+                        }
+                    });
         }
-
-        return false;
+        return true;
     }
 
     public void onStartingToHide() {
         if (mCurrentSecurityMode != SecurityMode.None) {
-            getCurrentSecurityController().onStartingToHide();
+            getCurrentSecurityController(controller -> controller.onStartingToHide());
         }
-        setBouncerVisible(false);
     }
 
     /** Called when the bouncer changes visibility. */
-    public void onBouncerVisibilityChanged(@View.Visibility int visibility) {
-        setBouncerVisible(visibility == View.VISIBLE);
-    }
-
-    private void setBouncerVisible(boolean visible) {
-        mBouncerVisible = visible;
-        updateSideFpsVisibility();
+    public void onBouncerVisibilityChanged(boolean isVisible) {
+        if (!isVisible) {
+            mView.resetScale();
+        }
     }
 
     /**
      * Shows the next security screen if there is one.
-     * @param authenticated true if the user entered the correct authentication
-     * @param targetUserId a user that needs to be the foreground user at the finish (if called)
-     *     completion.
+     *
+     * @param authenticated             true if the user entered the correct authentication
+     * @param targetUserId              a user that needs to be the foreground user at the finish
+     *                                  (if called)
+     *                                  completion.
      * @param bypassSecondaryLockScreen true if the user is allowed to bypass the secondary
-     *     secondary lock screen requirement, if any.
-     * @param expectedSecurityMode SecurityMode that is invoking this request. SecurityMode.Invalid
-     *      indicates that no check should be done
+     *                                  secondary lock screen requirement, if any.
+     * @param expectedSecurityMode      SecurityMode that is invoking this request.
+     *                                  SecurityMode.Invalid
+     *                                  indicates that no check should be done
      * @return true if keyguard is done
      */
     public boolean showNextSecurityScreenOrFinish(boolean authenticated, int targetUserId,
             boolean bypassSecondaryLockScreen, SecurityMode expectedSecurityMode) {
-
         if (DEBUG) Log.d(TAG, "showNextSecurityScreenOrFinish(" + authenticated + ")");
         if (expectedSecurityMode != SecurityMode.Invalid
                 && expectedSecurityMode != getCurrentSecurityMode()) {
@@ -480,8 +859,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             return false;
         }
 
+        boolean authenticatedWithPrimaryAuth = false;
         boolean finish = false;
-        boolean strongAuth = false;
         int eventSubtype = -1;
         BouncerUiEvent uiEvent = BouncerUiEvent.UNKNOWN;
         if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
@@ -506,7 +885,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 case Pattern:
                 case Password:
                 case PIN:
-                    strongAuth = true;
+                    authenticatedWithPrimaryAuth = true;
                     finish = true;
                     eventSubtype = BOUNCER_DISMISS_PASSWORD;
                     uiEvent = BouncerUiEvent.BOUNCER_DISMISS_PASSWORD;
@@ -516,12 +895,16 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 case SimPuk:
                     // Shortcut for SIM PIN/PUK to go to directly to user's security screen or home
                     SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
-                    if (securityMode == SecurityMode.None && mLockPatternUtils.isLockScreenDisabled(
-                            KeyguardUpdateMonitor.getCurrentUser())) {
+                    boolean isLockscreenDisabled = mLockPatternUtils.isLockScreenDisabled(
+                            mSelectedUserInteractor.getSelectedUserId())
+                            || !mDeviceProvisionedController.isUserSetup(targetUserId);
+
+                    if (securityMode == SecurityMode.None && isLockscreenDisabled) {
                         finish = true;
                         eventSubtype = BOUNCER_DISMISS_SIM;
                         uiEvent = BouncerUiEvent.BOUNCER_DISMISS_SIM;
-                    } else {
+                    } else if (Arrays.asList(SimPin, SimPuk).contains(securityMode)) {
+                        // There are additional screens to the sim pin/puk flow.
                         showSecurityScreen(securityMode);
                     }
                     break;
@@ -549,21 +932,143 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (uiEvent != BouncerUiEvent.UNKNOWN) {
             mUiEventLogger.log(uiEvent, getSessionId());
         }
+
+        if (mFeatureFlags.isEnabled(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT)) {
+            if (authenticatedWithPrimaryAuth) {
+                mPrimaryBouncerInteractor.get()
+                        .notifyKeyguardAuthenticatedPrimaryAuth(targetUserId);
+            } else if (finish) {
+                mPrimaryBouncerInteractor.get().notifyUserRequestedBouncerWhenAlreadyAuthenticated(
+                        targetUserId);
+            }
+        }
+
         if (finish) {
-            mSecurityCallback.finish(strongAuth, targetUserId);
+            mKeyguardSecurityCallback.finish(targetUserId);
         }
         return finish;
     }
 
+    @Override
     public boolean needsInput() {
-        return getCurrentSecurityController().needsInput();
+        return false;
     }
+
+    /**
+     * @return the {@link OnBackAnimationCallback} to animate this view during a back gesture.
+     */
+    @NonNull
+    public OnBackAnimationCallback getBackCallback() {
+        return mView.getBackCallback();
+    }
+
+    /**
+     * @return whether we should dispatch the back key event before Ime.
+     */
+    public boolean dispatchBackKeyEventPreIme() {
+        return getCurrentSecurityMode() == SecurityMode.Password;
+    }
+
+    /**
+     * Allows the media keys to work when the keyguard is showing.
+     * The media keys should be of no interest to the actual keyguard view(s),
+     * so intercepting them here should not be of any harm.
+     *
+     * @param event The key event
+     * @return whether the event was consumed as a media key.
+     */
+    public boolean interceptMediaKey(KeyEvent event) {
+        int keyCode = event.getKeyCode();
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_MEDIA_PLAY:
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                    /* Suppress PLAY/PAUSE toggle when phone is ringing or
+                     * in-call to avoid music playback */
+                    if (mTelephonyManager != null
+                            && mTelephonyManager.getCallState()
+                            != TelephonyManager.CALL_STATE_IDLE) {
+                        return true;  // suppress key event
+                    }
+                    return false;
+                case KeyEvent.KEYCODE_MUTE:
+                case KeyEvent.KEYCODE_HEADSETHOOK:
+                case KeyEvent.KEYCODE_MEDIA_STOP:
+                case KeyEvent.KEYCODE_MEDIA_NEXT:
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
+                case KeyEvent.KEYCODE_MEDIA_RECORD:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK: {
+                    handleMediaKeyEvent(event);
+                    return true;
+                }
+
+                case KeyEvent.KEYCODE_VOLUME_UP:
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                case KeyEvent.KEYCODE_VOLUME_MUTE: {
+                    if (KEYGUARD_MANAGES_VOLUME) {
+                        // Volume buttons should only function for music (local or remote).
+                        // TODO: Actually handle MUTE.
+                        mAudioManager.adjustSuggestedStreamVolume(
+                                keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                        ? AudioManager.ADJUST_RAISE
+                                        : AudioManager.ADJUST_LOWER /* direction */,
+                                AudioManager.STREAM_MUSIC /* stream */, 0 /* flags */);
+                        // Don't execute default volume behavior
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_MUTE:
+                case KeyEvent.KEYCODE_HEADSETHOOK:
+                case KeyEvent.KEYCODE_MEDIA_PLAY:
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                case KeyEvent.KEYCODE_MEDIA_STOP:
+                case KeyEvent.KEYCODE_MEDIA_NEXT:
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
+                case KeyEvent.KEYCODE_MEDIA_RECORD:
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK: {
+                    handleMediaKeyEvent(event);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    private void handleMediaKeyEvent(KeyEvent keyEvent) {
+        mAudioManager.dispatchMediaKeyEvent(keyEvent);
+    }
+
+    /**
+     * In general, we enable unlocking the insecure keyguard with the menu key. However, there are
+     * some cases where we wish to disable it, notably when the menu button placement or technology
+     * is prone to false positives.
+     *
+     * @return true if the menu key should be enabled
+     */
+    public boolean shouldEnableMenuKey() {
+        final Resources res = mView.getResources();
+        final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
+        final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
+        final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
+        return !configDisabled || isTestHarness || fileOverride;
+    }
+
 
     /**
      * Switches to the given security view unless it's already being shown, in which case
      * this is a no-op.
-     *
-     * @param securityMode
      */
     @VisibleForTesting
     void showSecurityScreen(SecurityMode securityMode) {
@@ -573,22 +1078,19 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             return;
         }
 
-        KeyguardInputViewController<KeyguardInputView> oldView = getCurrentSecurityController();
+        getCurrentSecurityController(oldView -> oldView.onPause());
 
-        // Emulate Activity life cycle
-        if (oldView != null) {
-            oldView.onPause();
-        }
+        mCurrentSecurityMode = securityMode;
 
-        KeyguardInputViewController<KeyguardInputView> newView = changeSecurityMode(securityMode);
-        if (newView != null) {
-            newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
-            mSecurityViewFlipperController.show(newView);
-            configureMode();
-        }
+        getCurrentSecurityController(
+                newView -> {
+                    newView.onResume(KeyguardSecurityView.VIEW_REVEALED);
+                    mSecurityViewFlipperController.show(newView);
+                    configureMode();
+                    mKeyguardSecurityCallback.onSecurityModeChanged(
+                            securityMode, newView != null && newView.needsInput());
 
-        mSecurityCallback.onSecurityModeChanged(
-                securityMode, newView != null && newView.needsInput());
+                });
     }
 
     /**
@@ -597,12 +1099,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      * one side).
      */
     private boolean canUseOneHandedBouncer() {
-        if (!(mCurrentSecurityMode == SecurityMode.Pattern
-                || mCurrentSecurityMode == SecurityMode.PIN)) {
-            return false;
-        }
-
-        return getResources().getBoolean(R.bool.can_use_one_handed_bouncer);
+        return switch (mCurrentSecurityMode) {
+            case PIN, Pattern, SimPin, SimPuk -> getResources().getBoolean(
+                    R.bool.can_use_one_handed_bouncer);
+            default -> false;
+        };
     }
 
     private boolean canDisplayUserSwitcher() {
@@ -610,8 +1111,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private void configureMode() {
-        boolean useSimSecurity = mCurrentSecurityMode == SecurityMode.SimPin
-                || mCurrentSecurityMode == SecurityMode.SimPuk;
+        boolean useSimSecurity = mCurrentSecurityMode == SimPin
+                || mCurrentSecurityMode == SimPuk;
         int mode = KeyguardSecurityContainer.MODE_DEFAULT;
         if (canDisplayUserSwitcher() && !useSimSecurity) {
             mode = KeyguardSecurityContainer.MODE_USER_SWITCHER;
@@ -619,7 +1120,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mode = KeyguardSecurityContainer.MODE_ONE_HANDED;
         }
 
-        mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController);
+        mView.initMode(mode, mGlobalSettings, mFalsingManager, mUserSwitcherController,
+                () -> showMessage(getContext().getString(R.string.keyguard_unlock_to_continue),
+                        /* colorState= */ null, /* animated= */ true), mFalsingA11yDelegate);
     }
 
     public void reportFailedUnlockAttempt(int userId, int timeoutMs) {
@@ -661,20 +1164,18 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mLockPatternUtils.reportFailedPasswordAttempt(userId);
         if (timeoutMs > 0) {
             mLockPatternUtils.reportPasswordLockout(timeoutMs, userId);
-            mView.showTimeoutDialog(userId, timeoutMs, mLockPatternUtils,
-                    mSecurityModel.getSecurityMode(userId));
+            if (!mFeatureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) {
+                mView.showTimeoutDialog(userId, timeoutMs, mLockPatternUtils,
+                        mSecurityModel.getSecurityMode(userId));
+            }
         }
     }
 
-    private KeyguardInputViewController<KeyguardInputView> getCurrentSecurityController() {
-        return mSecurityViewFlipperController
-                .getSecurityView(mCurrentSecurityMode, mKeyguardSecurityCallback);
-    }
-
-    private KeyguardInputViewController<KeyguardInputView> changeSecurityMode(
-            SecurityMode securityMode) {
-        mCurrentSecurityMode = securityMode;
-        return getCurrentSecurityController();
+    private void getCurrentSecurityController(
+            KeyguardSecurityViewFlipperController.OnViewInflatedCallback onViewInflatedCallback) {
+        mSecurityViewFlipperController
+                .getSecurityView(mCurrentSecurityMode, mKeyguardSecurityCallback,
+                        onViewInflatedCallback);
     }
 
     /**
@@ -683,6 +1184,30 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      * configuration.
      */
     public void updateResources() {
+        int gravity;
+
+        Resources resources = mView.getResources();
+
+        if (resources.getBoolean(R.bool.can_use_one_handed_bouncer)) {
+            gravity = resources.getInteger(
+                    R.integer.keyguard_host_view_one_handed_gravity);
+        } else {
+            gravity = resources.getInteger(R.integer.keyguard_host_view_gravity);
+        }
+
+        mTranslationY = resources
+                .getDimensionPixelSize(R.dimen.keyguard_host_view_translation_y);
+        // Android SysUI uses a FrameLayout as the top-level, but Auto uses RelativeLayout.
+        // We're just changing the gravity here though (which can't be applied to RelativeLayout),
+        // so only attempt the update if mView is inside a FrameLayout.
+        if (mView.getLayoutParams() instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mView.getLayoutParams();
+            if (lp.gravity != gravity) {
+                lp.gravity = gravity;
+                mView.setLayoutParams(lp);
+            }
+        }
+
         int newOrientation = getResources().getConfiguration().orientation;
         if (newOrientation != mLastOrientation) {
             mLastOrientation = newOrientation;
@@ -700,78 +1225,34 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private void reloadColors() {
-        mSecurityViewFlipperController.reloadColors();
         mView.reloadColors();
     }
 
-    static class Factory {
+    /** Handles density or font scale changes. */
+    private void onDensityOrFontScaleOrOrientationChanged() {
+        reinflateViewFlipper(controller -> mView.onDensityOrFontScaleChanged());
+    }
 
-        private final KeyguardSecurityContainer mView;
-        private final AdminSecondaryLockScreenController.Factory
-                mAdminSecondaryLockScreenControllerFactory;
-        private final LockPatternUtils mLockPatternUtils;
-        private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-        private final KeyguardSecurityModel mKeyguardSecurityModel;
-        private final MetricsLogger mMetricsLogger;
-        private final UiEventLogger mUiEventLogger;
-        private final KeyguardStateController mKeyguardStateController;
-        private final KeyguardSecurityViewFlipperController mSecurityViewFlipperController;
-        private final ConfigurationController mConfigurationController;
-        private final FalsingCollector mFalsingCollector;
-        private final FalsingManager mFalsingManager;
-        private final GlobalSettings mGlobalSettings;
-        private final FeatureFlags mFeatureFlags;
-        private final UserSwitcherController mUserSwitcherController;
-        private final SessionTracker mSessionTracker;
-        private final Optional<SidefpsController> mSidefpsController;
+    /**
+     * Reinflate the view flipper child view.
+     */
+    public void reinflateViewFlipper(
+            KeyguardSecurityViewFlipperController.OnViewInflatedCallback onViewInflatedListener) {
+        mSecurityViewFlipperController.clearViews();
+        mSecurityViewFlipperController.asynchronouslyInflateView(mCurrentSecurityMode,
+                mKeyguardSecurityCallback, onViewInflatedListener);
+    }
 
-        @Inject
-        Factory(KeyguardSecurityContainer view,
-                AdminSecondaryLockScreenController.Factory
-                        adminSecondaryLockScreenControllerFactory,
-                LockPatternUtils lockPatternUtils,
-                KeyguardUpdateMonitor keyguardUpdateMonitor,
-                KeyguardSecurityModel keyguardSecurityModel,
-                MetricsLogger metricsLogger,
-                UiEventLogger uiEventLogger,
-                KeyguardStateController keyguardStateController,
-                KeyguardSecurityViewFlipperController securityViewFlipperController,
-                ConfigurationController configurationController,
-                FalsingCollector falsingCollector,
-                FalsingManager falsingManager,
-                UserSwitcherController userSwitcherController,
-                FeatureFlags featureFlags,
-                GlobalSettings globalSettings,
-                SessionTracker sessionTracker,
-                Optional<SidefpsController> sidefpsController) {
-            mView = view;
-            mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
-            mLockPatternUtils = lockPatternUtils;
-            mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-            mKeyguardSecurityModel = keyguardSecurityModel;
-            mMetricsLogger = metricsLogger;
-            mUiEventLogger = uiEventLogger;
-            mKeyguardStateController = keyguardStateController;
-            mSecurityViewFlipperController = securityViewFlipperController;
-            mConfigurationController = configurationController;
-            mFalsingCollector = falsingCollector;
-            mFalsingManager = falsingManager;
-            mFeatureFlags = featureFlags;
-            mGlobalSettings = globalSettings;
-            mUserSwitcherController = userSwitcherController;
-            mSessionTracker = sessionTracker;
-            mSidefpsController = sidefpsController;
-        }
-
-        public KeyguardSecurityContainerController create(
-                SecurityCallback securityCallback) {
-            return new KeyguardSecurityContainerController(mView,
-                    mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
-                    mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
-                    mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
-                    mConfigurationController, mFalsingCollector, mFalsingManager,
-                    mUserSwitcherController, mFeatureFlags, mGlobalSettings, mSessionTracker,
-                    mSidefpsController);
-        }
+    /**
+     * Fades and translates in/out the security screen.
+     * Fades in as expansion approaches 0.
+     * Animation duration is between 0.33f and 0.67f of panel expansion fraction.
+     *
+     * @param fraction amount of the screen that should show.
+     */
+    public void setExpansion(float fraction) {
+        float scaledFraction = BouncerPanelExpansionCalculator.showBouncerProgress(fraction);
+        setAlpha(MathUtils.constrain(1 - scaledFraction, 0f, 1f));
+        mView.setTranslationY(scaledFraction * mTranslationY);
     }
 }

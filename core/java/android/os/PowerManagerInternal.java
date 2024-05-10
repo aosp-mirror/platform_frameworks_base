@@ -315,6 +315,13 @@ public abstract class PowerManagerInternal {
     public static final int MODE_DISPLAY_INACTIVE = 9;
 
     /**
+     * Mode: It indicates that display is changing layout due to rotation or fold
+     * unfold behavior.
+     * Defined in hardware/interfaces/power/aidl/android/hardware/power/Mode.aidl
+     */
+    public static final int MODE_DISPLAY_CHANGE = 17;
+
+    /**
      * SetPowerMode() is called to enable/disable specific hint mode, which
      * may result in adjustment of power/performance parameters of the
      * cpufreq governor and other controls on device side.
@@ -335,4 +342,16 @@ public abstract class PowerManagerInternal {
 
     /** Allows power button to intercept a power key button press. */
     public abstract boolean interceptPowerKeyDown(KeyEvent event);
+
+    /**
+     * Internal version of {@link android.os.PowerManager#nap} which allows for napping while the
+     * device is not awake.
+     */
+    public abstract void nap(long eventTime, boolean allowWake);
+
+    /**
+     * Returns true if ambient display is suppressed by any app with any token. This method will
+     * return false if ambient display is not available.
+     */
+    public abstract boolean isAmbientDisplaySuppressed();
 }

@@ -17,17 +17,29 @@
 #ifndef AAPT_COMPILE_PSEUDOLOCALEGENERATOR_H
 #define AAPT_COMPILE_PSEUDOLOCALEGENERATOR_H
 
-#include "StringPool.h"
+#include "androidfw/StringPool.h"
 #include "compile/Pseudolocalizer.h"
 #include "process/IResourceTableConsumer.h"
 
 namespace aapt {
 
-std::unique_ptr<StyledString> PseudolocalizeStyledString(
-    StyledString* string, Pseudolocalizer::Method method, StringPool* pool);
+std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
+                                                         Pseudolocalizer::Method method,
+                                                         android::StringPool* pool);
 
-struct PseudolocaleGenerator : public IResourceTableConsumer {
-  bool Consume(IAaptContext* context, ResourceTable* table) override;
+class PseudolocaleGenerator : public IResourceTableConsumer {
+ public:
+  explicit PseudolocaleGenerator(std::string grammatical_gender_values,
+                                 std::string grammatical_gender_ratio)
+      : grammatical_gender_values_(std::move(grammatical_gender_values)),
+        grammatical_gender_ratio_(std::move(grammatical_gender_ratio)) {
+  }
+
+  bool Consume(IAaptContext* context, ResourceTable* table);
+
+ private:
+  std::string grammatical_gender_values_;
+  std::string grammatical_gender_ratio_;
 };
 
 }  // namespace aapt

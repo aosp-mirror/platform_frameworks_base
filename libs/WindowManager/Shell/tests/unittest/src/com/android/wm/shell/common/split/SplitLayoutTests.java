@@ -16,7 +16,12 @@
 
 package com.android.wm.shell.common.split;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
+import static com.android.wm.shell.common.split.SplitScreenConstants.SNAP_TO_START_AND_DISMISS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -25,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
@@ -36,10 +42,10 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 
 import org.junit.Before;
@@ -56,6 +62,7 @@ import org.mockito.MockitoAnnotations;
 public class SplitLayoutTests extends ShellTestCase {
     @Mock SplitLayout.SplitLayoutHandler mSplitLayoutHandler;
     @Mock SplitWindowManager.ParentContainerCallbacks mCallbacks;
+    @Mock DisplayController mDisplayController;
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock WindowContainerTransaction mWct;
@@ -71,6 +78,7 @@ public class SplitLayoutTests extends ShellTestCase {
                 getConfiguration(),
                 mSplitLayoutHandler,
                 mCallbacks,
+                mDisplayController,
                 mDisplayImeController,
                 mTaskOrganizer,
                 SplitLayout.PARALLAX_NONE));
@@ -91,12 +99,25 @@ public class SplitLayoutTests extends ShellTestCase {
         // Verify updateConfiguration returns true if the root bounds changed.
         config.windowConfiguration.setBounds(new Rect(0, 0, 2160, 1080));
         assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration returns true if the orientation changed.
+        config.orientation = ORIENTATION_LANDSCAPE;
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration returns true if the density changed.
+        config.densityDpi = 123;
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration checks the current DisplayLayout
+        verify(mDisplayController, times(5)) // init * 1 + updateConfiguration * 4
+                .getDisplayLayout(anyInt());
     }
 
     @Test
     public void testUpdateDivideBounds() {
         mSplitLayout.updateDivideBounds(anyInt());
-        verify(mSplitLayoutHandler).onLayoutSizeChanging(any(SplitLayout.class));
+        verify(mSplitLayoutHandler).onLayoutSizeChanging(any(SplitLayout.class), anyInt(),
+                anyInt());
     }
 
     @Test
@@ -113,7 +134,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Test
     public void testSetDivideRatio() {
         mSplitLayout.setDividePosition(200, false /* applyLayoutChange */);
-        mSplitLayout.setDivideRatio(0.5f);
+        mSplitLayout.setDivideRatio(SNAP_TO_50_50);
         assertThat(mSplitLayout.getDividePosition()).isEqualTo(
                 mSplitLayout.mDividerSnapAlgorithm.getMiddleTarget().position);
     }
@@ -129,9 +150,9 @@ public class SplitLayoutTests extends ShellTestCase {
     public void testSnapToDismissStart() {
         // verify it callbacks properly when the snap target indicates dismissing split.
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
+                SNAP_TO_START_AND_DISMISS);
 
-        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
+        mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(false), anyInt());
     }
@@ -141,9 +162,9 @@ public class SplitLayoutTests extends ShellTestCase {
     public void testSnapToDismissEnd() {
         // verify it callbacks properly when the snap target indicates dismissing split.
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
-                DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END);
+                SNAP_TO_END_AND_DISMISS);
 
-        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
+        mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true), anyInt());
     }
@@ -156,6 +177,14 @@ public class SplitLayoutTests extends ShellTestCase {
 
         verify(mWct).setSmallestScreenWidthDp(eq(task1.token), anyInt());
         verify(mWct).setSmallestScreenWidthDp(eq(task2.token), anyInt());
+    }
+
+    @Test
+    public void testRoateTo_checksDisplayLayout() {
+        mSplitLayout.rotateTo(90);
+
+        verify(mDisplayController, times(2)) // init * 1 + rotateTo * 1
+                .getDisplayLayout(anyInt());
     }
 
     private void waitDividerFlingFinished() {

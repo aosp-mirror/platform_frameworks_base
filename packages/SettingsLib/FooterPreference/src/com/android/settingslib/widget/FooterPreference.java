@@ -30,6 +30,8 @@ import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.preference.footer.R;
+
 /**
  * A custom preference acting as "footer" of a page. It has a field for icon and text. It is added
  * to screen as the last preference.
@@ -47,7 +49,7 @@ public class FooterPreference extends Preference {
     private FooterLearnMoreSpan mLearnMoreSpan;
 
     public FooterPreference(Context context, AttributeSet attrs) {
-        super(context, attrs, R.attr.footerPreferenceStyle);
+        super(context, attrs, com.android.settingslib.widget.theme.R.attr.footerPreferenceStyle);
         init();
     }
 
@@ -59,32 +61,36 @@ public class FooterPreference extends Preference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         TextView title = holder.itemView.findViewById(android.R.id.title);
-        if (!TextUtils.isEmpty(mContentDescription)) {
+        if (title != null && !TextUtils.isEmpty(mContentDescription)) {
             title.setContentDescription(mContentDescription);
         }
 
         TextView learnMore = holder.itemView.findViewById(R.id.settingslib_learn_more);
-        if (learnMore != null && mLearnMoreListener != null) {
-            learnMore.setVisibility(View.VISIBLE);
-            if (TextUtils.isEmpty(mLearnMoreText)) {
-                mLearnMoreText = learnMore.getText();
+        if (learnMore != null) {
+            if (mLearnMoreListener != null) {
+                learnMore.setVisibility(View.VISIBLE);
+                if (TextUtils.isEmpty(mLearnMoreText)) {
+                    mLearnMoreText = learnMore.getText();
+                } else {
+                    learnMore.setText(mLearnMoreText);
+                }
+                SpannableString learnMoreText = new SpannableString(mLearnMoreText);
+                if (mLearnMoreSpan != null) {
+                    learnMoreText.removeSpan(mLearnMoreSpan);
+                }
+                mLearnMoreSpan = new FooterLearnMoreSpan(mLearnMoreListener);
+                learnMoreText.setSpan(mLearnMoreSpan, 0,
+                        learnMoreText.length(), 0);
+                learnMore.setText(learnMoreText);
             } else {
-                learnMore.setText(mLearnMoreText);
+                learnMore.setVisibility(View.GONE);
             }
-            SpannableString learnMoreText = new SpannableString(mLearnMoreText);
-            if (mLearnMoreSpan != null) {
-                learnMoreText.removeSpan(mLearnMoreSpan);
-            }
-            mLearnMoreSpan = new FooterLearnMoreSpan(mLearnMoreListener);
-            learnMoreText.setSpan(mLearnMoreSpan, 0,
-                    learnMoreText.length(), 0);
-            learnMore.setText(learnMoreText);
-        } else {
-            learnMore.setVisibility(View.GONE);
         }
 
         View icon = holder.itemView.findViewById(R.id.icon_frame);
-        icon.setVisibility(mIconVisibility);
+        if (icon != null) {
+            icon.setVisibility(mIconVisibility);
+        }
     }
 
     @Override

@@ -13,13 +13,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/controls_more_item_text"
     style="@style/Control.MenuItem"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="start"
+    android:layout_height="@dimen/control_menu_item_height"
+    android:layout_gravity="center_vertical"
+    android:background="@drawable/controls_popup_item_background"
     android:paddingStart="@dimen/control_menu_horizontal_padding"
     android:paddingEnd="@dimen/control_menu_horizontal_padding"
-    android:textDirection="locale"/>
-
+    android:textDirection="locale"
+    android:textSize="@dimen/control_item_text_size"
+    tools:fontFamily="@null"
+    tools:text="@tools:sample/lorem/random" />

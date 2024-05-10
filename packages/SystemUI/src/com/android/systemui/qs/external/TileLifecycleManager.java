@@ -15,6 +15,10 @@
  */
 package com.android.systemui.qs.external;
 
+import static android.service.quicksettings.TileService.START_ACTIVITY_NEEDS_PENDING_INTENT;
+
+import android.app.ActivityManager;
+import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,22 +36,26 @@ import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.TileService;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import dagger.assisted.Assisted;
-import dagger.assisted.AssistedFactory;
-import dagger.assisted.AssistedInject;
 
 /**
  * Manages the lifecycle of a TileService.
@@ -75,7 +83,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
 
     // Bind retry control.
     private static final int MAX_BIND_RETRIES = 5;
-    private static final int DEFAULT_BIND_RETRY_DELAY = 1000;
+    private static final long DEFAULT_BIND_RETRY_DELAY = 5 * DateUtils.SECOND_IN_MILLIS;
+    private static final long LOW_MEMORY_BIND_RETRY_DELAY = 20 * DateUtils.SECOND_IN_MILLIS;
 
     // Shared prefs that hold tile lifecycle info.
     private static final String TILES = "tiles_prefs";
@@ -84,9 +93,11 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final Handler mHandler;
     private final Intent mIntent;
     private final UserHandle mUser;
+    private final DelayableExecutor mExecutor;
     private final IBinder mToken = new Binder();
     private final PackageManagerAdapter mPackageManagerAdapter;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final ActivityManager mActivityManager;
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
     @Nullable
@@ -95,35 +106,41 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private IBinder mClickBinder;
 
     private int mBindTryCount;
-    private int mBindRetryDelay = DEFAULT_BIND_RETRY_DELAY;
-    private boolean mBound;
+    private long mBindRetryDelay = DEFAULT_BIND_RETRY_DELAY;
+    private AtomicBoolean isDeathRebindScheduled = new AtomicBoolean(false);
+    private AtomicBoolean mBound = new AtomicBoolean(false);
     private AtomicBoolean mPackageReceiverRegistered = new AtomicBoolean(false);
     private AtomicBoolean mUserReceiverRegistered = new AtomicBoolean(false);
-    private boolean mUnbindImmediate;
+    private AtomicBoolean mUnbindImmediate = new AtomicBoolean(false);
     @Nullable
     private TileChangeListener mChangeListener;
     // Return value from bindServiceAsUser, determines whether safe to call unbind.
-    private boolean mIsBound;
+    private AtomicBoolean mIsBound = new AtomicBoolean(false);
 
     @AssistedInject
     TileLifecycleManager(@Main Handler handler, Context context, IQSService service,
             PackageManagerAdapter packageManagerAdapter, BroadcastDispatcher broadcastDispatcher,
-            @Assisted Intent intent, @Assisted UserHandle user) {
+            @Assisted Intent intent, @Assisted UserHandle user, ActivityManager activityManager,
+            @Background DelayableExecutor executor) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
         mIntent.putExtra(TileService.EXTRA_SERVICE, service.asBinder());
         mIntent.putExtra(TileService.EXTRA_TOKEN, mToken);
         mUser = user;
+        mExecutor = executor;
         mPackageManagerAdapter = packageManagerAdapter;
         mBroadcastDispatcher = broadcastDispatcher;
+        mActivityManager = activityManager;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
 
     /** Injectable factory for TileLifecycleManager. */
     @AssistedFactory
     public interface Factory {
-        /** */
+        /**
+         *
+         */
         TileLifecycleManager create(Intent intent, UserHandle userHandle);
     }
 
@@ -141,10 +158,6 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
     }
 
-    public void setBindRetryDelay(int delayMs) {
-        mBindRetryDelay = delayMs;
-    }
-
     public boolean isActiveTile() {
         try {
             ServiceInfo info = mPackageManagerAdapter.getServiceInfo(mIntent.getComponent(),
@@ -160,7 +173,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
      * Determines whether the associated TileService is a Boolean Tile.
      *
      * @return true if {@link TileService#META_DATA_TOGGLEABLE_TILE} is set to {@code true} for this
-     *         tile
+     * tile
      * @see TileService#META_DATA_TOGGLEABLE_TILE
      */
     public boolean isToggleableTile() {
@@ -178,18 +191,21 @@ public class TileLifecycleManager extends BroadcastReceiver implements
      * Binds just long enough to send any queued messages, then unbinds.
      */
     public void flushMessagesAndUnbind() {
-        mUnbindImmediate = true;
-        setBindService(true);
+        mExecutor.execute(() -> {
+            mUnbindImmediate.set(true);
+            setBindService(true);
+        });
     }
 
-    public void setBindService(boolean bind) {
-        if (mBound && mUnbindImmediate) {
+    @WorkerThread
+    private void setBindService(boolean bind) {
+        if (mBound.get() && mUnbindImmediate.get()) {
             // If we are already bound and expecting to unbind, this means we should stay bound
             // because something else wants to hold the connection open.
-            mUnbindImmediate = false;
+            mUnbindImmediate.set(false);
             return;
         }
-        mBound = bind;
+        mBound.set(bind);
         if (bind) {
             if (mBindTryCount == MAX_BIND_RETRIES) {
                 // Too many failures, give up on this tile until an update.
@@ -202,34 +218,50 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             if (DEBUG) Log.d(TAG, "Binding service " + mIntent + " " + mUser);
             mBindTryCount++;
             try {
-                mIsBound = mContext.bindServiceAsUser(mIntent, this,
-                        Context.BIND_AUTO_CREATE
-                                | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
-                                | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS
-                                | Context.BIND_WAIVE_PRIORITY,
-                        mUser);
-                if (!mIsBound) {
+                mIsBound.set(bindServices());
+                if (!mIsBound.get()) {
                     mContext.unbindService(this);
                 }
             } catch (SecurityException e) {
                 Log.e(TAG, "Failed to bind to service", e);
-                mIsBound = false;
+                mIsBound.set(false);
             }
         } else {
             if (DEBUG) Log.d(TAG, "Unbinding service " + mIntent + " " + mUser);
             // Give it another chance next time it needs to be bound, out of kindness.
             mBindTryCount = 0;
             freeWrapper();
-            if (mIsBound) {
+            if (mIsBound.get()) {
                 try {
                     mContext.unbindService(this);
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to unbind service "
                             + mIntent.getComponent().flattenToShortString(), e);
                 }
-                mIsBound = false;
+                mIsBound.set(false);
             }
         }
+    }
+
+    /**
+     * Binds or unbinds to IQSService
+     */
+    public void executeSetBindService(boolean bind) {
+        mExecutor.execute(() -> setBindService(bind));
+    }
+
+    private boolean bindServices() {
+        String packageName = mIntent.getComponent().getPackageName();
+        int flags = Context.BIND_AUTO_CREATE
+                | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                | Context.BIND_WAIVE_PRIORITY;
+        if (CompatChanges.isChangeEnabled(START_ACTIVITY_NEEDS_PENDING_INTENT, packageName,
+                mUser)) {
+            return mContext.bindServiceAsUser(mIntent, this, flags, mUser);
+        }
+        return mContext.bindServiceAsUser(mIntent, this,
+                flags | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS,
+                mUser);
     }
 
     @Override
@@ -244,6 +276,11 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
         mWrapper = wrapper;
         handlePendingMessages();
+    }
+
+    @Override
+    public void onNullBinding(ComponentName name) {
+        executeSetBindService(false);
     }
 
     @Override
@@ -294,10 +331,12 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             }
             onTileRemoved();
         }
-        if (mUnbindImmediate) {
-            mUnbindImmediate = false;
-            setBindService(false);
-        }
+        mExecutor.execute(() -> {
+            if (mUnbindImmediate.get()) {
+                mUnbindImmediate.set(false);
+                setBindService(false);
+            }
+        });
     }
 
     public void handleDestroy() {
@@ -312,20 +351,36 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         if (mWrapper == null) return;
         freeWrapper();
         // Clearly not bound anymore
-        mIsBound = false;
-        if (!mBound) return;
+        mIsBound.set(false);
+        if (!mBound.get()) return;
         if (DEBUG) Log.d(TAG, "handleDeath");
         if (checkComponentState()) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (mBound) {
-                        // Retry binding.
-                        setBindService(true);
-                    }
-                }
-            }, mBindRetryDelay);
+            if (isDeathRebindScheduled.compareAndSet(false, true)) {
+                mExecutor.executeDelayed(() -> {
+                    setBindService(true);
+                    isDeathRebindScheduled.set(false);
+                }, getRebindDelay());
+            }
         }
+    }
+
+    /**
+     * @return the delay to automatically rebind after a service died. It provides a longer delay if
+     * the device is a low memory state because the service is likely to get killed again by the
+     * system. In this case we want to rebind later and not to cause a loop of a frequent rebinds.
+     */
+    private long getRebindDelay() {
+        final ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
+        mActivityManager.getMemoryInfo(info);
+
+        final long delay;
+        if (info.lowMemory) {
+            delay = LOW_MEMORY_BIND_RETRY_DELAY;
+        } else {
+            delay = mBindRetryDelay;
+        }
+        Log.i(TAG, "Rebinding with a delay=" + delay);
+        return delay;
     }
 
     private boolean checkComponentState() {
@@ -387,11 +442,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             mChangeListener.onTileChanged(mIntent.getComponent());
         }
         stopPackageListening();
-        if (mBound) {
-            // Trying to bind again will check the state of the package before bothering to bind.
-            if (DEBUG) Log.d(TAG, "Trying to rebind");
-            setBindService(true);
-        }
+        mExecutor.execute(() -> {
+            if (mBound.get()) {
+                // Trying to bind again will check the state of the package before bothering to
+                // bind.
+                if (DEBUG) Log.d(TAG, "Trying to rebind");
+                setBindService(true);
+            }
+
+        });
     }
 
     private boolean isComponentAvailable() {
@@ -413,8 +472,11 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             mPackageManagerAdapter.getPackageInfoAsUser(packageName, 0, mUser.getIdentifier());
             return true;
         } catch (PackageManager.NameNotFoundException e) {
-            if (DEBUG) Log.d(TAG, "Package not available: " + packageName, e);
-            else Log.d(TAG, "Package not available: " + packageName);
+            if (DEBUG) {
+                Log.d(TAG, "Package not available: " + packageName, e);
+            } else {
+                Log.d(TAG, "Package not available: " + packageName);
+            }
         }
         return false;
     }

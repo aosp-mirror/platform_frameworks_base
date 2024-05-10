@@ -53,8 +53,14 @@ public interface PackageStateWrite {
     PackageStateWrite setLoadingProgress(float progress);
 
     @NonNull
+    PackageStateWrite setLoadingCompletedTime(long loadingCompletedTime);
+
+    @NonNull
     PackageStateWrite setOverrideSeInfo(@Nullable String newSeInfo);
 
     @NonNull
-    PackageStateWrite setInstaller(@NonNull String installerPackageName);
+    PackageStateWrite setInstaller(@Nullable String installerPackageName, int installerPackageUid);
+
+    @NonNull
+    PackageStateWrite setUpdateOwner(@Nullable String updateOwnerPackageName);
 }

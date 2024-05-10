@@ -18,28 +18,41 @@ package {
     // all of the 'license_kinds' from "frameworks_base_license"
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
+    default_team: "trendy_team_aaos_framework",
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
 android_test {
     name: "BroadcastRadioTests",
+    srcs: ["src/**/*.java"],
     privileged: true,
     certificate: "platform",
     // TODO(b/13282254): uncomment when b/13282254 is fixed
     // sdk_version: "current"
     platform_apis: true,
-    static_libs: [
-        "compatibility-device-util-axt",
-        "androidx.test.rules",
-        "testng",
-        "services.core",
-    ],
-    libs: ["android.test.base"],
-    srcs: ["src/**/*.java"],
     dex_preopt: {
         enabled: false,
     },
     optimize: {
         enabled: false,
     },
+    static_libs: [
+        "services.core",
+        "androidx.test.rules",
+        "truth",
+        "testng",
+        "android.hardware.radio.flags-aconfig-java",
+        "flag-junit",
+        "mockito-target-extended",
+    ],
+    libs: ["android.test.base"],
+    test_suites: [
+        "general-tests",
+        "automotive-general-tests",
+    ],
+    // mockito-target-inline dependency
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
 }

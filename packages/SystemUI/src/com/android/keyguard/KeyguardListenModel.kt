@@ -1,86 +1,32 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.keyguard
 
-import android.annotation.CurrentTimeMillisLong
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /** Verbose logging for various keyguard listening states. */
 sealed class KeyguardListenModel {
     /** Timestamp of the state change. */
-    abstract val timeMillis: Long
+    abstract var timeMillis: Long
     /** Current user. */
-    abstract val userId: Int
+    abstract var userId: Int
     /** If keyguard is listening for the modality represented by this model. */
-    abstract val listening: Boolean
+    abstract var listening: Boolean
 }
 
-/**
- * Verbose debug information associated with [KeyguardUpdateMonitor.shouldListenForFingerprint].
- */
-data class KeyguardFingerprintListenModel(
-    @CurrentTimeMillisLong override val timeMillis: Long,
-    override val userId: Int,
-    override val listening: Boolean,
-    // keep sorted
-    val biometricEnabledForUser: Boolean,
-    val bouncerIsOrWillShow: Boolean,
-    val canSkipBouncer: Boolean,
-    val credentialAttempted: Boolean,
-    val deviceInteractive: Boolean,
-    val dreaming: Boolean,
-    val encryptedOrLockdown: Boolean,
-    val fingerprintDisabled: Boolean,
-    val fingerprintLockedOut: Boolean,
-    val goingToSleep: Boolean,
-    val keyguardGoingAway: Boolean,
-    val keyguardIsVisible: Boolean,
-    val keyguardOccluded: Boolean,
-    val occludingAppRequestingFp: Boolean,
-    val primaryUser: Boolean,
-    val shouldListenForFingerprintAssistant: Boolean,
-    val switchingUser: Boolean,
-    val udfps: Boolean,
-    val userDoesNotHaveTrust: Boolean
-) : KeyguardListenModel()
-/**
- * Verbose debug information associated with [KeyguardUpdateMonitor.shouldListenForFace].
- */
-data class KeyguardFaceListenModel(
-    @CurrentTimeMillisLong override val timeMillis: Long,
-    override val userId: Int,
-    override val listening: Boolean,
-    // keep sorted
-    val authInterruptActive: Boolean,
-    val becauseCannotSkipBouncer: Boolean,
-    val biometricSettingEnabledForUser: Boolean,
-    val bouncerFullyShown: Boolean,
-    val faceAuthenticated: Boolean,
-    val faceDisabled: Boolean,
-    val faceLockedOut: Boolean,
-    val fpLockedOut: Boolean,
-    val goingToSleep: Boolean,
-    val keyguardAwake: Boolean,
-    val keyguardGoingAway: Boolean,
-    val listeningForFaceAssistant: Boolean,
-    val occludingAppRequestingFaceAuth: Boolean,
-    val primaryUser: Boolean,
-    val scanningAllowedByStrongAuth: Boolean,
-    val secureCameraLaunched: Boolean,
-    val switchingUser: Boolean,
-    val udfpsBouncerShowing: Boolean,
-) : KeyguardListenModel()
-/**
- * Verbose debug information associated with [KeyguardUpdateMonitor.shouldTriggerActiveUnlock].
- */
-data class KeyguardActiveUnlockModel(
-    @CurrentTimeMillisLong override val timeMillis: Long,
-    override val userId: Int,
-    override val listening: Boolean,
-    // keep sorted
-    val awakeKeyguard: Boolean,
-    val authInterruptActive: Boolean,
-    val encryptedOrTimedOut: Boolean,
-    val fpLockout: Boolean,
-    val lockDown: Boolean,
-    val switchingUser: Boolean,
-    val triggerActiveUnlockForAssistant: Boolean,
-    val userCanDismissLockScreen: Boolean
-) : KeyguardListenModel()
+val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)

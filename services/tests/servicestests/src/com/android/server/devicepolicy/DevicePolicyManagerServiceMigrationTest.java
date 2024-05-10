@@ -18,7 +18,6 @@ package com.android.server.devicepolicy;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.devicepolicy.DpmTestUtils.writeInputStreamToFile;
-import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -49,6 +48,7 @@ import com.android.frameworks.servicestests.R;
 import com.android.server.SystemService;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -59,7 +59,6 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
-    private static final String USER_TYPE_EMPTY = "";
     private static final int COPE_ADMIN1_APP_ID = 123;
     private static final int COPE_ANOTHER_ADMIN_APP_ID = 125;
     private static final int COPE_PROFILE_USER_ID = 11;
@@ -81,10 +80,12 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
+        when(getServices().userManagerInternal.getUserIds()).thenReturn(new int[]{0});
     }
 
     // Test setting default restrictions for managed profile.
     @Test
+    @Ignore("b/277916462")
     public void testMigration_managedProfileOwner() throws Exception {
         // Create a managed profile user.
         final File user10dir = getServices().addUser(10, 0,
@@ -156,6 +157,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/269249457")
     public void testCompMigrationAffiliated() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.R);
@@ -219,21 +221,21 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.R);
 
         // Pretend some packages are suspended.
-        when(getServices().packageManagerInternal.isSuspendingAnyPackages(
-                PLATFORM_PACKAGE_NAME, USER_SYSTEM)).thenReturn(true);
+        when(getServices().packageManagerInternal.isAdminSuspendingAnyPackages(
+                USER_SYSTEM)).thenReturn(true);
 
         final DevicePolicyManagerServiceTestable dpms = bootDpmsUp();
 
         verify(getServices().packageManagerInternal, never())
-                .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, USER_SYSTEM);
+                .unsuspendAdminSuspendedPackages(USER_SYSTEM);
 
         sendBroadcastWithUser(dpms, Intent.ACTION_USER_STARTED, USER_SYSTEM);
 
         // Verify that actual package suspension state is not modified after user start
         verify(getServices().packageManagerInternal, never())
-                .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, USER_SYSTEM);
+                .unsuspendAdminSuspendedPackages(USER_SYSTEM);
         verify(getServices().ipackageManager, never()).setPackagesSuspendedAsUser(
-                any(), anyBoolean(), any(), any(), any(), any(), anyInt());
+                any(), anyBoolean(), any(), any(), any(), anyInt(), any(), anyInt(), anyInt());
 
         final DpmMockContext poContext = new DpmMockContext(getServices(), mRealTestContext);
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);
@@ -252,14 +254,14 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.Q);
 
         // Pretend some packages are suspended.
-        when(getServices().packageManagerInternal.isSuspendingAnyPackages(
-                PLATFORM_PACKAGE_NAME, USER_SYSTEM)).thenReturn(true);
+        when(getServices().packageManagerInternal.isAdminSuspendingAnyPackages(
+                USER_SYSTEM)).thenReturn(true);
 
         final DevicePolicyManagerServiceTestable dpms = bootDpmsUp();
 
         // Verify that apps get unsuspended.
         verify(getServices().packageManagerInternal)
-                .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, USER_SYSTEM);
+                .unsuspendAdminSuspendedPackages(USER_SYSTEM);
 
         final DpmMockContext poContext = new DpmMockContext(getServices(), mRealTestContext);
         poContext.binder.callingUid = UserHandle.getUid(COPE_PROFILE_USER_ID, COPE_ADMIN1_APP_ID);

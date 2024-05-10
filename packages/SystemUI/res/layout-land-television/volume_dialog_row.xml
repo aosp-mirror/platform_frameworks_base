@@ -13,6 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- TODO(b/289498394) move this to the TvSystemUI target -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:tag="row"
@@ -78,7 +79,4 @@
             android:tint="@color/accent_tint_color_selector"
             android:soundEffectsEnabled="false" />
     </LinearLayout>
-
-    <include layout="@layout/volume_dnd_icon"/>
-
 </FrameLayout>

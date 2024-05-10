@@ -1,0 +1,104 @@
+// Signature format: 2.0
+package android.location {
+
+  public final class GnssClock implements android.os.Parcelable {
+    ctor public GnssClock();
+    method public void reset();
+    method public void resetBiasNanos();
+    method public void resetBiasUncertaintyNanos();
+    method public void resetDriftNanosPerSecond();
+    method public void resetDriftUncertaintyNanosPerSecond();
+    method public void resetElapsedRealtimeNanos();
+    method public void resetElapsedRealtimeUncertaintyNanos();
+    method public void resetFullBiasNanos();
+    method public void resetLeapSecond();
+    method public void resetReferenceCarrierFrequencyHzForIsb();
+    method public void resetReferenceCodeTypeForIsb();
+    method public void resetReferenceConstellationTypeForIsb();
+    method public void resetTimeUncertaintyNanos();
+    method public void set(android.location.GnssClock);
+    method public void setBiasNanos(double);
+    method public void setBiasUncertaintyNanos(@FloatRange(from=0.0f) double);
+    method public void setDriftNanosPerSecond(double);
+    method public void setDriftUncertaintyNanosPerSecond(@FloatRange(from=0.0f) double);
+    method public void setElapsedRealtimeNanos(long);
+    method public void setElapsedRealtimeUncertaintyNanos(@FloatRange(from=0.0f) double);
+    method public void setFullBiasNanos(long);
+    method public void setHardwareClockDiscontinuityCount(int);
+    method public void setLeapSecond(int);
+    method public void setReferenceCarrierFrequencyHzForIsb(@FloatRange(from=0.0) double);
+    method public void setReferenceCodeTypeForIsb(@NonNull String);
+    method public void setReferenceConstellationTypeForIsb(int);
+    method public void setTimeNanos(long);
+    method public void setTimeUncertaintyNanos(@FloatRange(from=0.0f) double);
+  }
+
+  public final class GnssMeasurement implements android.os.Parcelable {
+    ctor public GnssMeasurement();
+    method public void reset();
+    method public void resetAutomaticGainControlLevel();
+    method public void resetBasebandCn0DbHz();
+    method @Deprecated public void resetCarrierCycles();
+    method public void resetCarrierFrequencyHz();
+    method @Deprecated public void resetCarrierPhase();
+    method @Deprecated public void resetCarrierPhaseUncertainty();
+    method public void resetCodeType();
+    method public void resetCorrelationVectors();
+    method public void resetFullInterSignalBiasNanos();
+    method public void resetFullInterSignalBiasUncertaintyNanos();
+    method public void resetSatelliteInterSignalBiasNanos();
+    method public void resetSatelliteInterSignalBiasUncertaintyNanos();
+    method public void resetSatellitePvt();
+    method public void resetSnrInDb();
+    method public void set(android.location.GnssMeasurement);
+    method public void setAccumulatedDeltaRangeMeters(double);
+    method public void setAccumulatedDeltaRangeState(int);
+    method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
+    method @Deprecated public void setAutomaticGainControlLevelInDb(double);
+    method public void setBasebandCn0DbHz(double);
+    method @Deprecated public void setCarrierCycles(long);
+    method public void setCarrierFrequencyHz(float);
+    method @Deprecated public void setCarrierPhase(double);
+    method @Deprecated public void setCarrierPhaseUncertainty(double);
+    method public void setCn0DbHz(double);
+    method public void setCodeType(@NonNull String);
+    method public void setConstellationType(int);
+    method public void setCorrelationVectors(@Nullable java.util.Collection<android.location.CorrelationVector>);
+    method public void setFullInterSignalBiasNanos(double);
+    method public void setFullInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
+    method public void setMultipathIndicator(int);
+    method public void setPseudorangeRateMetersPerSecond(double);
+    method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
+    method public void setReceivedSvTimeNanos(long);
+    method public void setReceivedSvTimeUncertaintyNanos(long);
+    method public void setSatelliteInterSignalBiasNanos(double);
+    method public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
+    method public void setSatellitePvt(@Nullable android.location.SatellitePvt);
+    method public void setSnrInDb(double);
+    method public void setState(int);
+    method public void setSvid(int);
+    method public void setTimeOffsetNanos(double);
+    field public static final int ADR_STATE_ALL = 31; // 0x1f
+  }
+
+  public final class GnssNavigationMessage implements android.os.Parcelable {
+    ctor public GnssNavigationMessage();
+    method public void reset();
+    method public void set(android.location.GnssNavigationMessage);
+    method public void setData(byte[]);
+    method public void setMessageId(@IntRange(from=0xffffffff, to=120) int);
+    method public void setStatus(int);
+    method public void setSubmessageId(@IntRange(from=1) int);
+    method public void setSvid(@IntRange(from=1, to=200) int);
+    method public void setType(int);
+  }
+
+  public class LocationManager {
+    method @NonNull public String[] getBackgroundThrottlingWhitelist();
+    method @NonNull public android.os.PackageTagsList getIgnoreSettingsAllowlist();
+    method @Deprecated @NonNull public String[] getIgnoreSettingsWhitelist();
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public java.util.List<java.lang.String> getProviderPackages(@NonNull String);
+  }
+
+}
+

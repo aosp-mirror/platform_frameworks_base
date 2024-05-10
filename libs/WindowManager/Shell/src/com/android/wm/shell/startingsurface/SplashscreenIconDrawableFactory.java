@@ -62,7 +62,7 @@ public class SplashscreenIconDrawableFactory {
      */
     static Drawable[] makeIconDrawable(@ColorInt int backgroundColor, @ColorInt int themeColor,
             @NonNull Drawable foregroundDrawable, int srcIconSize, int iconSize,
-            boolean loadInDetail, Handler splashscreenWorkerHandler) {
+            boolean loadInDetail, Handler preDrawHandler) {
         Drawable foreground;
         Drawable background = null;
         boolean drawBackground =
@@ -74,13 +74,13 @@ public class SplashscreenIconDrawableFactory {
             // If the icon is Adaptive, we already use the icon background.
             drawBackground = false;
             foreground = new ImmobileIconDrawable(foregroundDrawable,
-                    srcIconSize, iconSize, loadInDetail, splashscreenWorkerHandler);
+                    srcIconSize, iconSize, loadInDetail, preDrawHandler);
         } else {
             // Adaptive icon don't handle transparency so we draw the background of the adaptive
             // icon with the same color as the window background color instead of using two layers
             foreground = new ImmobileIconDrawable(
                     new AdaptiveForegroundDrawable(foregroundDrawable),
-                    srcIconSize, iconSize, loadInDetail, splashscreenWorkerHandler);
+                    srcIconSize, iconSize, loadInDetail, preDrawHandler);
         }
 
         if (drawBackground) {
@@ -91,9 +91,9 @@ public class SplashscreenIconDrawableFactory {
     }
 
     static Drawable[] makeLegacyIconDrawable(@NonNull Drawable iconDrawable, int srcIconSize,
-            int iconSize, boolean loadInDetail, Handler splashscreenWorkerHandler) {
+            int iconSize, boolean loadInDetail, Handler preDrawHandler) {
         return new Drawable[]{new ImmobileIconDrawable(iconDrawable, srcIconSize, iconSize,
-                loadInDetail, splashscreenWorkerHandler)};
+                loadInDetail, preDrawHandler)};
     }
 
     /**
@@ -107,14 +107,14 @@ public class SplashscreenIconDrawableFactory {
         private Bitmap mIconBitmap;
 
         ImmobileIconDrawable(Drawable drawable, int srcIconSize, int iconSize, boolean loadInDetail,
-                Handler splashscreenWorkerHandler) {
+                Handler preDrawHandler) {
             // This icon has lower density, don't scale it.
             if (loadInDetail) {
-                splashscreenWorkerHandler.post(() -> preDrawIcon(drawable, iconSize));
+                preDrawHandler.post(() -> preDrawIcon(drawable, iconSize));
             } else {
                 final float scale = (float) iconSize / srcIconSize;
                 mMatrix.setScale(scale, scale);
-                splashscreenWorkerHandler.post(() -> preDrawIcon(drawable, srcIconSize));
+                preDrawHandler.post(() -> preDrawIcon(drawable, srcIconSize));
             }
         }
 

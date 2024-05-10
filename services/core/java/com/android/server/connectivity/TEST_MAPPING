@@ -1,0 +1,43 @@
+{
+  "presubmit": [
+      {
+          "name": "FrameworksNetTests",
+          "options": [
+              {
+                  "exclude-annotation": "com.android.testutils.SkipPresubmit"
+              }
+          ],
+          "file_patterns": ["VpnIkeV2Utils\\.java", "VpnProfileStore\\.java"]
+      },
+      {
+          "name":"FrameworksVpnTests",
+          "options": [
+              {
+                "exclude-annotation": "com.android.testutils.SkipPresubmit"
+              }
+          ],
+          "file_patterns":[
+              "Vpn\\.java",
+              "VpnIkeV2Utils\\.java",
+              "VpnProfileStore\\.java"
+          ]
+      }
+  ],
+  "presubmit-large": [
+      {
+          "name": "CtsHostsideNetworkTests",
+          "options": [
+              {
+                "exclude-annotation": "androidx.test.filters.FlakyTest"
+              },
+              {
+                "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+              },
+              {
+                "exclude-annotation": "com.android.testutils.SkipPresubmit"
+              }
+          ],
+        "file_patterns": ["Vpn\\.java", "VpnIkeV2Utils\\.java", "VpnProfileStore\\.java"]
+      }
+  ]
+}

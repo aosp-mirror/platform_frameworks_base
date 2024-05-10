@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.carrier.CarrierIdentifier;
+import android.telephony.SubscriptionInfo;
 import android.telephony.UiccAccessRule;
 import android.text.TextUtils;
 
@@ -42,7 +43,11 @@ import java.util.Objects;
 @SystemApi
 public final class EuiccProfileInfo implements Parcelable {
 
-    /** Profile policy rules (bit mask) */
+    /**
+     * Profile policy rules (bit mask)
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "POLICY_RULE_" }, value = {
             POLICY_RULE_DO_NOT_DISABLE,
@@ -57,7 +62,11 @@ public final class EuiccProfileInfo implements Parcelable {
     /** This profile should be deleted after being disabled. */
     public static final int POLICY_RULE_DELETE_AFTER_DISABLING = 1 << 2;
 
-    /** Class of the profile */
+    /**
+     * Class of the profile
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "PROFILE_CLASS_" }, value = {
             PROFILE_CLASS_TESTING,
@@ -78,7 +87,11 @@ public final class EuiccProfileInfo implements Parcelable {
      */
     public static final int PROFILE_CLASS_UNSET = -1;
 
-    /** State of the profile */
+    /**
+     * State of the profile
+     *
+     * @removed mistakenly exposed previously
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "PROFILE_STATE_" }, value = {
             PROFILE_STATE_DISABLED,
@@ -451,6 +464,8 @@ public final class EuiccProfileInfo implements Parcelable {
                 + mPolicyRules
                 + ", accessRules="
                 + Arrays.toString(mAccessRules)
+                + ", iccid="
+                + SubscriptionInfo.getPrintableId(mIccid)
                 + ")";
     }
 }

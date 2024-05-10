@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "GnssCallbckJni"
+#define LOG_TAG "GnssCallbackJni"
 
 #include "GnssCallback.h"
 
@@ -31,6 +31,7 @@ using hardware::Return;
 using hardware::Void;
 
 using GnssLocationAidl = android::hardware::gnss::GnssLocation;
+using GnssSignalType = android::hardware::gnss::GnssSignalType;
 using GnssLocation_V1_0 = android::hardware::gnss::V1_0::GnssLocation;
 using GnssLocation_V2_0 = android::hardware::gnss::V2_0::GnssLocation;
 using IGnssCallbackAidl = android::hardware::gnss::IGnssCallback;
@@ -42,11 +43,18 @@ jmethodID method_reportGnssServiceDied;
 
 namespace {
 
+jclass class_arrayList;
+jclass class_gnssSignalType;
+
+jmethodID method_arrayListAdd;
+jmethodID method_arrayListCtor;
+jmethodID method_gnssSignalTypeCreate;
 jmethodID method_reportLocation;
 jmethodID method_reportStatus;
 jmethodID method_reportSvStatus;
 jmethodID method_reportNmea;
 jmethodID method_setTopHalCapabilities;
+jmethodID method_setSignalTypeCapabilities;
 jmethodID method_setGnssYearOfHardware;
 jmethodID method_setGnssHardwareModelName;
 jmethodID method_requestLocation;
@@ -87,7 +95,9 @@ void Gnss_class_init_once(JNIEnv* env, jclass& clazz) {
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "(I[I[F[F[F[F[F)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
 
-    method_setTopHalCapabilities = env->GetMethodID(clazz, "setTopHalCapabilities", "(I)V");
+    method_setTopHalCapabilities = env->GetMethodID(clazz, "setTopHalCapabilities", "(IZ)V");
+    method_setSignalTypeCapabilities =
+            env->GetMethodID(clazz, "setSignalTypeCapabilities", "(Ljava/util/List;)V");
     method_setGnssYearOfHardware = env->GetMethodID(clazz, "setGnssYearOfHardware", "(I)V");
     method_setGnssHardwareModelName =
             env->GetMethodID(clazz, "setGnssHardwareModelName", "(Ljava/lang/String;)V");
@@ -95,13 +105,57 @@ void Gnss_class_init_once(JNIEnv* env, jclass& clazz) {
     method_requestLocation = env->GetMethodID(clazz, "requestLocation", "(ZZ)V");
     method_requestUtcTime = env->GetMethodID(clazz, "requestUtcTime", "()V");
     method_reportGnssServiceDied = env->GetMethodID(clazz, "reportGnssServiceDied", "()V");
+
+    jclass arrayListClass = env->FindClass("java/util/ArrayList");
+    class_arrayList = (jclass)env->NewGlobalRef(arrayListClass);
+    method_arrayListCtor = env->GetMethodID(class_arrayList, "<init>", "()V");
+    method_arrayListAdd = env->GetMethodID(class_arrayList, "add", "(Ljava/lang/Object;)Z");
+
+    jclass gnssSignalTypeClass = env->FindClass("android/location/GnssSignalType");
+    class_gnssSignalType = (jclass)env->NewGlobalRef(gnssSignalTypeClass);
+    method_gnssSignalTypeCreate =
+            env->GetStaticMethodID(class_gnssSignalType, "create",
+                                   "(IDLjava/lang/String;)Landroid/location/GnssSignalType;");
 }
 
 Status GnssCallbackAidl::gnssSetCapabilitiesCb(const int capabilities) {
-    ALOGD("GnssCallbackAidl::%s: %du\n", __func__, capabilities);
+    ALOGD("%s: %du\n", __func__, capabilities);
+    bool isAdrCapabilityKnown = (getInterfaceVersion() >= 3) ? true : false;
     JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities);
+    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities,
+                        isAdrCapabilityKnown);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return Status::ok();
+}
+
+namespace {
+
+jobject translateSingleSignalType(JNIEnv* env, const GnssSignalType& signalType) {
+    jstring jstringCodeType = env->NewStringUTF(signalType.codeType.c_str());
+    jobject signalTypeObject =
+            env->CallStaticObjectMethod(class_gnssSignalType, method_gnssSignalTypeCreate,
+                                        signalType.constellation, signalType.carrierFrequencyHz,
+                                        jstringCodeType);
+    env->DeleteLocalRef(jstringCodeType);
+    return signalTypeObject;
+}
+
+} // anonymous namespace
+
+Status GnssCallbackAidl::gnssSetSignalTypeCapabilitiesCb(
+        const std::vector<GnssSignalType>& signalTypes) {
+    ALOGD("%s: %d signal types", __func__, (int)signalTypes.size());
+    JNIEnv* env = getJniEnv();
+    jobject arrayList = env->NewObject(class_arrayList, method_arrayListCtor);
+    for (auto& signalType : signalTypes) {
+        jobject signalTypeObject = translateSingleSignalType(env, signalType);
+        env->CallBooleanMethod(arrayList, method_arrayListAdd, signalTypeObject);
+        // Delete Local Refs
+        env->DeleteLocalRef(signalTypeObject);
+    }
+    env->CallVoidMethod(mCallbacksObj, method_setSignalTypeCapabilities, arrayList);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    env->DeleteLocalRef(arrayList);
     return Status::ok();
 }
 
@@ -357,7 +411,8 @@ Return<void> GnssCallbackHidl::gnssSetCapabilitesCb(uint32_t capabilities) {
     ALOGD("%s: %du\n", __func__, capabilities);
 
     JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities);
+    env->CallVoidMethod(mCallbacksObj, method_setTopHalCapabilities, capabilities,
+                        /* isAdrCapabilityKnown= */ false);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }

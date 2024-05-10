@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,8 +25,6 @@ import android.view.ViewConfiguration;
 import android.widget.Button;
 
 import com.android.internal.util.EmergencyAffordanceManager;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.settingslib.Utils;
 
 /**
  * This class implements a smart emergency button that updates itself based
@@ -40,8 +39,6 @@ public class EmergencyButton extends Button {
     private int mDownX;
     private int mDownY;
     private boolean mLongPressWasDragged;
-
-    private LockPatternUtils mLockPatternUtils;
 
     private final boolean mEnableEmergencyCallWhileSimLocked;
 
@@ -59,10 +56,12 @@ public class EmergencyButton extends Button {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mLockPatternUtils = new LockPatternUtils(mContext);
         if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
             setOnLongClickListener(v -> {
-                if (!mLongPressWasDragged
+                boolean isEmergencyCallButton = getVisibility() == View.VISIBLE
+                        && TextUtils.equals(getText(), getEmergencyButtonLabel());
+                if (isEmergencyCallButton
+                        && !mLongPressWasDragged
                         && mEmergencyAffordanceManager.needsEmergencyAffordance()) {
                     mEmergencyAffordanceManager.performEmergencyCall();
                     return true;
@@ -91,23 +90,13 @@ public class EmergencyButton extends Button {
         return super.onTouchEvent(event);
     }
 
-    /**
-     * Reload colors from resources.
-     **/
-    public void reloadColors() {
-        int color = Utils.getColorAttrDefaultColor(getContext(),
-                com.android.internal.R.attr.textColorOnAccent);
-        setTextColor(color);
-        setBackground(getContext()
-                .getDrawable(com.android.systemui.R.drawable.kg_emergency_button_background));
-    }
-
     @Override
     public boolean performLongClick() {
         return super.performLongClick();
     }
 
-    void updateEmergencyCallButton(boolean isInCall, boolean hasTelephonyRadio, boolean simLocked) {
+    void updateEmergencyCallButton(boolean isInCall, boolean hasTelephonyRadio, boolean simLocked,
+            boolean isSecure) {
         boolean visible = false;
         if (hasTelephonyRadio) {
             // Emergency calling requires a telephony radio.
@@ -119,7 +108,7 @@ public class EmergencyButton extends Button {
                     visible = mEnableEmergencyCallWhileSimLocked;
                 } else {
                     // Only show if there is a secure screen (pin/pattern/SIM pin/SIM puk);
-                    visible = mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser());
+                    visible = isSecure;
                 }
             }
         }
@@ -136,5 +125,9 @@ public class EmergencyButton extends Button {
         } else {
             setVisibility(View.GONE);
         }
+    }
+
+    private String getEmergencyButtonLabel() {
+        return mContext.getString(com.android.internal.R.string.lockscreen_emergency_call);
     }
 }

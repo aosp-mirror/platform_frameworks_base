@@ -28,18 +28,23 @@ import android.util.ArraySet
 import android.util.IndentingPrintWriter
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.pkg.component.ParsedActivityImpl
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.Computer
-import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
 import com.android.server.pm.verify.domain.DomainVerificationEnforcer
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.pm.verify.domain.DomainVerificationService
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.test.assertFailsWith
+import kotlin.test.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -47,14 +52,10 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verifyNoMoreInteractions
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.test.assertFailsWith
-import kotlin.test.fail
 
 @RunWith(Parameterized::class)
 class DomainVerificationEnforcerTest {
@@ -218,6 +219,20 @@ class DomainVerificationEnforcerTest {
                     printState(mock(Computer::class.java), mock(IndentingPrintWriter::class.java),
                         null, null)
                 },
+                service(Type.QUERENT, "printOwnersForPackage") {
+                    printOwnersForPackage(
+                        mock(IndentingPrintWriter::class.java),
+                        it.targetPackageName,
+                        it.userId
+                    )
+                },
+                service(Type.QUERENT, "printOwnersForDomains") {
+                    printOwnersForDomains(
+                        mock(IndentingPrintWriter::class.java),
+                        listOf("example.com"),
+                        it.userId
+                    )
+                },
                 service(Type.VERIFIER, "setStatus") {
                     setDomainVerificationStatus(
                         it.targetDomainSetId,
@@ -303,7 +318,7 @@ class DomainVerificationEnforcerTest {
             )
         }
 
-        fun mockPkg(packageName: String) = mockThrowOnUnmocked<AndroidPackage> {
+        fun mockPkg(packageName: String) = mockThrowOnUnmocked<AndroidPackageInternal> {
             whenever(this.packageName) { packageName }
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
             whenever(isEnabled) { true }
@@ -336,12 +351,12 @@ class DomainVerificationEnforcerTest {
                 whenever(this.domainSetId) { domainSetId }
                 whenever(getUserStateOrDefault(0)) { PackageUserStateInternal.DEFAULT }
                 whenever(getUserStateOrDefault(1)) { PackageUserStateInternal.DEFAULT }
-                whenever(userStates) {
+                doReturn(
                     SparseArray<PackageUserStateInternal>().apply {
                         this[0] = PackageUserStateInternal.DEFAULT
                         this[1] = PackageUserStateInternal.DEFAULT
                     }
-                }
+                ).whenever(this).userStates
                 whenever(isSystem) { false }
                 whenever(signingDetails) { SigningDetails.UNKNOWN }
             }

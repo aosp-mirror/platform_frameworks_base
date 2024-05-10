@@ -1,9 +1,11 @@
 # Camera
-per-file *Camera*,*camera* = cychen@google.com, epeev@google.com, etalvala@google.com
-per-file *Camera*,*camera* = shuzhenwang@google.com, yinchiayeh@google.com, zhijunhe@google.com
+per-file *Camera*,*camera* = file:platform/frameworks/av:/camera/OWNERS
 
 # Connectivity
 per-file android_net_* = codewiz@google.com, jchalard@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
+
+# Choreographer
+per-file android_view_DisplayEventReceiver* = file:platform/frameworks/native:/services/surfaceflinger/OWNERS
 
 # CPU
 per-file *Cpu* = file:/core/java/com/android/internal/os/CPU_OWNERS
@@ -17,7 +19,9 @@ per-file android_view_Input* = file:/services/core/java/com/android/server/input
 per-file android_view_KeyCharacterMap.* = file:/services/core/java/com/android/server/input/OWNERS
 per-file android_view_*KeyEvent.* = file:/services/core/java/com/android/server/input/OWNERS
 per-file android_view_*MotionEvent.* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_MotionPredictor.* = file:/services/core/java/com/android/server/input/OWNERS
 per-file android_view_PointerIcon.* = file:/services/core/java/com/android/server/input/OWNERS
+per-file android_view_VelocityTracker.* = file:/services/core/java/com/android/server/input/OWNERS
 
 # WindowManager
 per-file android_graphics_BLASTBufferQueue.cpp = file:/services/core/java/com/android/server/wm/OWNERS
@@ -100,5 +104,11 @@ per-file com_android_internal_os_*MultiStateCounter* = file:/BATTERY_STATS_OWNER
 # PM
 per-file com_android_internal_content_* = file:/PACKAGE_MANAGER_OWNERS
 
-# Stats/expresslog
-per-file *expresslog* = file:/services/core/java/com/android/server/stats/OWNERS
+# SQLite
+per-file android_database_SQLite* = file:/SQLITE_OWNERS
+
+# PerformanceHintManager
+per-file android_os_PerformanceHintManager.cpp = file:/ADPF_OWNERS
+
+# IF Tools
+per-file android_tracing_Perfetto* = file:platform/development:/tools/winscope/OWNERS

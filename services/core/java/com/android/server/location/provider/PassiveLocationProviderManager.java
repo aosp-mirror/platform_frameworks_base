@@ -54,7 +54,7 @@ public class PassiveLocationProviderManager extends LocationProviderManager {
      * Reports a new location to passive location provider clients.
      */
     public void updateLocation(LocationResult locationResult) {
-        synchronized (mLock) {
+        synchronized (mMultiplexerLock) {
             PassiveLocationProvider passive = (PassiveLocationProvider) mProvider.getProvider();
             Preconditions.checkState(passive != null);
 

@@ -63,7 +63,7 @@ public:
                                  int32_t* _aidl_return) final;
     binder::Status makeDirectories(int32_t storageId, const std::string& path,
                                    int32_t* _aidl_return) final;
-    binder::Status makeFile(int32_t storageId, const std::string& path,
+    binder::Status makeFile(int32_t storageId, const std::string& path, int32_t mode,
                             const IncrementalNewFileParams& params,
                             const ::std::optional<::std::vector<uint8_t>>& content,
                             int32_t* _aidl_return) final;

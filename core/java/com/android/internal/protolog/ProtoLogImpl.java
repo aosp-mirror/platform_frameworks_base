@@ -30,6 +30,7 @@ public class ProtoLogImpl extends BaseProtoLogImpl {
     private static final int BUFFER_CAPACITY = 1024 * 1024;
     private static final String LOG_FILENAME = "/data/misc/wmtrace/wm_log.winscope";
     private static final String VIEWER_CONFIG_FILENAME = "/system/etc/protolog.conf.json.gz";
+    private static final int PER_CHUNK_SIZE = 1024;
 
     private static ProtoLogImpl sServiceInstance = null;
 
@@ -94,7 +95,10 @@ public class ProtoLogImpl extends BaseProtoLogImpl {
     public static synchronized ProtoLogImpl getSingleInstance() {
         if (sServiceInstance == null) {
             sServiceInstance = new ProtoLogImpl(
-                    new File(LOG_FILENAME), BUFFER_CAPACITY, new ProtoLogViewerConfigReader());
+                    new File(LOG_FILENAME)
+                    , BUFFER_CAPACITY
+                    , new ProtoLogViewerConfigReader()
+                    , PER_CHUNK_SIZE);
         }
         return sServiceInstance;
     }
@@ -105,8 +109,8 @@ public class ProtoLogImpl extends BaseProtoLogImpl {
     }
 
     public ProtoLogImpl(File logFile, int bufferCapacity,
-            ProtoLogViewerConfigReader viewConfigReader) {
-        super(logFile, VIEWER_CONFIG_FILENAME, bufferCapacity, viewConfigReader);
-    }
+            ProtoLogViewerConfigReader viewConfigReader, int perChunkSize) {
+        super(logFile, VIEWER_CONFIG_FILENAME, bufferCapacity, viewConfigReader, perChunkSize);
+  }
 }
 

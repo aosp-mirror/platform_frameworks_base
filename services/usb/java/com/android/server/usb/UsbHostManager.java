@@ -221,9 +221,7 @@ public class UsbHostManager {
                 for (int line = 0; line < length / kDumpBytesPerLine; line++) {
                     StringBuilder sb = new StringBuilder();
                     for (int offset = 0; offset < kDumpBytesPerLine; offset++) {
-                        sb.append("0x")
-                            .append(String.format("0x%02X", mDescriptors[dataOffset++]))
-                            .append(" ");
+                        sb.append(String.format("0x%02X", mDescriptors[dataOffset++])).append(" ");
                     }
                     pw.println(sb.toString());
                 }
@@ -231,9 +229,7 @@ public class UsbHostManager {
                 // remainder
                 StringBuilder sb = new StringBuilder();
                 while (dataOffset < length) {
-                    sb.append("0x")
-                        .append(String.format("0x%02X", mDescriptors[dataOffset++]))
-                        .append(" ");
+                    sb.append(String.format("0x%02X", mDescriptors[dataOffset++])).append(" ");
                 }
                 pw.println(sb.toString());
             } else {
@@ -444,14 +440,19 @@ public class UsbHostManager {
                         } else {
                             Slog.e(TAG, "Universal Midi Device is null.");
                         }
-                    }
-                    if (parser.containsLegacyMidiDeviceEndpoint()) {
-                        UsbDirectMidiDevice midiDevice = UsbDirectMidiDevice.create(mContext,
-                                newDevice, parser, false, uniqueUsbDeviceIdentifier);
-                        if (midiDevice != null) {
-                            midiDevices.add(midiDevice);
-                        } else {
-                            Slog.e(TAG, "Legacy Midi Device is null.");
+
+                        // Use UsbDirectMidiDevice only if this supports MIDI 2.0 as well.
+                        // ALSA removes the audio sound card if MIDI interfaces are removed.
+                        // This means that as long as ALSA is used for audio, MIDI 1.0 USB
+                        // devices should use the ALSA path for MIDI.
+                        if (parser.containsLegacyMidiDeviceEndpoint()) {
+                            midiDevice = UsbDirectMidiDevice.create(mContext,
+                                    newDevice, parser, false, uniqueUsbDeviceIdentifier);
+                            if (midiDevice != null) {
+                                midiDevices.add(midiDevice);
+                            } else {
+                                Slog.e(TAG, "Legacy Midi Device is null.");
+                            }
                         }
                     }
 

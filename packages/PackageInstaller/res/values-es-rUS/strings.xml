@@ -26,6 +26,9 @@
     <string name="install_done" msgid="5987363587661783896">"Se instaló la app."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"¿Deseas instalar esta app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"¿Deseas actualizar esta app?"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tablet" msgid="7994800761970572198">"&lt;p&gt;Actualiza esta app desde &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Esta app normalmente recibe actualizaciones desde &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si actualizas a través de otra fuente, es posible que recibas las próximas actualizaciones de cualquier fuente en la tablet. Las funciones de la app puede cambiar.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="tv" msgid="2435174886412089791">"&lt;p&gt;Actualiza esta app desde &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Esta app normalmente recibe actualizaciones desde &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si actualizas a través de otra fuente, es posible que recibas las próximas actualizaciones de cualquier fuente en la TV. Las funciones de la app puede cambiar.&lt;/p&gt;"</string>
+    <string name="install_confirm_question_update_owner_reminder" product="default" msgid="7155138616126795839">"&lt;p&gt;Actualiza esta app desde &lt;b&gt;<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;Esta app normalmente recibe actualizaciones desde &lt;b&gt;<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>&lt;/b&gt;. Si actualizas a través de otra fuente, es posible que recibas las próximas actualizaciones de cualquier fuente en el teléfono. Las funciones de la app puede cambiar.&lt;/p&gt;"</string>
     <string name="install_failed" msgid="5777824004474125469">"No se instaló la app."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Se bloqueó el paquete para impedir la instalación."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"No se instaló la app debido a un conflicto con un paquete."</string>
@@ -41,6 +44,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Este usuario no puede instalar apps desconocidas"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Este usuario no puede instalar apps"</string>
     <string name="ok" msgid="7871959885003339302">"Aceptar"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Actualizar de todas formas"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Gestionar apps"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Sin espacio"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"No se pudo instalar <xliff:g id="APP_NAME">%1$s</xliff:g>. Libera espacio y vuelve a intentarlo."</string>
@@ -60,14 +64,19 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"¿Deseas reemplazar esta app con la versión de fábrica? Se quitarán todos los datos."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"¿Deseas reemplazar esta app con la versión de fábrica? Se quitarán todos los datos. Esta acción afectará a todos los usuarios de este dispositivo, incluidos los que tengan perfiles de trabajo."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Guardar <xliff:g id="SIZE">%1$s</xliff:g> en datos de apps"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"¿Quieres borrar esta app?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"¿Quieres desinstalar esta app? También se borrará el clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"¿Quieres desinstalar esta app de tu espacio privado?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Desinstalaciones activas"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstalaciones con errores"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Desinstalando…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Desinstalando <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Se completó la desinstalación."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Se desinstaló <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Se borró el clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"No se pudo completar la desinstalación."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"No se pudo desinstalar <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Borrando la clonación de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"No se puede desinstalar la app de administración activa del dispositivo"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"No se puede desinstalar la app de administración activa del dispositivo para <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Esta app es necesaria para algunos usuarios o perfiles, y se desinstaló en otros casos"</string>
@@ -83,14 +92,36 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Desconocido"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Por tu seguridad, la tablet no tiene permitido actualmente instalar apps desconocidas de esta fuente. Puedes modificar esta opción en Configuración."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Por tu seguridad, la TV no tiene permitido actualmente instalar apps desconocidas de esta fuente. Puedes modificar esta opción en Configuración."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Por tu seguridad, el reloj no tiene permitido actualmente instalar apps desconocidas de esta fuente. Puedes modificar esta opción en Configuración."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Por tu seguridad, el teléfono no tiene permitido actualmente instalar apps desconocidas de esta fuente. Puedes modificar esta opción en Configuración."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"El teléfono y tus datos personales son más vulnerables a los ataques de apps desconocidas. Si instalas esta app, serás responsable de los daños que sufra el teléfono y de la pérdida de datos que pueda ocasionar su uso."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"La tablet y tus datos personales son más vulnerables a los ataques de apps desconocidas. Si instalas esta app, serás responsable de los daños que sufra la tablet y de la pérdida de datos que pueda ocasionar su uso."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"La TV y tus datos personales son más vulnerables a los ataques de apps desconocidas. Si instalas esta app, serás responsable de los daños que sufra la TV y de la pérdida de datos que pueda ocasionar su uso."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Continuar"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Configuración"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalando/desinstalando apps para Wear"</string>
     <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Notificación de app instalada"</string>
     <string name="notification_installation_success_message" msgid="6450467996056038442">"Se instaló correctamente"</string>
     <string name="notification_installation_success_status" msgid="3172502643504323321">"Se instaló correctamente \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
+    <string name="unarchive_application_title" msgid="7958278328280721421">"¿Quieres restablecer <xliff:g id="APPNAME">%1$s</xliff:g> desde <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
+    <string name="unarchive_body_text" msgid="8244155079861708964">"Esta app comenzará la descarga en segundo plano"</string>
+    <string name="restore" msgid="8460854736328970444">"Restablecer"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"No tienes conexión"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Se restablecerá automáticamente esta app cuando te conectes a Internet"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Se produjo un error"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Hubo un problema al intentar restablecer esta app"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"No hay suficiente espacio de almacenamiento"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Para restablecer la app, deberás liberar espacio en este dispositivo. Almacenamiento requerido: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Acción obligatoria"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Sigue los próximos pasos para restablecer esta app"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"Se inhabilitó <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"No se instaló <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Para restablecer esta app, deberás instalar <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Continuar"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Liberar almacenamiento"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Configuración"</string>
+    <string name="close" msgid="5214897374055647996">"Cerrar"</string>
 </resources>

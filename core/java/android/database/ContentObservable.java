@@ -23,6 +23,7 @@ import android.net.Uri;
  * that provides methods for sending notifications to a list of
  * {@link ContentObserver} objects.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ContentObservable extends Observable<ContentObserver> {
     // Even though the generic method defined in Observable would be perfectly
     // fine on its own, we can't delete this overridden method because it would

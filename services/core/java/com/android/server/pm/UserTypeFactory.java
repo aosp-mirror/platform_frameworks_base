@@ -16,11 +16,14 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.UserInfo.FLAG_ADMIN;
 import static android.content.pm.UserInfo.FLAG_DEMO;
 import static android.content.pm.UserInfo.FLAG_EPHEMERAL;
 import static android.content.pm.UserInfo.FLAG_FULL;
 import static android.content.pm.UserInfo.FLAG_GUEST;
+import static android.content.pm.UserInfo.FLAG_MAIN;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_PROFILE;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
 import static android.content.pm.UserInfo.FLAG_SYSTEM;
@@ -30,13 +33,16 @@ import static android.os.UserManager.USER_TYPE_FULL_RESTRICTED;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
+import static android.os.UserManager.USER_TYPE_PROFILE_COMMUNAL;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
 import static android.os.UserManager.USER_TYPE_PROFILE_TEST;
 import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
 
 import static com.android.server.pm.UserTypeDetails.UNLIMITED_NUMBER_OF_USERS;
 
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
@@ -45,6 +51,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 
@@ -61,7 +68,7 @@ import java.util.function.Consumer;
  * This class is responsible both for defining the AOSP use types, as well as reading in customized
  * user types from {@link com.android.internal.R.xml#config_user_types}.
  *
- * Tests are located in UserManagerServiceUserTypeTest.java.
+ * Tests are located in {@link UserManagerServiceUserTypeTest}.
  * @hide
  */
 public final class UserTypeFactory {
@@ -102,6 +109,8 @@ public final class UserTypeFactory {
         builders.put(USER_TYPE_FULL_RESTRICTED, getDefaultTypeFullRestricted());
         builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
         builders.put(USER_TYPE_PROFILE_CLONE, getDefaultTypeProfileClone());
+        builders.put(USER_TYPE_PROFILE_COMMUNAL, getDefaultTypeProfileCommunal());
+        builders.put(USER_TYPE_PROFILE_PRIVATE, getDefaultTypeProfilePrivate());
         if (Build.IS_DEBUGGABLE) {
             builders.put(USER_TYPE_PROFILE_TEST, getDefaultTypeProfileTest());
         }
@@ -119,10 +128,41 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_PROFILE_CLONE)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
-                .setLabel(0)
+                .setLabels(R.string.profile_label_clone)
+                .setIconBadge(com.android.internal.R.drawable.ic_clone_icon_badge)
+                .setBadgePlain(com.android.internal.R.drawable.ic_clone_badge)
+                // Clone doesn't use BadgeNoBackground, so just set to BadgePlain as a placeholder.
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_clone_badge)
+                .setStatusBarIcon(Resources.ID_NULL)
+                .setBadgeLabels(
+                        com.android.internal.R.string.clone_profile_label_badge)
+                .setBadgeColors(
+                        com.android.internal.R.color.system_neutral2_800)
+                .setDarkThemeBadgeColors(
+                        com.android.internal.R.color.system_neutral2_900)
                 .setDefaultRestrictions(null)
-                .setIsMediaSharedWithParent(true)
-                .setIsCredentialSharableWithParent(true);
+                .setDefaultCrossProfileIntentFilters(getDefaultCloneCrossProfileIntentFilter())
+                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
+                .setDefaultUserProperties(new UserProperties.Builder()
+                        .setStartWithParent(true)
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT)
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_WITH_PARENT)
+                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
+                        .setUseParentsContacts(true)
+                        .setUpdateCrossProfileIntentFiltersOnOTA(true)
+                        .setCrossProfileIntentFilterAccessControl(
+                                UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
+                        .setCrossProfileIntentResolutionStrategy(UserProperties
+                                .CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_DEFAULT)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_WITH_PARENT)
+                        .setMediaSharedWithParent(true)
+                        .setCredentialShareableWithParent(true)
+                        .setDeleteAppWithParent(true)
+                        .setCrossProfileContentSharingStrategy(UserProperties
+                                .CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT));
     }
 
     /**
@@ -135,10 +175,14 @@ public final class UserTypeFactory {
                 .setBaseType(FLAG_PROFILE)
                 .setDefaultUserInfoPropertyFlags(FLAG_MANAGED_PROFILE)
                 .setMaxAllowedPerParent(1)
-                .setLabel(0)
+                .setLabels(
+                        R.string.profile_label_work,
+                        R.string.profile_label_work_2,
+                        R.string.profile_label_work_3)
                 .setIconBadge(com.android.internal.R.drawable.ic_corp_icon_badge_case)
                 .setBadgePlain(com.android.internal.R.drawable.ic_corp_badge_case)
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_corp_badge_no_background)
+                .setStatusBarIcon(com.android.internal.R.drawable.stat_sys_managed_profile_status)
                 .setBadgeLabels(
                         com.android.internal.R.string.managed_profile_label_badge,
                         com.android.internal.R.string.managed_profile_label_badge_2,
@@ -151,10 +195,19 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_1_dark,
                         com.android.internal.R.color.profile_badge_2_dark,
                         com.android.internal.R.color.profile_badge_3_dark)
-                .setDefaultRestrictions(getDefaultManagedProfileRestrictions())
+                .setDefaultRestrictions(getDefaultProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultManagedProfileSecureSettings())
                 .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter())
-                .setIsCredentialSharableWithParent(true);
+                .setDefaultUserProperties(new UserProperties.Builder()
+                        .setStartWithParent(true)
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_PAUSED)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_SEPARATE)
+                        .setAuthAlwaysRequiredToDisableQuietMode(false)
+                        .setCredentialShareableWithParent(true));
     }
 
     /**
@@ -162,17 +215,21 @@ public final class UserTypeFactory {
      * configuration (for userdebug builds). For now it just uses managed profile badges.
      */
     private static UserTypeDetails.Builder getDefaultTypeProfileTest() {
-        final Bundle restrictions = new Bundle();
+        final Bundle restrictions = getDefaultProfileRestrictions();
         restrictions.putBoolean(UserManager.DISALLOW_FUN, true);
 
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_PROFILE_TEST)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(2)
-                .setLabel(0)
-                .setIconBadge(com.android.internal.R.drawable.ic_corp_icon_badge_case)
-                .setBadgePlain(com.android.internal.R.drawable.ic_corp_badge_case)
-                .setBadgeNoBackground(com.android.internal.R.drawable.ic_corp_badge_no_background)
+                .setLabels(
+                        R.string.profile_label_test,
+                        R.string.profile_label_test,
+                        R.string.profile_label_test)
+                .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
+                .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
+                .setStatusBarIcon(com.android.internal.R.drawable.ic_test_badge_experiment)
                 .setBadgeLabels(
                         com.android.internal.R.string.managed_profile_label_badge,
                         com.android.internal.R.string.managed_profile_label_badge_2,
@@ -185,7 +242,87 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_1_dark,
                         com.android.internal.R.color.profile_badge_2_dark,
                         com.android.internal.R.color.profile_badge_3_dark)
-                .setDefaultRestrictions(restrictions);
+                .setDefaultRestrictions(restrictions)
+                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings());
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_PROFILE_COMMUNAL}
+     * configuration. For now it just uses managed profile badges.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeProfileCommunal() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_PROFILE_COMMUNAL)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowed(1)
+                .setEnabled(UserManager.isCommunalProfileEnabled() ? 1 : 0)
+                .setLabels(R.string.profile_label_communal)
+                .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
+                .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)
+                .setStatusBarIcon(com.android.internal.R.drawable.ic_test_badge_experiment)
+                .setBadgeLabels(
+                        com.android.internal.R.string.managed_profile_label_badge,
+                        com.android.internal.R.string.managed_profile_label_badge_2,
+                        com.android.internal.R.string.managed_profile_label_badge_3)
+                .setBadgeColors(
+                        com.android.internal.R.color.profile_badge_1,
+                        com.android.internal.R.color.profile_badge_2,
+                        com.android.internal.R.color.profile_badge_3)
+                .setDarkThemeBadgeColors(
+                        com.android.internal.R.color.profile_badge_1_dark,
+                        com.android.internal.R.color.profile_badge_2_dark,
+                        com.android.internal.R.color.profile_badge_3_dark)
+                .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
+                .setDefaultUserProperties(new UserProperties.Builder()
+                        .setStartWithParent(false)
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setCredentialShareableWithParent(false)
+                        .setAlwaysVisible(true));
+    }
+
+    /**
+     * Returns the Builder for the default {@link UserManager#USER_TYPE_PROFILE_PRIVATE}
+     * configuration.
+     */
+    private static UserTypeDetails.Builder getDefaultTypeProfilePrivate() {
+        return new UserTypeDetails.Builder()
+                .setName(USER_TYPE_PROFILE_PRIVATE)
+                .setBaseType(FLAG_PROFILE)
+                .setMaxAllowedPerParent(1)
+                .setLabels(R.string.profile_label_private)
+                .setIconBadge(com.android.internal.R.drawable.ic_private_profile_icon_badge)
+                .setBadgePlain(com.android.internal.R.drawable.ic_private_profile_badge)
+                // Private Profile doesn't use BadgeNoBackground, so just set to BadgePlain
+                // as a placeholder.
+                .setBadgeNoBackground(com.android.internal.R.drawable.ic_private_profile_badge)
+                .setStatusBarIcon(com.android.internal.R.drawable.stat_sys_private_profile_status)
+                .setBadgeLabels(
+                        com.android.internal.R.string.private_profile_label_badge)
+                .setBadgeColors(
+                        R.color.black)
+                .setDarkThemeBadgeColors(
+                        R.color.white)
+                .setDefaultRestrictions(getDefaultProfileRestrictions())
+                .setDefaultUserProperties(new UserProperties.Builder()
+                        .setStartWithParent(true)
+                        .setCredentialShareableWithParent(true)
+                        .setAuthAlwaysRequiredToDisableQuietMode(true)
+                        .setAllowStoppingUserWithDelayedLocking(true)
+                        .setMediaSharedWithParent(false)
+                        .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
+                        .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_HIDDEN)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_SEPARATE)
+                        .setCrossProfileIntentFilterAccessControl(
+                                UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
+                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
+                        .setCrossProfileContentSharingStrategy(
+                                UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT));
     }
 
     /**
@@ -248,7 +385,9 @@ public final class UserTypeFactory {
     private static UserTypeDetails.Builder getDefaultTypeFullSystem() {
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_FULL_SYSTEM)
-                .setBaseType(FLAG_SYSTEM | FLAG_FULL);
+                .setBaseType(FLAG_SYSTEM | FLAG_FULL)
+                .setDefaultUserInfoPropertyFlags(FLAG_PRIMARY | FLAG_ADMIN | FLAG_MAIN)
+                .setMaxAllowed(1);
     }
 
     /**
@@ -258,7 +397,9 @@ public final class UserTypeFactory {
     private static UserTypeDetails.Builder getDefaultTypeSystemHeadless() {
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_SYSTEM_HEADLESS)
-                .setBaseType(FLAG_SYSTEM);
+                .setBaseType(FLAG_SYSTEM)
+                .setDefaultUserInfoPropertyFlags(FLAG_PRIMARY | FLAG_ADMIN)
+                .setMaxAllowed(1);
     }
 
     private static Bundle getDefaultSecondaryUserRestrictions() {
@@ -277,7 +418,7 @@ public final class UserTypeFactory {
         return restrictions;
     }
 
-    private static Bundle getDefaultManagedProfileRestrictions() {
+    private static Bundle getDefaultProfileRestrictions() {
         final Bundle restrictions = new Bundle();
         restrictions.putBoolean(UserManager.DISALLOW_WALLPAPER, true);
         return restrictions;
@@ -296,6 +437,19 @@ public final class UserTypeFactory {
     private static List<DefaultCrossProfileIntentFilter>
             getDefaultManagedCrossProfileIntentFilter() {
         return DefaultCrossProfileIntentFiltersUtils.getDefaultManagedProfileFilters();
+    }
+
+    private static List<DefaultCrossProfileIntentFilter> getDefaultCloneCrossProfileIntentFilter() {
+        return DefaultCrossProfileIntentFiltersUtils.getDefaultCloneProfileFilters();
+    }
+
+    /** Gets a default bundle, keyed by Settings.Secure String names, for non-managed profiles. */
+    private static Bundle getDefaultNonManagedProfileSecureSettings() {
+        final Bundle settings = new Bundle();
+        // Non-managed profiles go through neither SetupWizard nor DPC flows, so we automatically
+        // mark them as setup.
+        settings.putString(android.provider.Settings.Secure.USER_SETUP_COMPLETE, "1");
+        return settings;
     }
 
     /**
@@ -376,9 +530,11 @@ public final class UserTypeFactory {
                     setResAttribute(parser, "icon-badge", builder::setIconBadge);
                     setResAttribute(parser, "badge-plain", builder::setBadgePlain);
                     setResAttribute(parser, "badge-no-background", builder::setBadgeNoBackground);
+                    setResAttribute(parser, "status-bar-icon", builder::setStatusBarIcon);
                 }
 
                 setIntAttribute(parser, "enabled", builder::setEnabled);
+                setIntAttribute(parser, "max-allowed", builder::setMaxAllowed);
 
                 // Process child elements.
                 final int depth = parser.getDepth();
@@ -394,6 +550,9 @@ public final class UserTypeFactory {
                         setResAttributeArray(parser, builder::setBadgeColors);
                     } else if (isProfile && "badge-colors-dark".equals(childName)) {
                         setResAttributeArray(parser, builder::setDarkThemeBadgeColors);
+                    } else if ("user-properties".equals(childName)) {
+                        builder.getDefaultUserProperties()
+                                .updateFromXml(XmlUtils.makeTyped(parser));
                     } else {
                         Slog.w(LOG_TAG, "Unrecognized tag " + childName + " in "
                                 + parser.getPositionDescription());

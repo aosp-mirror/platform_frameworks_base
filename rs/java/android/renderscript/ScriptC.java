@@ -16,9 +16,12 @@
 
 package android.renderscript;
 
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.res.Resources;
+import android.util.Slog;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -33,6 +36,15 @@ import java.io.InputStream;
 @Deprecated
 public class ScriptC extends Script {
     private static final String TAG = "ScriptC";
+
+    /**
+     * In targetSdkVersion 36 and above, Renderscript's ScriptC stops being supported
+     * and an exception is thrown when the class is instantiated.
+     * In targetSdkVersion 35 and below, Renderscript's ScriptC still works.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = 36)
+    private static final long RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID = 297019750L;
 
     /**
      * Only intended for use by the generated derived classes.
@@ -89,7 +101,31 @@ public class ScriptC extends Script {
         setID(id);
     }
 
+    private static void throwExceptionIfScriptCUnsupported() {
+        // Checks that this device actually does have an ABI that supports ScriptC.
+        //
+        // For an explanation as to why `System.loadLibrary` is used, see discussion at
+        // https://android-review.googlesource.com/c/platform/frameworks/base/+/2957974/comment/2f908b80_a05292ee
+        try {
+            System.loadLibrary("RS");
+        } catch (UnsatisfiedLinkError e) {
+            String s = "This device does not have an ABI that supports ScriptC.";
+            throw new UnsupportedOperationException(s);
+        }
+
+        // Throw an exception if the target API is 36 or above
+        String message =
+                "ScriptC scripts are not supported when targeting an API Level >= 36. Please refer "
+                    + "to https://developer.android.com/guide/topics/renderscript/migration-guide "
+                    + "for proposed alternatives.";
+        Slog.w(TAG, message);
+        if (CompatChanges.isChangeEnabled(RENDERSCRIPT_SCRIPTC_DEPRECATION_CHANGE_ID)) {
+            throw new UnsupportedOperationException(message);
+        }
+    }
+
     private static synchronized long internalCreate(RenderScript rs, Resources resources, int resourceID) {
+        throwExceptionIfScriptCUnsupported();
         byte[] pgm;
         int pgmLength;
         InputStream is = resources.openRawResource(resourceID);
@@ -126,6 +162,7 @@ public class ScriptC extends Script {
 
     private static synchronized long internalStringCreate(RenderScript rs, String resName, byte[] bitcode) {
         //        Log.v(TAG, "Create script for resource = " + resName);
+        throwExceptionIfScriptCUnsupported();
         return rs.nScriptCCreate(resName, RenderScript.getCachePath(), bitcode, bitcode.length);
     }
 }

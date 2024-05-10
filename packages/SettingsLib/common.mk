@@ -18,16 +18,5 @@
 # to the corresponding module.
 # NOTE: keep this file and ./Android.bp in sync.
 
-LOCAL_STATIC_JAVA_LIBRARIES += \
-    androidx.annotation_annotation \
-    androidx.lifecycle_lifecycle-common
-
 LOCAL_STATIC_ANDROID_LIBRARIES += \
-    androidx.legacy_legacy-support-v4 \
-    androidx.lifecycle_lifecycle-runtime \
-    androidx.recyclerview_recyclerview \
-    androidx.preference_preference \
-    androidx.appcompat_appcompat \
-    androidx.legacy_legacy-preference-v14 \
     SettingsLib
-

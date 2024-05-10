@@ -19,8 +19,15 @@ import android.testing.LeakCheck;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FakeLocationController extends BaseLeakChecker<LocationChangeCallback>
         implements LocationController {
+
+    private final List<LocationChangeCallback> mCallbacks = new ArrayList<>();
+    private boolean mLocationEnabled = false;
+
     public FakeLocationController(LeakCheck test) {
         super(test, "location");
     }
@@ -32,11 +39,25 @@ public class FakeLocationController extends BaseLeakChecker<LocationChangeCallba
 
     @Override
     public boolean isLocationEnabled() {
-        return false;
+        return mLocationEnabled;
     }
 
     @Override
     public boolean setLocationEnabled(boolean enabled) {
-        return false;
+        mLocationEnabled = enabled;
+        mCallbacks.forEach(callback -> callback.onLocationSettingsChanged(enabled));
+        return true;
+    }
+
+    @Override
+    public void addCallback(LocationChangeCallback callback) {
+        super.addCallback(callback);
+        mCallbacks.add(callback);
+    }
+
+    @Override
+    public void removeCallback(LocationChangeCallback callback) {
+        super.removeCallback(callback);
+        mCallbacks.remove(callback);
     }
 }

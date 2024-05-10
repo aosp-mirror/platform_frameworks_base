@@ -44,8 +44,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.ImageView;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 /**
  * @hide
  */
@@ -60,31 +58,11 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private int mTouchDownY;
     private AudioManager mAudioManager;
     private boolean mGestureAborted;
-    @VisibleForTesting boolean mLongClicked;
     private OnClickListener mOnClickListener;
     private final KeyButtonRipple mRipple;
     private final Paint mOvalBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private float mDarkIntensity;
     private boolean mHasOvalBg = false;
-
-    private final Runnable mCheckLongPress = new Runnable() {
-        public void run() {
-            if (isPressed()) {
-                // Log.d("KeyButtonView", "longpressed: " + this);
-                if (isLongClickable()) {
-                    // Just an old-fashioned ImageView
-                    performLongClick();
-                    mLongClicked = true;
-                } else {
-                    if (mCode != KEYCODE_UNKNOWN) {
-                        sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
-                        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-                    }
-                    mLongClicked = true;
-                }
-            }
-        }
-    };
 
     public KeyButtonView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -181,7 +159,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDownTime = SystemClock.uptimeMillis();
-                mLongClicked = false;
                 setPressed(true);
 
                 // Use raw X and Y to detect gestures in case a parent changes the x and y values
@@ -196,8 +173,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 if (!showSwipeUI) {
                     playSoundEffect(SoundEffectConstants.CLICK);
                 }
-                removeCallbacks(mCheckLongPress);
-                postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
                 x = (int) ev.getRawX();
@@ -208,7 +183,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     // When quick step is enabled, prevent animating the ripple triggered by
                     // setPressed and decide to run it on touch up
                     setPressed(false);
-                    removeCallbacks(mCheckLongPress);
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -216,10 +190,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 if (mCode != KEYCODE_UNKNOWN) {
                     sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
                 }
-                removeCallbacks(mCheckLongPress);
                 break;
             case MotionEvent.ACTION_UP:
-                final boolean doIt = isPressed() && !mLongClicked;
+                final boolean doIt = isPressed();
                 setPressed(false);
                 final boolean doHapticFeedback = (SystemClock.uptimeMillis() - mDownTime) > 150;
                 if (showSwipeUI) {
@@ -228,7 +201,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                         performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                         playSoundEffect(SoundEffectConstants.CLICK);
                     }
-                } else if (doHapticFeedback && !mLongClicked) {
+                } else if (doHapticFeedback) {
                     // Always send a release ourselves because it doesn't seem to be sent elsewhere
                     // and it feels weird to sometimes get a release haptic and other times not.
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY_RELEASE);
@@ -248,7 +221,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                     }
                 }
-                removeCallbacks(mCheckLongPress);
                 break;
         }
 
@@ -283,12 +255,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     }
 
     private void sendEvent(int action, int flags, long when) {
-        if (mCode == KeyEvent.KEYCODE_BACK && flags != KeyEvent.FLAG_LONG_PRESS) {
-            if (action == MotionEvent.ACTION_UP) {
-                // TODO(b/215443343): Implement notifyBackAction();
-            }
-        }
-
         // TODO(b/215443343): Consolidate this logic to somewhere else.
         if (mContext instanceof InputMethodService) {
             final int repeatCount = (flags & KeyEvent.FLAG_LONG_PRESS) != 0 ? 1 : 0;

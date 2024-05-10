@@ -18,6 +18,7 @@
 
 #include "android-base/errors.h"
 #include "android-base/logging.h"
+#include "android-base/utf8.h"
 
 namespace android {
 
@@ -26,39 +27,34 @@ using base::unique_fd;
 
 constexpr const char* kResourcesArsc = "resources.arsc";
 
-ApkAssets::ApkAssets(std::unique_ptr<Asset> resources_asset,
+ApkAssets::ApkAssets(PrivateConstructorUtil, std::unique_ptr<Asset> resources_asset,
                      std::unique_ptr<LoadedArsc> loaded_arsc,
-                     std::unique_ptr<AssetsProvider> assets,
-                     package_property_t property_flags,
-                     std::unique_ptr<Asset> idmap_asset,
-                     std::unique_ptr<LoadedIdmap> loaded_idmap)
+                     std::unique_ptr<AssetsProvider> assets, package_property_t property_flags,
+                     std::unique_ptr<Asset> idmap_asset, std::unique_ptr<LoadedIdmap> loaded_idmap)
     : resources_asset_(std::move(resources_asset)),
       loaded_arsc_(std::move(loaded_arsc)),
       assets_provider_(std::move(assets)),
       property_flags_(property_flags),
       idmap_asset_(std::move(idmap_asset)),
-      loaded_idmap_(std::move(loaded_idmap)) {}
+      loaded_idmap_(std::move(loaded_idmap)) {
+}
 
-std::unique_ptr<ApkAssets> ApkAssets::Load(const std::string& path, package_property_t flags) {
+ApkAssetsPtr ApkAssets::Load(const std::string& path, package_property_t flags) {
   return Load(ZipAssetsProvider::Create(path, flags), flags);
 }
 
-std::unique_ptr<ApkAssets> ApkAssets::LoadFromFd(base::unique_fd fd,
-                                                 const std::string& debug_name,
-                                                 package_property_t flags,
-                                                 off64_t offset,
-                                                 off64_t len) {
+ApkAssetsPtr ApkAssets::LoadFromFd(base::unique_fd fd, const std::string& debug_name,
+                                   package_property_t flags, off64_t offset, off64_t len) {
   return Load(ZipAssetsProvider::Create(std::move(fd), debug_name, offset, len), flags);
 }
 
-std::unique_ptr<ApkAssets> ApkAssets::Load(std::unique_ptr<AssetsProvider> assets,
-                                           package_property_t flags) {
+ApkAssetsPtr ApkAssets::Load(std::unique_ptr<AssetsProvider> assets, package_property_t flags) {
   return LoadImpl(std::move(assets), flags, nullptr /* idmap_asset */, nullptr /* loaded_idmap */);
 }
 
-std::unique_ptr<ApkAssets> ApkAssets::LoadTable(std::unique_ptr<Asset> resources_asset,
-                                                std::unique_ptr<AssetsProvider> assets,
-                                                package_property_t flags) {
+ApkAssetsPtr ApkAssets::LoadTable(std::unique_ptr<Asset> resources_asset,
+                                  std::unique_ptr<AssetsProvider> assets,
+                                  package_property_t flags) {
   if (resources_asset == nullptr) {
     return {};
   }
@@ -66,8 +62,7 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadTable(std::unique_ptr<Asset> resources
                   nullptr /* loaded_idmap */);
 }
 
-std::unique_ptr<ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
-                                                  package_property_t flags) {
+ApkAssetsPtr ApkAssets::LoadOverlay(const std::string& idmap_path, package_property_t flags) {
   CHECK((flags & PROPERTY_LOADER) == 0U) << "Cannot load RROs through loaders";
   auto idmap_asset = AssetsProvider::CreateAssetFromFile(idmap_path);
   if (idmap_asset == nullptr) {
@@ -83,15 +78,16 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
     return {};
   }
 
+  std::string overlay_path(loaded_idmap->OverlayApkPath());
+  auto fd = unique_fd(base::utf8::open(overlay_path.c_str(), O_RDONLY | O_CLOEXEC));
   std::unique_ptr<AssetsProvider> overlay_assets;
-  const std::string overlay_path(loaded_idmap->OverlayApkPath());
-  if (IsFabricatedOverlay(overlay_path)) {
+  if (IsFabricatedOverlay(fd)) {
     // Fabricated overlays do not contain resource definitions. All of the overlay resource values
     // are defined inline in the idmap.
-    overlay_assets = EmptyAssetsProvider::Create(overlay_path);
+    overlay_assets = EmptyAssetsProvider::Create(std::move(overlay_path));
   } else {
     // The overlay should be an APK.
-    overlay_assets = ZipAssetsProvider::Create(overlay_path, flags);
+    overlay_assets = ZipAssetsProvider::Create(std::move(overlay_path), flags, std::move(fd));
   }
   if (overlay_assets == nullptr) {
     return {};
@@ -101,10 +97,10 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
                   std::move(loaded_idmap));
 }
 
-std::unique_ptr<ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<AssetsProvider> assets,
-                                               package_property_t property_flags,
-                                               std::unique_ptr<Asset> idmap_asset,
-                                               std::unique_ptr<LoadedIdmap> loaded_idmap) {
+ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<AssetsProvider> assets,
+                                 package_property_t property_flags,
+                                 std::unique_ptr<Asset> idmap_asset,
+                                 std::unique_ptr<LoadedIdmap> loaded_idmap) {
   if (assets == nullptr) {
     return {};
   }
@@ -123,11 +119,11 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<AssetsProvider> a
                   std::move(idmap_asset), std::move(loaded_idmap));
 }
 
-std::unique_ptr<ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<Asset> resources_asset,
-                                               std::unique_ptr<AssetsProvider> assets,
-                                               package_property_t property_flags,
-                                               std::unique_ptr<Asset> idmap_asset,
-                                               std::unique_ptr<LoadedIdmap> loaded_idmap) {
+ApkAssetsPtr ApkAssets::LoadImpl(std::unique_ptr<Asset> resources_asset,
+                                 std::unique_ptr<AssetsProvider> assets,
+                                 package_property_t property_flags,
+                                 std::unique_ptr<Asset> idmap_asset,
+                                 std::unique_ptr<LoadedIdmap> loaded_idmap) {
   if (assets == nullptr ) {
     return {};
   }
@@ -141,6 +137,9 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<Asset> resources_
       return {};
     }
     loaded_arsc = LoadedArsc::Load(data, length, loaded_idmap.get(), property_flags);
+  } else if (loaded_idmap != nullptr &&
+      IsFabricatedOverlay(std::string(loaded_idmap->OverlayApkPath()))) {
+    loaded_arsc = LoadedArsc::Load(loaded_idmap.get());
   } else {
     loaded_arsc = LoadedArsc::CreateEmpty();
   }
@@ -150,10 +149,9 @@ std::unique_ptr<ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<Asset> resources_
     return {};
   }
 
-  return std::unique_ptr<ApkAssets>(new ApkAssets(std::move(resources_asset),
-                                                  std::move(loaded_arsc), std::move(assets),
-                                                  property_flags, std::move(idmap_asset),
-                                                  std::move(loaded_idmap)));
+  return ApkAssetsPtr::make(PrivateConstructorUtil{}, std::move(resources_asset),
+                            std::move(loaded_arsc), std::move(assets), property_flags,
+                            std::move(idmap_asset), std::move(loaded_idmap));
 }
 
 std::optional<std::string_view> ApkAssets::GetPath() const {
@@ -169,4 +167,5 @@ bool ApkAssets::IsUpToDate() const {
   return IsLoader() || ((!loaded_idmap_ || loaded_idmap_->IsUpToDate())
                         && assets_provider_->IsUpToDate());
 }
+
 }  // namespace android

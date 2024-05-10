@@ -22,11 +22,13 @@ import android.hardware.display.AmbientBrightnessDayStats;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.display.utils.DebugUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -49,7 +51,10 @@ import java.util.Map;
 public class AmbientBrightnessStatsTracker {
 
     private static final String TAG = "AmbientBrightnessStatsTracker";
-    private static final boolean DEBUG = false;
+
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.AmbientBrightnessStatsTracker DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
 
     @VisibleForTesting
     static final float[] BUCKET_BOUNDARIES_FOR_NEW_STATS =
@@ -287,6 +292,14 @@ public class AmbientBrightnessStatsTracker {
                     localDate)) {
                 return lastBrightnessStats;
             } else {
+                // It is a new day, and we have available data, so log data. The daily boundary
+                // might not be right if the user changes timezones but that is fine, since it
+                // won't be that frequent.
+                if (lastBrightnessStats != null) {
+                    FrameworkStatsLog.write(FrameworkStatsLog.AMBIENT_BRIGHTNESS_STATS_REPORTED,
+                            lastBrightnessStats.getStats(),
+                            lastBrightnessStats.getBucketBoundaries());
+                }
                 AmbientBrightnessDayStats dayStats = new AmbientBrightnessDayStats(localDate,
                         BUCKET_BOUNDARIES_FOR_NEW_STATS);
                 if (userStats.size() == MAX_DAYS_TO_TRACK) {

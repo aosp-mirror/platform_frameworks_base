@@ -17,7 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.carrierdefaultapp.tests.unit">
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
-    <application>
+    <application android:extractNativeLibs="true">
         <uses-library android:name="android.test.runner" />
     </application>
 

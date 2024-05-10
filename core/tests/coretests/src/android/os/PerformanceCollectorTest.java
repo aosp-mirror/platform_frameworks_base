@@ -16,33 +16,48 @@
 
 package android.os;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.os.PerformanceCollector.PerformanceResultsWriter;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class PerformanceCollectorTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = PerformanceCollector.class)
+public class PerformanceCollectorTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private PerformanceCollector mPerfCollector;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         mPerfCollector = new PerformanceCollector();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         mPerfCollector = null;
     }
 
+    @Test
     @SmallTest
     public void testBeginSnapshotNoWriter() throws Exception {
         mPerfCollector.beginSnapshot("testBeginSnapshotNoWriter");
@@ -54,6 +69,7 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals(2, snapshot.size());
     }
 
+    @Test
     @MediumTest
     public void testEndSnapshotNoWriter() throws Exception {
         mPerfCollector.beginSnapshot("testEndSnapshotNoWriter");
@@ -63,6 +79,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifySnapshotBundle(snapshot);
     }
 
+    @Test
     @SmallTest
     public void testStartTimingNoWriter() throws Exception {
         mPerfCollector.startTiming("testStartTimingNoWriter");
@@ -74,6 +91,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(measurement, new ArrayList<String>());
     }
 
+    @Test
     @SmallTest
     public void testAddIterationNoWriter() throws Exception {
         mPerfCollector.startTiming("testAddIterationNoWriter");
@@ -83,6 +101,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyIterationBundle(iteration, "timing1");
     }
 
+    @Test
     @SmallTest
     public void testStopTimingNoWriter() throws Exception {
         mPerfCollector.startTiming("testStopTimingNoWriter");
@@ -100,6 +119,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
+    @Test
     @SmallTest
     public void testBeginSnapshot() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
@@ -114,6 +134,7 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals(2, snapshot.size());
     }
 
+    @Test
     @MediumTest
     public void testEndSnapshot() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
@@ -127,6 +148,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifySnapshotBundle(snapshot1);
     }
 
+    @Test
     @SmallTest
     public void testStartTiming() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
@@ -141,6 +163,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(measurement, new ArrayList<String>());
     }
 
+    @Test
     @SmallTest
     public void testAddIteration() throws Exception {
         mPerfCollector.startTiming("testAddIteration");
@@ -150,6 +173,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyIterationBundle(iteration, "timing5");
     }
 
+    @Test
     @SmallTest
     public void testStopTiming() throws Exception {
         mPerfCollector.startTiming("testStopTiming");
@@ -167,6 +191,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
+    @Test
     @SmallTest
     public void testAddMeasurementLong() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
@@ -188,6 +213,7 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals(-19354, results.getLong("testAddMeasurementLongNeg"));
     }
 
+    @Test
     @SmallTest
     public void testAddMeasurementFloat() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
@@ -202,13 +228,14 @@ public class PerformanceCollectorTest extends TestCase {
         Bundle results = writer.timingResults;
         assertEquals(4, results.size());
         assertTrue(results.containsKey("testAddMeasurementFloatZero"));
-        assertEquals(0.0f, results.getFloat("testAddMeasurementFloatZero"));
+        assertEquals(0.0f, results.getFloat("testAddMeasurementFloatZero"), 0.0f);
         assertTrue(results.containsKey("testAddMeasurementFloatPos"));
-        assertEquals(348573.345f, results.getFloat("testAddMeasurementFloatPos"));
+        assertEquals(348573.345f, results.getFloat("testAddMeasurementFloatPos"), 0.0f);
         assertTrue(results.containsKey("testAddMeasurementFloatNeg"));
-        assertEquals(-19354.093f, results.getFloat("testAddMeasurementFloatNeg"));
+        assertEquals(-19354.093f, results.getFloat("testAddMeasurementFloatNeg"), 0.0f);
     }
 
+    @Test
     @SmallTest
     public void testAddMeasurementString() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
@@ -230,6 +257,7 @@ public class PerformanceCollectorTest extends TestCase {
         assertEquals("Hello World", results.getString("testAddMeasurementStringNonEmpty"));
     }
 
+    @Test
     @MediumTest
     public void testSimpleSequence() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
@@ -262,6 +290,7 @@ public class PerformanceCollectorTest extends TestCase {
         verifyTimingBundle(timing, labels);
     }
 
+    @Test
     @MediumTest
     public void testLongSequence() throws Exception {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();
@@ -348,6 +377,7 @@ public class PerformanceCollectorTest extends TestCase {
      * Verify that snapshotting and timing do not interfere w/ each other,
      * by staggering calls to snapshot and timing functions.
      */
+    @Test
     @MediumTest
     public void testOutOfOrderSequence() {
         MockPerformanceResultsWriter writer = new MockPerformanceResultsWriter();

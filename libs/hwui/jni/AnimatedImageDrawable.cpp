@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-#include "GraphicsJNI.h"
-#include "ImageDecoder.h"
-#include "Utils.h"
-
 #include <SkAndroidCodec.h>
 #include <SkAnimatedImage.h>
 #include <SkColorFilter.h>
+#include <SkEncodedImageFormat.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
 #include <hwui/AnimatedImageDrawable.h>
-#include <hwui/ImageDecoder.h>
 #include <hwui/Canvas.h>
+#include <hwui/ImageDecoder.h>
 #include <utils/Looper.h>
+
+#include "ColorFilter.h"
+#include "GraphicsJNI.h"
+#include "ImageDecoder.h"
+#include "Utils.h"
 
 using namespace android;
 
@@ -94,7 +98,7 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
         bytesUsed += picture->approximateBytesUsed();
     }
 
-
+    SkEncodedImageFormat format = imageDecoder->mCodec->getEncodedFormat();
     sk_sp<SkAnimatedImage> animatedImg = SkAnimatedImage::Make(std::move(imageDecoder->mCodec),
                                                                info, subset,
                                                                std::move(picture));
@@ -105,8 +109,8 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
 
     bytesUsed += sizeof(animatedImg.get());
 
-    sk_sp<AnimatedImageDrawable> drawable(new AnimatedImageDrawable(std::move(animatedImg),
-                                                                    bytesUsed));
+    sk_sp<AnimatedImageDrawable> drawable(
+            new AnimatedImageDrawable(std::move(animatedImg), bytesUsed, format));
     return reinterpret_cast<jlong>(drawable.release());
 }
 
@@ -142,8 +146,9 @@ static jlong AnimatedImageDrawable_nGetAlpha(JNIEnv* env, jobject /*clazz*/, jlo
 static void AnimatedImageDrawable_nSetColorFilter(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                                   jlong nativeFilter) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    auto* filter = reinterpret_cast<SkColorFilter*>(nativeFilter);
-    drawable->setStagingColorFilter(sk_ref_sp(filter));
+    auto filter = uirenderer::ColorFilter::fromJava(nativeFilter);
+    auto skColorFilter = filter != nullptr ? filter->getInstance() : sk_sp<SkColorFilter>();
+    drawable->setStagingColorFilter(skColorFilter);
 }
 
 static jboolean AnimatedImageDrawable_nIsRunning(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {

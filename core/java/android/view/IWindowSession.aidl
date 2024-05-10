@@ -32,7 +32,6 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -48,20 +47,27 @@ import java.util.List;
  */
 interface IWindowSession {
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, in InsetsVisibilities requestedVisibilities,
+            in int viewVisibility, in int layerStackId, int requestedVisibleTypes,
             out InputChannel outInputChannel, out InsetsState insetsState,
-            out InsetsSourceControl[] activeControls, out Rect attachedFrame,
+            out InsetsSourceControl.Array activeControls, out Rect attachedFrame,
             out float[] sizeCompatScale);
     int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, in int userId,
-            in InsetsVisibilities requestedVisibilities, out InputChannel outInputChannel,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
-            out Rect attachedFrame, out float[] sizeCompatScale);
+            in int viewVisibility, in int layerStackId, in int userId, int requestedVisibleTypes,
+            out InputChannel outInputChannel, out InsetsState insetsState,
+            out InsetsSourceControl.Array activeControls, out Rect attachedFrame,
+            out float[] sizeCompatScale);
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out InsetsState insetsState,
             out Rect attachedFrame, out float[] sizeCompatScale);
-    @UnsupportedAppUsage
-    void remove(IWindow window);
+
+    /**
+     * Removes a clientToken from WMS, which includes unlinking the input channel.
+     *
+     * @param clientToken The token that should be removed. This will normally be the IWindow token
+     * for a standard window. It can also be the generic clientToken that was used when calling
+     * grantInputChannel
+     */
+    void remove(IBinder clientToken);
 
     /**
      * Change the parameters of a window.  You supply the
@@ -92,7 +98,7 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
+            out InsetsState insetsState, out InsetsSourceControl.Array activeControls,
             out Bundle bundle);
 
     /**
@@ -110,16 +116,6 @@ interface IWindowSession {
     oneway void relayoutAsync(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
             int lastSyncSeqId);
-
-    /*
-     * Notify the window manager that an application is relaunching and
-     * windows should be prepared for replacement.
-     *
-     * @param appToken The application
-     * @param childrenOnly Whether to only prepare child windows for replacement
-     * (for example when main windows are being reused via preservation).
-     */
-    oneway void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly);
 
     /**
      * Called by a client to report that it ran out of graphics memory.
@@ -151,12 +147,13 @@ interface IWindowSession {
             int seqId);
 
     @UnsupportedAppUsage
-    oneway void setInTouchMode(boolean showFocus);
-    @UnsupportedAppUsage
-    boolean getInTouchMode();
-
-    @UnsupportedAppUsage
     boolean performHapticFeedback(int effectId, boolean always);
+
+    /**
+     * Called by attached views to perform predefined haptic feedback without requiring VIBRATE
+     * permission.
+     */
+    oneway void performHapticFeedbackAsync(int effectId, boolean always);
 
     /**
      * Initiate the drag operation itself
@@ -165,6 +162,8 @@ interface IWindowSession {
      * @param flags See {@code View#startDragAndDrop}
      * @param surface Surface containing drag shadow image
      * @param touchSource See {@code InputDevice#getSource()}
+     * @param touchDeviceId device ID of last touch event
+     * @param pointerId pointer ID of last touch event
      * @param touchX X coordinate of last touch point
      * @param touchY Y coordinate of last touch point
      * @param thumbCenterX X coordinate for the position within the shadow image that should be
@@ -174,9 +173,9 @@ interface IWindowSession {
      * @param data Data transferred by drag and drop
      * @return Token of drag operation which will be passed to cancelDragAndDrop.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     IBinder performDrag(IWindow window, int flags, in SurfaceControl surface, int touchSource,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
+            int touchDeviceId, int touchPointerId, float touchX, float touchY, float thumbCenterX,
+            float thumbCenterY, in ClipData data);
 
     /**
      * Drops the content of the current drag operation for accessibility
@@ -284,14 +283,19 @@ interface IWindowSession {
     oneway void updateTapExcludeRegion(IWindow window, in Region region);
 
     /**
-     * Updates the requested visibilities of insets.
+     * Updates the requested visible types of insets.
      */
-    oneway void updateRequestedVisibilities(IWindow window, in InsetsVisibilities visibilities);
+    oneway void updateRequestedVisibleTypes(IWindow window, int requestedVisibleTypes);
 
     /**
      * Called when the system gesture exclusion has changed.
      */
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
+
+    /**
+     * Called when the DecorView gesture interception state has changed.
+     */
+    oneway void reportDecorViewGestureInterceptionChanged(IWindow window, in boolean intercepted);
 
     /**
      * Called when the keep-clear areas for this window have changed.
@@ -301,17 +305,21 @@ interface IWindowSession {
 
     /**
     * Request the server to call setInputWindowInfo on a given Surface, and return
-    * an input channel where the client can receive input.
+    * an input channel where the client can receive input. For windows, the clientToken should be
+    * the IWindow binder object. For other requests, the token can be any unique IBinder token to
+    * be used as unique identifier.
     */
-    void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
-            in IBinder hostInputToken, int flags, int privateFlags, int type,
-            in IBinder focusGrantToken, String inputHandleName, out InputChannel outInputChannel);
+    void grantInputChannel(int displayId, in SurfaceControl surface, in IBinder clientToken,
+            in IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
+            in IBinder windowToken, in IBinder focusGrantToken, String inputHandleName,
+            out InputChannel outInputChannel);
 
     /**
      * Update the flags on an input channel associated with a particular surface.
      */
     oneway void updateInputChannel(in IBinder channelToken, int displayId,
-            in SurfaceControl surface, int flags, int privateFlags, in Region region);
+            in SurfaceControl surface, int flags, int privateFlags, int inputFeatures,
+            in Region region);
 
     /**
      * Transfer window focus to an embedded window if the calling window has focus.
@@ -358,4 +366,8 @@ interface IWindowSession {
      * Returns whether this window needs to cancel draw and retry later.
      */
     boolean cancelDraw(IWindow window);
+
+    boolean transferEmbeddedTouchFocusToHost(IWindow embeddedWindow);
+
+    boolean transferHostTouchGestureToEmbedded(IWindow hostWindow, IBinder transferTouchToken);
 }

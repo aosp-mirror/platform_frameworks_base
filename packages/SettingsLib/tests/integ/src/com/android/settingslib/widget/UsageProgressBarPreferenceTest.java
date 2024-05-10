@@ -35,6 +35,8 @@ import androidx.preference.PreferenceViewHolder;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.settingslib.widget.preference.usage.R;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

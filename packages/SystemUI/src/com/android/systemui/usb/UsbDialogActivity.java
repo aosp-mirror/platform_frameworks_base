@@ -29,7 +29,7 @@ import android.widget.TextView;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 abstract class UsbDialogActivity extends AlertActivity
         implements DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener {

@@ -20,6 +20,7 @@ import static com.android.systemui.wallet.ui.WalletCardCarousel.CARD_ANIM_ALPHA_
 import static com.android.systemui.wallet.ui.WalletCardCarousel.CARD_ANIM_ALPHA_DURATION;
 
 import android.annotation.Nullable;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -39,7 +40,7 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.classifier.FalsingCollector;
 
 import java.util.List;
@@ -303,7 +304,12 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
                             ? mDeviceLockedActionOnClickListener
                             : v -> {
                         try {
-                            walletCard.getPendingIntent().send();
+
+                            BroadcastOptions options = BroadcastOptions.makeBasic();
+                            options.setInteractive(true);
+                            options.setPendingIntentBackgroundActivityStartMode(
+                                    BroadcastOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                            walletCard.getPendingIntent().send(options.toBundle());
                         } catch (PendingIntent.CanceledException e) {
                             Log.w(TAG, "Error sending pending intent for wallet card.");
                         }

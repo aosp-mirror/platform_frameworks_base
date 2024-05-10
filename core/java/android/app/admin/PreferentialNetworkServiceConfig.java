@@ -27,8 +27,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -543,9 +544,9 @@ public final class PreferentialNetworkServiceConfig implements Parcelable {
         pw.print("blockNonMatchingNetworks=");
         pw.println(mShouldBlockNonMatchingNetworks);
         pw.print("includedUids=");
-        pw.println(mIncludedUids);
+        pw.println(Arrays.toString(mIncludedUids));
         pw.print("excludedUids=");
-        pw.println(mExcludedUids);
+        pw.println(Arrays.toString(mExcludedUids));
     }
 
     @Override

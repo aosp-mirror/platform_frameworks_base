@@ -26,52 +26,10 @@ public interface FalsingCollector {
     void onSuccessfulUnlock();
 
     /** */
-    void onNotificationActive();
-
-    /** */
     void setShowingAod(boolean showingAod);
 
     /** */
-    void onNotificationStartDraggingDown();
-
-    /** */
-    void onNotificationStopDraggingDown();
-
-    /** */
-    void setNotificationExpanded();
-
-    /** */
-    void onQsDown();
-
-    /** */
-    void setQsExpanded(boolean expanded);
-
-    /** */
     boolean shouldEnforceBouncer();
-
-    /** */
-    void onTrackingStarted(boolean secure);
-
-    /** */
-    void onTrackingStopped();
-
-    /** */
-    void onLeftAffordanceOn();
-
-    /** */
-    void onCameraOn();
-
-    /** */
-    void onAffordanceSwipingStarted(boolean rightCorner);
-
-    /** */
-    void onAffordanceSwipingAborted();
-
-    /** */
-    void onStartExpandingFromPulse();
-
-    /** */
-    void onExpansionFromPulseStopped();
 
     /** */
     void onScreenOnFromTouch();
@@ -80,31 +38,10 @@ public interface FalsingCollector {
     boolean isReportingEnabled();
 
     /** */
-    void onUnlockHintStarted();
-
-    /** */
-    void onCameraHintStarted();
-
-    /** */
-    void onLeftAffordanceHintStarted();
-
-    /** */
     void onScreenTurningOn();
 
     /** */
     void onScreenOff();
-
-    /** */
-    void onNotificationStopDismissing();
-
-    /** */
-    void onNotificationDismissed();
-
-    /** */
-    void onNotificationStartDismissing();
-
-    /** */
-    void onNotificationDoubleTap(boolean accepted, float dx, float dy);
 
     /** */
     void onBouncerShown();
@@ -135,5 +72,11 @@ public interface FalsingCollector {
 
     /** */
     void updateFalseConfidence(FalsingClassifier.Result result);
+
+    /** Indicates an a11y action was made. */
+    void onA11yAction();
+
+    /** Initialize the class. */
+    void init();
 }
 

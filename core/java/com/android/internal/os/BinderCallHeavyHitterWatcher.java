@@ -33,6 +33,7 @@ import java.util.List;
  * A watcher which makes stats on the incoming binder transaction, if the amount of some type of
  * transactions exceeds the threshold, the listener will be notified.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class BinderCallHeavyHitterWatcher {
     private static final String TAG = "BinderCallHeavyHitterWatcher";
 

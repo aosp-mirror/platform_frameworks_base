@@ -16,16 +16,13 @@
 
 package com.android.systemui.navigationbar.buttons;
 
-import static com.android.systemui.animation.Interpolators.LINEAR;
+import static com.android.app.animation.Interpolators.LINEAR;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
-
-import com.android.systemui.Dependency;
-import com.android.systemui.assist.AssistManager;
 
 import java.util.ArrayList;
 
@@ -247,6 +244,14 @@ public class ButtonDispatcher {
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
             mViews.get(i).setOnTouchListener(mTouchListener);
+        }
+    }
+
+    public void animateLongPress(boolean isTouchDown, boolean shrink, long durationMs) {
+        for (int i = 0; i < mViews.size(); i++) {
+            if (mViews.get(i) instanceof ButtonInterface) {
+                ((ButtonInterface) mViews.get(i)).animateLongPress(isTouchDown, shrink, durationMs);
+            }
         }
     }
 

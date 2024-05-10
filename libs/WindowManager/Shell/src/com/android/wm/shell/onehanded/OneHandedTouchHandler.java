@@ -19,7 +19,7 @@ package com.android.wm.shell.onehanded;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.graphics.Rect;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Looper;
 import android.view.InputChannel;
 import android.view.InputEvent;
@@ -129,7 +129,7 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
     private void updateIsEnabled() {
         disposeInputChannel();
         if (mIsEnabled) {
-            mInputMonitor = InputManager.getInstance().monitorGestureInput(
+            mInputMonitor = InputManagerGlobal.getInstance().monitorGestureInput(
                     "onehanded-touch", DEFAULT_DISPLAY);
             try {
                 mMainExecutor.executeBlocking(() -> {

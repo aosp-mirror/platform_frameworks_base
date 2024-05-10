@@ -24,6 +24,8 @@ import android.hardware.security.keymint.EcCurve;
 import android.hardware.security.keymint.HardwareAuthenticatorType;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
+import android.os.StrictMode;
+import android.security.Flags;
 import android.security.GateKeeper;
 import android.security.KeyStore2;
 import android.security.KeyStoreParameter;
@@ -36,6 +38,7 @@ import android.security.keystore.KeyProtection;
 import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.WrappedKeyEntry;
 import android.system.keystore2.AuthenticatorSpec;
+import android.system.keystore2.Authorization;
 import android.system.keystore2.Domain;
 import android.system.keystore2.IKeystoreSecurityLevel;
 import android.system.keystore2.KeyDescriptor;
@@ -79,13 +82,11 @@ import java.security.spec.NamedParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.NoSuchElementException;
 
 import javax.crypto.SecretKey;
 
@@ -165,6 +166,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         KeyDescriptor descriptor = makeKeyDescriptor(alias);
 
         try {
+            StrictMode.noteDiskRead();
             return mKeyStore.getKeyEntry(descriptor);
         } catch (android.security.KeyStoreException e) {
             if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
@@ -252,6 +254,15 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         } catch (CertificateException e) {
             Log.w(NAME, "Couldn't parse certificates in keystore", e);
             return new ArrayList<X509Certificate>();
+        }
+    }
+
+    private static boolean getMgf1DigestSetterFlag() {
+        try {
+            return Flags.mgf1DigestSetterV2();
+        } catch (SecurityException e) {
+            Log.w(NAME, "Cannot read MGF1 Digest setter flag value", e);
+            return false;
         }
     }
 
@@ -448,6 +459,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             assertCanReplace(alias, targetDomain, mNamespace, descriptor);
 
             try {
+                StrictMode.noteDiskWrite();
                 mKeyStore.updateSubcomponents(
                         ((AndroidKeyStorePrivateKey) key).getKeyIdDescriptor(),
                         userCertBytes, chainBytes);
@@ -524,24 +536,41 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         padding
                 ));
                 if (padding == KeymasterDefs.KM_PAD_RSA_OAEP) {
-                    if (spec.isDigestsSpecified()) {
-                        boolean hasDefaultMgf1DigestBeenAdded = false;
-                        for (String digest : spec.getDigests()) {
+                    if (spec.isMgf1DigestsSpecified()) {
+                        for (String mgf1Digest : spec.getMgf1Digests()) {
                             importArgs.add(KeyStore2ParameterUtils.makeEnum(
                                     KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
-                                    KeyProperties.Digest.toKeymaster(digest)
+                                    KeyProperties.Digest.toKeymaster(mgf1Digest)
                             ));
-                            hasDefaultMgf1DigestBeenAdded |= digest.equals(DEFAULT_MGF1_DIGEST);
                         }
+                    } else {
                         /* Because of default MGF1 digest is SHA-1. It has to be added in Key
                          * characteristics. Otherwise, crypto operations will fail with Incompatible
                          * MGF1 digest.
+                         * If the MGF1 Digest setter flag isn't set, then the condition in the
+                         * if clause above must be false (cannot have MGF1 digests specified if the
+                         * flag was off). In that case, in addition to adding the default MGF1
+                         * digest, we have to add all the other digests as MGF1 Digests.
+                         *
                          */
-                        if (!hasDefaultMgf1DigestBeenAdded) {
-                            importArgs.add(KeyStore2ParameterUtils.makeEnum(
-                                    KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
-                                    KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
-                            ));
+                        importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                                KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
+                                KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
+                        ));
+                        if (!getMgf1DigestSetterFlag()) {
+                            final int defaultMgf1Digest = KeyProperties.Digest.toKeymaster(
+                                    DEFAULT_MGF1_DIGEST);
+                            for (String digest : spec.getDigests()) {
+                                int digestToAddAsMgf1Digest = KeyProperties.Digest.toKeymaster(
+                                        digest);
+                                // Do not add the default MGF1 digest as it has been added above.
+                                if (digestToAddAsMgf1Digest != defaultMgf1Digest) {
+                                    importArgs.add(KeyStore2ParameterUtils.makeEnum(
+                                            KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
+                                            digestToAddAsMgf1Digest
+                                    ));
+                                }
+                            }
                         }
                     }
                 }
@@ -598,6 +627,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                     importArgs, flags, pkcs8EncodedPrivateKeyBytes);
 
             try {
+                StrictMode.noteDiskWrite();
                 mKeyStore.updateSubcomponents(metadata.key, userCertBytes, chainBytes);
             } catch (android.security.KeyStoreException e) {
                 mKeyStore.deleteKey(metadata.key);
@@ -850,6 +880,12 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         params.getMaxUsageCount()
                 ));
             }
+
+            if (params.isRollbackResistant()) {
+                importArgs.add(KeyStore2ParameterUtils.makeBool(
+                        KeymasterDefs.KM_TAG_ROLLBACK_RESISTANT
+                ));
+            }
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new KeyStoreException(e);
         }
@@ -933,6 +969,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         KeyEntryResponse response = null;
         try {
+            StrictMode.noteDiskRead();
             response = mKeyStore.getKeyEntry(wrappingkey);
         } catch (android.security.KeyStoreException e) {
             throw new KeyStoreException("Failed to import wrapped key. Keystore error code: "
@@ -962,7 +999,34 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             authenticatorSpecs.add(authSpec);
         }
 
+        if (parts.length > 2) {
+            @KeyProperties.EncryptionPaddingEnum int padding =
+                    KeyProperties.EncryptionPadding.toKeymaster(parts[2]);
+            if (padding == KeymasterDefs.KM_PAD_RSA_OAEP
+                    && response.metadata != null
+                    && response.metadata.authorizations != null) {
+                Authorization[] keyCharacteristics = response.metadata.authorizations;
+
+                for (Authorization authorization : keyCharacteristics) {
+                    // Add default MGF1 digest SHA-1
+                    // when wrapping key has KM_TAG_RSA_OAEP_MGF_DIGEST tag
+                    if (authorization.keyParameter.tag
+                            == KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST) {
+                        // Default MGF1 digest is SHA-1
+                        // and KeyMint only supports default MGF1 digest crypto operations
+                        // for importWrappedKey.
+                        args.add(KeyStore2ParameterUtils.makeEnum(
+                                KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
+                                KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
+                        ));
+                        break;
+                    }
+                }
+            }
+        }
+
         try {
+            StrictMode.noteDiskWrite();
             securityLevel.importWrappedKey(
                     wrappedKey, wrappingkey,
                     entry.getWrappedKeyBytes(),
@@ -1023,6 +1087,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
 
         try {
+            StrictMode.noteDiskWrite();
             mKeyStore.updateSubcomponents(makeKeyDescriptor(alias),
                     null /* publicCert - unused when used as pure certificate store. */,
                     encoded);
@@ -1035,6 +1100,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     public void engineDeleteEntry(String alias) throws KeyStoreException {
         KeyDescriptor descriptor = makeKeyDescriptor(alias);
         try {
+            StrictMode.noteDiskWrite();
             mKeyStore.deleteKey(descriptor);
         } catch (android.security.KeyStoreException e) {
             if (e.getErrorCode() != ResponseCode.KEY_NOT_FOUND) {
@@ -1043,26 +1109,23 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
     }
 
-    private Set<String> getUniqueAliases() {
+    private KeyDescriptor[] getAliasesBatch(String startPastAlias) {
         try {
-            final KeyDescriptor[] keys = mKeyStore.list(
+            StrictMode.noteDiskRead();
+            return mKeyStore.listBatch(
                     getTargetDomain(),
-                    mNamespace
+                    mNamespace,
+                    startPastAlias
             );
-            final Set<String> aliases = new HashSet<>(keys.length);
-            for (KeyDescriptor d : keys) {
-                aliases.add(d.alias);
-            }
-            return aliases;
         } catch (android.security.KeyStoreException e) {
             Log.e(TAG, "Failed to list keystore entries.", e);
-            return new HashSet<>();
+            return new KeyDescriptor[0];
         }
     }
 
     @Override
     public Enumeration<String> engineAliases() {
-        return Collections.enumeration(getUniqueAliases());
+        return new KeyEntriesEnumerator();
     }
 
     @Override
@@ -1073,12 +1136,19 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         return getKeyMetadata(alias) != null;
     }
-
     @Override
     public int engineSize() {
-        return getUniqueAliases().size();
+        try {
+            StrictMode.noteDiskRead();
+            return mKeyStore.getNumberOfEntries(
+                    getTargetDomain(),
+                    mNamespace
+            );
+        } catch (android.security.KeyStoreException e) {
+            Log.e(TAG, "Failed to get the number of keystore entries.", e);
+            return 0;
+        }
     }
-
     @Override
     public boolean engineIsKeyEntry(String alias) {
         return isKeyEntry(alias);
@@ -1133,6 +1203,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         KeyDescriptor[] keyDescriptors = null;
         try {
+            StrictMode.noteDiskRead();
             keyDescriptors = mKeyStore.list(
                     getTargetDomain(),
                     mNamespace
@@ -1249,6 +1320,40 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             throw new KeyStoreException(
                     "Entry must be a PrivateKeyEntry, SecretKeyEntry, WrappedKeyEntry "
                             + "or TrustedCertificateEntry; was " + entry);
+        }
+    }
+
+    private class KeyEntriesEnumerator implements Enumeration<String> {
+        private KeyDescriptor[] mCurrentBatch;
+        private int mCurrentEntry = 0;
+        private String mLastAlias = null;
+        private KeyEntriesEnumerator() {
+            getAndValidateNextBatch();
+        }
+
+        private void getAndValidateNextBatch() {
+            mCurrentBatch = getAliasesBatch(mLastAlias);
+            mCurrentEntry = 0;
+        }
+
+        public boolean hasMoreElements() {
+            return (mCurrentBatch != null) && (mCurrentBatch.length > 0);
+        }
+
+        public String nextElement() {
+            if ((mCurrentBatch == null) || (mCurrentBatch.length == 0)) {
+                throw new NoSuchElementException("Error while fetching entries.");
+            }
+            final KeyDescriptor currentEntry = mCurrentBatch[mCurrentEntry];
+            mLastAlias = currentEntry.alias;
+
+            mCurrentEntry++;
+            // This was the last entry in the batch.
+            if (mCurrentEntry >= mCurrentBatch.length) {
+                getAndValidateNextBatch();
+            }
+
+            return mLastAlias;
         }
     }
 }

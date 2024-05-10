@@ -1379,7 +1379,7 @@ public final class DocumentsContract {
 
             final Bundle out = content.call(parentDocumentUri.getAuthority(),
                     METHOD_CREATE_DOCUMENT, null, in);
-            return out.getParcelable(DocumentsContract.EXTRA_URI);
+            return out.getParcelable(DocumentsContract.EXTRA_URI, android.net.Uri.class);
         } catch (Exception e) {
             Log.w(TAG, "Failed to create document", e);
             rethrowIfNecessary(e);
@@ -1445,7 +1445,7 @@ public final class DocumentsContract {
 
             final Bundle out = content.call(documentUri.getAuthority(),
                     METHOD_RENAME_DOCUMENT, null, in);
-            final Uri outUri = out.getParcelable(DocumentsContract.EXTRA_URI);
+            final Uri outUri = out.getParcelable(DocumentsContract.EXTRA_URI, android.net.Uri.class);
             return (outUri != null) ? outUri : documentUri;
         } catch (Exception e) {
             Log.w(TAG, "Failed to rename document", e);
@@ -1494,7 +1494,7 @@ public final class DocumentsContract {
 
             final Bundle out = content.call(sourceDocumentUri.getAuthority(),
                     METHOD_COPY_DOCUMENT, null, in);
-            return out.getParcelable(DocumentsContract.EXTRA_URI);
+            return out.getParcelable(DocumentsContract.EXTRA_URI, android.net.Uri.class);
         } catch (Exception e) {
             Log.w(TAG, "Failed to copy document", e);
             rethrowIfNecessary(e);
@@ -1522,7 +1522,7 @@ public final class DocumentsContract {
 
             final Bundle out = content.call(sourceDocumentUri.getAuthority(),
                     METHOD_MOVE_DOCUMENT, null, in);
-            return out.getParcelable(DocumentsContract.EXTRA_URI);
+            return out.getParcelable(DocumentsContract.EXTRA_URI, android.net.Uri.class);
         } catch (Exception e) {
             Log.w(TAG, "Failed to move document", e);
             rethrowIfNecessary(e);
@@ -1642,7 +1642,7 @@ public final class DocumentsContract {
 
             final Bundle out = content.call(treeUri.getAuthority(),
                     METHOD_FIND_DOCUMENT_PATH, null, in);
-            return out.getParcelable(DocumentsContract.EXTRA_RESULT);
+            return out.getParcelable(DocumentsContract.EXTRA_RESULT, android.provider.DocumentsContract.Path.class);
         } catch (Exception e) {
             Log.w(TAG, "Failed to find path", e);
             rethrowIfNecessary(e);
@@ -1715,7 +1715,7 @@ public final class DocumentsContract {
 
             final Bundle out = content.call(uri.getAuthority(),
                     METHOD_CREATE_WEB_LINK_INTENT, null, in);
-            return out.getParcelable(DocumentsContract.EXTRA_RESULT);
+            return out.getParcelable(DocumentsContract.EXTRA_RESULT, android.content.IntentSender.class);
         } catch (Exception e) {
             Log.w(TAG, "Failed to create a web link intent", e);
             rethrowIfNecessary(e);

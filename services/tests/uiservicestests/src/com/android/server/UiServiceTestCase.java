@@ -16,8 +16,10 @@ package com.android.server;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Build;
@@ -44,8 +46,8 @@ public class UiServiceTestCase {
     protected static final String PKG_R = "com.example.r";
 
     @Rule
-    public final TestableContext mContext =
-            new TestableContext(InstrumentationRegistry.getContext(), null);
+    public TestableContext mContext =
+            spy(new TestableContext(InstrumentationRegistry.getContext(), null));
 
     protected TestableContext getContext() {
         return mContext;
@@ -81,6 +83,12 @@ public class UiServiceTestCase {
         LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
         when(mUgmInternal.checkGrantUriPermission(
                 anyInt(), anyString(), any(Uri.class), anyInt(), anyInt())).thenReturn(-1);
+
+        Mockito.doReturn(new Intent()).when(mContext).registerReceiverAsUser(
+                any(), any(), any(), any(), any());
+        Mockito.doReturn(new Intent()).when(mContext).registerReceiver(any(), any());
+        Mockito.doReturn(new Intent()).when(mContext).registerReceiver(any(), any(), anyInt());
+        Mockito.doNothing().when(mContext).unregisterReceiver(any());
     }
 
     @After

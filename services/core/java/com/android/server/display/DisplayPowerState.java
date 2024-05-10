@@ -26,6 +26,8 @@ import android.util.Slog;
 import android.view.Choreographer;
 import android.view.Display;
 
+import com.android.server.display.utils.DebugUtils;
+
 import java.io.PrintWriter;
 
 /**
@@ -48,7 +50,9 @@ import java.io.PrintWriter;
 final class DisplayPowerState {
     private static final String TAG = "DisplayPowerState";
 
-    private static final boolean DEBUG = false;
+    // To enable these logs, run:
+    // 'adb shell setprop persist.log.tag.DisplayPowerState DEBUG && adb reboot'
+    private static final boolean DEBUG = DebugUtils.isDebuggable(TAG);
     private static String COUNTER_COLOR_FADE = "ColorFadeLevel";
 
     private final Handler mHandler;
@@ -145,7 +149,7 @@ final class DisplayPowerState {
     public void setScreenState(int state) {
         if (mScreenState != state) {
             if (DEBUG) {
-                Slog.d(TAG, "setScreenState: state=" + state);
+                Slog.w(TAG, "setScreenState: state=" + Display.stateToString(state));
             }
 
             mScreenState = state;
@@ -316,7 +320,9 @@ final class DisplayPowerState {
     public void stop() {
         mStopped = true;
         mPhotonicModulator.interrupt();
-        dismissColorFade();
+        if (mColorFade != null) {
+            mColorFade.destroy();
+        }
         mCleanListener = null;
         mHandler.removeCallbacksAndMessages(null);
     }
@@ -337,6 +343,15 @@ final class DisplayPowerState {
 
         mPhotonicModulator.dump(pw);
         if (mColorFade != null) mColorFade.dump(pw);
+    }
+
+    /**
+     * Resets the screen state to unknown. Useful when the underlying display-device changes for the
+     * LogicalDisplay and we do not know the last state that was sent to it.
+     */
+    void resetScreenState() {
+        mScreenState = Display.STATE_UNKNOWN;
+        mScreenReady = false;
     }
 
     private void scheduleScreenUpdate() {
@@ -497,6 +512,8 @@ final class DisplayPowerState {
                     boolean valid = state != Display.STATE_UNKNOWN && !Float.isNaN(brightnessState);
                     boolean changed = stateChanged || backlightChanged;
                     if (!valid || !changed) {
+                        mStateChangeInProgress = false;
+                        mBacklightChangeInProgress = false;
                         try {
                             mLock.wait();
                         } catch (InterruptedException ex) {

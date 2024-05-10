@@ -21,11 +21,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ExceptionUtils;
+
+import com.android.modules.utils.FastDataInput;
+import com.android.modules.utils.FastDataOutput;
 
 import libcore.util.HexEncoding;
 
 import org.junit.Assume;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,6 +44,8 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,6 +53,9 @@ import java.util.function.Consumer;
 
 @RunWith(Parameterized.class)
 public class FastDataTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private final boolean use4ByteSequence;
 
     private static final String TEST_SHORT_STRING = "a";
@@ -54,21 +64,44 @@ public class FastDataTest {
 
     @Parameters(name = "use4ByteSequence={0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] { {true}, {false} });
+        if (RavenwoodRule.isUnderRavenwood()) {
+            // TODO: 4-byte sequences are only supported on ART
+            return Arrays.asList(new Object[][]{{false}});
+        } else {
+            return Arrays.asList(new Object[][]{{true}, {false}});
+        }
     }
 
     public FastDataTest(boolean use4ByteSequence) {
         this.use4ByteSequence = use4ByteSequence;
     }
 
+    @NonNull
+    private FastDataInput createFastDataInput(@NonNull InputStream in, int bufferSize) {
+        if (use4ByteSequence) {
+            return new ArtFastDataInput(in, bufferSize);
+        } else {
+            return new FastDataInput(in, bufferSize);
+        }
+    }
+
+    @NonNull
+    private FastDataOutput createFastDataOutput(@NonNull OutputStream out, int bufferSize) {
+        if (use4ByteSequence) {
+            return new ArtFastDataOutput(out, bufferSize);
+        } else {
+            return new FastDataOutput(out, bufferSize);
+        }
+    }
+
     @Test
     public void testEndOfFile_Int() throws Exception {
-        try (FastDataInput in = new FastDataInput(new ByteArrayInputStream(
-                new byte[] { 1 }), 1000, use4ByteSequence)) {
+        try (FastDataInput in = createFastDataInput(new ByteArrayInputStream(
+                new byte[] { 1 }), 1000)) {
             assertThrows(EOFException.class, () -> in.readInt());
         }
-        try (FastDataInput in = new FastDataInput(new ByteArrayInputStream(
-                new byte[] { 1, 1, 1, 1 }), 1000, use4ByteSequence)) {
+        try (FastDataInput in = createFastDataInput(new ByteArrayInputStream(
+                new byte[] { 1, 1, 1, 1 }), 1000)) {
             assertEquals(1, in.readByte());
             assertThrows(EOFException.class, () -> in.readInt());
         }
@@ -76,25 +109,25 @@ public class FastDataTest {
 
     @Test
     public void testEndOfFile_String() throws Exception {
-        try (FastDataInput in = new FastDataInput(new ByteArrayInputStream(
-                new byte[] { 1 }), 1000, use4ByteSequence)) {
+        try (FastDataInput in = createFastDataInput(new ByteArrayInputStream(
+                new byte[] { 1 }), 1000)) {
             assertThrows(EOFException.class, () -> in.readUTF());
         }
-        try (FastDataInput in = new FastDataInput(new ByteArrayInputStream(
-                new byte[] { 1, 1, 1, 1 }), 1000, use4ByteSequence)) {
+        try (FastDataInput in = createFastDataInput(new ByteArrayInputStream(
+                new byte[] { 1, 1, 1, 1 }), 1000)) {
             assertThrows(EOFException.class, () -> in.readUTF());
         }
     }
 
     @Test
     public void testEndOfFile_Bytes_Small() throws Exception {
-        try (FastDataInput in = new FastDataInput(new ByteArrayInputStream(
-                new byte[] { 1, 1, 1, 1 }), 1000, use4ByteSequence)) {
+        try (FastDataInput in = createFastDataInput(new ByteArrayInputStream(
+                new byte[] { 1, 1, 1, 1 }), 1000)) {
             final byte[] tmp = new byte[10];
             assertThrows(EOFException.class, () -> in.readFully(tmp));
         }
-        try (FastDataInput in = new FastDataInput(new ByteArrayInputStream(
-                new byte[] { 1, 1, 1, 1 }), 1000, use4ByteSequence)) {
+        try (FastDataInput in = createFastDataInput(new ByteArrayInputStream(
+                new byte[] { 1, 1, 1, 1 }), 1000)) {
             final byte[] tmp = new byte[10_000];
             assertThrows(EOFException.class, () -> in.readFully(tmp));
         }
@@ -103,8 +136,7 @@ public class FastDataTest {
     @Test
     public void testUTF_Bounds() throws Exception {
         final char[] buf = new char[65_534];
-        try (FastDataOutput out = new FastDataOutput(new ByteArrayOutputStream(),
-                BOUNCE_SIZE, use4ByteSequence)) {
+        try (FastDataOutput out = createFastDataOutput(new ByteArrayOutputStream(), BOUNCE_SIZE)) {
             // Writing simple string will fit fine
             Arrays.fill(buf, '!');
             final String simple = new String(buf);
@@ -132,17 +164,15 @@ public class FastDataTest {
             doTranscodeWrite(out);
             out.flush();
 
-            final FastDataInput in = new FastDataInput(
-                    new ByteArrayInputStream(outStream.toByteArray()),
-                    BOUNCE_SIZE, use4ByteSequence);
+            final FastDataInput in = createFastDataInput(
+                    new ByteArrayInputStream(outStream.toByteArray()), BOUNCE_SIZE);
             doTranscodeRead(in);
         }
 
         // Verify that fast data can be read by upstream
         {
             final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-            final FastDataOutput out = new FastDataOutput(outStream,
-                    BOUNCE_SIZE, use4ByteSequence);
+            final FastDataOutput out = createFastDataOutput(outStream, BOUNCE_SIZE);
             doTranscodeWrite(out);
             out.flush();
 
@@ -299,7 +329,7 @@ public class FastDataTest {
         final DataOutput slowData = new DataOutputStream(slowStream);
 
         final ByteArrayOutputStream fastStream = new ByteArrayOutputStream();
-        final FastDataOutput fastData = FastDataOutput.obtainUsing3ByteSequences(fastStream);
+        final FastDataOutput fastData = FastDataOutput.obtain(fastStream);
 
         for (int cp = Character.MIN_CODE_POINT; cp < Character.MAX_CODE_POINT; cp++) {
             if (Character.isValidCodePoint(cp)) {
@@ -416,16 +446,14 @@ public class FastDataTest {
     private void doBounce(@NonNull ThrowingConsumer<FastDataOutput> out,
             @NonNull ThrowingConsumer<FastDataInput> in, int count) throws Exception {
         final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        final FastDataOutput outData = new FastDataOutput(outStream,
-                BOUNCE_SIZE, use4ByteSequence);
+        final FastDataOutput outData = createFastDataOutput(outStream, BOUNCE_SIZE);
         for (int i = 0; i < count; i++) {
             out.accept(outData);
         }
         outData.flush();
 
         final ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
-        final FastDataInput inData = new FastDataInput(inStream,
-                BOUNCE_SIZE, use4ByteSequence);
+        final FastDataInput inData = createFastDataInput(inStream, BOUNCE_SIZE);
         for (int i = 0; i < count; i++) {
             in.accept(inData);
         }

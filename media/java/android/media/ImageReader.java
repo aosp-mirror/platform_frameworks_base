@@ -18,7 +18,11 @@ package android.media;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.graphics.GraphicBuffer;
 import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
@@ -29,6 +33,7 @@ import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
 import android.hardware.SyncFence;
 import android.hardware.camera2.MultiResolutionImageReader;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -84,6 +89,38 @@ public class ImageReader implements AutoCloseable {
      * acquire more than that.
      */
     private static final int ACQUIRE_MAX_IMAGES = 2;
+
+    /**
+     * <p>
+     * Flag to gate correct exception thrown by {@code #detachImage}.
+     * </p>
+     * <p>
+     * {@code #detachImage} is documented as throwing {@link java.lang.IllegalStateException} in
+     * the event of an error; a native helper method to this threw
+     * {@link java.lang.RuntimeException} if the surface was abandoned while detaching the
+     * {@code Image}.
+     * <p>
+     * This previously undocumented exception behavior continues through Android T.
+     * </p>
+     * <p>
+     * After Android T, the native helper method only throws {@code IllegalStateExceptions} in
+     * accordance with the documentation.
+     * </p>
+     * <p>
+     * {@code #detachImage} will now throw only ISEs if it runs into errors while detaching
+     * the image. Behavior on apps targeting API levels <= T remains unchanged.
+     * </p>
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long DETACH_THROWS_ISE_ONLY = 236825255L;
+
+    /**
+     * Cached value of {@link #DETACH_THROWS_ISE_ONLY} flag to prevent repeated calls when
+     * detaching image.
+     */
+    private final boolean mDetachThrowsIseOnly =
+            CompatChanges.isChangeEnabled(DETACH_THROWS_ISE_ONLY);
 
     /**
      * <p>
@@ -813,10 +850,10 @@ public class ImageReader implements AutoCloseable {
      * </p>
      * <p>
      * After this call, the ImageReader no longer owns this image, and the image
-     * ownership can be transfered to another entity like {@link ImageWriter}
+     * ownership can be transferred to another entity like {@link ImageWriter}
      * via {@link ImageWriter#queueInputImage}. It's up to the new owner to
      * release the resources held by this image. For example, if the ownership
-     * of this image is transfered to an {@link ImageWriter}, the image will be
+     * of this image is transferred to an {@link ImageWriter}, the image will be
      * freed by the ImageWriter after the image data consumption is done.
      * </p>
      * <p>
@@ -837,16 +874,22 @@ public class ImageReader implements AutoCloseable {
      * @throws IllegalStateException If the ImageReader or image have been
      *             closed, or the has been detached, or has not yet been
      *             acquired.
+     * @throws RuntimeException If there is an error detaching {@code Image} from {@code Surface}.
+     *              {@code RuntimeException} is only thrown for applications targeting SDK <=
+     *              {@link android.os.Build.VERSION_CODES#TIRAMISU}.
+     *              For applications targeting SDK >
+     *              {@link android.os.Build.VERSION_CODES#TIRAMISU},
+     *              this method only throws {@code IllegalStateException}.
      * @hide
      */
-     public void detachImage(Image image) {
-       if (image == null) {
+    public void detachImage(@Nullable Image image) {
+        if (image == null) {
            throw new IllegalArgumentException("input image must not be null");
-       }
-       if (!isImageOwnedbyMe(image)) {
+        }
+        if (!isImageOwnedbyMe(image)) {
            throw new IllegalArgumentException("Trying to detach an image that is not owned by"
                    + " this ImageReader");
-       }
+        }
 
         SurfaceImage si = (SurfaceImage) image;
         si.throwISEIfImageIsInvalid();
@@ -855,7 +898,7 @@ public class ImageReader implements AutoCloseable {
             throw new IllegalStateException("Image was already detached from this ImageReader");
         }
 
-        nativeDetachImage(image);
+        nativeDetachImage(image, mDetachThrowsIseOnly);
         si.clearSurfacePlanes();
         si.mPlanes = null;
         si.setDetached(true);
@@ -1156,6 +1199,7 @@ public class ImageReader implements AutoCloseable {
                 case ImageFormat.RAW_PRIVATE:
                 case ImageFormat.DEPTH_JPEG:
                 case ImageFormat.HEIC:
+                case ImageFormat.JPEG_R:
                     width = ImageReader.this.getWidth();
                     break;
                 default:
@@ -1174,6 +1218,7 @@ public class ImageReader implements AutoCloseable {
                 case ImageFormat.RAW_PRIVATE:
                 case ImageFormat.DEPTH_JPEG:
                 case ImageFormat.HEIC:
+                case ImageFormat.JPEG_R:
                     height = ImageReader.this.getHeight();
                     break;
                 default:
@@ -1386,7 +1431,7 @@ public class ImageReader implements AutoCloseable {
     private synchronized native void nativeClose();
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();
-    private synchronized native int nativeDetachImage(Image i);
+    private synchronized native int nativeDetachImage(Image i, boolean throwISEOnly);
     private synchronized native void nativeDiscardFreeBuffers();
 
     /**

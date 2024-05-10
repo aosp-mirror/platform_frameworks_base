@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.AppOpsManager.OP_NONE;
+
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -66,29 +67,29 @@ public final class BugReportHandlerUtil {
      * Launches a bugreport-allowlisted app to handle a bugreport.
      *
      * <p>Allows a bug report handler app to take bugreports on the user's behalf. The handler can
-     * be predefined in the config, meant to be launched with the primary user. The user can
-     * override this with a different (or same) handler app on possibly a different user. This is
-     * useful for capturing bug reports from work profile, for instance.
-     *
-     * @param context Context
-     * @return true if there is a bugreport-allowlisted app to handle a bugreport, or false
+     * be predefined in the config, meant to be launched with the current foreground user. The user
+     * can override this with a different (or same) handler app on possibly a different
+     * user profile. This is useful for capturing bug reports from work profile, for instance.
+     * @param userContext Context of the current foreground user
+     * @return true if there is a bugreport-allow-listed app to handle a bugreport, or false
      * otherwise
      */
-    static boolean launchBugReportHandlerApp(Context context) {
-        if (!isBugReportHandlerEnabled(context)) {
+    static boolean launchBugReportHandlerApp(Context userContext) {
+        if (!isBugReportHandlerEnabled(userContext)) {
             return false;
         }
 
-        String handlerApp = getCustomBugReportHandlerApp(context);
+        String handlerApp = getCustomBugReportHandlerApp(userContext);
         if (isShellApp(handlerApp)) {
             return false;
         }
 
-        int handlerUser = getCustomBugReportHandlerUser(context);
+        int handlerUser = getCustomBugReportHandlerUser(userContext);
         if (!isValidBugReportHandlerApp(handlerApp)) {
-            handlerApp = getDefaultBugReportHandlerApp(context);
-            handlerUser = UserHandle.USER_SYSTEM;
-        } else if (getBugReportHandlerAppReceivers(context, handlerApp, handlerUser).isEmpty()) {
+            handlerApp = getDefaultBugReportHandlerApp(userContext);
+            handlerUser = userContext.getUserId();
+        } else if (getBugReportHandlerAppReceivers(userContext, handlerApp, handlerUser)
+                .isEmpty()) {
             // It looks like the settings are outdated, reset outdated settings.
             //
             // i.e.
@@ -97,21 +98,23 @@ public final class BugReportHandlerUtil {
             // === RESULT ===
             // The chosen bugreport handler app is outdated because the profile is removed,
             // so reset the chosen app and profile
-            handlerApp = getDefaultBugReportHandlerApp(context);
-            handlerUser = UserHandle.USER_SYSTEM;
-            resetCustomBugreportHandlerAppAndUser(context);
+            handlerApp = getDefaultBugReportHandlerApp(userContext);
+            handlerUser = userContext.getUserId();
+            resetCustomBugreportHandlerAppAndUser(userContext);
         }
 
         if (isShellApp(handlerApp) || !isValidBugReportHandlerApp(handlerApp)
-                || getBugReportHandlerAppReceivers(context, handlerApp, handlerUser).isEmpty()) {
+                || getBugReportHandlerAppReceivers(userContext, handlerApp, handlerUser)
+                .isEmpty()) {
             return false;
         }
 
-        if (getBugReportHandlerAppResponseReceivers(context, handlerApp, handlerUser).isEmpty()) {
+        if (getBugReportHandlerAppResponseReceivers(userContext, handlerApp, handlerUser)
+                .isEmpty()) {
             // Just try to launch bugreport handler app to handle bugreport request
             // because the bugreport handler app is old and not support to provide response to
             // let BugReportHandlerUtil know it is available or not.
-            launchBugReportHandlerApp(context, handlerApp, handlerUser);
+            launchBugReportHandlerApp(userContext, handlerApp, handlerUser);
             return true;
         }
 
@@ -124,7 +127,7 @@ public final class BugReportHandlerUtil {
         try {
             // Handler app's BroadcastReceiver should call setResultCode(Activity.RESULT_OK) to
             // let BugreportHandlerResponseBroadcastReceiver know the handler app is available.
-            context.sendOrderedBroadcastAsUser(intent,
+            userContext.sendOrderedBroadcastAsUser(intent,
                     UserHandle.of(handlerUser),
                     android.Manifest.permission.DUMP,
                     OP_NONE, /* options= */ null,
@@ -166,13 +169,14 @@ public final class BugReportHandlerUtil {
 
     private static String getCustomBugReportHandlerApp(Context context) {
         // Get the package of custom bugreport handler app
-        return Settings.Global.getString(context.getContentResolver(),
-                Settings.Global.CUSTOM_BUGREPORT_HANDLER_APP);
+        return Settings.Secure.getStringForUser(context.getContentResolver(),
+                Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP, context.getUserId());
     }
 
     private static int getCustomBugReportHandlerUser(Context context) {
-        return Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.CUSTOM_BUGREPORT_HANDLER_USER, UserHandle.USER_NULL);
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER, UserHandle.USER_NULL,
+                context.getUserId());
     }
 
     private static boolean isShellApp(String app) {
@@ -219,11 +223,11 @@ public final class BugReportHandlerUtil {
     private static void resetCustomBugreportHandlerAppAndUser(Context context) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            Settings.Global.putString(context.getContentResolver(),
-                    Settings.Global.CUSTOM_BUGREPORT_HANDLER_APP,
+            Settings.Secure.putString(context.getContentResolver(),
+                    Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
                     getDefaultBugReportHandlerApp(context));
-            Settings.Global.putInt(context.getContentResolver(),
-                    Settings.Global.CUSTOM_BUGREPORT_HANDLER_USER, UserHandle.USER_SYSTEM);
+            Settings.Secure.putInt(context.getContentResolver(),
+                    Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER, context.getUserId());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

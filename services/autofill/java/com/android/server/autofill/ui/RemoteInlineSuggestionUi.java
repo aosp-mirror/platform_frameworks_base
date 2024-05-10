@@ -221,6 +221,7 @@ final class RemoteInlineSuggestionUi {
         if (surfacePackage != null) {
             surfacePackage.release();
         }
+        mRemoteInlineSuggestionViewConnector.onRender();
     }
 
     private void handleOnClick() {

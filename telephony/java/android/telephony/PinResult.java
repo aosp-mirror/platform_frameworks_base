@@ -25,6 +25,8 @@ import android.os.Parcelable;
 
 import com.android.internal.telephony.PhoneConstants;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -46,6 +48,7 @@ public final class PinResult implements Parcelable {
             PIN_RESULT_TYPE_FAILURE,
             PIN_RESULT_TYPE_ABORTED,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface PinResultType {}
 
     /**

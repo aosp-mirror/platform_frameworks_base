@@ -30,6 +30,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.media.AudioManager;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
@@ -57,8 +58,9 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.QuickStepContract;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
@@ -79,7 +81,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private final KeyButtonRipple mRipple;
     private final OverviewProxyService mOverviewProxyService;
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    private final InputManager mInputManager;
+    private final InputManagerGlobal mInputManagerGlobal;
     private final Paint mOvalBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private float mDarkIntensity;
     private boolean mHasOvalBg = false;
@@ -145,12 +147,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     }
 
     public KeyButtonView(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, InputManager.getInstance(), new UiEventLoggerImpl());
+        this(context, attrs, defStyle, InputManagerGlobal.getInstance(), new UiEventLoggerImpl());
     }
 
     @VisibleForTesting
-    public KeyButtonView(Context context, AttributeSet attrs, int defStyle, InputManager manager,
-            UiEventLogger uiEventLogger) {
+    public KeyButtonView(Context context, AttributeSet attrs, int defStyle,
+            InputManagerGlobal manager, UiEventLogger uiEventLogger) {
         super(context, attrs);
         mUiEventLogger = uiEventLogger;
 
@@ -173,7 +175,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
         mRipple = new KeyButtonRipple(context, this, R.dimen.key_button_ripple_max_width);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
-        mInputManager = manager;
+        mInputManagerGlobal = manager;
         setBackground(mRipple);
         setWillNotDraw(false);
         forceHasOverlappingRendering(false);
@@ -412,10 +414,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         logSomePresses(action, flags);
         if (mCode == KeyEvent.KEYCODE_BACK && flags != KeyEvent.FLAG_LONG_PRESS) {
             Log.i(TAG, "Back button event: " + KeyEvent.actionToString(action));
-            if (action == MotionEvent.ACTION_UP) {
-                mOverviewProxyService.notifyBackAction((flags & KeyEvent.FLAG_CANCELED) == 0,
-                        -1, -1, true /* isButton */, false /* gestureSwipeLeft */);
-            }
         }
         final int repeatCount = (flags & KeyEvent.FLAG_LONG_PRESS) != 0 ? 1 : 0;
         final KeyEvent ev = new KeyEvent(mDownTime, when, action, mCode, repeatCount,
@@ -432,7 +430,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         if (displayId != INVALID_DISPLAY) {
             ev.setDisplayId(displayId);
         }
-        mInputManager.injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        mInputManagerGlobal.injectInputEvent(ev,
+                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
     @Override
@@ -441,9 +440,20 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         if (mCode != KeyEvent.KEYCODE_UNKNOWN) {
             sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
         }
+        // When aborting long-press home and Launcher has requested to override it, fade out the
+        // ripple more quickly.
+        if (mCode == KeyEvent.KEYCODE_HOME && Dependency.get(AssistManager.class)
+                .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS)) {
+            mRipple.speedUpNextFade();
+        }
         setPressed(false);
         mRipple.abortDelayedRipple();
         mGestureAborted = true;
+    }
+
+    /** Run when the ripple for this button is next invisible. Only used once. */
+    public void setOnRippleInvisibleRunnable(Runnable onRippleInvisibleRunnable) {
+        mRipple.setOnInvisibleRunnable(onRippleInvisibleRunnable);
     }
 
     @Override

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "Bitmap"
 #include <log/log.h>
 
 #include "android/graphics/bitmap.h"
@@ -24,6 +22,11 @@
 
 #include <GraphicsJNI.h>
 #include <hwui/Bitmap.h>
+#include <SkBitmap.h>
+#include <SkColorSpace.h>
+#include <SkImageInfo.h>
+#include <SkRefCnt.h>
+#include <SkStream.h>
 #include <utils/Color.h>
 
 using namespace android;

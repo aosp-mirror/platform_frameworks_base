@@ -40,7 +40,7 @@ public final class SurfaceAnimationThread extends ServiceThread {
             sInstance = new SurfaceAnimationThread();
             sInstance.start();
             sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_WINDOW_MANAGER);
-            sHandler = new Handler(sInstance.getLooper());
+            sHandler = makeSharedHandler(sInstance.getLooper());
         }
     }
 

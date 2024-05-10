@@ -1,15 +1,7 @@
 {
-    "presubmit": [
-        {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.recoverysystem."
-                },
-                {
-                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-                }
-            ]
-        }
-    ]
+  "presubmit": [
+    {
+      "name": "FrameworksServicesTests_recoverysystem"
+    }
+  ]
 }

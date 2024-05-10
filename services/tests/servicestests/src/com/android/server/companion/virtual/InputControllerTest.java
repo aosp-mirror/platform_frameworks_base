@@ -16,16 +16,19 @@
 
 package com.android.server.companion.virtual;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputManagerInternal;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,7 +42,9 @@ import android.view.WindowManager;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
+import com.android.server.input.InputManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +55,8 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class InputControllerTest {
+    private static final String LANGUAGE_TAG = "en-US";
+    private static final String LAYOUT_TYPE = "qwerty";
 
     @Mock
     private InputManagerInternal mInputManagerInternalMock;
@@ -81,14 +88,43 @@ public class InputControllerTest {
 
         // Allow virtual devices to be created on the looper thread for testing.
         final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
-        mInputController = new InputController(new Object(), mNativeWrapperMock,
+        mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 InstrumentationRegistry.getTargetContext().getSystemService(WindowManager.class),
                 threadVerifier);
     }
 
+    @After
+    public void tearDown() {
+        mInputManagerMockHelper.tearDown();
+    }
+
     @Test
-    public void unregisterInputDevice_allMiceUnregistered_clearPointerDisplayId() {
+    public void registerInputDevice_deviceCreation_hasDeviceId() throws Exception {
+        final IBinder device1Token = new Binder("device1");
+        mInputController.createMouse("mouse", /*vendorId= */ 1, /*productId= */ 1, device1Token,
+                /* displayId= */ 1);
+        int device1Id = mInputController.getInputDeviceId(device1Token);
+
+        final IBinder device2Token = new Binder("device2");
+        mInputController.createKeyboard("keyboard", /*vendorId= */2, /*productId= */ 2,
+                device2Token, 2, LANGUAGE_TAG, LAYOUT_TYPE);
+        int device2Id = mInputController.getInputDeviceId(device2Token);
+
+        assertWithMessage("Different devices should have different id").that(
+                device1Id).isNotEqualTo(device2Id);
+
+
+        int[] deviceIds = InputManagerGlobal.getInstance().getInputDeviceIds();
+        assertWithMessage("InputManager's deviceIds list should contain id of device 1").that(
+                deviceIds).asList().contains(device1Id);
+        assertWithMessage("InputManager's deviceIds list should contain id of device 2").that(
+                deviceIds).asList().contains(device2Id);
+
+    }
+
+    @Test
+    public void unregisterInputDevice_allMiceUnregistered_clearPointerDisplayId() throws Exception {
         final IBinder deviceToken = new Binder();
         mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
@@ -101,18 +137,82 @@ public class InputControllerTest {
     }
 
     @Test
-    public void unregisterInputDevice_anotherMouseExists_setPointerDisplayIdOverride() {
+    public void unregisterInputDevice_anotherMouseExists_setPointerDisplayIdOverride()
+            throws Exception {
         final IBinder deviceToken = new Binder();
-        mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
+        mInputController.createMouse("mouse1", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
-        verify(mNativeWrapperMock).openUinputMouse(eq("name"), eq(1), eq(1), anyString());
+        verify(mNativeWrapperMock).openUinputMouse(eq("mouse1"), eq(1), eq(1), anyString());
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
         final IBinder deviceToken2 = new Binder();
-        mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken2,
+        mInputController.createMouse("mouse2", /*vendorId= */ 1, /*productId= */ 1, deviceToken2,
                 /* displayId= */ 2);
-        verify(mNativeWrapperMock, times(2)).openUinputMouse(eq("name"), eq(1), eq(1), anyString());
+        verify(mNativeWrapperMock).openUinputMouse(eq("mouse2"), eq(1), eq(1), anyString());
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(2));
         mInputController.unregisterInputDevice(deviceToken);
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
+    }
+
+    @Test
+    public void createNavigationTouchpad_hasDeviceId() throws Exception {
+        final IBinder deviceToken = new Binder();
+        mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
+                deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
+
+        int deviceId = mInputController.getInputDeviceId(deviceToken);
+        int[] deviceIds = InputManagerGlobal.getInstance().getInputDeviceIds();
+
+        assertWithMessage("InputManager's deviceIds list should contain id of the device").that(
+            deviceIds).asList().contains(deviceId);
+    }
+
+    @Test
+    public void createNavigationTouchpad_setsTypeAssociation() throws Exception {
+        final IBinder deviceToken = new Binder();
+        mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
+                deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
+
+        verify(mInputManagerInternalMock).setTypeAssociation(
+                startsWith("virtualNavigationTouchpad:"), eq("touchNavigation"));
+    }
+
+    @Test
+    public void createAndUnregisterNavigationTouchpad_unsetsTypeAssociation() throws Exception {
+        final IBinder deviceToken = new Binder();
+        mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
+                deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
+
+        mInputController.unregisterInputDevice(deviceToken);
+
+        verify(mInputManagerInternalMock).unsetTypeAssociation(
+                startsWith("virtualNavigationTouchpad:"));
+    }
+
+    @Test
+    public void createKeyboard_addAndRemoveKeyboardLayoutAssociation() throws Exception {
+        final IBinder deviceToken = new Binder("device");
+
+        mInputController.createKeyboard("keyboard", /*vendorId= */2, /*productId= */ 2, deviceToken,
+                2, LANGUAGE_TAG, LAYOUT_TYPE);
+        verify(mInputManagerInternalMock).addKeyboardLayoutAssociation(anyString(),
+                eq(LANGUAGE_TAG), eq(LAYOUT_TYPE));
+
+        mInputController.unregisterInputDevice(deviceToken);
+        verify(mInputManagerInternalMock).removeKeyboardLayoutAssociation(anyString());
+    }
+
+    @Test
+    public void createInputDevice_duplicateNamesAreNotAllowed() throws Exception {
+        final IBinder deviceToken1 = new Binder("deviceToken1");
+        final IBinder deviceToken2 = new Binder("deviceToken2");
+
+        final String sharedDeviceName = "DeviceName";
+
+        mInputController.createDpad(sharedDeviceName, /*vendorId= */4, /*productId=*/4,
+                deviceToken1, 1);
+        assertThrows("Device names need to be unique",
+                InputController.DeviceCreationException.class,
+                () -> mInputController.createDpad(
+                        sharedDeviceName, /*vendorId= */5, /*productId=*/5, deviceToken2, 2));
     }
 }

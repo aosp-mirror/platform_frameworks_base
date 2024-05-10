@@ -29,7 +29,7 @@ AHardwareBuffer* allocHardwareBuffer() {
             .height = 16,
             .layers = 1,
             .format = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
-            .usage = AHARDWAREBUFFER_USAGE_CPU_READ_RARELY | AHARDWAREBUFFER_USAGE_CPU_WRITE_RARELY,
+            .usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
     };
     constexpr int kSucceeded = 0;
     int status = AHardwareBuffer_allocate(&desc, &buffer);
@@ -46,7 +46,7 @@ RENDERTHREAD_TEST(AutoBackendTextureRelease, makeImage_invalid) {
 
     EXPECT_EQ(1, TestUtils::getUsageCount(textureRelease));
 
-    // SkImage::MakeFromTexture should fail if given null GrDirectContext.
+    // SkImages::BorrowTextureFrom should fail if given null GrDirectContext.
     textureRelease->makeImage(buffer, HAL_DATASPACE_UNKNOWN, /*context = */ nullptr);
 
     EXPECT_EQ(1, TestUtils::getUsageCount(textureRelease));

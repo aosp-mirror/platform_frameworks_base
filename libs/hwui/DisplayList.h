@@ -54,6 +54,8 @@ public:
         mImpl->updateChildren(std::move(updateFn));
     }
 
+    void visit(std::function<void(const RenderNode&)> func) const { mImpl->visit(std::move(func)); }
+
     [[nodiscard]] explicit operator bool() const {
         return mImpl.get() != nullptr;
     }
@@ -142,6 +144,8 @@ public:
     [[nodiscard]] bool hasText() const {
         return mImpl && mImpl->hasText();
     }
+
+    [[nodiscard]] bool hasFill() const { return mImpl && mImpl->hasFill(); }
 
     void applyColorTransform(ColorTransform transform) {
         if (mImpl) {

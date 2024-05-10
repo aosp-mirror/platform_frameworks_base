@@ -36,7 +36,9 @@ import android.view.Surface
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
+import com.android.systemui.util.asIndenting
+import java.io.PrintWriter
 
 /**
  *  A class that handles common actions of display cutout view.
@@ -86,27 +88,35 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         onUpdate()
     }
 
-    fun onDisplayChanged(newDisplayUniqueId: String?) {
+    fun updateConfiguration(newDisplayUniqueId: String?) {
+        val info = DisplayInfo()
+        context.display?.getDisplayInfo(info)
         val oldMode: Display.Mode? = displayMode
-        val display: Display? = context.display
-        displayMode = display?.mode
+        displayMode = info.mode
 
-        if (displayUniqueId != display?.uniqueId) {
-            displayUniqueId = display?.uniqueId
-            shouldDrawCutout = DisplayCutout.getFillBuiltInDisplayCutout(
-                context.resources, displayUniqueId
-            )
-        }
+        updateDisplayUniqueId(info.uniqueId)
 
         // Skip if display mode or cutout hasn't changed.
         if (!displayModeChanged(oldMode, displayMode) &&
-                display?.cutout == displayInfo.displayCutout) {
+                displayInfo.displayCutout == info.displayCutout &&
+                displayRotation == info.rotation) {
             return
         }
-        if (newDisplayUniqueId == display?.uniqueId) {
+        if (newDisplayUniqueId == info.uniqueId) {
+            displayRotation = info.rotation
             updateCutout()
             updateProtectionBoundingPath()
             onUpdate()
+        }
+    }
+
+    open fun updateDisplayUniqueId(newDisplayUniqueId: String?) {
+        if (displayUniqueId != newDisplayUniqueId) {
+            displayUniqueId = newDisplayUniqueId
+            shouldDrawCutout = DisplayCutout.getFillBuiltInDisplayCutout(
+                    context.resources, displayUniqueId
+            )
+            invalidate()
         }
     }
 
@@ -161,7 +171,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
             return
         }
         cutoutPath.reset()
-        display.getDisplayInfo(displayInfo)
+        context.display?.getDisplayInfo(displayInfo)
         displayInfo.displayCutout?.cutoutPath?.let { path -> cutoutPath.set(path) }
         invalidate()
     }
@@ -199,11 +209,11 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
         return result
     }
 
-    open fun enableShowProtection(show: Boolean) {
-        if (showProtection == show) {
+    open fun enableShowProtection(isCameraActive: Boolean) {
+        if (showProtection == isCameraActive) {
             return
         }
-        showProtection = show
+        showProtection = isCameraActive
         updateProtectionBoundingPath()
         // Delay the relayout until the end of the animation when hiding the cutout,
         // otherwise we'd clip it.
@@ -315,5 +325,19 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
                 else -> throw IllegalArgumentException("Unknown rotation: $rotation")
             }
         }
+    }
+
+    open fun dump(pw: PrintWriter) {
+        val ipw = pw.asIndenting()
+        ipw.increaseIndent()
+        ipw.println("DisplayCutoutBaseView:")
+        ipw.increaseIndent()
+        ipw.println("shouldDrawCutout=$shouldDrawCutout")
+        ipw.println("cutout=${displayInfo.displayCutout}")
+        ipw.println("cameraProtectionProgress=$cameraProtectionProgress")
+        ipw.println("protectionRect=$protectionRect")
+        ipw.println("protectionRectOrig=$protectionRectOrig")
+        ipw.decreaseIndent()
+        ipw.decreaseIndent()
     }
 }

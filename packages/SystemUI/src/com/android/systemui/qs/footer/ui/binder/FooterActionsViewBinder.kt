@@ -24,45 +24,41 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.R
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.binder.IconViewBinder
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.people.ui.view.PeopleViewBinder.bind
-import com.android.systemui.qs.FooterActionsView
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
-import kotlinx.coroutines.flow.collect
+import com.android.systemui.res.R
+import javax.inject.Inject
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /** A ViewBinder for [FooterActionsViewBinder]. */
-object FooterActionsViewBinder {
-    /**
-     * Create a [FooterActionsView] that can later be [bound][bind] to a [FooterActionsViewModel].
-     */
-    @JvmStatic
-    fun create(context: Context): FooterActionsView {
+@SysUISingleton
+class FooterActionsViewBinder @Inject constructor() {
+    /** Create a view that can later be [bound][bind] to a [FooterActionsViewModel]. */
+    fun create(context: Context): LinearLayout {
         return LayoutInflater.from(context).inflate(R.layout.footer_actions, /* root= */ null)
-            as FooterActionsView
+            as LinearLayout
     }
 
     /** Bind [view] to [viewModel]. */
-    @JvmStatic
     fun bind(
-        view: FooterActionsView,
+        view: LinearLayout,
         viewModel: FooterActionsViewModel,
         qsVisibilityLifecycleOwner: LifecycleOwner,
     ) {
-        // Remove all children of the FooterActionsView that are used by the old implementation.
-        // TODO(b/242040009): Clean up the XML once the old implementation is removed.
-        view.removeAllViews()
+        view.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
 
         // Add the views used by this new implementation.
         val context = view.context
@@ -101,6 +97,7 @@ object FooterActionsViewBinder {
         var previousForegroundServices: FooterActionsForegroundServicesButtonViewModel? = null
         var previousUserSwitcher: FooterActionsButtonViewModel? = null
 
+        // Listen for ViewModel updates when the View is attached.
         view.repeatWhenAttached {
             val attachedScope = this.lifecycleScope
 
@@ -109,14 +106,13 @@ object FooterActionsViewBinder {
                 // TODO(b/242040009): Should this move somewhere else?
                 launch { viewModel.observeDeviceMonitoringDialogRequests(view.context) }
 
-                // Make sure we set the correct visibility and alpha even when QS are not currently
-                // shown.
-                launch {
-                    viewModel.isVisible.collect { isVisible -> view.isInvisible = !isVisible }
-                }
-
+                // Make sure we set the correct alphas even when QS are not currently shown.
                 launch { viewModel.alpha.collect { view.alpha = it } }
-                launch { viewModel.backgroundAlpha.collect { view.backgroundAlpha = it } }
+                launch {
+                    viewModel.backgroundAlpha.collect {
+                        view.background?.alpha = (it * 255).roundToInt()
+                    }
+                }
             }
 
             // Listen for model changes only when QS are visible.
@@ -125,7 +121,7 @@ object FooterActionsViewBinder {
                 launch {
                     viewModel.security.collect { security ->
                         if (previousSecurity != security) {
-                            bindSecurity(securityHolder, security)
+                            bindSecurity(view.context, securityHolder, security)
                             previousSecurity = security
                         }
                     }
@@ -159,6 +155,7 @@ object FooterActionsViewBinder {
     }
 
     private fun bindSecurity(
+        quickSettingsContext: Context,
         securityHolder: TextButtonViewHolder,
         security: FooterActionsSecurityButtonViewModel?,
     ) {
@@ -171,9 +168,12 @@ object FooterActionsViewBinder {
         // Make sure that the chevron is visible and that the button is clickable if there is a
         // listener.
         val chevron = securityHolder.chevron
-        if (security.onClick != null) {
+        val onClick = security.onClick
+        if (onClick != null) {
             securityView.isClickable = true
-            securityView.setOnClickListener(security.onClick)
+            securityView.setOnClickListener {
+                onClick(quickSettingsContext, Expandable.fromView(securityView))
+            }
             chevron.isVisible = true
         } else {
             securityView.isClickable = false
@@ -205,15 +205,19 @@ object FooterActionsViewBinder {
             foregroundServicesWithNumberView.isVisible = false
 
             foregroundServicesWithTextView.isVisible = true
-            foregroundServicesWithTextView.setOnClickListener(foregroundServices.onClick)
+            foregroundServicesWithTextView.setOnClickListener {
+                foregroundServices.onClick(Expandable.fromView(foregroundServicesWithTextView))
+            }
             foregroundServicesWithTextHolder.text.text = foregroundServices.text
             foregroundServicesWithTextHolder.newDot.isVisible = foregroundServices.hasNewChanges
         } else {
             // Small button with the number only.
             foregroundServicesWithTextView.isVisible = false
 
-            foregroundServicesWithNumberView.visibility = View.VISIBLE
-            foregroundServicesWithNumberView.setOnClickListener(foregroundServices.onClick)
+            foregroundServicesWithNumberView.isVisible = true
+            foregroundServicesWithNumberView.setOnClickListener {
+                foregroundServices.onClick(Expandable.fromView(foregroundServicesWithNumberView))
+            }
             foregroundServicesWithNumberHolder.number.text = foregroundServicesCount.toString()
             foregroundServicesWithNumberHolder.number.contentDescription = foregroundServices.text
             foregroundServicesWithNumberHolder.newDot.isVisible = foregroundServices.hasNewChanges
@@ -222,13 +226,20 @@ object FooterActionsViewBinder {
 
     private fun bindButton(button: IconButtonViewHolder, model: FooterActionsButtonViewModel?) {
         val buttonView = button.view
+        buttonView.id = model?.id ?: View.NO_ID
         buttonView.isVisible = model != null
         if (model == null) {
             return
         }
 
-        buttonView.setBackgroundResource(model.background)
-        buttonView.setOnClickListener(model.onClick)
+        val backgroundResource =
+            when (model.backgroundColor) {
+                R.attr.shadeInactive -> R.drawable.qs_footer_action_circle
+                R.attr.shadeActive -> R.drawable.qs_footer_action_circle_color
+                else -> error("Unsupported icon background resource ${model.backgroundColor}")
+            }
+        buttonView.setBackgroundResource(backgroundResource)
+        buttonView.setOnClickListener { model.onClick(Expandable.fromView(buttonView)) }
 
         val icon = model.icon
         val iconView = button.icon

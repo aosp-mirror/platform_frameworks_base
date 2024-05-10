@@ -21,6 +21,7 @@ import android.content.ComponentName;
 
 import com.android.internal.util.JournaledFile;
 
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -28,11 +29,6 @@ import java.util.function.Function;
  * to go through the upgrade process.
  */
 public interface PolicyUpgraderDataProvider {
-    /**
-     * Returns true if the storage manager indicates file-based encryption is enabled.
-     */
-    boolean storageManagerIsFileBasedEncryptionEnabled();
-
     /**
      * Returns the journaled policies file for a given user.
      */
@@ -53,4 +49,9 @@ public interface PolicyUpgraderDataProvider {
      * Returns the users to upgrade.
      */
     int[] getUsersForUpgrade();
+
+    /**
+     * Returns packages suspended by platform for a given user.
+     */
+    List<String> getPlatformSuspendedPackages(int userId);
 }

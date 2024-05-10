@@ -26,9 +26,15 @@
 using namespace android;
 using namespace android::uirenderer;
 
+#define ASSUME_GLES()                                                      \
+    if (WebViewFunctor_queryPlatformRenderMode() != RenderMode::OpenGL_ES) \
+    GTEST_SKIP() << "Not in GLES, skipping test"
+
 TEST(WebViewFunctor, createDestroyGLES) {
+    ASSUME_GLES();
     int functor = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+            nullptr, TestUtils::createMockFunctorCallbacks(RenderMode::OpenGL_ES),
+            RenderMode::OpenGL_ES);
     ASSERT_NE(-1, functor);
     WebViewFunctor_release(functor);
     TestUtils::runOnRenderThreadUnmanaged([](renderthread::RenderThread&) {
@@ -41,8 +47,10 @@ TEST(WebViewFunctor, createDestroyGLES) {
 }
 
 TEST(WebViewFunctor, createSyncHandleGLES) {
+    ASSUME_GLES();
     int functor = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+            nullptr, TestUtils::createMockFunctorCallbacks(RenderMode::OpenGL_ES),
+            RenderMode::OpenGL_ES);
     ASSERT_NE(-1, functor);
     auto handle = WebViewFunctorManager::instance().handleFor(functor);
     ASSERT_TRUE(handle);
@@ -82,8 +90,10 @@ TEST(WebViewFunctor, createSyncHandleGLES) {
 }
 
 TEST(WebViewFunctor, createSyncDrawGLES) {
+    ASSUME_GLES();
     int functor = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+            nullptr, TestUtils::createMockFunctorCallbacks(RenderMode::OpenGL_ES),
+            RenderMode::OpenGL_ES);
     ASSERT_NE(-1, functor);
     auto handle = WebViewFunctorManager::instance().handleFor(functor);
     ASSERT_TRUE(handle);
@@ -108,9 +118,11 @@ TEST(WebViewFunctor, createSyncDrawGLES) {
     EXPECT_EQ(1, counts.destroyed);
 }
 
-TEST(WebViewFunctor, contextDestroyed) {
+TEST(WebViewFunctor, contextDestroyedGLES) {
+    ASSUME_GLES();
     int functor = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+            nullptr, TestUtils::createMockFunctorCallbacks(RenderMode::OpenGL_ES),
+            RenderMode::OpenGL_ES);
     ASSERT_NE(-1, functor);
     auto handle = WebViewFunctorManager::instance().handleFor(functor);
     ASSERT_TRUE(handle);

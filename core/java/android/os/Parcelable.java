@@ -16,9 +16,10 @@
 
 package android.os;
 
-import android.annotation.NonNull;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,8 +27,9 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Interface for classes whose instances can be written to
  * and restored from a {@link Parcel}.  Classes implementing the Parcelable
- * interface must also have a non-null static field called <code>CREATOR</code>
- * of a type that implements the {@link Parcelable.Creator} interface.
+ * interface must also have a non-null public static field called
+ * <code>CREATOR</code> of a type that implements the {@link Parcelable.Creator}
+ * interface.
  *
  * <p>A typical implementation of Parcelable is:</p>
  *
@@ -85,6 +87,7 @@ import java.lang.annotation.RetentionPolicy;
  *     }
  * }</pre></section></div></div>
  */
+@RavenwoodKeepWholeClass
 public interface Parcelable {
     /** @hide */
     @IntDef(flag = true, prefix = { "PARCELABLE_" }, value = {

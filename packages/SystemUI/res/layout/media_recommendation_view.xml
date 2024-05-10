@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<!-- Layout for media recommendation item inside QSPanel carousel -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Album cover -->
+    <ImageView
+        android:id="@+id/media_cover"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:translationZ="0dp"
+        android:scaleType="matrix"
+        android:adjustViewBounds="true"
+        android:clipToOutline="true"
+        android:layerType="hardware"
+        android:background="@drawable/bg_smartspace_media_item"/>
+
+    <!-- App icon -->
+    <com.android.internal.widget.CachingIconView
+        android:id="@+id/media_rec_app_icon"
+        android:layout_width="@dimen/qs_media_rec_album_icon_size"
+        android:layout_height="@dimen/qs_media_rec_album_icon_size"
+        android:minWidth="@dimen/qs_media_rec_album_icon_size"
+        android:minHeight="@dimen/qs_media_rec_album_icon_size"
+        android:layout_marginStart="@dimen/qs_media_info_spacing"
+        android:layout_marginTop="@dimen/qs_media_info_spacing"/>
+
+    <!-- Artist name -->
+    <TextView
+        android:id="@+id/media_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_media_info_spacing"
+        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginBottom="@dimen/qs_media_rec_album_title_bottom_margin"
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:singleLine="true"
+        android:textSize="12sp"
+        android:gravity="top"
+        android:layout_gravity="bottom"
+        android:importantForAccessibility="no"/>
+
+    <!-- Album name -->
+    <TextView
+        android:id="@+id/media_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_rec_album_subtitle_height"
+        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginStart="@dimen/qs_media_info_spacing"
+        android:layout_marginBottom="@dimen/qs_media_info_spacing"
+        android:fontFamily="@*android:string/config_headlineFontFamily"
+        android:singleLine="true"
+        android:textSize="11sp"
+        android:gravity="center_vertical"
+        android:layout_gravity="bottom"
+        android:importantForAccessibility="no"/>
+
+    <!-- Seek Bar -->
+    <SeekBar
+        android:id="@+id/media_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+        android:layout_gravity="bottom"
+        android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
+        android:thumb="@android:color/transparent"
+        android:splitTrack="false"
+        android:clickable="false"
+        android:progressTint="?android:attr/textColorPrimary"
+        android:progressBackgroundTint="?android:attr/textColorTertiary"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
+        android:layout_marginEnd="@dimen/qs_media_info_spacing"
+        android:layout_marginStart="@dimen/qs_media_info_spacing"
+        android:layout_marginBottom="@dimen/qs_media_info_spacing"/>
+</merge>

@@ -17,11 +17,14 @@
 package com.android.server.hdmi;
 
 /**
- * Action to query and track the audio status of the System Audio device when enabling or using
- * Absolute Volume Control. Must be removed when AVC is disabled. Performs two main functions:
- * 1. When enabling AVC: queries the starting audio status of the System Audio device and
- *    enables the feature upon receiving a response.
- * 2. While AVC is enabled: monitors <Report Audio Status> messages from the System Audio device and
+ * Action to query and track the audio status of the System Audio device when using
+ * absolute volume behavior, or adjust-only absolute volume behavior. Must be removed when
+ * neither behavior is used.
+ *
+ * Performs two main functions:
+ * 1. When enabling AVB: queries the starting audio status of the System Audio device and
+ *    adopts the appropriate volume behavior upon receiving a response.
+ * 2. While AVB is enabled: monitors <Report Audio Status> messages from the System Audio device and
  *    notifies AudioService if the audio status changes.
  */
 final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
@@ -67,6 +70,15 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
         return false;
     }
 
+    /**
+     * If AVB has been enabled, send <Give Audio Status> and notify AudioService of the response.
+     */
+    void requestAndUpdateAudioStatus() {
+        if (mState == STATE_MONITOR_AUDIO_STATUS) {
+            sendGiveAudioStatus();
+        }
+    }
+
     private boolean handleReportAudioStatus(HdmiCecMessage cmd) {
         if (mTargetAddress != cmd.getSource() || cmd.getParams().length == 0) {
             return false;
@@ -74,16 +86,31 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
 
         boolean mute = HdmiUtils.isAudioStatusMute(cmd);
         int volume = HdmiUtils.getAudioStatusVolume(cmd);
+
+        // If the volume is out of range, report it as handled and ignore the message.
+        // According to the spec, such values are either reserved or indicate an unknown volume.
+        if (volume == Constants.UNKNOWN_VOLUME) {
+            return true;
+        }
+
         AudioStatus audioStatus = new AudioStatus(volume, mute);
         if (mState == STATE_WAIT_FOR_INITIAL_AUDIO_STATUS) {
-            localDevice().getService().enableAbsoluteVolumeControl(audioStatus);
+            localDevice().getService().enableAbsoluteVolumeBehavior(audioStatus);
             mState = STATE_MONITOR_AUDIO_STATUS;
         } else if (mState == STATE_MONITOR_AUDIO_STATUS) {
-            if (audioStatus.getVolume() != mLastAudioStatus.getVolume()) {
-                localDevice().getService().notifyAvcVolumeChange(audioStatus.getVolume());
+            // On TV panels, we notify AudioService even if neither volume nor mute state changed.
+            // This ensures that the user sees volume UI if they tried to adjust the AVR's volume,
+            // even if the new volume level is the same as the previous one.
+            boolean notifyAvbVolumeToShowUi = localDevice().getService().isTvDevice()
+                    && audioStatus.equals(mLastAudioStatus);
+
+            if (audioStatus.getVolume() != mLastAudioStatus.getVolume()
+                    || notifyAvbVolumeToShowUi) {
+                localDevice().getService().notifyAvbVolumeChange(audioStatus.getVolume());
             }
+
             if (audioStatus.getMute() != mLastAudioStatus.getMute()) {
-                localDevice().getService().notifyAvcMuteChange(audioStatus.getMute());
+                localDevice().getService().notifyAvbMuteChange(audioStatus.getMute());
             }
         }
         mLastAudioStatus = audioStatus;

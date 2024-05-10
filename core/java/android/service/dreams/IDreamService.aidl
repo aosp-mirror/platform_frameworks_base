@@ -22,7 +22,7 @@ import android.os.IRemoteCallback;
  * @hide
  */
 oneway interface IDreamService {
-    void attach(IBinder windowToken, boolean canDoze, IRemoteCallback started);
+    void attach(IBinder windowToken, boolean canDoze, boolean isPreviewMode, IRemoteCallback started);
     void detach();
     void wakeUp();
 }

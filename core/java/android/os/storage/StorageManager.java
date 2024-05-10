@@ -18,17 +18,10 @@ package android.os.storage;
 
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
-import static android.app.AppOpsManager.OP_READ_MEDIA_AUDIO;
 import static android.app.AppOpsManager.OP_READ_MEDIA_IMAGES;
-import static android.app.AppOpsManager.OP_READ_MEDIA_VIDEO;
-import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
-import static android.app.AppOpsManager.OP_WRITE_MEDIA_AUDIO;
-import static android.app.AppOpsManager.OP_WRITE_MEDIA_IMAGES;
-import static android.app.AppOpsManager.OP_WRITE_MEDIA_VIDEO;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.PER_USER_RANGE;
@@ -1366,6 +1359,15 @@ public class StorageManager {
     }
 
     /** {@hide} */
+    public long getInternalStorageBlockDeviceSize() {
+        try {
+            return mStorageManager.getInternalStorageBlockDeviceSize();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
     public void mkdirs(File file) {
         BlockGuard.getVmPolicy().onPathAccess(file.getAbsolutePath());
         try {
@@ -1391,7 +1393,7 @@ public class StorageManager {
                 // Package name can be null if the activity thread is running but the app
                 // hasn't bound yet. In this case we fall back to the first package in the
                 // current UID. This works for runtime permissions as permission state is
-                // per UID and permission realted app ops are updated for all UID packages.
+                // per UID and permission related app ops are updated for all UID packages.
                 String[] packageNames = ActivityThread.getPackageManager().getPackagesForUid(
                         android.os.Process.myUid());
                 if (packageNames == null || packageNames.length <= 0) {
@@ -1587,46 +1589,72 @@ public class StorageManager {
                 DEFAULT_FULL_THRESHOLD_BYTES);
     }
 
-    /** {@hide} */
-    public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
+    /**
+     * Creates the keys for a user's credential-encrypted (CE) and device-encrypted (DE) storage.
+     * <p>
+     * This creates the user's CE key and DE key for internal storage, then adds them to the kernel.
+     * Then, if the user is not ephemeral, this stores the DE key (encrypted) on flash.  (The CE key
+     * is not stored until {@link IStorageManager#setCeStorageProtection()}.)
+     * <p>
+     * This does not create the CE and DE directories themselves.  For that, see {@link
+     * #prepareUserStorage()}.
+     * <p>
+     * This is only intended to be called by UserManagerService, as part of creating a user.
+     *
+     * @param userId ID of the user
+     * @param ephemeral whether the user is ephemeral
+     * @throws RuntimeException on error.  The user's keys already existing is considered an error.
+     * @hide
+     */
+    public void createUserStorageKeys(int userId, boolean ephemeral) {
         try {
-            mStorageManager.createUserKey(userId, serialNumber, ephemeral);
+            mStorageManager.createUserStorageKeys(userId, ephemeral);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Destroys the keys for a user's credential-encrypted (CE) and device-encrypted (DE) storage.
+     * <p>
+     * This evicts the keys from the kernel (if present), which "locks" the corresponding
+     * directories.  Then, this deletes the encrypted keys from flash.  This operates on all the
+     * user's CE and DE keys, for both internal and adoptable storage.
+     * <p>
+     * This does not destroy the CE and DE directories themselves.  For that, see {@link
+     * #destroyUserStorage()}.
+     * <p>
+     * This is only intended to be called by UserManagerService, as part of removing a user.
+     *
+     * @param userId ID of the user
+     * @throws RuntimeException on error.  On error, as many things as possible are still destroyed.
+     * @hide
+     */
+    public void destroyUserStorageKeys(int userId) {
+        try {
+            mStorageManager.destroyUserStorageKeys(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Locks the user's credential-encrypted (CE) storage.
+     *
+     * @hide
+     */
+    public void lockCeStorage(int userId) {
+        try {
+            mStorageManager.lockCeStorage(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /** {@hide} */
-    public void destroyUserKey(int userId) {
+    public void prepareUserStorage(String volumeUuid, int userId, int flags) {
         try {
-            mStorageManager.destroyUserKey(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
-        try {
-            mStorageManager.unlockUserKey(userId, serialNumber, secret);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    public void lockUserKey(int userId) {
-        try {
-            mStorageManager.lockUserKey(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
-        try {
-            mStorageManager.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
+            mStorageManager.prepareUserStorage(volumeUuid, userId, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1641,20 +1669,23 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
-    @TestApi
-    public static boolean isUserKeyUnlocked(int userId) {
+    /**
+     * Returns true if the user's credential-encrypted (CE) storage is unlocked.
+     *
+     * @hide
+     */
+    public static boolean isCeStorageUnlocked(int userId) {
         if (sStorageManager == null) {
             sStorageManager = IStorageManager.Stub
                     .asInterface(ServiceManager.getService("mount"));
         }
         if (sStorageManager == null) {
-            Slog.w(TAG, "Early during boot, assuming locked");
+            Slog.w(TAG, "Early during boot, assuming CE storage is locked");
             return false;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            return sStorageManager.isUserKeyUnlocked(userId);
+            return sStorageManager.isCeStorageUnlocked(userId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } finally {
@@ -1698,23 +1729,6 @@ public class StorageManager {
             return false;
         }
         return RoSystemProperties.CRYPTO_FILE_ENCRYPTED;
-    }
-
-    /** {@hide}
-     * @deprecated Use {@link #isFileEncrypted} instead, since emulated FBE is no longer supported.
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @Deprecated
-    public static boolean isFileEncryptedNativeOnly() {
-        return isFileEncrypted();
-    }
-
-    /** {@hide}
-     * @deprecated Use {@link #isFileEncrypted} instead, since emulated FBE is no longer supported.
-     */
-    @Deprecated
-    public static boolean isFileEncryptedNativeOrEmulated() {
-        return isFileEncrypted();
     }
 
     /** {@hide} */
@@ -1878,51 +1892,14 @@ public class StorageManager {
     // handle obscure cases like when an app targets Q but was installed on
     // a device that was originally running on P before being upgraded to Q.
 
-    /** {@hide} */
-    public boolean checkPermissionReadAudio(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_READ_MEDIA_AUDIO);
-    }
-
-    /** {@hide} */
-    public boolean checkPermissionWriteAudio(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_WRITE_MEDIA_AUDIO);
-    }
-
-    /** {@hide} */
-    public boolean checkPermissionReadVideo(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_READ_MEDIA_VIDEO);
-    }
-
-    /** {@hide} */
-    public boolean checkPermissionWriteVideo(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_WRITE_MEDIA_VIDEO);
-    }
-
-    /** {@hide} */
+    /**
+     * @deprecated This method should not be used since it check slegacy permissions,
+     * no longer valid. Clients should check the appropriate permissions directly
+     * instead (e.g. READ_MEDIA_IMAGES).
+     *
+     * {@hide}
+     */
+    @Deprecated
     public boolean checkPermissionReadImages(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
         if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
@@ -1931,17 +1908,6 @@ public class StorageManager {
         }
         return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
                 OP_READ_MEDIA_IMAGES);
-    }
-
-    /** {@hide} */
-    public boolean checkPermissionWriteImages(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_WRITE_MEDIA_IMAGES);
     }
 
     private boolean checkExternalStoragePermissionAndAppOp(boolean enforce,
@@ -2143,6 +2109,7 @@ public class StorageManager {
             MOUNT_MODE_EXTERNAL_PASS_THROUGH,
             MOUNT_MODE_EXTERNAL_ANDROID_WRITABLE
     })
+    @Retention(RetentionPolicy.SOURCE)
     /** @hide */
     public @interface MountMode {}
 
@@ -2552,6 +2519,8 @@ public class StorageManager {
      * This API doesn't require any special permissions, though typical implementations
      * will require being called from an SELinux domain that allows setting file attributes
      * related to quota (eg the GID or project ID).
+     * If the calling user has MANAGE_EXTERNAL_STORAGE permissions, quota for shared profile's
+     * volumes is also updated.
      *
      * The default platform user of this API is the MediaProvider process, which is
      * responsible for managing all of external storage.
@@ -2572,7 +2541,14 @@ public class StorageManager {
             @QuotaType int quotaType) throws IOException {
         long projectId;
         final String filePath = path.getCanonicalPath();
-        final StorageVolume volume = getStorageVolume(path);
+        int volFlags = FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE;
+        // If caller has MANAGE_EXTERNAL_STORAGE permission, results from User Profile(s) are also
+        // returned by enabling FLAG_INCLUDE_SHARED_PROFILE.
+        if (mContext.checkSelfPermission(MANAGE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
+            volFlags |= FLAG_INCLUDE_SHARED_PROFILE;
+        }
+        final StorageVolume[] availableVolumes = getVolumeList(mContext.getUserId(), volFlags);
+        final StorageVolume volume = getStorageVolume(availableVolumes, path);
         if (volume == null) {
             Log.w(TAG, "Failed to update quota type for " + filePath);
             return;
@@ -2742,7 +2718,8 @@ public class StorageManager {
 
     /** {@hide} */
     @TestApi
-    public static @NonNull UUID convert(@NonNull String uuid) {
+    public static @NonNull UUID convert(@Nullable String uuid) {
+        // UUID_PRIVATE_INTERNAL is null, so this accepts nullable input
         if (Objects.equals(uuid, UUID_PRIVATE_INTERNAL)) {
             return UUID_DEFAULT;
         } else if (Objects.equals(uuid, UUID_PRIMARY_PHYSICAL)) {

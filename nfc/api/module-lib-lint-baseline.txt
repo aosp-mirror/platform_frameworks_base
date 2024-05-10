@@ -1,0 +1,93 @@
+// Baseline format: 1.0
+BroadcastBehavior: android.nfc.NfcAdapter#ACTION_ADAPTER_STATE_CHANGED:
+    Field 'ACTION_ADAPTER_STATE_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.nfc.NfcAdapter#ACTION_PREFERRED_PAYMENT_CHANGED:
+    Field 'ACTION_PREFERRED_PAYMENT_CHANGED' is missing @BroadcastBehavior
+BroadcastBehavior: android.nfc.NfcAdapter#ACTION_REQUIRE_UNLOCK_FOR_NFC:
+    Field 'ACTION_REQUIRE_UNLOCK_FOR_NFC' is missing @BroadcastBehavior
+BroadcastBehavior: android.nfc.NfcAdapter#ACTION_TRANSACTION_DETECTED:
+    Field 'ACTION_TRANSACTION_DETECTED' is missing @BroadcastBehavior
+
+RequiresPermission: android.nfc.NfcAdapter#disableForegroundDispatch(android.app.Activity):
+    Method 'disableForegroundDispatch' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.NfcAdapter#enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], String[][]):
+    Method 'enableForegroundDispatch' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.cardemulation.CardEmulation#isDefaultServiceForAid(android.content.ComponentName, String):
+    Method 'isDefaultServiceForAid' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.cardemulation.CardEmulation#isDefaultServiceForCategory(android.content.ComponentName, String):
+    Method 'isDefaultServiceForCategory' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.cardemulation.CardEmulation#setOffHostForService(android.content.ComponentName, String):
+    Method 'setOffHostForService' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.nfc.tech.IsoDep#getTimeout():
+    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.IsoDep#setTimeout(int):
+    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.IsoDep#transceive(byte[]):
+    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#authenticateSectorWithKeyA(int, byte[]):
+    Method 'authenticateSectorWithKeyA' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#authenticateSectorWithKeyB(int, byte[]):
+    Method 'authenticateSectorWithKeyB' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#decrement(int, int):
+    Method 'decrement' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#getTimeout():
+    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#increment(int, int):
+    Method 'increment' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#readBlock(int):
+    Method 'readBlock' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#restore(int):
+    Method 'restore' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#setTimeout(int):
+    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#transceive(byte[]):
+    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#transfer(int):
+    Method 'transfer' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareClassic#writeBlock(int, byte[]):
+    Method 'writeBlock' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareUltralight#getTimeout():
+    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareUltralight#readPages(int):
+    Method 'readPages' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareUltralight#setTimeout(int):
+    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareUltralight#transceive(byte[]):
+    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.MifareUltralight#writePage(int, byte[]):
+    Method 'writePage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.Ndef#getNdefMessage():
+    Method 'getNdefMessage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.Ndef#isWritable():
+    Method 'isWritable' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.Ndef#makeReadOnly():
+    Method 'makeReadOnly' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.Ndef#writeNdefMessage(android.nfc.NdefMessage):
+    Method 'writeNdefMessage' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NdefFormatable#format(android.nfc.NdefMessage):
+    Method 'format' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NdefFormatable#formatReadOnly(android.nfc.NdefMessage):
+    Method 'formatReadOnly' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NfcA#getTimeout():
+    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NfcA#setTimeout(int):
+    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NfcA#transceive(byte[]):
+    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NfcB#transceive(byte[]):
+    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NfcF#getTimeout():
+    Method 'getTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NfcF#setTimeout(int):
+    Method 'setTimeout' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NfcF#transceive(byte[]):
+    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.NfcV#transceive(byte[]):
+    Method 'transceive' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.TagTechnology#close():
+    Method 'close' documentation mentions permissions without declaring @RequiresPermission
+RequiresPermission: android.nfc.tech.TagTechnology#connect():
+    Method 'connect' documentation mentions permissions without declaring @RequiresPermission
+
+SdkConstant: android.nfc.NfcAdapter#ACTION_REQUIRE_UNLOCK_FOR_NFC:
+    Field 'ACTION_REQUIRE_UNLOCK_FOR_NFC' is missing @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)

@@ -17,10 +17,9 @@
 package android.os;
 
 import android.annotation.NonNull;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
-import com.android.internal.os.PowerCalculator;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -60,7 +59,7 @@ public class UserBatteryConsumer extends BatteryConsumer {
         pw.print("User ");
         pw.print(getUserId());
         pw.print(": ");
-        PowerCalculator.printPowerMah(pw, consumedPower);
+        pw.print(BatteryStats.formatCharge(consumedPower));
         pw.print(" ( ");
         mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
         pw.print(" ) ");
@@ -108,8 +107,8 @@ public class UserBatteryConsumer extends BatteryConsumer {
     public static final class Builder extends BaseBuilder<Builder> {
         private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
-        Builder(BatteryConsumerData data, int userId) {
-            super(data, CONSUMER_TYPE_USER);
+        Builder(BatteryConsumerData data, int userId, double minConsumedPowerThreshold) {
+            super(data, CONSUMER_TYPE_USER, minConsumedPowerThreshold);
             data.putLong(COLUMN_INDEX_USER_ID, userId);
         }
 

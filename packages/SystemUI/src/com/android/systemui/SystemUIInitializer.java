@@ -22,11 +22,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.util.InitializationChecker;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.transition.ShellTransitions;
 
@@ -93,11 +95,11 @@ public abstract class SystemUIInitializer {
                     .setBubbles(mWMComponent.getBubbles())
                     .setTaskViewFactory(mWMComponent.getTaskViewFactory())
                     .setTransitions(mWMComponent.getTransitions())
+                    .setKeyguardTransitions(mWMComponent.getKeyguardTransitions())
                     .setStartingSurface(mWMComponent.getStartingSurface())
                     .setDisplayAreaHelper(mWMComponent.getDisplayAreaHelper())
                     .setRecentTasks(mWMComponent.getRecentTasks())
                     .setBackAnimation(mWMComponent.getBackAnimation())
-                    .setFloatingTasks(mWMComponent.getFloatingTasks())
                     .setDesktopMode(mWMComponent.getDesktopMode());
 
             // Only initialize when not starting from tests since this currently initializes some
@@ -114,11 +116,11 @@ public abstract class SystemUIInitializer {
                     .setBubbles(Optional.ofNullable(null))
                     .setTaskViewFactory(Optional.ofNullable(null))
                     .setTransitions(new ShellTransitions() {})
+                    .setKeyguardTransitions(new KeyguardTransitions() {})
                     .setDisplayAreaHelper(Optional.ofNullable(null))
                     .setStartingSurface(Optional.ofNullable(null))
                     .setRecentTasks(Optional.ofNullable(null))
                     .setBackAnimation(Optional.ofNullable(null))
-                    .setFloatingTasks(Optional.ofNullable(null))
                     .setDesktopMode(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();

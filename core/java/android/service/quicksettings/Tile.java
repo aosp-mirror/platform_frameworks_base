@@ -16,6 +16,7 @@
 package android.service.quicksettings;
 
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.graphics.drawable.Icon;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -39,8 +40,8 @@ public final class Tile implements Parcelable {
 
     /**
      * An unavailable state indicates that for some reason this tile is not currently
-     * available to the user for some reason, and will have no click action.  The tile's
-     * icon will be tinted differently to reflect this state.
+     * available to the user, and will have no click action.  The tile's icon will be
+     * tinted differently to reflect this state.
      */
     public static final int STATE_UNAVAILABLE = 0;
 
@@ -63,9 +64,11 @@ public final class Tile implements Parcelable {
     private IBinder mToken;
     private Icon mIcon;
     private CharSequence mLabel;
+    private CharSequence mDefaultLabel;
     private CharSequence mSubtitle;
     private CharSequence mContentDescription;
     private CharSequence mStateDescription;
+    private PendingIntent mPendingIntent;
     // Default to inactive until clients of the new API can update.
     private int mState = STATE_INACTIVE;
 
@@ -140,7 +143,22 @@ public final class Tile implements Parcelable {
      * Gets the current label for the tile.
      */
     public CharSequence getLabel() {
+        return mLabel != null ? mLabel : mDefaultLabel;
+    }
+
+    /**
+     * @hide
+     * @return
+     */
+    public CharSequence getCustomLabel() {
         return mLabel;
+    }
+
+    /**
+     * @hide
+     */
+    public void setDefaultLabel(CharSequence defaultLabel) {
+        mDefaultLabel = defaultLabel;
     }
 
     /**
@@ -223,6 +241,32 @@ public final class Tile implements Parcelable {
         }
     }
 
+    /**
+     * Gets the Activity {@link PendingIntent} to be launched when the tile is clicked.
+     */
+    @Nullable
+    public PendingIntent getActivityLaunchForClick() {
+        return mPendingIntent;
+    }
+
+    /**
+     * Sets an Activity {@link PendingIntent} to be launched when the tile is clicked.
+     *
+     * The last value set here will be launched when the user clicks in the tile, instead of
+     * forwarding the `onClick` message to the {@link TileService}. Set to {@code null} to handle
+     * the `onClick` in the `TileService`
+     * (This is the default behavior if this method is never called.)
+     * @param pendingIntent a PendingIntent for an activity to be launched onclick, or {@code null}
+     *                      to handle the clicks in the `TileService`.
+     */
+    public void setActivityLaunchForClick(@Nullable PendingIntent pendingIntent) {
+        if (pendingIntent != null && !pendingIntent.isActivity()) {
+            throw new IllegalArgumentException();
+        } else {
+            mPendingIntent = pendingIntent;
+        }
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (mIcon != null) {
@@ -231,8 +275,15 @@ public final class Tile implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
+        if (mPendingIntent != null) {
+            dest.writeByte((byte) 1);
+            mPendingIntent.writeToParcel(dest, flags);
+        } else {
+            dest.writeByte((byte) 0);
+        }
         dest.writeInt(mState);
         TextUtils.writeToParcel(mLabel, dest, flags);
+        TextUtils.writeToParcel(mDefaultLabel, dest, flags);
         TextUtils.writeToParcel(mSubtitle, dest, flags);
         TextUtils.writeToParcel(mContentDescription, dest, flags);
         TextUtils.writeToParcel(mStateDescription, dest, flags);
@@ -244,8 +295,14 @@ public final class Tile implements Parcelable {
         } else {
             mIcon = null;
         }
+        if (source.readByte() != 0) {
+            mPendingIntent = PendingIntent.CREATOR.createFromParcel(source);
+        } else {
+            mPendingIntent = null;
+        }
         mState = source.readInt();
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+        mDefaultLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mStateDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);

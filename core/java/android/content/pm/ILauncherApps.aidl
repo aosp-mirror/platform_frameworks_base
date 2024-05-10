@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.LocusId;
+import android.content.pm.LauncherUserInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.LauncherActivityInfoInternal;
@@ -33,10 +34,12 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.LauncherActivityInfoInternal;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.ParcelFileDescriptor;
+import android.window.IDumpCallback;
 
 import com.android.internal.infra.AndroidFuture;
 
@@ -59,6 +62,10 @@ interface ILauncherApps {
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
     PendingIntent getActivityLaunchIntent(String callingPackage, in ComponentName component,
+            in UserHandle user);
+    LauncherUserInfo getLauncherUserInfo(in UserHandle user);
+    List<String> getPreInstalledSystemPackages(in UserHandle user);
+    IntentSender getAppMarketActivityIntent(String callingPackage, String packageName,
             in UserHandle user);
     void showAppDetailsAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
@@ -114,4 +121,11 @@ interface ILauncherApps {
 
     String getShortcutIconUri(String callingPackage, String packageName, String shortcutId,
             int userId);
+    Map<String, LauncherActivityInfoInternal> getActivityOverrides(String callingPackage, int userId);
+
+    /** Register a callback to be called right before the wmtrace data is moved to the bugreport. */
+    void registerDumpCallback(IDumpCallback cb);
+
+    /** Unregister a callback, so that it won't be called when LauncherApps dumps. */
+    void unRegisterDumpCallback(IDumpCallback cb);
 }

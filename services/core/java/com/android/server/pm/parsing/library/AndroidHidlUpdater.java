@@ -21,7 +21,7 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_H
 import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 
 /**
  * Updates a package to ensure that if it targets <= P that the android.hidl.base-V1.0-java
@@ -35,13 +35,13 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 public class AndroidHidlUpdater extends PackageSharedLibraryUpdater {
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         // This was the default <= P and is maintained for backwards compatibility.
         boolean isLegacy = parsedPackage.getTargetSdkVersion() <= Build.VERSION_CODES.P;
         // Only system apps use these libraries
-        boolean isSystem = parsedPackage.isSystem() || isUpdatedSystemApp;
 
-        if (isLegacy && isSystem) {
+        if (isLegacy && (isSystemApp || isUpdatedSystemApp)) {
             prefixRequiredLibrary(parsedPackage, ANDROID_HIDL_BASE);
             prefixRequiredLibrary(parsedPackage, ANDROID_HIDL_MANAGER);
         } else {

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.PROCESS_STATE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -111,14 +112,15 @@ public class RecentsAnimationTest extends WindowTestsBase {
         RecentsAnimationCallbacks recentsAnimation = startRecentsActivity(
                 mRecentsComponent, true /* getRecentsAnimation */);
         // The launch-behind state should make the recents activity visible.
-        assertTrue(recentActivity.mVisibleRequested);
+        assertTrue(recentActivity.isVisibleRequested());
         assertEquals(ActivityTaskManagerService.DEMOTE_TOP_REASON_ANIMATING_RECENTS,
                 mAtm.mDemoteTopAppReasons);
+        assertFalse(mAtm.mInternal.useTopSchedGroupForTopProcess());
 
         // Simulate the animation is cancelled without changing the stack order.
         recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, false /* sendUserLeaveHint */);
         // The non-top recents activity should be invisible by the restored launch-behind state.
-        assertFalse(recentActivity.mVisibleRequested);
+        assertFalse(recentActivity.isVisibleRequested());
         assertEquals(0, mAtm.mDemoteTopAppReasons);
     }
 
@@ -147,8 +149,9 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 anyInt() /* startFlags */, any() /* profilerInfo */);
 
         // Assume its process is alive because the caller should be the recents service.
-        mSystemServicesTestRule.addProcess(aInfo.packageName, aInfo.processName, 12345 /* pid */,
-                aInfo.applicationInfo.uid);
+        final WindowProcessController proc = mSystemServicesTestRule.addProcess(aInfo.packageName,
+                aInfo.processName, 12345 /* pid */, aInfo.applicationInfo.uid);
+        proc.setCurrentProcState(PROCESS_STATE_HOME);
 
         Intent recentsIntent = new Intent().setComponent(mRecentsComponent);
         // Null animation indicates to preload.
@@ -163,7 +166,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         // The activity is started in background so it should be invisible and will be stopped.
         assertThat(recentsActivity).isNotNull();
         assertThat(mSupervisor.mStoppingActivities).contains(recentsActivity);
-        assertFalse(recentsActivity.mVisibleRequested);
+        assertFalse(recentsActivity.isVisibleRequested());
 
         // Assume it is stopped to test next use case.
         recentsActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
@@ -199,8 +202,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 any() /* starting */, anyInt() /* configChanges */,
                 anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
         doReturn(app).when(mAtm).getProcessController(eq(recentActivity.processName), anyInt());
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
-        doNothing().when(lifecycleManager).scheduleTransaction(any());
+        doNothing().when(mClientLifecycleManager).scheduleTransaction(any());
 
         startRecentsActivity();
 
@@ -359,7 +361,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 true);
 
         // Ensure we find the task for the right user and it is made visible
-        assertTrue(otherUserHomeActivity.mVisibleRequested);
+        assertTrue(otherUserHomeActivity.isVisibleRequested());
     }
 
     private void startRecentsActivity() {

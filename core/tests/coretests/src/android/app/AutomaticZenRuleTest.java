@@ -19,15 +19,20 @@ package android.app;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
+import static org.junit.Assert.assertThrows;
+
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Parcel;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.google.common.base.Strings;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +42,9 @@ import java.lang.reflect.Field;
 @SmallTest
 public class AutomaticZenRuleTest {
     private static final String CLASS = "android.app.AutomaticZenRule";
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void testLongFields_inConstructor() {
@@ -100,6 +108,7 @@ public class AutomaticZenRuleTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
     public void testLongInputsFromParcel() {
         // Create a rule with long fields, set directly via reflection so that we can confirm that
         // a rule with too-long fields that comes in via a parcel has its fields truncated directly.
@@ -125,6 +134,9 @@ public class AutomaticZenRuleTest {
             Field configActivity = Class.forName(CLASS).getDeclaredField("configurationActivity");
             configActivity.setAccessible(true);
             configActivity.set(rule, new ComponentName(longString, longString));
+            Field trigger = Class.forName(CLASS).getDeclaredField("mTriggerDescription");
+            trigger.setAccessible(true);
+            trigger.set(rule, longString);
         } catch (NoSuchFieldException e) {
             fail(e.toString());
         } catch (ClassNotFoundException e) {
@@ -149,5 +161,60 @@ public class AutomaticZenRuleTest {
                 fromParcel.getOwner().getPackageName().length());
         assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
                 fromParcel.getOwner().getClassName().length());
+        assertEquals(AutomaticZenRule.MAX_DESC_LENGTH, fromParcel.getTriggerDescription().length());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void validate_builderWithValidType_succeeds() throws Exception {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
+                .setType(AutomaticZenRule.TYPE_BEDTIME)
+                .build();
+        rule.validate(); // No exception.
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void validate_builderWithoutType_succeeds() throws Exception {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri")).build();
+        rule.validate(); // No exception.
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void validate_constructorWithoutType_succeeds() throws Exception {
+        AutomaticZenRule rule = new AutomaticZenRule("rule", new ComponentName("pkg", "cps"),
+                new ComponentName("pkg", "activity"), Uri.parse("condition"), null,
+                NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+        rule.validate(); // No exception.
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void validate_invalidType_throws() throws Exception {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri")).build();
+
+        // Set the field via reflection.
+        Field typeField = AutomaticZenRule.class.getDeclaredField("mType");
+        typeField.setAccessible(true);
+        typeField.set(rule, 100);
+
+        assertThrows(IllegalArgumentException.class, rule::validate);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void setType_invalidType_throws() {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri")).build();
+
+        assertThrows(IllegalArgumentException.class, () -> rule.setType(100));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void setTypeBuilder_invalidType_throws() {
+        AutomaticZenRule.Builder builder = new AutomaticZenRule.Builder("rule", Uri.parse("uri"));
+
+        assertThrows(IllegalArgumentException.class, () -> builder.setType(100));
     }
 }

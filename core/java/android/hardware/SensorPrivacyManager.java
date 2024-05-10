@@ -66,11 +66,25 @@ public final class SensorPrivacyManager {
             + ".extra.sensor";
 
     /**
+     * An extra containing the notification id that triggered the intent
+     * @hide
+     */
+    public static final String EXTRA_NOTIFICATION_ID = SensorPrivacyManager.class.getName()
+            + ".extra.notification_id";
+
+    /**
      * An extra indicating if all sensors are affected
      * @hide
      */
     public static final String EXTRA_ALL_SENSORS = SensorPrivacyManager.class.getName()
             + ".extra.all_sensors";
+
+    /**
+     * An extra containing the sensor type
+     * @hide
+     */
+    public static final String EXTRA_TOGGLE_TYPE = SensorPrivacyManager.class.getName()
+            + ".extra.toggle_type";
 
     /**
      * Sensor constants which are used in {@link SensorPrivacyManager}
@@ -458,7 +472,7 @@ public final class SensorPrivacyManager {
             @Override
             public void onSensorPrivacyChanged(SensorPrivacyChangedParams params) {
                 if (params.getSensor() == sensor) {
-                    listener.onSensorPrivacyChanged(params.getSensor(), params.isEnabled());
+                    listener.onSensorPrivacyChanged(params);
                 }
             }
             @Override

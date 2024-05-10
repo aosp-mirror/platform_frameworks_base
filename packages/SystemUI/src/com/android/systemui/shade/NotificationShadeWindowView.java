@@ -16,7 +16,7 @@
 
 package com.android.systemui.shade;
 
-import static android.view.WindowInsets.Type.systemBars;
+import static android.os.Trace.TRACE_TAG_APP;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
 
@@ -25,17 +25,15 @@ import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.ActionMode;
-import android.view.DisplayCutout;
 import android.view.InputQueue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -47,22 +45,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-import android.widget.FrameLayout;
 
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
-import com.android.systemui.R;
+import com.android.systemui.scene.ui.view.WindowRootView;
 
 /**
- * Combined keyguard and notification panel view. Also holding backdrop and scrims.
+ * Combined keyguard and notification panel view. Also holding backdrop and scrims. This view can
+ * serve as the root view of the main SysUI window, but because other views can also serve that
+ * purpose, users of this class cannot assume it is the root.
  */
-public class NotificationShadeWindowView extends FrameLayout {
+public class NotificationShadeWindowView extends WindowRootView {
     public static final String TAG = "NotificationShadeWindowView";
-
-    private int mRightInset = 0;
-    private int mLeftInset = 0;
 
     // Implements the floating action mode for TextView's Cut/Copy/Past menu. Normally provided by
     // DecorView, but since this is a special window we have to roll our own.
@@ -76,70 +71,6 @@ public class NotificationShadeWindowView extends FrameLayout {
     public NotificationShadeWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
-    }
-
-    public NotificationPanelView getNotificationPanelView() {
-        return findViewById(R.id.notification_panel);
-    }
-
-    @Override
-    public WindowInsets onApplyWindowInsets(WindowInsets windowInsets) {
-        final Insets insets = windowInsets.getInsetsIgnoringVisibility(systemBars());
-        if (getFitsSystemWindows()) {
-            boolean paddingChanged = insets.top != getPaddingTop()
-                    || insets.bottom != getPaddingBottom();
-
-            // Drop top inset, and pass through bottom inset.
-            if (paddingChanged) {
-                setPadding(0, 0, 0, 0);
-            }
-        } else {
-            boolean changed = getPaddingLeft() != 0
-                    || getPaddingRight() != 0
-                    || getPaddingTop() != 0
-                    || getPaddingBottom() != 0;
-            if (changed) {
-                setPadding(0, 0, 0, 0);
-            }
-        }
-
-        mLeftInset = 0;
-        mRightInset = 0;
-        DisplayCutout displayCutout = getRootWindowInsets().getDisplayCutout();
-        if (displayCutout != null) {
-            mLeftInset = displayCutout.getSafeInsetLeft();
-            mRightInset = displayCutout.getSafeInsetRight();
-        }
-        mLeftInset = Math.max(insets.left, mLeftInset);
-        mRightInset = Math.max(insets.right, mRightInset);
-        applyMargins();
-        return windowInsets;
-    }
-
-    private void applyMargins() {
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            View child = getChildAt(i);
-            if (child.getLayoutParams() instanceof LayoutParams) {
-                LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                if (!lp.ignoreRightInset
-                        && (lp.rightMargin != mRightInset || lp.leftMargin != mLeftInset)) {
-                    lp.rightMargin = mRightInset;
-                    lp.leftMargin = mLeftInset;
-                    child.requestLayout();
-                }
-            }
-        }
-    }
-
-    @Override
-    public FrameLayout.LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new LayoutParams(getContext(), attrs);
-    }
-
-    @Override
-    protected FrameLayout.LayoutParams generateDefaultLayoutParams() {
-        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     }
 
     @Override
@@ -175,6 +106,8 @@ public class NotificationShadeWindowView extends FrameLayout {
         Boolean result = mInteractionEventHandler.handleDispatchTouchEvent(ev);
 
         result = result != null ? result : super.dispatchTouchEvent(ev);
+
+        TouchLogger.logDispatchTouch(TAG, ev, result);
 
         mInteractionEventHandler.dispatchTouchEventComplete();
 
@@ -218,24 +151,6 @@ public class NotificationShadeWindowView extends FrameLayout {
             pt.setStrokeWidth(12.0f);
             pt.setStyle(Paint.Style.STROKE);
             canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), pt);
-        }
-    }
-
-    private static class LayoutParams extends FrameLayout.LayoutParams {
-
-        public boolean ignoreRightInset;
-
-        LayoutParams(int width, int height) {
-            super(width, height);
-        }
-
-        LayoutParams(Context c, AttributeSet attrs) {
-            super(c, attrs);
-
-            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.StatusBarWindowView_Layout);
-            ignoreRightInset = a.getBoolean(
-                    R.styleable.StatusBarWindowView_Layout_ignoreRightInset, false);
-            a.recycle();
         }
     }
 
@@ -297,6 +212,19 @@ public class NotificationShadeWindowView extends FrameLayout {
             mode = null;
         }
         return mode;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection("NotificationShadeWindowView#onMeasure");
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Trace.endSection();
+    }
+
+    @Override
+    public void requestLayout() {
+        Trace.instant(TRACE_TAG_APP, "NotificationShadeWindowView#requestLayout");
+        super.requestLayout();
     }
 
     private class ActionModeCallback2Wrapper extends ActionMode.Callback2 {
@@ -603,10 +531,6 @@ public class NotificationShadeWindowView extends FrameLayout {
 
         @Override
         public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
-        }
-
-        @Override
-        public void reportActivityRelaunched() {
         }
 
         @Override

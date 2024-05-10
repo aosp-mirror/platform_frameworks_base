@@ -23,4 +23,6 @@ import dagger.Module
 @Module
 interface UserRepositoryModule {
     @Binds fun bindRepository(impl: UserRepositoryImpl): UserRepository
+
+    @Binds fun userSwitcherRepository(impl: UserSwitcherRepositoryImpl): UserSwitcherRepository
 }

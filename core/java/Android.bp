@@ -9,31 +9,29 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+aidl_library {
+    name: "HardwareBuffer_aidl",
+    hdrs: ["android/hardware/HardwareBuffer.aidl"],
+}
+
 filegroup {
     name: "framework-core-sources",
     srcs: [
         "**/*.java",
         "**/*.aidl",
-    ],
-    exclude_srcs: [
-        // Remove election toolbar code from build time
-        "android/service/selectiontoolbar/*.aidl",
-        "android/service/selectiontoolbar/*.java",
-        "android/view/selectiontoolbar/*.aidl",
-        "android/view/selectiontoolbar/*.java",
-        "com/android/internal/widget/floatingtoolbar/RemoteFloatingToolbarPopup.java",
+        ":framework-nfc-non-updatable-sources",
     ],
     visibility: ["//frameworks/base"],
 }
 
-filegroup {
-    name: "IKeyAttestationApplicationIdProvider.aidl",
-    srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
-}
-
-filegroup {
-    name: "IDropBoxManagerService.aidl",
-    srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
+aidl_library {
+    name: "IDropBoxManagerService_aidl",
+    srcs: [
+        "com/android/internal/os/IDropBoxManagerService.aidl",
+    ],
+    hdrs: [
+        "android/os/DropBoxManager.aidl",
+    ],
 }
 
 filegroup {
@@ -146,7 +144,7 @@ filegroup {
     ],
 }
 
-filegroup {
+aidl_library {
     name: "ILogcatManagerService_aidl",
     srcs: ["android/os/logcat/ILogcatManagerService.aidl"],
 }
@@ -167,6 +165,9 @@ java_library {
     srcs: [
         "com/android/internal/logging/UiEventLoggerImpl.java",
         ":statslog-framework-java-gen",
+    ],
+    libs: [
+        "androidx.annotation_annotation",
     ],
     static_libs: ["modules-utils-uieventlogger-interface"],
 }
@@ -220,7 +221,6 @@ filegroup {
         "com/android/internal/util/ConcurrentUtils.java",
         "com/android/internal/util/DumpUtils.java",
         "com/android/internal/util/FastPrintWriter.java",
-        "com/android/internal/util/FastXmlSerializer.java",
         "com/android/internal/util/FunctionalUtils.java",
         "com/android/internal/util/ParseUtils.java",
         "com/android/internal/util/RingBufferIndices.java",
@@ -290,6 +290,28 @@ filegroup {
     name: "activity_manager_procstate_aidl",
     srcs: [
         "android/app/ProcessStateEnum.aidl",
+    ],
+}
+
+filegroup {
+    name: "hwbinder-stubs-srcs",
+    srcs: [
+        "android/os/HidlSupport.java",
+        "android/os/HidlMemory.java",
+        "android/os/HwBinder.java",
+        "android/os/HwBlob.java",
+        "android/os/HwParcel.java",
+        "android/os/IHwBinder.java",
+        "android/os/IHwInterface.java",
+        "android/os/DeadObjectException.java",
+        "android/os/DeadSystemException.java",
+        "android/os/NativeHandle.java",
+        "android/os/RemoteException.java",
+        "android/util/AndroidException.java",
+    ],
+    visibility: [
+        "//frameworks/base",
+        "//frameworks/base/api",
     ],
 }
 
@@ -386,6 +408,10 @@ aidl_interface {
     backend: {
         rust: {
             enabled: true,
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.virt",
+            ],
         },
     },
 }
@@ -407,6 +433,21 @@ aidl_interface {
     },
 }
 
+aidl_interface {
+    name: "android.companion.virtual.virtualdevice_aidl",
+    unstable: true,
+    host_supported: true,
+    srcs: [
+        "android/companion/virtualnative/IVirtualDeviceManagerNative.aidl",
+    ],
+    local_include_dir: ".",
+}
+
+filegroup {
+    name: "frameworks-base-java-overview",
+    srcs: ["overview.html"],
+}
+
 // Avoid including Parcelable classes as we don't want to have two copies of
 // Parcelable cross the libraries. This is used by telephony-common (frameworks/opt/telephony)
 // and TeleService app (packages/services/Telephony).
@@ -422,7 +463,6 @@ filegroup {
         "com/android/internal/util/AsyncChannel.java",
         "com/android/internal/util/AsyncService.java",
         "com/android/internal/util/BitwiseInputStream.java",
-        "com/android/internal/util/FastXmlSerializer.java",
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/UserIcons.java",
@@ -472,7 +512,6 @@ filegroup {
         "android/net/InterfaceConfiguration.java",
         "android/util/BackupUtils.java",
         "android/util/Rational.java",
-        "com/android/internal/util/FastXmlSerializer.java",
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/MessageUtils.java",
         "com/android/internal/util/WakeupMessage.java",
@@ -488,6 +527,26 @@ filegroup {
     name: "protolog-common-src",
     srcs: [
         "com/android/internal/protolog/common/**/*.java",
+    ],
+}
+
+// common protolog sources without classes that rely on Android SDK
+filegroup {
+    name: "protolog-common-no-android-src",
+    srcs: [
+        ":protolog-common-src",
+    ],
+    exclude_srcs: [
+        "com/android/internal/protolog/common/ProtoLog.java",
+    ],
+}
+
+// PackageManager common
+filegroup {
+    name: "framework-pm-common-shared-srcs",
+    srcs: [
+        "com/android/server/pm/pkg/AndroidPackage.java",
+        "com/android/server/pm/pkg/AndroidPackageSplit.java",
     ],
 }
 
@@ -510,14 +569,3 @@ java_library {
 }
 
 // protolog end
-
-// temporary placeholder until the real module is available
-java_library {
-    name: "framework-configinfrastructure",
-    sdk_version: "module_current",
-}
-
-java_library {
-    name: "framework-configinfrastructure.stubs.module_lib",
-    sdk_version: "module_current",
-}

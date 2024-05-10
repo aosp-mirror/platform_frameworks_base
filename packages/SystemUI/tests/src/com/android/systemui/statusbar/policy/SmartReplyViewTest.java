@@ -47,13 +47,15 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -107,14 +109,15 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private SmartReplyInflaterImpl mSmartReplyInflater;
     private SmartActionInflaterImpl mSmartActionInflater;
+    private KeyguardDismissUtil mKeyguardDismissUtil;
 
     @Mock private SmartReplyConstants mConstants;
     @Mock private ActivityStarter mActivityStarter;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock private SmartReplyController mSmartReplyController;
-
-    private final KeyguardDismissUtil mKeyguardDismissUtil = new KeyguardDismissUtil();
+    @Mock private  KeyguardStateController mKeyguardStateController;
+    @Mock private  SysuiStatusBarStateController mStatusBarStateController;
 
     @Before
     public void setUp() {
@@ -122,12 +125,15 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION),
                 Context.RECEIVER_EXPORTED_UNAUDITED);
-        mKeyguardDismissUtil.setDismissHandler((action, unused, afterKgGone) -> action.onDismiss());
+
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectMockDependency(NotificationRemoteInputManager.class);
         mDependency.injectTestDependency(ActivityStarter.class, mActivityStarter);
         mDependency.injectTestDependency(SmartReplyConstants.class, mConstants);
+        mDependency.injectTestDependency(KeyguardStateController.class, mKeyguardStateController);
+        mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
+
 
         // Any number of replies are fine.
         when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(0);
@@ -153,6 +159,13 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
 
+        mKeyguardDismissUtil = new KeyguardDismissUtil(
+                mKeyguardStateController, mStatusBarStateController, mActivityStarter) {
+            public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
+                    boolean requiresShadeOpen, boolean afterKeyguardGone) {
+                action.onDismiss();
+            }
+        };
         mSmartReplyInflater = new SmartReplyInflaterImpl(
                 mConstants,
                 mKeyguardDismissUtil,
@@ -185,7 +198,17 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     @Test
     public void testSendSmartReply_keyguardCancelled() throws InterruptedException {
-        mKeyguardDismissUtil.setDismissHandler((action, unused, afterKgGone) -> { });
+        mKeyguardDismissUtil = new KeyguardDismissUtil(
+                mKeyguardStateController, mStatusBarStateController, mActivityStarter) {
+            public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
+                    boolean requiresShadeOpen, boolean afterKeyguardGone) { }};
+        mSmartReplyInflater = new SmartReplyInflaterImpl(
+                mConstants,
+                mKeyguardDismissUtil,
+                mNotificationRemoteInputManager,
+                mSmartReplyController,
+                mContext);
+
         setSmartReplies(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();
@@ -196,9 +219,20 @@ public class SmartReplyViewTest extends SysuiTestCase {
     @Test
     public void testSendSmartReply_waitsForKeyguard() throws InterruptedException {
         AtomicReference<OnDismissAction> actionRef = new AtomicReference<>();
+        mKeyguardDismissUtil = new KeyguardDismissUtil(
+                mKeyguardStateController, mStatusBarStateController, mActivityStarter) {
+            public void executeWhenUnlocked(ActivityStarter.OnDismissAction action,
+                    boolean requiresShadeOpen, boolean afterKeyguardGone) {
+                actionRef.set(action);
+            }
+        };
+        mSmartReplyInflater = new SmartReplyInflaterImpl(
+                mConstants,
+                mKeyguardDismissUtil,
+                mNotificationRemoteInputManager,
+                mSmartReplyController,
+                mContext);
 
-        mKeyguardDismissUtil.setDismissHandler((action, unused, afterKgGone)
-                -> actionRef.set(action));
         setSmartReplies(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();
@@ -488,7 +522,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private SmartReplyView.SmartReplies createSmartReplies(CharSequence[] choices,
             boolean fromAssistant) {
         PendingIntent pendingIntent =
-                PendingIntent.getBroadcast(mContext, 0, new Intent(TEST_ACTION),
+                PendingIntent.getBroadcast(mContext, 0,
+                        new Intent(TEST_ACTION).setPackage(mContext.getPackageName()),
                         PendingIntent.FLAG_MUTABLE);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
         return new SmartReplyView.SmartReplies(
@@ -505,7 +540,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private Notification.Action createAction(String actionTitle) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
+                new Intent(TEST_ACTION).setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
         return new Notification.Action.Builder(mActionIcon, actionTitle, pendingIntent).build();
     }
 
@@ -583,8 +619,6 @@ public class SmartReplyViewTest extends SysuiTestCase {
         // devices.
         layout.setBaselineAligned(false);
 
-        final boolean isRtl = mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-
         // Add smart replies
         Button previous = null;
         SmartReplyView.SmartReplies smartReplies =
@@ -604,11 +638,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
             if (previous != null) {
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
-                if (isRtl) {
-                    lp.leftMargin = mSpacing;
-                } else {
-                    lp.rightMargin = mSpacing;
-                }
+                lp.setMarginEnd(mSpacing);
             }
             layout.addView(current);
             previous = current;
@@ -632,11 +662,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
             if (previous != null) {
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
-                if (isRtl) {
-                    lp.leftMargin = mSpacing;
-                } else {
-                    lp.rightMargin = mSpacing;
-                }
+                lp.setMarginEnd(mSpacing);
             }
             layout.addView(current);
             previous = current;
@@ -935,8 +961,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
                 .collect(Collectors.toList());
         Button singleLineButton = buttons.get(0);
         Button doubleLineButton = buttons.get(1);
-        Drawable singleLineDrawable = singleLineButton.getCompoundDrawables()[0]; // left drawable
-        Drawable doubleLineDrawable = doubleLineButton.getCompoundDrawables()[0]; // left drawable
+        Drawable singleLineDrawable = singleLineButton.getCompoundDrawablesRelative()[0]; // start
+        Drawable doubleLineDrawable = doubleLineButton.getCompoundDrawablesRelative()[0]; // start
         assertEquals(singleLineDrawable.getBounds().width(),
                      doubleLineDrawable.getBounds().width());
         assertEquals(singleLineDrawable.getBounds().height(),

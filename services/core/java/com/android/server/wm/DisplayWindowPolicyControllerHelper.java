@@ -19,15 +19,20 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.window.DisplayWindowPolicyController;
 
 import java.io.PrintWriter;
 import java.util.List;
 
 class DisplayWindowPolicyControllerHelper {
+    private static final String TAG = "DisplayWindowPolicyControllerHelper";
 
     private final DisplayContent mDisplayContent;
 
@@ -64,34 +69,54 @@ class DisplayWindowPolicyControllerHelper {
     }
 
     /**
-     * @see DisplayWindowPolicyController#canContainActivities(List, int)
+     * @see DisplayWindowPolicyController#canContainActivities
      */
     public boolean canContainActivities(@NonNull List<ActivityInfo> activities,
             @WindowConfiguration.WindowingMode int windowingMode) {
         if (mDisplayWindowPolicyController == null) {
+            for (int i = 0; i < activities.size(); ++i) {
+                // Missing controller means that this display has no categories for activity launch
+                // restriction.
+                if (hasDisplayCategory(activities.get(i))) {
+                    return false;
+                }
+            }
             return true;
         }
         return mDisplayWindowPolicyController.canContainActivities(activities, windowingMode);
     }
 
     /**
-     * @see DisplayWindowPolicyController#canActivityBeLaunched(ActivityInfo, int, int, boolean)
+     * @see DisplayWindowPolicyController#canActivityBeLaunched
      */
     public boolean canActivityBeLaunched(ActivityInfo activityInfo,
-            @WindowConfiguration.WindowingMode int windowingMode, int launchingFromDisplayId,
-            boolean isNewTask) {
+            Intent intent, @WindowConfiguration.WindowingMode int windowingMode,
+            int launchingFromDisplayId, boolean isNewTask) {
         if (mDisplayWindowPolicyController == null) {
+            // Missing controller means that this display has no categories for activity launch
+            // restriction.
+            return !hasDisplayCategory(activityInfo);
+        }
+        return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, intent,
+            windowingMode, launchingFromDisplayId, isNewTask);
+    }
+
+    private boolean hasDisplayCategory(ActivityInfo aInfo) {
+        if (aInfo.requiredDisplayCategory != null) {
+            Slog.d(TAG,
+                    String.format("Checking activity launch with requiredDisplayCategory='%s' on"
+                                    + " display %d, which doesn't have a matching category.",
+                            aInfo.requiredDisplayCategory, mDisplayContent.mDisplayId));
             return true;
         }
-        return mDisplayWindowPolicyController.canActivityBeLaunched(activityInfo, windowingMode,
-            launchingFromDisplayId, isNewTask);
+        return false;
     }
 
     /**
      * @see DisplayWindowPolicyController#keepActivityOnWindowFlagsChanged(ActivityInfo, int, int)
      */
     boolean keepActivityOnWindowFlagsChanged(ActivityInfo aInfo, int flagChanges,
-            int privateFlagChanges) {
+            int privateFlagChanges, int flagValues, int privateFlagValues) {
         if (mDisplayWindowPolicyController == null) {
             return true;
         }
@@ -102,7 +127,7 @@ class DisplayWindowPolicyControllerHelper {
         }
 
         return mDisplayWindowPolicyController.keepActivityOnWindowFlagsChanged(
-                aInfo, flagChanges, privateFlagChanges);
+                aInfo, flagValues, privateFlagValues);
     }
 
     /** Update the top activity and the uids of non-finishing activity */
@@ -116,10 +141,14 @@ class DisplayWindowPolicyControllerHelper {
                 true /* includeOverlays */);
         if (topActivity != mTopRunningActivity) {
             mTopRunningActivity = topActivity;
-            mDisplayWindowPolicyController.onTopActivityChanged(
-                    topActivity == null ? null : topActivity.info.getComponentName(),
-                    topActivity == null
-                            ? UserHandle.USER_NULL : topActivity.info.applicationInfo.uid);
+            if (topActivity == null) {
+                mDisplayWindowPolicyController.onTopActivityChanged(null, Process.INVALID_UID,
+                        UserHandle.USER_NULL);
+            } else {
+                mDisplayWindowPolicyController.onTopActivityChanged(
+                        topActivity.info.getComponentName(), topActivity.info.applicationInfo.uid,
+                        topActivity.mUserId);
+            }
         }
 
         // Update running uid.
@@ -153,13 +182,34 @@ class DisplayWindowPolicyControllerHelper {
     }
 
     /**
-     * @see DisplayWindowPolicyController#canShowTasksInRecents()
+     * @see DisplayWindowPolicyController#canShowTasksInHostDeviceRecents()
      */
-    public final boolean canShowTasksInRecents() {
+    public final boolean canShowTasksInHostDeviceRecents() {
         if (mDisplayWindowPolicyController == null) {
             return true;
         }
-        return mDisplayWindowPolicyController.canShowTasksInRecents();
+        return mDisplayWindowPolicyController.canShowTasksInHostDeviceRecents();
+    }
+
+    /**
+     * @see DisplayWindowPolicyController#isEnteringPipAllowed(int)
+     */
+    public final boolean isEnteringPipAllowed(int uid) {
+        if (mDisplayWindowPolicyController == null) {
+            return true;
+        }
+        return mDisplayWindowPolicyController.isEnteringPipAllowed(uid);
+    }
+
+    /**
+     * @see DisplayWindowPolicyController#getCustomHomeComponent
+     */
+    @Nullable
+    public ComponentName getCustomHomeComponent() {
+        if (mDisplayWindowPolicyController == null) {
+            return null;
+        }
+        return mDisplayWindowPolicyController.getCustomHomeComponent();
     }
 
     void dump(String prefix, PrintWriter pw) {

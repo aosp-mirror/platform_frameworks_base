@@ -57,6 +57,7 @@ import java.nio.file.attribute.FileTime;
             ShadowBackupDataOutput.class,
             ShadowEnvironment.class,
             ShadowFullBackup.class,
+            ShadowSigningInfo.class,
         })
 public class AppMetadataBackupWriterTest {
     private static final String TEST_PACKAGE = "com.test.package";

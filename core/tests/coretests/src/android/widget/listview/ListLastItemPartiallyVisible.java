@@ -16,7 +16,7 @@
 
 package android.widget.listview;
 
-import android.util.ListScenario;
+import android.widget.ListScenario;
 
 /**
  * A list where the very last item is partially visible, but still requires scrolling

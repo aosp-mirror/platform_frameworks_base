@@ -92,8 +92,24 @@ message BatteryUsageStatsAtomsProto {
     message UidBatteryConsumer {
         optional int32 uid = 1;
         optional BatteryConsumerData battery_consumer_data = 2;
-        optional int64 time_in_foreground_millis = 3;
-        optional int64 time_in_background_millis = 4;
+        // DEPRECATED Use time_in_state instead.
+        optional int64 time_in_foreground_millis = 3 [deprecated = true];
+        // DEPRECATED Use time_in_state instead.
+        optional int64 time_in_background_millis = 4 [deprecated = true];
+
+        message TimeInState {
+            enum ProcessState {
+                UNSPECIFIED = 0;
+                FOREGROUND = 1;
+                BACKGROUND = 2;
+                FOREGROUND_SERVICE = 3;
+            }
+
+            optional ProcessState process_state = 1;
+            optional int64 time_in_state_millis = 2;
+        }
+
+        repeated TimeInState time_in_state = 5;
     }
     repeated UidBatteryConsumer uid_battery_consumers = 5;
 
@@ -102,4 +118,21 @@ message BatteryUsageStatsAtomsProto {
 
     // Total amount of time battery was discharging during the reported session
     optional int64 discharge_duration_millis = 7;
+
+    // Notes the power model used for a power component.
+    message PowerComponentModel {
+        // Holds android.os.PowerComponentEnum, or custom component value between 1000 and 9999.
+        optional int32 component = 1;
+
+        enum PowerModel {
+            UNDEFINED = 0;
+            POWER_PROFILE = 1;
+            MEASURED_ENERGY = 2;
+        }
+
+        optional PowerModel power_model = 2;
+    }
+
+    // The power model used for each power component.
+    repeated PowerComponentModel component_models = 8;
 }

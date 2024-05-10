@@ -19,7 +19,6 @@
 #include <jni.h>
 #include <android/bitmap.h>
 
-class SkBitmap;
 struct SkImageInfo;
 
 namespace android {

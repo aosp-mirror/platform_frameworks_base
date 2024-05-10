@@ -54,6 +54,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -82,6 +83,7 @@ import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.test.FakePermissionEnforcer;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
@@ -101,6 +103,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -133,28 +136,37 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private TwilightState mTwilightState;
     @Mock
     PowerManagerInternal mLocalPowerManager;
+
+    @Mock
+    DreamManagerInternal mDreamManagerInternal;
     @Mock
     private PackageManager mPackageManager;
     @Mock
     private IBinder mBinder;
-    @Mock
-    private DreamManagerInternal mDreamManager;
+    @Spy
+    private TestInjector mInjector;
     @Captor
     private ArgumentCaptor<Intent> mOrderedBroadcastIntent;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mOrderedBroadcastReceiver;
 
     private BroadcastReceiver mScreenOffCallback;
+    private BroadcastReceiver mDreamingStartedCallback;
     private BroadcastReceiver mTimeChangedCallback;
     private BroadcastReceiver mDockStateChangedCallback;
     private AlarmManager.OnAlarmListener mCustomListener;
     private Consumer<PowerSaveState> mPowerSaveConsumer;
     private TwilightListener mTwilightListener;
+    private FakePermissionEnforcer mPermissionEnforcer;
 
     @Before
     public void setUp() {
-        when(mContext.checkCallingOrSelfPermission(anyString()))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        // The AIDL stub will use PermissionEnforcer to check permission from the caller.
+        mPermissionEnforcer = new FakePermissionEnforcer();
+        mPermissionEnforcer.grant(Manifest.permission.MODIFY_DAY_NIGHT_MODE);
+        mPermissionEnforcer.grant(Manifest.permission.READ_PROJECTION_STATE);
+        doReturn(mPermissionEnforcer).when(mContext).getSystemService(
+                eq(Context.PERMISSION_ENFORCER_SERVICE));
         doAnswer(inv -> {
             mTwilightListener = (TwilightListener) inv.getArgument(0);
             return null;
@@ -184,6 +196,9 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             if (filter.hasAction(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOffCallback = inv.getArgument(0);
             }
+            if (filter.hasAction(Intent.ACTION_DREAMING_STARTED)) {
+                mDreamingStartedCallback = inv.getArgument(0);
+            }
             if (filter.hasAction(Intent.ACTION_DOCK_EVENT)) {
                 mDockStateChangedCallback = inv.getArgument(0);
             }
@@ -207,10 +222,11 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         addLocalService(WindowManagerInternal.class, mWindowManager);
         addLocalService(PowerManagerInternal.class, mLocalPowerManager);
         addLocalService(TwilightManager.class, mTwilightManager);
-        addLocalService(DreamManagerInternal.class, mDreamManager);
-        
+        addLocalService(DreamManagerInternal.class, mDreamManagerInternal);
+
+        mInjector = spy(new TestInjector());
         mUiManagerService = new UiModeManagerService(mContext, /* setupWizardComplete= */ true,
-                mTwilightManager, new TestInjector());
+                mTwilightManager, mInjector);
         try {
             mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         } catch (SecurityException e) {/* ignore for permission denial */}
@@ -278,7 +294,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void setAutoMode_screenOffRegistered() throws RemoteException {
+    public void setAutoMode_deviceInactiveRegistered() throws RemoteException {
         try {
             mService.setNightMode(MODE_NIGHT_NO);
         } catch (SecurityException e) { /* we should ignore this update config exception*/ }
@@ -288,7 +304,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Ignore // b/152719290 - Fails on stage-aosp-master
     @Test
-    public void setAutoMode_screenOffUnRegistered() throws RemoteException {
+    public void setAutoMode_deviceInactiveUnRegistered() throws RemoteException {
         try {
             mService.setNightMode(MODE_NIGHT_AUTO);
         } catch (SecurityException e) { /* we should ignore this update config exception*/ }
@@ -311,8 +327,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void setNightModeCustomType_noPermission_shouldThrow() throws RemoteException {
-        when(mContext.checkCallingOrSelfPermission(eq(MODIFY_DAY_NIGHT_MODE)))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mPermissionEnforcer.revoke(MODIFY_DAY_NIGHT_MODE);
 
         assertThrows(SecurityException.class,
                 () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME));
@@ -752,8 +767,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void getNightModeCustomType_permissionNotGranted_shouldThrow()
             throws RemoteException {
-        when(mContext.checkCallingOrSelfPermission(eq(MODIFY_DAY_NIGHT_MODE)))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        mPermissionEnforcer.revoke(MODIFY_DAY_NIGHT_MODE);
 
         assertThrows(SecurityException.class, () -> mService.getNightModeCustomType());
     }
@@ -775,7 +789,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void customTime_darkThemeOn() throws RemoteException {
+    public void customTime_darkThemeOn_afterScreenOff() throws RemoteException {
         LocalTime now = LocalTime.now();
         mService.setNightMode(MODE_NIGHT_NO);
         mService.setCustomNightModeStart(now.minusHours(1L).toNanoOfDay() / 1000);
@@ -786,13 +800,35 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void customTime_darkThemeOff() throws RemoteException {
+    public void customTime_darkThemeOff_afterScreenOff() throws RemoteException {
         LocalTime now = LocalTime.now();
         mService.setNightMode(MODE_NIGHT_YES);
         mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
         mService.setCustomNightModeEnd(now.minusHours(1L).toNanoOfDay() / 1000);
         mService.setNightMode(MODE_NIGHT_CUSTOM);
         mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+        assertFalse(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOn_afterDreamingStarted() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_NO);
+        mService.setCustomNightModeStart(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mDreamingStartedCallback.onReceive(mContext, new Intent(Intent.ACTION_DREAMING_STARTED));
+        assertTrue(isNightModeActivated());
+    }
+
+    @Test
+    public void customTime_darkThemeOff_afterDreamingStarted() throws RemoteException {
+        LocalTime now = LocalTime.now();
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.minusHours(1L).toNanoOfDay() / 1000);
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mDreamingStartedCallback.onReceive(mContext, new Intent(Intent.ACTION_DREAMING_STARTED));
         assertFalse(isNightModeActivated());
     }
 
@@ -1115,8 +1151,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void addOnProjectionStateChangedListener_enforcesReadProjStatePermission() {
-        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.READ_PROJECTION_STATE), any());
+        mPermissionEnforcer.revoke(android.Manifest.permission.READ_PROJECTION_STATE);
         IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
 
         assertThrows(SecurityException.class, () -> mService.addOnProjectionStateChangedListener(
@@ -1140,8 +1175,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void removeOnProjectionStateChangedListener_enforcesReadProjStatePermission() {
-        doThrow(new SecurityException()).when(mContext).enforceCallingOrSelfPermission(
-                eq(android.Manifest.permission.READ_PROJECTION_STATE), any());
+        mPermissionEnforcer.revoke(android.Manifest.permission.READ_PROJECTION_STATE);
         IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
 
         assertThrows(SecurityException.class, () -> mService.removeOnProjectionStateChangedListener(
@@ -1321,84 +1355,86 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void dreamWhenDocked() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
-
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager).requestDream();
-    }
-
-    @Test
-    public void noDreamWhenDocked_dreamsDisabled() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(false);
-
-        triggerDockIntent();
-        verifyAndSendResultBroadcast();
-        verify(mDreamManager, never()).requestDream();
-    }
-
-    @Test
-    public void noDreamWhenDocked_dreamsWhenDockedDisabled() {
-        setScreensaverActivateOnDock(false);
-        setScreensaverEnabled(true);
-
-        triggerDockIntent();
-        verifyAndSendResultBroadcast();
-        verify(mDreamManager, never()).requestDream();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     @Test
     public void noDreamWhenDocked_keyguardNotShowing_interactive() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
         mUiManagerService.setStartDreamImmediatelyOnDock(false);
         when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(false);
         when(mPowerManager.isInteractive()).thenReturn(true);
 
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager, never()).requestDream();
+        verify(mInjector, never()).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     @Test
     public void dreamWhenDocked_keyguardShowing_interactive() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
         mUiManagerService.setStartDreamImmediatelyOnDock(false);
         when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(true);
         when(mPowerManager.isInteractive()).thenReturn(false);
 
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager).requestDream();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     @Test
     public void dreamWhenDocked_keyguardNotShowing_notInteractive() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
         mUiManagerService.setStartDreamImmediatelyOnDock(false);
         when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(false);
         when(mPowerManager.isInteractive()).thenReturn(false);
 
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager).requestDream();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     @Test
     public void dreamWhenDocked_keyguardShowing_notInteractive() {
-        setScreensaverActivateOnDock(true);
-        setScreensaverEnabled(true);
         mUiManagerService.setStartDreamImmediatelyOnDock(false);
         when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(true);
         when(mPowerManager.isInteractive()).thenReturn(false);
 
         triggerDockIntent();
         verifyAndSendResultBroadcast();
-        verify(mDreamManager).requestDream();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    @Test
+    public void dreamWhenDocked_ambientModeSuppressed_suppressionEnabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(true);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(true);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector, never()).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    @Test
+    public void dreamWhenDocked_ambientModeSuppressed_suppressionDisabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(false);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(true);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
+    }
+
+    @Test
+    public void dreamWhenDocked_ambientModeNotSuppressed_suppressionEnabled() {
+        mUiManagerService.setStartDreamImmediatelyOnDock(true);
+        mUiManagerService.setDreamsDisabledByAmbientModeSuppression(true);
+
+        when(mLocalPowerManager.isAmbientDisplaySuppressed()).thenReturn(false);
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mInjector).startDreamWhenDockedIfAppropriate(mContext);
     }
 
     private void triggerDockIntent() {
@@ -1435,22 +1471,6 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
                 mOrderedBroadcastIntent.getValue());
     }
 
-    private void setScreensaverEnabled(boolean enable) {
-        Settings.Secure.putIntForUser(
-                mContentResolver,
-                Settings.Secure.SCREENSAVER_ENABLED,
-                enable ? 1 : 0,
-                UserHandle.USER_CURRENT);
-    }
-
-    private void setScreensaverActivateOnDock(boolean enable) {
-        Settings.Secure.putIntForUser(
-                mContentResolver,
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
-                enable ? 1 : 0,
-                UserHandle.USER_CURRENT);
-    }
-
     private void requestAllPossibleProjectionTypes() throws RemoteException {
         for (int i = 0; i < Integer.SIZE; ++i) {
             mService.requestProjection(mBinder, 1 << i, PACKAGE_NAME);
@@ -1467,11 +1487,17 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         }
 
         public TestInjector(int callingUid) {
-          this.callingUid = callingUid;
+            this.callingUid = callingUid;
         }
 
+        @Override
         public int getCallingUid() {
             return callingUid;
+        }
+
+        @Override
+        public void startDreamWhenDockedIfAppropriate(Context context) {
+            // do nothing
         }
     }
 }

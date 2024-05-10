@@ -40,11 +40,11 @@ public final class Checksum implements Parcelable {
     /**
      * Root SHA256 hash of a 4K Merkle tree computed over all file bytes.
      * <a href="https://source.android.com/security/apksigning/v4">See APK Signature Scheme V4</a>.
-     * <a href="https://git.kernel.org/pub/scm/fs/fscrypt/fscrypt.git/tree/Documentation/filesystems/fsverity.rst">See fs-verity</a>.
+     * <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html">See fs-verity</a>.
      *
      * Recommended for all new applications.
      * Can be used by kernel to enforce authenticity and integrity of the APK.
-     * <a href="https://git.kernel.org/pub/scm/fs/fscrypt/fscrypt.git/tree/Documentation/filesystems/fsverity.rst#">See fs-verity for details</a>
+     * <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html">See fs-verity for details</a>
      *
      * @see PackageManager#requestChecksums
      */
@@ -137,6 +137,13 @@ public final class Checksum implements Parcelable {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TypeMask {}
+
+    /**
+     * Max size of checksum in bytes.
+     * sizeof(SHA512) == 64 bytes
+     * @hide
+     */
+    public static final int MAX_CHECKSUM_SIZE_BYTES = 64;
 
     /**
      * Serialize checksum to the stream in binary format.
@@ -276,10 +283,10 @@ public final class Checksum implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1619810358402L,
+            time = 1700002689652L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/Checksum.java",
-            inputSignatures = "public static final  int TYPE_WHOLE_MERKLE_ROOT_4K_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_MD5\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA1\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA512\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512\nprivate final @android.content.pm.Checksum.Type int mType\nprivate final @android.annotation.NonNull byte[] mValue\npublic static  void writeToStream(java.io.DataOutputStream,android.content.pm.Checksum)\npublic static @android.annotation.NonNull android.content.pm.Checksum readFromStream(java.io.DataInputStream)\nclass Checksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstDefs=false)")
+            inputSignatures = "public static final  int TYPE_WHOLE_MERKLE_ROOT_4K_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_MD5\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA1\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA512\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512\npublic static final  int MAX_CHECKSUM_SIZE_BYTES\nprivate final @android.content.pm.Checksum.Type int mType\nprivate final @android.annotation.NonNull byte[] mValue\npublic static  void writeToStream(java.io.DataOutputStream,android.content.pm.Checksum)\npublic static @android.annotation.NonNull android.content.pm.Checksum readFromStream(java.io.DataInputStream)\nclass Checksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

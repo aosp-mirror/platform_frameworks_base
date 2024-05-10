@@ -11,13 +11,13 @@
   ],
   "presubmit-large": [
     {
-      "name": "CtsContentTestCases",
+      "name": "CtsPackageManagerTestCases",
       "options": [
         {
           "include-filter": "android.content.pm.cts.PackageManagerShellCommandIncrementalTest"
         },
         {
-          "include-filter": "android.content.pm.cts.PackageManagerShellCommandTest"
+          "include-filter": "android.content.pm.cts.PackageManagerShellCommandInstallTest"
         }
       ]
     }

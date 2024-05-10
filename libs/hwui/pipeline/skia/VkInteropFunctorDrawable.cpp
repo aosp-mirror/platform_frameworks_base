@@ -32,6 +32,11 @@
 #include "renderthread/EglManager.h"
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
+#include "effects/GainmapRenderer.h"
+
+#include <SkBlendMode.h>
+#include <SkImage.h>
+#include <SkImageAndroid.h>
 
 namespace android {
 namespace uirenderer {
@@ -137,6 +142,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         info.height = mFBInfo.height();
         mat4.getColMajor(&info.transform[0]);
         info.color_space_ptr = canvas->imageInfo().colorSpace();
+        info.currentHdrSdrRatio = getTargetHdrSdrRatio(info.color_space_ptr);
 
         glViewport(0, 0, info.width, info.height);
 
@@ -179,9 +185,9 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     // drawing into the offscreen surface, so we need to reset it here.
     canvas->resetMatrix();
 
-    auto functorImage = SkImage::MakeFromAHardwareBuffer(mFrameBuffer.get(), kPremul_SkAlphaType,
-                                                         canvas->imageInfo().refColorSpace(),
-                                                         kBottomLeft_GrSurfaceOrigin);
+    auto functorImage = SkImages::DeferredFromAHardwareBuffer(
+        mFrameBuffer.get(), kPremul_SkAlphaType, canvas->imageInfo().refColorSpace(),
+        kBottomLeft_GrSurfaceOrigin);
     canvas->drawImage(functorImage, 0, 0, SkSamplingOptions(), &paint);
     canvas->restore();
 }

@@ -16,14 +16,13 @@
 
 package com.android.wm.shell;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
@@ -31,6 +30,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.AppCompatTaskInfo;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.LocusId;
@@ -44,11 +44,11 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
+import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
-import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -105,7 +105,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {}
         /** Whether this task listener supports compat UI. */
         default boolean supportCompatUI() {
-            // All TaskListeners should support compat UI except PIP.
+            // All TaskListeners should support compat UI except PIP and StageCoordinator.
             return true;
         }
         /** Attaches a child window surface to the task surface. */
@@ -168,6 +168,13 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     private final Object mLock = new Object();
     private StartingWindowController mStartingWindow;
+
+    /** Overlay surface for home root task */
+    private final SurfaceControl mHomeTaskOverlayContainer = new SurfaceControl.Builder()
+            .setName("home_task_overlay_container")
+            .setContainerLayer()
+            .setHidden(false)
+            .build();
 
     /**
      * In charge of showing compat UI. Can be {@code null} if the device doesn't support size
@@ -259,12 +266,30 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
+    /**
+     * Creates a persistent root task in WM for a particular windowing-mode.
+     * @param displayId The display to create the root task on.
+     * @param windowingMode Windowing mode to put the root task in.
+     * @param listener The listener to get the created task callback.
+     */
     public void createRootTask(int displayId, int windowingMode, TaskListener listener) {
-        ProtoLog.v(WM_SHELL_TASK_ORG, "createRootTask() displayId=%d winMode=%d listener=%s",
+        createRootTask(displayId, windowingMode, listener, false /* removeWithTaskOrganizer */);
+    }
+
+    /**
+     * Creates a persistent root task in WM for a particular windowing-mode.
+     * @param displayId The display to create the root task on.
+     * @param windowingMode Windowing mode to put the root task in.
+     * @param listener The listener to get the created task callback.
+     * @param removeWithTaskOrganizer True if this task should be removed when organizer destroyed.
+     */
+    public void createRootTask(int displayId, int windowingMode, TaskListener listener,
+            boolean removeWithTaskOrganizer) {
+        ProtoLog.v(WM_SHELL_TASK_ORG, "createRootTask() displayId=%d winMode=%d listener=%s" ,
                 displayId, windowingMode, listener.toString());
         final IBinder cookie = new Binder();
         setPendingLaunchCookieListener(cookie, listener);
-        super.createRootTask(displayId, windowingMode, cookie);
+        super.createRootTask(displayId, windowingMode, cookie, removeWithTaskOrganizer);
     }
 
     /**
@@ -405,16 +430,24 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     /**
      * Removes listener.
      */
-    public void removeLocusIdListener(FocusListener listener) {
+    public void removeFocusListener(FocusListener listener) {
         synchronized (mLock) {
             mFocusListeners.remove(listener);
         }
     }
 
+    /**
+     * Returns a surface which can be used to attach overlays to the home root task
+     */
+    @NonNull
+    public SurfaceControl getHomeTaskOverlayContainer() {
+        return mHomeTaskOverlayContainer;
+    }
+
     @Override
-    public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
+    public void addStartingWindow(StartingWindowInfo info) {
         if (mStartingWindow != null) {
-            mStartingWindow.addStartingWindow(info, appToken);
+            mStartingWindow.addStartingWindow(info);
         }
     }
 
@@ -448,6 +481,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     @Override
     public void onTaskAppeared(RunningTaskInfo taskInfo, SurfaceControl leash) {
+        if (leash != null) {
+            leash.setUnreleasedWarningCallSite("ShellTaskOrganizer.onTaskAppeared");
+        }
         synchronized (mLock) {
             onTaskAppeared(new TaskAppearedInfo(taskInfo, leash));
         }
@@ -465,6 +501,15 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         if (mUnfoldAnimationController != null) {
             mUnfoldAnimationController.onTaskAppeared(info.getTaskInfo(), info.getLeash());
         }
+
+        if (info.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
+            ProtoLog.v(WM_SHELL_TASK_ORG, "Adding overlay to home task");
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            t.setLayer(mHomeTaskOverlayContainer, Integer.MAX_VALUE);
+            t.reparent(mHomeTaskOverlayContainer, info.getLeash());
+            t.apply();
+        }
+
         notifyLocusVisibilityIfNeeded(info.getTaskInfo());
         notifyCompatUI(info.getTaskInfo(), listener);
         mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskAdded(info.getTaskInfo()));
@@ -474,7 +519,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
      * Take a screenshot of a task.
      */
     public void screenshotTask(RunningTaskInfo taskInfo, Rect crop,
-            Consumer<SurfaceControl.ScreenshotHardwareBuffer> consumer) {
+            Consumer<ScreenCapture.ScreenshotHardwareBuffer> consumer) {
         final TaskAppearedInfo info = mTasks.get(taskInfo.taskId);
         if (info == null) {
             return;
@@ -559,12 +604,34 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             notifyCompatUI(taskInfo, null /* taskListener */);
             // Notify the recent tasks that a task has been removed
             mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskRemoved(taskInfo));
+            if (taskInfo.getActivityType() == ACTIVITY_TYPE_HOME) {
+                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                t.reparent(mHomeTaskOverlayContainer, null);
+                t.apply();
+                ProtoLog.v(WM_SHELL_TASK_ORG, "Removing overlay surface");
+            }
 
             if (!ENABLE_SHELL_TRANSITIONS && (appearedInfo.getLeash() != null)) {
                 // Preemptively clean up the leash only if shell transitions are not enabled
                 appearedInfo.getLeash().release();
             }
         }
+    }
+
+    /**
+     * Return list of {@link RunningTaskInfo}s for the given display.
+     *
+     * @return filtered list of tasks or empty list
+     */
+    public ArrayList<RunningTaskInfo> getRunningTasks(int displayId) {
+        ArrayList<RunningTaskInfo> result = new ArrayList<>();
+        for (int i = 0; i < mTasks.size(); i++) {
+            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
+            if (taskInfo.displayId == displayId) {
+                result.add(taskInfo);
+            }
+        }
+        return result;
     }
 
     /** Gets running task by taskId. Returns {@code null} if no such task observed. */
@@ -665,7 +732,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
 
     @Override
     public void onCameraControlStateUpdated(
-            int taskId, @TaskInfo.CameraCompatControlState int state) {
+            int taskId, @AppCompatTaskInfo.CameraCompatControlState int state) {
         final TaskAppearedInfo info;
         synchronized (mLock) {
             info = mTasks.get(taskId);
@@ -691,57 +758,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             return;
         }
         taskListener.reparentChildSurfaceToTask(taskId, sc, t);
-    }
-
-    /**
-     * Create a {@link WindowContainerTransaction} to clear task bounds.
-     *
-     * Only affects tasks that have {@link RunningTaskInfo#getActivityType()} set to
-     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
-     *
-     * @param displayId display id for tasks that will have bounds cleared
-     * @return {@link WindowContainerTransaction} with pending operations to clear bounds
-     */
-    public WindowContainerTransaction prepareClearBoundsForStandardTasks(int displayId) {
-        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "prepareClearBoundsForTasks: displayId=%d", displayId);
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        for (int i = 0; i < mTasks.size(); i++) {
-            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
-            if ((taskInfo.displayId == displayId) && (taskInfo.getActivityType()
-                    == WindowConfiguration.ACTIVITY_TYPE_STANDARD)) {
-                ProtoLog.d(WM_SHELL_DESKTOP_MODE, "clearing bounds for token=%s taskInfo=%s",
-                        taskInfo.token, taskInfo);
-                wct.setBounds(taskInfo.token, null);
-            }
-        }
-        return wct;
-    }
-
-    /**
-     * Create a {@link WindowContainerTransaction} to clear task level freeform setting.
-     *
-     * Only affects tasks that have {@link RunningTaskInfo#getActivityType()} set to
-     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
-     *
-     * @param displayId display id for tasks that will have windowing mode reset to {@link
-     *                  WindowConfiguration#WINDOWING_MODE_UNDEFINED}
-     * @return {@link WindowContainerTransaction} with pending operations to clear windowing mode
-     */
-    public WindowContainerTransaction prepareClearFreeformForStandardTasks(int displayId) {
-        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "prepareClearFreeformForTasks: displayId=%d", displayId);
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        for (int i = 0; i < mTasks.size(); i++) {
-            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
-            if (taskInfo.displayId == displayId
-                    && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                    && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD) {
-                ProtoLog.d(WM_SHELL_DESKTOP_MODE,
-                        "clearing windowing mode for token=%s taskInfo=%s", taskInfo.token,
-                        taskInfo);
-                wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED);
-            }
-        }
-        return wct;
     }
 
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
@@ -770,7 +786,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         // The task is vanished or doesn't support compat UI, notify to remove compat UI
         // on this Task if there is any.
         if (taskListener == null || !taskListener.supportCompatUI()
-                || !taskInfo.hasCompatUI() || !taskInfo.isVisible) {
+                || !taskInfo.appCompatTaskInfo.hasCompatUI() || !taskInfo.isVisible) {
             mCompatUI.onCompatInfoChanged(taskInfo, null /* taskListener */);
             return;
         }

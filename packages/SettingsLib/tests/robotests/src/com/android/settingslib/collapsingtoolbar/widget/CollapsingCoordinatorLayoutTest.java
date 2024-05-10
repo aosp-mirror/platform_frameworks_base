@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.android.settingslib.R;
+import com.android.settingslib.collapsingtoolbar.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +57,7 @@ public class CollapsingCoordinatorLayoutTest {
         CollapsingCoordinatorLayout layout = mActivity.getCollapsingCoordinatorLayout();
         View contentFrameView = layout.findViewById(R.id.content_frame);
 
-        TextView textView = contentFrameView.findViewById(R.id.text_hello_world);
+        TextView textView = contentFrameView.findViewById(com.android.settingslib.robotests.R.id.text_hello_world);
 
         assertThat(textView).isNotNull();
         assertThat(textView.getText().toString()).isEqualTo(TEXT_HELLO_WORLD);
@@ -79,8 +79,8 @@ public class CollapsingCoordinatorLayoutTest {
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setTheme(android.R.style.Theme_Light_NoTitleBar);
-            setContentView(R.layout.collapsing_test_layout);
-            mCollapsingCoordinatorLayout = findViewById(R.id.id_collapsing_test);
+            setContentView(com.android.settingslib.robotests.R.layout.collapsing_test_layout);
+            mCollapsingCoordinatorLayout = findViewById(com.android.settingslib.robotests.R.id.id_collapsing_test);
         }
 
         public CollapsingCoordinatorLayout getCollapsingCoordinatorLayout() {

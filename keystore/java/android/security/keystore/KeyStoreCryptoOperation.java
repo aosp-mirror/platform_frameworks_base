@@ -16,18 +16,16 @@
 
 package android.security.keystore;
 
-import android.security.KeyStore;
-
 /**
- * Cryptographic operation backed by {@link KeyStore}.
+ * Cryptographic operation backed by Android KeyStore.
  *
  * @hide
  */
 public interface KeyStoreCryptoOperation {
     /**
-     * Gets the KeyStore operation handle of this crypto operation.
+     * Gets the Android KeyStore operation handle of this crypto operation.
      *
-     * @return handle or {@code 0} if the KeyStore operation is not in progress.
+     * @return handle or {@code 0} if the Android KeyStore operation is not in progress.
      */
     long getOperationHandle();
 }

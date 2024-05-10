@@ -18,10 +18,9 @@ package com.android.systemui.keyguard;
 
 import android.os.Trace;
 
-import androidx.annotation.NonNull;
-
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 
 import java.io.PrintWriter;
 
@@ -30,8 +29,11 @@ import javax.inject.Singleton;
 
 /**
  * Tracks the screen lifecycle.
+ *
+ * @deprecated Collect flows from {@link PowerInteractor} instead.
  */
 @Singleton
+@Deprecated
 public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> implements Dumpable {
 
     public static final int SCREEN_OFF = 0;
@@ -50,14 +52,9 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
         return mScreenState;
     }
 
-    /**
-     * Dispatch screen turning on events to the registered observers
-     *
-     * @param onDrawn Invoke to notify the caller that the event has been processed
-     */
-    public void dispatchScreenTurningOn(@NonNull Runnable onDrawn) {
+    public void dispatchScreenTurningOn() {
         setScreenState(SCREEN_TURNING_ON);
-        dispatch(Observer::onScreenTurningOn, onDrawn);
+        dispatch(Observer::onScreenTurningOn);
     }
 
     public void dispatchScreenTurnedOn() {
@@ -87,12 +84,7 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
     }
 
     public interface Observer {
-        /**
-         * Receive the screen turning on event
-         *
-         * @param onDrawn Invoke to notify the caller that the event has been processed
-         */
-        default void onScreenTurningOn(@NonNull Runnable onDrawn) {}
+        default void onScreenTurningOn() {}
         default void onScreenTurnedOn() {}
         default void onScreenTurningOff() {}
         default void onScreenTurnedOff() {}

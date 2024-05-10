@@ -75,9 +75,12 @@ class AllModel(
         } else {
             favoriteIds.remove(controlId)
         }
-        if (changed && !modified) {
-            modified = true
-            controlsModelCallback.onFirstChange()
+        if (changed) {
+            if (!modified) {
+                modified = true
+                controlsModelCallback.onFirstChange()
+            }
+            controlsModelCallback.onChange()
         }
         toChange?.let {
             it.controlStatus.favorite = favorite

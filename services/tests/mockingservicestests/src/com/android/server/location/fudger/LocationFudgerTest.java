@@ -49,7 +49,7 @@ public class LocationFudgerTest {
     private static final double APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR = 111_000;
     private static final float ACCURACY_M = 2000;
     private static final float MAX_COARSE_FUDGE_DISTANCE_M =
-            (float) Math.sqrt(2 * ACCURACY_M * ACCURACY_M);
+            (float) Math.sqrt(2 * ACCURACY_M * ACCURACY_M) + ACCURACY_M / 4f;
 
     private Random mRandom;
 

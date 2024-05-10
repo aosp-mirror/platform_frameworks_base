@@ -445,7 +445,7 @@ public final class StorageUserConnection {
         }
 
         private void setResult(Bundle result, CompletableFuture<Void> future) {
-            ParcelableException ex = result.getParcelable(EXTRA_ERROR);
+            ParcelableException ex = result.getParcelable(EXTRA_ERROR, android.os.ParcelableException.class);
             if (ex != null) {
                 future.completeExceptionally(ex);
             } else {

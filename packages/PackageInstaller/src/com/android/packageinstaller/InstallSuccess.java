@@ -16,29 +16,27 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.android.internal.app.AlertActivity;
+import androidx.annotation.Nullable;
 
-import java.io.File;
 import java.util.List;
 
 /**
  * Finish installation: Return status code to the caller or display "success" UI to user
  */
-public class InstallSuccess extends AlertActivity {
+public class InstallSuccess extends Activity {
     private static final String LOG_TAG = InstallSuccess.class.getSimpleName();
 
     @Nullable
@@ -50,9 +48,13 @@ public class InstallSuccess extends AlertActivity {
     @Nullable
     private Intent mLaunchIntent;
 
+    private AlertDialog mDialog;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setFinishOnTouchOutside(true);
 
         if (getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)) {
             // Return result if requested
@@ -65,18 +67,8 @@ public class InstallSuccess extends AlertActivity {
             ApplicationInfo appInfo =
                     intent.getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
             mAppPackageName = appInfo.packageName;
-            Uri packageURI = intent.getData();
-
-            // Set header icon and title
-            PackageManager pm = getPackageManager();
-
-            if ("package".equals(packageURI.getScheme())) {
-                mAppSnippet = new PackageUtil.AppSnippet(pm.getApplicationLabel(appInfo),
-                        pm.getApplicationIcon(appInfo));
-            } else {
-                File sourceFile = new File(packageURI.getPath());
-                mAppSnippet = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
-            }
+            mAppSnippet = intent.getParcelableExtra(PackageInstallerActivity.EXTRA_APP_SNIPPET,
+                    PackageUtil.AppSnippet.class);
 
             mLaunchIntent = getPackageManager().getLaunchIntentForPackage(mAppPackageName);
 
@@ -95,20 +87,27 @@ public class InstallSuccess extends AlertActivity {
             return;
         }
 
-        mAlert.setIcon(mAppSnippet.icon);
-        mAlert.setTitle(mAppSnippet.label);
-        mAlert.setView(R.layout.install_content_view);
-        mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.launch), null,
-                null);
-        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.done),
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(mAppSnippet.icon);
+        builder.setTitle(mAppSnippet.label);
+        builder.setView(R.layout.install_content_view);
+        builder.setPositiveButton(getString(R.string.launch), null);
+        builder.setNegativeButton(getString(R.string.done),
                 (ignored, ignored2) -> {
                     if (mAppPackageName != null) {
                         Log.i(LOG_TAG, "Finished installing " + mAppPackageName);
                     }
                     finish();
-                }, null);
-        setupAlert();
-        requireViewById(R.id.install_success).setVisibility(View.VISIBLE);
+                });
+        builder.setOnCancelListener(dialog -> {
+            if (mAppPackageName != null) {
+                Log.i(LOG_TAG, "Finished installing " + mAppPackageName);
+            }
+            finish();
+        });
+        mDialog = builder.create();
+        mDialog.show();
+        mDialog.requireViewById(R.id.install_success).setVisibility(View.VISIBLE);
         // Enable or disable "launch" button
         boolean enabled = false;
         if (mLaunchIntent != null) {
@@ -119,11 +118,12 @@ public class InstallSuccess extends AlertActivity {
             }
         }
 
-        Button launchButton = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
+        Button launchButton = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (enabled) {
             launchButton.setOnClickListener(view -> {
                 try {
-                    startActivity(mLaunchIntent);
+                    startActivity(mLaunchIntent.addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                 } catch (ActivityNotFoundException | SecurityException e) {
                     Log.e(LOG_TAG, "Could not start activity", e);
                 }

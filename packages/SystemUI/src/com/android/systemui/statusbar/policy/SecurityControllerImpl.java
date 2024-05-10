@@ -15,8 +15,10 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.DeviceOwnerType;
@@ -33,7 +35,9 @@ import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
+import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.VpnManager;
 import android.os.Handler;
@@ -51,12 +55,13 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -70,13 +75,16 @@ import javax.inject.Inject;
 /**
  */
 @SysUISingleton
-public class SecurityControllerImpl extends CurrentUserTracker implements SecurityController {
+public class SecurityControllerImpl implements SecurityController {
 
     private static final String TAG = "SecurityController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final NetworkRequest REQUEST =
-            new NetworkRequest.Builder().clearCapabilities().build();
+            new NetworkRequest.Builder()
+                    .clearCapabilities()
+                    .addTransportType(TRANSPORT_VPN)
+                    .build();
     private static final int NO_NETWORK = -1;
 
     private static final String VPN_BRANDED_META_DATA = "com.android.systemui.IS_BRANDED";
@@ -84,11 +92,13 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private static final int CA_CERT_LOADING_RETRY_TIME_IN_MS = 30_000;
 
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final ConnectivityManager mConnectivityManager;
     private final VpnManager mVpnManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
+    private final Executor mMainExecutor;
     private final Executor mBgExecutor;
 
     @GuardedBy("mCallbacks")
@@ -97,23 +107,35 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private SparseArray<VpnConfig> mCurrentVpns = new SparseArray<>();
     private int mCurrentUserId;
     private int mVpnUserId;
+    @GuardedBy("mNetworkProperties")
+    private final SparseArray<NetworkProperties> mNetworkProperties = new SparseArray<>();
 
     // Key: userId, Value: whether the user has CACerts installed
     // Needs to be cached here since the query has to be asynchronous
     private ArrayMap<Integer, Boolean> mHasCACerts = new ArrayMap<Integer, Boolean>();
+
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    onUserSwitched(newUser);
+                }
+            };
 
     /**
      */
     @Inject
     public SecurityControllerImpl(
             Context context,
+            UserTracker userTracker,
             @Background Handler bgHandler,
             BroadcastDispatcher broadcastDispatcher,
+            @Main Executor mainExecutor,
             @Background Executor bgExecutor,
             DumpManager dumpManager
     ) {
-        super(broadcastDispatcher);
         mContext = context;
+        mUserTracker = userTracker;
         mDevicePolicyManager = (DevicePolicyManager)
                 context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mConnectivityManager = (ConnectivityManager)
@@ -121,6 +143,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         mVpnManager = context.getSystemService(VpnManager.class);
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
@@ -133,8 +156,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
-        onUserSwitched(ActivityManager.getCurrentUser());
-        startTracking();
+        onUserSwitched(mUserTracker.getUserId());
+        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
     }
 
     public void dump(PrintWriter pw, String[] args) {
@@ -147,6 +170,21 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
             pw.print(mCurrentVpns.keyAt(i));
             pw.print('=');
             pw.print(mCurrentVpns.valueAt(i).user);
+        }
+        pw.println("}");
+        pw.print("  mNetworkProperties={");
+        synchronized (mNetworkProperties) {
+            for (int i = 0; i < mNetworkProperties.size(); ++i) {
+                if (i > 0) {
+                    pw.print(", ");
+                }
+                pw.print(mNetworkProperties.keyAt(i));
+                pw.print("={");
+                pw.print(mNetworkProperties.valueAt(i).interfaceName);
+                pw.print(", ");
+                pw.print(mNetworkProperties.valueAt(i).validated);
+                pw.print("}");
+            }
         }
         pw.println("}");
     }
@@ -241,10 +279,16 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         return mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser();
     }
 
+    // TODO(b/259908270): remove
     @Override
     @DeviceOwnerType
     public int getDeviceOwnerType(@NonNull ComponentName admin) {
         return mDevicePolicyManager.getDeviceOwnerType(admin);
+    }
+
+    @Override
+    public boolean isFinancedDevice() {
+        return mDevicePolicyManager.isFinancedDevice();
     }
 
     @Override
@@ -282,6 +326,26 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         }
 
         return isVpnPackageBranded(packageName);
+    }
+
+    @Override
+    public boolean isVpnValidated() {
+        // Prioritize reporting the network status of the parent user.
+        final VpnConfig primaryVpnConfig = mCurrentVpns.get(mVpnUserId);
+        if (primaryVpnConfig != null) {
+            return getVpnValidationStatus(primaryVpnConfig);
+        }
+        // Identify any Unvalidated status in each active VPN network within other profiles.
+        for (int profileId : mUserManager.getEnabledProfileIds(mVpnUserId)) {
+            final VpnConfig vpnConfig = mCurrentVpns.get(profileId);
+            if (vpnConfig == null) {
+                continue;
+            }
+            if (!getVpnValidationStatus(vpnConfig)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -472,10 +536,73 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         @Override
         public void onLost(Network network) {
             if (DEBUG) Log.d(TAG, "onLost " + network.getNetId());
+            synchronized (mNetworkProperties) {
+                mNetworkProperties.delete(network.getNetId());
+            }
             updateState();
             fireCallbacks();
         };
+
+
+        @Override
+        public void onCapabilitiesChanged(Network network, NetworkCapabilities nc) {
+            if (DEBUG) Log.d(TAG, "onCapabilitiesChanged " + network.getNetId());
+            final NetworkProperties properties;
+            synchronized (mNetworkProperties) {
+                properties = mNetworkProperties.get(network.getNetId());
+            }
+            // When a new network appears, the system first notifies the application about
+            // its capabilities through onCapabilitiesChanged. This initial notification
+            // will be skipped because the interface information is included in the
+            // subsequent onLinkPropertiesChanged call. After validating the network, the
+            // system might send another onCapabilitiesChanged notification if the network
+            // becomes validated.
+            if (properties == null) {
+                return;
+            }
+            final boolean validated = nc.hasCapability(NET_CAPABILITY_VALIDATED);
+            if (properties.validated != validated) {
+                properties.validated = validated;
+                fireCallbacks();
+            }
+        }
+
+        @Override
+        public void onLinkPropertiesChanged(Network network, LinkProperties linkProperties) {
+            if (DEBUG) Log.d(TAG, "onLinkPropertiesChanged " + network.getNetId());
+            final String interfaceName = linkProperties.getInterfaceName();
+            if (interfaceName == null) {
+                Log.w(TAG, "onLinkPropertiesChanged event with null interface");
+                return;
+            }
+            synchronized (mNetworkProperties) {
+                final NetworkProperties properties = mNetworkProperties.get(network.getNetId());
+                if (properties == null) {
+                    mNetworkProperties.put(
+                            network.getNetId(),
+                            new NetworkProperties(interfaceName, false));
+                } else {
+                    properties.interfaceName = interfaceName;
+                }
+            }
+        }
     };
+
+    /**
+     *  Retrieve the validation status of the VPN network associated with the given VpnConfig.
+     */
+    private boolean getVpnValidationStatus(@NonNull VpnConfig vpnConfig) {
+        synchronized (mNetworkProperties) {
+            // Find the network has the same interface as the VpnConfig
+            for (int i = 0; i < mNetworkProperties.size(); ++i) {
+                if (mNetworkProperties.valueAt(i).interfaceName.equals(vpnConfig.interfaze)) {
+                    return mNetworkProperties.valueAt(i).validated;
+                }
+            }
+        }
+        // If no matching network is found, consider it validated.
+        return true;
+    }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
@@ -487,4 +614,17 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
             }
         }
     };
+
+    /**
+     *  A data class to hold specific Network properties received through the NetworkCallback.
+     */
+    private static class NetworkProperties {
+        public String interfaceName;
+        public boolean validated;
+
+        NetworkProperties(@NonNull String interfaceName, boolean validated) {
+            this.interfaceName = interfaceName;
+            this.validated = validated;
+        }
+    }
 }

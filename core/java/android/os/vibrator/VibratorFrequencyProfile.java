@@ -65,7 +65,9 @@ public final class VibratorFrequencyProfile {
      * {@link #getMinFrequency()} to {@link #getMaxFrequency()}, inclusive.
      *
      * @return Array of maximum relative amplitude measurements.
+     * @hide
      */
+    @TestApi
     @NonNull
     @FloatRange(from = 0, to = 1)
     public float[] getMaxAmplitudeMeasurements() {
@@ -77,7 +79,9 @@ public final class VibratorFrequencyProfile {
      * Gets the frequency interval used to measure the maximum relative amplitudes.
      *
      * @return the frequency interval used for the measurement, in hertz.
+     * @hide
      */
+    @TestApi
     public float getMaxAmplitudeMeasurementInterval() {
         return mFrequencyProfile.getFrequencyResolutionHz();
     }
@@ -86,7 +90,9 @@ public final class VibratorFrequencyProfile {
      * Gets the minimum frequency supported by the vibrator.
      *
      * @return the minimum frequency supported by the vibrator, in hertz.
+     * @hide
      */
+    @TestApi
     public float getMinFrequency() {
         return mFrequencyProfile.getFrequencyRangeHz().getLower();
     }
@@ -95,7 +101,9 @@ public final class VibratorFrequencyProfile {
      * Gets the maximum frequency supported by the vibrator.
      *
      * @return the maximum frequency supported by the vibrator, in hertz.
+     * @hide
      */
+    @TestApi
     public float getMaxFrequency() {
         return mFrequencyProfile.getFrequencyRangeHz().getUpper();
     }

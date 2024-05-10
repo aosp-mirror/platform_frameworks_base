@@ -213,7 +213,13 @@ final class HdmiCecKeycode {
         }
 
         private int toAndroidKeycodeIfMatched(byte[] cecKeycodeAndParams) {
-            if (Arrays.equals(mCecKeycodeAndParams, cecKeycodeAndParams)) {
+            if (cecKeycodeAndParams.length < mCecKeycodeAndParams.length) {
+                return UNSUPPORTED_KEYCODE;
+            }
+            byte[] trimmedCecKeycodeAndParams = new byte[mCecKeycodeAndParams.length];
+            System.arraycopy(cecKeycodeAndParams, 0, trimmedCecKeycodeAndParams, 0,
+                    mCecKeycodeAndParams.length);
+            if (Arrays.equals(mCecKeycodeAndParams, trimmedCecKeycodeAndParams)) {
                 return mAndroidKeycode;
             } else {
                 return UNSUPPORTED_KEYCODE;

@@ -20,6 +20,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.FloatArrayEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -223,9 +224,11 @@ public class ChangeTransform extends Transition {
         captureValues(transitionValues);
     }
 
+    @Nullable
     @Override
-    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
+    public Animator createAnimator(@NonNull ViewGroup sceneRoot,
+            @Nullable TransitionValues startValues,
+            @Nullable TransitionValues endValues) {
         if (startValues == null || endValues == null ||
                 !startValues.values.containsKey(PROPNAME_PARENT) ||
                 !endValues.values.containsKey(PROPNAME_PARENT)) {

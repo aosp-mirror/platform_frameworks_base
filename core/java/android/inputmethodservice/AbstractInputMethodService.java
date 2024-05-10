@@ -33,6 +33,8 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
 import android.window.WindowProviderService;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -72,8 +74,9 @@ public abstract class AbstractInputMethodService extends WindowProviderService
      *         {@code null} if {@link #onCreateInputMethodInterface()} is not yet called.
      * @hide
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     @Nullable
-    protected final InputMethod getInputMethodInternal() {
+    public final InputMethod getInputMethodInternal() {
         return mInputMethod;
     }
 

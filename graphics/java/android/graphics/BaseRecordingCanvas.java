@@ -286,11 +286,7 @@ public class BaseRecordingCanvas extends Canvas {
 
     @Override
     public final void drawPath(@NonNull Path path, @NonNull Paint paint) {
-        if (path.isSimplePath && path.rects != null) {
-            nDrawRegion(mNativeCanvasWrapper, path.rects.mNativeRegion, paint.getNativeInstance());
-        } else {
-            nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
-        }
+        nDrawPath(mNativeCanvasWrapper, path.readOnlyNI(), paint.getNativeInstance());
     }
 
     @Override
@@ -406,8 +402,8 @@ public class BaseRecordingCanvas extends Canvas {
     }
 
     @Override
-    public final void drawDoubleRoundRect(@NonNull RectF outer, float[] outerRadii,
-            @NonNull RectF inner, float[] innerRadii, @NonNull Paint paint) {
+    public final void drawDoubleRoundRect(@NonNull RectF outer, @NonNull float[] outerRadii,
+            @NonNull RectF inner, @NonNull float[] innerRadii, @NonNull Paint paint) {
         nDrawDoubleRoundRect(mNativeCanvasWrapper,
                 outer.left, outer.top, outer.right, outer.bottom, outerRadii,
                 inner.left, inner.top, inner.right, inner.bottom, innerRadii,
@@ -610,12 +606,22 @@ public class BaseRecordingCanvas extends Canvas {
                 indices, indexOffset, indexCount, paint.getNativeInstance());
     }
 
+    @Override
+    public final void drawMesh(@NonNull Mesh mesh, BlendMode blendMode, @NonNull Paint paint) {
+        if (blendMode == null) {
+            blendMode = BlendMode.MODULATE;
+        }
+        nDrawMesh(mNativeCanvasWrapper, mesh.getNativeWrapperInstance(),
+                blendMode.getXfermode().porterDuffMode, paint.getNativeInstance());
+    }
+
     /**
      * @hide
      */
     @Override
-    public void punchHole(float left, float top, float right, float bottom, float rx, float ry) {
-        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry);
+    public void punchHole(float left, float top, float right, float bottom, float rx, float ry,
+            float alpha) {
+        nPunchHole(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, alpha);
     }
 
     @FastNative
@@ -711,6 +717,10 @@ public class BaseRecordingCanvas extends Canvas {
             long nativePaint);
 
     @FastNative
+    private static native void nDrawMesh(
+            long canvasHandle, long nativeMesh, int mode, long nativePaint);
+
+    @FastNative
     private static native void nDrawVertices(long nativeCanvas, int mode, int n, float[] verts,
             int vertOffset, float[] texs, int texOffset, int[] colors, int colorOffset,
             short[] indices, int indexOffset, int indexCount, long nativePaint);
@@ -746,5 +756,5 @@ public class BaseRecordingCanvas extends Canvas {
 
     @FastNative
     private static native void nPunchHole(long renderer, float left, float top, float right,
-            float bottom, float rx, float ry);
+            float bottom, float rx, float ry, float alpha);
 }

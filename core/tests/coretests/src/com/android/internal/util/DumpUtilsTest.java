@@ -23,15 +23,31 @@ import static com.android.internal.util.DumpUtils.isPlatformCriticalPackage;
 import static com.android.internal.util.DumpUtils.isPlatformNonCriticalPackage;
 import static com.android.internal.util.DumpUtils.isPlatformPackage;
 
-import android.content.ComponentName;
+import static com.google.common.truth.Truth.assertWithMessage;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import android.content.ComponentName;
+import android.util.SparseArray;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Run with:
  atest FrameworksCoreTests:DumpUtilsTest
  */
-public class DumpUtilsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class DumpUtilsTest {
+
+    private final StringWriter mStringWriter = new StringWriter();
+    private final PrintWriter mPrintWriter = new PrintWriter(mStringWriter);
 
     private static ComponentName cn(String componentName) {
         if (componentName == null) {
@@ -47,6 +63,7 @@ public class DumpUtilsTest extends TestCase {
         return () -> cn(componentName);
     }
 
+    @Test
     public void testIsPlatformPackage() {
         assertTrue(isPlatformPackage("android"));
         assertTrue(isPlatformPackage("android.abc"));
@@ -70,6 +87,7 @@ public class DumpUtilsTest extends TestCase {
         assertFalse(isPlatformPackage(wcn("com.google.def/abc")));
     }
 
+    @Test
     public void testIsNonPlatformPackage() {
         assertFalse(isNonPlatformPackage("android"));
         assertFalse(isNonPlatformPackage("android.abc"));
@@ -93,6 +111,7 @@ public class DumpUtilsTest extends TestCase {
         assertTrue(isNonPlatformPackage(wcn("com.google.def/abc")));
     }
 
+    @Test
     public void testIsPlatformCriticalPackage() {
         for (final ComponentName componentName : CRITICAL_SECTION_COMPONENTS) {
             assertTrue(isPlatformCriticalPackage(() -> componentName));
@@ -106,6 +125,7 @@ public class DumpUtilsTest extends TestCase {
         assertFalse(isPlatformCriticalPackage(null));
     }
 
+    @Test
     public void testIsPlatformNonCriticalPackage() {
         for (final ComponentName componentName : CRITICAL_SECTION_COMPONENTS) {
             assertFalse(isPlatformNonCriticalPackage(() -> componentName));
@@ -119,6 +139,7 @@ public class DumpUtilsTest extends TestCase {
         assertFalse(isPlatformNonCriticalPackage(null));
     }
 
+    @Test
     public void testFilterRecord() {
         assertFalse(filterRecord(null).test(wcn("com.google.p/abc")));
         assertFalse(filterRecord(null).test(wcn("com.android.p/abc")));
@@ -167,5 +188,153 @@ public class DumpUtilsTest extends TestCase {
         assertFalse(filterRecord(
                 Integer.toHexString(System.identityHashCode(component))).test(
                         wcn("com.google/.abc")));
+    }
+
+    @Test
+    public void testDumpSparseArray_empty() {
+        SparseArray<String> array = new SparseArray<>();
+
+        DumpUtils.dumpSparseArray(mPrintWriter, /* prefix= */ "...", array, "whatever");
+
+        String output = flushPrintWriter();
+
+        assertWithMessage("empty array dump").that(output).isEqualTo("...No whatevers\n");
+    }
+
+    @Test
+    public void testDumpSparseArray_oneElement() {
+        SparseArray<String> array = new SparseArray<>();
+        array.put(1, "uno");
+
+        DumpUtils.dumpSparseArray(mPrintWriter, /* prefix= */ ".", array, "number");
+
+        String output = flushPrintWriter();
+
+        assertWithMessage("dump of %s", array).that(output).isEqualTo(""
+                + ".1 number(s):\n"
+                + "..0: 1->uno\n");
+    }
+
+    @Test
+    public void testDumpSparseArray_oneNullElement() {
+        SparseArray<String> array = new SparseArray<>();
+        array.put(1, null);
+
+        DumpUtils.dumpSparseArray(mPrintWriter, /* prefix= */ ".", array, "NULL");
+
+        String output = flushPrintWriter();
+
+        assertWithMessage("dump of %s", array).that(output).isEqualTo(""
+                + ".1 NULL(s):\n"
+                + "..0: 1->(null)\n");
+    }
+
+    @Test
+    public void testDumpSparseArray_multipleElements() {
+        SparseArray<String> array = new SparseArray<>();
+        array.put(1, "uno");
+        array.put(2, "duo");
+        array.put(42, null);
+
+        DumpUtils.dumpSparseArray(mPrintWriter, /* prefix= */ ".", array, "number");
+
+        String output = flushPrintWriter();
+
+        assertWithMessage("dump of %s", array).that(output).isEqualTo(""
+                + ".3 number(s):\n"
+                + "..0: 1->uno\n"
+                + "..1: 2->duo\n"
+                + "..2: 42->(null)\n");
+    }
+
+    @Test
+    public void testDumpSparseArray_keyDumperOnly() {
+        SparseArray<String> array = new SparseArray<>();
+        array.put(1, "uno");
+        array.put(2, "duo");
+        array.put(42, null);
+
+        DumpUtils.dumpSparseArray(mPrintWriter, /* prefix= */ ".", array, "number",
+                (i, k) -> {
+                    mPrintWriter.printf("_%d=%d_", i, k);
+                }, /* valueDumper= */ null);
+
+        String output = flushPrintWriter();
+
+        assertWithMessage("dump of %s", array).that(output).isEqualTo(""
+                + ".3 number(s):\n"
+                + "_0=1_uno\n"
+                + "_1=2_duo\n"
+                + "_2=42_(null)\n");
+    }
+
+    @Test
+    public void testDumpSparseArray_valueDumperOnly() {
+        SparseArray<String> array = new SparseArray<>();
+        array.put(1, "uno");
+        array.put(2, "duo");
+        array.put(42, null);
+
+        DumpUtils.dumpSparseArray(mPrintWriter, /* prefix= */ ".", array, "number",
+                /* keyDumper= */ null,
+                s -> {
+                    mPrintWriter.print(s.toUpperCase());
+                });
+
+        String output = flushPrintWriter();
+
+        assertWithMessage("dump of %s", array).that(output).isEqualTo(""
+                + ".3 number(s):\n"
+                + "..0: 1->UNO\n"
+                + "..1: 2->DUO\n"
+                + "..2: 42->(null)\n");
+    }
+
+    @Test
+    public void testDumpSparseArray_keyAndValueDumpers() {
+        SparseArray<String> array = new SparseArray<>();
+        array.put(1, "uno");
+        array.put(2, "duo");
+        array.put(42, null);
+
+        DumpUtils.dumpSparseArray(mPrintWriter, /* prefix= */ ".", array, "number",
+                (i, k) -> {
+                    mPrintWriter.printf("_%d=%d_", i, k);
+                },
+                s -> {
+                    mPrintWriter.print(s.toUpperCase());
+                });
+
+        String output = flushPrintWriter();
+
+        assertWithMessage("dump of %s", array).that(output).isEqualTo(""
+                + ".3 number(s):\n"
+                + "_0=1_UNO\n"
+                + "_1=2_DUO\n"
+                + "_2=42_(null)\n");
+    }
+
+    @Test
+    public void testDumpSparseArrayValues() {
+        SparseArray<String> array = new SparseArray<>();
+        array.put(1, "uno");
+        array.put(2, "duo");
+        array.put(42, null);
+
+        DumpUtils.dumpSparseArrayValues(mPrintWriter, /* prefix= */ ".", array, "number");
+
+        String output = flushPrintWriter();
+
+        assertWithMessage("dump of %s", array).that(output).isEqualTo(""
+                + ".3 number(s):\n"
+                + "..uno\n"
+                + "..duo\n"
+                + "..(null)\n");
+    }
+
+    private String flushPrintWriter() {
+        mPrintWriter.flush();
+
+        return mStringWriter.toString();
     }
 }

@@ -24,6 +24,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name="SurfaceControlViewHostSyncTest"
+            android:label="View Embedding Test Sync"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <service android:name=".EmbeddedWindowService"
+            android:process="com.android.test.viewembed.embedded_process"/>
     </application>
 
 

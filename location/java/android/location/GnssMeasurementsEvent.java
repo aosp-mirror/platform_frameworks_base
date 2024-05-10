@@ -37,9 +37,13 @@ import java.util.List;
  * Events are delivered to registered instances of {@link Callback}.
  */
 public final class GnssMeasurementsEvent implements Parcelable {
+    private final int mFlag;
     private final GnssClock mClock;
     private final List<GnssMeasurement> mMeasurements;
     private final List<GnssAutomaticGainControl> mGnssAgcs;
+    private final boolean mIsFullTracking;
+
+    private static final int HAS_IS_FULL_TRACKING = 1;
 
     /**
      * Used for receiving GNSS satellite measurements from the GNSS engine.
@@ -122,12 +126,16 @@ public final class GnssMeasurementsEvent implements Parcelable {
     /**
      * Create a {@link GnssMeasurementsEvent} instance with a full list of parameters.
      */
-    private GnssMeasurementsEvent(@NonNull GnssClock clock,
+    private GnssMeasurementsEvent(int flag,
+            @NonNull GnssClock clock,
             @NonNull List<GnssMeasurement> measurements,
-            @NonNull List<GnssAutomaticGainControl> agcs) {
+            @NonNull List<GnssAutomaticGainControl> agcs,
+            boolean isFullTracking) {
+        mFlag = flag;
         mMeasurements = measurements;
         mGnssAgcs = agcs;
         mClock = clock;
+        mIsFullTracking = isFullTracking;
     }
 
     /**
@@ -156,15 +164,41 @@ public final class GnssMeasurementsEvent implements Parcelable {
         return mGnssAgcs;
     }
 
+    /**
+     * True indicates that this event was produced while the chipset was in full tracking mode, ie,
+     * the GNSS chipset switched off duty cycling. In this mode, no clock discontinuities are
+     * expected and, when supported, carrier phase should be continuous in good signal conditions.
+     * All non-blocklisted, healthy constellations, satellites and frequency bands that are
+     * meaningful to positioning accuracy must be tracked and reported in this mode.
+     *
+     * False indicates that the GNSS chipset may optimize power via duty cycling, constellations and
+     * frequency limits, etc.
+     *
+     * <p>The value is only available if {@link #hasIsFullTracking()} is {@code true}.
+     */
+    public boolean isFullTracking() {
+        return mIsFullTracking;
+    }
+
+    /**
+     * Return {@code true} if {@link #isFullTracking()} is available, {@code false} otherwise.
+     */
+    public boolean hasIsFullTracking() {
+        return (mFlag & HAS_IS_FULL_TRACKING) == HAS_IS_FULL_TRACKING;
+    }
+
     public static final @android.annotation.NonNull Creator<GnssMeasurementsEvent> CREATOR =
             new Creator<GnssMeasurementsEvent>() {
         @Override
         public GnssMeasurementsEvent createFromParcel(Parcel in) {
-            GnssClock clock = in.readParcelable(getClass().getClassLoader(), android.location.GnssClock.class);
+            int flag = in.readInt();
+            GnssClock clock = in.readParcelable(getClass().getClassLoader(),
+                    android.location.GnssClock.class);
             List<GnssMeasurement> measurements = in.createTypedArrayList(GnssMeasurement.CREATOR);
             List<GnssAutomaticGainControl> agcs = in.createTypedArrayList(
                     GnssAutomaticGainControl.CREATOR);
-            return new GnssMeasurementsEvent(clock, measurements, agcs);
+            boolean isFullTracking = in.readBoolean();
+            return new GnssMeasurementsEvent(flag, clock, measurements, agcs, isFullTracking);
         }
 
         @Override
@@ -180,9 +214,11 @@ public final class GnssMeasurementsEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(mFlag);
         parcel.writeParcelable(mClock, flags);
         parcel.writeTypedList(mMeasurements);
         parcel.writeTypedList(mGnssAgcs);
+        parcel.writeBoolean(mIsFullTracking);
     }
 
     @Override
@@ -191,15 +227,20 @@ public final class GnssMeasurementsEvent implements Parcelable {
         builder.append(mClock);
         builder.append(' ').append(mMeasurements.toString());
         builder.append(' ').append(mGnssAgcs.toString());
+        if (hasIsFullTracking()) {
+            builder.append(" isFullTracking=").append(mIsFullTracking);
+        }
         builder.append("]");
         return builder.toString();
     }
 
     /** Builder for {@link GnssMeasurementsEvent} */
     public static final class Builder {
+        private int mFlag;
         private GnssClock mClock;
         private List<GnssMeasurement> mMeasurements;
         private List<GnssAutomaticGainControl> mGnssAgcs;
+        private boolean mIsFullTracking;
 
         /**
          * Constructs a {@link GnssMeasurementsEvent.Builder} instance.
@@ -215,9 +256,11 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * {@link GnssMeasurementsEvent}.
          */
         public Builder(@NonNull GnssMeasurementsEvent event) {
+            mFlag = event.mFlag;
             mClock = event.getClock();
             mMeasurements = (List<GnssMeasurement>) event.getMeasurements();
             mGnssAgcs = (List<GnssAutomaticGainControl>) event.getGnssAutomaticGainControls();
+            mIsFullTracking = event.isFullTracking();
         }
 
         /**
@@ -276,10 +319,41 @@ public final class GnssMeasurementsEvent implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets whether the GNSS chipset was in the full tracking mode at the time this event was
+         * produced.
+         *
+         * True indicates that this event was produced while the chipset was in full tracking
+         * mode, ie, the GNSS chipset switched off duty cycling. In this mode, no clock
+         * discontinuities are expected and, when supported, carrier phase should be continuous in
+         * good signal conditions. All non-blocklisted, healthy constellations, satellites and
+         * frequency bands that are meaningful to positioning accuracy must be tracked and reported
+         * in this mode.
+         *
+         * False indicates that the GNSS chipset may optimize power via duty cycling, constellations
+         * and frequency limits, etc.
+         */
+        @NonNull
+        public Builder setIsFullTracking(boolean isFullTracking) {
+            mFlag |= HAS_IS_FULL_TRACKING;
+            mIsFullTracking = isFullTracking;
+            return this;
+        }
+
+        /**
+         * Clears the full tracking mode indicator.
+         */
+        @NonNull
+        public Builder clearIsFullTracking() {
+            mFlag &= ~HAS_IS_FULL_TRACKING;
+            return this;
+        }
+
         /** Builds a {@link GnssMeasurementsEvent} instance as specified by this builder. */
         @NonNull
         public GnssMeasurementsEvent build() {
-            return new GnssMeasurementsEvent(mClock, mMeasurements, mGnssAgcs);
+            return new GnssMeasurementsEvent(mFlag, mClock, mMeasurements, mGnssAgcs,
+                    mIsFullTracking);
         }
     }
 }

@@ -20,131 +20,309 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.media.AudioDeviceInfo;
 import android.media.MediaRoute2Info;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import com.android.settingslib.R;
+import com.android.settingslib.media.flags.Flags;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
 public class DeviceIconUtilTest {
-    private final DeviceIconUtil mDeviceIconUtil = new DeviceIconUtil();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Before
+    public void setup() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_TV_MEDIA_OUTPUT_DIALOG);
+    }
 
     @Test
     public void getIconResIdFromMediaRouteType_usbDevice_isHeadphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_DEVICE))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_DEVICE))
+                .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_DEVICE))
+                .isEqualTo(R.drawable.ic_headphone);
     }
 
     @Test
     public void getIconResIdFromMediaRouteType_usbHeadset_isHeadphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_HEADSET))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_HEADSET))
+                .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_HEADSET))
+                .isEqualTo(R.drawable.ic_headphone);
     }
 
     @Test
     public void getIconResIdFromMediaRouteType_usbAccessory_isHeadphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_ACCESSORY))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_ACCESSORY))
+                .isEqualTo(R.drawable.ic_headphone);
     }
 
     @Test
-    public void getIconResIdFromMediaRouteType_dock_isHeadphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_DOCK))
-            .isEqualTo(R.drawable.ic_headphone);
+    public void getIconResIdFromMediaRouteType_tv_usbAccessory_isUsb() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_USB_ACCESSORY))
+                .isEqualTo(R.drawable.ic_usb);
     }
 
     @Test
-    public void getIconResIdFromMediaRouteType_hdmi_isHeadphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI))
-            .isEqualTo(R.drawable.ic_headphone);
+    public void getIconResIdFromMediaRouteType_dock_isDock() {
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_DOCK))
+                .isEqualTo(R.drawable.ic_dock_device);
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_DOCK))
+                .isEqualTo(R.drawable.ic_dock_device);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_hdmi() {
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_tv_hdmi_isTv() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI))
+                .isEqualTo(R.drawable.ic_tv);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_hdmiArc_isHeadphone() {
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI_ARC))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_tv_hdmiArc_isHdmi() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI_ARC))
+                .isEqualTo(R.drawable.ic_hdmi);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_hdmiEarc_isHeadphone() {
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI_EARC))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_tv_hdmiEarc_isHdmi() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_HDMI_EARC))
+                .isEqualTo(R.drawable.ic_hdmi);
     }
 
     @Test
     public void getIconResIdFromMediaRouteType_wiredHeadset_isHeadphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_WIRED_HEADSET))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_WIRED_HEADSET))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_tv_wiredHeadset_isWiredDevice() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_WIRED_HEADSET))
+                .isEqualTo(R.drawable.ic_wired_device);
     }
 
     @Test
     public void getIconResIdFromMediaRouteType_wiredHeadphones_isHeadphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_WIRED_HEADPHONES))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_WIRED_HEADPHONES))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_tv_wiredHeadphones_isWiredDevice() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_WIRED_HEADPHONES))
+                .isEqualTo(R.drawable.ic_wired_device);
     }
 
     @Test
     public void getIconResIdFromMediaRouteType_builtinSpeaker_isSmartphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_BUILTIN_SPEAKER))
-            .isEqualTo(R.drawable.ic_smartphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_BUILTIN_SPEAKER))
+                .isEqualTo(R.drawable.ic_smartphone);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_tv_builtinSpeaker_isTv() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_BUILTIN_SPEAKER))
+                .isEqualTo(R.drawable.ic_tv);
     }
 
     @Test
     public void getIconResIdFromMediaRouteType_unsupportedType_isSmartphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_UNKNOWN))
-            .isEqualTo(R.drawable.ic_smartphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_UNKNOWN))
+                .isEqualTo(R.drawable.ic_smartphone);
+    }
+
+    @Test
+    public void getIconResIdFromMediaRouteType_tv_unsupportedType_isSpeaker() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromMediaRouteType(MediaRoute2Info.TYPE_UNKNOWN))
+                .isEqualTo(R.drawable.ic_media_speaker_device);
     }
 
     @Test
     public void getIconResIdFromAudioDeviceType_usbDevice_isHeadphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_DEVICE))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_DEVICE))
+                .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_DEVICE))
+                .isEqualTo(R.drawable.ic_headphone);
     }
 
     @Test
     public void getIconResIdFromAudioDeviceType_usbHeadset_isHeadphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_HEADSET))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_HEADSET))
+                .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_HEADSET))
+                .isEqualTo(R.drawable.ic_headphone);
     }
 
     @Test
     public void getIconResIdFromAudioDeviceType_usbAccessory_isHeadphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_ACCESSORY))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_ACCESSORY))
+                .isEqualTo(R.drawable.ic_headphone);
     }
 
     @Test
-    public void getIconResIdFromAudioDeviceType_dock_isHeadphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_DOCK))
-            .isEqualTo(R.drawable.ic_headphone);
+    public void getIconResIdFromAudioDeviceType_tv_usbAccessory_isUsb() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_USB_ACCESSORY))
+                .isEqualTo(R.drawable.ic_usb);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_dock_isDock() {
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_DOCK))
+                .isEqualTo(R.drawable.ic_dock_device);
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_DOCK))
+                .isEqualTo(R.drawable.ic_dock_device);
     }
 
     @Test
     public void getIconResIdFromAudioDeviceType_hdmi_isHeadphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_tv_hdmi_isTv() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI))
+                .isEqualTo(R.drawable.ic_tv);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_hdmiArc_isHeadphone() {
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI_ARC))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_hdmiArc_isHdmi() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI_ARC))
+                .isEqualTo(R.drawable.ic_hdmi);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_hdmiEarc_isHeadphone() {
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI_EARC))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_tv_hdmiEarc() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_HDMI_EARC))
+                .isEqualTo(R.drawable.ic_hdmi);
     }
 
     @Test
     public void getIconResIdFromAudioDeviceType_wiredHeadset_isHeadphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_WIRED_HEADSET))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_WIRED_HEADSET))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_tv_wiredHeadset_isWiredDevice() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_WIRED_HEADSET))
+                .isEqualTo(R.drawable.ic_wired_device);
     }
 
     @Test
     public void getIconResIdFromAudioDeviceType_wiredHeadphones_isHeadphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_WIRED_HEADPHONES))
-            .isEqualTo(R.drawable.ic_headphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_WIRED_HEADPHONES))
+                .isEqualTo(R.drawable.ic_headphone);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_tv_wiredHeadphones_isWiredDevice() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_WIRED_HEADPHONES))
+                .isEqualTo(R.drawable.ic_wired_device);
     }
 
     @Test
     public void getIconResIdFromAudioDeviceType_builtinSpeaker_isSmartphone() {
-        assertThat(
-            mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER))
-            .isEqualTo(R.drawable.ic_smartphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER))
+                .isEqualTo(R.drawable.ic_smartphone);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_tv_builtinSpeaker_isTv() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER))
+                .isEqualTo(R.drawable.ic_tv);
     }
 
     @Test
     public void getIconResIdFromAudioDeviceType_unsupportedType_isSmartphone() {
-        assertThat(mDeviceIconUtil.getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_UNKNOWN))
-            .isEqualTo(R.drawable.ic_smartphone);
+        assertThat(new DeviceIconUtil(/* isTv */ false)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_UNKNOWN))
+                .isEqualTo(R.drawable.ic_smartphone);
+    }
+
+    @Test
+    public void getIconResIdFromAudioDeviceType_tv_unsupportedType_isSpeaker() {
+        assertThat(new DeviceIconUtil(/* isTv */ true)
+                .getIconResIdFromAudioDeviceType(AudioDeviceInfo.TYPE_UNKNOWN))
+                .isEqualTo(R.drawable.ic_media_speaker_device);
     }
 }

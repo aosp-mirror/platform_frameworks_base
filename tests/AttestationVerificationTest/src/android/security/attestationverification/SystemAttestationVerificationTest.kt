@@ -43,7 +43,7 @@ class SystemAttestationVerificationTest {
     @Before
     fun setup() {
         rule.getScenario().onActivity {
-            avm = it.getSystemService(AttestationVerificationManager::class.java)
+            avm = it.getSystemService(AttestationVerificationManager::class.java)!!
             activity = it
             androidKeystore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
         }

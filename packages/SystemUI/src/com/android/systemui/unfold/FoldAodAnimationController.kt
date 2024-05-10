@@ -16,6 +16,7 @@
 
 package com.android.systemui.unfold
 
+import android.annotation.BinderThread
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.PowerManager
@@ -29,6 +30,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.shade.ShadeFoldAnimator
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.ScreenOffAnimation
@@ -37,12 +40,11 @@ import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationSt
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.GlobalSettings
 import dagger.Lazy
-import java.util.function.Consumer
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.util.function.Consumer
+import javax.inject.Inject
 
 /**
  * Controls folding to AOD animation: when AOD is enabled and foldable device is folded we play a
@@ -52,7 +54,7 @@ import kotlinx.coroutines.launch
 class FoldAodAnimationController
 @Inject
 constructor(
-    @Main private val executor: DelayableExecutor,
+    @Main private val mainExecutor: DelayableExecutor,
     private val context: Context,
     private val deviceStateManager: DeviceStateManager,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
@@ -61,7 +63,7 @@ constructor(
     private val keyguardInteractor: Lazy<KeyguardInteractor>,
 ) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
 
-    private lateinit var centralSurfaces: CentralSurfaces
+    private lateinit var shadeViewController: ShadeViewController
 
     private var isFolded = false
     private var isFoldHandled = true
@@ -79,20 +81,25 @@ constructor(
     private val foldToAodLatencyTracker = FoldToAodLatencyTracker()
 
     private val startAnimationRunnable = Runnable {
-        centralSurfaces.notificationPanelViewController.startFoldToAodAnimation(
+        getShadeFoldAnimator().startFoldToAodAnimation(
             /* startAction= */ { foldToAodLatencyTracker.onAnimationStarted() },
             /* endAction= */ { setAnimationState(playing = false) },
             /* cancelAction= */ { setAnimationState(playing = false) },
         )
     }
 
-    override fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
-        this.centralSurfaces = centralSurfaces
+    override fun initialize(
+            centralSurfaces: CentralSurfaces,
+            shadeViewController: ShadeViewController,
+            lightRevealScrim: LightRevealScrim,
+    ) {
+        this.shadeViewController = shadeViewController
 
-        deviceStateManager.registerCallback(executor, FoldListener())
+        deviceStateManager.registerCallback(mainExecutor, FoldListener())
         wakefulnessLifecycle.addObserver(this)
 
-        centralSurfaces.notificationPanelViewController.view.repeatWhenAttached {
+        // TODO(b/254878364): remove this call to NPVC.getView()
+        getShadeFoldAnimator().view?.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) { listenForDozing(this) }
         }
     }
@@ -108,7 +115,7 @@ constructor(
     override fun startAnimation(): Boolean =
         if (shouldStartAnimation()) {
             setAnimationState(playing = true)
-            centralSurfaces.notificationPanelViewController.prepareFoldToAodAnimation()
+            getShadeFoldAnimator().prepareFoldToAodAnimation()
             true
         } else {
             setAnimationState(playing = false)
@@ -119,11 +126,14 @@ constructor(
         if (isAnimationPlaying) {
             foldToAodLatencyTracker.cancel()
             cancelAnimation?.run()
-            centralSurfaces.notificationPanelViewController.cancelFoldToAodAnimation()
+            getShadeFoldAnimator().cancelFoldToAodAnimation()
         }
 
         setAnimationState(playing = false)
     }
+
+    private fun getShadeFoldAnimator(): ShadeFoldAnimator =
+        shadeViewController.shadeFoldAnimator
 
     private fun setAnimationState(playing: Boolean) {
         shouldPlayAnimation = playing
@@ -138,7 +148,8 @@ constructor(
      * @param onReady callback when the animation is ready
      * @see [com.android.systemui.keyguard.KeyguardViewMediator]
      */
-    fun onScreenTurningOn(onReady: Runnable) {
+    @BinderThread
+    fun onScreenTurningOn(onReady: Runnable) = mainExecutor.execute {
         if (shouldPlayAnimation) {
             // The device was not dozing and going to sleep after folding, play the animation
 
@@ -148,22 +159,26 @@ constructor(
                 pendingScrimReadyCallback = onReady
             }
         } else if (isFolded && !isFoldHandled && alwaysOnEnabled && isDozing) {
-            // Screen turning on for the first time after folding and we are already dozing
-            // We should play the folding to AOD animation
-
             setAnimationState(playing = true)
-            centralSurfaces.notificationPanelViewController.prepareFoldToAodAnimation()
+            getShadeFoldAnimator().prepareFoldToAodAnimation()
 
             // We don't need to wait for the scrim as it is already displayed
             // but we should wait for the initial animation preparations to be drawn
             // (setting initial alpha/translation)
-            OneShotPreDrawListener.add(
-                centralSurfaces.notificationPanelViewController.view,
-                onReady
-            )
+            // TODO(b/254878364): remove this call to NPVC.getView()
+            getShadeFoldAnimator().view?.let {
+                OneShotPreDrawListener.add(it, onReady)
+            }
         } else {
             // No animation, call ready callback immediately
             onReady.run()
+        }
+
+        if (isFolded) {
+            // Any time the screen turns on, this state needs to be reset if the device has been
+            // folded. Reaching this line implies AOD has been shown in one way or another,
+            // if enabled
+            isFoldHandled = true
         }
     }
 
@@ -177,12 +192,16 @@ constructor(
         }
     }
 
-    fun onScreenTurnedOn() {
+    @BinderThread
+    fun onScreenTurnedOn() = mainExecutor.execute {
         if (shouldPlayAnimation) {
             cancelAnimation?.run()
 
             // Post starting the animation to the next frame to avoid junk due to inset changes
-            cancelAnimation = executor.executeDelayed(startAnimationRunnable, /* delayMillis= */ 0)
+            cancelAnimation = mainExecutor.executeDelayed(
+                startAnimationRunnable,
+                /* delayMillis= */ 0
+            )
             shouldPlayAnimation = false
         }
     }

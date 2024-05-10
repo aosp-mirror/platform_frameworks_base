@@ -20,8 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.app.AlarmManager;
-import android.app.timedetector.GnssTimeSuggestion;
-import android.app.timedetector.TimeDetector;
+import android.app.time.UnixEpochTime;
 import android.content.Context;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -33,7 +32,6 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemClock;
-import android.os.TimestampedValue;
 import android.util.LocalLog;
 import android.util.Log;
 
@@ -54,7 +52,7 @@ import java.util.concurrent.Executor;
  * Monitors the GNSS time.
  *
  * <p>When available, the time is always suggested to the {@link
- * com.android.server.timedetector.TimeDetectorService} where it may be used to set the device
+ * com.android.server.timedetector.TimeDetectorInternal} where it may be used to set the device
  * system clock, depending on user settings and what other signals are available.
  */
 public final class GnssTimeUpdateService extends Binder {
@@ -78,10 +76,11 @@ public final class GnssTimeUpdateService extends Binder {
             LocationManager locationManager = context.getSystemService(LocationManager.class);
             LocationManagerInternal locationManagerInternal =
                     LocalServices.getService(LocationManagerInternal.class);
-            TimeDetector timeDetector = context.getSystemService(TimeDetector.class);
+            TimeDetectorInternal timeDetectorInternal =
+                    LocalServices.getService(TimeDetectorInternal.class);
 
             mService = new GnssTimeUpdateService(context, alarmManager, locationManager,
-                    locationManagerInternal, timeDetector);
+                    locationManagerInternal, timeDetectorInternal);
             publishBinderService("gnss_time_update_service", mService);
         }
 
@@ -113,7 +112,7 @@ public final class GnssTimeUpdateService extends Binder {
     private final Handler mHandler = FgThread.getHandler();
 
     private final Context mContext;
-    private final TimeDetector mTimeDetector;
+    private final TimeDetectorInternal mTimeDetectorInternal;
     private final AlarmManager mAlarmManager;
     private final LocationManager mLocationManager;
     private final LocationManagerInternal mLocationManagerInternal;
@@ -123,18 +122,18 @@ public final class GnssTimeUpdateService extends Binder {
     @GuardedBy("mLock") @Nullable private AlarmManager.OnAlarmListener mAlarmListener;
     @GuardedBy("mLock") @Nullable private LocationListener mLocationListener;
 
-    @Nullable private volatile TimestampedValue<Long> mLastSuggestedGnssTime;
+    @Nullable private volatile UnixEpochTime mLastSuggestedGnssTime;
 
     @VisibleForTesting
     GnssTimeUpdateService(@NonNull Context context, @NonNull AlarmManager alarmManager,
             @NonNull LocationManager locationManager,
             @NonNull LocationManagerInternal locationManagerInternal,
-            @NonNull TimeDetector timeDetector) {
+            @NonNull TimeDetectorInternal timeDetectorInternal) {
         mContext = Objects.requireNonNull(context);
         mAlarmManager = Objects.requireNonNull(alarmManager);
         mLocationManager = Objects.requireNonNull(locationManager);
         mLocationManagerInternal = Objects.requireNonNull(locationManagerInternal);
-        mTimeDetector = Objects.requireNonNull(timeDetector);
+        mTimeDetectorInternal = Objects.requireNonNull(timeDetectorInternal);
     }
 
     /**
@@ -264,12 +263,11 @@ public final class GnssTimeUpdateService extends Binder {
         long gnssUnixEpochTimeMillis = locationTime.getUnixEpochTimeMillis();
         long elapsedRealtimeMs = locationTime.getElapsedRealtimeNanos() / 1_000_000L;
 
-        TimestampedValue<Long> timeSignal =
-                new TimestampedValue<>(elapsedRealtimeMs, gnssUnixEpochTimeMillis);
-        mLastSuggestedGnssTime = timeSignal;
+        UnixEpochTime unixEpochTime = new UnixEpochTime(elapsedRealtimeMs, gnssUnixEpochTimeMillis);
+        mLastSuggestedGnssTime = unixEpochTime;
 
-        GnssTimeSuggestion timeSuggestion = new GnssTimeSuggestion(timeSignal);
-        mTimeDetector.suggestGnssTime(timeSuggestion);
+        GnssTimeSuggestion suggestion = new GnssTimeSuggestion(unixEpochTime);
+        mTimeDetectorInternal.suggestGnssTime(suggestion);
     }
 
     @Override

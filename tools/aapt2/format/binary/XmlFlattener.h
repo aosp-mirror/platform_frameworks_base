@@ -18,9 +18,8 @@
 #define AAPT_FORMAT_BINARY_XMLFLATTENER_H
 
 #include "android-base/macros.h"
-
+#include "androidfw/BigBuffer.h"
 #include "process/IResourceTableConsumer.h"
-#include "util/BigBuffer.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
@@ -36,7 +35,7 @@ struct XmlFlattenerOptions {
 
 class XmlFlattener {
  public:
-  XmlFlattener(BigBuffer* buffer, XmlFlattenerOptions options)
+  XmlFlattener(android::BigBuffer* buffer, XmlFlattenerOptions options)
       : buffer_(buffer), options_(options) {
   }
 
@@ -47,7 +46,7 @@ class XmlFlattener {
 
   bool Flatten(IAaptContext* context, const xml::Node* node);
 
-  BigBuffer* buffer_;
+  android::BigBuffer* buffer_;
   XmlFlattenerOptions options_;
 };
 

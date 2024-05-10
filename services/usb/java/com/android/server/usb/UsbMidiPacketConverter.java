@@ -16,12 +16,17 @@
 
 package com.android.server.usb;
 
+import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 
 /**
- * Converts between MIDI packets and USB MIDI 1.0 packets.
+ * Converts between raw MIDI packets and USB MIDI 1.0 packets.
+ * This is NOT thread-safe. Please handle locking outside this function for multiple threads.
+ * For data mapping to an invalid cable number, this converter will use the first cable.
  */
 public class UsbMidiPacketConverter {
+    private static final String TAG = "UsbMidiPacketConverter";
 
     // Refer to Table 4-1 in USB MIDI 1.0 spec.
     private static final int[] PAYLOAD_SIZE = new int[]{
@@ -74,54 +79,133 @@ public class UsbMidiPacketConverter {
     private static final byte SYSEX_START_EXCLUSIVE = (byte) 0xF0;
     private static final byte SYSEX_END_EXCLUSIVE = (byte) 0xF7;
 
-    private UsbMidiDecoder mUsbMidiDecoder = new UsbMidiDecoder();
     private UsbMidiEncoder[] mUsbMidiEncoders;
+    private ByteArrayOutputStream mEncoderOutputStream = new ByteArrayOutputStream();
 
-    public UsbMidiPacketConverter(int numEncoders) {
-        mUsbMidiEncoders = new UsbMidiEncoder[numEncoders];
-        for (int i = 0; i < numEncoders; i++) {
-            mUsbMidiEncoders[i] = new UsbMidiEncoder();
-        }
-    }
+    private UsbMidiDecoder mUsbMidiDecoder;
 
     /**
-     * Converts a USB MIDI array into a raw MIDI array.
+     * Creates encoders.
      *
-     * @param usbMidiBytes the USB MIDI bytes to convert
-     * @param size the size of usbMidiBytes
-     * @return byte array of raw MIDI packets
+     * createEncoders() must be called before raw MIDI can be converted to USB MIDI.
+     *
+     * @param size the number of encoders to create
      */
-    public byte[] usbMidiToRawMidi(byte[] usbMidiBytes, int size) {
-        return mUsbMidiDecoder.decode(usbMidiBytes, size);
+    public void createEncoders(int size) {
+        mUsbMidiEncoders = new UsbMidiEncoder[size];
+        for (int i = 0; i < size; i++) {
+            mUsbMidiEncoders[i] = new UsbMidiEncoder(i);
+        }
     }
 
     /**
      * Converts a raw MIDI array into a USB MIDI array.
      *
+     * Call pullEncodedMidiPackets to retrieve the byte array.
+     *
      * @param midiBytes the raw MIDI bytes to convert
      * @param size the size of usbMidiBytes
      * @param encoderId which encoder to use
+     */
+    public void encodeMidiPackets(byte[] midiBytes, int size, int encoderId) {
+        // Use the first encoder if the encoderId is invalid.
+        if (encoderId >= mUsbMidiEncoders.length) {
+            Log.w(TAG, "encoderId " + encoderId + " invalid");
+            encoderId = 0;
+        }
+        byte[] encodedPacket = mUsbMidiEncoders[encoderId].encode(midiBytes, size);
+        mEncoderOutputStream.write(encodedPacket, 0, encodedPacket.length);
+    }
+
+    /**
+     * Returns the encoded MIDI packets from encodeMidiPackets
+     *
      * @return byte array of USB MIDI packets
      */
-    public byte[] rawMidiToUsbMidi(byte[] midiBytes, int size, int encoderId) {
-        return mUsbMidiEncoders[encoderId].encode(midiBytes, size);
+    public byte[] pullEncodedMidiPackets() {
+        byte[] output = mEncoderOutputStream.toByteArray();
+        mEncoderOutputStream.reset();
+        return output;
+    }
+
+    /**
+     * Creates decoders.
+     *
+     * createDecoders() must be called before USB MIDI can be converted to raw MIDI.
+     *
+     * @param size the number of decoders to create
+     */
+    public void createDecoders(int size) {
+        mUsbMidiDecoder = new UsbMidiDecoder(size);
+    }
+
+    /**
+     * Converts a USB MIDI array into a multiple MIDI arrays, one per cable.
+     *
+     * Call pullDecodedMidiPackets to retrieve the byte array.
+     *
+     * @param usbMidiBytes the USB MIDI bytes to convert
+     * @param size the size of usbMidiBytes
+     */
+    public void decodeMidiPackets(byte[] usbMidiBytes, int size) {
+        mUsbMidiDecoder.decode(usbMidiBytes, size);
+    }
+
+    /**
+     * Returns the decoded MIDI packets from decodeMidiPackets
+     *
+     * @param cableNumber the cable to pull data from
+     * @return byte array of raw MIDI packets
+     */
+    public byte[] pullDecodedMidiPackets(int cableNumber) {
+        return mUsbMidiDecoder.pullBytes(cableNumber);
     }
 
     private class UsbMidiDecoder {
+        int mNumJacks;
+        ByteArrayOutputStream[] mDecodedByteArrays;
+
+        UsbMidiDecoder(int numJacks) {
+            mNumJacks = numJacks;
+            mDecodedByteArrays = new ByteArrayOutputStream[numJacks];
+            for (int i = 0; i < numJacks; i++) {
+                mDecodedByteArrays[i] = new ByteArrayOutputStream();
+            }
+        }
+
         // Decodes the data from USB MIDI to raw MIDI.
         // Each valid 4 byte input maps to a 1-3 byte output.
         // Reference the USB MIDI 1.0 spec for more info.
-        public byte[] decode(byte[] usbMidiBytes, int size) {
+        public void decode(byte[] usbMidiBytes, int size) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            if (size % 4 != 0) {
+                Log.w(TAG, "size " + size + " not multiple of 4");
+            }
             for (int i = 0; i + 3 < size; i += 4) {
+                int cableNumber = (usbMidiBytes[i] >> 4) & 0x0f;
                 int codeIndex = usbMidiBytes[i] & 0x0f;
                 int numPayloadBytes = PAYLOAD_SIZE[codeIndex];
                 if (numPayloadBytes < 0) {
                     continue;
                 }
-                outputStream.write(usbMidiBytes, i + 1, numPayloadBytes);
+                // Use the first cable if the cable number is invalid.
+                if (cableNumber >= mNumJacks) {
+                    Log.w(TAG, "cableNumber " + cableNumber + " invalid");
+                    cableNumber = 0;
+                }
+                mDecodedByteArrays[cableNumber].write(usbMidiBytes, i + 1, numPayloadBytes);
             }
-            return outputStream.toByteArray();
+        }
+
+        public byte[] pullBytes(int cableNumber) {
+            // Use the first cable if the cable number is invalid.
+            if (cableNumber >= mNumJacks) {
+                Log.w(TAG, "cableNumber " + cableNumber + " invalid");
+                cableNumber = 0;
+            }
+            byte[] output = mDecodedByteArrays[cableNumber].toByteArray();
+            mDecodedByteArrays[cableNumber].reset();
+            return output;
         }
     }
 
@@ -134,6 +218,13 @@ public class UsbMidiPacketConverter {
         private boolean mHasSystemExclusiveStarted = false;
 
         private byte[] mEmptyBytes = new byte[3]; // Used to fill out extra data
+
+        private byte mShiftedCableNumber;
+
+        UsbMidiEncoder(int cableNumber) {
+            // Jack Id is always the left nibble of every byte so shift this now.
+            mShiftedCableNumber = (byte) (cableNumber << 4);
+        }
 
         // Encodes the data from raw MIDI to USB MIDI.
         // Each valid 1-3 byte input maps to a 4 byte output.
@@ -153,7 +244,8 @@ public class UsbMidiPacketConverter {
                                 midiBytes[curLocation];
                         mNumStoredSystemExclusiveBytes++;
                         if (mNumStoredSystemExclusiveBytes == 3) {
-                            outputStream.write(CODE_INDEX_NUMBER_SYSEX_STARTS_OR_CONTINUES);
+                            outputStream.write(CODE_INDEX_NUMBER_SYSEX_STARTS_OR_CONTINUES
+                                    | mShiftedCableNumber);
                             outputStream.write(mStoredSystemExclusiveBytes, 0, 3);
                             mNumStoredSystemExclusiveBytes = 0;
                         }
@@ -179,7 +271,7 @@ public class UsbMidiPacketConverter {
                     byte codeIndexNumber = (byte) ((midiBytes[curLocation] >> 4) & 0x0f);
                     int channelMessageSize = PAYLOAD_SIZE[codeIndexNumber];
                     if (curLocation + channelMessageSize <= size) {
-                        outputStream.write(codeIndexNumber);
+                        outputStream.write(codeIndexNumber | mShiftedCableNumber);
                         outputStream.write(midiBytes, curLocation, channelMessageSize);
                         // Fill in the rest of the bytes with 0.
                         outputStream.write(mEmptyBytes, 0, 3 - channelMessageSize);
@@ -197,8 +289,8 @@ public class UsbMidiPacketConverter {
                     curLocation++;
                 } else if (midiBytes[curLocation] == SYSEX_END_EXCLUSIVE) {
                     // 1 byte is 0x05, 2 bytes is 0x06, and 3 bytes is 0x07
-                    outputStream.write(CODE_INDEX_NUMBER_SYSEX_END_SINGLE_BYTE
-                            + mNumStoredSystemExclusiveBytes);
+                    outputStream.write((CODE_INDEX_NUMBER_SYSEX_END_SINGLE_BYTE
+                            + mNumStoredSystemExclusiveBytes) | mShiftedCableNumber);
                     mStoredSystemExclusiveBytes[mNumStoredSystemExclusiveBytes] =
                             midiBytes[curLocation];
                     mNumStoredSystemExclusiveBytes++;
@@ -218,7 +310,7 @@ public class UsbMidiPacketConverter {
                     } else {
                         int systemMessageSize = PAYLOAD_SIZE[codeIndexNumber];
                         if (curLocation + systemMessageSize <= size) {
-                            outputStream.write(codeIndexNumber);
+                            outputStream.write(codeIndexNumber | mShiftedCableNumber);
                             outputStream.write(midiBytes, curLocation, systemMessageSize);
                             // Fill in the rest of the bytes with 0.
                             outputStream.write(mEmptyBytes, 0, 3 - systemMessageSize);
@@ -236,7 +328,7 @@ public class UsbMidiPacketConverter {
         }
 
         private void writeSingleByte(ByteArrayOutputStream outputStream, byte byteToWrite) {
-            outputStream.write(CODE_INDEX_NUMBER_SINGLE_BYTE);
+            outputStream.write(CODE_INDEX_NUMBER_SINGLE_BYTE | mShiftedCableNumber);
             outputStream.write(byteToWrite);
             outputStream.write(0);
             outputStream.write(0);

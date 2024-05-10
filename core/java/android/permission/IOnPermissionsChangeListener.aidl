@@ -21,5 +21,5 @@ package android.permission;
  * {@hide}
  */
 oneway interface IOnPermissionsChangeListener {
-    void onPermissionsChanged(int uid);
+    void onPermissionsChanged(int uid, String persistentDeviceId);
 }

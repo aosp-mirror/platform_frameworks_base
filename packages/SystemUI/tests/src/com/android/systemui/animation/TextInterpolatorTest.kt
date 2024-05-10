@@ -31,10 +31,11 @@ import android.text.TextPaint
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
-import java.io.File
-import kotlin.math.ceil
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
+import kotlin.math.ceil
 
 private const val TEXT = "Hello, World."
 private const val BIDI_TEXT = "abc\u05D0\u05D1\u05D2"
@@ -48,7 +49,7 @@ private val VF_FONT = Font.Builder(File("/system/fonts/Roboto-Regular.ttf")).bui
 private fun Font.toTypeface() =
         Typeface.CustomFallbackBuilder(FontFamily.Builder(this).build()).build()
 
-private val PAINT = TextPaint().apply {
+internal val PAINT = TextPaint().apply {
     typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 400").build().toTypeface()
     textSize = 32f
 }
@@ -64,6 +65,7 @@ private val END_PAINT = TextPaint(PAINT).apply {
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class TextInterpolatorTest : SysuiTestCase() {
+    lateinit var typefaceCache: TypefaceVariantCache
 
     private fun makeLayout(
         text: String,
@@ -75,11 +77,16 @@ class TextInterpolatorTest : SysuiTestCase() {
                 .setTextDirection(dir).build()
     }
 
+    @Before
+    fun setup() {
+        typefaceCache = TypefaceVariantCacheImpl(PAINT.typeface)
+    }
+
     @Test
     fun testStartState() {
         val layout = makeLayout(TEXT, PAINT)
 
-        val interp = TextInterpolator(layout)
+        val interp = TextInterpolator(layout, typefaceCache)
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -98,7 +105,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testEndState() {
         val layout = makeLayout(TEXT, PAINT)
 
-        val interp = TextInterpolator(layout)
+        val interp = TextInterpolator(layout, typefaceCache)
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -116,7 +123,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testMiddleState() {
         val layout = makeLayout(TEXT, PAINT)
 
-        val interp = TextInterpolator(layout)
+        val interp = TextInterpolator(layout, typefaceCache)
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -138,7 +145,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testRebase() {
         val layout = makeLayout(TEXT, PAINT)
 
-        val interp = TextInterpolator(layout)
+        val interp = TextInterpolator(layout, typefaceCache)
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -160,7 +167,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testBidi_LTR() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.LTR)
 
-        val interp = TextInterpolator(layout)
+        val interp = TextInterpolator(layout, typefaceCache)
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -180,7 +187,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testBidi_RTL() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout)
+        val interp = TextInterpolator(layout, typefaceCache)
         interp.basePaint.set(START_PAINT)
         interp.onBasePaintModified()
 
@@ -200,7 +207,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_Empty() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout).apply {
+        val interp = TextInterpolator(layout, typefaceCache).apply {
             glyphFilter = { glyph, progress ->
             }
         }
@@ -222,7 +229,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_Xcoordinate() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout).apply {
+        val interp = TextInterpolator(layout, typefaceCache).apply {
             glyphFilter = { glyph, progress ->
                 glyph.x += 30f
             }
@@ -247,7 +254,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_Ycoordinate() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout).apply {
+        val interp = TextInterpolator(layout, typefaceCache).apply {
             glyphFilter = { glyph, progress ->
                 glyph.y += 30f
             }
@@ -272,7 +279,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_TextSize() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout).apply {
+        val interp = TextInterpolator(layout, typefaceCache).apply {
             glyphFilter = { glyph, progress ->
                 glyph.textSize += 10f
             }
@@ -297,7 +304,7 @@ class TextInterpolatorTest : SysuiTestCase() {
     fun testGlyphCallback_Color() {
         val layout = makeLayout(BIDI_TEXT, PAINT, TextDirectionHeuristics.RTL)
 
-        val interp = TextInterpolator(layout).apply {
+        val interp = TextInterpolator(layout, typefaceCache).apply {
             glyphFilter = { glyph, progress ->
                 glyph.color = Color.RED
             }

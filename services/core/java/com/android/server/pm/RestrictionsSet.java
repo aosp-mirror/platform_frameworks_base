@@ -20,12 +20,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.IntArray;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.BundleUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -37,9 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data structure that contains the mapping of users to user restrictions (either the user
- * restrictions that apply to them, or the user restrictions that they set, depending on the
- * circumstances).
+ * Data structure that contains the mapping of users to user restrictions.
  *
  * @hide
  */
@@ -85,6 +85,24 @@ public class RestrictionsSet {
             mUserRestrictions.delete(userId);
         }
         return true;
+    }
+
+    /**
+     * Removes a particular restriction for all users.
+     *
+     * @return whether the restriction was removed or not.
+     */
+    public boolean removeRestrictionsForAllUsers(String restriction) {
+        boolean removed = false;
+        for (int i = 0; i < mUserRestrictions.size(); i++) {
+            final Bundle restrictions = mUserRestrictions.valueAt(i);
+
+            if (UserRestrictionsUtils.contains(restrictions, restriction)) {
+                restrictions.remove(restriction);
+                removed = true;
+            }
+        }
+        return removed;
     }
 
     /**
@@ -139,22 +157,19 @@ public class RestrictionsSet {
      * @return list of enforcing users that enforce a particular restriction.
      */
     public @NonNull List<UserManager.EnforcingUser> getEnforcingUsers(String restriction,
-            @UserIdInt int deviceOwnerUserId) {
+            @UserIdInt int userId) {
         final List<UserManager.EnforcingUser> result = new ArrayList<>();
-        for (int i = 0; i < mUserRestrictions.size(); i++) {
-            if (UserRestrictionsUtils.contains(mUserRestrictions.valueAt(i), restriction)) {
-                result.add(getEnforcingUser(mUserRestrictions.keyAt(i), deviceOwnerUserId));
-            }
+        if (getRestrictionsNonNull(userId).containsKey(restriction)) {
+            result.add(new UserManager.EnforcingUser(userId,
+                    UserManager.RESTRICTION_SOURCE_PROFILE_OWNER));
         }
-        return result;
-    }
 
-    private UserManager.EnforcingUser getEnforcingUser(@UserIdInt int userId,
-            @UserIdInt int deviceOwnerUserId) {
-        int source = deviceOwnerUserId == userId
-                ? UserManager.RESTRICTION_SOURCE_DEVICE_OWNER
-                : UserManager.RESTRICTION_SOURCE_PROFILE_OWNER;
-        return new UserManager.EnforcingUser(userId, source);
+        if (getRestrictionsNonNull(UserHandle.USER_ALL).containsKey(restriction)) {
+            result.add(new UserManager.EnforcingUser(UserHandle.USER_ALL,
+                    UserManager.RESTRICTION_SOURCE_DEVICE_OWNER));
+        }
+
+        return result;
     }
 
     /**
@@ -163,6 +178,11 @@ public class RestrictionsSet {
      */
     public @Nullable Bundle getRestrictions(@UserIdInt int userId) {
         return mUserRestrictions.get(userId);
+    }
+
+    /** @return list of user restrictions for a given user that is not null. */
+    public @NonNull Bundle getRestrictionsNonNull(@UserIdInt int userId) {
+        return UserRestrictionsUtils.nonNull(mUserRestrictions.get(userId));
     }
 
     /**
@@ -234,6 +254,15 @@ public class RestrictionsSet {
         if (noneSet) {
             pw.println(prefix + "none");
         }
+    }
+
+    /** @return list of users in this restriction set. */
+    public IntArray getUserIds() {
+        IntArray userIds = new IntArray(mUserRestrictions.size());
+        for (int i = 0; i < mUserRestrictions.size(); i++) {
+            userIds.add(mUserRestrictions.keyAt(i));
+        }
+        return userIds;
     }
 
     public boolean containsKey(@UserIdInt int userId) {

@@ -16,15 +16,18 @@
 
 package android.app;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -45,6 +48,8 @@ import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
+import android.window.ScreenCapture;
+import android.window.ScreenCapture.CaptureArgs;
 
 import libcore.io.IoUtils;
 
@@ -96,6 +101,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public UiAutomationConnection() {
+        Log.d(TAG, "Created on user " + Process.myUserHandle());
     }
 
     @Override
@@ -109,7 +115,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 throw new IllegalStateException("Already connected.");
             }
             mOwningUid = Binder.getCallingUid();
-            registerUiTestAutomationServiceLocked(client, flags);
+            registerUiTestAutomationServiceLocked(client,
+                    Binder.getCallingUserHandle().getIdentifier(), flags);
             storeRotationStateLocked();
         }
     }
@@ -155,7 +162,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 mWindowManager.syncInputTransactions(waitForAnimations);
             }
 
-            final boolean result = InputManager.getInstance().injectInputEvent(event,
+            final boolean result = InputManagerGlobal.getInstance().injectInputEvent(event,
                     sync ? InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
                             : InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
 
@@ -169,6 +176,16 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             Binder.restoreCallingIdentity(identity);
         }
         return false;
+    }
+
+    @Override
+    public void injectInputEventToInputFilter(InputEvent event) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        mAccessibilityManager.injectInputEventToInputFilter(event);
     }
 
     @Override
@@ -195,9 +212,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             if (rotation == UiAutomation.ROTATION_UNFREEZE) {
-                mWindowManager.thawRotation();
+                mWindowManager.thawRotation(/* caller= */ "UiAutomationConnection#setRotation");
             } else {
-                mWindowManager.freezeRotation(rotation);
+                mWindowManager.freezeRotation(rotation,
+                        /* caller= */ "UiAutomationConnection#setRotation");
             }
             return true;
         } catch (RemoteException re) {
@@ -209,54 +227,54 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public Bitmap takeScreenshot(Rect crop) {
+    public boolean takeScreenshot(Rect crop, ScreenCapture.ScreenCaptureListener listener) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
+
         final long identity = Binder.clearCallingIdentity();
         try {
-            int width = crop.width();
-            int height = crop.height();
-            final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-            final SurfaceControl.DisplayCaptureArgs captureArgs =
-                    new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
-                            .setSourceCrop(crop)
-                            .setSize(width, height)
-                            .build();
-            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                    SurfaceControl.captureDisplay(captureArgs);
-            return screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+            final CaptureArgs captureArgs = new CaptureArgs.Builder<>()
+                    .setSourceCrop(crop)
+                    .build();
+            mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs, listener);
+        } catch (RemoteException re) {
+            re.rethrowAsRuntimeException();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+
+        return true;
     }
 
     @Nullable
     @Override
-    public Bitmap takeSurfaceControlScreenshot(@NonNull SurfaceControl surfaceControl) {
+    public boolean takeSurfaceControlScreenshot(@NonNull SurfaceControl surfaceControl,
+            ScreenCapture.ScreenCaptureListener listener) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
 
-        SurfaceControl.ScreenshotHardwareBuffer captureBuffer;
         final long identity = Binder.clearCallingIdentity();
         try {
-            captureBuffer = SurfaceControl.captureLayers(
-                    new SurfaceControl.LayerCaptureArgs.Builder(surfaceControl)
-                            .setChildrenOnly(false)
-                            .build());
+            ScreenCapture.LayerCaptureArgs args =
+                    new ScreenCapture.LayerCaptureArgs.Builder(surfaceControl)
+                    .setChildrenOnly(false)
+                    .build();
+            int status = ScreenCapture.captureLayers(args, listener);
+
+            if (status != 0) {
+                return false;
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (captureBuffer == null) {
-            return null;
-        }
-        return captureBuffer.asBitmap();
+        return true;
     }
 
     @Override
@@ -331,6 +349,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
     }
 
+    /**
+     * Grants permission for the {@link Context#DEVICE_ID_DEFAULT default device}
+     */
     @Override
     public void grantRuntimePermission(String packageName, String permission, int userId)
             throws RemoteException {
@@ -341,12 +362,16 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.grantRuntimePermission(packageName, permission, userId);
+            mPermissionManager.grantRuntimePermission(packageName, permission,
+                    Context.DEVICE_ID_DEFAULT, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
     }
 
+    /**
+     * Revokes permission for the {@link Context#DEVICE_ID_DEFAULT default device}
+     */
     @Override
     public void revokeRuntimePermission(String packageName, String permission, int userId)
             throws RemoteException {
@@ -357,7 +382,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mPermissionManager.revokeRuntimePermission(packageName, permission, userId, null);
+            mPermissionManager.revokeRuntimePermission(packageName, permission,
+                    Context.DEVICE_ID_DEFAULT, userId, null);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -431,8 +457,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                     writeTo.write(buffer, 0, readByteCount);
                     writeTo.flush();
                 }
-            } catch (IOException ioe) {
-                Log.w(TAG, "Error while reading/writing to streams");
+            } catch (IOException ignored) {
             } finally {
                 IoUtils.closeQuietly(readFrom);
                 IoUtils.closeQuietly(writeTo);
@@ -539,7 +564,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     private void registerUiTestAutomationServiceLocked(IAccessibilityServiceClient client,
-            int flags) {
+            @UserIdInt int userId, int flags) {
         IAccessibilityManager manager = IAccessibilityManager.Stub.asInterface(
                 ServiceManager.getService(Context.ACCESSIBILITY_SERVICE));
         final AccessibilityServiceInfo info = new AccessibilityServiceInfo();
@@ -550,15 +575,18 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 | AccessibilityServiceInfo.FLAG_FORCE_DIRECT_BOOT_AWARE;
         info.setCapabilities(AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
-                | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS);
+        if ((flags & UiAutomation.FLAG_NOT_ACCESSIBILITY_TOOL) == 0) {
+            info.setAccessibilityTool(true);
+        }
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.
-            manager.registerUiTestAutomationService(mToken, client, info, flags);
+            manager.registerUiTestAutomationService(mToken, client, info, userId, flags);
             mClient = client;
         } catch (RemoteException re) {
-            throw new IllegalStateException("Error while registering UiTestAutomationService.", re);
+            throw new IllegalStateException("Error while registering UiTestAutomationService for "
+                    + "user " + userId + ".", re);
         }
     }
 
@@ -593,11 +621,13 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             if (mInitialFrozenRotation != INITIAL_FROZEN_ROTATION_UNSPECIFIED) {
                 // Calling out with a lock held is fine since if the system
                 // process is gone the client calling in will be killed.
-                mWindowManager.freezeRotation(mInitialFrozenRotation);
+                mWindowManager.freezeRotation(mInitialFrozenRotation,
+                        /* caller= */ "UiAutomationConnection#restoreRotationStateLocked");
             } else {
                 // Calling out with a lock held is fine since if the system
                 // process is gone the client calling in will be killed.
-                mWindowManager.thawRotation();
+                mWindowManager.thawRotation(
+                        /* caller= */ "UiAutomationConnection#restoreRotationStateLocked");
             }
         } catch (RemoteException re) {
             /* ignore */

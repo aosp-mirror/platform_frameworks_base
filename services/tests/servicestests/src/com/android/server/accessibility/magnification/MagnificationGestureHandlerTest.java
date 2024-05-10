@@ -59,7 +59,8 @@ public class MagnificationGestureHandlerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mMgh = new TestMagnificationGestureHandler(DISPLAY_0,
-                /* detectTripleTap= */true,
+                /* detectSingleFingerTripleTap= */true,
+                /* detectTwoFingerTripleTap= */true,
                 /* detectShortcutTrigger= */true,
                 mTraceManager,
                 mCallback);
@@ -125,10 +126,12 @@ public class MagnificationGestureHandlerTest {
 
         boolean mIsInternalMethodCalled = false;
 
-        TestMagnificationGestureHandler(int displayId, boolean detectTripleTap,
+        TestMagnificationGestureHandler(int displayId, boolean detectSingleFingerTripleTap,
+                boolean detectTwoFingerTripleTap,
                 boolean detectShortcutTrigger, @NonNull AccessibilityTraceManager trace,
                 @NonNull Callback callback) {
-            super(displayId, detectTripleTap, detectShortcutTrigger, trace, callback);
+            super(displayId, detectSingleFingerTripleTap, detectTwoFingerTripleTap,
+                    detectShortcutTrigger, trace, callback);
         }
 
         @Override

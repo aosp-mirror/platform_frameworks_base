@@ -91,7 +91,7 @@ message VibrationProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
     optional int64 start_time = 1;
     optional int64 end_time = 2;
-    optional CombinedVibrationEffectProto effect = 3;
+    optional CombinedVibrationEffectProto played_effect = 3;
     optional CombinedVibrationEffectProto original_effect = 4;
     optional VibrationAttributesProto attributes = 5;
     optional int64 duration_ms = 7;
@@ -128,6 +128,7 @@ message VibrationProto {
         IGNORED_FOR_SETTINGS = 24;
         IGNORED_SUPERSEDED = 25;
         IGNORED_FROM_VIRTUAL_DEVICE = 26;
+        IGNORED_ON_WIRELESS_CHARGER = 27;
     }
 }
 

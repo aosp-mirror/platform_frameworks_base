@@ -27,4 +27,5 @@ interface IQualifiedNetworksService
     oneway void createNetworkAvailabilityProvider(int slotId, IQualifiedNetworksServiceCallback callback);
     oneway void removeNetworkAvailabilityProvider(int slotId);
     oneway void reportThrottleStatusChanged(int slotId, in List<ThrottleStatus> statuses);
+    oneway void reportEmergencyDataNetworkPreferredTransportChanged (int slotId, int transportType);
 }

@@ -31,17 +31,17 @@ import java.io.IOException;
 import libcore.io.IoUtils;
 
 /**
- * <p>CertBlacklister provides a simple mechanism for updating the platform blacklists for SSL
+ * <p>CertBlacklister provides a simple mechanism for updating the platform denylists for SSL
  * certificate public keys and serial numbers.
  */
 public class CertBlacklister extends Binder {
 
     private static final String TAG = "CertBlacklister";
 
-    private static final String BLACKLIST_ROOT = System.getenv("ANDROID_DATA") + "/misc/keychain/";
+    private static final String DENYLIST_ROOT = System.getenv("ANDROID_DATA") + "/misc/keychain/";
 
-    public static final String PUBKEY_PATH = BLACKLIST_ROOT + "pubkey_blacklist.txt";
-    public static final String SERIAL_PATH = BLACKLIST_ROOT + "serial_blacklist.txt";
+    public static final String PUBKEY_PATH = DENYLIST_ROOT + "pubkey_blacklist.txt";
+    public static final String SERIAL_PATH = DENYLIST_ROOT + "serial_blacklist.txt";
 
     public static final String PUBKEY_BLACKLIST_KEY = "pubkey_blacklist";
     public static final String SERIAL_BLACKLIST_KEY = "serial_blacklist";
@@ -66,14 +66,14 @@ public class CertBlacklister extends Binder {
         @Override
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
-            writeBlacklist();
+            writeDenylist();
         }
 
         public String getValue() {
             return Settings.Secure.getString(mContentResolver, mKey);
         }
 
-        private void writeBlacklist() {
+        private void writeDenylist() {
             new Thread("BlacklistUpdater") {
                 public void run() {
                     synchronized(mTmpDir) {

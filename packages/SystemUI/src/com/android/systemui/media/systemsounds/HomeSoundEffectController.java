@@ -26,7 +26,7 @@ import android.media.AudioManager;
 import android.util.Slog;
 
 import com.android.systemui.CoreStartable;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -40,7 +40,7 @@ import javax.inject.Inject;
  * documented at {@link #handleTaskStackChanged} apply.
  */
 @SysUISingleton
-public class HomeSoundEffectController extends CoreStartable {
+public class HomeSoundEffectController implements CoreStartable {
 
     private static final String TAG = "HomeSoundEffectController";
     private final AudioManager mAudioManager;
@@ -65,7 +65,6 @@ public class HomeSoundEffectController extends CoreStartable {
             TaskStackChangeListeners taskStackChangeListeners,
             ActivityManagerWrapper activityManagerWrapper,
             PackageManager packageManager) {
-        super(context);
         mAudioManager = audioManager;
         mTaskStackChangeListeners = taskStackChangeListeners;
         mActivityManagerWrapper = activityManagerWrapper;

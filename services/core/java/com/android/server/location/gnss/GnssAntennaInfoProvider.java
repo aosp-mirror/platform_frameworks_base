@@ -16,6 +16,7 @@
 
 package com.android.server.location.gnss;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.annotation.Nullable;
@@ -25,6 +26,7 @@ import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.android.server.FgThread;
 import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.listeners.BinderListenerRegistration;
 import com.android.server.location.listeners.ListenerMultiplexer;
@@ -45,16 +47,34 @@ public class GnssAntennaInfoProvider extends
      * Registration object for GNSS listeners.
      */
     protected class AntennaInfoListenerRegistration extends
-            BinderListenerRegistration<Void, IGnssAntennaInfoListener> {
+            BinderListenerRegistration<IBinder, IGnssAntennaInfoListener> {
 
-        protected AntennaInfoListenerRegistration(CallerIdentity callerIdentity,
+        private final CallerIdentity mIdentity;
+
+        protected AntennaInfoListenerRegistration(CallerIdentity identity,
                 IGnssAntennaInfoListener listener) {
-            super(null, callerIdentity, listener);
+            super(identity.isMyProcess() ? FgThread.getExecutor() : DIRECT_EXECUTOR, listener);
+            mIdentity = identity;
+        }
+
+        @Override
+        protected String getTag() {
+            return TAG;
         }
 
         @Override
         protected GnssAntennaInfoProvider getOwner() {
             return GnssAntennaInfoProvider.this;
+        }
+
+        @Override
+        protected IBinder getBinderFromKey(IBinder key) {
+            return key;
+        }
+
+        @Override
+        public String toString() {
+            return mIdentity.toString();
         }
     }
 
@@ -70,11 +90,6 @@ public class GnssAntennaInfoProvider extends
 
     @Nullable List<GnssAntennaInfo> getAntennaInfos() {
         return mAntennaInfos;
-    }
-
-    @Override
-    public String getTag() {
-        return TAG;
     }
 
     public boolean isSupported() {

@@ -234,8 +234,8 @@ public abstract class SharedElementCallback {
         View view = null;
         if (snapshot instanceof Bundle) {
             Bundle bundle = (Bundle) snapshot;
-            HardwareBuffer buffer = bundle.getParcelable(BUNDLE_SNAPSHOT_HARDWARE_BUFFER);
-            Bitmap bitmap = bundle.getParcelable(BUNDLE_SNAPSHOT_BITMAP);
+            HardwareBuffer buffer = bundle.getParcelable(BUNDLE_SNAPSHOT_HARDWARE_BUFFER, android.hardware.HardwareBuffer.class);
+            Bitmap bitmap = bundle.getParcelable(BUNDLE_SNAPSHOT_BITMAP, android.graphics.Bitmap.class);
             if (buffer == null && bitmap == null) {
                 return null;
             }

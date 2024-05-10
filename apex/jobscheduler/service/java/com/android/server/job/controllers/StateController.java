@@ -56,6 +56,12 @@ public abstract class StateController {
     }
 
     /**
+     * Called to get the controller to start tracking relevant information. This is called before
+     * {@link #onSystemServicesReady()}.
+     */
+    public void startTrackingLocked() {}
+
+    /**
      * Called when the system boot phase has reached
      * {@link com.android.server.SystemService#PHASE_SYSTEM_SERVICES_READY}.
      */
@@ -67,6 +73,7 @@ public abstract class StateController {
      * This logic is put here so the JobManager can be completely agnostic of Controller logic.
      * Also called when updating a task, so implementing controllers have to be aware of
      * preexisting tasks.
+     * This will never be called before {@link #onSystemServicesReady()}.
      */
     public abstract void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob);
 
@@ -85,8 +92,7 @@ public abstract class StateController {
     /**
      * Remove task - this will happen if the task is cancelled, completed, etc.
      */
-    public abstract void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
-            boolean forUpdate);
+    public abstract void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob);
 
     /**
      * Called when a new job is being created to reschedule an old failed job.
@@ -186,5 +192,12 @@ public abstract class StateController {
 
     /** Dump any internal constants the Controller may have. */
     public void dumpConstants(ProtoOutputStream proto) {
+    }
+
+    /**
+     * Standardize the output of userId-packageName combo.
+     */
+    static String packageToString(int userId, String packageName) {
+        return "<" + userId + ">" + packageName;
     }
 }

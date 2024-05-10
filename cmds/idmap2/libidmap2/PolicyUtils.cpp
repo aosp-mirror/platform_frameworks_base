@@ -53,7 +53,7 @@ std::vector<std::string> BitmaskToPolicies(const PolicyBitmask& bitmask) {
 
   for (const auto& policy : kPolicyStringToFlag) {
     if ((bitmask & policy.second) != 0) {
-      policies.emplace_back(policy.first.to_string());
+      policies.emplace_back(policy.first);
     }
   }
 

@@ -16,25 +16,28 @@
 
 package com.android.systemui.doze;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+
 import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSE_DONE;
 
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 
 import androidx.annotation.Nullable;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.UdfpsController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.doze.dagger.WrappedService;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -78,6 +81,7 @@ public class DozeScreenState implements DozeMachine.Part {
     @Nullable private UdfpsController mUdfpsController;
     private final DozeLog mDozeLog;
     private final DozeScreenBrightness mDozeScreenBrightness;
+    private final SelectedUserInteractor mSelectedUserInteractor;
 
     private int mPendingScreenState = Display.STATE_UNKNOWN;
     private SettableWakeLock mWakeLock;
@@ -92,7 +96,8 @@ public class DozeScreenState implements DozeMachine.Part {
             AuthController authController,
             Provider<UdfpsController> udfpsControllerProvider,
             DozeLog dozeLog,
-            DozeScreenBrightness dozeScreenBrightness) {
+            DozeScreenBrightness dozeScreenBrightness,
+            SelectedUserInteractor selectedUserInteractor) {
         mDozeService = service;
         mHandler = handler;
         mParameters = parameters;
@@ -102,6 +107,7 @@ public class DozeScreenState implements DozeMachine.Part {
         mUdfpsControllerProvider = udfpsControllerProvider;
         mDozeLog = dozeLog;
         mDozeScreenBrightness = dozeScreenBrightness;
+        mSelectedUserInteractor = selectedUserInteractor;
 
         updateUdfpsController();
         if (mUdfpsController == null) {
@@ -110,7 +116,7 @@ public class DozeScreenState implements DozeMachine.Part {
     }
 
     private void updateUdfpsController() {
-        if (mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
+        if (mAuthController.isUdfpsEnrolled(mSelectedUserInteractor.getSelectedUserId())) {
             mUdfpsController = mUdfpsControllerProvider.get();
         } else {
             mUdfpsController = null;
@@ -232,13 +238,17 @@ public class DozeScreenState implements DozeMachine.Part {
 
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
         @Override
-        public void onAllAuthenticatorsRegistered() {
-            updateUdfpsController();
+        public void onAllAuthenticatorsRegistered(@BiometricAuthenticator.Modality int modality) {
+            if (modality == TYPE_FINGERPRINT) {
+                updateUdfpsController();
+            }
         }
 
         @Override
-        public void onEnrollmentsChanged() {
-            updateUdfpsController();
+        public void onEnrollmentsChanged(@BiometricAuthenticator.Modality int modality) {
+            if (modality == TYPE_FINGERPRINT) {
+                updateUdfpsController();
+            }
         }
     };
 }

@@ -1,0 +1,11 @@
+aconfig_declarations {
+    name: "am_flags",
+    package: "com.android.server.am",
+    container: "system",
+    srcs: ["*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "am_flags_lib",
+    aconfig_declarations: "am_flags",
+}

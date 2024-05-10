@@ -15,26 +15,32 @@ package com.android.systemui.qs
 
 import android.graphics.Rect
 import android.testing.AndroidTestingRunner
+import android.testing.TestableContext
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.qs.tileimpl.QSIconViewImpl
+import com.android.systemui.plugins.qs.QSTileView
+import com.android.systemui.qs.QSPanelControllerBase.TileRecord
+import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileViewImpl
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -42,24 +48,32 @@ import org.mockito.MockitoAnnotations
 @RunWithLooper
 @SmallTest
 class QSPanelTest : SysuiTestCase() {
+
+    @Mock private lateinit var qsLogger: QSLogger
+
     private lateinit var testableLooper: TestableLooper
     private lateinit var qsPanel: QSPanel
 
     private lateinit var footer: View
+
+    private val themedContext = TestableContext(
+            ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
+    )
 
     @Before
     @Throws(Exception::class)
     fun setup() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
+        // Apply only the values of the theme that are not defined
 
         testableLooper.runWithLooper {
-            qsPanel = QSPanel(context, null)
+            qsPanel = QSPanel(themedContext, null)
             qsPanel.mUsingMediaPlayer = true
 
-            qsPanel.initialize()
+            qsPanel.initialize(qsLogger)
             // QSPanel inflates a footer inside of it, mocking it here
-            footer = LinearLayout(context).apply { id = R.id.qs_footer }
+            footer = LinearLayout(themedContext).apply { id = R.id.qs_footer }
             qsPanel.addView(footer, MATCH_PARENT, 100)
             qsPanel.onFinishInflate()
             // Provides a parent with non-zero size for QSPanel
@@ -97,12 +111,12 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.tileLayout?.addTile(
                 QSPanelControllerBase.TileRecord(
                     mock(QSTile::class.java),
-                    QSTileViewImpl(context, QSIconViewImpl(context))
+                    QSTileViewImpl(themedContext)
                 )
             )
 
-        val mediaView = FrameLayout(context)
-        mediaView.addView(View(context), MATCH_PARENT, 800)
+        val mediaView = FrameLayout(themedContext)
+        mediaView.addView(View(themedContext), MATCH_PARENT, 800)
 
         qsPanel.setUsingHorizontalLayout(/* horizontal */ true, mediaView, /* force */ true)
         qsPanel.measure(
@@ -127,12 +141,12 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.tileLayout?.addTile(
             QSPanelControllerBase.TileRecord(
                 mock(QSTile::class.java),
-                QSTileViewImpl(context, QSIconViewImpl(context))
+                QSTileViewImpl(themedContext)
             )
         )
 
-        val mediaView = FrameLayout(context)
-        mediaView.addView(View(context), MATCH_PARENT, 800)
+        val mediaView = FrameLayout(themedContext)
+        mediaView.addView(View(themedContext), MATCH_PARENT, 800)
 
         qsPanel.setUsingHorizontalLayout(/* horizontal */ true, mediaView, /* force */ true)
         qsPanel.measure(
@@ -153,32 +167,23 @@ class QSPanelTest : SysuiTestCase() {
     @Test
     fun testBottomPadding() {
         val padding = 10
-        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_bottom, padding)
+        themedContext.orCreateTestableResources.addOverride(
+                R.dimen.qs_panel_padding_bottom,
+                padding
+        )
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingBottom).isEqualTo(padding)
     }
 
     @Test
-    fun testTopPadding_notCombinedHeaders() {
-        qsPanel.setUsingCombinedHeaders(false)
+    fun testTopPadding() {
         val padding = 10
         val paddingCombined = 100
-        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
-        context.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_top_combined_headers, paddingCombined)
-
-        qsPanel.updatePadding()
-        assertThat(qsPanel.paddingTop).isEqualTo(padding)
-    }
-
-    @Test
-    fun testTopPadding_combinedHeaders() {
-        qsPanel.setUsingCombinedHeaders(true)
-        val padding = 10
-        val paddingCombined = 100
-        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
-        context.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_top_combined_headers, paddingCombined)
+        themedContext.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
+        themedContext.orCreateTestableResources.addOverride(
+                R.dimen.qs_panel_padding_top,
+                paddingCombined
+        )
 
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingTop).isEqualTo(paddingCombined)
@@ -189,6 +194,28 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.addView(qsPanel.mTileLayout as View, 0)
         qsPanel.addView(FrameLayout(context))
         qsPanel.setSquishinessFraction(0.5f)
+    }
+
+    @Test
+    fun testSplitShade_CollapseAccessibilityActionNotAnnounced() {
+        qsPanel.setCanCollapse(false)
+        val accessibilityInfo = mock(AccessibilityNodeInfo::class.java)
+        qsPanel.onInitializeAccessibilityNodeInfo(accessibilityInfo)
+
+        val actionCollapse = AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE
+        verify(accessibilityInfo, never()).addAction(actionCollapse)
+    }
+
+    @Test
+    fun addTile_callbackAdded() {
+        val tile = mock(QSTile::class.java)
+        val tileView = mock(QSTileView::class.java)
+
+        val record = TileRecord(tile, tileView)
+
+        qsPanel.addTile(record)
+
+        verify(tile).addCallback(record.callback)
     }
 
     private infix fun View.isLeftOf(other: View): Boolean {

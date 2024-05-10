@@ -70,17 +70,17 @@ public interface UsbPortHal {
      *
      * @hide
      */
-    public static final int HAL_MODE_DFP = 1;
+    public static final int HAL_MODE_UFP = 1;
 
     /**
      * This USB port can act as an upstream facing port (device).
      *
      * @hide
      */
-    public static final int HAL_MODE_UFP = 2;
+    public static final int HAL_MODE_DFP = 2;
     @IntDef(prefix = { "HAL_MODE_" }, value = {
-            HAL_MODE_DFP,
             HAL_MODE_UFP,
+            HAL_MODE_DFP,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface HalUsbPortMode{}

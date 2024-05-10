@@ -75,7 +75,7 @@ public final class ViewTreeObserver {
     private boolean mWindowShown;
 
     // The reason that the last call to dispatchOnPreDraw() returned true to cancel and redraw
-    private String mLastDispatchOnPreDrawCanceledReason;
+    private StringBuilder mLastDispatchOnPreDrawCanceledReason;
 
     private boolean mAlive = true;
 
@@ -112,8 +112,6 @@ public final class ViewTreeObserver {
     /**
      * Interface definition for a callback to be invoked when the view hierarchy's window
      * visibility changes.
-     *
-     * @hide
      */
     public interface OnWindowVisibilityChangeListener {
         /**
@@ -572,8 +570,6 @@ public final class ViewTreeObserver {
      * @param listener The callback to add
      *
      * @throws IllegalStateException If {@link #isAlive()} returns false
-     *
-     * @hide
      */
     public void addOnWindowVisibilityChangeListener(
             @NonNull OnWindowVisibilityChangeListener listener) {
@@ -596,8 +592,6 @@ public final class ViewTreeObserver {
      *
      * @see #addOnWindowVisibilityChangeListener(
      * android.view.ViewTreeObserver.OnWindowVisibilityChangeListener)
-     *
-     * @hide
      */
     public void removeOnWindowVisibilityChangeListener(
             @NonNull OnWindowVisibilityChangeListener victim) {
@@ -1179,9 +1173,15 @@ public final class ViewTreeObserver {
                 int count = access.size();
                 for (int i = 0; i < count; i++) {
                     final OnPreDrawListener preDrawListener = access.get(i);
-                    cancelDraw |= !(preDrawListener.onPreDraw());
-                    if (cancelDraw) {
-                        mLastDispatchOnPreDrawCanceledReason = preDrawListener.getClass().getName();
+                    final boolean listenerCanceledDraw = !(preDrawListener.onPreDraw());
+                    cancelDraw |= listenerCanceledDraw;
+                    if (listenerCanceledDraw) {
+                        final String className = preDrawListener.getClass().getName();
+                        if (mLastDispatchOnPreDrawCanceledReason == null) {
+                            mLastDispatchOnPreDrawCanceledReason = new StringBuilder(className);
+                        } else {
+                            mLastDispatchOnPreDrawCanceledReason.append("|").append(className);
+                        }
                     }
                 }
             } finally {
@@ -1197,7 +1197,10 @@ public final class ViewTreeObserver {
      * @hide
      */
     final String getLastDispatchOnPreDrawCanceledReason() {
-        return mLastDispatchOnPreDrawCanceledReason;
+        if (mLastDispatchOnPreDrawCanceledReason != null) {
+            return mLastDispatchOnPreDrawCanceledReason.toString();
+        }
+        return null;
     }
 
     /**

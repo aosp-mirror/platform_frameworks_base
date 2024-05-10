@@ -27,6 +27,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.settings.UserTracker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -67,8 +68,8 @@ public class AccessibilityButtonModeObserver extends
     }
 
     @Inject
-    public AccessibilityButtonModeObserver(Context context) {
-        super(context, Settings.Secure.ACCESSIBILITY_BUTTON_MODE);
+    public AccessibilityButtonModeObserver(Context context, UserTracker userTracker) {
+        super(context, userTracker, Settings.Secure.ACCESSIBILITY_BUTTON_MODE);
     }
 
     @Override

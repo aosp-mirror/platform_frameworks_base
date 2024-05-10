@@ -22,8 +22,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
-import android.app.IActivityManager;
-import android.app.SynchronousUserSwitchObserver;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -35,7 +34,6 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
@@ -46,11 +44,12 @@ import android.view.View;
 
 import androidx.lifecycle.Observer;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.privacy.PrivacyType;
@@ -58,6 +57,7 @@ import com.android.systemui.privacy.logging.PrivacyLogger;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.RingerModeTracker;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.DateFormatUtil;
 
 import java.io.PrintWriter;
@@ -123,9 +124,12 @@ public class PhoneStatusBarPolicy
     private final String mSlotCamera;
     private final String mSlotSensorsOff;
     private final String mSlotScreenRecord;
+    private final String mSlotConnectedDisplay;
     private final int mDisplayId;
     private final SharedPreferences mSharedPreferences;
     private final DateFormatUtil mDateFormatUtil;
+    private final JavaAdapter mJavaAdapter;
+    private final ConnectedDisplayInteractor mConnectedDisplayInteractor;
     private final TelecomManager mTelecomManager;
 
     private final Handler mHandler;
@@ -134,8 +138,8 @@ public class PhoneStatusBarPolicy
     private final NextAlarmController mNextAlarmController;
     private final AlarmManager mAlarmManager;
     private final UserInfoController mUserInfoController;
-    private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
+    private final UserTracker mUserTracker;
     private final DevicePolicyManager mDevicePolicyManager;
     private final StatusBarIconController mIconController;
     private final CommandQueue mCommandQueue;
@@ -148,6 +152,7 @@ public class PhoneStatusBarPolicy
     private final KeyguardStateController mKeyguardStateController;
     private final LocationController mLocationController;
     private final PrivacyItemController mPrivacyItemController;
+    private final Executor mMainExecutor;
     private final Executor mUiBgExecutor;
     private final SensorPrivacyController mSensorPrivacyController;
     private final RecordingController mRecordingController;
@@ -159,7 +164,7 @@ public class PhoneStatusBarPolicy
     private boolean mMuteVisible;
     private boolean mCurrentUserSetup;
 
-    private boolean mManagedProfileIconVisible = false;
+    private boolean mProfileIconVisible = false;
 
     private BluetoothController mBluetooth;
     private AlarmManager.AlarmClockInfo mNextAlarm;
@@ -167,24 +172,29 @@ public class PhoneStatusBarPolicy
     @Inject
     public PhoneStatusBarPolicy(StatusBarIconController iconController,
             CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher,
-            @UiBackground Executor uiBgExecutor, @Main Looper looper, @Main Resources resources,
-            CastController castController, HotspotController hotspotController,
-            BluetoothController bluetoothController, NextAlarmController nextAlarmController,
-            UserInfoController userInfoController, RotationLockController rotationLockController,
-            DataSaverController dataSaverController, ZenModeController zenModeController,
+            @Main Executor mainExecutor, @UiBackground Executor uiBgExecutor, @Main Looper looper,
+            @Main Resources resources, CastController castController,
+            HotspotController hotspotController, BluetoothController bluetoothController,
+            NextAlarmController nextAlarmController, UserInfoController userInfoController,
+            RotationLockController rotationLockController, DataSaverController dataSaverController,
+            ZenModeController zenModeController,
             DeviceProvisionedController deviceProvisionedController,
             KeyguardStateController keyguardStateController,
             LocationController locationController,
-            SensorPrivacyController sensorPrivacyController, IActivityManager iActivityManager,
-            AlarmManager alarmManager, UserManager userManager,
+            SensorPrivacyController sensorPrivacyController, AlarmManager alarmManager,
+            UserManager userManager, UserTracker userTracker,
             DevicePolicyManager devicePolicyManager, RecordingController recordingController,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
             RingerModeTracker ringerModeTracker,
             PrivacyItemController privacyItemController,
-            PrivacyLogger privacyLogger) {
+            PrivacyLogger privacyLogger,
+            ConnectedDisplayInteractor connectedDisplayInteractor,
+            JavaAdapter javaAdapter
+    ) {
         mIconController = iconController;
         mCommandQueue = commandQueue;
+        mConnectedDisplayInteractor = connectedDisplayInteractor;
         mBroadcastDispatcher = broadcastDispatcher;
         mHandler = new Handler(looper);
         mResources = resources;
@@ -194,8 +204,8 @@ public class PhoneStatusBarPolicy
         mNextAlarmController = nextAlarmController;
         mAlarmManager = alarmManager;
         mUserInfoController = userInfoController;
-        mIActivityManager = iActivityManager;
         mUserManager = userManager;
+        mUserTracker = userTracker;
         mDevicePolicyManager = devicePolicyManager;
         mRotationLockController = rotationLockController;
         mDataSaver = dataSaverController;
@@ -206,12 +216,16 @@ public class PhoneStatusBarPolicy
         mPrivacyItemController = privacyItemController;
         mSensorPrivacyController = sensorPrivacyController;
         mRecordingController = recordingController;
+        mMainExecutor = mainExecutor;
         mUiBgExecutor = uiBgExecutor;
         mTelecomManager = telecomManager;
         mRingerModeTracker = ringerModeTracker;
         mPrivacyLogger = privacyLogger;
+        mJavaAdapter = javaAdapter;
 
         mSlotCast = resources.getString(com.android.internal.R.string.status_bar_cast);
+        mSlotConnectedDisplay = resources.getString(
+                com.android.internal.R.string.status_bar_connected_display);
         mSlotHotspot = resources.getString(com.android.internal.R.string.status_bar_hotspot);
         mSlotBluetooth = resources.getString(com.android.internal.R.string.status_bar_bluetooth);
         mSlotTty = resources.getString(com.android.internal.R.string.status_bar_tty);
@@ -246,7 +260,9 @@ public class PhoneStatusBarPolicy
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
-        filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        filter.addAction(Intent.ACTION_PROFILE_REMOVED);
+        filter.addAction(Intent.ACTION_PROFILE_ACCESSIBLE);
+        filter.addAction(Intent.ACTION_PROFILE_INACCESSIBLE);
         mBroadcastDispatcher.registerReceiverWithHandler(mIntentReceiver, filter, mHandler);
         Observer<Integer> observer = ringer -> mHandler.post(this::updateVolumeZen);
 
@@ -254,11 +270,7 @@ public class PhoneStatusBarPolicy
         mRingerModeTracker.getRingerModeInternal().observeForever(observer);
 
         // listen for user / profile change.
-        try {
-            mIActivityManager.registerUserSwitchObserver(mUserSwitchListener, TAG);
-        } catch (RemoteException e) {
-            // Ignore
-        }
+        mUserTracker.addCallback(mUserSwitchListener, mMainExecutor);
 
         // TTY status
         updateTTY();
@@ -288,13 +300,18 @@ public class PhoneStatusBarPolicy
         mIconController.setIcon(mSlotCast, R.drawable.stat_sys_cast, null);
         mIconController.setIconVisibility(mSlotCast, false);
 
+        // connected display
+        mIconController.setIcon(mSlotConnectedDisplay, R.drawable.stat_sys_connected_display,
+                mResources.getString(R.string.connected_display_icon_desc));
+        mIconController.setIconVisibility(mSlotConnectedDisplay, false);
+
         // hotspot
         mIconController.setIcon(mSlotHotspot, R.drawable.stat_sys_hotspot,
                 mResources.getString(R.string.accessibility_status_bar_hotspot));
         mIconController.setIconVisibility(mSlotHotspot, mHotspot.isHotspotEnabled());
 
-        // managed profile
-        updateManagedProfile();
+        // profile
+        updateProfileIcon();
 
         // data saver
         mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
@@ -345,6 +362,8 @@ public class PhoneStatusBarPolicy
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
+        mJavaAdapter.alwaysCollectFlow(mConnectedDisplayInteractor.getConnectedDisplayState(),
+                this::onConnectedDisplayAvailabilityChanged);
 
         mCommandQueue.addCallback(this);
     }
@@ -361,12 +380,12 @@ public class PhoneStatusBarPolicy
     }
 
     @Override
-    public void onConfigChanged(ZenModeConfig config) {
+    public void onConsolidatedPolicyChanged(NotificationManager.Policy policy) {
         updateVolumeZen();
     }
 
     private void updateAlarm() {
-        final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
+        final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(mUserTracker.getUserId());
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
         int zen = mZenController.getZen();
         final boolean zenNone = zen == Global.ZEN_MODE_NO_INTERRUPTIONS;
@@ -521,50 +540,50 @@ public class PhoneStatusBarPolicy
         }
     }
 
-    private void updateManagedProfile() {
+    private void updateProfileIcon() {
         // getLastResumedActivityUserId needs to acquire the AM lock, which may be contended in
         // some cases. Since it doesn't really matter here whether it's updated in this frame
         // or in the next one, we call this method from our UI offload thread.
         mUiBgExecutor.execute(() -> {
-            final int userId;
             try {
-                userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
-                boolean isManagedProfile = mUserManager.isManagedProfile(userId);
+                final int userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
+                final int iconResId = mUserManager.getUserStatusBarIconResId(userId);
+                // TODO(b/170249807, b/230779281): Handle non-managed-profile String
                 String accessibilityString = getManagedProfileAccessibilityString();
-                mHandler.post(() -> {
+                mMainExecutor.execute(() -> {
                     final boolean showIcon;
-                    if (isManagedProfile && (!mKeyguardStateController.isShowing()
+                    if (iconResId != Resources.ID_NULL && (!mKeyguardStateController.isShowing()
                             || mKeyguardStateController.isOccluded())) {
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
-                                R.drawable.stat_sys_managed_profile_status,
+                                iconResId,
                                 accessibilityString);
                     } else {
                         showIcon = false;
                     }
-                    if (mManagedProfileIconVisible != showIcon) {
+                    if (mProfileIconVisible != showIcon) {
                         mIconController.setIconVisibility(mSlotManagedProfile, showIcon);
-                        mManagedProfileIconVisible = showIcon;
+                        mProfileIconVisible = showIcon;
                     }
                 });
             } catch (RemoteException e) {
-                Log.w(TAG, "updateManagedProfile: ", e);
+                Log.w(TAG, "updateProfileIcon: ", e);
             }
         });
     }
 
-    private final SynchronousUserSwitchObserver mUserSwitchListener =
-            new SynchronousUserSwitchObserver() {
+    private final UserTracker.Callback mUserSwitchListener =
+            new UserTracker.Callback() {
                 @Override
-                public void onUserSwitching(int newUserId) throws RemoteException {
+                public void onUserChanging(int newUser, Context userContext) {
                     mHandler.post(() -> mUserInfoController.reloadUserInfo());
                 }
 
                 @Override
-                public void onUserSwitchComplete(int newUserId) throws RemoteException {
+                public void onUserChanged(int newUser, Context userContext) {
                     mHandler.post(() -> {
                         updateAlarm();
-                        updateManagedProfile();
+                        updateProfileIcon();
                         onUserSetupChanged();
                     });
                 }
@@ -607,13 +626,20 @@ public class PhoneStatusBarPolicy
     public void appTransitionStarting(int displayId, long startTime, long duration,
             boolean forced) {
         if (mDisplayId == displayId) {
-            updateManagedProfile();
+            updateProfileIcon();
+        }
+    }
+
+    @Override
+    public void appTransitionFinished(int displayId) {
+        if (mDisplayId == displayId) {
+            updateProfileIcon();
         }
     }
 
     @Override
     public void onKeyguardShowingChanged() {
-        updateManagedProfile();
+        updateProfileIcon();
     }
 
     @Override
@@ -736,8 +762,10 @@ public class PhoneStatusBarPolicy
                     break;
                 case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
                 case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
-                case Intent.ACTION_MANAGED_PROFILE_REMOVED:
-                    updateManagedProfile();
+                case Intent.ACTION_PROFILE_REMOVED:
+                case Intent.ACTION_PROFILE_ACCESSIBLE:
+                case Intent.ACTION_PROFILE_INACCESSIBLE:
+                    updateProfileIcon();
                     break;
                 case AudioManager.ACTION_HEADSET_PLUG:
                     updateHeadsetPlug(intent);
@@ -802,5 +830,15 @@ public class PhoneStatusBarPolicy
         // Ensure this is on the main thread
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
+    }
+
+    private void onConnectedDisplayAvailabilityChanged(ConnectedDisplayInteractor.State state) {
+        boolean visible = state != ConnectedDisplayInteractor.State.DISCONNECTED;
+
+        if (DEBUG) {
+            Log.d(TAG, "connected_display: " + (visible ? "showing" : "hiding") + " icon");
+        }
+
+        mIconController.setIconVisibility(mSlotConnectedDisplay, visible);
     }
 }

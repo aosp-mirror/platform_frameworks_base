@@ -20,7 +20,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Build;
 import android.provider.DeviceConfig;
@@ -32,7 +31,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -46,7 +45,7 @@ import javax.inject.Inject;
  * system that are used for testing the latency.
  */
 @SysUISingleton
-public class LatencyTester extends CoreStartable {
+public class LatencyTester implements CoreStartable {
     private static final boolean DEFAULT_ENABLED = Build.IS_ENG;
     private static final String
             ACTION_FINGERPRINT_WAKE =
@@ -54,24 +53,25 @@ public class LatencyTester extends CoreStartable {
     private static final String
             ACTION_FACE_WAKE =
             "com.android.systemui.latency.ACTION_FACE_WAKE";
-    private final BiometricUnlockController mBiometricUnlockController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final DeviceConfigProxy mDeviceConfigProxy;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final SelectedUserInteractor mSelectedUserInteractor;
 
     private boolean mEnabled;
 
     @Inject
     public LatencyTester(
-            Context context,
-            BiometricUnlockController biometricUnlockController,
             BroadcastDispatcher broadcastDispatcher,
             DeviceConfigProxy deviceConfigProxy,
-            @Main DelayableExecutor mainExecutor
+            @Main DelayableExecutor mainExecutor,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            SelectedUserInteractor selectedUserInteractor
     ) {
-        super(context);
-        mBiometricUnlockController = biometricUnlockController;
         mBroadcastDispatcher = broadcastDispatcher;
         mDeviceConfigProxy = deviceConfigProxy;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mSelectedUserInteractor = selectedUserInteractor;
 
         updateEnabled();
         mDeviceConfigProxy.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
@@ -80,17 +80,19 @@ public class LatencyTester extends CoreStartable {
 
     @Override
     public void start() {
-        registerForBroadcasts(mEnabled);
     }
 
     private void fakeWakeAndUnlock(BiometricSourceType type) {
         if (!mEnabled) {
             return;
         }
-        mBiometricUnlockController.onBiometricAcquired(type,
-                BiometricConstants.BIOMETRIC_ACQUIRED_GOOD);
-        mBiometricUnlockController.onBiometricAuthenticated(
-                KeyguardUpdateMonitor.getCurrentUser(), type, true /* isStrongBiometric */);
+        if (type == BiometricSourceType.FACE) {
+            mKeyguardUpdateMonitor.onFaceAuthenticated(mSelectedUserInteractor.getSelectedUserId(),
+                    true);
+        } else if (type == BiometricSourceType.FINGERPRINT) {
+            mKeyguardUpdateMonitor.onFingerprintAuthenticated(
+                    mSelectedUserInteractor.getSelectedUserId(), true);
+        }
     }
 
     private void registerForBroadcasts(boolean register) {

@@ -42,6 +42,7 @@ import java.util.Iterator;
  * }
  * </pre>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CursorJoiner
         implements Iterator<CursorJoiner.Result>, Iterable<CursorJoiner.Result> {
     private Cursor mCursorLeft;

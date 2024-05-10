@@ -172,7 +172,7 @@ public class DynamicSystemManager {
         }
     }
     /**
-     * Finish a previously started installation. Installations without a cooresponding
+     * Finish a previously started installation. Installations without a corresponding
      * finishInstallation() will be cleaned up during device boot.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
@@ -281,6 +281,18 @@ public class DynamicSystemManager {
     public long suggestScratchSize() {
         try {
             return mService.suggestScratchSize();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+
+    /**
+     * Returns the active DSU slot
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public String getActiveDsuSlot() {
+        try {
+            return mService.getActiveDsuSlot();
         } catch (RemoteException e) {
             throw new RuntimeException(e.toString());
         }

@@ -8,7 +8,9 @@
 #include "OutputSet.h"
 #include "ResourceTable.h"
 #include "ResourceFilter.h"
+#include "Utils.h"
 
+#include <androidfw/PathUtils.h>
 #include <androidfw/misc.h>
 
 #include <utils/Log.h>
@@ -69,39 +71,39 @@ status_t writeAPK(Bundle* bundle, const String8& outputFile, const sp<OutputSet>
      * If "update" is set, update the contents of the existing archive.
      * Else, if "force" is set, remove the existing archive.
      */
-    FileType fileType = getFileType(outputFile.string());
+    FileType fileType = getFileType(outputFile.c_str());
     if (fileType == kFileTypeNonexistent) {
         // okay, create it below
     } else if (fileType == kFileTypeRegular) {
         if (bundle->getUpdate()) {
             // okay, open it below
         } else if (bundle->getForce()) {
-            if (unlink(outputFile.string()) != 0) {
-                fprintf(stderr, "ERROR: unable to remove '%s': %s\n", outputFile.string(),
+            if (unlink(outputFile.c_str()) != 0) {
+                fprintf(stderr, "ERROR: unable to remove '%s': %s\n", outputFile.c_str(),
                         strerror(errno));
                 goto bail;
             }
         } else {
             fprintf(stderr, "ERROR: '%s' exists (use '-f' to force overwrite)\n",
-                    outputFile.string());
+                    outputFile.c_str());
             goto bail;
         }
     } else {
-        fprintf(stderr, "ERROR: '%s' exists and is not a regular file\n", outputFile.string());
+        fprintf(stderr, "ERROR: '%s' exists and is not a regular file\n", outputFile.c_str());
         goto bail;
     }
 
     if (bundle->getVerbose()) {
         printf("%s '%s'\n", (fileType == kFileTypeNonexistent) ? "Creating" : "Opening",
-                outputFile.string());
+                outputFile.c_str());
     }
 
     status_t status;
     zip = new ZipFile;
-    status = zip->open(outputFile.string(), ZipFile::kOpenReadWrite | ZipFile::kOpenCreate);
+    status = zip->open(outputFile.c_str(), ZipFile::kOpenReadWrite | ZipFile::kOpenCreate);
     if (status != NO_ERROR) {
         fprintf(stderr, "ERROR: unable to open '%s' as Zip file for writing\n",
-                outputFile.string());
+                outputFile.c_str());
         goto bail;
     }
 
@@ -112,7 +114,7 @@ status_t writeAPK(Bundle* bundle, const String8& outputFile, const sp<OutputSet>
     count = processAssets(bundle, zip, outputSet);
     if (count < 0) {
         fprintf(stderr, "ERROR: unable to process assets while packaging '%s'\n",
-                outputFile.string());
+                outputFile.c_str());
         result = count;
         goto bail;
     }
@@ -124,7 +126,7 @@ status_t writeAPK(Bundle* bundle, const String8& outputFile, const sp<OutputSet>
     count = processJarFiles(bundle, zip);
     if (count < 0) {
         fprintf(stderr, "ERROR: unable to process jar files while packaging '%s'\n",
-                outputFile.string());
+                outputFile.c_str());
         result = count;
         goto bail;
     }
@@ -169,12 +171,12 @@ status_t writeAPK(Bundle* bundle, const String8& outputFile, const sp<OutputSet>
     /* anything here? */
     if (zip->getNumEntries() == 0) {
         if (bundle->getVerbose()) {
-            printf("Archive is empty -- removing %s\n", outputFile.getPathLeaf().string());
+            printf("Archive is empty -- removing %s\n", getPathLeaf(outputFile).c_str());
         }
         delete zip;        // close the file so we can remove it in Win32
         zip = NULL;
-        if (unlink(outputFile.string()) != 0) {
-            fprintf(stderr, "warning: could not unlink '%s'\n", outputFile.string());
+        if (unlink(outputFile.c_str()) != 0) {
+            fprintf(stderr, "warning: could not unlink '%s'\n", outputFile.c_str());
         }
     }
 
@@ -187,9 +189,9 @@ status_t writeAPK(Bundle* bundle, const String8& outputFile, const sp<OutputSet>
         String8 dependencyFile = outputFile;
         dependencyFile.append(".d");
 
-        FILE* fp = fopen(dependencyFile.string(), "a");
+        FILE* fp = fopen(dependencyFile.c_str(), "a");
         // Add this file to the dependency file
-        fprintf(fp, "%s \\\n", outputFile.string());
+        fprintf(fp, "%s \\\n", outputFile.c_str());
         fclose(fp);
     }
 
@@ -199,10 +201,10 @@ bail:
     delete zip;        // must close before remove in Win32
     if (result != NO_ERROR) {
         if (bundle->getVerbose()) {
-            printf("Removing %s due to earlier failures\n", outputFile.string());
+            printf("Removing %s due to earlier failures\n", outputFile.c_str());
         }
-        if (unlink(outputFile.string()) != 0) {
-            fprintf(stderr, "warning: could not unlink '%s'\n", outputFile.string());
+        if (unlink(outputFile.c_str()) != 0) {
+            fprintf(stderr, "warning: could not unlink '%s'\n", outputFile.c_str());
         }
     }
 
@@ -226,7 +228,7 @@ ssize_t processAssets(Bundle* bundle, ZipFile* zip, const sp<const OutputSet>& o
             fprintf(stderr, "warning: null file being processed.\n");
         } else {
             String8 storagePath(entry.getPath());
-            storagePath.convertToResPath();
+            convertToResPath(storagePath);
             if (!processFile(bundle, zip, storagePath, entry.getFile())) {
                 return UNKNOWN_ERROR;
             }
@@ -267,31 +269,31 @@ bool processFile(Bundle* bundle, ZipFile* zip,
     int fileNameLen = storageName.length();
     int excludeExtensionLen = strlen(kExcludeExtension);
     if (fileNameLen > excludeExtensionLen
-            && (0 == strcmp(storageName.string() + (fileNameLen - excludeExtensionLen),
+            && (0 == strcmp(storageName.c_str() + (fileNameLen - excludeExtensionLen),
                             kExcludeExtension))) {
-        fprintf(stderr, "warning: '%s' not added to Zip\n", storageName.string());
+        fprintf(stderr, "warning: '%s' not added to Zip\n", storageName.c_str());
         return true;
     }
 
-    if (strcasecmp(storageName.getPathExtension().string(), ".gz") == 0) {
+    if (strcasecmp(getPathExtension(storageName).c_str(), ".gz") == 0) {
         fromGzip = true;
-        storageName = storageName.getBasePath();
+        storageName = getBasePath(storageName);
     }
 
     if (bundle->getUpdate()) {
-        entry = zip->getEntryByName(storageName.string());
+        entry = zip->getEntryByName(storageName.c_str());
         if (entry != NULL) {
             /* file already exists in archive; there can be only one */
             if (entry->getMarked()) {
                 fprintf(stderr,
                         "ERROR: '%s' exists twice (check for with & w/o '.gz'?)\n",
-                        file->getPrintableSource().string());
+                        file->getPrintableSource().c_str());
                 return false;
             }
             if (!hasData) {
                 const String8& srcName = file->getSourceFile();
                 time_t fileModWhen;
-                fileModWhen = getFileModDate(srcName.string());
+                fileModWhen = getFileModDate(srcName.c_str());
                 if (fileModWhen == (time_t) -1) { // file existence tested earlier,
                     return false;                 //  not expecting an error here
                 }
@@ -299,14 +301,14 @@ bool processFile(Bundle* bundle, ZipFile* zip,
                 if (fileModWhen > entry->getModWhen()) {
                     // mark as deleted so add() will succeed
                     if (bundle->getVerbose()) {
-                        printf("      (removing old '%s')\n", storageName.string());
+                        printf("      (removing old '%s')\n", storageName.c_str());
                     }
     
                     zip->remove(entry);
                 } else {
                     // version in archive is newer
                     if (bundle->getVerbose()) {
-                        printf("      (not updating '%s')\n", storageName.string());
+                        printf("      (not updating '%s')\n", storageName.c_str());
                     }
                     entry->setMarked(true);
                     return true;
@@ -321,22 +323,22 @@ bool processFile(Bundle* bundle, ZipFile* zip,
     //android_setMinPriority(NULL, ANDROID_LOG_VERBOSE);
 
     if (fromGzip) {
-        result = zip->addGzip(file->getSourceFile().string(), storageName.string(), &entry);
+        result = zip->addGzip(file->getSourceFile().c_str(), storageName.c_str(), &entry);
     } else if (!hasData) {
         /* don't compress certain files, e.g. PNGs */
         int compressionMethod = bundle->getCompressionMethod();
         if (!okayToCompress(bundle, storageName)) {
             compressionMethod = ZipEntry::kCompressStored;
         }
-        result = zip->add(file->getSourceFile().string(), storageName.string(), compressionMethod,
+        result = zip->add(file->getSourceFile().c_str(), storageName.c_str(), compressionMethod,
                             &entry);
     } else {
-        result = zip->add(file->getData(), file->getSize(), storageName.string(),
+        result = zip->add(file->getData(), file->getSize(), storageName.c_str(),
                            file->getCompressionMethod(), &entry);
     }
     if (result == NO_ERROR) {
         if (bundle->getVerbose()) {
-            printf("      '%s'%s", storageName.string(), fromGzip ? " (from .gz)" : "");
+            printf("      '%s'%s", storageName.c_str(), fromGzip ? " (from .gz)" : "");
             if (entry->getCompressionMethod() == ZipEntry::kCompressStored) {
                 printf(" (not compressed)\n");
             } else {
@@ -348,10 +350,10 @@ bool processFile(Bundle* bundle, ZipFile* zip,
     } else {
         if (result == ALREADY_EXISTS) {
             fprintf(stderr, "      Unable to add '%s': file already in archive (try '-u'?)\n",
-                    file->getPrintableSource().string());
+                    file->getPrintableSource().c_str());
         } else {
             fprintf(stderr, "      Unable to add '%s': Zip add failed (%d)\n",
-                    file->getPrintableSource().string(), result);
+                    file->getPrintableSource().c_str(), result);
         }
         return false;
     }
@@ -365,14 +367,14 @@ bool processFile(Bundle* bundle, ZipFile* zip,
  */
 bool okayToCompress(Bundle* bundle, const String8& pathName)
 {
-    String8 ext = pathName.getPathExtension();
+    String8 ext = getPathExtension(pathName);
     int i;
 
     if (ext.length() == 0)
         return true;
 
     for (i = 0; i < NELEM(kNoCompressExt); i++) {
-        if (strcasecmp(ext.string(), kNoCompressExt[i]) == 0)
+        if (strcasecmp(ext.c_str(), kNoCompressExt[i]) == 0)
             return false;
     }
 
@@ -383,7 +385,7 @@ bool okayToCompress(Bundle* bundle, const String8& pathName)
         if (pos < 0) {
             continue;
         }
-        const char* path = pathName.string();
+        const char* path = pathName.c_str();
         if (strcasecmp(path + pos, str) == 0) {
             return false;
         }

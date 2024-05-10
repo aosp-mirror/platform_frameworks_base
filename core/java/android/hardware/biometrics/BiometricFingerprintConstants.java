@@ -218,7 +218,8 @@ public interface BiometricFingerprintConstants {
             FINGERPRINT_ACQUIRED_UNKNOWN,
             FINGERPRINT_ACQUIRED_IMMOBILE,
             FINGERPRINT_ACQUIRED_TOO_BRIGHT,
-            FINGERPRINT_ACQUIRED_POWER_PRESSED})
+            FINGERPRINT_ACQUIRED_POWER_PRESSED,
+            FINGERPRINT_ACQUIRED_RE_ENROLL})
     @Retention(RetentionPolicy.SOURCE)
     @interface FingerprintAcquired {}
 
@@ -308,6 +309,12 @@ public interface BiometricFingerprintConstants {
      * @hide
      */
     int FINGERPRINT_ACQUIRED_POWER_PRESSED = 11;
+
+    /**
+     * This message is sent to encourage the user to re-enroll their fingerprints.
+     * @hide
+     */
+    int FINGERPRINT_ACQUIRED_RE_ENROLL = 12;
 
     /**
      * @hide

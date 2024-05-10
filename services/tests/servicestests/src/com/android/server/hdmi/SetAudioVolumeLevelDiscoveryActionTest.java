@@ -21,7 +21,6 @@ import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORT_UNKNOWN;
 
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -67,7 +66,6 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
     private Context mContextSpy;
     private TestLooper mTestLooper = new TestLooper();
     private int mPhysicalAddress = 0x1100;
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPlaybackLogicalAddress;
 
     private TestCallback mTestCallback;
@@ -82,14 +80,18 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
-        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy, Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()));
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
+        mHdmiControlServiceSpy = spy(new HdmiControlService(mContextSpy,
+                Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()));
         doNothing().when(mHdmiControlServiceSpy)
                 .writeStringSystemProperty(anyString(), anyString());
 
         mLooper = mTestLooper.getLooper();
         mHdmiControlServiceSpy.setIoLooper(mLooper);
         mHdmiControlServiceSpy.setHdmiCecConfig(new FakeHdmiCecConfig(mContextSpy));
+        mHdmiControlServiceSpy.setDeviceConfig(new FakeDeviceConfigWrapper());
 
         mNativeWrapper = new FakeNativeWrapper();
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
@@ -104,23 +106,16 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mPowerManager = new FakePowerManagerWrapper(mContextSpy);
         mHdmiControlServiceSpy.setPowerManager(mPowerManager);
 
-        mPlaybackDevice = new HdmiCecLocalDevicePlayback(mHdmiControlServiceSpy);
-        mPlaybackDevice.init();
-        mLocalDevices.add(mPlaybackDevice);
-
-        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mTestLooper.dispatchAll();
 
-        synchronized (mPlaybackDevice.mLock) {
-            mPlaybackLogicalAddress = mPlaybackDevice.getDeviceInfo().getLogicalAddress();
-        }
+        mPlaybackDevice = mHdmiControlServiceSpy.playback();
+        mPlaybackLogicalAddress = mPlaybackDevice.getDeviceInfo().getLogicalAddress();
 
         // Setup specific to these tests
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 Constants.ADDR_TV, 0x0000, HdmiDeviceInfo.DEVICE_TV));
         mTestLooper.dispatchAll();
-
         mTestCallback = new TestCallback();
         mAction = new SetAudioVolumeLevelDiscoveryAction(mPlaybackDevice,
                 Constants.ADDR_TV, mTestCallback);
@@ -159,11 +154,11 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
         mTestLooper.dispatchAll();
 
-        @DeviceFeatures.FeatureSupportStatus int avcSupport =
+        @DeviceFeatures.FeatureSupportStatus int savlSupport =
                 mHdmiControlServiceSpy.getHdmiCecNetwork().getCecDeviceInfo(Constants.ADDR_TV)
                         .getDeviceFeatures().getSetAudioVolumeLevelSupport();
 
-        assertThat(avcSupport).isEqualTo(FEATURE_SUPPORTED);
+        assertThat(savlSupport).isEqualTo(FEATURE_SUPPORTED);
         assertThat(mTestCallback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
@@ -179,11 +174,11 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
                 Constants.ABORT_UNRECOGNIZED_OPCODE));
         mTestLooper.dispatchAll();
 
-        @DeviceFeatures.FeatureSupportStatus int avcSupport =
+        @DeviceFeatures.FeatureSupportStatus int savlSupport =
                 mHdmiControlServiceSpy.getHdmiCecNetwork().getCecDeviceInfo(Constants.ADDR_TV)
                         .getDeviceFeatures().getSetAudioVolumeLevelSupport();
 
-        assertThat(avcSupport).isEqualTo(FEATURE_NOT_SUPPORTED);
+        assertThat(savlSupport).isEqualTo(FEATURE_NOT_SUPPORTED);
         assertThat(mTestCallback.getResult()).isEqualTo(HdmiControlManager.RESULT_SUCCESS);
     }
 
@@ -196,11 +191,11 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mPlaybackDevice.addAndStartAction(mAction);
         mTestLooper.dispatchAll();
 
-        @DeviceFeatures.FeatureSupportStatus int avcSupport =
+        @DeviceFeatures.FeatureSupportStatus int savlSupport =
                 mHdmiControlServiceSpy.getHdmiCecNetwork().getCecDeviceInfo(Constants.ADDR_TV)
                         .getDeviceFeatures().getSetAudioVolumeLevelSupport();
 
-        assertThat(avcSupport).isEqualTo(FEATURE_SUPPORT_UNKNOWN);
+        assertThat(savlSupport).isEqualTo(FEATURE_SUPPORT_UNKNOWN);
         assertThat(mTestCallback.getResult()).isEqualTo(
                 HdmiControlManager.RESULT_COMMUNICATION_FAILED);
     }

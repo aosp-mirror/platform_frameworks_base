@@ -27,6 +27,7 @@ import static com.google.errorprone.matchers.Matchers.methodInvocation;
 import static com.google.errorprone.matchers.Matchers.methodIsNamed;
 import static com.google.errorprone.matchers.Matchers.staticMethod;
 
+import android.annotation.EnforcePermission;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 
@@ -290,6 +291,13 @@ public final class RequiresPermissionChecker extends BugChecker
             if (perm.anyOf() != null) this.anyOf.addAll(Arrays.asList(perm.anyOf()));
         }
 
+        public void addAll(EnforcePermission perm) {
+            if (perm == null) return;
+            if (!perm.value().isEmpty()) this.allOf.add(perm.value());
+            if (perm.allOf() != null) this.allOf.addAll(Arrays.asList(perm.allOf()));
+            if (perm.anyOf() != null) this.anyOf.addAll(Arrays.asList(perm.anyOf()));
+        }
+
         public void addConstValue(Tree tree) {
             final Object value = ASTHelpers.constValue(tree);
             if (value != null) {
@@ -416,14 +424,20 @@ public final class RequiresPermissionChecker extends BugChecker
             final ParsedRequiresPermission res = new ParsedRequiresPermission();
             res.allOf.add(String.valueOf(ASTHelpers.constValue(tree.getArguments().get(0))));
             return res;
-        } else if (ENFORCE_VIA_CHECKER.matches(tree, state) && tree.getArguments().size() > 1) {
+        }
+        if (ENFORCE_VIA_CHECKER.matches(tree, state) && tree.getArguments().size() > 1) {
             final ParsedRequiresPermission res = new ParsedRequiresPermission();
             res.allOf.add(String.valueOf(ASTHelpers.constValue(tree.getArguments().get(1))));
             return res;
-        } else {
-            final MethodSymbol method = ASTHelpers.getSymbol(tree);
-            return parseRequiresPermissionRecursively(method, state);
         }
+        final MethodSymbol method = ASTHelpers.getSymbol(tree);
+        final EnforcePermission enforced = method.getAnnotation(EnforcePermission.class);
+        if (enforced != null) {
+            final ParsedRequiresPermission res = new ParsedRequiresPermission();
+            res.addAll(enforced);
+            return res;
+        }
+        return parseRequiresPermissionRecursively(method, state);
     }
 
     /**

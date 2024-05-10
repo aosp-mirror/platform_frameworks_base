@@ -16,7 +16,7 @@
 
 package com.android.systemui.recents;
 
-import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
+import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
@@ -51,31 +51,36 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.systemui.R;
+import androidx.annotation.NonNull;
+
+import com.android.systemui.CoreStartable;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
 import dagger.Lazy;
 
+@SysUISingleton
 public class ScreenPinningRequest implements View.OnClickListener,
-        NavigationModeController.ModeChangedListener {
+        NavigationModeController.ModeChangedListener, CoreStartable {
     private static final String TAG = "ScreenPinningRequest";
 
     private final Context mContext;
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
-
+    private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
     private final AccessibilityManager mAccessibilityService;
     private final WindowManager mWindowManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final UserTracker mUserTracker;
 
     private RequestWindowView mRequestWindow;
     private int mNavBarMode;
@@ -83,21 +88,34 @@ public class ScreenPinningRequest implements View.OnClickListener,
     /** ID of task to be pinned or locked. */
     private int taskId;
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    clearPrompt();
+                }
+            };
+
     @Inject
     public ScreenPinningRequest(
             Context context,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             NavigationModeController navigationModeController,
-            BroadcastDispatcher broadcastDispatcher) {
+            Lazy<NavigationBarController> navigationBarControllerLazy,
+            BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker) {
         mContext = context;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mNavigationBarControllerLazy = navigationBarControllerLazy;
         mAccessibilityService = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mWindowManager = (WindowManager)
                 mContext.getSystemService(Context.WINDOW_SERVICE);
         mNavBarMode = navigationModeController.addListener(this);
         mBroadcastDispatcher = broadcastDispatcher;
+        mUserTracker = userTracker;
     }
+
+    @Override
+    public void start() {}
 
     public void clearPrompt() {
         if (mRequestWindow != null) {
@@ -130,7 +148,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
         mNavBarMode = mode;
     }
 
-    public void onConfigurationChanged() {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         if (mRequestWindow != null) {
             mRequestWindow.onConfigurationChanged();
         }
@@ -228,9 +247,9 @@ public class ScreenPinningRequest implements View.OnClickListener,
             }
 
             IntentFilter filter = new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
-            filter.addAction(Intent.ACTION_USER_SWITCHED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             mBroadcastDispatcher.registerReceiver(mReceiver, filter);
+            mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
         }
 
         private void inflateView(int rotation) {
@@ -251,7 +270,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
             if (!QuickStepContract.isGesturalMode(mNavBarMode)
-            	    && hasSoftNavigationBar(mContext.getDisplayId()) && !isTablet(mContext)) {
+            	    && hasSoftNavigationBar(mContext.getDisplayId()) && !isLargeScreen(mContext)) {
                 buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
                 swapChildrenIfRtlAndVertical(buttons);
             } else {
@@ -268,15 +287,14 @@ public class ScreenPinningRequest implements View.OnClickListener,
                         .setVisibility(View.INVISIBLE);
             }
 
-            final Optional<CentralSurfaces> centralSurfacesOptional =
-                    mCentralSurfacesOptionalLazy.get();
-            boolean recentsVisible =
-                    centralSurfacesOptional.map(CentralSurfaces::isOverviewEnabled).orElse(false);
+            int displayId = mContext.getDisplayId();
+            boolean overviewEnabled =
+                    mNavigationBarControllerLazy.get().isOverviewEnabled(displayId);
             boolean touchExplorationEnabled = mAccessibilityService.isTouchExplorationEnabled();
             int descriptionStringResId;
             if (QuickStepContract.isGesturalMode(mNavBarMode)) {
                 descriptionStringResId = R.string.screen_pinning_description_gestural;
-            } else if (recentsVisible) {
+            } else if (overviewEnabled) {
                 mLayout.findViewById(R.id.screen_pinning_recents_group).setVisibility(VISIBLE);
                 mLayout.findViewById(R.id.screen_pinning_home_bg_light).setVisibility(INVISIBLE);
                 mLayout.findViewById(R.id.screen_pinning_home_bg).setVisibility(INVISIBLE);
@@ -293,7 +311,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
             }
 
             NavigationBarView navigationBarView =
-                    centralSurfacesOptional.map(CentralSurfaces::getNavigationBarView).orElse(null);
+                    mNavigationBarControllerLazy.get().getNavigationBarView(displayId);
             if (navigationBarView != null) {
                 ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
                         .setImageDrawable(navigationBarView.getBackDrawable());
@@ -358,6 +376,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
         @Override
         public void onDetachedFromWindow() {
             mBroadcastDispatcher.unregisterReceiver(mReceiver);
+            mUserTracker.removeCallback(mUserChangedCallback);
         }
 
         protected void onConfigurationChanged() {
@@ -388,8 +407,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                     post(mUpdateLayoutRunnable);
-                } else if (intent.getAction().equals(Intent.ACTION_USER_SWITCHED)
-                        || intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                } else if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                     clearPrompt();
                 }
             }

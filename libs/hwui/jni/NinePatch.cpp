@@ -15,8 +15,6 @@
 ** limitations under the License.
 */
 
-#undef LOG_TAG
-#define LOG_TAG "9patch"
 #define LOG_NDEBUG 1
 
 #include <androidfw/ResourceTypes.h>
@@ -24,8 +22,10 @@
 #include <hwui/Paint.h>
 #include <utils/Log.h>
 
+#include "SkBitmap.h"
 #include "SkCanvas.h"
 #include "SkLatticeIter.h"
+#include "SkRect.h"
 #include "SkRegion.h"
 #include "GraphicsJNI.h"
 #include "NinePatchPeeker.h"

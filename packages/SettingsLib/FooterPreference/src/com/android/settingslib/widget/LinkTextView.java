@@ -22,6 +22,8 @@ import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.android.settingslib.widget.preference.footer.R;
+
 /**
  * Copied from setup wizard. This TextView performed two functions. The first is to make it so the
  * link behaves properly and becomes clickable. The second was that it made the link visible to

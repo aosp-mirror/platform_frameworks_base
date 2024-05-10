@@ -1,0 +1,3 @@
+# Bug component: 44215
+
+include /core/java/android/view/accessibility/OWNERS

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"अ‍ॅक्सेसिबिलिटी मेनू"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"तुमचे डिव्हाइस नियंत्रित करण्यासाठी अ‍ॅक्सेसिबिलिटी मेनू मोठा स्क्रीनवरील मेनू पुरवतो. तुम्ही तुमचे डिव्हाइस लॉक करणे, व्हॉल्यूम आणि ब्राइटनेस नियंत्रित करणे, स्क्रीनशॉट घेणे आणि आणखी बरेच काही करू शकता."</string>
+    <string name="assistant_label" msgid="6796392082252272356">"असिस्टंट"</string>
+    <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"अ‍ॅक्सेसिबिलिटी सेटिंग्ज"</string>
+    <string name="power_label" msgid="7699720321491287839">"पॉवर"</string>
+    <string name="power_utterance" msgid="7444296686402104807">"पॉवर पर्याय"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"अलीकडील अ‍ॅप्स"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"लॉक स्क्रीन"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"क्विक सेटिंग्ज"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"सूचना"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"स्क्रीनशॉट"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"स्क्रीनशॉट घ्या"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"व्‍हॉल्‍यूम वाढवा"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"व्‍हॉल्‍यूम कमी करा"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"ब्राइटनेस वाढवा"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"ब्राइटनेस कमी करा"</string>
+    <string name="previous_button_content_description" msgid="840869171117765966">"मागील स्क्रीनवर जा"</string>
+    <string name="next_button_content_description" msgid="6810058269847364406">"पुढील स्क्रीनवर जा"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"तुमचे डिव्हाइस नियंत्रित करण्यासाठी अ‍ॅक्सेसिबिलिटी मेनू मोठा स्क्रीनवरील मेनू पुरवतो. तुम्ही तुमचे डिव्हाइस लॉक करणे, व्हॉल्यूम आणि ब्राइटनेस नियंत्रित करणे, स्क्रीनशॉट घेणे आणि आणखी बरेच काही करू शकता."</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"मोठ्या मेनूद्वारे डिव्हाइस नियंत्रित करा"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"अ‍ॅक्सेसिबिलिटी मेनू सेटिंग्ज"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"मोठी बटणे"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"अ‍ॅक्सेसिबिलिटी मेनू बटणांचा आकार वाढवा"</string>
+    <string name="pref_help_title" msgid="6871558837025010641">"मदत"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"ब्राइटनेस <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"संगीताचा व्हॉल्यूम <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+</resources>

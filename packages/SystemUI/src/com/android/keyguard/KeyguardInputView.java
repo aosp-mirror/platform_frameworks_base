@@ -21,17 +21,23 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.res.R;
 
 /**
  * A Base class for all Keyguard password/pattern/pin related inputs.
  */
 public abstract class KeyguardInputView extends LinearLayout {
     private Runnable mOnFinishImeAnimationRunnable;
+
+    @Nullable
+    private View mBouncerMessageView;
 
     public KeyguardInputView(Context context) {
         super(context);
@@ -56,6 +62,13 @@ public abstract class KeyguardInputView extends LinearLayout {
 
     boolean startDisappearAnimation(Runnable finishRunnable) {
         return false;
+    }
+
+    /** Updates the keyguard view's constraints (single or split constraints).
+     *  Split constraints are only used for small landscape screens.
+     *  Only called when flag LANDSCAPE_ENABLE_LOCKSCREEN is enabled. */
+    protected void updateConstraints(boolean useSplitBouncer) {
+        //Unless overridden, never update constrains (keeping default portrait constraints)
     }
 
     protected AnimatorListenerAdapter getAnimationListener(int cuj) {
@@ -85,6 +98,18 @@ public abstract class KeyguardInputView extends LinearLayout {
 
     public void setOnFinishImeAnimationRunnable(Runnable onFinishImeAnimationRunnable) {
         mOnFinishImeAnimationRunnable = onFinishImeAnimationRunnable;
+    }
+
+    @Override
+    @CallSuper
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mBouncerMessageView = findViewById(R.id.bouncer_message_view);
+    }
+
+    @Nullable
+    public final View getBouncerMessageView() {
+        return mBouncerMessageView;
     }
 
     public void runOnFinishImeAnimationRunnable() {

@@ -29,6 +29,7 @@ import android.telephony.PinResult;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -36,8 +37,10 @@ import android.widget.ImageView;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.res.R;
+import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 
 public class KeyguardSimPukViewController
         extends KeyguardPinBasedInputViewController<KeyguardSimPukView> {
@@ -68,7 +71,8 @@ public class KeyguardSimPukViewController
             if (simState == TelephonyManager.SIM_STATE_READY) {
                 mRemainingAttempts = -1;
                 mShowDefaultMessage = true;
-                getKeyguardSecurityCallback().dismiss(true, KeyguardUpdateMonitor.getCurrentUser(),
+                getKeyguardSecurityCallback().dismiss(
+                        true, mSelectedUserInteractor.getSelectedUserId(),
                         SecurityMode.SimPuk);
             } else {
                 resetState();
@@ -85,10 +89,11 @@ public class KeyguardSimPukViewController
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker, LiftToActivateListener liftToActivateListener,
             TelephonyManager telephonyManager, FalsingCollector falsingCollector,
-            EmergencyButtonController emergencyButtonController) {
+            EmergencyButtonController emergencyButtonController, FeatureFlags featureFlags,
+            SelectedUserInteractor selectedUserInteractor) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
-                emergencyButtonController, falsingCollector);
+                emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mTelephonyManager = telephonyManager;
         mSimImageView = mView.findViewById(R.id.keyguard_sim);
@@ -121,12 +126,6 @@ public class KeyguardSimPukViewController
     }
 
     @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mView.reloadColors();
-    }
-
-    @Override
     protected void verifyPasswordAndUnlock() {
         mStateMachine.next();
     }
@@ -144,25 +143,25 @@ public class KeyguardSimPukViewController
             if (mState == ENTER_PUK) {
                 if (checkPuk()) {
                     mState = ENTER_PIN;
-                    msg = com.android.systemui.R.string.kg_puk_enter_pin_hint;
+                    msg = com.android.systemui.res.R.string.kg_puk_enter_pin_hint;
                 } else {
-                    msg = com.android.systemui.R.string.kg_invalid_sim_puk_hint;
+                    msg = com.android.systemui.res.R.string.kg_invalid_sim_puk_hint;
                 }
             } else if (mState == ENTER_PIN) {
                 if (checkPin()) {
                     mState = CONFIRM_PIN;
-                    msg = com.android.systemui.R.string.kg_enter_confirm_pin_hint;
+                    msg = com.android.systemui.res.R.string.kg_enter_confirm_pin_hint;
                 } else {
-                    msg = com.android.systemui.R.string.kg_invalid_sim_pin_hint;
+                    msg = com.android.systemui.res.R.string.kg_invalid_sim_pin_hint;
                 }
             } else if (mState == CONFIRM_PIN) {
                 if (confirmPin()) {
                     mState = DONE;
-                    msg = com.android.systemui.R.string.keyguard_sim_unlock_progress_dialog_message;
+                    msg = com.android.systemui.res.R.string.keyguard_sim_unlock_progress_dialog_message;
                     updateSim();
                 } else {
                     mState = ENTER_PIN; // try again?
-                    msg = com.android.systemui.R.string.kg_invalid_confirm_pin_hint;
+                    msg = com.android.systemui.res.R.string.kg_invalid_confirm_pin_hint;
                 }
             }
             mView.resetPasswordText(true /* animate */, true /* announce */);
@@ -211,7 +210,11 @@ public class KeyguardSimPukViewController
         } else {
             SubscriptionInfo info = mKeyguardUpdateMonitor.getSubscriptionInfoForSubId(mSubId);
             CharSequence displayName = info != null ? info.getDisplayName() : "";
-            msg = rez.getString(R.string.kg_puk_enter_puk_hint_multi, displayName);
+            if (!TextUtils.isEmpty(displayName)) {
+                msg = rez.getString(R.string.kg_puk_enter_puk_hint_multi, displayName);
+            } else {
+                msg = rez.getString(R.string.kg_puk_enter_puk_hint);
+            }
             if (info != null) {
                 color = info.getIconTint();
             }
@@ -243,7 +246,7 @@ public class KeyguardSimPukViewController
 
     private boolean checkPuk() {
         // make sure the puk is at least 8 digits long.
-        if (mPasswordEntry.getText().length() == 8) {
+        if (mPasswordEntry.getText().length() >= 8) {
             mPukText = mPasswordEntry.getText();
             return true;
         }
@@ -284,7 +287,7 @@ public class KeyguardSimPukViewController
                             mShowDefaultMessage = true;
 
                             getKeyguardSecurityCallback().dismiss(
-                                    true, KeyguardUpdateMonitor.getCurrentUser(),
+                                    true, mSelectedUserInteractor.getSelectedUserId(),
                                     SecurityMode.SimPuk);
                         } else {
                             mShowDefaultMessage = false;

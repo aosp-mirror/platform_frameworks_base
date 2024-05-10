@@ -26,19 +26,21 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.incremental.IncrementalManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
-import com.android.server.pm.dex.ViewCompiler;
+import com.android.server.pm.dex.DynamicCodeLogger;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
 public final class PackageManagerServiceTestParams {
@@ -49,6 +51,7 @@ public final class PackageManagerServiceTestParams {
     public int defParseFlags;
     public DefaultAppProvider defaultAppProvider;
     public DexManager dexManager;
+    public DynamicCodeLogger dynamicCodeLogger;
     public List<ScanPartition> dirsToScanAsSystem;
     public boolean factoryTest;
     public ArrayMap<String, FeatureInfo> availableFeatures;
@@ -57,11 +60,10 @@ public final class PackageManagerServiceTestParams {
     public IncrementalManager incrementalManager;
     public PackageInstallerService installerService;
     public InstantAppRegistry instantAppRegistry;
-    public ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
+    public final ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
     public InstantAppResolverConnection instantAppResolverConnection;
     public ComponentName instantAppResolverSettingsComponent;
     public boolean isPreNmr1Upgrade;
-    public boolean isPreNupgrade;
     public boolean isPreQupgrade;
     public boolean isUpgrade;
     public LegacyPermissionManagerInternal legacyPermissionManagerInternal;
@@ -80,7 +82,7 @@ public final class PackageManagerServiceTestParams {
     public @NonNull String requiredInstallerPackage;
     public @NonNull String requiredPermissionControllerPackage;
     public @NonNull String requiredUninstallerPackage;
-    public @Nullable String requiredVerifierPackage;
+    public @NonNull String[] requiredVerifierPackages;
     public String[] separateProcesses;
     public @NonNull String servicesExtensionPackageName;
     public @Nullable String setupWizardPackage;
@@ -90,20 +92,19 @@ public final class PackageManagerServiceTestParams {
     public @Nullable String systemTextClassifierPackage;
     public @Nullable String overlayConfigSignaturePackage;
     public @NonNull String requiredSdkSandboxPackage;
-    public ViewCompiler viewCompiler;
     public @Nullable String retailDemoPackage;
     public @Nullable String recentsPackage;
     public @Nullable String ambientContextDetectionPackage;
+    public @Nullable String wearableSensingPackage;
     public ComponentName resolveComponentName;
     public ArrayMap<String, AndroidPackage> packages;
-    public boolean enableFreeCacheV2;
     public int sdkVersion;
     public File appInstallDir;
     public File appLib32InstallDir;
     public boolean isEngBuild;
     public boolean isUserDebugBuild;
     public int sdkInt = Build.VERSION.SDK_INT;
-    public BackgroundDexOptService backgroundDexOptService;
+    public @Nullable BackgroundDexOptService backgroundDexOptService;
     public final String incrementalVersion = Build.VERSION.INCREMENTAL;
     public BroadcastHelper broadcastHelper;
     public AppDataHelper appDataHelper;
@@ -115,6 +116,10 @@ public final class PackageManagerServiceTestParams {
     public ResolveIntentHelper resolveIntentHelper;
     public DexOptHelper dexOptHelper;
     public SuspendPackageHelper suspendPackageHelper;
-    public StorageEventHelper storageEventHelper;
     public DistractingPackageHelper distractingPackageHelper;
+    public StorageEventHelper storageEventHelper;
+    public final Set<String> initialNonStoppedSystemPackages = new ArraySet<>();
+    public boolean shouldStopSystemPackagesByDefault;
+    public FreeStorageHelper freeStorageHelper;
+    public PackageMonitorCallbackHelper packageMonitorCallbackHelper;
 }

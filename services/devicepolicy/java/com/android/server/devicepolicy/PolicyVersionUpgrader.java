@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,6 +105,31 @@ public class PolicyVersionUpgrader {
             currentVersion = 3;
         }
 
+        if (currentVersion == 3) {
+            Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
+            upgradePackageSuspension(allUsers, ownersData, allUsersData);
+            currentVersion = 4;
+        }
+
+        if (currentVersion == 4) {
+            Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
+            initializeEffectiveKeepProfilesRunning(allUsersData);
+            currentVersion = 5;
+        }
+
+        if (currentVersion == 5) {
+            Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
+            // No-op upgrade here:
+            // DevicePolicyData.mEffectiveKeepProfilesRunning is only stored in XML file when it is
+            // different from its default value, otherwise the tag is not written. When loading, if
+            // the tag is missing, the field retains the value previously assigned in the
+            // constructor, which is the default value.
+            // In version 5 the default value was 'true', in version 6 it is 'false', so when
+            // loading XML version 5 we need to initialize the field to 'true' for it to be restored
+            // correctly in case the tag is missing. This is done in loadDataForUser().
+            currentVersion = 6;
+        }
+
         writePoliciesAndVersion(allUsers, allUsersData, ownersData, currentVersion);
     }
 
@@ -170,6 +196,54 @@ public class PolicyVersionUpgrader {
         }
     }
 
+    /**
+     * This upgrade step stores packages suspended via DPM.setPackagesSuspended() into ActiveAdmin
+     * data structure. Prior to this it was only persisted in PackageManager which doesn't have any
+     * way of knowing which admin suspended it.
+     */
+    private void upgradePackageSuspension(
+            int[] allUsers, OwnersData ownersData, SparseArray<DevicePolicyData> allUsersData) {
+        if (ownersData.mDeviceOwner != null) {
+            saveSuspendedPackages(allUsersData, ownersData.mDeviceOwnerUserId,
+                    ownersData.mDeviceOwner.admin);
+        }
+
+        for (int i = 0; i < ownersData.mProfileOwners.size(); i++) {
+            int ownerUserId = ownersData.mProfileOwners.keyAt(i);
+            OwnersData.OwnerInfo ownerInfo = ownersData.mProfileOwners.valueAt(i);
+            saveSuspendedPackages(allUsersData, ownerUserId, ownerInfo.admin);
+        }
+    }
+
+    private void saveSuspendedPackages(SparseArray<DevicePolicyData> allUsersData, int ownerUserId,
+            ComponentName ownerPackage) {
+        DevicePolicyData ownerUserData = allUsersData.get(ownerUserId);
+        if (ownerUserData == null) {
+            Slog.e(LOG_TAG, "No policy data for owner user, cannot migrate suspended packages");
+            return;
+        }
+
+        ActiveAdmin ownerAdmin = ownerUserData.mAdminMap.get(ownerPackage);
+        if (ownerAdmin == null) {
+            Slog.e(LOG_TAG, "No admin for owner, cannot migrate suspended packages");
+            return;
+        }
+
+        ownerAdmin.suspendedPackages = mProvider.getPlatformSuspendedPackages(ownerUserId);
+        Slog.i(LOG_TAG, String.format("Saved %d packages suspended by %s in user %d",
+                ownerAdmin.suspendedPackages.size(), ownerPackage, ownerUserId));
+    }
+
+    private void initializeEffectiveKeepProfilesRunning(
+            SparseArray<DevicePolicyData> allUsersData) {
+        DevicePolicyData systemUserData = allUsersData.get(UserHandle.USER_SYSTEM);
+        if (systemUserData == null) {
+            return;
+        }
+        systemUserData.mEffectiveKeepProfilesRunning = false;
+        Slog.i(LOG_TAG, "Keep profile running effective state set to false");
+    }
+
     private OwnersData loadOwners(int[] allUsers) {
         OwnersData ownersData = new OwnersData(mPathProvider);
         ownersData.load(allUsers);
@@ -221,8 +295,11 @@ public class PolicyVersionUpgrader {
     private DevicePolicyData loadDataForUser(
             int userId, int loadVersion, ComponentName ownerComponent) {
         DevicePolicyData policy = new DevicePolicyData(userId);
+        // See version 5 -> 6 step in upgradePolicy()
+        if (loadVersion == 5 && userId == UserHandle.USER_SYSTEM) {
+            policy.mEffectiveKeepProfilesRunning = true;
+        }
         DevicePolicyData.load(policy,
-                !mProvider.storageManagerIsFileBasedEncryptionEnabled(),
                 mProvider.makeDevicePoliciesJournaledFile(userId),
                 mProvider.getAdminInfoSupplier(userId),
                 ownerComponent);
@@ -230,10 +307,7 @@ public class PolicyVersionUpgrader {
     }
 
     private boolean writeDataForUser(int userId, DevicePolicyData policy) {
-        return DevicePolicyData.store(
-                policy,
-                mProvider.makeDevicePoliciesJournaledFile(userId),
-                !mProvider.storageManagerIsFileBasedEncryptionEnabled());
+        return DevicePolicyData.store(policy, mProvider.makeDevicePoliciesJournaledFile(userId));
     }
 
     private JournaledFile getVersionFile() {
@@ -251,6 +325,8 @@ public class PolicyVersionUpgrader {
             String versionString = Files.readAllLines(
                     file.toPath(), Charset.defaultCharset()).get(0);
             return Integer.parseInt(versionString);
+        } catch (NoSuchFileException e) {
+            return 0; // expected on first boot
         } catch (IOException | NumberFormatException | IndexOutOfBoundsException e) {
             Slog.e(LOG_TAG, "Error reading version", e);
             return 0;

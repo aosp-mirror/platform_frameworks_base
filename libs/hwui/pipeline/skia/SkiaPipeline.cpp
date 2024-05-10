@@ -16,24 +16,37 @@
 
 #include "SkiaPipeline.h"
 
-#include <SkImageEncoder.h>
+#include <include/android/SkSurfaceAndroid.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
+#include <include/encode/SkPngEncoder.h>
+#include <SkCanvas.h>
+#include <SkColor.h>
+#include <SkColorSpace.h>
+#include <SkData.h>
+#include <SkImage.h>
+#include <SkImageAndroid.h>
 #include <SkImageInfo.h>
-#include <SkImagePriv.h>
+#include <SkMatrix.h>
 #include <SkMultiPictureDocument.h>
 #include <SkOverdrawCanvas.h>
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
 #include <SkSerialProcs.h>
+#include <SkStream.h>
+#include <SkString.h>
 #include <SkTypeface.h>
 #include <android-base/properties.h>
+#include <gui/TraceUtils.h>
 #include <unistd.h>
 
 #include <sstream>
 
-#include <gui/TraceUtils.h>
 #include "LightingInfo.h"
 #include "VectorDrawable.h"
+#include "include/gpu/GpuTypes.h"  // from Skia
 #include "thread/CommonPool.h"
 #include "tools/SkSharingProc.h"
 #include "utils/Color.h"
@@ -64,7 +77,7 @@ bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
         return false;
     }
     for (SkImage* image : mutableImages) {
-        if (SkImage_pinAsTexture(image, mRenderThread.getGrContext())) {
+        if (skgpu::ganesh::PinAsTexture(mRenderThread.getGrContext(), image)) {
             mPinnedImages.emplace_back(sk_ref_sp(image));
         } else {
             return false;
@@ -75,7 +88,7 @@ bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
 
 void SkiaPipeline::unpinImages() {
     for (auto& image : mPinnedImages) {
-        SkImage_unpinAsTexture(image.get(), mRenderThread.getGrContext());
+        skgpu::ganesh::UnpinTexture(mRenderThread.getGrContext(), image.get());
     }
     mPinnedImages.clear();
 }
@@ -176,9 +189,9 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
                                  kPremul_SkAlphaType, getSurfaceColorSpace());
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
-        node->setLayerSurface(SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                          SkBudgeted::kYes, info, 0,
-                                                          this->getSurfaceOrigin(), &props));
+        node->setLayerSurface(SkSurfaces::RenderTarget(mRenderThread.getGrContext(),
+                                                       skgpu::Budgeted::kYes, info, 0,
+                                                       this->getSurfaceOrigin(), &props));
         if (node->getLayerSurface()) {
             // update the transform in window of the layer to reset its origin wrt light source
             // position
@@ -189,7 +202,7 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
             String8 cachesOutput;
             mRenderThread.cacheManager().dumpMemoryUsage(cachesOutput,
                                                          &mRenderThread.renderState());
-            ALOGE("%s", cachesOutput.string());
+            ALOGE("%s", cachesOutput.c_str());
             if (errorHandler) {
                 std::ostringstream err;
                 err << "Unable to create layer for " << node->getName();
@@ -211,8 +224,8 @@ void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
         auto image = bitmap->makeImage();
         if (image.get()) {
-            SkImage_pinAsTexture(image.get(), context);
-            SkImage_unpinAsTexture(image.get(), context);
+            skgpu::ganesh::PinAsTexture(context, image.get());
+            skgpu::ganesh::UnpinTexture(context, image.get());
             // A submit is necessary as there may not be a frame coming soon, so without a call
             // to submit these texture uploads can just sit in the queue building up until
             // we run out of RAM
@@ -428,6 +441,13 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
                 procs.fTypefaceProc = [](SkTypeface* tf, void* ctx){
                     return tf->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
                 };
+                procs.fImageProc = [](SkImage* img, void* ctx) -> sk_sp<SkData> {
+                    GrDirectContext* dCtx = static_cast<GrDirectContext*>(ctx);
+                    return SkPngEncoder::Encode(dCtx,
+                                                img,
+                                                SkPngEncoder::Options{});
+                };
+                procs.fImageCtx = mRenderThread.getGrContext();
                 auto data = picture->serialize(&procs);
                 savePictureAsync(data, mCapturedFile);
                 mCaptureSequence = 0;
@@ -488,8 +508,7 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
     }
     canvas->concat(preTransform);
 
-    // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
-    if (!opaque || getSurfaceColorType() == kRGBA_F16_SkColorType) {
+    if (!opaque) {
         canvas->clear(SK_ColorTRANSPARENT);
     }
 
@@ -594,6 +613,31 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
     ALOGD("%s", log.c_str());
 }
 
+void SkiaPipeline::setHardwareBuffer(AHardwareBuffer* buffer) {
+    if (mHardwareBuffer) {
+        AHardwareBuffer_release(mHardwareBuffer);
+        mHardwareBuffer = nullptr;
+    }
+
+    if (buffer) {
+        AHardwareBuffer_acquire(buffer);
+        mHardwareBuffer = buffer;
+    }
+}
+
+sk_sp<SkSurface> SkiaPipeline::getBufferSkSurface(
+        const renderthread::HardwareBufferRenderParams& bufferParams) {
+    auto bufferColorSpace = bufferParams.getColorSpace();
+    if (mBufferSurface == nullptr || mBufferColorSpace == nullptr ||
+        !SkColorSpace::Equals(mBufferColorSpace.get(), bufferColorSpace.get())) {
+        mBufferSurface = SkSurfaces::WrapAndroidHardwareBuffer(
+                mRenderThread.getGrContext(), mHardwareBuffer, kTopLeft_GrSurfaceOrigin,
+                bufferColorSpace, nullptr, true);
+        mBufferColorSpace = bufferColorSpace;
+    }
+    return mBufferSurface;
+}
+
 void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
     mColorMode = colorMode;
     switch (colorMode) {
@@ -606,17 +650,29 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
             mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
             break;
         case ColorMode::Hdr:
-            mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
+            mSurfaceColorType = SkColorType::kN32_SkColorType;
+            mSurfaceColorSpace = SkColorSpace::MakeRGB(
+                    GetExtendedTransferFunction(mTargetSdrHdrRatio), SkNamedGamut::kDisplayP3);
             break;
         case ColorMode::Hdr10:
             mSurfaceColorType = SkColorType::kRGBA_1010102_SkColorType;
-            mSurfaceColorSpace = SkColorSpace::MakeRGB(GetPQSkTransferFunction(), SkNamedGamut::kRec2020);
+            mSurfaceColorSpace = SkColorSpace::MakeRGB(
+                    GetExtendedTransferFunction(mTargetSdrHdrRatio), SkNamedGamut::kDisplayP3);
             break;
         case ColorMode::A8:
             mSurfaceColorType = SkColorType::kAlpha_8_SkColorType;
             mSurfaceColorSpace = nullptr;
             break;
+    }
+}
+
+void SkiaPipeline::setTargetSdrHdrRatio(float ratio) {
+    if (mColorMode == ColorMode::Hdr || mColorMode == ColorMode::Hdr10) {
+        mTargetSdrHdrRatio = ratio;
+        mSurfaceColorSpace = SkColorSpace::MakeRGB(GetExtendedTransferFunction(mTargetSdrHdrRatio),
+                                                   SkNamedGamut::kDisplayP3);
+    } else {
+        mTargetSdrHdrRatio = 1.f;
     }
 }
 

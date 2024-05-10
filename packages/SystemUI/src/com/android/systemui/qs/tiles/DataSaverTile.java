@@ -28,7 +28,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -38,6 +38,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -48,6 +49,8 @@ import javax.inject.Inject;
 public class DataSaverTile extends QSTileImpl<BooleanState> implements
         DataSaverController.Listener{
 
+    public static final String TILE_SPEC = "saver";
+
     private static final String INTERACTION_JANK_TAG = "start_data_saver";
 
     private final DataSaverController mDataSaverController;
@@ -56,6 +59,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     @Inject
     public DataSaverTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -66,7 +70,7 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             DataSaverController dataSaverController,
             DialogLaunchAnimator dialogLaunchAnimator
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDataSaverController = dataSaverController;
         mDialogLaunchAnimator = dialogLaunchAnimator;

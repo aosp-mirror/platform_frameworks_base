@@ -19,13 +19,17 @@ package com.android.server.companion;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
-import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME;
+import static android.companion.CompanionDeviceManager.REASON_INTERNAL_ERROR;
+import static android.companion.CompanionDeviceManager.RESULT_INTERNAL_ERROR;
 import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
+import static com.android.server.companion.MetricUtils.logCreateAssociation;
 import static com.android.server.companion.PackageUtils.enforceUsesCompanionDeviceFeature;
 import static com.android.server.companion.PermissionsUtils.enforcePermissionsForAssociation;
+import static com.android.server.companion.RolesUtils.addRoleHolderForAssociation;
 import static com.android.server.companion.RolesUtils.isRoleHolder;
+import static com.android.server.companion.Utils.prepareForIpc;
 
 import static java.util.Objects.requireNonNull;
 
@@ -34,6 +38,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
+import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.IAssociationRequestCallback;
@@ -42,25 +47,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.Signature;
 import android.net.MacAddress;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
-import android.util.Log;
-import android.util.PackageUtils;
 import android.util.Slog;
 
-import com.android.internal.util.ArrayUtils;
+import com.android.internal.R;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Class responsible for handling incoming {@link AssociationRequest}s.
@@ -87,7 +85,7 @@ import java.util.Set;
  * required.
  *
  * If the user's approval is NOT required: an {@link AssociationRequestsProcessor} invokes
- * {@link #createAssociationAndNotifyApplication(AssociationRequest, String, int, MacAddress, IAssociationRequestCallback)}
+ * {@link #createAssociationAndNotifyApplication(AssociationRequest, String, int, MacAddress, IAssociationRequestCallback, ResultReceiver)}
  * which after calling to  {@link CompanionDeviceManagerService} to create an association, notifies
  * the requester via
  * {@link android.companion.CompanionDeviceManager.Callback#onAssociationCreated(AssociationInfo)}.
@@ -99,7 +97,7 @@ import java.util.Set;
  * from the Approval UI in via {@link #mOnRequestConfirmationReceiver} and invokes
  * {@link #processAssociationRequestApproval(AssociationRequest, IAssociationRequestCallback, ResultReceiver, MacAddress)}
  * which one more time checks that the packages holds all necessary permissions before proceeding to
- * {@link #createAssociationAndNotifyApplication(AssociationRequest, String, int, MacAddress, IAssociationRequestCallback)}.
+ * {@link #createAssociationAndNotifyApplication(AssociationRequest, String, int, MacAddress, IAssociationRequestCallback, ResultReceiver)}.
  *
  * @see #processNewAssociationRequest(AssociationRequest, String, int, IAssociationRequestCallback)
  * @see #processAssociationRequestApproval(AssociationRequest, IAssociationRequestCallback,
@@ -107,15 +105,13 @@ import java.util.Set;
  */
 @SuppressLint("LongLogTag")
 class AssociationRequestsProcessor {
-    private static final String TAG = "CompanionDevice_AssociationRequestsProcessor";
-
-    private static final ComponentName ASSOCIATION_REQUEST_APPROVAL_ACTIVITY =
-            createRelative(COMPANION_DEVICE_DISCOVERY_PACKAGE_NAME, ".CompanionDeviceActivity");
+    private static final String TAG = "CDM_AssociationRequestsProcessor";
 
     // AssociationRequestsProcessor <-> UI
     private static final String EXTRA_APPLICATION_CALLBACK = "application_callback";
     private static final String EXTRA_ASSOCIATION_REQUEST = "association_request";
     private static final String EXTRA_RESULT_RECEIVER = "result_receiver";
+    private static final String EXTRA_FORCE_CANCEL_CONFIRMATION = "cancel_confirmation";
 
     // AssociationRequestsProcessor -> UI
     private static final int RESULT_CODE_ASSOCIATION_CREATED = 0;
@@ -131,14 +127,19 @@ class AssociationRequestsProcessor {
     private final @NonNull Context mContext;
     private final @NonNull CompanionDeviceManagerService mService;
     private final @NonNull PackageManagerInternal mPackageManager;
-    private final @NonNull AssociationStore mAssociationStore;
+    private final @NonNull AssociationStoreImpl mAssociationStore;
+    @NonNull
+    private final ComponentName mCompanionDeviceActivity;
 
     AssociationRequestsProcessor(@NonNull CompanionDeviceManagerService service,
-            @NonNull AssociationStore associationStore) {
+            @NonNull AssociationStoreImpl associationStore) {
         mContext = service.getContext();
         mService = service;
         mPackageManager = service.mPackageManagerInternal;
         mAssociationStore = associationStore;
+        mCompanionDeviceActivity = createRelative(
+                mContext.getString(R.string.config_companionDeviceManagerPackage),
+                ".CompanionDeviceActivity");
     }
 
     /**
@@ -173,7 +174,7 @@ class AssociationRequestsProcessor {
                 && !willAddRoleHolder(request, packageName, userId)) {
             // 2a. Create association right away.
             createAssociationAndNotifyApplication(request, packageName, userId,
-                    /*macAddress*/ null, callback);
+                    /* macAddress */ null, callback, /* resultReceiver */ null);
             return;
         }
 
@@ -191,30 +192,37 @@ class AssociationRequestsProcessor {
         extras.putParcelable(EXTRA_RESULT_RECEIVER, prepareForIpc(mOnRequestConfirmationReceiver));
 
         final Intent intent = new Intent();
-        intent.setComponent(ASSOCIATION_REQUEST_APPROVAL_ACTIVITY);
+        intent.setComponent(mCompanionDeviceActivity);
         intent.putExtras(extras);
 
         // 2b.3. Create a PendingIntent.
-        final PendingIntent pendingIntent;
-        final long token = Binder.clearCallingIdentity();
-        try {
-            // Using uid of the application that will own the association (usually the same
-            // application that sent the request) allows us to have multiple "pending" association
-            // requests at the same time.
-            // If the application already has a pending association request, that PendingIntent
-            // will be cancelled.
-            pendingIntent = PendingIntent.getActivityAsUser(
-                    mContext, /*requestCode */ packageUid, intent,
-                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
-                    /* options= */ null, UserHandle.CURRENT);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        final PendingIntent pendingIntent = createPendingIntent(packageUid, intent);
 
         // 2b.4. Send the PendingIntent back to the app.
         try {
             callback.onAssociationPending(pendingIntent);
         } catch (RemoteException ignore) { }
+    }
+
+    /**
+     * Process another AssociationRequest in CompanionDeviceActivity to cancel current dialog.
+     */
+    PendingIntent buildAssociationCancellationIntent(@NonNull String packageName,
+            @UserIdInt int userId) {
+        requireNonNull(packageName, "Package name MUST NOT be null");
+
+        enforceUsesCompanionDeviceFeature(mContext, userId, packageName);
+
+        final int packageUid = mPackageManager.getPackageUid(packageName, 0, userId);
+
+        final Bundle extras = new Bundle();
+        extras.putBoolean(EXTRA_FORCE_CANCEL_CONFIRMATION, true);
+
+        final Intent intent = new Intent();
+        intent.setComponent(mCompanionDeviceActivity);
+        intent.putExtras(extras);
+
+        return createPendingIntent(packageUid, intent);
     }
 
     private void processAssociationRequestApproval(@NonNull AssociationRequest request,
@@ -245,33 +253,124 @@ class AssociationRequestsProcessor {
         }
 
         // 2. Create association and notify the application.
-        final AssociationInfo association = createAssociationAndNotifyApplication(
-                request, packageName, userId, macAddress, callback);
-
-        // 3. Send the association back the Approval Activity, so that it can report back to the app
-        // via Activity.setResult().
-        final Bundle data = new Bundle();
-        data.putParcelable(EXTRA_ASSOCIATION, association);
-        resultReceiver.send(RESULT_CODE_ASSOCIATION_CREATED, data);
+        createAssociationAndNotifyApplication(request, packageName, userId, macAddress, callback,
+                resultReceiver);
     }
 
-    private AssociationInfo createAssociationAndNotifyApplication(
+    private void createAssociationAndNotifyApplication(
             @NonNull AssociationRequest request, @NonNull String packageName, @UserIdInt int userId,
-            @Nullable MacAddress macAddress, @NonNull IAssociationRequestCallback callback) {
-        final AssociationInfo association;
+            @Nullable MacAddress macAddress, @NonNull IAssociationRequestCallback callback,
+            @NonNull ResultReceiver resultReceiver) {
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
-            association = mService.createAssociation(userId, packageName, macAddress,
-                    request.getDisplayName(), request.getDeviceProfile(), request.isSelfManaged());
+            createAssociation(userId, packageName, macAddress, request.getDisplayName(),
+                    request.getDeviceProfile(), request.getAssociatedDevice(),
+                    request.isSelfManaged(),
+                    callback, resultReceiver);
         } finally {
             Binder.restoreCallingIdentity(callingIdentity);
         }
+    }
 
-        try {
-            callback.onAssociationCreated(association);
-        } catch (RemoteException ignore) { }
+    public void createAssociation(@UserIdInt int userId, @NonNull String packageName,
+            @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
+            @Nullable String deviceProfile, @Nullable AssociatedDevice associatedDevice,
+            boolean selfManaged, @Nullable IAssociationRequestCallback callback,
+            @Nullable ResultReceiver resultReceiver) {
+        final int id = mService.getNewAssociationIdForPackage(userId, packageName);
+        final long timestamp = System.currentTimeMillis();
 
-        return association;
+        final AssociationInfo association = new AssociationInfo(id, userId, packageName,
+                /* tag */ null, macAddress, displayName, deviceProfile, associatedDevice,
+                selfManaged, /* notifyOnDeviceNearby */ false, /* revoked */ false,
+                timestamp, Long.MAX_VALUE, /* systemDataSyncFlags */ 0);
+
+        if (deviceProfile != null) {
+            // If the "Device Profile" is specified, make the companion application a holder of the
+            // corresponding role.
+            addRoleHolderForAssociation(mService.getContext(), association, success -> {
+                if (success) {
+                    addAssociationToStore(association, deviceProfile);
+
+                    sendCallbackAndFinish(association, callback, resultReceiver);
+                } else {
+                    Slog.e(TAG, "Failed to add u" + userId + "\\" + packageName
+                            + " to the list of " + deviceProfile + " holders.");
+
+                    sendCallbackAndFinish(null, callback, resultReceiver);
+                }
+            });
+        } else {
+            addAssociationToStore(association, null);
+
+            sendCallbackAndFinish(association, callback, resultReceiver);
+        }
+
+        // Don't need to update the mRevokedAssociationsPendingRoleHolderRemoval since
+        // maybeRemoveRoleHolderForAssociation in PackageInactivityListener will handle the case
+        // that there are other devices with the same profile, so the role holder won't be removed.
+    }
+
+    public void enableSystemDataSync(int associationId, int flags) {
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        AssociationInfo updated = (new AssociationInfo.Builder(association))
+                .setSystemDataSyncFlags(association.getSystemDataSyncFlags() | flags).build();
+        mAssociationStore.updateAssociation(updated);
+    }
+
+    public void disableSystemDataSync(int associationId, int flags) {
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        AssociationInfo updated = (new AssociationInfo.Builder(association))
+                .setSystemDataSyncFlags(association.getSystemDataSyncFlags() & (~flags)).build();
+        mAssociationStore.updateAssociation(updated);
+    }
+
+    private void addAssociationToStore(@NonNull AssociationInfo association,
+            @Nullable String deviceProfile) {
+        Slog.i(TAG, "New CDM association created=" + association);
+
+        mAssociationStore.addAssociation(association);
+
+        mService.updateSpecialAccessPermissionForAssociatedPackage(association);
+
+        logCreateAssociation(deviceProfile);
+    }
+
+    private void sendCallbackAndFinish(@Nullable AssociationInfo association,
+            @Nullable IAssociationRequestCallback callback,
+            @Nullable ResultReceiver resultReceiver) {
+        if (association != null) {
+            // Send the association back via the app's callback
+            if (callback != null) {
+                try {
+                    callback.onAssociationCreated(association);
+                } catch (RemoteException ignore) {
+                }
+            }
+
+            // Send the association back to CompanionDeviceActivity, so that it can report
+            // back to the app via Activity.setResult().
+            if (resultReceiver != null) {
+                final Bundle data = new Bundle();
+                data.putParcelable(EXTRA_ASSOCIATION, association);
+                resultReceiver.send(RESULT_CODE_ASSOCIATION_CREATED, data);
+            }
+        } else {
+            // Send the association back via the app's callback
+            if (callback != null) {
+                try {
+                    callback.onFailure(REASON_INTERNAL_ERROR);
+                } catch (RemoteException ignore) {
+                }
+            }
+
+            // Send the association back to CompanionDeviceActivity, so that it can report
+            // back to the app via Activity.setResult().
+            if (resultReceiver != null) {
+                final Bundle data = new Bundle();
+                resultReceiver.send(RESULT_INTERNAL_ERROR, data);
+            }
+        }
     }
 
     private boolean willAddRoleHolder(@NonNull AssociationRequest request,
@@ -284,6 +383,27 @@ class AssociationRequestsProcessor {
 
         // Don't need to "grant" the role, if the package already holds the role.
         return !isRoleHolder;
+    }
+
+    private PendingIntent createPendingIntent(int packageUid, Intent intent) {
+        final PendingIntent pendingIntent;
+        final long token = Binder.clearCallingIdentity();
+
+        // Using uid of the application that will own the association (usually the same
+        // application that sent the request) allows us to have multiple "pending" association
+        // requests at the same time.
+        // If the application already has a pending association request, that PendingIntent
+        // will be cancelled except application wants to cancel the request by the system.
+        try {
+            pendingIntent = PendingIntent.getActivityAsUser(
+                    mContext, /*requestCode */ packageUid, intent,
+                    FLAG_ONE_SHOT | FLAG_CANCEL_CURRENT | FLAG_IMMUTABLE,
+                    /* options= */ null, UserHandle.CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return pendingIntent;
     }
 
     private final ResultReceiver mOnRequestConfirmationReceiver =
@@ -300,10 +420,10 @@ class AssociationRequestsProcessor {
                 return;
             }
 
-            final AssociationRequest request = data.getParcelable(EXTRA_ASSOCIATION_REQUEST);
+            final AssociationRequest request = data.getParcelable(EXTRA_ASSOCIATION_REQUEST, android.companion.AssociationRequest.class);
             final IAssociationRequestCallback callback = IAssociationRequestCallback.Stub
                     .asInterface(data.getBinder(EXTRA_APPLICATION_CALLBACK));
-            final ResultReceiver resultReceiver = data.getParcelable(EXTRA_RESULT_RECEIVER);
+            final ResultReceiver resultReceiver = data.getParcelable(EXTRA_RESULT_RECEIVER, android.os.ResultReceiver.class);
 
             requireNonNull(request);
             requireNonNull(callback);
@@ -313,7 +433,7 @@ class AssociationRequestsProcessor {
             if (request.isSelfManaged()) {
                 macAddress = null;
             } else {
-                macAddress = data.getParcelable(EXTRA_MAC_ADDRESS);
+                macAddress = data.getParcelable(EXTRA_MAC_ADDRESS, android.net.MacAddress.class);
                 requireNonNull(macAddress);
             }
 
@@ -322,31 +442,6 @@ class AssociationRequestsProcessor {
     };
 
     private boolean mayAssociateWithoutPrompt(@NonNull String packageName, @UserIdInt int userId) {
-        // Below we check if the requesting package is allowlisted (usually by the OEM) for creating
-        // CDM associations without user confirmation (prompt).
-        // For this we'll check to config arrays:
-        // - com.android.internal.R.array.config_companionDevicePackages
-        // and
-        // - com.android.internal.R.array.config_companionDeviceCerts.
-        // Both arrays are expected to contain similar number of entries.
-        // config_companionDevicePackages contains package names of the allowlisted packages.
-        // config_companionDeviceCerts contains SHA256 digests of the signatures of the
-        // corresponding packages.
-        // If a package may be signed with one of several certificates, its package name would
-        // appear multiple times in the config_companionDevicePackages, with different entries
-        // (one for each of the valid signing certificates) at the corresponding positions in
-        // config_companionDeviceCerts.
-        final String[] allowlistedPackages = mContext.getResources()
-                .getStringArray(com.android.internal.R.array.config_companionDevicePackages);
-        if (!ArrayUtils.contains(allowlistedPackages, packageName)) {
-            if (DEBUG) {
-                Log.d(TAG, packageName + " is not allowlisted for creating associations "
-                        + "without user confirmation (prompt)");
-                Log.v(TAG, "Allowlisted packages=" + Arrays.toString(allowlistedPackages));
-            }
-            return false;
-        }
-
         // Throttle frequent associations
         final long now = System.currentTimeMillis();
         final List<AssociationInfo> associationForPackage =
@@ -366,56 +461,6 @@ class AssociationRequestsProcessor {
             }
         }
 
-        final String[] allowlistedPackagesSignatureDigests = mContext.getResources()
-                .getStringArray(com.android.internal.R.array.config_companionDeviceCerts);
-        final Set<String> allowlistedSignatureDigestsForRequestingPackage = new HashSet<>();
-        for (int i = 0; i < allowlistedPackages.length; i++) {
-            if (allowlistedPackages[i].equals(packageName)) {
-                final String digest = allowlistedPackagesSignatureDigests[i].replaceAll(":", "");
-                allowlistedSignatureDigestsForRequestingPackage.add(digest);
-            }
-        }
-
-        final Signature[] requestingPackageSignatures = mPackageManager.getPackage(packageName)
-                .getSigningDetails().getSignatures();
-        final String[] requestingPackageSignatureDigests =
-                PackageUtils.computeSignaturesSha256Digests(requestingPackageSignatures);
-
-        boolean requestingPackageSignatureAllowlisted = false;
-        for (String signatureDigest : requestingPackageSignatureDigests) {
-            if (allowlistedSignatureDigestsForRequestingPackage.contains(signatureDigest)) {
-                requestingPackageSignatureAllowlisted = true;
-                break;
-            }
-        }
-
-        if (!requestingPackageSignatureAllowlisted) {
-            Slog.w(TAG, "Certificate mismatch for allowlisted package " + packageName);
-            if (DEBUG) {
-                Log.d(TAG, "  > allowlisted signatures for " + packageName + ": ["
-                        + String.join(", ", allowlistedSignatureDigestsForRequestingPackage)
-                        + "]");
-                Log.d(TAG, "  > actual signatures for " + packageName + ": "
-                        + Arrays.toString(requestingPackageSignatureDigests));
-            }
-        }
-
-        return requestingPackageSignatureAllowlisted;
-    }
-
-    /**
-     * Convert an instance of a "locally-defined" ResultReceiver to an instance of
-     * {@link android.os.ResultReceiver} itself, which the receiving process will be able to
-     * unmarshall.
-     */
-    private static <T extends ResultReceiver> ResultReceiver prepareForIpc(T resultReceiver) {
-        final Parcel parcel = Parcel.obtain();
-        resultReceiver.writeToParcel(parcel, 0);
-        parcel.setDataPosition(0);
-
-        final ResultReceiver ipcFriendly = ResultReceiver.CREATOR.createFromParcel(parcel);
-        parcel.recycle();
-
-        return ipcFriendly;
+        return PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName);
     }
 }

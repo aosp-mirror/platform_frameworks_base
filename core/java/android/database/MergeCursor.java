@@ -22,6 +22,7 @@ package android.database;
  * may be different if that is desired. Calls to getColumns, getColumnIndex, etc will return the
  * value for the row that the MergeCursor is currently pointing at.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class MergeCursor extends AbstractCursor
 {
     private DataSetObserver mObserver = new DataSetObserver() {

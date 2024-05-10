@@ -58,7 +58,7 @@ import android.util.DisplayMetrics;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.appwidget.IAppWidgetService;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.people.widget.PeopleTileKey;

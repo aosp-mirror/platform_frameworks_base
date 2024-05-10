@@ -46,8 +46,6 @@ import android.util.AtomicFile;
 import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -55,10 +53,12 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -879,22 +879,22 @@ public class InstantAppRegistry implements Watchable, Snappable {
             });
         }
 
-        synchronized (mLock) {
-            if (packagesToDelete != null) {
-                final int packageCount = packagesToDelete.size();
-                for (int i = 0; i < packageCount; i++) {
-                    final String packageToDelete = packagesToDelete.get(i);
-                    if (mDeletePackageHelper.deletePackageX(packageToDelete,
-                            PackageManager.VERSION_CODE_HIGHEST,
-                            UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
-                            true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
-                        if (file.getUsableSpace() >= neededSpace) {
-                            return true;
-                        }
+        if (packagesToDelete != null) {
+            final int packageCount = packagesToDelete.size();
+            for (int i = 0; i < packageCount; i++) {
+                final String packageToDelete = packagesToDelete.get(i);
+                if (mDeletePackageHelper.deletePackageX(packageToDelete,
+                        PackageManager.VERSION_CODE_HIGHEST,
+                        UserHandle.USER_SYSTEM, PackageManager.DELETE_ALL_USERS,
+                        true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
+                    if (file.getUsableSpace() >= neededSpace) {
+                        return true;
                     }
                 }
             }
+        }
 
+        synchronized (mLock) {
             // Prune uninstalled instant apps
             // TODO: Track last used time for uninstalled instant apps for better pruning
             for (int userId : mUserManager.getUserIds()) {

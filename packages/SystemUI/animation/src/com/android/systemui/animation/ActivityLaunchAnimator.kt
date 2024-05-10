@@ -21,9 +21,10 @@ import android.app.ActivityTaskManager
 import android.app.PendingIntent
 import android.app.TaskInfo
 import android.graphics.Matrix
-import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.RectF
+import android.os.Build
+import android.os.Handler
 import android.os.Looper
 import android.os.RemoteException
 import android.util.Log
@@ -35,8 +36,11 @@ import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
+import androidx.annotation.AnyThread
+import androidx.annotation.BinderThread
+import androidx.annotation.UiThread
+import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.policy.ScreenDecorationsUtils
 import kotlin.math.roundToInt
@@ -49,12 +53,19 @@ private const val TAG = "ActivityLaunchAnimator"
  */
 class ActivityLaunchAnimator(
     /** The animator used when animating a View into an app. */
-    private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
+    private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
 
     /** The animator used when animating a Dialog into an app. */
     // TODO(b/218989950): Remove this animator and instead set the duration of the dim fade out to
     // TIMINGS.contentBeforeFadeOutDuration.
-    private val dialogToAppAnimator: LaunchAnimator = LaunchAnimator(DIALOG_TIMINGS, INTERPOLATORS)
+    private val dialogToAppAnimator: LaunchAnimator = DEFAULT_DIALOG_TO_APP_ANIMATOR,
+
+    /**
+     * Whether we should disable the WindowManager timeout. This should be set to true in tests
+     * only.
+     */
+    // TODO(b/301385865): Remove this flag.
+    private val disableWmTimeout: Boolean = false,
 ) {
     companion object {
         /** The timings when animating a View into an app. */
@@ -80,10 +91,16 @@ class ActivityLaunchAnimator(
         val INTERPOLATORS =
             LaunchAnimator.Interpolators(
                 positionInterpolator = Interpolators.EMPHASIZED,
-                positionXInterpolator = createPositionXInterpolator(),
+                positionXInterpolator = Interpolators.EMPHASIZED_COMPLEMENT,
                 contentBeforeFadeOutInterpolator = Interpolators.LINEAR_OUT_SLOW_IN,
                 contentAfterFadeInInterpolator = PathInterpolator(0f, 0f, 0.6f, 1f)
             )
+
+        // TODO(b/288507023): Remove this flag.
+        @JvmField val DEBUG_LAUNCH_ANIMATION = Build.IS_DEBUGGABLE
+
+        private val DEFAULT_LAUNCH_ANIMATOR = LaunchAnimator(TIMINGS, INTERPOLATORS)
+        private val DEFAULT_DIALOG_TO_APP_ANIMATOR = LaunchAnimator(DIALOG_TIMINGS, INTERPOLATORS)
 
         /** Durations & interpolators for the navigation bar fading in & out. */
         private const val ANIMATION_DURATION_NAV_FADE_IN = 266L
@@ -95,17 +112,13 @@ class ActivityLaunchAnimator(
         private val NAV_FADE_OUT_INTERPOLATOR = PathInterpolator(0.2f, 0f, 1f, 1f)
 
         /** The time we wait before timing out the remote animation after starting the intent. */
-        private const val LAUNCH_TIMEOUT = 1000L
+        private const val LAUNCH_TIMEOUT = 1_000L
 
-        private fun createPositionXInterpolator(): Interpolator {
-            val path =
-                Path().apply {
-                    moveTo(0f, 0f)
-                    cubicTo(0.1217f, 0.0462f, 0.15f, 0.4686f, 0.1667f, 0.66f)
-                    cubicTo(0.1834f, 0.8878f, 0.1667f, 1f, 1f, 1f)
-                }
-            return PathInterpolator(path)
-        }
+        /**
+         * The time we wait before we Log.wtf because the remote animation was neither started or
+         * cancelled by WM.
+         */
+        private const val LONG_LAUNCH_TIMEOUT = 5_000L
     }
 
     /**
@@ -116,6 +129,26 @@ class ActivityLaunchAnimator(
 
     /** The set of [Listener] that should be notified of any animation started by this animator. */
     private val listeners = LinkedHashSet<Listener>()
+
+    /** Top-level listener that can be used to notify all registered [listeners]. */
+    private val lifecycleListener =
+        object : Listener {
+            override fun onLaunchAnimationStart() {
+                listeners.forEach { it.onLaunchAnimationStart() }
+            }
+
+            override fun onLaunchAnimationEnd() {
+                listeners.forEach { it.onLaunchAnimationEnd() }
+            }
+
+            override fun onLaunchAnimationProgress(linearProgress: Float) {
+                listeners.forEach { it.onLaunchAnimationProgress(linearProgress) }
+            }
+
+            override fun onLaunchAnimationCancelled() {
+                listeners.forEach { it.onLaunchAnimationCancelled() }
+            }
+        }
 
     /**
      * Start an intent and animate the opening window. The intent will be started by running
@@ -156,7 +189,8 @@ class ActivityLaunchAnimator(
                 ?: throw IllegalStateException(
                     "ActivityLaunchAnimator.callback must be set before using this animator"
                 )
-        val runner = Runner(controller)
+        val runner = createRunner(controller)
+        val runnerDelegate = runner.delegate!!
         val hideKeyguardWithAnimation = callback.isOnKeyguard() && !showOverLockscreen
 
         // Pass the RemoteAnimationAdapter to the intent starter only if we are not hiding the
@@ -207,19 +241,31 @@ class ActivityLaunchAnimator(
         // If we expect an animation, post a timeout to cancel it in case the remote animation is
         // never started.
         if (willAnimate) {
-            runner.postTimeout()
+            runnerDelegate.postTimeouts()
 
             // Hide the keyguard using the launch animation instead of the default unlock animation.
             if (hideKeyguardWithAnimation) {
                 callback.hideKeyguardWithAnimation(runner)
             }
+        } else {
+            // We need to make sure delegate references are dropped to avoid memory leaks.
+            runner.dispose()
         }
     }
 
     private fun Controller.callOnIntentStartedOnMainThread(willAnimate: Boolean) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            this.launchContainer.context.mainExecutor.execute { this.onIntentStarted(willAnimate) }
+            this.launchContainer.context.mainExecutor.execute {
+                callOnIntentStartedOnMainThread(willAnimate)
+            }
         } else {
+            if (DEBUG_LAUNCH_ANIMATION) {
+                Log.d(
+                    TAG,
+                    "Calling controller.onIntentStarted(willAnimate=$willAnimate) " +
+                        "[controller=$this]"
+                )
+            }
             this.onIntentStarted(willAnimate)
         }
     }
@@ -238,9 +284,10 @@ class ActivityLaunchAnimator(
         controller: Controller?,
         animate: Boolean = true,
         packageName: String? = null,
+        showOverLockscreen: Boolean = false,
         intentStarter: PendingIntentStarter
     ) {
-        startIntentWithAnimation(controller, animate, packageName) {
+        startIntentWithAnimation(controller, animate, packageName, showOverLockscreen) {
             intentStarter.startPendingIntent(it)
         }
     }
@@ -256,7 +303,18 @@ class ActivityLaunchAnimator(
     }
 
     /** Create a new animation [Runner] controlled by [controller]. */
-    @VisibleForTesting fun createRunner(controller: Controller): Runner = Runner(controller)
+    @VisibleForTesting
+    fun createRunner(controller: Controller): Runner {
+        // Make sure we use the modified timings when animating a dialog into an app.
+        val launchAnimator =
+            if (controller.isDialogLaunch) {
+                dialogToAppAnimator
+            } else {
+                launchAnimator
+            }
+
+        return Runner(controller, callback!!, launchAnimator, lifecycleListener)
+    }
 
     interface PendingIntentStarter {
         /**
@@ -269,10 +327,12 @@ class ActivityLaunchAnimator(
 
     interface Callback {
         /** Whether we are currently on the keyguard or not. */
-        fun isOnKeyguard(): Boolean
+        fun isOnKeyguard(): Boolean = false
 
         /** Hide the keyguard and animate using [runner]. */
-        fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner)
+        fun hideKeyguardWithAnimation(runner: IRemoteAnimationRunner) {
+            throw UnsupportedOperationException()
+        }
 
         /* Get the background color of [task]. */
         fun getBackgroundColor(task: TaskInfo): Int
@@ -280,16 +340,23 @@ class ActivityLaunchAnimator(
 
     interface Listener {
         /** Called when an activity launch animation started. */
-        @JvmDefault fun onLaunchAnimationStart() {}
+        fun onLaunchAnimationStart() {}
 
         /**
          * Called when an activity launch animation is finished. This will be called if and only if
          * [onLaunchAnimationStart] was called earlier.
          */
-        @JvmDefault fun onLaunchAnimationEnd() {}
+        fun onLaunchAnimationEnd() {}
+
+        /**
+         * The animation was cancelled. Note that [onLaunchAnimationEnd] will still be called after
+         * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
+         * before the cancellation.
+         */
+        fun onLaunchAnimationCancelled() {}
 
         /** Called when an activity launch animation made progress. */
-        @JvmDefault fun onLaunchAnimationProgress(linearProgress: Float) {}
+        fun onLaunchAnimationProgress(linearProgress: Float) {}
     }
 
     /**
@@ -303,13 +370,24 @@ class ActivityLaunchAnimator(
              * Return a [Controller] that will animate and expand [view] into the opening window.
              *
              * Important: The view must be attached to a [ViewGroup] when calling this function and
-             * during the animation. For safety, this method will return null when it is not.
+             * during the animation. For safety, this method will return null when it is not. The
+             * view must also implement [LaunchableView], otherwise this method will throw.
              *
              * Note: The background of [view] should be a (rounded) rectangle so that it can be
              * properly animated.
              */
             @JvmStatic
             fun fromView(view: View, cujType: Int? = null): Controller? {
+                // Make sure the View we launch from implements LaunchableView to avoid visibility
+                // issues.
+                if (view !is LaunchableView) {
+                    throw IllegalArgumentException(
+                        "An ActivityLaunchAnimator.Controller was created from a View that does " +
+                            "not implement LaunchableView. This can lead to subtle bugs where the" +
+                            " visibility of the View we are launching from is not what we expected."
+                    )
+                }
+
                 if (view.parent !is ViewGroup) {
                     Log.e(
                         TAG,
@@ -353,19 +431,138 @@ class ActivityLaunchAnimator(
          * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
          * before the cancellation.
          *
-         * If this launch animation affected the occlusion state of the keyguard, WM will provide
-         * us with [newKeyguardOccludedState] so that we can set the occluded state appropriately.
+         * If this launch animation affected the occlusion state of the keyguard, WM will provide us
+         * with [newKeyguardOccludedState] so that we can set the occluded state appropriately.
          */
         fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean? = null) {}
     }
 
+    /**
+     * Invokes [onAnimationComplete] when animation is either cancelled or completed. Delegates all
+     * events to the passed [delegate].
+     */
     @VisibleForTesting
-    inner class Runner(private val controller: Controller) : IRemoteAnimationRunner.Stub() {
+    inner class DelegatingAnimationCompletionListener(
+        private val delegate: Listener?,
+        private val onAnimationComplete: () -> Unit
+    ) : Listener {
+        var cancelled = false
+
+        override fun onLaunchAnimationStart() {
+            delegate?.onLaunchAnimationStart()
+        }
+
+        override fun onLaunchAnimationProgress(linearProgress: Float) {
+            delegate?.onLaunchAnimationProgress(linearProgress)
+        }
+
+        override fun onLaunchAnimationEnd() {
+            delegate?.onLaunchAnimationEnd()
+            if (!cancelled) {
+                onAnimationComplete.invoke()
+            }
+        }
+
+        override fun onLaunchAnimationCancelled() {
+            cancelled = true
+            delegate?.onLaunchAnimationCancelled()
+            onAnimationComplete.invoke()
+        }
+    }
+
+    @VisibleForTesting
+    inner class Runner(
+        controller: Controller,
+        callback: Callback,
+        /** The animator to use to animate the window launch. */
+        launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
+        /** Listener for animation lifecycle events. */
+        listener: Listener? = null
+    ) : IRemoteAnimationRunner.Stub() {
+        private val context = controller.launchContainer.context
+
+        // This is being passed across IPC boundaries and cycles (through PendingIntentRecords,
+        // etc.) are possible. So we need to make sure we drop any references that might
+        // transitively cause leaks when we're done with animation.
+        @VisibleForTesting var delegate: AnimationDelegate?
+
+        init {
+            delegate =
+                AnimationDelegate(
+                    controller,
+                    callback,
+                    DelegatingAnimationCompletionListener(listener, this::dispose),
+                    launchAnimator,
+                    disableWmTimeout
+                )
+        }
+
+        @BinderThread
+        override fun onAnimationStart(
+            transit: Int,
+            apps: Array<out RemoteAnimationTarget>?,
+            wallpapers: Array<out RemoteAnimationTarget>?,
+            nonApps: Array<out RemoteAnimationTarget>?,
+            finishedCallback: IRemoteAnimationFinishedCallback?
+        ) {
+            val delegate = delegate
+            context.mainExecutor.execute {
+                if (delegate == null) {
+                    Log.i(TAG, "onAnimationStart called after completion")
+                    // Animation started too late and timed out already. We need to still
+                    // signal back that we're done with it.
+                    finishedCallback?.onAnimationFinished()
+                } else {
+                    delegate.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback)
+                }
+            }
+        }
+
+        @BinderThread
+        override fun onAnimationCancelled() {
+            val delegate = delegate
+            context.mainExecutor.execute {
+                delegate ?: Log.wtf(TAG, "onAnimationCancelled called after completion")
+                delegate?.onAnimationCancelled()
+            }
+        }
+
+        @AnyThread
+        fun dispose() {
+            // Drop references to animation controller once we're done with the animation
+            // to avoid leaking.
+            context.mainExecutor.execute { delegate = null }
+        }
+    }
+
+    class AnimationDelegate
+    @JvmOverloads
+    constructor(
+        private val controller: Controller,
+        private val callback: Callback,
+        /** Listener for animation lifecycle events. */
+        private val listener: Listener? = null,
+        /** The animator to use to animate the window launch. */
+        private val launchAnimator: LaunchAnimator = DEFAULT_LAUNCH_ANIMATOR,
+
+        /**
+         * Whether we should disable the WindowManager timeout. This should be set to true in tests
+         * only.
+         */
+        // TODO(b/301385865): Remove this flag.
+        disableWmTimeout: Boolean = false,
+    ) : RemoteAnimationDelegate<IRemoteAnimationFinishedCallback> {
         private val launchContainer = controller.launchContainer
         private val context = launchContainer.context
         private val transactionApplierView =
             controller.openingWindowSyncView ?: controller.launchContainer
         private val transactionApplier = SyncRtSurfaceTransactionApplier(transactionApplierView)
+        private val timeoutHandler =
+            if (!disableWmTimeout) {
+                Handler(Looper.getMainLooper())
+            } else {
+                null
+            }
 
         private val matrix = Matrix()
         private val invertMatrix = Matrix()
@@ -375,35 +572,57 @@ class ActivityLaunchAnimator(
         private var cancelled = false
         private var animation: LaunchAnimator.Animation? = null
 
-        // A timeout to cancel the remote animation if it is not started within X milliseconds after
-        // the intent was started.
-        //
-        // Note that this is important to keep this a Runnable (and not a Kotlin lambda), otherwise
-        // it will be automatically converted when posted and we wouldn't be able to remove it after
-        // posting it.
+        /**
+         * A timeout to cancel the launch animation if the remote animation is not started or
+         * cancelled within [LAUNCH_TIMEOUT] milliseconds after the intent was started.
+         *
+         * Note that this is important to keep this a Runnable (and not a Kotlin lambda), otherwise
+         * it will be automatically converted when posted and we wouldn't be able to remove it after
+         * posting it.
+         */
         private var onTimeout = Runnable { onAnimationTimedOut() }
 
-        internal fun postTimeout() {
-            launchContainer.postDelayed(onTimeout, LAUNCH_TIMEOUT)
+        /**
+         * A long timeout to Log.wtf (signaling a bug in WM) when the remote animation wasn't
+         * started or cancelled within [LONG_LAUNCH_TIMEOUT] milliseconds after the intent was
+         * started.
+         */
+        private var onLongTimeout = Runnable {
+            Log.wtf(
+                TAG,
+                "The remote animation was neither cancelled or started within $LONG_LAUNCH_TIMEOUT"
+            )
         }
 
-        private fun removeTimeout() {
-            launchContainer.removeCallbacks(onTimeout)
+        @UiThread
+        internal fun postTimeouts() {
+            if (timeoutHandler != null) {
+                timeoutHandler.postDelayed(onTimeout, LAUNCH_TIMEOUT)
+                timeoutHandler.postDelayed(onLongTimeout, LONG_LAUNCH_TIMEOUT)
+            }
         }
 
+        private fun removeTimeouts() {
+            if (timeoutHandler != null) {
+                timeoutHandler.removeCallbacks(onTimeout)
+                timeoutHandler.removeCallbacks(onLongTimeout)
+            }
+        }
+
+        @UiThread
         override fun onAnimationStart(
             @WindowManager.TransitionOldType transit: Int,
             apps: Array<out RemoteAnimationTarget>?,
             wallpapers: Array<out RemoteAnimationTarget>?,
             nonApps: Array<out RemoteAnimationTarget>?,
-            iCallback: IRemoteAnimationFinishedCallback?
+            callback: IRemoteAnimationFinishedCallback?
         ) {
-            removeTimeout()
+            removeTimeouts()
 
             // The animation was started too late and we already notified the controller that it
             // timed out.
             if (timedOut) {
-                iCallback?.invoke()
+                callback?.invoke()
                 return
             }
 
@@ -413,7 +632,27 @@ class ActivityLaunchAnimator(
                 return
             }
 
-            context.mainExecutor.execute { startAnimation(apps, nonApps, iCallback) }
+            startAnimation(apps, nonApps, callback)
+        }
+
+        private fun findRootTaskIfPossible(
+            apps: Array<out RemoteAnimationTarget>?
+        ): RemoteAnimationTarget? {
+            if (apps == null) {
+                return null
+            }
+            var candidate: RemoteAnimationTarget? = null
+            for (it in apps) {
+                if (it.mode == RemoteAnimationTarget.MODE_OPENING) {
+                    if (it.taskInfo != null && !it.hasAnimatingParent) {
+                        return it
+                    }
+                    if (candidate == null) {
+                        candidate = it
+                    }
+                }
+            }
+            return candidate
         }
 
         private fun startAnimation(
@@ -425,13 +664,19 @@ class ActivityLaunchAnimator(
                 Log.d(TAG, "Remote animation started")
             }
 
-            val window = apps?.firstOrNull { it.mode == RemoteAnimationTarget.MODE_OPENING }
-
+            val window = findRootTaskIfPossible(apps)
             if (window == null) {
                 Log.i(TAG, "Aborting the animation as no window is opening")
-                removeTimeout()
                 iCallback?.invoke()
+
+                if (DEBUG_LAUNCH_ANIMATION) {
+                    Log.d(
+                        TAG,
+                        "Calling controller.onLaunchAnimationCancelled() [no window opening]"
+                    )
+                }
                 controller.onLaunchAnimationCancelled()
+                listener?.onLaunchAnimationCancelled()
                 return
             }
 
@@ -448,17 +693,8 @@ class ActivityLaunchAnimator(
                     left = windowBounds.left,
                     right = windowBounds.right
                 )
-            val callback = this@ActivityLaunchAnimator.callback!!
             val windowBackgroundColor =
                 window.taskInfo?.let { callback.getBackgroundColor(it) } ?: window.backgroundColor
-
-            // Make sure we use the modified timings when animating a dialog into an app.
-            val launchAnimator =
-                if (controller.isDialogLaunch) {
-                    dialogToAppAnimator
-                } else {
-                    launchAnimator
-                }
 
             // TODO(b/184121838): We should somehow get the top and bottom radius of the window
             // instead of recomputing isExpandingFullyAbove here.
@@ -483,13 +719,29 @@ class ActivityLaunchAnimator(
             val controller =
                 object : Controller by delegate {
                     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
-                        listeners.forEach { it.onLaunchAnimationStart() }
+                        listener?.onLaunchAnimationStart()
+
+                        if (DEBUG_LAUNCH_ANIMATION) {
+                            Log.d(
+                                TAG,
+                                "Calling controller.onLaunchAnimationStart(isExpandingFullyAbove=" +
+                                    "$isExpandingFullyAbove) [controller=$delegate]"
+                            )
+                        }
                         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
                     }
 
                     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
-                        listeners.forEach { it.onLaunchAnimationEnd() }
+                        listener?.onLaunchAnimationEnd()
                         iCallback?.invoke()
+
+                        if (DEBUG_LAUNCH_ANIMATION) {
+                            Log.d(
+                                TAG,
+                                "Calling controller.onLaunchAnimationEnd(isExpandingFullyAbove=" +
+                                    "$isExpandingFullyAbove) [controller=$delegate]"
+                            )
+                        }
                         delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
                     }
 
@@ -505,7 +757,7 @@ class ActivityLaunchAnimator(
                         }
                         navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
 
-                        listeners.forEach { it.onLaunchAnimationProgress(linearProgress) }
+                        listener?.onLaunchAnimationProgress(linearProgress)
                         delegate.onLaunchAnimationProgress(state, progress, linearProgress)
                     }
                 }
@@ -651,27 +903,44 @@ class ActivityLaunchAnimator(
         }
 
         private fun onAnimationTimedOut() {
+            // The remote animation was cancelled by WM, so we already cancelled the launch
+            // animation.
             if (cancelled) {
                 return
             }
 
-            Log.i(TAG, "Remote animation timed out")
+            Log.w(TAG, "Remote animation timed out")
             timedOut = true
+
+            if (DEBUG_LAUNCH_ANIMATION) {
+                Log.d(TAG, "Calling controller.onLaunchAnimationCancelled() [animation timed out]")
+            }
             controller.onLaunchAnimationCancelled()
+            listener?.onLaunchAnimationCancelled()
         }
 
-        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {
+        @UiThread
+        override fun onAnimationCancelled() {
+            removeTimeouts()
+
+            // The short timeout happened, so we already cancelled the launch animation.
             if (timedOut) {
                 return
             }
 
             Log.i(TAG, "Remote animation was cancelled")
             cancelled = true
-            removeTimeout()
-            context.mainExecutor.execute {
-                animation?.cancel()
-                controller.onLaunchAnimationCancelled(newKeyguardOccludedState = isKeyguardOccluded)
+
+            animation?.cancel()
+
+            if (DEBUG_LAUNCH_ANIMATION) {
+                Log.d(
+                    TAG,
+                    "Calling controller.onLaunchAnimationCancelled() [remote animation cancelled]",
+                )
             }
+            controller.onLaunchAnimationCancelled()
+            listener?.onLaunchAnimationCancelled()
         }
 
         private fun IRemoteAnimationFinishedCallback.invoke() {

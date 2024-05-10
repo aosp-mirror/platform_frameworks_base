@@ -18,9 +18,12 @@ package android.os;
 
 /**
  * Exception thrown when a call into system_server resulted in a
- * DeadObjectException, meaning that the system_server has died.  There's
- * nothing apps can do at this point - the system will automatically restart -
- * so there's no point in catching this.
+ * DeadObjectException, meaning that the system_server has died or
+ * experienced a low-level binder error.  There's nothing apps can
+ * do at this point - the system will automatically restart - so
+ * there's no point in catching this.
+ *
+ * See {@link android.os.DeadObjectException}.
  *
  * @hide
  */

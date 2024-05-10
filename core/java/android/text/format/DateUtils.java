@@ -743,7 +743,7 @@ public class DateUtils
      * @param startMillis the start time in UTC milliseconds
      * @param endMillis the end time in UTC milliseconds
      * @param flags a bit mask of options
-     * @param timeZone the time zone to compute the string in. Use null for local
+     * @param timeZone the id of the time zone to compute the string in. Use null for local
      * or if the FORMAT_UTC flag is being used.
      *
      * @return the formatter with the formatted date/time range appended to the string buffer.

@@ -199,6 +199,9 @@ public class TouchState {
             case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
                 mLastTouchedWindowId = event.getWindowId();
                 break;
+            case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END:
+                mAms.moveNonProxyTopFocusedDisplayToTopIfNeeded();
+                break;
         }
     }
 
@@ -522,8 +525,9 @@ public class TouchState {
             mReceivedPointersDown |= pointerFlag;
             mReceivedPointers[pointerId].set(
                     event.getX(pointerIndex), event.getY(pointerIndex), event.getEventTime());
-
-            mPrimaryPointerId = pointerId;
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                mPrimaryPointerId = pointerId;
+            }
         }
 
         /**

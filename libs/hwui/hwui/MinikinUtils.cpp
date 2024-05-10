@@ -16,12 +16,15 @@
 
 #include "MinikinUtils.h"
 
-#include <string>
-
 #include <log/log.h>
-
+#include <minikin/FamilyVariant.h>
 #include <minikin/MeasuredText.h>
 #include <minikin/Measurement.h>
+
+#include <optional>
+#include <string>
+
+#include "FeatureFlags.h"
 #include "Paint.h"
 #include "SkPathMeasure.h"
 #include "Typeface.h"
@@ -43,9 +46,17 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
     minikinPaint.wordSpacing = paint->getWordSpacing();
     minikinPaint.fontFlags = MinikinFontSkia::packFontFlags(font);
     minikinPaint.localeListId = paint->getMinikinLocaleListId();
-    minikinPaint.familyVariant = paint->getFamilyVariant();
     minikinPaint.fontStyle = resolvedFace->fStyle;
     minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
+
+    const std::optional<minikin::FamilyVariant>& familyVariant = paint->getFamilyVariant();
+    if (familyVariant.has_value()) {
+        minikinPaint.familyVariant = familyVariant.value();
+    } else {
+        minikinPaint.familyVariant = text_feature::deprecate_ui_fonts()
+                                             ? minikin::FamilyVariant::ELEGANT
+                                             : minikin::FamilyVariant::DEFAULT;
+    }
     return minikinPaint;
 }
 
@@ -84,7 +95,8 @@ void MinikinUtils::getBounds(const Paint* paint, minikin::Bidi bidiFlags, const 
 
 float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
                                 const Typeface* typeface, const uint16_t* buf, size_t start,
-                                size_t count, size_t bufSize, float* advances) {
+                                size_t count, size_t bufSize, float* advances,
+                                minikin::MinikinRect* bounds) {
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
     const minikin::U16StringPiece textBuf(buf, bufSize);
     const minikin::Range range(start, start + count);
@@ -92,7 +104,7 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
 
     return minikin::Layout::measureText(textBuf, range, bidiFlags, minikinPaint, startHyphen,
-                                        endHyphen, advances);
+                                        endHyphen, advances, bounds);
 }
 
 minikin::MinikinExtent MinikinUtils::getFontExtent(const Paint* paint, minikin::Bidi bidiFlags,

@@ -17,20 +17,25 @@ package com.android.settingslib.drawer;
 
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_GROUP_KEY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SEARCHABLE;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SWITCH_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.UserHandle;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -173,13 +178,108 @@ public class ProviderTileTest {
         assertThat(tile.mLastUpdateTime).isNotEqualTo(staleTimeStamp);
     }
 
+    @Test
+    public void hasPendingIntent_empty_returnsFalse() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.hasPendingIntent()).isFalse();
+    }
+
+    @Test
+    public void hasPendingIntent_notEmpty_returnsTrue() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+        tile.pendingIntentMap.put(
+                UserHandle.CURRENT, PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+
+        assertThat(tile.hasPendingIntent()).isTrue();
+    }
+
+    @Test
+    public void hasGroupKey_empty_returnsFalse() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.hasGroupKey()).isFalse();
+    }
+
+    @Test
+    public void hasGroupKey_notEmpty_returnsTrue() {
+        mMetaData.putString(META_DATA_PREFERENCE_GROUP_KEY, "test_key");
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.hasGroupKey()).isTrue();
+    }
+
+    @Test
+    public void getGroupKey_empty_returnsNull() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.getGroupKey()).isNull();
+    }
+
+    @Test
+    public void getGroupKey_notEmpty_returnsValue() {
+        mMetaData.putString(META_DATA_PREFERENCE_GROUP_KEY, "test_key");
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.getGroupKey()).isEqualTo("test_key");
+    }
+
+    @Test
+    public void getType_withSwitch_returnsSwitch() {
+        mMetaData.putString(META_DATA_PREFERENCE_SWITCH_URI, "test://testabc/");
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.getType()).isEqualTo(Tile.Type.SWITCH);
+    }
+
+    @Test
+    public void getType_withSwitchAndPendingIntent_returnsSwitchWithAction() {
+        mMetaData.putString(META_DATA_PREFERENCE_SWITCH_URI, "test://testabc/");
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+        tile.pendingIntentMap.put(
+                UserHandle.CURRENT, PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+
+        assertThat(tile.getType()).isEqualTo(Tile.Type.SWITCH_WITH_ACTION);
+    }
+
+    @Test
+    public void getType_withPendingIntent_returnsExternalAction() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+        tile.pendingIntentMap.put(
+                UserHandle.CURRENT, PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+
+        assertThat(tile.getType()).isEqualTo(Tile.Type.EXTERNAL_ACTION);
+    }
+
+    @Test
+    public void getType_withoutSwitchAndPendingIntent_returnsGroup() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.getType()).isEqualTo(Tile.Type.GROUP);
+    }
+
+    @Test
+    public void isSearchable_notSet_isTrue() {
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.isSearchable()).isTrue();
+    }
+
+    @Test
+    public void isSearchable_isSet_false() {
+        mMetaData.putBoolean(META_DATA_PREFERENCE_SEARCHABLE, false);
+        final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
+
+        assertThat(tile.isSearchable()).isFalse();
+    }
+
     @Implements(TileUtils.class)
     private static class ShadowTileUtils {
 
         private static Bundle sMetaData;
 
         @Implementation
-        protected static Bundle getSwitchDataFromProvider(Context context, String authority,
+        protected static Bundle getEntryDataFromProvider(Context context, String authority,
                 String key) {
             return sMetaData;
         }

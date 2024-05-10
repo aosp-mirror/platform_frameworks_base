@@ -16,7 +16,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 

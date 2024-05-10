@@ -16,14 +16,18 @@
 
 package com.android.server.job.controllers.idle;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.provider.DeviceConfig;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
@@ -50,7 +54,7 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
     public static final String ACTION_UNFORCE_IDLE = "com.android.server.jobscheduler.UNFORCE_IDLE";
 
     // After construction, mutations of idle/screen-on state will only happen
-    // on the main looper thread, either in onReceive() or in an alarm callback.
+    // on the JobScheduler thread, either in onReceive() or in an alarm callback.
     private boolean mIdle;
     private boolean mGarageModeOn;
     private boolean mForced;
@@ -72,7 +76,8 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
     }
 
     @Override
-    public void startTracking(Context context, IdlenessListener listener) {
+    public void startTracking(Context context, JobSchedulerService service,
+            IdlenessListener listener) {
         mIdleListener = listener;
 
         IntentFilter filter = new IntentFilter();
@@ -90,7 +95,16 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         filter.addAction(ACTION_UNFORCE_IDLE);
         filter.addAction(ActivityManagerService.ACTION_TRIGGER_IDLE);
 
-        context.registerReceiver(this, filter);
+        context.registerReceiver(this, filter, null, AppSchedulingModuleThread.getHandler());
+    }
+
+    /** Process the specified constant and update internal constants if relevant. */
+    public void processConstant(@NonNull DeviceConfig.Properties properties,
+            @NonNull String key) {
+    }
+
+    @Override
+    public void onBatteryStateChanged(boolean isCharging, boolean isBatteryNotLow) {
     }
 
     @Override
@@ -115,6 +129,10 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
 
         proto.end(ciToken);
         proto.end(token);
+    }
+
+    @Override
+    public void dumpConstants(IndentingPrintWriter pw) {
     }
 
     @Override

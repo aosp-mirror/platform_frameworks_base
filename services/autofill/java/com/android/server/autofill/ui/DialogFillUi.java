@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.PluralsMessageFormatter;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
@@ -52,6 +53,7 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.server.autofill.AutofillManagerService;
+import com.android.server.autofill.Helper;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -83,6 +85,7 @@ final class DialogFillUi {
         void onDatasetPicked(@NonNull Dataset dataset);
         void onDismissed();
         void onCanceled();
+        void onShown();
         void startIntentSender(IntentSender intentSender);
     }
 
@@ -117,7 +120,9 @@ final class DialogFillUi {
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         final View decor = inflater.inflate(R.layout.autofill_fill_dialog, null);
 
-        setServiceIcon(decor, serviceIcon);
+        if (response.getShowFillDialogIcon()) {
+            setServiceIcon(decor, serviceIcon);
+        }
         setHeader(decor, response);
 
         mVisibleDatasetsMaxCount = getVisibleDatasetsMaxCount();
@@ -146,7 +151,7 @@ final class DialogFillUi {
         mDialog.setContentView(decor);
         setDialogParamsAsBottomSheet();
         mDialog.setOnCancelListener((d) -> mCallback.onCanceled());
-
+        mDialog.setOnShowListener((d) -> mCallback.onShown());
         show();
     }
 
@@ -174,7 +179,14 @@ final class DialogFillUi {
         window.setGravity(Gravity.BOTTOM | Gravity.CENTER);
         window.setCloseOnTouchOutside(true);
         final WindowManager.LayoutParams params = window.getAttributes();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        window.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        final int screenWidth = displayMetrics.widthPixels;
+        final int maxWidth =
+                mContext.getResources().getDimensionPixelSize(R.dimen.autofill_dialog_max_width);
+        params.width = Math.min(screenWidth, maxWidth);
+
         params.accessibilityTitle =
                 mContext.getString(R.string.autofill_picker_accessibility_title);
         params.windowAnimations = R.style.AutofillSaveAnimation;
@@ -197,7 +209,8 @@ final class DialogFillUi {
     }
 
     private void setHeader(View decor, FillResponse response) {
-        final RemoteViews presentation = response.getDialogHeader();
+        final RemoteViews presentation =
+                Helper.sanitizeRemoteView(response.getDialogHeader());
         if (presentation == null) {
             return;
         }
@@ -232,9 +245,10 @@ final class DialogFillUi {
     }
 
     private void initialAuthenticationLayout(View decor, FillResponse response) {
-        RemoteViews presentation = response.getDialogPresentation();
+        RemoteViews presentation = Helper.sanitizeRemoteView(
+                response.getDialogPresentation());
         if (presentation == null) {
-            presentation = response.getPresentation();
+            presentation = Helper.sanitizeRemoteView(response.getPresentation());
         }
         if (presentation == null) {
             throw new RuntimeException("No presentation for fill dialog authentication");
@@ -278,7 +292,8 @@ final class DialogFillUi {
             final Dataset dataset = response.getDatasets().get(i);
             final int index = dataset.getFieldIds().indexOf(focusedViewId);
             if (index >= 0) {
-                RemoteViews presentation = dataset.getFieldDialogPresentation(index);
+                RemoteViews presentation = Helper.sanitizeRemoteView(
+                        dataset.getFieldDialogPresentation(index));
                 if (presentation == null) {
                     if (sDebug) {
                         Slog.w(TAG, "not displaying UI on field " + focusedViewId + " because "

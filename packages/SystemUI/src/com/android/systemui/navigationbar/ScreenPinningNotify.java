@@ -21,7 +21,7 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.widget.Toast;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.SysUIToast;
 
 /**

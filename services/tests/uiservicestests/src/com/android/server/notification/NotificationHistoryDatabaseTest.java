@@ -30,6 +30,7 @@ import android.app.NotificationHistory.HistoricalNotification;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
@@ -56,8 +57,6 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     File mRootDir;
     @Mock
     Handler mFileWriteHandler;
-    @Mock
-    Context mContext;
 
     NotificationHistoryDatabase mDataBase;
 
@@ -92,10 +91,8 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mContext.getUser()).thenReturn(getContext().getUser());
-        when(mContext.getPackageName()).thenReturn(getContext().getPackageName());
-
-        mRootDir = new File(mContext.getFilesDir(), "NotificationHistoryDatabaseTest");
+        final File fileDir = mContext.getFilesDir();
+        mRootDir = new File(fileDir, "NotificationHistoryDatabaseTest");
 
         mDataBase = new NotificationHistoryDatabase(mFileWriteHandler, mRootDir);
         mDataBase.init();
@@ -116,7 +113,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
             when(file.getAbsolutePath()).thenReturn(String.valueOf(i));
             AtomicFile af = new AtomicFile(file);
             expectedFiles.add(af);
-            mDataBase.mHistoryFiles.addLast(af);
+            mDataBase.mHistoryFiles.add(af);
         }
 
         cal.add(Calendar.DATE, -1 * retainDays);
@@ -126,7 +123,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
             when(file.getName()).thenReturn(String.valueOf(cal.getTimeInMillis() - i));
             when(file.getAbsolutePath()).thenReturn(String.valueOf(cal.getTimeInMillis() - i));
             AtomicFile af = new AtomicFile(file);
-            mDataBase.mHistoryFiles.addLast(af);
+            mDataBase.mHistoryFiles.add(af);
         }
 
         // back to today; trim everything a day + old
@@ -150,7 +147,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
             when(file.getName()).thenReturn(i + ".bak");
             when(file.getAbsolutePath()).thenReturn(i + ".bak");
             AtomicFile af = new AtomicFile(file);
-            mDataBase.mHistoryFiles.addLast(af);
+            mDataBase.mHistoryFiles.add(af);
         }
 
         // trim everything a day+ old
@@ -212,7 +209,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     public void testReadNotificationHistory_readsAllFiles() throws Exception {
         for (long i = 10; i >= 5; i--) {
             AtomicFile af = mock(AtomicFile.class);
-            mDataBase.mHistoryFiles.addLast(af);
+            mDataBase.mHistoryFiles.add(af);
         }
 
         mDataBase.readNotificationHistory();
@@ -236,11 +233,11 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     public void testReadNotificationHistory_withNumFilterDoesNotReadExtraFiles() throws Exception {
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
-        mDataBase.mHistoryFiles.addLast(af);
+        mDataBase.mHistoryFiles.add(af);
 
         AtomicFile af2 = mock(AtomicFile.class);
         when(af2.getBaseFile()).thenReturn(new File(mRootDir, "af2"));
-        mDataBase.mHistoryFiles.addLast(af2);
+        mDataBase.mHistoryFiles.add(af2);
 
         mDataBase.readNotificationHistory(null, null, 0);
 
@@ -257,7 +254,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
 
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
-        mDataBase.mHistoryFiles.addLast(af);
+        mDataBase.mHistoryFiles.add(af);
 
         when(nh.removeNotificationFromWrite("pkg", 123)).thenReturn(true);
 
@@ -280,7 +277,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
 
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
-        mDataBase.mHistoryFiles.addLast(af);
+        mDataBase.mHistoryFiles.add(af);
 
         when(nh.removeNotificationFromWrite("pkg", 123)).thenReturn(false);
 
@@ -303,7 +300,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
 
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
-        mDataBase.mHistoryFiles.addLast(af);
+        mDataBase.mHistoryFiles.add(af);
 
         when(nh.removeConversationsFromWrite("pkg", Set.of("convo", "another"))).thenReturn(true);
 
@@ -326,7 +323,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
 
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
-        mDataBase.mHistoryFiles.addLast(af);
+        mDataBase.mHistoryFiles.add(af);
 
         when(nh.removeConversationsFromWrite("pkg", Set.of("convo"))).thenReturn(false);
 
@@ -349,7 +346,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
 
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
-        mDataBase.mHistoryFiles.addLast(af);
+        mDataBase.mHistoryFiles.add(af);
 
         when(nh.removeChannelFromWrite("pkg", "channel")).thenReturn(true);
 
@@ -372,7 +369,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
 
         AtomicFile af = mock(AtomicFile.class);
         when(af.getBaseFile()).thenReturn(new File(mRootDir, "af"));
-        mDataBase.mHistoryFiles.addLast(af);
+        mDataBase.mHistoryFiles.add(af);
 
         when(nh.removeChannelFromWrite("pkg", "channel")).thenReturn(false);
 
@@ -411,7 +408,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         for (int i = 0; i < 5; i++) {
             AtomicFile af = mock(AtomicFile.class);
             when(af.getBaseFile()).thenReturn(new File(mRootDir, "af" + i));
-            mDataBase.mHistoryFiles.addLast(af);
+            mDataBase.mHistoryFiles.add(af);
         }
         // Baseline size of history files
         assertThat(mDataBase.mHistoryFiles.size()).isEqualTo(5);
@@ -427,7 +424,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         for (int i = 0; i < 5; i++) {
             AtomicFile af = mock(AtomicFile.class);
             when(af.getBaseFile()).thenReturn(new File(mRootDir, "af" + i));
-            mDataBase.mHistoryFiles.addLast(af);
+            mDataBase.mHistoryFiles.add(af);
         }
         // Baseline size of history files
         assertThat(mDataBase.mHistoryFiles.size()).isEqualTo(5);

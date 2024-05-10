@@ -25,13 +25,14 @@ import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.dagger.ControlsComponent.Visibility.AVAILABLE
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -39,6 +40,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import java.util.concurrent.atomic.AtomicBoolean
@@ -46,6 +48,7 @@ import javax.inject.Inject
 
 class DeviceControlsTile @Inject constructor(
     host: QSHost,
+    uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,
@@ -55,14 +58,15 @@ class DeviceControlsTile @Inject constructor(
     qsLogger: QSLogger,
     private val controlsComponent: ControlsComponent
 ) : QSTileImpl<QSTile.State>(
-        host,
-        backgroundLooper,
-        mainHandler,
-        falsingManager,
-        metricsLogger,
-        statusBarStateController,
-        activityStarter,
-        qsLogger
+    host,
+    uiEventLogger,
+    backgroundLooper,
+    mainHandler,
+    falsingManager,
+    metricsLogger,
+    statusBarStateController,
+    activityStarter,
+    qsLogger
 ) {
 
     private var hasControlsApps = AtomicBoolean(false)
@@ -125,14 +129,15 @@ class DeviceControlsTile @Inject constructor(
         state.icon = icon
         if (controlsComponent.isEnabled() && hasControlsApps.get()) {
             if (controlsComponent.getVisibility() == AVAILABLE) {
-                val structureInfo = controlsComponent
-                    .getControlsController().get().getPreferredStructure()
-                state.state = if (structureInfo.controls.isEmpty()) {
+                val selection = controlsComponent
+                    .getControlsController().get().getPreferredSelection()
+                state.state = if (selection is SelectedItem.StructureItem &&
+                        selection.structure.controls.isEmpty()) {
                     Tile.STATE_INACTIVE
                 } else {
                     Tile.STATE_ACTIVE
                 }
-                val label = structureInfo.structure
+                val label = selection.name
                 state.secondaryLabel = if (label == tileLabel) null else label
             } else {
                 state.state = Tile.STATE_INACTIVE
@@ -156,5 +161,9 @@ class DeviceControlsTile @Inject constructor(
 
     override fun getTileLabel(): CharSequence {
         return mContext.getText(controlsComponent.getTileTitleId())
+    }
+
+    companion object {
+        const val TILE_SPEC = "controls"
     }
 }

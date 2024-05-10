@@ -17,7 +17,6 @@
 package com.android.server.pm
 
 import android.os.Build
-import android.os.Bundle
 import android.os.UserHandle
 import android.os.UserManager
 import com.android.server.pm.pkg.PackageStateInternal
@@ -37,6 +36,7 @@ import org.mockito.MockitoAnnotations
 open class PackageHelperTestBase {
 
     companion object {
+        const val PLATFORM_PACKAGE_NAME = "android"
         const val TEST_PACKAGE_1 = "com.android.test.package1"
         const val TEST_PACKAGE_2 = "com.android.test.package2"
         const val DEVICE_OWNER_PACKAGE = "com.android.test.owner"
@@ -48,6 +48,7 @@ open class PackageHelperTestBase {
         const val UNINSTALLER_PACKAGE = "com.android.test.known.uninstaller"
         const val VERIFIER_PACKAGE = "com.android.test.known.verifier"
         const val PERMISSION_CONTROLLER_PACKAGE = "com.android.test.known.permission"
+        const val MGMT_ROLE_HOLDER_PACKAGE = "com.android.test.know.device_management"
         const val TEST_USER_ID = 0
     }
 
@@ -67,7 +68,11 @@ open class PackageHelperTestBase {
     lateinit var protectedPackages: ProtectedPackages
 
     @Captor
-    lateinit var bundleCaptor: ArgumentCaptor<Bundle>
+    lateinit var pkgListCaptor: ArgumentCaptor<Array<String>>
+    @Captor
+    lateinit var flagsCaptor: ArgumentCaptor<Int>
+    @Captor
+    lateinit var uidsCaptor: ArgumentCaptor<IntArray>
 
     @Rule
     @JvmField
@@ -119,6 +124,8 @@ open class PackageHelperTestBase {
         Mockito.doReturn(arrayOf(PERMISSION_CONTROLLER_PACKAGE)).`when`(pms)
                 .getKnownPackageNamesInternal(any(),
                         eq(KnownPackages.PACKAGE_PERMISSION_CONTROLLER), eq(TEST_USER_ID))
+        Mockito.doReturn(MGMT_ROLE_HOLDER_PACKAGE).`when`(pms)
+                .getDevicePolicyManagementRoleHolderPackageName(eq(TEST_USER_ID))
     }
 
     private fun createPackageManagerService(vararg stageExistingPackages: String):
@@ -128,7 +135,6 @@ open class PackageHelperTestBase {
                     rule.system().dataAppDirectory)
         }
         var pms = PackageManagerService(rule.mocks().injector,
-                false /* coreOnly */,
                 false /* factoryTest */,
                 MockSystem.DEFAULT_VERSION_INFO.fingerprint,
                 false /* isEngBuild */,

@@ -18,8 +18,10 @@ package com.android.companiondevicemanager;
 
 import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
 
 import static com.android.companiondevicemanager.Utils.getApplicationIcon;
+import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 
 import android.annotation.Nullable;
@@ -44,7 +46,7 @@ import androidx.fragment.app.DialogFragment;
  * A fragmentDialog shows additional information about selfManaged devices
  */
 public class CompanionVendorHelperDialogFragment extends DialogFragment {
-    private static final String TAG = CompanionVendorHelperDialogFragment.class.getSimpleName();
+    private static final String TAG = "CDM_CompanionVendorHelperDialogFragment";
     private static final String ASSOCIATION_REQUEST_EXTRA = "association_request";
 
     private CompanionVendorHelperDialogListener mListener;
@@ -104,9 +106,11 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
         final String packageName = request.getPackageName();
         final CharSequence displayName = request.getDisplayName();
         final int userId = request.getUserId();
+        final CharSequence appLabel;
 
         try {
             applicationIcon = getApplicationIcon(getContext(), packageName);
+            appLabel = getApplicationLabel(getContext(), packageName, userId);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
             mListener.onShowHelperDialogFailed();
@@ -118,7 +122,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
         mAppIcon = view.findViewById(R.id.app_icon);
         mButton = view.findViewById(R.id.btn_back);
 
-        final Spanned title;
+        final CharSequence title;
         final Spanned summary;
 
         switch (deviceProfile) {
@@ -132,6 +136,13 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
                 title = getHtmlFromResources(getContext(), R.string.helper_title_computer);
                 summary = getHtmlFromResources(
                         getContext(), R.string.helper_summary_computer, title, displayName);
+                break;
+
+            case DEVICE_PROFILE_NEARBY_DEVICE_STREAMING:
+                title = appLabel;
+                summary = getHtmlFromResources(
+                        getContext(), R.string.helper_summary_nearby_device_streaming, title,
+                        displayName);
                 break;
 
             default:

@@ -28,7 +28,7 @@ import android.text.format.DateUtils;
 import android.util.KeyValueListParser;
 import android.util.Log;
 
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.util.ColorUtilKt.hexColorString;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
@@ -27,22 +29,28 @@ import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.android.internal.util.ArrayUtils;
-import com.android.systemui.R;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.android.systemui.Dumpable;
+import com.android.systemui.res.R;
+
+import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
  */
-public class NotificationBackgroundView extends View {
+public class NotificationBackgroundView extends View implements Dumpable {
 
     private final boolean mDontModifyCorners;
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mClipBottomAmount;
     private int mTintColor;
+    @Nullable private Integer mRippleColor;
     private final float[] mCornerRadii = new float[8];
     private boolean mBottomIsRounded;
-    private int mBackgroundTop;
     private boolean mBottomAmountClips = true;
     private int mActualHeight = -1;
     private int mActualWidth = -1;
@@ -50,7 +58,6 @@ public class NotificationBackgroundView extends View {
     private int mExpandAnimationWidth = -1;
     private int mExpandAnimationHeight = -1;
     private int mDrawableAlpha = 255;
-    private boolean mIsPressedAllowed;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,8 +67,7 @@ public class NotificationBackgroundView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mClipTopAmount + mClipBottomAmount < getActualHeight() - mBackgroundTop
-                || mExpandAnimationRunning) {
+        if (mClipTopAmount + mClipBottomAmount < getActualHeight() || mExpandAnimationRunning) {
             canvas.save();
             if (!mExpandAnimationRunning) {
                 canvas.clipRect(0, mClipTopAmount, getWidth(),
@@ -74,7 +80,7 @@ public class NotificationBackgroundView extends View {
 
     private void draw(Canvas canvas, Drawable drawable) {
         if (drawable != null) {
-            int top = mBackgroundTop;
+            int top = 0;
             int bottom = getActualHeight();
             if (mBottomIsRounded
                     && mBottomAmountClips
@@ -125,6 +131,7 @@ public class NotificationBackgroundView extends View {
             unscheduleDrawable(mBackground);
         }
         mBackground = background;
+        mRippleColor = null;
         mBackground.mutate();
         if (mBackground != null) {
             mBackground.setCallback(this);
@@ -144,9 +151,17 @@ public class NotificationBackgroundView extends View {
 
     public void setTint(int tintColor) {
         if (tintColor != 0) {
-            mBackground.setColorFilter(tintColor, PorterDuff.Mode.SRC_ATOP);
+            ColorStateList stateList = new ColorStateList(new int[][]{
+                    new int[]{com.android.internal.R.attr.state_pressed},
+                    new int[]{com.android.internal.R.attr.state_hovered},
+                    new int[]{}},
+
+                    new int[]{tintColor, 0, tintColor}
+            );
+            mBackground.setTintMode(PorterDuff.Mode.SRC_ATOP);
+            mBackground.setTintList(stateList);
         } else {
-            mBackground.clearColorFilter();
+            mBackground.setTintList(null);
         }
         mTintColor = tintColor;
         invalidate();
@@ -201,10 +216,6 @@ public class NotificationBackgroundView extends View {
 
     public void setState(int[] drawableState) {
         if (mBackground != null && mBackground.isStateful()) {
-            if (!mIsPressedAllowed) {
-                drawableState = ArrayUtils.removeInt(drawableState,
-                        com.android.internal.R.attr.state_pressed);
-            }
             mBackground.setState(drawableState);
         }
     }
@@ -213,6 +224,9 @@ public class NotificationBackgroundView extends View {
         if (mBackground instanceof RippleDrawable) {
             RippleDrawable ripple = (RippleDrawable) mBackground;
             ripple.setColor(ColorStateList.valueOf(color));
+            mRippleColor = color;
+        } else {
+            mRippleColor = null;
         }
     }
 
@@ -255,15 +269,13 @@ public class NotificationBackgroundView extends View {
             return;
         }
         if (mBackground instanceof LayerDrawable) {
-            GradientDrawable gradientDrawable =
-                    (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
-            gradientDrawable.setCornerRadii(mCornerRadii);
+            int numberOfLayers = ((LayerDrawable) mBackground).getNumberOfLayers();
+            for (int i = 0; i < numberOfLayers; i++) {
+                GradientDrawable gradientDrawable =
+                        (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(i);
+                gradientDrawable.setCornerRadii(mCornerRadii);
+            }
         }
-    }
-
-    public void setBackgroundTop(int backgroundTop) {
-        mBackgroundTop = backgroundTop;
-        invalidate();
     }
 
     /** Set the current expand animation size. */
@@ -288,7 +300,18 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
-    public void setPressedAllowed(boolean allowed) {
-        mIsPressedAllowed = allowed;
+    @Override
+    public void dump(PrintWriter pw, @NonNull String[] args) {
+        pw.println("mDontModifyCorners: " + mDontModifyCorners);
+        pw.println("mClipTopAmount: " + mClipTopAmount);
+        pw.println("mClipBottomAmount: " + mClipBottomAmount);
+        pw.println("mCornerRadii: " + Arrays.toString(mCornerRadii));
+        pw.println("mBottomIsRounded: " + mBottomIsRounded);
+        pw.println("mBottomAmountClips: " + mBottomAmountClips);
+        pw.println("mActualWidth: " + mActualWidth);
+        pw.println("mActualHeight: " + mActualHeight);
+        pw.println("mTintColor: " + hexColorString(mTintColor));
+        pw.println("mRippleColor: " + hexColorString(mRippleColor));
+        pw.println("mBackground: " + mBackground);
     }
 }

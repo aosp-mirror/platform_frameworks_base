@@ -17,7 +17,6 @@
 package android.app;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.SuppressLint;
@@ -25,6 +24,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
+import android.util.Log;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -40,6 +40,8 @@ import java.util.concurrent.Executor;
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 @TestApi
 public abstract class HomeVisibilityListener {
+    private static final String TAG = HomeVisibilityListener.class.getSimpleName();
+    private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     private ActivityTaskManager mActivityTaskManager;
     private Executor mExecutor;
     private int mMaxScanTasksForHomeVisibility;
@@ -102,11 +104,15 @@ public abstract class HomeVisibilityListener {
 
         for (int i = 0, taskSize = tasksTopToBottom.size(); i < taskSize; ++i) {
             ActivityManager.RunningTaskInfo task = tasksTopToBottom.get(i);
-            if (!task.isVisible()
-                    || (task.baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0) {
-                continue;
+            if (DBG) {
+                Log.d(TAG, "Task#" + i + ": activity=" + task.topActivity
+                        + ", visible=" + task.isVisible()
+                        + ", flg=" + Integer.toHexString(task.baseIntent.getFlags())
+                        + ", type=" + task.getActivityType());
             }
-            return task.getActivityType() == ACTIVITY_TYPE_HOME;
+            if (task.isVisible() && (task.getActivityType() == ACTIVITY_TYPE_HOME)) {
+                return true;
+            }
         }
         return false;
     }

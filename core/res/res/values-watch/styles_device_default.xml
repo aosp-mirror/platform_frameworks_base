@@ -34,4 +34,7 @@
         <item name="android:textSize">16sp</item>
         <item name="android:fontFamily">google-sans-medium</item>
     </style>
+    <style name="BaseErrorDialog.DeviceDefault" parent="AlertDialog.DeviceDefault">
+        <item name="layout">@layout/watch_base_error_dialog</item>
+    </style>
 </resources>

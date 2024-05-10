@@ -35,6 +35,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -44,6 +45,14 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.pm.pkg.component.ComponentMutateUtils;
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedComponent;
+import com.android.internal.pm.pkg.component.ParsedIntentInfo;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedProviderImpl;
+import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.IntentResolver;
 import com.android.server.pm.Computer;
@@ -51,18 +60,10 @@ import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.UserNeedsBadgingCache;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.PackageUserStateInternal;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedProviderImpl;
-import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
@@ -498,9 +499,9 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         String packageName = activity.getPackageName();
-        AndroidPackage pkg = computer.getPackage(packageName);
+        var packageState = computer.getPackageStateInternal(packageName);
 
-        final boolean privilegedApp = pkg.isPrivileged();
+        final boolean privilegedApp = packageState.isPrivileged();
         String className = activity.getClassName();
         if (!privilegedApp) {
             // non-privileged applications can never define a priority >0
@@ -930,21 +931,25 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        protected boolean isFilterStopped(@Nullable PackageStateInternal packageState,
+        protected boolean isFilterStopped(@NonNull Computer computer, F filter,
                 @UserIdInt int userId) {
             if (!mUserManager.exists(userId)) {
                 return true;
             }
 
+            final PackageStateInternal packageState = computer.getPackageStateInternal(
+                    filter.first.getPackageName());
             if (packageState == null || packageState.getPkg() == null) {
                 return false;
             }
 
-            // System apps are never considered stopped for purposes of
-            // filtering, because there may be no way for the user to
-            // actually re-launch them.
-            return !packageState.isSystem()
-                    && packageState.getUserStateOrDefault(userId).isStopped();
+            if (packageState.isSystem()) {
+                // A system app can be considered in the stopped state only if it was originally
+                // scanned in the stopped state.
+                return packageState.isScannedAsStoppedSystemApp() &&
+                    packageState.getUserStateOrDefault(userId).isStopped();
+            }
+            return packageState.getUserStateOrDefault(userId).isStopped();
         }
     }
 
@@ -952,7 +957,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
             extends MimeGroupsAwareIntentResolver<Pair<ParsedActivity, ParsedIntentInfo>, ResolveInfo> {
 
         @NonNull
-        private UserNeedsBadgingCache mUserNeedsBadging;
+        private final UserNeedsBadgingCache mUserNeedsBadging;
 
         // Default constructor
         ActivityIntentResolver(@NonNull UserManagerService userManager,
@@ -1195,6 +1200,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
             res.iconResourceId = info.getIcon();
             res.system = res.activityInfo.applicationInfo.isSystemApp();
             res.isInstantAppAvailable = userState.isInstantApp();
+            res.userHandle = UserHandle.of(userId);
             return res;
         }
 

@@ -64,14 +64,14 @@ class FlagManagerTest : SysuiTestCase() {
         verifyNoMoreInteractions(mFlagSettingsHelper)
 
         // adding the first listener registers the observer
-        mFlagManager.addListener(ReleasedFlag(1), listener1)
+        mFlagManager.addListener(ReleasedFlag("1", "test"), listener1)
         val observer = withArgCaptor<ContentObserver> {
             verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
         }
         verifyNoMoreInteractions(mFlagSettingsHelper)
 
         // adding another listener does nothing
-        mFlagManager.addListener(ReleasedFlag(2), listener2)
+        mFlagManager.addListener(ReleasedFlag("2", "test"), listener2)
         verifyNoMoreInteractions(mFlagSettingsHelper)
 
         // removing the original listener does nothing with second one still present
@@ -87,22 +87,22 @@ class FlagManagerTest : SysuiTestCase() {
     @Test
     fun testObserverClearsCache() {
         val listener = mock<FlagListenable.Listener>()
-        val clearCacheAction = mock<Consumer<Int>>()
+        val clearCacheAction = mock<Consumer<String>>()
         mFlagManager.clearCacheAction = clearCacheAction
-        mFlagManager.addListener(ReleasedFlag(1), listener)
+        mFlagManager.addListener(ReleasedFlag("1", "test"), listener)
         val observer = withArgCaptor<ContentObserver> {
             verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
         }
         observer.onChange(false, flagUri(1))
-        verify(clearCacheAction).accept(eq(1))
+        verify(clearCacheAction).accept(eq("1"))
     }
 
     @Test
     fun testObserverInvokesListeners() {
         val listener1 = mock<FlagListenable.Listener>()
         val listener10 = mock<FlagListenable.Listener>()
-        mFlagManager.addListener(ReleasedFlag(1), listener1)
-        mFlagManager.addListener(ReleasedFlag(10), listener10)
+        mFlagManager.addListener(ReleasedFlag("1", "test"), listener1)
+        mFlagManager.addListener(ReleasedFlag("10", "test"), listener10)
         val observer = withArgCaptor<ContentObserver> {
             verify(mFlagSettingsHelper).registerContentObserver(any(), any(), capture())
         }
@@ -110,14 +110,14 @@ class FlagManagerTest : SysuiTestCase() {
         val flagEvent1 = withArgCaptor<FlagListenable.FlagEvent> {
             verify(listener1).onFlagChanged(capture())
         }
-        assertThat(flagEvent1.flagId).isEqualTo(1)
+        assertThat(flagEvent1.flagName).isEqualTo("1")
         verifyNoMoreInteractions(listener1, listener10)
 
         observer.onChange(false, flagUri(10))
         val flagEvent10 = withArgCaptor<FlagListenable.FlagEvent> {
             verify(listener10).onFlagChanged(capture())
         }
-        assertThat(flagEvent10.flagId).isEqualTo(10)
+        assertThat(flagEvent10.flagName).isEqualTo("10")
         verifyNoMoreInteractions(listener1, listener10)
     }
 
@@ -127,49 +127,49 @@ class FlagManagerTest : SysuiTestCase() {
     fun testOnlySpecificFlagListenerIsInvoked() {
         val listener1 = mock<FlagListenable.Listener>()
         val listener10 = mock<FlagListenable.Listener>()
-        mFlagManager.addListener(ReleasedFlag(1), listener1)
-        mFlagManager.addListener(ReleasedFlag(10), listener10)
+        mFlagManager.addListener(ReleasedFlag("1", "test"), listener1)
+        mFlagManager.addListener(ReleasedFlag("10", "test"), listener10)
 
-        mFlagManager.dispatchListenersAndMaybeRestart(1, null)
+        mFlagManager.dispatchListenersAndMaybeRestart("1", null)
         val flagEvent1 = withArgCaptor<FlagListenable.FlagEvent> {
             verify(listener1).onFlagChanged(capture())
         }
-        assertThat(flagEvent1.flagId).isEqualTo(1)
+        assertThat(flagEvent1.flagName).isEqualTo("1")
         verifyNoMoreInteractions(listener1, listener10)
 
-        mFlagManager.dispatchListenersAndMaybeRestart(10, null)
+        mFlagManager.dispatchListenersAndMaybeRestart("10", null)
         val flagEvent10 = withArgCaptor<FlagListenable.FlagEvent> {
             verify(listener10).onFlagChanged(capture())
         }
-        assertThat(flagEvent10.flagId).isEqualTo(10)
+        assertThat(flagEvent10.flagName).isEqualTo("10")
         verifyNoMoreInteractions(listener1, listener10)
     }
 
     @Test
     fun testSameListenerCanBeUsedForMultipleFlags() {
         val listener = mock<FlagListenable.Listener>()
-        mFlagManager.addListener(ReleasedFlag(1), listener)
-        mFlagManager.addListener(ReleasedFlag(10), listener)
+        mFlagManager.addListener(ReleasedFlag("1", "test"), listener)
+        mFlagManager.addListener(ReleasedFlag("10", "test"), listener)
 
-        mFlagManager.dispatchListenersAndMaybeRestart(1, null)
+        mFlagManager.dispatchListenersAndMaybeRestart("1", null)
         val flagEvent1 = withArgCaptor<FlagListenable.FlagEvent> {
             verify(listener).onFlagChanged(capture())
         }
-        assertThat(flagEvent1.flagId).isEqualTo(1)
+        assertThat(flagEvent1.flagName).isEqualTo("1")
         verifyNoMoreInteractions(listener)
 
-        mFlagManager.dispatchListenersAndMaybeRestart(10, null)
+        mFlagManager.dispatchListenersAndMaybeRestart("10", null)
         val flagEvent10 = withArgCaptor<FlagListenable.FlagEvent> {
             verify(listener, times(2)).onFlagChanged(capture())
         }
-        assertThat(flagEvent10.flagId).isEqualTo(10)
+        assertThat(flagEvent10.flagName).isEqualTo("10")
         verifyNoMoreInteractions(listener)
     }
 
     @Test
     fun testRestartWithNoListeners() {
         val restartAction = mock<Consumer<Boolean>>()
-        mFlagManager.dispatchListenersAndMaybeRestart(1, restartAction)
+        mFlagManager.dispatchListenersAndMaybeRestart("1", restartAction)
         verify(restartAction).accept(eq(false))
         verifyNoMoreInteractions(restartAction)
     }
@@ -177,10 +177,10 @@ class FlagManagerTest : SysuiTestCase() {
     @Test
     fun testListenerCanSuppressRestart() {
         val restartAction = mock<Consumer<Boolean>>()
-        mFlagManager.addListener(ReleasedFlag(1)) { event ->
+        mFlagManager.addListener(ReleasedFlag("1", "test")) { event ->
             event.requestNoRestart()
         }
-        mFlagManager.dispatchListenersAndMaybeRestart(1, restartAction)
+        mFlagManager.dispatchListenersAndMaybeRestart("1", restartAction)
         verify(restartAction).accept(eq(true))
         verifyNoMoreInteractions(restartAction)
     }
@@ -188,10 +188,10 @@ class FlagManagerTest : SysuiTestCase() {
     @Test
     fun testListenerOnlySuppressesRestartForOwnFlag() {
         val restartAction = mock<Consumer<Boolean>>()
-        mFlagManager.addListener(ReleasedFlag(10)) { event ->
+        mFlagManager.addListener(ReleasedFlag("10", "test")) { event ->
             event.requestNoRestart()
         }
-        mFlagManager.dispatchListenersAndMaybeRestart(1, restartAction)
+        mFlagManager.dispatchListenersAndMaybeRestart("1", restartAction)
         verify(restartAction).accept(eq(false))
         verifyNoMoreInteractions(restartAction)
     }
@@ -199,13 +199,13 @@ class FlagManagerTest : SysuiTestCase() {
     @Test
     fun testRestartWhenNotAllListenersRequestSuppress() {
         val restartAction = mock<Consumer<Boolean>>()
-        mFlagManager.addListener(ReleasedFlag(10)) { event ->
+        mFlagManager.addListener(ReleasedFlag("10", "test")) { event ->
             event.requestNoRestart()
         }
-        mFlagManager.addListener(ReleasedFlag(10)) {
+        mFlagManager.addListener(ReleasedFlag("10", "test")) {
             // do not request
         }
-        mFlagManager.dispatchListenersAndMaybeRestart(1, restartAction)
+        mFlagManager.dispatchListenersAndMaybeRestart("1", restartAction)
         verify(restartAction).accept(eq(false))
         verifyNoMoreInteractions(restartAction)
     }
@@ -214,31 +214,31 @@ class FlagManagerTest : SysuiTestCase() {
     fun testReadBooleanFlag() {
         // test that null string returns null
         whenever(mFlagSettingsHelper.getString(any())).thenReturn(null)
-        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isNull()
+        assertThat(mFlagManager.readFlagValue("1", BooleanFlagSerializer)).isNull()
 
         // test that empty string returns null
         whenever(mFlagSettingsHelper.getString(any())).thenReturn("")
-        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isNull()
+        assertThat(mFlagManager.readFlagValue("1", BooleanFlagSerializer)).isNull()
 
         // test false
         whenever(mFlagSettingsHelper.getString(any()))
             .thenReturn("{\"type\":\"boolean\",\"value\":false}")
-        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isFalse()
+        assertThat(mFlagManager.readFlagValue("1", BooleanFlagSerializer)).isFalse()
 
         // test true
         whenever(mFlagSettingsHelper.getString(any()))
             .thenReturn("{\"type\":\"boolean\",\"value\":true}")
-        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isTrue()
+        assertThat(mFlagManager.readFlagValue("1", BooleanFlagSerializer)).isTrue()
 
         // Reading a value of a different type should just return null
         whenever(mFlagSettingsHelper.getString(any()))
             .thenReturn("{\"type\":\"string\",\"value\":\"foo\"}")
-        assertThat(mFlagManager.readFlagValue(1, BooleanFlagSerializer)).isNull()
+        assertThat(mFlagManager.readFlagValue("1", BooleanFlagSerializer)).isNull()
 
         // Reading a value that isn't json should throw an exception
         assertThrows(InvalidFlagStorageException::class.java) {
             whenever(mFlagSettingsHelper.getString(any())).thenReturn("1")
-            mFlagManager.readFlagValue(1, BooleanFlagSerializer)
+            mFlagManager.readFlagValue("1", BooleanFlagSerializer)
         }
     }
 
@@ -257,31 +257,31 @@ class FlagManagerTest : SysuiTestCase() {
     fun testReadStringFlag() {
         // test that null string returns null
         whenever(mFlagSettingsHelper.getString(any())).thenReturn(null)
-        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isNull()
+        assertThat(mFlagManager.readFlagValue("1", StringFlagSerializer)).isNull()
 
         // test that empty string returns null
         whenever(mFlagSettingsHelper.getString(any())).thenReturn("")
-        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isNull()
+        assertThat(mFlagManager.readFlagValue("1", StringFlagSerializer)).isNull()
 
         // test json with the empty string value returns empty string
         whenever(mFlagSettingsHelper.getString(any()))
             .thenReturn("{\"type\":\"string\",\"value\":\"\"}")
-        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isEqualTo("")
+        assertThat(mFlagManager.readFlagValue("1", StringFlagSerializer)).isEqualTo("")
 
         // test string with value is returned
         whenever(mFlagSettingsHelper.getString(any()))
             .thenReturn("{\"type\":\"string\",\"value\":\"foo\"}")
-        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isEqualTo("foo")
+        assertThat(mFlagManager.readFlagValue("1", StringFlagSerializer)).isEqualTo("foo")
 
         // Reading a value of a different type should just return null
         whenever(mFlagSettingsHelper.getString(any()))
             .thenReturn("{\"type\":\"boolean\",\"value\":false}")
-        assertThat(mFlagManager.readFlagValue(1, StringFlagSerializer)).isNull()
+        assertThat(mFlagManager.readFlagValue("1", StringFlagSerializer)).isNull()
 
         // Reading a value that isn't json should throw an exception
         assertThrows(InvalidFlagStorageException::class.java) {
             whenever(mFlagSettingsHelper.getString(any())).thenReturn("1")
-            mFlagManager.readFlagValue(1, StringFlagSerializer)
+            mFlagManager.readFlagValue("1", StringFlagSerializer)
         }
     }
 

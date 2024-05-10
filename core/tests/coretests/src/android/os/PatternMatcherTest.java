@@ -16,9 +16,10 @@
 
 package android.os;
 
-import androidx.test.filters.SmallTest;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import junit.framework.TestCase;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +27,7 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 @SmallTest
-public class PatternMatcherTest extends TestCase{
+public class PatternMatcherTest {
 
     @Test
     public void testAdvancedPatternMatchesAnyToken() {

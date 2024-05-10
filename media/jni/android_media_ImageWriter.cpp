@@ -1028,7 +1028,7 @@ static void Image_getLockedImage(JNIEnv* env, jobject thiz, LockedImage *image) 
     status_t res = lockImageFromBuffer(
             buffer, GRALLOC_USAGE_SW_WRITE_OFTEN, noCrop, fenceFd, image);
     // Clear the fenceFd as it is already consumed by lock call.
-    Image_setFenceFd(env, thiz, /*fenceFd*/-1);
+    env->SetIntField(thiz, gSurfaceImageClassInfo.mNativeFenceFd, -1);
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/RuntimeException",
                 "lock buffer failed for format 0x%x",
@@ -1068,7 +1068,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
         String8 msg;
         msg.appendFormat("Format 0x%x is opaque, thus not writable, the number of planes (%d)"
                 " must be 0", writerFormat, numPlanes);
-        jniThrowException(env, "java/lang/IllegalArgumentException", msg.string());
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg.c_str());
         return NULL;
     }
 

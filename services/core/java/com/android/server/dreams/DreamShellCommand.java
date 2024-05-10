@@ -18,10 +18,8 @@ package com.android.server.dreams;
 
 import android.annotation.NonNull;
 import android.os.Binder;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.ShellCommand;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -34,41 +32,35 @@ public class DreamShellCommand extends ShellCommand {
     private static final boolean DEBUG = true;
     private static final String TAG = "DreamShellCommand";
     private final @NonNull DreamManagerService mService;
-    private final @NonNull PowerManager mPowerManager;
 
-    DreamShellCommand(@NonNull DreamManagerService service, @NonNull PowerManager powerManager) {
+    DreamShellCommand(@NonNull DreamManagerService service) {
         mService = service;
-        mPowerManager = powerManager;
     }
 
     @Override
     public int onCommand(String cmd) {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.ROOT_UID) {
-            Slog.e(TAG, "Must be root before calling Dream shell commands");
-            return -1;
-        }
-
-        if (TextUtils.isEmpty(cmd)) {
-            return super.handleDefaultCommands(cmd);
-        }
         if (DEBUG) {
             Slog.d(TAG, "onCommand:" + cmd);
         }
 
-        switch (cmd) {
-            case "start-dreaming":
-                return startDreaming();
-            case "stop-dreaming":
-                return stopDreaming();
-            default:
-                return super.handleDefaultCommands(cmd);
+        try {
+            switch (cmd) {
+                case "start-dreaming":
+                    enforceCallerIsRoot();
+                    return startDreaming();
+                case "stop-dreaming":
+                    enforceCallerIsRoot();
+                    return stopDreaming();
+                default:
+                    return super.handleDefaultCommands(cmd);
+            }
+        } catch (SecurityException e) {
+            getOutPrintWriter().println(e);
+            return -1;
         }
     }
 
     private int startDreaming() {
-        mPowerManager.wakeUp(SystemClock.uptimeMillis(),
-                PowerManager.WAKE_REASON_PLUGGED_IN, "shell:cmd:android.service.dreams:DREAM");
         mService.requestStartDreamFromShell();
         return 0;
     }
@@ -76,6 +68,12 @@ public class DreamShellCommand extends ShellCommand {
     private int stopDreaming() {
         mService.requestStopDreamFromShell();
         return 0;
+    }
+
+    private void enforceCallerIsRoot() {
+        if (Binder.getCallingUid() != Process.ROOT_UID) {
+            throw new SecurityException("Must be root to call Dream shell commands");
+        }
     }
 
     @Override

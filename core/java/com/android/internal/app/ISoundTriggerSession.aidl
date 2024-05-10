@@ -36,7 +36,8 @@ interface ISoundTriggerSession {
 
     void deleteSoundModel(in ParcelUuid soundModelId);
 
-    int startRecognition(in ParcelUuid soundModelId, in IRecognitionStatusCallback callback,
+    int startRecognition(in SoundTrigger.GenericSoundModel soundModel,
+         in IRecognitionStatusCallback callback,
          in SoundTrigger.RecognitionConfig config, boolean runInBatterySaver);
 
     int stopRecognition(in ParcelUuid soundModelId, in IRecognitionStatusCallback callback);

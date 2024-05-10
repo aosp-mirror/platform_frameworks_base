@@ -115,7 +115,7 @@ bool SoundPool::unload(int32_t soundID)
 }
 
 int32_t SoundPool::play(int32_t soundID, float leftVolume, float rightVolume,
-        int32_t priority, int32_t loop, float rate)
+        int32_t priority, int32_t loop, float rate, int32_t playerIId)
 {
     ALOGV("%s(soundID=%d, leftVolume=%f, rightVolume=%f, priority=%d, loop=%d, rate=%f)",
             __func__, soundID, leftVolume, rightVolume, priority, loop, rate);
@@ -136,8 +136,9 @@ int32_t SoundPool::play(int32_t soundID, float leftVolume, float rightVolume,
     }
 
     const int32_t streamID = mStreamManager.queueForPlay(
-            sound, soundID, leftVolume, rightVolume, priority, loop, rate);
+            sound, soundID, leftVolume, rightVolume, priority, loop, rate, playerIId);
     ALOGV("%s returned %d", __func__, streamID);
+
     return streamID;
 }
 

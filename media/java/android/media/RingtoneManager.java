@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -30,26 +30,27 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.StaleDataException;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
-import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.vibrator.Flags;
+import android.os.vibrator.persistence.VibrationXmlParser;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Audio.AudioColumns;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
 import android.provider.Settings.System;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.database.SortCursor;
@@ -60,6 +61,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,6 +122,53 @@ public class RingtoneManager {
     public static final String ACTION_RINGTONE_PICKER = "android.intent.action.RINGTONE_PICKER";
 
     /**
+     * Given to the ringtone picker as a string that represents the category of ringtone picker that
+     * should be used. This value should also be returned once a ringtone is selected.
+     * <p>
+     * The categories are:
+     * <li>{@link #CATEGORY_RINGTONE_PICKER_SOUND}
+     * <li>{@link #CATEGORY_RINGTONE_PICKER_VIBRATION}
+     * <li>{@link #CATEGORY_RINGTONE_PICKER_RINGTONE}
+     * <li>{@link Intent#CATEGORY_DEFAULT}
+     *
+     * <p> If the category is {@link Intent#CATEGORY_DEFAULT} or absent, then the picker will
+     * default to a sound-only ringtone picker.
+     *
+     * <p> If the selected category was not supported, then the returned category will be null.
+     *
+     * @hide
+     */
+    public static final String EXTRA_RINGTONE_PICKER_CATEGORY =
+            "android.intent.extra.ringtone.RINGTONE_PICKER_CATEGORY";
+
+    /**
+     * A sound-only ringtone picker.
+     *
+     * @hide
+     * @see #EXTRA_RINGTONE_PICKER_CATEGORY
+     */
+    public static final String CATEGORY_RINGTONE_PICKER_SOUND =
+            "android.net.category.RINGTONE_PICKER_SOUND";
+
+    /**
+     * A vibration-only ringtone picker.
+     *
+     * @hide
+     * @see #EXTRA_RINGTONE_PICKER_CATEGORY
+     */
+    public static final String CATEGORY_RINGTONE_PICKER_VIBRATION =
+            "android.net.category.RINGTONE_PICKER_VIBRATION";
+
+    /**
+     * A combined sound and vibration ringtone picker.
+     *
+     * @hide
+     * @see #EXTRA_RINGTONE_PICKER_CATEGORY
+     */
+    public static final String CATEGORY_RINGTONE_PICKER_RINGTONE =
+            "android.net.category.RINGTONE_PICKER_RINGTONE";
+
+    /**
      * Given to the ringtone picker as a boolean. Whether to show an item for
      * "Default".
      * 
@@ -159,6 +209,18 @@ public class RingtoneManager {
      */
     public static final String EXTRA_RINGTONE_EXISTING_URI =
             "android.intent.extra.ringtone.EXISTING_URI";
+
+    /**
+     * Similar to #EXTRA_RINGTONE_EXISTING_URI but the {@link Uri} can include both sound and
+     * vibration.
+     * <p>This can include silent sound/vibration explicitly by setting that part of the URI to
+     * null.
+     *
+     * @hide
+     * @see #ACTION_RINGTONE_PICKER
+     */
+    public static final String EXTRA_RINGTONE_EXISTING_RINGTONE_URI =
+            "android.intent.extra.ringtone.RINGTONE_EXISTING_RINGTONE_URI";
     
     /**
      * Given to the ringtone picker as a {@link Uri}. The {@link Uri} of the
@@ -211,21 +273,30 @@ public class RingtoneManager {
      */
     public static final String EXTRA_RINGTONE_PICKED_URI =
             "android.intent.extra.ringtone.PICKED_URI";
-    
+
+    /**
+     * Declares the allowed types of media for this RingtoneManager.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "MEDIA_", value = {
+            Ringtone.MEDIA_SOUND,
+            Ringtone.MEDIA_VIBRATION,
+    })
+    public @interface MediaType {}
+
     // Make sure the column ordering and then ..._COLUMN_INDEX are in sync
     
-    private static final String[] INTERNAL_COLUMNS = new String[] {
+    private static final String[] MEDIA_AUDIO_COLUMNS = new String[] {
         MediaStore.Audio.Media._ID,
         MediaStore.Audio.Media.TITLE,
         MediaStore.Audio.Media.TITLE,
         MediaStore.Audio.Media.TITLE_KEY,
     };
 
-    private static final String[] MEDIA_COLUMNS = new String[] {
-        MediaStore.Audio.Media._ID,
-        MediaStore.Audio.Media.TITLE,
-        MediaStore.Audio.Media.TITLE,
-        MediaStore.Audio.Media.TITLE_KEY,
+    private static final String[] MEDIA_VIBRATION_COLUMNS = new String[]{
+            MediaStore.Files.FileColumns._ID,
+            MediaStore.Files.FileColumns.TITLE,
     };
 
     /**
@@ -253,7 +324,9 @@ public class RingtoneManager {
     private Cursor mCursor;
 
     private int mType = TYPE_RINGTONE;
-    
+    @MediaType
+    private int mMediaType = Ringtone.MEDIA_SOUND;
+
     /**
      * If a column (item from this list) exists in the Cursor, its value must
      * be true (value of 1) for the row to be returned.
@@ -320,6 +393,41 @@ public class RingtoneManager {
     }
 
     /**
+     * Sets the media type that will be listed by the RingtoneManager.
+     *
+     * <p>This method should be called before calling {@link RingtoneManager#getCursor()}.
+     *
+     * @hide
+     */
+    public void setMediaType(@MediaType int mediaType) {
+        if (mCursor != null) {
+            throw new IllegalStateException(
+                    "Setting media should be done before calling getCursor().");
+        }
+
+        switch (mediaType) {
+            case Ringtone.MEDIA_SOUND:
+            case Ringtone.MEDIA_VIBRATION:
+                mMediaType = mediaType;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported media type " + mediaType);
+        }
+    }
+
+    /**
+     * Returns the RingtoneManagers media type.
+     *
+     * @return the media type.
+     * @see #setMediaType
+     * @hide
+     */
+    @MediaType
+    public int getMediaType() {
+        return mMediaType;
+    }
+
+    /**
      * Sets which type(s) of ringtones will be listed by this.
      * 
      * @param type The type(s), one or more of {@link #TYPE_RINGTONE},
@@ -355,6 +463,25 @@ public class RingtoneManager {
             default:
                 return AudioManager.STREAM_RING;
         }
+    }
+
+    /** @hide */
+    @NonNull
+    public static AudioAttributes getDefaultAudioAttributes(int ringtoneType) {
+        AudioAttributes.Builder builder = new AudioAttributes.Builder();
+        switch (ringtoneType) {
+            case TYPE_ALARM:
+                builder.setUsage(AudioAttributes.USAGE_ALARM);
+                break;
+            case TYPE_NOTIFICATION:
+                builder.setUsage(AudioAttributes.USAGE_NOTIFICATION);
+                break;
+            default:  // ringtone or all
+                builder.setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
+                break;
+        }
+        builder.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION);
+        return builder.build();
     }
 
     /**
@@ -437,19 +564,19 @@ public class RingtoneManager {
             return mCursor;
         }
 
-        ArrayList<Cursor> ringtoneCursors = new ArrayList<Cursor>();
-        ringtoneCursors.add(getInternalRingtones());
-        ringtoneCursors.add(getMediaRingtones());
+        ArrayList<Cursor> cursors = new ArrayList<>();
+
+        cursors.add(queryMediaStore(/* internal= */ true));
+        cursors.add(queryMediaStore(/* internal= */ false));
 
         if (mIncludeParentRingtones) {
             Cursor parentRingtonesCursor = getParentProfileRingtones();
             if (parentRingtonesCursor != null) {
-                ringtoneCursors.add(parentRingtonesCursor);
+                cursors.add(parentRingtonesCursor);
             }
         }
-
-        return mCursor = new SortCursor(ringtoneCursors.toArray(new Cursor[ringtoneCursors.size()]),
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        return mCursor = new SortCursor(cursors.toArray(new Cursor[cursors.size()]),
+                getSortOrderForMedia(mMediaType));
     }
 
     private Cursor getParentProfileRingtones() {
@@ -461,9 +588,7 @@ public class RingtoneManager {
                 // We don't need to re-add the internal ringtones for the work profile since
                 // they are the same as the personal profile. We just need the external
                 // ringtones.
-                final Cursor res = getMediaRingtones(parentContext);
-                return new ExternalRingtonesCursorWrapper(res, ContentProvider.maybeAddUserId(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, parentInfo.id));
+                return queryMediaStore(parentContext, /* internal= */ false);
             }
         }
         return null;
@@ -481,9 +606,30 @@ public class RingtoneManager {
             mPreviousRingtone.stop();
         }
 
-        mPreviousRingtone =
-                getRingtone(mContext, getRingtoneUri(position), inferStreamType(), true);
+        Ringtone ringtone;
+        Uri positionUri = getRingtoneUri(position);
+        if (Flags.hapticsCustomizationRingtoneV2Enabled()) {
+            mPreviousRingtone = new Ringtone.Builder(
+                    mContext, mMediaType, getDefaultAudioAttributes(mType))
+                    .setUri(positionUri)
+                    .build();
+        } else {
+            mPreviousRingtone = createRingtoneV1WithStreamType(mContext, positionUri,
+                    inferStreamType(), /* volumeShaperConfig= */ null);
+        }
         return mPreviousRingtone;
+    }
+
+    private static Ringtone createRingtoneV1WithStreamType(
+            final Context context, Uri ringtoneUri, int streamType,
+            @Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        try {
+            return Ringtone.createV1WithCustomStreamType(context, streamType, ringtoneUri,
+                    volumeShaperConfig);
+        } catch (Exception ex) {
+            Log.e(TAG, "Failed to open ringtone " + ringtoneUri + ": " + ex);
+        }
+        return null;
     }
 
     /**
@@ -505,6 +651,95 @@ public class RingtoneManager {
         }
 
         return getUriFromCursor(mContext, mCursor);
+    }
+
+    /**
+     * Gets the valid ringtone uri by a given uri string and ringtone type for the restore purpose.
+     *
+     * @param contentResolver ContentResolver to execute media query.
+     * @param value a canonicalized uri which refers to the ringtone.
+     * @param ringtoneType an integer representation of the kind of uri that is being restored, can
+     *     be RingtoneManager.TYPE_RINGTONE, RingtoneManager.TYPE_NOTIFICATION, or
+     *     RingtoneManager.TYPE_ALARM.
+     * @hide
+     */
+    public static @Nullable Uri getRingtoneUriForRestore(
+            @NonNull ContentResolver contentResolver, @Nullable String value, int ringtoneType)
+            throws FileNotFoundException, IllegalArgumentException {
+        if (value == null) {
+            // Return a valid null. It means the null value is intended instead of a failure.
+            return null;
+        }
+
+        Uri ringtoneUri;
+        final Uri canonicalUri = Uri.parse(value);
+
+        // Try to get the media uri via the regular uncanonicalize method first.
+        ringtoneUri = contentResolver.uncanonicalize(canonicalUri);
+        if (ringtoneUri != null) {
+            // Canonicalize it to make the result contain the right metadata of the media asset.
+            ringtoneUri = contentResolver.canonicalize(ringtoneUri);
+            return ringtoneUri;
+        }
+
+        // Query the media by title and ringtone type.
+        final String title = canonicalUri.getQueryParameter(AudioColumns.TITLE);
+        Uri baseUri = ContentUris.removeId(canonicalUri).buildUpon().clearQuery().build();
+        String ringtoneTypeSelection = "";
+        switch (ringtoneType) {
+            case RingtoneManager.TYPE_RINGTONE:
+                ringtoneTypeSelection = MediaStore.Audio.AudioColumns.IS_RINGTONE;
+                break;
+            case RingtoneManager.TYPE_NOTIFICATION:
+                ringtoneTypeSelection = MediaStore.Audio.AudioColumns.IS_NOTIFICATION;
+                break;
+            case RingtoneManager.TYPE_ALARM:
+                ringtoneTypeSelection = MediaStore.Audio.AudioColumns.IS_ALARM;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown ringtone type: " + ringtoneType);
+        }
+
+        final String selection = ringtoneTypeSelection + "=1 AND " + AudioColumns.TITLE + "=?";
+        Cursor cursor = null;
+        try {
+            cursor =
+                    contentResolver.query(
+                            baseUri,
+                            /* projection */ new String[] {BaseColumns._ID},
+                            /* selection */ selection,
+                            /* selectionArgs */ new String[] {title},
+                            /* sortOrder */ null,
+                            /* cancellationSignal */ null);
+
+        } catch (IllegalArgumentException e) {
+            throw new FileNotFoundException("Volume not found for " + baseUri);
+        }
+        if (cursor == null) {
+            throw new FileNotFoundException("Missing cursor for " + baseUri);
+        } else if (cursor.getCount() == 0) {
+            FileUtils.closeQuietly(cursor);
+            throw new FileNotFoundException("No item found for " + baseUri);
+        } else if (cursor.getCount() > 1) {
+            // Find more than 1 result.
+            // We are not sure which one is the right ringtone file so just abandon this case.
+            FileUtils.closeQuietly(cursor);
+            throw new FileNotFoundException(
+                    "Find multiple ringtone candidates by title+ringtone_type query: count: "
+                            + cursor.getCount());
+        }
+        if (cursor.moveToFirst()) {
+            ringtoneUri = ContentUris.withAppendedId(baseUri, cursor.getLong(0));
+            FileUtils.closeQuietly(cursor);
+        } else {
+            FileUtils.closeQuietly(cursor);
+            throw new FileNotFoundException("Failed to read row from the result.");
+        }
+
+        // Canonicalize it to make the result contain the right metadata of the media asset.
+        ringtoneUri = contentResolver.canonicalize(ringtoneUri);
+        Log.v(TAG, "Find a valid result: " + ringtoneUri);
+        return ringtoneUri;
     }
 
     private static Uri getUriFromCursor(Context context, Cursor cursor) {
@@ -548,11 +783,13 @@ public class RingtoneManager {
      */
     public static Uri getValidRingtoneUri(Context context) {
         final RingtoneManager rm = new RingtoneManager(context);
-        
-        Uri uri = getValidRingtoneUriFromCursorAndClose(context, rm.getInternalRingtones());
+
+        Uri uri = getValidRingtoneUriFromCursorAndClose(context,
+                rm.queryMediaStore(/* internal= */ true));
 
         if (uri == null) {
-            uri = getValidRingtoneUriFromCursorAndClose(context, rm.getMediaRingtones());
+            uri = getValidRingtoneUriFromCursorAndClose(context,
+                    rm.queryMediaStore(/* internal= */ false));
         }
         
         return uri;
@@ -573,28 +810,26 @@ public class RingtoneManager {
         }
     }
 
-    @UnsupportedAppUsage
-    private Cursor getInternalRingtones() {
-        final Cursor res = query(
-                MediaStore.Audio.Media.INTERNAL_CONTENT_URI, INTERNAL_COLUMNS,
-                constructBooleanTrueWhereClause(mFilterColumns),
-                null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        return new ExternalRingtonesCursorWrapper(res, MediaStore.Audio.Media.INTERNAL_CONTENT_URI);
+    private Cursor queryMediaStore(boolean internal) {
+        return queryMediaStore(mContext, internal);
     }
 
-    private Cursor getMediaRingtones() {
-        final Cursor res = getMediaRingtones(mContext);
-        return new ExternalRingtonesCursorWrapper(res, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-    }
+    private Cursor queryMediaStore(Context context, boolean internal) {
+        Uri contentUri = getContentUriForMedia(mMediaType, internal);
+        String[] columns =
+                mMediaType == Ringtone.MEDIA_VIBRATION ? MEDIA_VIBRATION_COLUMNS
+                        : MEDIA_AUDIO_COLUMNS;
+        String whereClause = getWhereClauseForMedia(mMediaType, mFilterColumns);
+        String sortOrder = getSortOrderForMedia(mMediaType);
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private Cursor getMediaRingtones(Context context) {
-        // MediaStore now returns ringtones on other storage devices, even when
-        // we don't have storage or audio permissions
-        return query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MEDIA_COLUMNS,
-                constructBooleanTrueWhereClause(mFilterColumns), null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER, context);
+        Cursor cursor = query(contentUri, columns, whereClause, /* selectionArgs= */ null,
+                sortOrder, context);
+
+        if (context.getUserId() != mContext.getUserId()) {
+            contentUri = ContentProvider.maybeAddUserId(contentUri, context.getUserId());
+        }
+
+        return new ExternalRingtonesCursorWrapper(cursor, contentUri);
     }
 
     private void setFilterColumnsList(int type) {
@@ -612,6 +847,56 @@ public class RingtoneManager {
         if ((type & TYPE_ALARM) != 0) {
             columns.add(MediaStore.Audio.AudioColumns.IS_ALARM);
         }
+    }
+
+    /**
+     * Returns the sort order for the specified media.
+     *
+     * @param media The RingtoneManager media type.
+     * @return The sort order column.
+     */
+    private static String getSortOrderForMedia(@MediaType int media) {
+        return media == Ringtone.MEDIA_VIBRATION ? MediaStore.Files.FileColumns.TITLE
+                : MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
+    }
+
+    /**
+     * Returns the content URI based on the specified media and whether it's internal or external
+     * storage.
+     *
+     * @param media    The RingtoneManager media type.
+     * @param internal Whether it's for internal or external storage.
+     * @return The media content URI.
+     */
+    private static Uri getContentUriForMedia(@MediaType int media, boolean internal) {
+        switch (media) {
+            case Ringtone.MEDIA_VIBRATION:
+                return MediaStore.Files.getContentUri(
+                        internal ? MediaStore.VOLUME_INTERNAL : MediaStore.VOLUME_EXTERNAL);
+            case Ringtone.MEDIA_SOUND:
+                return internal ? MediaStore.Audio.Media.INTERNAL_CONTENT_URI
+                        : MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            default:
+                throw new IllegalArgumentException("Unsupported media type " + media);
+        }
+    }
+
+    /**
+     * Constructs a where clause based on the media type. This will be used to find all matching
+     * sound or vibration files.
+     *
+     * @param media   The RingtoneManager media type.
+     * @param columns The columns that must be true, when media type is {@link Ringtone#MEDIA_SOUND}
+     * @return The where clause.
+     */
+    private static String getWhereClauseForMedia(@MediaType int media, List<String> columns) {
+        // TODO(b/296213309): Filtering by ringtone-type isn't supported yet for vibrations.
+        if (media == Ringtone.MEDIA_VIBRATION) {
+            return TextUtils.formatSimple("(%s='%s')", MediaStore.Files.FileColumns.MIME_TYPE,
+                    VibrationXmlParser.APPLICATION_VIBRATION_XML_MIME_TYPE);
+        }
+
+        return constructBooleanTrueWhereClause(columns);
     }
     
     /**
@@ -642,14 +927,6 @@ public class RingtoneManager {
 
         return sb.toString();
     }
-    
-    private Cursor query(Uri uri,
-            String[] projection,
-            String selection,
-            String[] selectionArgs,
-            String sortOrder) {
-        return query(uri, projection, selection, selectionArgs, sortOrder, mContext);
-    }
 
     private Cursor query(Uri uri,
             String[] projection,
@@ -677,40 +954,14 @@ public class RingtoneManager {
      * @return A {@link Ringtone} for the given URI, or null.
      */
     public static Ringtone getRingtone(final Context context, Uri ringtoneUri) {
-        // Don't set the stream type
-        return getRingtone(context, ringtoneUri, -1, true);
-    }
-
-    /**
-     * Returns a {@link Ringtone} with {@link VolumeShaper} if required for a given sound URI.
-     * <p>
-     * If the given URI cannot be opened for any reason, this method will
-     * attempt to fallback on another sound. If it cannot find any, it will
-     * return null.
-     *
-     * @param context A context used to query.
-     * @param ringtoneUri The {@link Uri} of a sound or ringtone.
-     * @param volumeShaperConfig config for volume shaper of the ringtone if applied.
-     * @return A {@link Ringtone} for the given URI, or null.
-     *
-     * @hide
-     */
-    public static Ringtone getRingtone(
-            final Context context, Uri ringtoneUri,
-            @Nullable VolumeShaper.Configuration volumeShaperConfig) {
-        // Don't set the stream type
-        return getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig, true);
-    }
-
-    /**
-     * @hide
-     */
-    public static Ringtone getRingtone(final Context context, Uri ringtoneUri,
-            @Nullable VolumeShaper.Configuration volumeShaperConfig,
-            boolean createLocalMediaPlayer) {
-        // Don't set the stream type
-        return getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig,
-                createLocalMediaPlayer);
+        if (Flags.hapticsCustomizationRingtoneV2Enabled()) {
+            return new Ringtone.Builder(
+                    context, Ringtone.MEDIA_SOUND, getDefaultAudioAttributes(-1))
+                    .setUri(ringtoneUri)
+                    .build();
+        } else {
+            return createRingtoneV1WithStreamType(context, ringtoneUri, -1, null);
+        }
     }
 
     /**
@@ -719,71 +970,23 @@ public class RingtoneManager {
     public static Ringtone getRingtone(final Context context, Uri ringtoneUri,
             @Nullable VolumeShaper.Configuration volumeShaperConfig,
             AudioAttributes audioAttributes) {
-        // Don't set the stream type
-        Ringtone ringtone =
-                getRingtone(context, ringtoneUri, -1 /* streamType */, volumeShaperConfig, false);
-        if (ringtone != null) {
-            ringtone.setAudioAttributesField(audioAttributes);
-            ringtone.createLocalMediaPlayer();
-        }
-        return ringtone;
-    }
-
-    //FIXME bypass the notion of stream types within the class
-    /**
-     * Returns a {@link Ringtone} for a given sound URI on the given stream
-     * type. Normally, if you change the stream type on the returned
-     * {@link Ringtone}, it will re-create the {@link MediaPlayer}. This is just
-     * an optimized route to avoid that.
-     *
-     * @param streamType The stream type for the ringtone, or -1 if it should
-     *            not be set (and the default used instead).
-     * @param createLocalMediaPlayer when true, the ringtone returned will be fully
-     *      created otherwise, it will require the caller to create the media player manually
-     *      {@link Ringtone#createLocalMediaPlayer()} in order to play the Ringtone.
-     * @see #getRingtone(Context, Uri)
-     */
-    @UnsupportedAppUsage
-    private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType,
-            boolean createLocalMediaPlayer) {
-        return getRingtone(context, ringtoneUri, streamType, null /* volumeShaperConfig */,
-                createLocalMediaPlayer);
-    }
-
-    //FIXME bypass the notion of stream types within the class
-    /**
-     * Returns a {@link Ringtone} with {@link VolumeShaper} if required for a given sound URI on
-     * the given stream type. Normally, if you change the stream type on the returned
-     * {@link Ringtone}, it will re-create the {@link MediaPlayer}. This is just
-     * an optimized route to avoid that.
-     *
-     * @param streamType The stream type for the ringtone, or -1 if it should
-     *            not be set (and the default used instead).
-     * @param volumeShaperConfig config for volume shaper of the ringtone if applied.
-     * @see #getRingtone(Context, Uri)
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private static Ringtone getRingtone(final Context context, Uri ringtoneUri, int streamType,
-            @Nullable VolumeShaper.Configuration volumeShaperConfig,
-            boolean createLocalMediaPlayer) {
-        try {
-            final Ringtone r = new Ringtone(context, true);
-            if (streamType >= 0) {
-                //FIXME deprecated call
-                r.setStreamType(streamType);
+        // TODO: move caller(s) away from this method: inline the builder call.
+        if (Flags.hapticsCustomizationRingtoneV2Enabled()) {
+            return new Ringtone.Builder(context, Ringtone.MEDIA_SOUND, audioAttributes)
+                    .setUri(ringtoneUri)
+                    .setVolumeShaperConfig(volumeShaperConfig)
+                    .setUseExactAudioAttributes(true)  // May be using audio-coupled via attrs
+                    .build();
+        } else {
+            try {
+                return Ringtone.createV1WithCustomAudioAttributes(context, audioAttributes,
+                        ringtoneUri, volumeShaperConfig, /* allowRemote= */ true);
+            } catch (Exception ex) {
+                // Match broad catching of createRingtoneV1.
+                Log.e(TAG, "Failed to open ringtone " + ringtoneUri + ": " + ex);
+                return null;
             }
-
-            r.setVolumeShaperConfig(volumeShaperConfig);
-            r.setUri(ringtoneUri, volumeShaperConfig);
-            if (createLocalMediaPlayer) {
-                r.createLocalMediaPlayer();
-            }
-            return r;
-        } catch (Exception ex) {
-            Log.e(TAG, "Failed to open ringtone " + ringtoneUri + ": " + ex);
         }
-
-        return null;
     }
 
     /**
@@ -833,20 +1036,23 @@ public class RingtoneManager {
         if(!isInternalRingtoneUri(ringtoneUri)) {
             ringtoneUri = ContentProvider.maybeAddUserId(ringtoneUri, context.getUserId());
         }
-        Settings.System.putStringForUser(resolver, setting,
-                ringtoneUri != null ? ringtoneUri.toString() : null, context.getUserId());
 
-        // Stream selected ringtone into cache so it's available for playback
-        // when CE storage is still locked
         if (ringtoneUri != null) {
-            final Uri cacheUri = getCacheForType(type, context.getUserId());
-            try (InputStream in = openRingtone(context, ringtoneUri);
-                    OutputStream out = resolver.openOutputStream(cacheUri, "wt")) {
-                FileUtils.copy(in, out);
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to cache ringtone: " + e);
+            final String mimeType = resolver.getType(ringtoneUri);
+            if (mimeType == null) {
+                Log.e(TAG, "setActualDefaultRingtoneUri for URI:" + ringtoneUri
+                        + " ignored: failure to find mimeType (no access from this context?)");
+                return;
+            }
+            if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg"))) {
+                Log.e(TAG, "setActualDefaultRingtoneUri for URI:" + ringtoneUri
+                        + " ignored: associated mimeType:" + mimeType + " is not an audio type");
+                return;
             }
         }
+
+        Settings.System.putStringForUser(resolver, setting,
+                ringtoneUri != null ? ringtoneUri.toString() : null, context.getUserId());
     }
 
     private static boolean isInternalRingtoneUri(Uri uri) {
@@ -939,28 +1145,6 @@ public class RingtoneManager {
                 return Environment.DIRECTORY_ALARMS;
             default:
                 throw new IllegalArgumentException("Unsupported ringtone type: " + type);
-        }
-    }
-
-    /**
-     * Try opening the given ringtone locally first, but failover to
-     * {@link IRingtonePlayer} if we can't access it directly. Typically happens
-     * when process doesn't hold
-     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}.
-     */
-    private static InputStream openRingtone(Context context, Uri uri) throws IOException {
-        final ContentResolver resolver = context.getContentResolver();
-        try {
-            return resolver.openInputStream(uri);
-        } catch (SecurityException | IOException e) {
-            Log.w(TAG, "Failed to open directly; attempting failover: " + e);
-            final IRingtonePlayer player = context.getSystemService(AudioManager.class)
-                    .getRingtonePlayer();
-            try {
-                return new ParcelFileDescriptor.AutoCloseInputStream(player.openRingtone(uri));
-            } catch (Exception e2) {
-                throw new IOException(e2);
-            }
         }
     }
 
@@ -1158,22 +1342,36 @@ public class RingtoneManager {
             }
 
             // Try finding the scanned ringtone
-            final String filename = getDefaultRingtoneFilename(type);
-            final String whichAudio = getQueryStringForType(type);
-            final String where = MediaColumns.DISPLAY_NAME + "=? AND " + whichAudio + "=?";
-            final Uri baseUri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
-            try (Cursor cursor = context.getContentResolver().query(baseUri,
-                    new String[] { MediaColumns._ID },
-                    where,
-                    new String[] { filename, "1" }, null)) {
-                if (cursor.moveToFirst()) {
-                    final Uri ringtoneUri = context.getContentResolver().canonicalizeOrElse(
-                            ContentUris.withAppendedId(baseUri, cursor.getLong(0)));
-                    RingtoneManager.setActualDefaultRingtoneUri(context, type, ringtoneUri);
-                    Settings.System.putInt(context.getContentResolver(), setting, 1);
-                }
+            Uri ringtoneUri = computeDefaultRingtoneUri(context, type);
+            if (ringtoneUri != null) {
+                RingtoneManager.setActualDefaultRingtoneUri(context, type, ringtoneUri);
+                Settings.System.putInt(context.getContentResolver(), setting, 1);
             }
         }
+    }
+
+    /**
+     * @param type the type of ringtone (e.g {@link #TYPE_RINGTONE})
+     * @return the system default URI if found, null otherwise.
+     */
+    private static Uri computeDefaultRingtoneUri(@NonNull Context context, int type) {
+        // Try finding the scanned ringtone
+        final String filename = getDefaultRingtoneFilename(type);
+        final String whichAudio = getQueryStringForType(type);
+        final String where = MediaColumns.DISPLAY_NAME + "=? AND " + whichAudio + "=?";
+        final Uri baseUri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
+        try (Cursor cursor = context.getContentResolver().query(baseUri,
+                new String[] { MediaColumns._ID },
+                where,
+                new String[] { filename, "1" }, null)) {
+            if (cursor.moveToFirst()) {
+                final Uri ringtoneUri = context.getContentResolver().canonicalizeOrElse(
+                        ContentUris.withAppendedId(baseUri, cursor.getLong(0)));
+                return ringtoneUri;
+            }
+        }
+
+        return null;
     }
 
     private static String getDefaultRingtoneSetting(int type) {

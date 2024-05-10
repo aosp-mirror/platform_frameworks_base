@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.sensors.AuthenticationStateListeners;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -69,6 +70,8 @@ public class Fingerprint21Test {
     Fingerprint21.HalResultController mHalResultController;
     @Mock
     private BiometricScheduler mScheduler;
+    @Mock
+    private AuthenticationStateListeners mAuthenticationStateListeners;
     @Mock
     private BiometricStateCallback mBiometricStateCallback;
     @Mock
@@ -102,9 +105,10 @@ public class Fingerprint21Test {
                         componentInfo, FingerprintSensorProperties.TYPE_UNKNOWN,
                         resetLockoutRequiresHardwareAuthToken);
 
-        mFingerprint21 = new TestableFingerprint21(mContext, mBiometricStateCallback, sensorProps,
-                mScheduler, new Handler(Looper.getMainLooper()), mLockoutResetDispatcher,
-                mHalResultController, mBiometricContext);
+        mFingerprint21 = new TestableFingerprint21(mContext, mBiometricStateCallback,
+                mAuthenticationStateListeners, sensorProps, mScheduler,
+                new Handler(Looper.getMainLooper()), mLockoutResetDispatcher, mHalResultController,
+                mBiometricContext);
     }
 
     @Test
@@ -126,13 +130,14 @@ public class Fingerprint21Test {
 
         TestableFingerprint21(@NonNull Context context,
                 @NonNull BiometricStateCallback biometricStateCallback,
+                @NonNull AuthenticationStateListeners authenticationStateListeners,
                 @NonNull FingerprintSensorPropertiesInternal sensorProps,
                 @NonNull BiometricScheduler scheduler, @NonNull Handler handler,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher,
                 @NonNull HalResultController controller,
                 @NonNull BiometricContext biometricContext) {
-            super(context, biometricStateCallback, sensorProps, scheduler, handler,
-                    lockoutResetDispatcher, controller, biometricContext);
+            super(context, biometricStateCallback, authenticationStateListeners, sensorProps,
+                    scheduler, handler, lockoutResetDispatcher, controller, biometricContext);
         }
 
         @Override

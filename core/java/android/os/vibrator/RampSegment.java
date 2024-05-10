@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.VibrationEffect;
+import android.os.VibratorInfo;
 
 import com.android.internal.util.Preconditions;
 
@@ -95,14 +96,31 @@ public final class RampSegment extends VibrationEffectSegment {
 
     /** @hide */
     @Override
-    public boolean isHapticFeedbackCandidate() {
-        return true;
+    public boolean areVibrationFeaturesSupported(@NonNull VibratorInfo vibratorInfo) {
+        boolean areFeaturesSupported = true;
+        // If the start/end frequencies are not the same, require frequency control since we need to
+        // ramp up/down the frequency.
+        if ((mStartFrequencyHz != mEndFrequencyHz)
+                // If there is no frequency ramping, make sure that the one frequency used does not
+                // require frequency control.
+                || frequencyRequiresFrequencyControl(mStartFrequencyHz)) {
+            areFeaturesSupported &= vibratorInfo.hasFrequencyControl();
+        }
+        // If the start/end amplitudes are not the same, require amplitude control since we need to
+        // ramp up/down the amplitude.
+        if ((mStartAmplitude != mEndAmplitude)
+                // If there is no amplitude ramping, make sure that the amplitude used does not
+                // require amplitude control.
+                || amplitudeRequiresAmplitudeControl(mStartAmplitude)) {
+            areFeaturesSupported &= vibratorInfo.hasAmplitudeControl();
+        }
+        return areFeaturesSupported;
     }
 
     /** @hide */
     @Override
-    public boolean hasNonZeroAmplitude() {
-        return mStartAmplitude > 0 || mEndAmplitude > 0;
+    public boolean isHapticFeedbackCandidate() {
+        return true;
     }
 
     /** @hide */
@@ -159,6 +177,17 @@ public final class RampSegment extends VibrationEffectSegment {
                 + ", endFrequencyHz=" + mEndFrequencyHz
                 + ", duration=" + mDuration
                 + "}";
+    }
+
+    /** @hide */
+    @Override
+    public String toDebugString() {
+        return String.format("Ramp=%dms(amplitude=%.2f%s to %.2f%s)",
+                mDuration,
+                mStartAmplitude,
+                Float.compare(mStartFrequencyHz, 0) == 0 ? "" : " @ " + mStartFrequencyHz + "Hz",
+                mEndAmplitude,
+                Float.compare(mEndFrequencyHz, 0) == 0 ? "" : " @ " + mEndFrequencyHz + "Hz");
     }
 
     @Override

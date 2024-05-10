@@ -63,6 +63,7 @@
         <item type="string" name="y" />
         <item type="string" name="z" />
         <item type="integer" name="int1" />
+        <item type="drawable" name="dr1" />
     </policy>
 </overlayable>
 

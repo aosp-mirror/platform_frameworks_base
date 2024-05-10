@@ -52,6 +52,22 @@ public final class DeviceStateManager {
     /** The maximum allowed device state identifier. */
     public static final int MAXIMUM_DEVICE_STATE = 255;
 
+    /**
+     * Intent needed to launch the rear display overlay activity from SysUI
+     *
+     * @hide
+     */
+    public static final String ACTION_SHOW_REAR_DISPLAY_OVERLAY =
+            "com.android.intent.action.SHOW_REAR_DISPLAY_OVERLAY";
+
+    /**
+     * Intent extra sent to the rear display overlay activity of the current base state
+     *
+     * @hide
+     */
+    public static final String EXTRA_ORIGINAL_DEVICE_BASE_STATE =
+            "original_device_base_state";
+
     private final DeviceStateManagerGlobal mGlobal;
 
     /** @hide */
@@ -235,6 +251,10 @@ public final class DeviceStateManager {
         @Nullable
         private Boolean lastResult;
 
+        public FoldStateListener(Context context) {
+            this(context, folded -> {});
+        }
+
         public FoldStateListener(Context context, Consumer<Boolean> listener) {
             mFoldedDeviceStates = context.getResources().getIntArray(
                     com.android.internal.R.array.config_foldedDeviceStates);
@@ -249,6 +269,11 @@ public final class DeviceStateManager {
                 lastResult = folded;
                 mDelegate.accept(folded);
             }
+        }
+
+        @Nullable
+        public Boolean getFolded() {
+            return lastResult;
         }
     }
 }

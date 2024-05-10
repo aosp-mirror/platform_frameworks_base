@@ -16,7 +16,6 @@
 
 package com.android.systemui.util;
 
-import android.content.Context;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
@@ -80,11 +79,6 @@ public class DeviceConfigProxyFake extends DeviceConfigProxy {
             Map<String, Map<String, String>> properties) {
         properties.putIfAbsent(namespace, new HashMap<>());
         properties.get(namespace).put(name, value);
-    }
-
-    @Override
-    public void enforceReadPermission(Context context, String namespace) {
-        // no-op
     }
 
     private Properties propsForNamespaceAndName(String namespace, String name) {

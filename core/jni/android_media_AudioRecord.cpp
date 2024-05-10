@@ -145,7 +145,8 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
                                             jint channelIndexMask, jint audioFormat,
                                             jint buffSizeInBytes, jintArray jSession,
                                             jobject jAttributionSource, jlong nativeRecordInJavaObj,
-                                            jint sharedAudioHistoryMs) {
+                                            jint sharedAudioHistoryMs,
+                                            jint halFlags) {
     //ALOGV(">> Entering android_media_AudioRecord_setup");
     //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d "
     //     "nativeRecordInJavaObj=0x%llX",
@@ -157,13 +158,13 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         return (jint) AUDIO_JAVA_ERROR;
     }
 
-    jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    jint* nSession = env->GetIntArrayElements(jSession, nullptr /* isCopy */);
     if (nSession == NULL) {
         ALOGE("Error creating AudioRecord: Error retrieving session id pointer");
         return (jint) AUDIO_JAVA_ERROR;
     }
     audio_session_t sessionId = (audio_session_t) nSession[0];
-    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     nSession = NULL;
 
     sp<AudioRecord> lpRecorder;
@@ -211,14 +212,11 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
             return (jint) AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
         }
 
-        size_t bytesPerSample = audio_bytes_per_sample(format);
-
         if (buffSizeInBytes == 0) {
             ALOGE("Error creating AudioRecord: frameCount is 0.");
             return (jint) AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
         }
-        size_t frameSize = channelCount * bytesPerSample;
-        size_t frameCount = buffSizeInBytes / frameSize;
+        size_t frameCount = buffSizeInBytes / audio_bytes_per_frame(channelCount, format);
 
         // create an uninitialized AudioRecord object
         Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
@@ -235,10 +233,7 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         }
         ALOGV("AudioRecord_setup for source=%d tags=%s flags=%08x", paa->source, paa->tags, paa->flags);
 
-        audio_input_flags_t flags = AUDIO_INPUT_FLAG_NONE;
-        if (paa->flags & AUDIO_FLAG_HW_HOTWORD) {
-            flags = AUDIO_INPUT_FLAG_HW_HOTWORD;
-        }
+        const auto flags = static_cast<audio_input_flags_t>(halFlags);
         // create the callback information:
         // this data will be passed with every AudioRecord callback
         // we use a weak reference so the AudioRecord object can be garbage collected.
@@ -284,14 +279,14 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         // callbackData = sp<AudioRecordJNIStorage>::make(clazz, weak_this);
     }
 
-    nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    nSession = env->GetIntArrayElements(jSession, nullptr /* isCopy */);
     if (nSession == NULL) {
         ALOGE("Error creating AudioRecord: Error retrieving session id pointer");
         goto native_init_failure;
     }
     // read the audio session ID back from AudioRecord in case a new session was created during set()
     nSession[0] = lpRecorder->getSessionId();
-    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     nSession = NULL;
 
     {
@@ -576,7 +571,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     if (result != NO_ERROR) {
         return -1;
     }
-    return frameCount * channelCount * audio_bytes_per_sample(format);
+    return frameCount * audio_bytes_per_frame(channelCount, format);
 }
 
 static jboolean android_media_AudioRecord_setInputDevice(
@@ -827,7 +822,7 @@ static const JNINativeMethod gMethods[] = {
         {"native_start", "(II)I", (void *)android_media_AudioRecord_start},
         {"native_stop", "()V", (void *)android_media_AudioRecord_stop},
         {"native_setup",
-         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/os/Parcel;JI)I",
+         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/os/Parcel;JII)I",
          (void *)android_media_AudioRecord_setup},
         {"native_finalize", "()V", (void *)android_media_AudioRecord_finalize},
         {"native_release", "()V", (void *)android_media_AudioRecord_release},

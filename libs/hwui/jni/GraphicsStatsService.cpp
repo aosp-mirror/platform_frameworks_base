@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#undef LOG_TAG
-#define LOG_TAG "GraphicsStatsService"
-
 #include <JankTracker.h>
 #include <log/log.h>
 #include <nativehelper/ScopedPrimitiveArray.h>

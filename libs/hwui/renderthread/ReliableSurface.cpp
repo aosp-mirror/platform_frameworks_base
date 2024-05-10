@@ -150,11 +150,11 @@ ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer(int error) {
     }
 
     AHardwareBuffer_Desc desc = AHardwareBuffer_Desc{
-            .usage = mUsage,
-            .format = mFormat,
             .width = 1,
             .height = 1,
             .layers = 1,
+            .format = mFormat,
+            .usage = mUsage,
             .rfu0 = 0,
             .rfu1 = 0,
     };

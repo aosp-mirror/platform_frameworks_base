@@ -22,7 +22,7 @@ import android.service.controls.Control
 import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.TemperatureControlTemplate
 
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
 
@@ -63,7 +63,7 @@ class TemperatureControlBehavior : Behavior {
             // interactions (touch, range)
             subBehavior = cvh.bindBehavior(
                 subBehavior,
-                ControlViewHolder.findBehaviorClass(
+                cvh.findBehaviorClass(
                     control.status,
                     subTemplate,
                     control.deviceType

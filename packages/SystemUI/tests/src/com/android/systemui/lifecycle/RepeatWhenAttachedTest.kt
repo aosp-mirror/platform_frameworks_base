@@ -17,7 +17,6 @@
 
 package com.android.systemui.lifecycle
 
-import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.lifecycle.Lifecycle
@@ -28,8 +27,16 @@ import com.android.systemui.util.Assert
 import com.android.systemui.util.mockito.argumentCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DisposableHandle
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -41,9 +48,9 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
-@RunWithLooper
 class RepeatWhenAttachedTest : SysuiTestCase() {
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
@@ -54,9 +61,13 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
 
     private lateinit var block: Block
     private lateinit var attachListeners: MutableList<View.OnAttachStateChangeListener>
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
+        val testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
+        Dispatchers.setMain(testDispatcher)
         Assert.setTestThread(Thread.currentThread())
         whenever(view.viewTreeObserver).thenReturn(viewTreeObserver)
         whenever(view.windowVisibility).thenReturn(View.GONE)
@@ -71,186 +82,218 @@ class RepeatWhenAttachedTest : SysuiTestCase() {
         block = Block()
     }
 
-    @Test(expected = IllegalStateException::class)
-    fun `repeatWhenAttached - enforces main thread`() = runBlockingTest {
-        Assert.setTestThread(null)
-
-        repeatWhenAttached()
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test(expected = IllegalStateException::class)
-    fun `repeatWhenAttached - dispose enforces main thread`() = runBlockingTest {
-        val disposableHandle = repeatWhenAttached()
-        Assert.setTestThread(null)
+    fun repeatWhenAttached_enforcesMainThread() =
+        testScope.runTest {
+            Assert.setTestThread(null)
 
-        disposableHandle.dispose()
-    }
+            repeatWhenAttached()
+        }
 
-    @Test
-    fun `repeatWhenAttached - view starts detached - runs block when attached`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(false)
-        repeatWhenAttached()
-        assertThat(block.invocationCount).isEqualTo(0)
+    @Test(expected = IllegalStateException::class)
+    fun repeatWhenAttached_disposeEnforcesMainThread() =
+        testScope.runTest {
+            val disposableHandle = repeatWhenAttached()
+            Assert.setTestThread(null)
 
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        attachListeners.last().onViewAttachedToWindow(view)
-
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.CREATED)
-    }
+            disposableHandle.dispose()
+        }
 
     @Test
-    fun `repeatWhenAttached - view already attached - immediately runs block`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
+    fun repeatWhenAttached_viewStartsDetached_runsBlockWhenAttached() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(false)
+            repeatWhenAttached()
+            assertThat(block.invocationCount).isEqualTo(0)
 
-        repeatWhenAttached()
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            attachListeners.last().onViewAttachedToWindow(view)
 
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.CREATED)
-    }
-
-    @Test
-    fun `repeatWhenAttached - starts visible without focus - STARTED`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        whenever(view.windowVisibility).thenReturn(View.VISIBLE)
-
-        repeatWhenAttached()
-
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.STARTED)
-    }
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.CREATED)
+        }
 
     @Test
-    fun `repeatWhenAttached - starts with focus but invisible - CREATED`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        whenever(view.hasWindowFocus()).thenReturn(true)
+    fun repeatWhenAttached_viewAlreadyAttached_immediatelyRunsBlock() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
 
-        repeatWhenAttached()
+            repeatWhenAttached()
 
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.CREATED)
-    }
-
-    @Test
-    fun `repeatWhenAttached - starts visible and with focus - RESUMED`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        whenever(view.windowVisibility).thenReturn(View.VISIBLE)
-        whenever(view.hasWindowFocus()).thenReturn(true)
-
-        repeatWhenAttached()
-
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.RESUMED)
-    }
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.CREATED)
+        }
 
     @Test
-    fun `repeatWhenAttached - becomes visible without focus - STARTED`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        repeatWhenAttached()
-        val listenerCaptor = argumentCaptor<ViewTreeObserver.OnWindowVisibilityChangeListener>()
-        verify(viewTreeObserver).addOnWindowVisibilityChangeListener(listenerCaptor.capture())
+    fun repeatWhenAttached_startsVisibleWithoutFocus_STARTED() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            whenever(view.windowVisibility).thenReturn(View.VISIBLE)
 
-        whenever(view.windowVisibility).thenReturn(View.VISIBLE)
-        listenerCaptor.value.onWindowVisibilityChanged(View.VISIBLE)
+            repeatWhenAttached()
 
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.STARTED)
-    }
-
-    @Test
-    fun `repeatWhenAttached - gains focus but invisible - CREATED`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        repeatWhenAttached()
-        val listenerCaptor = argumentCaptor<ViewTreeObserver.OnWindowFocusChangeListener>()
-        verify(viewTreeObserver).addOnWindowFocusChangeListener(listenerCaptor.capture())
-
-        whenever(view.hasWindowFocus()).thenReturn(true)
-        listenerCaptor.value.onWindowFocusChanged(true)
-
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.CREATED)
-    }
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.STARTED)
+        }
 
     @Test
-    fun `repeatWhenAttached - becomes visible and gains focus - RESUMED`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        repeatWhenAttached()
-        val visibleCaptor = argumentCaptor<ViewTreeObserver.OnWindowVisibilityChangeListener>()
-        verify(viewTreeObserver).addOnWindowVisibilityChangeListener(visibleCaptor.capture())
-        val focusCaptor = argumentCaptor<ViewTreeObserver.OnWindowFocusChangeListener>()
-        verify(viewTreeObserver).addOnWindowFocusChangeListener(focusCaptor.capture())
+    fun repeatWhenAttached_startsWithFocusButInvisible_CREATED() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            whenever(view.hasWindowFocus()).thenReturn(true)
 
-        whenever(view.windowVisibility).thenReturn(View.VISIBLE)
-        visibleCaptor.value.onWindowVisibilityChanged(View.VISIBLE)
-        whenever(view.hasWindowFocus()).thenReturn(true)
-        focusCaptor.value.onWindowFocusChanged(true)
+            repeatWhenAttached()
 
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.RESUMED)
-    }
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.CREATED)
+        }
 
     @Test
-    fun `repeatWhenAttached - view gets detached - destroys the lifecycle`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        repeatWhenAttached()
+    fun repeatWhenAttached_startsVisibleAndWithFocus_RESUMED() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            whenever(view.windowVisibility).thenReturn(View.VISIBLE)
+            whenever(view.hasWindowFocus()).thenReturn(true)
 
-        whenever(view.isAttachedToWindow).thenReturn(false)
-        attachListeners.last().onViewDetachedFromWindow(view)
+            repeatWhenAttached()
 
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.DESTROYED)
-    }
-
-    @Test
-    fun `repeatWhenAttached - view gets reattached - recreates a lifecycle`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        repeatWhenAttached()
-        whenever(view.isAttachedToWindow).thenReturn(false)
-        attachListeners.last().onViewDetachedFromWindow(view)
-
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        attachListeners.last().onViewAttachedToWindow(view)
-
-        assertThat(block.invocationCount).isEqualTo(2)
-        assertThat(block.invocations[0].lifecycleState).isEqualTo(Lifecycle.State.DESTROYED)
-        assertThat(block.invocations[1].lifecycleState).isEqualTo(Lifecycle.State.CREATED)
-    }
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.RESUMED)
+        }
 
     @Test
-    fun `repeatWhenAttached - dispose attached`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        val handle = repeatWhenAttached()
+    fun repeatWhenAttached_becomesVisibleWithoutFocus_STARTED() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            repeatWhenAttached()
+            val listenerCaptor = argumentCaptor<ViewTreeObserver.OnWindowVisibilityChangeListener>()
+            verify(viewTreeObserver).addOnWindowVisibilityChangeListener(listenerCaptor.capture())
 
-        handle.dispose()
+            whenever(view.windowVisibility).thenReturn(View.VISIBLE)
+            listenerCaptor.value.onWindowVisibilityChanged(View.VISIBLE)
 
-        assertThat(attachListeners).isEmpty()
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.DESTROYED)
-    }
-
-    @Test
-    fun `repeatWhenAttached - dispose never attached`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(false)
-        val handle = repeatWhenAttached()
-
-        handle.dispose()
-
-        assertThat(attachListeners).isEmpty()
-        assertThat(block.invocationCount).isEqualTo(0)
-    }
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.STARTED)
+        }
 
     @Test
-    fun `repeatWhenAttached - dispose previously attached now detached`() = runBlockingTest {
-        whenever(view.isAttachedToWindow).thenReturn(true)
-        val handle = repeatWhenAttached()
-        attachListeners.last().onViewDetachedFromWindow(view)
+    fun repeatWhenAttached_gainsFocusButInvisible_CREATED() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            repeatWhenAttached()
+            val listenerCaptor = argumentCaptor<ViewTreeObserver.OnWindowFocusChangeListener>()
+            verify(viewTreeObserver).addOnWindowFocusChangeListener(listenerCaptor.capture())
 
-        handle.dispose()
+            whenever(view.hasWindowFocus()).thenReturn(true)
+            listenerCaptor.value.onWindowFocusChanged(true)
 
-        assertThat(attachListeners).isEmpty()
-        assertThat(block.invocationCount).isEqualTo(1)
-        assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.DESTROYED)
-    }
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.CREATED)
+        }
+
+    @Test
+    fun repeatWhenAttached_becomesVisibleAndGainsFocus_RESUMED() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            repeatWhenAttached()
+            val visibleCaptor = argumentCaptor<ViewTreeObserver.OnWindowVisibilityChangeListener>()
+            verify(viewTreeObserver).addOnWindowVisibilityChangeListener(visibleCaptor.capture())
+            val focusCaptor = argumentCaptor<ViewTreeObserver.OnWindowFocusChangeListener>()
+            verify(viewTreeObserver).addOnWindowFocusChangeListener(focusCaptor.capture())
+
+            whenever(view.windowVisibility).thenReturn(View.VISIBLE)
+            visibleCaptor.value.onWindowVisibilityChanged(View.VISIBLE)
+            whenever(view.hasWindowFocus()).thenReturn(true)
+            focusCaptor.value.onWindowFocusChanged(true)
+
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.RESUMED)
+        }
+
+    @Test
+    fun repeatWhenAttached_viewGetsDetached_destroysTheLifecycle() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            repeatWhenAttached()
+
+            whenever(view.isAttachedToWindow).thenReturn(false)
+            attachListeners.last().onViewDetachedFromWindow(view)
+
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.DESTROYED)
+        }
+
+    @Test
+    fun repeatWhenAttached_viewGetsReattached_recreatesAlifecycle() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            repeatWhenAttached()
+            whenever(view.isAttachedToWindow).thenReturn(false)
+            attachListeners.last().onViewDetachedFromWindow(view)
+
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            attachListeners.last().onViewAttachedToWindow(view)
+
+            runCurrent()
+            assertThat(block.invocationCount).isEqualTo(2)
+            assertThat(block.invocations[0].lifecycleState).isEqualTo(Lifecycle.State.DESTROYED)
+            assertThat(block.invocations[1].lifecycleState).isEqualTo(Lifecycle.State.CREATED)
+        }
+
+    @Test
+    fun repeatWhenAttached_disposeAttached() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            val handle = repeatWhenAttached()
+
+            handle.dispose()
+
+            runCurrent()
+            assertThat(attachListeners).isEmpty()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.DESTROYED)
+        }
+
+    @Test
+    fun repeatWhenAttached_disposeNeverAttached() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(false)
+            val handle = repeatWhenAttached()
+
+            handle.dispose()
+
+            assertThat(attachListeners).isEmpty()
+            assertThat(block.invocationCount).isEqualTo(0)
+        }
+
+    @Test
+    fun repeatWhenAttached_disposePreviouslyAttachedNowDetached() =
+        testScope.runTest {
+            whenever(view.isAttachedToWindow).thenReturn(true)
+            val handle = repeatWhenAttached()
+            attachListeners.last().onViewDetachedFromWindow(view)
+
+            handle.dispose()
+
+            runCurrent()
+            assertThat(attachListeners).isEmpty()
+            assertThat(block.invocationCount).isEqualTo(1)
+            assertThat(block.latestLifecycleState).isEqualTo(Lifecycle.State.DESTROYED)
+        }
 
     private fun CoroutineScope.repeatWhenAttached(): DisposableHandle {
         return view.repeatWhenAttached(

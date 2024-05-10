@@ -25,6 +25,8 @@ import android.hardware.tv.tuner.LnbPosition;
 import android.hardware.tv.tuner.LnbTone;
 import android.hardware.tv.tuner.LnbVoltage;
 import android.media.tv.tuner.Tuner.Result;
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -147,10 +149,13 @@ public class Lnb implements AutoCloseable {
     public static final int EVENT_TYPE_LNB_OVERLOAD = LnbEventType.LNB_OVERLOAD;
 
     private static final String TAG = "Lnb";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     Map<LnbCallback, Executor> mCallbackMap =
             new HashMap<LnbCallback, Executor>();
     Tuner mOwner;
+    TunerResourceManager mTunerResourceManager;
+    int mClientId;
     private final Object mCallbackLock = new Object();
 
 
@@ -174,6 +179,10 @@ public class Lnb implements AutoCloseable {
             }
         }
         setOwner(tuner);
+        if (mOwner != null) {
+            mTunerResourceManager = mOwner.getTunerResourceManager();
+            mClientId = mOwner.getClientId();
+        }
     }
 
     /**
@@ -210,6 +219,8 @@ public class Lnb implements AutoCloseable {
         Objects.requireNonNull(newOwner, "newOwner must not be null");
         synchronized (mLock) {
             mOwner = newOwner;
+            mTunerResourceManager = newOwner.getTunerResourceManager();
+            mClientId = newOwner.getClientId();
         }
     }
 
@@ -317,21 +328,42 @@ public class Lnb implements AutoCloseable {
      * Releases the LNB instance.
      */
     public void close() {
-        synchronized (mLock) {
-            if (mIsClosed) {
-                return;
-            }
-            int res = nativeClose();
-            if (res != Tuner.RESULT_SUCCESS) {
-                TunerUtils.throwExceptionForResult(res, "Failed to close LNB");
-            } else {
-                mIsClosed = true;
-                if (mOwner != null) {
-                    mOwner.releaseLnb();
-                    mOwner = null;
+        acquireTRMSLock("close()");
+        try {
+            synchronized (mLock) {
+                if (mIsClosed) {
+                    return;
                 }
-                mCallbackMap.clear();
+                int res = nativeClose();
+                if (res != Tuner.RESULT_SUCCESS) {
+                    TunerUtils.throwExceptionForResult(res, "Failed to close LNB");
+                } else {
+                    mIsClosed = true;
+                    if (mOwner != null) {
+                        mOwner.releaseLnb();
+                        mOwner = null;
+                    }
+                    mCallbackMap.clear();
+                }
             }
+        } finally {
+            releaseTRMSLock();
         }
+    }
+
+    private void acquireTRMSLock(String functionNameForLog) {
+        if (DEBUG) {
+            Log.d(TAG, "ATTEMPT:acquireLock() in " + functionNameForLog
+                    + "for clientId:" + mClientId);
+        }
+        if (!mTunerResourceManager.acquireLock(mClientId)) {
+            Log.e(TAG, "FAILED:acquireLock() in " + functionNameForLog
+                    + " for clientId:" + mClientId + " - this can cause deadlock between"
+                    + " Tuner API calls and onReclaimResources()");
+        }
+    }
+
+    private void releaseTRMSLock() {
+        mTunerResourceManager.releaseLock(mClientId);
     }
 }

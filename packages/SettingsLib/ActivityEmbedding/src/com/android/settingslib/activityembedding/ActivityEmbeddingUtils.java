@@ -20,8 +20,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.os.BuildCompat;
@@ -105,15 +103,7 @@ public final class ActivityEmbeddingUtils {
             return false;
         }
 
-        final String shouldHideNavigateUpButton =
-                Settings.Global.getString(activity.getContentResolver(),
-                        "settings_hide_second_layer_page_navigate_up_button_in_two_pane");
-
-        if (TextUtils.isEmpty(shouldHideNavigateUpButton)
-                || Boolean.parseBoolean(shouldHideNavigateUpButton)) {
-            return isActivityEmbedded(activity);
-        }
-        return false;
+        return isActivityEmbedded(activity);
     }
 
     private ActivityEmbeddingUtils() {

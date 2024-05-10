@@ -98,18 +98,13 @@ public class DataConnectionStats extends BroadcastReceiver {
                 mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN);
         int networkType = regInfo == null ? TelephonyManager.NETWORK_TYPE_UNKNOWN
                 : regInfo.getAccessNetworkTechnology();
-        // If the device is in NSA NR connection the networkType will report as LTE.
-        // For cell dwell rate metrics, this should report NR instead.
-        if (mNrState == NetworkRegistrationInfo.NR_STATE_CONNECTED) {
-            networkType = TelephonyManager.NETWORK_TYPE_NR;
-        }
         if (DEBUG) {
             Log.d(TAG, String.format("Noting data connection for network type %s: %svisible",
                     networkType, visible ? "" : "not "));
         }
         try {
             mBatteryStats.notePhoneDataConnectionState(networkType, visible,
-                    mServiceState.getState(), mServiceState.getNrFrequencyRange());
+                    mServiceState.getState(), mNrState, mServiceState.getNrFrequencyRange());
         } catch (RemoteException e) {
             Log.w(TAG, "Error noting data connection state", e);
         }

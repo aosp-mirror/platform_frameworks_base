@@ -16,11 +16,17 @@
 
 package android.location;
 
+import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.location.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.WorkSource;
 import android.util.TimeUtils;
 
 import com.android.internal.util.Preconditions;
@@ -31,18 +37,31 @@ import java.util.Objects;
  * This class contains extra parameters to pass in a GNSS measurement request.
  */
 public final class GnssMeasurementRequest implements Parcelable {
+    /**
+     * Represents a passive only request. Such a request will not trigger any active GNSS
+     * measurements or power usage itself, but may receive GNSS measurements generated in response
+     * to other requests.
+     *
+     * <p class="note">Note that on Android T, such a request will trigger one GNSS measurement.
+     * Another GNSS measurement will be triggered after {@link #PASSIVE_INTERVAL} and so on.
+     *
+     * @see GnssMeasurementRequest#getIntervalMillis()
+     */
+    public static final int PASSIVE_INTERVAL = Integer.MAX_VALUE;
+
     private final boolean mCorrelationVectorOutputsEnabled;
     private final boolean mFullTracking;
     private final int mIntervalMillis;
-
+    private WorkSource mWorkSource;
     /**
      * Creates a {@link GnssMeasurementRequest} with a full list of parameters.
      */
     private GnssMeasurementRequest(boolean fullTracking, boolean correlationVectorOutputsEnabled,
-            int intervalMillis) {
+            int intervalMillis, WorkSource workSource) {
         mFullTracking = fullTracking;
         mCorrelationVectorOutputsEnabled = correlationVectorOutputsEnabled;
         mIntervalMillis = intervalMillis;
+        mWorkSource = Objects.requireNonNull(workSource);
     }
 
     /**
@@ -64,9 +83,10 @@ public final class GnssMeasurementRequest implements Parcelable {
      * <p>If true, GNSS chipset switches off duty cycling. In such a mode, no clock
      * discontinuities are expected, and when supported, carrier phase should be continuous in
      * good signal conditions. All non-blocklisted, healthy constellations, satellites and
-     * frequency bands that the chipset supports must be reported in this mode. The GNSS chipset
-     * will consume more power in full tracking mode than in duty cycling mode. If false, GNSS
-     * chipset optimizes power via duty cycling, constellations and frequency limits, etc.
+     * frequency bands that are meaningful to positioning accuracy must be tracked and reported in
+     * this mode. The GNSS chipset will consume more power in full tracking mode than in duty
+     * cycling mode. If false, GNSS chipset optimizes power via duty cycling, constellations and
+     * frequency limits, etc.
      *
      * <p>Full GNSS tracking mode affects GnssMeasurement and other GNSS functionalities
      * including GNSS location.
@@ -76,15 +96,37 @@ public final class GnssMeasurementRequest implements Parcelable {
     }
 
     /**
-     * Represents the requested time interval between the reported measurements in milliseconds.
+     * Returns the requested time interval between the reported measurements in milliseconds, or
+     * {@link #PASSIVE_INTERVAL} if this is a passive, no power request. A passive request will not
+     * actively generate GNSS measurement updates, but may receive GNSS measurement updates
+     * generated as a result of other GNSS measurement requests.
      *
      * <p>If the time interval is not set, the default value is 0, which means the fastest rate the
      * GNSS chipset can report.
      *
      * <p>The GNSS chipset may report measurements with a rate faster than requested.
+     *
+     * <p class="note">Note that on Android T, a request interval of {@link #PASSIVE_INTERVAL}
+     * will first trigger one GNSS measurement. Another GNSS measurement will be triggered after
+     * {@link #PASSIVE_INTERVAL} milliseconds ans so on.
      */
     public @IntRange(from = 0) int getIntervalMillis() {
         return mIntervalMillis;
+    }
+
+    /**
+     * Returns the work source used for power blame for this request. If empty (i.e.,
+     * {@link WorkSource#isEmpty()} is {@code true}, the system is free to assign power blame as it
+     * deems most appropriate.
+     *
+     * @return the work source used for power blame for this request
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_GNSS_API_MEASUREMENT_REQUEST_WORK_SOURCE)
+    @SystemApi
+    public @NonNull WorkSource getWorkSource() {
+        return mWorkSource;
     }
 
     @NonNull
@@ -93,8 +135,11 @@ public final class GnssMeasurementRequest implements Parcelable {
                 @Override
                 @NonNull
                 public GnssMeasurementRequest createFromParcel(@NonNull Parcel parcel) {
-                    return new GnssMeasurementRequest(parcel.readBoolean(), parcel.readBoolean(),
-                            parcel.readInt());
+                    return new GnssMeasurementRequest(
+                            /* fullTracking= */ parcel.readBoolean(),
+                            /* correlationVectorOutputsEnabled= */ parcel.readBoolean(),
+                            /* intervalMillis= */ parcel.readInt(),
+                            /* workSource= */ parcel.readTypedObject(WorkSource.CREATOR));
                 }
 
                 @Override
@@ -108,6 +153,7 @@ public final class GnssMeasurementRequest implements Parcelable {
         parcel.writeBoolean(mFullTracking);
         parcel.writeBoolean(mCorrelationVectorOutputsEnabled);
         parcel.writeInt(mIntervalMillis);
+        parcel.writeTypedObject(mWorkSource, 0);
     }
 
     @NonNull
@@ -115,13 +161,20 @@ public final class GnssMeasurementRequest implements Parcelable {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("GnssMeasurementRequest[");
-        s.append("@");
-        TimeUtils.formatDuration(mIntervalMillis, s);
+        if (mIntervalMillis == PASSIVE_INTERVAL) {
+            s.append("passive");
+        } else {
+            s.append("@");
+            TimeUtils.formatDuration(mIntervalMillis, s);
+        }
         if (mFullTracking) {
             s.append(", FullTracking");
         }
         if (mCorrelationVectorOutputsEnabled) {
             s.append(", CorrelationVectorOutputs");
+        }
+        if (mWorkSource != null && !mWorkSource.isEmpty()) {
+            s.append(", ").append(mWorkSource);
         }
         s.append(']');
         return s.toString();
@@ -141,12 +194,16 @@ public final class GnssMeasurementRequest implements Parcelable {
         if (mIntervalMillis != other.mIntervalMillis) {
             return false;
         }
+        if (!Objects.equals(mWorkSource, other.mWorkSource)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFullTracking, mCorrelationVectorOutputsEnabled, mIntervalMillis);
+        return Objects.hash(mFullTracking, mCorrelationVectorOutputsEnabled, mIntervalMillis,
+                mWorkSource);
     }
 
     @Override
@@ -159,6 +216,7 @@ public final class GnssMeasurementRequest implements Parcelable {
         private boolean mCorrelationVectorOutputsEnabled;
         private boolean mFullTracking;
         private int mIntervalMillis;
+        private WorkSource mWorkSource;
 
         /**
          * Constructs a {@link Builder} instance.
@@ -173,6 +231,7 @@ public final class GnssMeasurementRequest implements Parcelable {
             mCorrelationVectorOutputsEnabled = request.isCorrelationVectorOutputsEnabled();
             mFullTracking = request.isFullTracking();
             mIntervalMillis = request.getIntervalMillis();
+            mWorkSource = request.getWorkSource();
         }
 
         /**
@@ -213,11 +272,17 @@ public final class GnssMeasurementRequest implements Parcelable {
 
         /**
          * Set the time interval between the reported measurements in milliseconds, which is 0 by
-         * default.
+         * default. The request interval may be set to {@link #PASSIVE_INTERVAL} which indicates
+         * this request will not actively generate GNSS measurement updates, but may receive
+         * GNSS measurement updates generated as a result of other GNSS measurement requests.
          *
          * <p>An interval of 0 milliseconds means the fastest rate the chipset can report.
          *
          * <p>The GNSS chipset may report measurements with a rate faster than requested.
+         *
+         * <p class="note">Note that on Android T, a request interval of {@link #PASSIVE_INTERVAL}
+         * will first trigger one GNSS measurement. Another GNSS measurement will be triggered after
+         * {@link #PASSIVE_INTERVAL} milliseconds and so on.
          */
         @NonNull public Builder setIntervalMillis(@IntRange(from = 0) int value) {
             mIntervalMillis = Preconditions.checkArgumentInRange(value, 0, Integer.MAX_VALUE,
@@ -225,11 +290,30 @@ public final class GnssMeasurementRequest implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the work source to use for power blame for this request. Passing in null or leaving
+         * it unset will be an empty WorkSource, which implies the system is free to assign power
+         * blame as it determines best for this request (which usually means blaming the owner of
+         * the GnssMeasurement listener).
+         *
+         * <p>Permissions enforcement occurs when resulting request is actually used, not when this
+         * method is invoked.
+         *
+         * @hide
+         */
+        @FlaggedApi(Flags.FLAG_GNSS_API_MEASUREMENT_REQUEST_WORK_SOURCE)
+        @SystemApi
+        @RequiresPermission(Manifest.permission.UPDATE_DEVICE_STATS)
+        public @NonNull Builder setWorkSource(@Nullable WorkSource workSource) {
+            mWorkSource = workSource;
+            return this;
+        }
+
         /** Builds a {@link GnssMeasurementRequest} instance as specified by this builder. */
         @NonNull
         public GnssMeasurementRequest build() {
             return new GnssMeasurementRequest(mFullTracking, mCorrelationVectorOutputsEnabled,
-                    mIntervalMillis);
+                    mIntervalMillis, new WorkSource(mWorkSource));
         }
     }
 }

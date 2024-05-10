@@ -2,9 +2,11 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final String BLUETOOTH_STACK = "android.permission.BLUETOOTH_STACK";
     field public static final String CONTROL_AUTOMOTIVE_GNSS = "android.permission.CONTROL_AUTOMOTIVE_GNSS";
     field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
     field public static final String MAKE_UID_VISIBLE = "android.permission.MAKE_UID_VISIBLE";
+    field @FlaggedApi("android.companion.flags.companion_transport_apis") public static final String USE_COMPANION_TRANSPORTS = "android.permission.USE_COMPANION_TRANSPORTS";
   }
 
 }
@@ -13,12 +15,22 @@ package android.app {
 
   @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public final boolean isResumed();
   }
 
   public class ActivityManager {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int[] getUidFrozenState(@NonNull int[]);
+    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void registerUidFrozenStateChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
+    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void unregisterUidFrozenStateChangedCallback(@NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
+  }
+
+  public static interface ActivityManager.UidFrozenStateChangedCallback {
+    method public void onUidFrozenStateChanged(@NonNull int[], @NonNull int[]);
+    field public static final int UID_FROZEN_STATE_FROZEN = 1; // 0x1
+    field public static final int UID_FROZEN_STATE_UNFROZEN = 2; // 0x2
   }
 
   public class AppOpsManager {
@@ -62,8 +74,33 @@ package android.app.admin {
   public class DevicePolicyManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getLogoutUser();
+    method public boolean hasManagedProfileCallerIdAccess(@NonNull android.os.UserHandle, @NonNull String);
+    method public boolean hasManagedProfileContactsAccess(@NonNull android.os.UserHandle, @NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public int logoutUser();
     field public static final String ACTION_SHOW_NEW_USER_DISCLAIMER = "android.app.action.SHOW_NEW_USER_DISCLAIMER";
+  }
+
+}
+
+package android.companion {
+
+  public final class CompanionDeviceManager {
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void addOnMessageReceivedListener(@NonNull java.util.concurrent.Executor, int, @NonNull android.companion.CompanionDeviceManager.OnMessageReceivedListener);
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void addOnTransportsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnTransportsChangedListener);
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void removeOnMessageReceivedListener(int, @NonNull android.companion.CompanionDeviceManager.OnMessageReceivedListener);
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void removeOnTransportsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnTransportsChangedListener);
+    method @FlaggedApi("android.companion.companion_transport_apis") @RequiresPermission(android.Manifest.permission.USE_COMPANION_TRANSPORTS) public void sendMessage(int, @NonNull byte[], @NonNull int[]);
+    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 1667729539; // 0x63678883
+    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 1669491075; // 0x63826983
+    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_REMOTE_AUTHENTICATION = 1669494629; // 0x63827765
+  }
+
+  @FlaggedApi("android.companion.companion_transport_apis") public static interface CompanionDeviceManager.OnMessageReceivedListener {
+    method public void onMessageReceived(int, @NonNull byte[]);
+  }
+
+  @FlaggedApi("android.companion.companion_transport_apis") public static interface CompanionDeviceManager.OnTransportsChangedListener {
+    method public void onTransportsChanged(@NonNull java.util.List<android.companion.AssociationInfo>);
   }
 
 }
@@ -79,6 +116,8 @@ package android.content {
   }
 
   public abstract class Context {
+    method @NonNull public android.content.Context createContextForSdkInSandbox(@NonNull android.content.pm.ApplicationInfo, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
@@ -97,11 +136,15 @@ package android.content {
 package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.content.pm.sdk_lib_independence") @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getOptionalSharedLibraryInfos();
     method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraryInfos();
+    field public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1; // 0xffffffff
+    field public static final int HIDDEN_API_ENFORCEMENT_DISABLED = 0; // 0x0
+    field public static final int HIDDEN_API_ENFORCEMENT_ENABLED = 2; // 0x2
+    field public static final int HIDDEN_API_ENFORCEMENT_JUST_WARN = 1; // 0x1
   }
 
   public abstract class PackageManager {
-    method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public String getSdkSandboxPackageName();
     method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     field public static final String EXTRA_VERIFICATION_ROOT_HASH = "android.content.pm.extra.VERIFICATION_ROOT_HASH";
@@ -140,16 +183,6 @@ package android.hardware.usb {
 
 }
 
-package android.location {
-
-  public class LocationManager {
-    method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public boolean injectLocation(@NonNull android.location.Location);
-    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public boolean isAutomotiveGnssSuspended();
-    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public void setAutomotiveGnssSuspended(boolean);
-  }
-
-}
-
 package android.media {
 
   public class AudioManager {
@@ -158,13 +191,13 @@ package android.media {
     method @NonNull public java.util.List<android.bluetooth.BluetoothCodecConfig> getHwOffloadFormatsSupportedForA2dp();
     method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio();
     method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeBroadcast();
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BluetoothProfileConnectionInfo);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setA2dpSuspended(boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpEnabled(boolean);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpSamplingRate(int);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpVolume(int);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setLeAudioSuspended(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BluetoothProfileConnectionInfo);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setA2dpSuspended(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpSamplingRate(int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setHfpVolume(int);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK) public void setLeAudioSuspended(boolean);
     method public void setStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
@@ -173,6 +206,7 @@ package android.media {
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpInfo(boolean, int);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpSinkInfo(int);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createHearingAidInfo(boolean);
+    method @FlaggedApi("android.media.audio.sco_managed_by_audio") @NonNull public static android.media.BluetoothProfileConnectionInfo createHfpInfo();
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioInfo(boolean, boolean);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioOutputInfo(boolean, int);
     method public int describeContents();
@@ -297,7 +331,47 @@ package android.net.netstats {
 
 }
 
+package android.net.wifi {
+
+  public final class WifiKeystore {
+    method @NonNull public static byte[] get(@NonNull String);
+    method @NonNull public static String[] list(@NonNull String);
+    method public static boolean put(@NonNull String, @NonNull byte[]);
+    method public static boolean remove(@NonNull String);
+  }
+
+}
+
+package android.nfc {
+
+  public class NfcServiceManager {
+    method @NonNull public android.nfc.NfcServiceManager.ServiceRegisterer getNfcManagerServiceRegisterer();
+  }
+
+  public static class NfcServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public NfcServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public static final class NfcServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @NonNull public android.os.IBinder getOrThrow() throws android.nfc.NfcServiceManager.ServiceNotFoundException;
+    method public void register(@NonNull android.os.IBinder);
+    method @Nullable public android.os.IBinder tryGet();
+  }
+
+}
+
 package android.os {
+
+  public class ArtModuleServiceManager {
+    method @FlaggedApi("android.content.pm.use_art_service_v2") @NonNull public android.os.ArtModuleServiceManager.ServiceRegisterer getArtdPreRebootServiceRegisterer();
+    method @NonNull public android.os.ArtModuleServiceManager.ServiceRegisterer getArtdServiceRegisterer();
+    method @FlaggedApi("android.content.pm.use_art_service_v2") @NonNull public android.os.ArtModuleServiceManager.ServiceRegisterer getDexoptChrootSetupServiceRegisterer();
+  }
+
+  public static final class ArtModuleServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder waitForService();
+  }
 
   public final class BatteryStatsManager {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void reportNetworkInterfaceForTransports(@NonNull String, @NonNull int[]) throws java.lang.RuntimeException;
@@ -411,10 +485,46 @@ package android.provider {
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static java.util.Map<java.lang.String,java.util.List<android.content.ContentValues>> queryRawContactEntity(@NonNull android.content.ContentResolver, long);
   }
 
-  public final class DeviceConfig {
-    field public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
-    field public static final String NAMESPACE_APP_STANDBY = "app_standby";
-    field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
+  public class DeviceConfigInitializer {
+    method @Nullable public static android.provider.DeviceConfigServiceManager getDeviceConfigServiceManager();
+    method public static void setDeviceConfigServiceManager(@NonNull android.provider.DeviceConfigServiceManager);
+  }
+
+  public class DeviceConfigServiceManager {
+    method @NonNull public android.provider.DeviceConfigServiceManager.ServiceRegisterer getDeviceConfigUpdatableServiceRegisterer();
+  }
+
+  public static class DeviceConfigServiceManager.ServiceNotFoundException extends java.lang.Exception {
+  }
+
+  public static final class DeviceConfigServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @NonNull public android.os.IBinder getOrThrow() throws android.provider.DeviceConfigServiceManager.ServiceNotFoundException;
+    method public void register(@NonNull android.os.IBinder);
+    method @Nullable public android.os.IBinder tryGet();
+  }
+
+  public final class Settings {
+    field public static final int RESET_MODE_PACKAGE_DEFAULTS = 1; // 0x1
+    field public static final int RESET_MODE_TRUSTED_DEFAULTS = 4; // 0x4
+    field public static final int RESET_MODE_UNTRUSTED_CHANGES = 3; // 0x3
+    field public static final int RESET_MODE_UNTRUSTED_DEFAULTS = 2; // 0x2
+  }
+
+  public static final class Settings.Config extends android.provider.Settings.NameValueTable {
+    method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void clearMonitorCallback(@NonNull android.content.ContentResolver);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean deleteString(@NonNull String, @NonNull String);
+    method @NonNull public static java.util.Map<java.lang.String,java.lang.String> getAllStrings();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String);
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static java.util.Map<java.lang.String,java.lang.String> getStrings(@NonNull String, @NonNull java.util.List<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static int getSyncDisabledMode();
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean putString(@NonNull String, @NonNull String, @Nullable String, boolean);
+    method public static void registerContentObserver(@Nullable String, boolean, @NonNull android.database.ContentObserver);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.MONITOR_DEVICE_CONFIG_ACCESS) public static void setMonitorCallback(@NonNull android.content.ContentResolver, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.MonitorCallback);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setStrings(@NonNull String, @NonNull java.util.Map<java.lang.String,java.lang.String>) throws android.provider.DeviceConfig.BadConfigException;
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void setSyncDisabledMode(int);
+    method public static void unregisterContentObserver(@NonNull android.database.ContentObserver);
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
@@ -435,6 +545,30 @@ package android.provider {
     field public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
     field public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
     field public static final String BLUETOOTH_NAME = "bluetooth_name";
+  }
+
+}
+
+package android.se.omapi {
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public class SeFrameworkInitializer {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public static android.se.omapi.SeServiceManager getSeServiceManager();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public static void setSeServiceManager(@NonNull android.se.omapi.SeServiceManager);
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public class SeServiceManager {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.se.omapi.SeServiceManager.ServiceRegisterer getSeManagerServiceRegisterer();
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public static class SeServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor @FlaggedApi("android.nfc.enable_nfc_mainline") public SeServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  @FlaggedApi("android.nfc.enable_nfc_mainline") public static final class SeServiceManager.ServiceRegisterer {
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public android.os.IBinder get();
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public android.os.IBinder getOrThrow() throws android.se.omapi.SeServiceManager.ServiceNotFoundException;
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") public void register(@NonNull android.os.IBinder);
+    method @FlaggedApi("android.nfc.enable_nfc_mainline") @Nullable public android.os.IBinder tryGet();
   }
 
 }
@@ -500,6 +634,15 @@ package android.util {
   public class SystemConfigFileCommitEventLogger {
     ctor public SystemConfigFileCommitEventLogger(@NonNull String);
     method public void setStartTime(long);
+  }
+
+}
+
+package android.view.accessibility {
+
+  public final class AccessibilityManager {
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean startFlashNotificationSequence(@NonNull android.content.Context, int);
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean stopFlashNotificationSequence(@NonNull android.content.Context);
   }
 
 }

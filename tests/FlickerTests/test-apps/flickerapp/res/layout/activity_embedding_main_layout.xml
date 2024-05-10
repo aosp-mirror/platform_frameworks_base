@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright 2022 The Android Open Source Project
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/holo_orange_light">
+
+    <Button
+        android:id="@+id/launch_secondary_activity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchSecondaryActivity"
+        android:tag="LEFT_TO_RIGHT"
+        android:text="Launch Secondary Activity" />
+
+    <Button
+        android:id="@+id/launch_secondary_activity_rtl_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchSecondaryActivity"
+        android:tag="RIGHT_TO_LEFT"
+        android:text="Launch Secondary Activity in RTL" />
+
+    <Button
+        android:id="@+id/launch_secondary_activity_horizontally_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchSecondaryActivity"
+        android:tag="BOTTOM_TO_TOP"
+        android:text="Launch Secondary Activity Horizontally" />
+
+    <Button
+        android:id="@+id/launch_placeholder_split_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchPlaceholderSplit"
+        android:tag="LEFT_TO_RIGHT"
+        android:text="Launch Placeholder Split" />
+
+    <Button
+        android:id="@+id/launch_always_expand_activity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchAlwaysExpandActivity"
+        android:text="Launch Always Expand Activity" />
+
+    <Button
+        android:id="@+id/launch_placeholder_split_rtl_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchPlaceholderSplit"
+        android:tag="RIGHT_TO_LEFT"
+        android:text="Launch Placeholder Split in RTL" />
+
+    <Button
+        android:id="@+id/launch_trampoline_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchTrampolineActivity"
+        android:tag="LEFT_TO_RIGHT"
+        android:text="Launch Trampoline Activity" />
+
+</LinearLayout>

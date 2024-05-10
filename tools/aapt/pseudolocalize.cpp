@@ -42,7 +42,7 @@ String16 Pseudolocalizer::text(const String16& text) {
   size_t depth = mLastDepth;
   size_t lastpos, pos;
   const size_t length= text.size();
-  const char16_t* str = text.string();
+  const char16_t* str = text.c_str();
   bool escaped = false;
   for (lastpos = pos = 0; pos < length; pos++) {
     char16_t c = str[pos];
@@ -181,7 +181,7 @@ static bool is_possible_normal_placeholder_end(const char16_t c) {
 
 static String16 pseudo_generate_expansion(const unsigned int length) {
     String16 result = k_expansion_string;
-    const char16_t* s = result.string();
+    const char16_t* s = result.c_str();
     if (result.size() < length) {
         result += String16(" ");
         result += pseudo_generate_expansion(length - result.size());
@@ -237,7 +237,7 @@ String16 PseudoMethodAccent::end() {
  */
 String16 PseudoMethodAccent::text(const String16& source)
 {
-    const char16_t* s = source.string();
+    const char16_t* s = source.c_str();
     String16 result;
     const size_t I = source.size();
     bool lastspace = true;
@@ -357,7 +357,7 @@ String16 PseudoMethodAccent::placeholder(const String16& source) {
 
 String16 PseudoMethodBidi::text(const String16& source)
 {
-    const char16_t* s = source.string();
+    const char16_t* s = source.c_str();
     String16 result;
     bool lastspace = true;
     bool space = true;

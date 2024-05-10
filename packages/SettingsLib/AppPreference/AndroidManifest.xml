@@ -16,7 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.settingslib.widget">
+          package="com.android.settingslib.widget.preference.app">
 
     <uses-sdk android:minSdkVersion="21" />
 

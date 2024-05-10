@@ -16,8 +16,14 @@
 
 package com.android.wm.shell.unfold;
 
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
+
+import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -27,6 +33,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -36,6 +43,7 @@ import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
 import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
 import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +66,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     @Nullable
     private IBinder mTransition;
 
+    private boolean mAnimationFinished = false;
     private final List<UnfoldTaskAnimator> mAnimators = new ArrayList<>();
 
     public UnfoldTransitionHandler(ShellInit shellInit,
@@ -68,9 +77,9 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             Executor executor,
             Transitions transitions) {
         mUnfoldProgressProvider = unfoldProgressProvider;
+        mTransitions = transitions;
         mTransactionPool = transactionPool;
         mExecutor = executor;
-        mTransitions = transitions;
 
         mAnimators.add(splitUnfoldTaskAnimator);
         mAnimators.add(fullscreenUnfoldAnimator);
@@ -98,6 +107,16 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionFinishCallback finishCallback) {
+        if (shouldPlayUnfoldAnimation(info) && transition != mTransition) {
+            // Take over transition that has unfold, we might receive it if no other handler
+            // accepted request in handleRequest, e.g. for rotation + unfold or
+            // TRANSIT_NONE + unfold transitions
+            mTransition = transition;
+
+            ProtoLog.v(WM_SHELL_TRANSITIONS, "UnfoldTransitionHandler: "
+                    + "take over startAnimation");
+        }
+
         if (transition != mTransition) return false;
 
         for (int i = 0; i < mAnimators.size(); i++) {
@@ -105,8 +124,14 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             animator.clearTasks();
 
             info.getChanges().forEach(change -> {
-                if (change.getTaskInfo() != null
-                        && change.getMode() == TRANSIT_CHANGE
+                if (change.getTaskInfo() != null) {
+                    ProtoLog.v(WM_SHELL_TRANSITIONS,
+                            "startAnimation, check taskInfo: %s, mode: %s, isApplicableTask: %s",
+                            change.getTaskInfo(), TransitionInfo.modeToString(change.getMode()),
+                            animator.isApplicableTask(change.getTaskInfo()));
+                }
+                if (change.getTaskInfo() != null && (change.getMode() == TRANSIT_CHANGE
+                        || TransitionUtil.isOpeningType(change.getMode()))
                         && animator.isApplicableTask(change.getTaskInfo())) {
                     animator.onTaskAppeared(change.getTaskInfo(), change.getLeash());
                 }
@@ -121,6 +146,13 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
         startTransaction.apply();
         mFinishCallback = finishCallback;
+
+        // Shell transition started when unfold animation has already finished,
+        // finish shell transition immediately
+        if (mAnimationFinished) {
+            finishTransitionIfNeeded();
+        }
+
         return true;
     }
 
@@ -150,25 +182,104 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
     @Override
     public void onStateChangeFinished() {
-        if (mFinishCallback == null) return;
+        mAnimationFinished = true;
+        finishTransitionIfNeeded();
+    }
 
-        for (int i = 0; i < mAnimators.size(); i++) {
-            final UnfoldTaskAnimator animator = mAnimators.get(i);
-            animator.clearTasks();
-            animator.stop();
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull TransitionFinishCallback finishCallback) {
+        if (info.getType() != TRANSIT_CHANGE) {
+            return;
+        }
+        if ((info.getFlags() & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
+            return;
+        }
+        // TODO (b/286928742) unfold transition handler should be part of mixed handler to
+        //  handle merges better.
+        for (int i = 0; i < info.getChanges().size(); ++i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            if (taskInfo != null
+                    && taskInfo.configuration.windowConfiguration.isAlwaysOnTop()) {
+                // Tasks that are always on top (e.g. bubbles), will handle their own transition
+                // as they are on top of everything else. So skip merging transitions here.
+                return;
+            }
+        }
+        // Apply changes happening during the unfold animation immediately
+        t.apply();
+        finishCallback.onTransitionFinished(null);
+    }
+
+    /** Whether `request` contains an unfold action. */
+    public boolean shouldPlayUnfoldAnimation(@NonNull TransitionRequestInfo request) {
+        // Unfold animation won't play when animations are disabled
+        if (!ValueAnimator.areAnimatorsEnabled()) return false;
+
+        return (request.getType() == TRANSIT_CHANGE
+                && request.getDisplayChange() != null
+                && isUnfoldDisplayChange(request.getDisplayChange()));
+    }
+
+    private boolean isUnfoldDisplayChange(
+            @NonNull TransitionRequestInfo.DisplayChange displayChange) {
+        if (!displayChange.isPhysicalDisplayChanged()) {
+            return false;
         }
 
-        mFinishCallback.onTransitionFinished(null, null);
-        mFinishCallback = null;
-        mTransition = null;
+        if (displayChange.getStartAbsBounds() == null || displayChange.getEndAbsBounds() == null) {
+            return false;
+        }
+
+        // Handle only unfolding, currently we don't have an animation when folding
+        final int endArea =
+                displayChange.getEndAbsBounds().width() * displayChange.getEndAbsBounds().height();
+        final int startArea = displayChange.getStartAbsBounds().width()
+                * displayChange.getStartAbsBounds().height();
+
+        return endArea > startArea;
+    }
+
+    /** Whether `transitionInfo` contains an unfold action. */
+    public boolean shouldPlayUnfoldAnimation(@NonNull TransitionInfo transitionInfo) {
+        // Unfold animation won't play when animations are disabled
+        if (!ValueAnimator.areAnimatorsEnabled()) return false;
+        // Only handle transitions that are marked as physical display switch
+        // See PhysicalDisplaySwitchTransitionLauncher for the conditions
+        if ((transitionInfo.getFlags() & TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH) == 0) return false;
+
+        for (int i = 0; i < transitionInfo.getChanges().size(); i++) {
+            final TransitionInfo.Change change = transitionInfo.getChanges().get(i);
+            // We are interested only in display container changes
+            if ((change.getFlags() & TransitionInfo.FLAG_IS_DISPLAY) == 0) {
+                continue;
+            }
+
+            // Handle only unfolding, currently we don't have an animation when folding
+            if (change.getEndAbsBounds() == null || change.getStartAbsBounds() == null) {
+                continue;
+            }
+
+            final int afterArea =
+                    change.getEndAbsBounds().width() * change.getEndAbsBounds().height();
+            final int beforeArea = change.getStartAbsBounds().width()
+                    * change.getStartAbsBounds().height();
+
+            if (afterArea > beforeArea) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Nullable
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        if (request.getType() == TRANSIT_CHANGE && request.getDisplayChange() != null
-                && request.getDisplayChange().isPhysicalDisplayChanged()) {
+        if (shouldPlayUnfoldAnimation(request)) {
             mTransition = transition;
             return new WindowContainerTransaction();
         }
@@ -177,5 +288,26 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
 
     public boolean willHandleTransition() {
         return mTransition != null;
+    }
+
+    @Override
+    public void onFoldStateChanged(boolean isFolded) {
+        if (isFolded) {
+            mAnimationFinished = false;
+        }
+    }
+
+    private void finishTransitionIfNeeded() {
+        if (mFinishCallback == null) return;
+
+        for (int i = 0; i < mAnimators.size(); i++) {
+            final UnfoldTaskAnimator animator = mAnimators.get(i);
+            animator.clearTasks();
+            animator.stop();
+        }
+
+        mFinishCallback.onTransitionFinished(null);
+        mFinishCallback = null;
+        mTransition = null;
     }
 }

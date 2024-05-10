@@ -29,7 +29,7 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.res.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import java.util.Date;
@@ -114,7 +114,11 @@ public class DateView extends TextView {
         if (mDateFormat == null) {
             final Locale l = Locale.getDefault();
             DateFormat format = DateFormat.getInstanceForSkeleton(mDatePattern, l);
-            format.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
+            // The use of CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE instead of
+            // CAPITALIZATION_FOR_STANDALONE is to address
+            // https://unicode-org.atlassian.net/browse/ICU-21631
+            // TODO(b/229287642): Switch back to CAPITALIZATION_FOR_STANDALONE
+            format.setContext(DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE);
             mDateFormat = format;
         }
 

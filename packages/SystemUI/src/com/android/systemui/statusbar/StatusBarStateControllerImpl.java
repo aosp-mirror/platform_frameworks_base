@@ -16,10 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_FROM_AOD;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_TRANSITION_TO_AOD;
 
@@ -33,29 +29,29 @@ import android.text.format.DateFormat;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.view.Choreographer;
-import android.view.InsetsFlags;
-import android.view.InsetsVisibilities;
 import android.view.View;
-import android.view.ViewDebug;
-import android.view.WindowInsetsController.Appearance;
-import android.view.WindowInsetsController.Behavior;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
+import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.Dumpable;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.res.R;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.systemui.util.Compile;
+import com.android.systemui.util.kotlin.JavaAdapter;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -69,8 +65,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class StatusBarStateControllerImpl implements
         SysuiStatusBarStateController,
-        CallbackController<StateListener>,
-        Dumpable {
+        CallbackController<StateListener> {
     private static final String TAG = "SbStateController";
     private static final boolean DEBUG_IMMERSIVE_APPS =
             SystemProperties.getBoolean("persist.debug.immersive_apps", false);
@@ -100,6 +95,8 @@ public class StatusBarStateControllerImpl implements
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
     private final UiEventLogger mUiEventLogger;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    private final JavaAdapter mJavaAdapter;
+    private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private int mState;
     private int mLastState;
     private int mUpcomingState;
@@ -109,8 +106,9 @@ public class StatusBarStateControllerImpl implements
     // Record the HISTORY_SIZE most recent states
     private int mHistoryIndex = 0;
     private HistoricalState[] mHistoricalRecords = new HistoricalState[HISTORY_SIZE];
-    // This is used by InteractionJankMonitor to get callback from HWUI.
+    // These views are used by InteractionJankMonitor to get callback from HWUI.
     private View mView;
+    private KeyguardClockSwitch mClockSwitchView;
 
     /**
      * If any of the system bars is hidden.
@@ -126,6 +124,11 @@ public class StatusBarStateControllerImpl implements
      * If the device is currently dozing or not.
      */
     private boolean mIsDozing;
+
+    /**
+     * If the device is currently dreaming or not.
+     */
+    private boolean mIsDreaming;
 
     /**
      * If the status bar is currently expanded or not.
@@ -153,15 +156,24 @@ public class StatusBarStateControllerImpl implements
     private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     @Inject
-    public StatusBarStateControllerImpl(UiEventLogger uiEventLogger, DumpManager dumpManager,
-            InteractionJankMonitor interactionJankMonitor) {
+    public StatusBarStateControllerImpl(
+            UiEventLogger uiEventLogger,
+            InteractionJankMonitor interactionJankMonitor,
+            JavaAdapter javaAdapter,
+            Lazy<ShadeInteractor> shadeInteractorLazy) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitor = interactionJankMonitor;
+        mJavaAdapter = javaAdapter;
+        mShadeInteractorLazy = shadeInteractorLazy;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
+    }
 
-        dumpManager.registerDumpable(this);
+    @Override
+    public void start() {
+        mJavaAdapter.alwaysCollectFlow(mShadeInteractorLazy.get().isAnyExpanded(),
+                this::onShadeOrQsExpanded);
     }
 
     @Override
@@ -263,21 +275,6 @@ public class StatusBarStateControllerImpl implements
     }
 
     @Override
-    public boolean setPanelExpanded(boolean expanded) {
-        if (mIsExpanded == expanded) {
-            return false;
-        }
-        mIsExpanded = expanded;
-        String tag = getClass().getSimpleName() + "#setIsExpanded";
-        DejankUtils.startDetectingBlockingIpcs(tag);
-        for (RankedListener rl : new ArrayList<>(mListeners)) {
-            rl.mListener.onExpandedChanged(mIsExpanded);
-        }
-        DejankUtils.stopDetectingBlockingIpcs(tag);
-        return true;
-    }
-
-    @Override
     public float getInterpolatedDozeAmount() {
         return mDozeInterpolator.getInterpolation(mDozeAmount);
     }
@@ -303,6 +300,34 @@ public class StatusBarStateControllerImpl implements
     }
 
     @Override
+    public boolean setIsDreaming(boolean isDreaming) {
+        if (Log.isLoggable(TAG, Log.DEBUG) || Compile.IS_DEBUG) {
+            Log.d(TAG, "setIsDreaming:" + isDreaming);
+        }
+        if (mIsDreaming == isDreaming) {
+            return false;
+        }
+
+        mIsDreaming = isDreaming;
+
+        synchronized (mListeners) {
+            String tag = getClass().getSimpleName() + "#setIsDreaming";
+            DejankUtils.startDetectingBlockingIpcs(tag);
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onDreamingChanged(isDreaming);
+            }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean isDreaming() {
+        return mIsDreaming;
+    }
+
+    @Override
     public void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated) {
         if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
             if (animated && mDozeAmountTarget == dozeAmount) {
@@ -316,12 +341,25 @@ public class StatusBarStateControllerImpl implements
         if ((mView == null || !mView.isAttachedToWindow())
                 && (view != null && view.isAttachedToWindow())) {
             mView = view;
+            mClockSwitchView = view.findViewById(R.id.keyguard_clock_container);
         }
         mDozeAmountTarget = dozeAmount;
         if (animated) {
             startDozeAnimation();
         } else {
             setDozeAmountInternal(dozeAmount);
+        }
+    }
+
+    private void onShadeOrQsExpanded(Boolean isExpanded) {
+        if (mIsExpanded != isExpanded) {
+            mIsExpanded = isExpanded;
+            String tag = getClass().getSimpleName() + "#setIsExpanded";
+            DejankUtils.startDetectingBlockingIpcs(tag);
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.mListener.onExpandedChanged(mIsExpanded);
+            }
+            DejankUtils.stopDetectingBlockingIpcs(tag);
         }
     }
 
@@ -384,6 +422,16 @@ public class StatusBarStateControllerImpl implements
         }
     }
 
+    /** Returns the id of the currently rendering clock */
+    public String getClockId() {
+        if (mClockSwitchView == null) {
+            Log.e(TAG, "Clock container was missing");
+            return KeyguardClockSwitch.MISSING_CLOCK_ID;
+        }
+
+        return mClockSwitchView.getClockId();
+    }
+
     private void beginInteractionJankMonitor() {
         final boolean shouldPost =
                 (mIsDozing && mDozeAmount == 0) || (!mIsDozing && mDozeAmount == 1);
@@ -393,6 +441,7 @@ public class StatusBarStateControllerImpl implements
                         Choreographer.CALLBACK_ANIMATION, this::beginInteractionJankMonitor, null);
             } else {
                 Configuration.Builder builder = Configuration.Builder.withView(getCujType(), mView)
+                        .setTag(getClockId())
                         .setDeferMonitorForAnimationStart(false);
                 mInteractionJankMonitor.begin(builder);
             }
@@ -496,34 +545,6 @@ public class StatusBarStateControllerImpl implements
     }
 
     @Override
-    public void setSystemBarAttributes(@Appearance int appearance, @Behavior int behavior,
-            InsetsVisibilities requestedVisibilities, String packageName) {
-        boolean isFullscreen = !requestedVisibilities.getVisibility(ITYPE_STATUS_BAR)
-                || !requestedVisibilities.getVisibility(ITYPE_NAVIGATION_BAR);
-        if (mIsFullscreen != isFullscreen) {
-            mIsFullscreen = isFullscreen;
-            synchronized (mListeners) {
-                for (RankedListener rl : new ArrayList<>(mListeners)) {
-                    rl.mListener.onFullscreenStateChanged(isFullscreen);
-                }
-            }
-        }
-
-        // TODO (b/190543382): Finish the logging logic.
-        // This section can be removed if we don't need to print it on logcat.
-        if (DEBUG_IMMERSIVE_APPS) {
-            boolean dim = (appearance & APPEARANCE_LOW_PROFILE_BARS) != 0;
-            String behaviorName = ViewDebug.flagsToString(InsetsFlags.class, "behavior", behavior);
-            String requestedVisibilityString = requestedVisibilities.toString();
-            if (requestedVisibilityString.isEmpty()) {
-                requestedVisibilityString = "none";
-            }
-            Log.d(TAG, packageName + " dim=" + dim + " behavior=" + behaviorName
-                    + " requested visibilities: " + requestedVisibilityString);
-        }
-    }
-
-    @Override
     public void setPulsing(boolean pulsing) {
         if (mPulsing != pulsing) {
             mPulsing = pulsing;
@@ -550,6 +571,7 @@ public class StatusBarStateControllerImpl implements
         pw.println(" mLeaveOpenOnKeyguardHide=" + mLeaveOpenOnKeyguardHide);
         pw.println(" mKeyguardRequested=" + mKeyguardRequested);
         pw.println(" mIsDozing=" + mIsDozing);
+        pw.println(" mIsDreaming=" + mIsDreaming);
         pw.println(" mListeners{" + mListeners.size() + "}=");
         for (RankedListener rl : mListeners) {
             pw.println("    " + rl.mListener);

@@ -21,6 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/keyguard_lock_padding"
+        android:importantForAccessibility="no"
         android:ellipsize="marquee"
         android:focusable="true"
         android:gravity="center"

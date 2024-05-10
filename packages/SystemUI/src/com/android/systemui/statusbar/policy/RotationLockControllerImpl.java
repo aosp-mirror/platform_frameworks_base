@@ -93,12 +93,12 @@ public final class RotationLockControllerImpl implements RotationLockController 
         return mRotationPolicy.isCameraRotationEnabled();
     }
 
-    public void setRotationLocked(boolean locked) {
-        mRotationPolicy.setRotationLock(locked);
+    public void setRotationLocked(boolean locked, String caller) {
+        mRotationPolicy.setRotationLock(locked, caller);
     }
 
-    public void setRotationLockedAtAngle(boolean locked, int rotation) {
-        mRotationPolicy.setRotationLockAtAngle(locked, rotation);
+    public void setRotationLockedAtAngle(boolean locked, int rotation, String caller) {
+        mRotationPolicy.setRotationLockAtAngle(locked, rotation, caller);
     }
 
     public boolean isRotationLockAffordanceVisible() {

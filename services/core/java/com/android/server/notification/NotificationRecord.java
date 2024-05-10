@@ -24,9 +24,10 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
+import android.annotation.FlaggedApi;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.IActivityManager;
+import android.app.Flags;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.Person;
@@ -46,6 +47,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.provider.Settings;
@@ -96,12 +99,12 @@ public final class NotificationRecord {
     // the period after which a notification is updated where it can make sound
     private static final int MAX_SOUND_DELAY_MS = 2000;
     private final StatusBarNotification sbn;
-    IActivityManager mAm;
-    UriGrantsManagerInternal mUgmInternal;
+    private final UriGrantsManagerInternal mUgmInternal;
     final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
-
+    private KeyguardManager mKeyguardManager;
+    private final PowerManager mPowerManager;
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
     IBinder permissionOwner;
@@ -114,6 +117,8 @@ public final class NotificationRecord {
 
     // is this notification currently being intercepted by Zen Mode?
     private boolean mIntercept;
+    // has the intercept value been set explicitly? we only want to log it if new or changed
+    private boolean mInterceptSet;
 
     // is this notification hidden since the app pkg is suspended?
     private boolean mHidden;
@@ -210,13 +215,14 @@ public final class NotificationRecord {
     // Whether this notification record should have an update logged the next time notifications
     // are sorted.
     private boolean mPendingLogUpdate = false;
+    private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
+    private boolean mSensitiveContent = false;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
         this.sbn = sbn;
         mTargetSdkVersion = LocalServices.getService(PackageManagerInternal.class)
                 .getPackageTargetSdkVersion(sbn.getPackageName());
-        mAm = ActivityManager.getService();
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
@@ -224,6 +230,8 @@ public final class NotificationRecord {
         mUpdateTimeMs = mCreationTimeMs;
         mInterruptionTimeMs = mCreationTimeMs;
         mContext = context;
+        mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+        mPowerManager = mContext.getSystemService(PowerManager.class);
         stats = new NotificationUsageStats.SingleNotificationStats();
         mChannel = channel;
         mPreChannelsNotification = isPreChannelsNotification();
@@ -499,7 +507,10 @@ public final class NotificationRecord {
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "mImportanceExplanation=" + getImportanceExplanation());
+        pw.println(prefix + "mProposedImportance="
+                + NotificationListenerService.Ranking.importanceToString(mProposedImportance));
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
+        pw.println(prefix + "mSensitiveContent=" + mSensitiveContent);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
         pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
@@ -538,6 +549,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mAdjustments=" + mAdjustments);
         pw.println(prefix + "shortcut=" + notification.getShortcutId()
                 + " found valid? " + (mShortcutInfo != null));
+        pw.println(prefix + "mUserVisOverride=" + getPackageVisibilityOverride());
     }
 
     private void dumpNotification(PrintWriter pw, String prefix, Notification notification,
@@ -567,6 +579,7 @@ public final class NotificationRecord {
         } else {
             pw.println("null");
         }
+        pw.println(prefix + "vis=" + notification.visibility);
         pw.println(prefix + "contentView=" + formatRemoteViews(notification.contentView));
         pw.println(prefix + "bigContentView=" + formatRemoteViews(notification.bigContentView));
         pw.println(prefix + "headsUpContentView="
@@ -682,7 +695,7 @@ public final class NotificationRecord {
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
-                                    Adjustment.KEY_SNOOZE_CRITERIA);
+                                    Adjustment.KEY_SNOOZE_CRITERIA, android.service.notification.SnoozeCriterion.class);
                     setSnoozeCriteria(snoozeCriterionList);
                     EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_SNOOZE_CRITERIA,
                             snoozeCriterionList.toString());
@@ -708,7 +721,7 @@ public final class NotificationRecord {
                 }
                 if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
                     setSystemGeneratedSmartActions(
-                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS));
+                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, android.app.Notification.Action.class));
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_CONTEXTUAL_ACTIONS,
                             getSystemGeneratedSmartActions().toString());
@@ -737,6 +750,18 @@ public final class NotificationRecord {
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_NOT_CONVERSATION,
                             Boolean.toString(mIsNotConversationOverride));
+                }
+                if (signals.containsKey(Adjustment.KEY_IMPORTANCE_PROPOSAL)) {
+                    mProposedImportance = signals.getInt(Adjustment.KEY_IMPORTANCE_PROPOSAL);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_IMPORTANCE_PROPOSAL,
+                            Integer.toString(mProposedImportance));
+                }
+                if (signals.containsKey(Adjustment.KEY_SENSITIVE_CONTENT)) {
+                    mSensitiveContent = signals.getBoolean(Adjustment.KEY_SENSITIVE_CONTENT);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_SENSITIVE_CONTENT,
+                            Boolean.toString(mSensitiveContent));
                 }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
@@ -870,6 +895,17 @@ public final class NotificationRecord {
         return stats.naturalImportance;
     }
 
+    public int getProposedImportance() {
+        return mProposedImportance;
+    }
+
+    /**
+     * @return true if the notification contains sensitive content detected by the assistant.
+     */
+    public boolean hasSensitiveContent() {
+        return mSensitiveContent;
+    }
+
     public float getRankingScore() {
         return mRankingScore;
     }
@@ -901,6 +937,7 @@ public final class NotificationRecord {
 
     public boolean setIntercepted(boolean intercept) {
         mIntercept = intercept;
+        mInterceptSet = true;
         return mIntercept;
     }
 
@@ -919,6 +956,10 @@ public final class NotificationRecord {
 
     public boolean isIntercepted() {
         return mIntercept;
+    }
+
+    public boolean hasInterceptBeenSet() {
+        return mInterceptSet;
     }
 
     public boolean isNewEnoughForAlerting(long now) {
@@ -1218,8 +1259,25 @@ public final class NotificationRecord {
         mStats.setExpanded();
     }
 
+    /** Run when the notification is direct replied. */
     public void recordDirectReplied() {
+        if (Flags.lifetimeExtensionRefactor()) {
+            // Mark the NotificationRecord as lifetime extended.
+            Notification notification = getSbn().getNotification();
+            notification.flags |= Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        }
+
         mStats.setDirectReplied();
+    }
+
+
+    /** Run when the notification is smart replied. */
+    @FlaggedApi(Flags.FLAG_LIFETIME_EXTENSION_REFACTOR)
+    public void recordSmartReplied() {
+        Notification notification = getSbn().getNotification();
+        notification.flags |= Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+
+        mStats.setSmartReplied();
     }
 
     public void recordDismissalSurface(@NotificationStats.DismissalSurface int surface) {
@@ -1345,18 +1403,27 @@ public final class NotificationRecord {
      * Collect all {@link Uri} that should have permission granted to whoever
      * will be rendering it.
      */
-    protected void calculateGrantableUris() {
-        final Notification notification = getNotification();
-        notification.visitUris((uri) -> {
-            visitGrantableUri(uri, false, false);
-        });
+    private void calculateGrantableUris() {
+        Trace.beginSection("NotificationRecord.calculateGrantableUris");
+        try {
+            // We can't grant URI permissions from system.
+            final int sourceUid = getSbn().getUid();
+            if (sourceUid == android.os.Process.SYSTEM_UID) return;
 
-        if (notification.getChannelId() != null) {
-            NotificationChannel channel = getChannel();
-            if (channel != null) {
-                visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
-                        & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+            final Notification notification = getNotification();
+            notification.visitUris((uri) -> {
+                visitGrantableUri(uri, false, false);
+            });
+
+            if (notification.getChannelId() != null) {
+                NotificationChannel channel = getChannel();
+                if (channel != null) {
+                    visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
+                            & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                }
             }
+        } finally {
+            Trace.endSection();
         }
     }
 
@@ -1371,13 +1438,14 @@ public final class NotificationRecord {
     private void visitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
-        // We can't grant Uri permissions from system
-        final int sourceUid = getSbn().getUid();
-        if (sourceUid == android.os.Process.SYSTEM_UID) return;
+        if (mGrantableUris != null && mGrantableUris.contains(uri)) {
+            return; // already verified this URI
+        }
 
+        final int sourceUid = getSbn().getUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            // This will throw SecurityException if caller can't grant
+            // This will throw a SecurityException if the caller can't grant.
             mUgmInternal.checkGrantUriPermission(sourceUid, null,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
@@ -1580,6 +1648,22 @@ public final class NotificationRecord {
 
     public ArraySet<String> getPhoneNumbers() {
         return mPhoneNumbers;
+    }
+
+    boolean isLocked() {
+        return getKeyguardManager().isKeyguardLocked()
+                || !mPowerManager.isInteractive();  // Unlocked AOD
+    }
+
+    /**
+     * For some early {@link NotificationRecord}, {@link KeyguardManager} can be {@code null} in
+     * the constructor. Retrieve it again if it is null.
+     */
+    private KeyguardManager getKeyguardManager() {
+        if (mKeyguardManager == null) {
+            mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+        }
+        return mKeyguardManager;
     }
 
     @VisibleForTesting

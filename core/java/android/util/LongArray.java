@@ -23,8 +23,6 @@ import android.os.Build;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
-import libcore.util.EmptyArray;
-
 import java.util.Arrays;
 
 /**
@@ -32,6 +30,7 @@ import java.util.Arrays;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class LongArray implements Cloneable {
     private static final int MIN_CAPACITY_INCREMENT = 12;
 
@@ -48,7 +47,7 @@ public class LongArray implements Cloneable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public LongArray() {
-        this(10);
+        this(0);
     }
 
     /**

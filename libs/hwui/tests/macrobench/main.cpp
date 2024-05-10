@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-#include "tests/common/LeakChecker.h"
-#include "tests/common/TestScene.h"
-
-#include "Properties.h"
-#include "hwui/Typeface.h"
-#include "HardwareBitmapUploader.h"
-#include "renderthread/RenderProxy.h"
-
+#include <android-base/parsebool.h>
 #include <benchmark/benchmark.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <fnmatch.h>
 #include <getopt.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
+
+#include <regex>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include "HardwareBitmapUploader.h"
+#include "Properties.h"
+#include "hwui/Typeface.h"
+#include "renderthread/RenderProxy.h"
+#include "tests/common/LeakChecker.h"
+#include "tests/common/TestScene.h"
 
 using namespace android;
+using namespace android::base;
 using namespace android::uirenderer;
 using namespace android::uirenderer::test;
 
@@ -69,6 +71,9 @@ OPTIONS:
   --onscreen           Render tests on device screen. By default tests
                        are offscreen rendered
   --benchmark_format   Set output format. Possible values are tabular, json, csv
+  --benchmark_list_tests Lists the tests that would run but does not run them
+  --benchmark_filter=<regex> Filters the test set to the given regex. If prefixed with `-` and test
+                       that doesn't match the given regex is run
   --renderer=TYPE      Sets the render pipeline to use. May be skiagl or skiavk
   --skip-leak-check    Skips the memory leak check
   --report-gpu-memory[=verbose]  Dumps the GPU memory usage after each test run
@@ -140,6 +145,9 @@ static bool setBenchmarkFormat(const char* format) {
     if (!strcmp(format, "tabular")) {
         gBenchmarkReporter.reset(new benchmark::ConsoleReporter());
     } else if (!strcmp(format, "json")) {
+        // We cannot print the leak check if outputing to JSON as that will break
+        // JSON parsers since it's not JSON-formatted
+        gRunLeakCheck = false;
         gBenchmarkReporter.reset(new benchmark::JSONReporter());
     } else {
         fprintf(stderr, "Unknown format '%s'\n", format);
@@ -160,6 +168,24 @@ static bool setRenderer(const char* renderer) {
     return true;
 }
 
+static void addTestsThatMatchFilter(std::string spec) {
+    if (spec.empty() || spec == "all") {
+        spec = ".";  // Regexp that matches all benchmarks
+    }
+    bool isNegativeFilter = false;
+    if (spec[0] == '-') {
+        spec.replace(0, 1, "");
+        isNegativeFilter = true;
+    }
+    std::regex re(spec, std::regex_constants::extended);
+    for (auto& iter : TestScene::testMap()) {
+        if ((isNegativeFilter && !std::regex_search(iter.first, re)) ||
+            (!isNegativeFilter && std::regex_search(iter.first, re))) {
+            gRunTests.push_back(iter.second);
+        }
+    }
+}
+
 // For options that only exist in long-form. Anything in the
 // 0-255 range is reserved for short options (which just use their ASCII value)
 namespace LongOpts {
@@ -170,6 +196,8 @@ enum {
     ReportFrametime,
     CpuSet,
     BenchmarkFormat,
+    BenchmarkListTests,
+    BenchmarkFilter,
     Onscreen,
     Offscreen,
     Renderer,
@@ -179,14 +207,16 @@ enum {
 }
 
 static const struct option LONG_OPTIONS[] = {
-        {"frames", required_argument, nullptr, 'f'},
-        {"repeat", required_argument, nullptr, 'r'},
+        {"count", required_argument, nullptr, 'c'},
+        {"runs", required_argument, nullptr, 'r'},
         {"help", no_argument, nullptr, 'h'},
         {"list", no_argument, nullptr, LongOpts::List},
         {"wait-for-gpu", no_argument, nullptr, LongOpts::WaitForGpu},
         {"report-frametime", optional_argument, nullptr, LongOpts::ReportFrametime},
         {"cpuset", required_argument, nullptr, LongOpts::CpuSet},
         {"benchmark_format", required_argument, nullptr, LongOpts::BenchmarkFormat},
+        {"benchmark_list_tests", optional_argument, nullptr, LongOpts::BenchmarkListTests},
+        {"benchmark_filter", required_argument, nullptr, LongOpts::BenchmarkFilter},
         {"onscreen", no_argument, nullptr, LongOpts::Onscreen},
         {"offscreen", no_argument, nullptr, LongOpts::Offscreen},
         {"renderer", required_argument, nullptr, LongOpts::Renderer},
@@ -197,8 +227,12 @@ static const struct option LONG_OPTIONS[] = {
 static const char* SHORT_OPTIONS = "c:r:h";
 
 void parseOptions(int argc, char* argv[]) {
+    benchmark::BenchmarkReporter::Context::executable_name = (argc > 0) ? argv[0] : "unknown";
+
     int c;
     bool error = false;
+    bool listTestsOnly = false;
+    bool testsAreFiltered = false;
     opterr = 0;
 
     while (true) {
@@ -270,6 +304,21 @@ void parseOptions(int argc, char* argv[]) {
                 if (!setBenchmarkFormat(optarg)) {
                     error = true;
                 }
+                break;
+
+            case LongOpts::BenchmarkListTests:
+                if (!optarg || ParseBool(optarg) == ParseBoolResult::kTrue) {
+                    listTestsOnly = true;
+                }
+                break;
+
+            case LongOpts::BenchmarkFilter:
+                if (!optarg) {
+                    error = true;
+                    break;
+                }
+                addTestsThatMatchFilter(optarg);
+                testsAreFiltered = true;
                 break;
 
             case LongOpts::Renderer:
@@ -346,10 +395,17 @@ void parseOptions(int argc, char* argv[]) {
                 }
             }
         } while (optind < argc);
-    } else {
+    } else if (gRunTests.empty() && !testsAreFiltered) {
         for (auto& iter : TestScene::testMap()) {
             gRunTests.push_back(iter.second);
         }
+    }
+
+    if (listTestsOnly) {
+        for (auto& iter : gRunTests) {
+            std::cout << iter.name << std::endl;
+        }
+        exit(EXIT_SUCCESS);
     }
 }
 

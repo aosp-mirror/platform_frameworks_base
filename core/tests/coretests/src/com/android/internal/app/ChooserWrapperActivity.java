@@ -30,9 +30,12 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.UserHandle;
+import android.util.Pair;
 import android.util.Size;
 
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
 import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.TargetInfo;
@@ -59,25 +62,16 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     }
 
     @Override
-    protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
-            Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed) {
-        AbstractMultiProfilePagerAdapter multiProfilePagerAdapter =
-                super.createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
-        multiProfilePagerAdapter.setInjector(sOverrides.multiPagerAdapterInjector);
-        return multiProfilePagerAdapter;
-    }
-
-    @Override
     public ChooserListAdapter createChooserListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed,
-            ResolverListController resolverListController) {
+            UserHandle userHandle) {
         PackageManager packageManager =
                 sOverrides.packageManager == null ? context.getPackageManager()
                         : sOverrides.packageManager;
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, resolverListController,
+                filterLastUsed, createListController(userHandle),
                 this, this, packageManager,
-                getChooserActivityLogger());
+                getChooserActivityLogger(), userHandle);
     }
 
     @Override
@@ -134,12 +128,29 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     }
 
     @Override
-    public void safelyStartActivity(com.android.internal.app.chooser.TargetInfo cti) {
-        if (sOverrides.onSafelyStartCallback != null &&
-                sOverrides.onSafelyStartCallback.apply(cti)) {
+    protected CrossProfileIntentsChecker createCrossProfileIntentsChecker() {
+        if (sOverrides.mCrossProfileIntentsChecker != null) {
+            return sOverrides.mCrossProfileIntentsChecker;
+        }
+        return super.createCrossProfileIntentsChecker();
+    }
+
+    @Override
+    protected AbstractMultiProfilePagerAdapter.QuietModeManager createQuietModeManager() {
+        if (sOverrides.mQuietModeManager != null) {
+            return sOverrides.mQuietModeManager;
+        }
+        return super.createQuietModeManager();
+    }
+
+    @Override
+    public void safelyStartActivityInternal(TargetInfo cti, UserHandle user,
+            @Nullable Bundle options) {
+        if (sOverrides.onSafelyStartInternalCallback != null
+                && sOverrides.onSafelyStartInternalCallback.apply(cti)) {
             return;
         }
-        super.safelyStartActivity(cti);
+        super.safelyStartActivityInternal(cti, user, options);
     }
 
     @Override
@@ -231,6 +242,14 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     }
 
     @Override
+    protected UserHandle getTabOwnerUserHandleForLaunch() {
+        if (sOverrides.tabOwnerUserHandleForLaunch == null) {
+            return super.getTabOwnerUserHandleForLaunch();
+        }
+        return sOverrides.tabOwnerUserHandleForLaunch;
+    }
+
+    @Override
     public Context createContextAsUser(UserHandle user, int flags) {
         // return the current context as a work profile doesn't really exist in these tests
         return getApplicationContext();
@@ -239,6 +258,12 @@ public class ChooserWrapperActivity extends ChooserActivity implements IChooserW
     @Override
     protected void queryDirectShareTargets(ChooserListAdapter adapter,
             boolean skipAppPredictionService) {
+        if (sOverrides.directShareTargets != null) {
+            Pair<Integer, ServiceResultInfo[]> result =
+                    sOverrides.directShareTargets.apply(this, adapter);
+            sendShortcutManagerShareTargetResults(result.first, result.second);
+            return;
+        }
         if (sOverrides.onQueryDirectShareTargets != null) {
             sOverrides.onQueryDirectShareTargets.apply(adapter);
         }

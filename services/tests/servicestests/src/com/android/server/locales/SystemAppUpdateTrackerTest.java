@@ -16,6 +16,8 @@
 
 package com.android.server.locales;
 
+import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
@@ -44,11 +46,13 @@ import android.os.LocaleList;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AtomicFile;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.After;
@@ -85,6 +89,7 @@ public class SystemAppUpdateTrackerTest {
             /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
             /* originatingPackageName = */ null,
             /* installingPackageName = */ DEFAULT_INSTALLER_PACKAGE_NAME,
+            /* updateOwnerPackageName = */ null,
             /* packageSource = */ PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
 
     @Mock
@@ -124,6 +129,9 @@ public class SystemAppUpdateTrackerTest {
         doReturn(DEFAULT_INSTALL_SOURCE_INFO).when(mMockPackageManager)
                 .getInstallSourceInfo(anyString());
         doReturn(mMockPackageManager).when(mMockContext).getPackageManager();
+        doReturn(InstrumentationRegistry.getContext().getContentResolver())
+                .when(mMockContext).getContentResolver();
+        doReturn(mMockContext).when(mMockContext).createContextAsUser(any(), anyInt());
 
         mStoragefile = new AtomicFile(new File(
                 Environment.getExternalStorageDirectory(), "systemUpdateUnitTests.xml"));
@@ -131,8 +139,8 @@ public class SystemAppUpdateTrackerTest {
         mSystemAppUpdateTracker = new SystemAppUpdateTracker(mMockContext,
             mLocaleManagerService, mStoragefile);
 
-        mPackageMonitor = new LocaleManagerServicePackageMonitor(
-                mockLocaleManagerBackupHelper, mSystemAppUpdateTracker);
+        mPackageMonitor = new LocaleManagerServicePackageMonitor(mockLocaleManagerBackupHelper,
+                mSystemAppUpdateTracker, mLocaleManagerService);
     }
 
     @After
@@ -163,7 +171,8 @@ public class SystemAppUpdateTrackerTest {
             /* isUpdatedSystemApp = */ true))
             .when(mMockPackageManager).getApplicationInfo(eq(DEFAULT_PACKAGE_NAME_1), any());
         doReturn(new ActivityTaskManagerInternal.PackageConfig(/* nightMode = */ 0,
-                DEFAULT_LOCALES)).when(mMockActivityTaskManager)
+                        DEFAULT_LOCALES, GRAMMATICAL_GENDER_NOT_SPECIFIED))
+                .when(mMockActivityTaskManager)
                 .getApplicationConfig(anyString(), anyInt());
 
         mPackageMonitor.onPackageUpdateFinished(DEFAULT_PACKAGE_NAME_1,
@@ -181,7 +190,8 @@ public class SystemAppUpdateTrackerTest {
             /* isUpdatedSystemApp = */ true))
             .when(mMockPackageManager).getApplicationInfo(eq(DEFAULT_PACKAGE_NAME_1), any());
         doReturn(new ActivityTaskManagerInternal.PackageConfig(/* nightMode = */ 0,
-                DEFAULT_LOCALES)).when(mMockActivityTaskManager)
+                        DEFAULT_LOCALES, GRAMMATICAL_GENDER_NOT_SPECIFIED))
+                .when(mMockActivityTaskManager)
                 .getApplicationConfig(anyString(), anyInt());
 
         // first update

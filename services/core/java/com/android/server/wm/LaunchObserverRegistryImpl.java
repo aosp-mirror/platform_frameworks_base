@@ -84,10 +84,10 @@ class LaunchObserverRegistryImpl extends ActivityMetricsLaunchObserver implement
     }
 
     @Override
-    public void onActivityLaunched(long id, ComponentName name, int temperature) {
+    public void onActivityLaunched(long id, ComponentName name, int temperature, int userId) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 LaunchObserverRegistryImpl::handleOnActivityLaunched,
-                this, id, name, temperature));
+                this, id, name, temperature, userId));
     }
 
     @Override
@@ -97,10 +97,11 @@ class LaunchObserverRegistryImpl extends ActivityMetricsLaunchObserver implement
     }
 
     @Override
-    public void onActivityLaunchFinished(long id, ComponentName name, long timestampNs) {
+    public void onActivityLaunchFinished(long id, ComponentName name, long timestampNs,
+            int launchMode) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
                 LaunchObserverRegistryImpl::handleOnActivityLaunchFinished,
-                this, id, name, timestampNs));
+                this, id, name, timestampNs, launchMode));
     }
 
     @Override
@@ -137,10 +138,10 @@ class LaunchObserverRegistryImpl extends ActivityMetricsLaunchObserver implement
     }
 
     private void handleOnActivityLaunched(long id, ComponentName name,
-            @Temperature int temperature) {
+            @Temperature int temperature, int userId) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
-            mList.get(i).onActivityLaunched(id, name, temperature);
+            mList.get(i).onActivityLaunched(id, name, temperature, userId);
         }
     }
 
@@ -151,10 +152,11 @@ class LaunchObserverRegistryImpl extends ActivityMetricsLaunchObserver implement
         }
     }
 
-    private void handleOnActivityLaunchFinished(long id, ComponentName name, long timestampNs) {
+    private void handleOnActivityLaunchFinished(long id, ComponentName name, long timestampNs,
+            int launchMode) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
-            mList.get(i).onActivityLaunchFinished(id, name, timestampNs);
+            mList.get(i).onActivityLaunchFinished(id, name, timestampNs, launchMode);
         }
     }
 

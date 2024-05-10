@@ -31,8 +31,8 @@ import android.util.Log;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.SensorManagerPlugin;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.concurrency.ThreadFactory;
 
 import java.util.ArrayList;
@@ -191,7 +191,7 @@ public class AsyncSensorManager extends SensorManager
     }
 
     @Override
-    protected boolean initDataInjectionImpl(boolean enable) {
+    protected boolean initDataInjectionImpl(boolean enable, @DataInjectionMode int mode) {
         throw new UnsupportedOperationException("not implemented");
     }
 

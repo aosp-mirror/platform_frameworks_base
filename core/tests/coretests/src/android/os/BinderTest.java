@@ -16,21 +16,35 @@
 
 package android.os;
 
-import androidx.test.filters.SmallTest;
-
-import junit.framework.TestCase;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.testng.Assert.assertThrows;
 
-public class BinderTest extends TestCase {
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.filters.SmallTest;
+
+import org.junit.Rule;
+import org.junit.Test;
+
+@IgnoreUnderRavenwood(blockedBy = WorkSource.class)
+public class BinderTest {
     private static final int UID = 100;
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    @Test
     @SmallTest
     public void testSetWorkSource() throws Exception {
         Binder.setCallingWorkSourceUid(UID);
         assertEquals(UID, Binder.getCallingWorkSourceUid());
     }
 
+    @Test
     @SmallTest
     public void testClearWorkSource() throws Exception {
         Binder.setCallingWorkSourceUid(UID);
@@ -38,6 +52,7 @@ public class BinderTest extends TestCase {
         assertEquals(-1, Binder.getCallingWorkSourceUid());
     }
 
+    @Test
     @SmallTest
     public void testRestoreWorkSource() throws Exception {
         Binder.setCallingWorkSourceUid(UID);
@@ -46,11 +61,13 @@ public class BinderTest extends TestCase {
         assertEquals(UID, Binder.getCallingWorkSourceUid());
     }
 
+    @Test
     @SmallTest
     public void testGetCallingUidOrThrow_throws() throws Exception {
         assertThrows(IllegalStateException.class, () -> Binder.getCallingUidOrThrow());
     }
 
+    @Test
     @SmallTest
     public void testGetExtension() throws Exception {
         Binder binder = new Binder();

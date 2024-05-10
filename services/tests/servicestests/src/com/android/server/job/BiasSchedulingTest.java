@@ -21,10 +21,15 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.DeviceIdleManager;
 import android.test.AndroidTestCase;
+
+import androidx.test.filters.FlakyTest;
 
 import com.android.server.job.MockBiasJobService.TestEnvironment;
 import com.android.server.job.MockBiasJobService.TestEnvironment.Event;
+
+import libcore.junit.util.compat.CoreCompatChangeRule;
 
 import java.util.ArrayList;
 
@@ -48,6 +53,7 @@ public class BiasSchedulingTest extends AndroidTestCase {
         sJobServiceComponent = new ComponentName(getContext(), MockBiasJobService.class);
         mJobScheduler = (JobScheduler) getContext().getSystemService(Context.JOB_SCHEDULER_SERVICE);
         mJobScheduler.cancelAll();
+        getContext().getSystemService(DeviceIdleManager.class).endIdle("BiasSchedulingTest");
     }
 
     @Override
@@ -56,15 +62,17 @@ public class BiasSchedulingTest extends AndroidTestCase {
         super.tearDown();
     }
 
+    @FlakyTest(bugId = 293589359)
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testLowerBiasJobPreempted() throws Exception {
-        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+        for (int i = 0; i < JobConcurrencyManager.MAX_CONCURRENCY_LIMIT; ++i) {
             JobInfo job = new JobInfo.Builder(100 + i, sJobServiceComponent)
                     .setBias(LOW_BIAS)
                     .setOverrideDeadline(0)
                     .build();
             mJobScheduler.schedule(job);
         }
-        final int higherBiasJobId = 100 + JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT;
+        final int higherBiasJobId = 100 + JobConcurrencyManager.MAX_CONCURRENCY_LIMIT;
         JobInfo jobHigher = new JobInfo.Builder(higherBiasJobId, sJobServiceComponent)
                 .setBias(HIGH_BIAS)
                 .setMinimumLatency(2000)
@@ -87,15 +95,16 @@ public class BiasSchedulingTest extends AndroidTestCase {
         assertTrue("Lower bias jobs were not preempted.", wasJobHigherExecuted);
     }
 
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testHigherBiasJobNotPreempted() throws Exception {
-        for (int i = 0; i < JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT; ++i) {
+        for (int i = 0; i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT; ++i) {
             JobInfo job = new JobInfo.Builder(100 + i, sJobServiceComponent)
                     .setBias(HIGH_BIAS)
                     .setOverrideDeadline(0)
                     .build();
             mJobScheduler.schedule(job);
         }
-        final int lowerBiasJobId = 100 + JobConcurrencyManager.STANDARD_CONCURRENCY_LIMIT;
+        final int lowerBiasJobId = 100 + JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT;
         JobInfo jobLower = new JobInfo.Builder(lowerBiasJobId, sJobServiceComponent)
                 .setBias(LOW_BIAS)
                 .setMinimumLatency(2000)

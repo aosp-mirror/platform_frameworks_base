@@ -36,7 +36,7 @@ struct NameManglerPolicy {
    * We must know which references to mangle, and which to keep (android vs.
    * com.android.support).
    */
-  std::set<std::string> packages_to_mangle;
+  std::set<std::string, std::less<>> packages_to_mangle;
 };
 
 class NameMangler {
@@ -54,7 +54,7 @@ class NameMangler {
                         mangled_entry_name);
   }
 
-  bool ShouldMangle(const std::string& package) const {
+  bool ShouldMangle(std::string_view package) const {
     if (package.empty() || policy_.target_package_name == package) {
       return false;
     }
@@ -68,8 +68,8 @@ class NameMangler {
    * The mangled name should contain symbols that are illegal to define in XML,
    * so that there will never be name mangling collisions.
    */
-  static std::string MangleEntry(const std::string& package, const std::string& name) {
-    return package + "$" + name;
+  static std::string MangleEntry(std::string_view package, std::string_view name) {
+    return (std::string(package) += '$') += name;
   }
 
   /**

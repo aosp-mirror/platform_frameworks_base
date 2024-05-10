@@ -29,6 +29,9 @@ import java.util.function.Consumer;
  * Manages the lifecycle of a single instance of a remote listener, including the clean up if the
  * remote process dies.  All calls on this class should happen on the main shell thread.
  *
+ * Any external interface using this listener should also unregister the listener when it is
+ * invalidated, otherwise it may leak binder death recipients.
+ *
  * @param <C> The controller (must be RemoteCallable)
  * @param <L> The remote listener interface type
  */

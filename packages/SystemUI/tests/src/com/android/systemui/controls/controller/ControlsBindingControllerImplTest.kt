@@ -41,11 +41,11 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -116,11 +116,7 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testBindAndLoad_cancel() {
-        val callback = object : ControlsBindingController.LoadCallback {
-            override fun error(message: String) {}
-
-            override fun accept(t: List<Control>) {}
-        }
+        val callback = mock(ControlsBindingController.LoadCallback::class.java)
         val subscription = mock(IControlsSubscription::class.java)
 
         val canceller = controller.bindAndLoad(TEST_COMPONENT_NAME_1, callback)
@@ -130,6 +126,7 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
         canceller.run()
         verify(providers[0]).cancelSubscription(subscription)
+        verify(callback).error(any())
     }
 
     @Test
@@ -269,6 +266,14 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testBindServiceForPanel() {
+        controller.bindServiceForPanel(TEST_COMPONENT_NAME_1)
+        executor.runAllReady()
+
+        verify(providers[0]).bindServiceForPanel()
+    }
+
+    @Test
     fun testSubscribe() {
         val controlInfo1 = ControlInfo("id_1", "", "", DeviceTypes.TYPE_UNKNOWN)
         val controlInfo2 = ControlInfo("id_2", "", "", DeviceTypes.TYPE_UNKNOWN)
@@ -370,7 +375,13 @@ class TestableControlsBindingControllerImpl(
     executor: DelayableExecutor,
     lazyController: Lazy<ControlsController>,
     userTracker: UserTracker
-) : ControlsBindingControllerImpl(context, executor, lazyController, userTracker) {
+) : ControlsBindingControllerImpl(
+    context,
+    executor,
+    lazyController,
+    mock(PackageUpdateMonitor.Factory::class.java),
+    userTracker
+) {
 
     companion object {
         val providers = mutableListOf<ControlsProviderLifecycleManager>()

@@ -22,9 +22,20 @@
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
+#include <android-base/stringprintf.h>
 #include <android-base/thread_annotations.h>
+#include <com_android_input_flags.h>
+#include <ftl/enum.h>
+
+#include <mutex>
 
 #include "PointerControllerContext.h"
+
+#define INDENT "  "
+#define INDENT2 "    "
+#define INDENT3 "      "
+
+namespace input_flags = com::android::input::flags;
 
 namespace android {
 
@@ -37,14 +48,13 @@ const ui::Transform kIdentityTransform;
 // --- PointerController::DisplayInfoListener ---
 
 void PointerController::DisplayInfoListener::onWindowInfosChanged(
-        const std::vector<android::gui::WindowInfo>&,
-        const std::vector<android::gui::DisplayInfo>& displayInfos) {
+        const gui::WindowInfosUpdate& update) {
     std::scoped_lock lock(mLock);
     if (mPointerController == nullptr) return;
 
     // PointerController uses DisplayInfoListener's lock.
     base::ScopedLockAssertion assumeLocked(mPointerController->getLock());
-    mPointerController->onDisplayInfosChangedLocked(displayInfos);
+    mPointerController->onDisplayInfosChangedLocked(update.displayInfos);
 }
 
 void PointerController::DisplayInfoListener::onPointerControllerDestroyed() {
@@ -56,10 +66,28 @@ void PointerController::DisplayInfoListener::onPointerControllerDestroyed() {
 
 std::shared_ptr<PointerController> PointerController::create(
         const sp<PointerControllerPolicyInterface>& policy, const sp<Looper>& looper,
-        const sp<SpriteController>& spriteController) {
+        SpriteController& spriteController, bool enabled, ControllerType type) {
     // using 'new' to access non-public constructor
-    std::shared_ptr<PointerController> controller = std::shared_ptr<PointerController>(
-            new PointerController(policy, looper, spriteController));
+    std::shared_ptr<PointerController> controller;
+    switch (type) {
+        case ControllerType::MOUSE:
+            controller = std::shared_ptr<PointerController>(
+                    new MousePointerController(policy, looper, spriteController, enabled));
+            break;
+        case ControllerType::TOUCH:
+            controller = std::shared_ptr<PointerController>(
+                    new TouchPointerController(policy, looper, spriteController, enabled));
+            break;
+        case ControllerType::STYLUS:
+            controller = std::shared_ptr<PointerController>(
+                    new StylusPointerController(policy, looper, spriteController, enabled));
+            break;
+        case ControllerType::LEGACY:
+        default:
+            controller = std::shared_ptr<PointerController>(
+                    new PointerController(policy, looper, spriteController, enabled));
+            break;
+    }
 
     /*
      * Now we need to hook up the constructed PointerController object to its callbacks.
@@ -78,10 +106,10 @@ std::shared_ptr<PointerController> PointerController::create(
 }
 
 PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
-                                     const sp<Looper>& looper,
-                                     const sp<SpriteController>& spriteController)
+                                     const sp<Looper>& looper, SpriteController& spriteController,
+                                     bool enabled)
       : PointerController(
-                policy, looper, spriteController,
+                policy, looper, spriteController, enabled,
                 [](const sp<android::gui::WindowInfosListener>& listener) {
                     SurfaceComposerClient::getDefault()->addWindowInfosListener(listener);
                 },
@@ -90,13 +118,13 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
                 }) {}
 
 PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
-                                     const sp<Looper>& looper,
-                                     const sp<SpriteController>& spriteController,
-                                     WindowListenerConsumer registerListener,
+                                     const sp<Looper>& looper, SpriteController& spriteController,
+                                     bool enabled, WindowListenerConsumer registerListener,
                                      WindowListenerConsumer unregisterListener)
-      : mContext(policy, looper, spriteController, *this),
+      : mEnabled(enabled),
+        mContext(policy, looper, spriteController, *this),
         mCursorController(mContext),
-        mDisplayInfoListener(new DisplayInfoListener(this)),
+        mDisplayInfoListener(sp<DisplayInfoListener>::make(this)),
         mUnregisterWindowInfosListener(std::move(unregisterListener)) {
     std::scoped_lock lock(getLock());
     mLocked.presentation = Presentation::SPOT;
@@ -106,19 +134,22 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 PointerController::~PointerController() {
     mDisplayInfoListener->onPointerControllerDestroyed();
     mUnregisterWindowInfosListener(mDisplayInfoListener);
-    mContext.getPolicy()->onPointerDisplayIdChanged(ADISPLAY_ID_NONE, 0, 0);
+    mContext.getPolicy()->onPointerDisplayIdChanged(ADISPLAY_ID_NONE, FloatPoint{0, 0});
 }
 
 std::mutex& PointerController::getLock() const {
     return mDisplayInfoListener->mLock;
 }
 
-bool PointerController::getBounds(float* outMinX, float* outMinY, float* outMaxX,
-                                  float* outMaxY) const {
-    return mCursorController.getBounds(outMinX, outMinY, outMaxX, outMaxY);
+std::optional<FloatRect> PointerController::getBounds() const {
+    if (!mEnabled) return {};
+
+    return mCursorController.getBounds();
 }
 
 void PointerController::move(float deltaX, float deltaY) {
+    if (!mEnabled) return;
+
     const int32_t displayId = mCursorController.getDisplayId();
     vec2 transformed;
     {
@@ -129,15 +160,9 @@ void PointerController::move(float deltaX, float deltaY) {
     mCursorController.move(transformed.x, transformed.y);
 }
 
-void PointerController::setButtonState(int32_t buttonState) {
-    mCursorController.setButtonState(buttonState);
-}
-
-int32_t PointerController::getButtonState() const {
-    return mCursorController.getButtonState();
-}
-
 void PointerController::setPosition(float x, float y) {
+    if (!mEnabled) return;
+
     const int32_t displayId = mCursorController.getDisplayId();
     vec2 transformed;
     {
@@ -148,33 +173,43 @@ void PointerController::setPosition(float x, float y) {
     mCursorController.setPosition(transformed.x, transformed.y);
 }
 
-void PointerController::getPosition(float* outX, float* outY) const {
+FloatPoint PointerController::getPosition() const {
+    if (!mEnabled) {
+        return FloatPoint{0, 0};
+    }
+
     const int32_t displayId = mCursorController.getDisplayId();
-    mCursorController.getPosition(outX, outY);
+    const auto p = mCursorController.getPosition();
     {
         std::scoped_lock lock(getLock());
         const auto& transform = getTransformForDisplayLocked(displayId);
-        const auto xy = transform.inverse().transform(*outX, *outY);
-        *outX = xy.x;
-        *outY = xy.y;
+        return FloatPoint{transform.inverse().transform(p.x, p.y)};
     }
 }
 
 int32_t PointerController::getDisplayId() const {
+    if (!mEnabled) return ADISPLAY_ID_NONE;
+
     return mCursorController.getDisplayId();
 }
 
 void PointerController::fade(Transition transition) {
+    if (!mEnabled) return;
+
     std::scoped_lock lock(getLock());
     mCursorController.fade(transition);
 }
 
 void PointerController::unfade(Transition transition) {
+    if (!mEnabled) return;
+
     std::scoped_lock lock(getLock());
     mCursorController.unfade(transition);
 }
 
 void PointerController::setPresentation(Presentation presentation) {
+    if (!mEnabled) return;
+
     std::scoped_lock lock(getLock());
 
     if (mLocked.presentation == presentation) {
@@ -183,11 +218,24 @@ void PointerController::setPresentation(Presentation presentation) {
 
     mLocked.presentation = presentation;
 
+    if (input_flags::enable_pointer_choreographer()) {
+        // When pointer choreographer is enabled, the presentation mode is only set once when the
+        // PointerController is constructed, before the display viewport is provided.
+        // TODO(b/293587049): Clean up the PointerController interface after pointer choreographer
+        // is permanently enabled. The presentation can be set in the constructor.
+        mCursorController.setStylusHoverMode(presentation == Presentation::STYLUS_HOVER);
+        return;
+    }
+
     if (!mCursorController.isViewportValid()) {
         return;
     }
 
-    if (presentation == Presentation::POINTER) {
+    if (presentation == Presentation::POINTER || presentation == Presentation::STYLUS_HOVER) {
+        // For now, we support stylus hover using the mouse cursor implementation.
+        // TODO: Add proper support for stylus hover icons.
+        mCursorController.setStylusHoverMode(presentation == Presentation::STYLUS_HOVER);
+
         mCursorController.getAdditionalMouseResources();
         clearSpotsLocked();
     }
@@ -195,6 +243,8 @@ void PointerController::setPresentation(Presentation presentation) {
 
 void PointerController::setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
                                  BitSet32 spotIdBits, int32_t displayId) {
+    if (!mEnabled) return;
+
     std::scoped_lock lock(getLock());
     std::array<PointerCoords, MAX_POINTERS> outSpotCoords{};
     const ui::Transform& transform = getTransformForDisplayLocked(displayId);
@@ -218,12 +268,14 @@ void PointerController::setSpots(const PointerCoords* spotCoords, const uint32_t
 }
 
 void PointerController::clearSpots() {
+    if (!mEnabled) return;
+
     std::scoped_lock lock(getLock());
     clearSpotsLocked();
 }
 
 void PointerController::clearSpotsLocked() {
-    for (auto& [displayID, spotController] : mLocked.spotControllers) {
+    for (auto& [displayId, spotController] : mLocked.spotControllers) {
         spotController.clearSpots();
     }
 }
@@ -235,13 +287,14 @@ void PointerController::setInactivityTimeout(InactivityTimeout inactivityTimeout
 void PointerController::reloadPointerResources() {
     std::scoped_lock lock(getLock());
 
-    for (auto& [displayID, spotController] : mLocked.spotControllers) {
+    for (auto& [displayId, spotController] : mLocked.spotControllers) {
         spotController.reloadSpotResources();
     }
 
     if (mCursorController.resourcesLoaded()) {
         bool getAdditionalMouseResources = false;
-        if (mLocked.presentation == PointerController::Presentation::POINTER) {
+        if (mLocked.presentation == PointerController::Presentation::POINTER ||
+            mLocked.presentation == PointerController::Presentation::STYLUS_HOVER) {
             getAdditionalMouseResources = true;
         }
         mCursorController.reloadPointerResources(getAdditionalMouseResources);
@@ -249,27 +302,44 @@ void PointerController::reloadPointerResources() {
 }
 
 void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
-    std::scoped_lock lock(getLock());
+    struct PointerDisplayChangeArgs {
+        int32_t displayId;
+        FloatPoint cursorPosition;
+    };
+    std::optional<PointerDisplayChangeArgs> pointerDisplayChanged;
 
-    bool getAdditionalMouseResources = false;
-    if (mLocked.presentation == PointerController::Presentation::POINTER) {
-        getAdditionalMouseResources = true;
-    }
-    mCursorController.setDisplayViewport(viewport, getAdditionalMouseResources);
-    if (viewport.displayId != mLocked.pointerDisplayId) {
-        float xPos, yPos;
-        mCursorController.getPosition(&xPos, &yPos);
-        mContext.getPolicy()->onPointerDisplayIdChanged(viewport.displayId, xPos, yPos);
-        mLocked.pointerDisplayId = viewport.displayId;
+    { // acquire lock
+        std::scoped_lock lock(getLock());
+
+        bool getAdditionalMouseResources = false;
+        if (mLocked.presentation == PointerController::Presentation::POINTER ||
+            mLocked.presentation == PointerController::Presentation::STYLUS_HOVER) {
+            getAdditionalMouseResources = true;
+        }
+        mCursorController.setDisplayViewport(viewport, getAdditionalMouseResources);
+        if (viewport.displayId != mLocked.pointerDisplayId) {
+            mLocked.pointerDisplayId = viewport.displayId;
+            pointerDisplayChanged = {viewport.displayId, mCursorController.getPosition()};
+        }
+    } // release lock
+
+    if (pointerDisplayChanged) {
+        // Notify the policy without holding the pointer controller lock.
+        mContext.getPolicy()->onPointerDisplayIdChanged(pointerDisplayChanged->displayId,
+                                                        pointerDisplayChanged->cursorPosition);
     }
 }
 
-void PointerController::updatePointerIcon(int32_t iconId) {
+void PointerController::updatePointerIcon(PointerIconStyle iconId) {
+    if (!mEnabled) return;
+
     std::scoped_lock lock(getLock());
     mCursorController.updatePointerIcon(iconId);
 }
 
 void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
+    if (!mEnabled) return;
+
     std::scoped_lock lock(getLock());
     mCursorController.setCustomPointerIcon(icon);
 }
@@ -278,7 +348,7 @@ void PointerController::doInactivityTimeout() {
     fade(Transition::GRADUAL);
 }
 
-void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& viewports) {
+void PointerController::onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports) {
     std::unordered_set<int32_t> displayIdSet;
     for (const DisplayViewport& viewport : viewports) {
         displayIdSet.insert(viewport.displayId);
@@ -286,13 +356,13 @@ void PointerController::onDisplayViewportsUpdated(std::vector<DisplayViewport>& 
 
     std::scoped_lock lock(getLock());
     for (auto it = mLocked.spotControllers.begin(); it != mLocked.spotControllers.end();) {
-        int32_t displayID = it->first;
-        if (!displayIdSet.count(displayID)) {
+        int32_t displayId = it->first;
+        if (!displayIdSet.count(displayId)) {
             /*
              * Ensures that an in-progress animation won't dereference
              * a null pointer to TouchSpotController.
              */
-            mContext.removeAnimationCallback(displayID);
+            mContext.removeAnimationCallback(displayId);
             it = mLocked.spotControllers.erase(it);
         } else {
             ++it;
@@ -311,6 +381,66 @@ const ui::Transform& PointerController::getTransformForDisplayLocked(int display
         return info.displayId == displayId;
     });
     return it != di.end() ? it->transform : kIdentityTransform;
+}
+
+std::string PointerController::dump() {
+    if (!mEnabled) {
+        return INDENT "PointerController: DISABLED due to ongoing PointerChoreographer refactor\n";
+    }
+
+    std::string dump = INDENT "PointerController:\n";
+    std::scoped_lock lock(getLock());
+    dump += StringPrintf(INDENT2 "Presentation: %s\n",
+                         ftl::enum_string(mLocked.presentation).c_str());
+    dump += StringPrintf(INDENT2 "Pointer Display ID: %" PRIu32 "\n", mLocked.pointerDisplayId);
+    dump += StringPrintf(INDENT2 "Viewports:\n");
+    for (const auto& info : mLocked.mDisplayInfos) {
+        info.dump(dump, INDENT3);
+    }
+    dump += INDENT2 "Spot Controllers:\n";
+    for (const auto& [_, spotController] : mLocked.spotControllers) {
+        spotController.dump(dump, INDENT3);
+    }
+    return dump;
+}
+
+// --- MousePointerController ---
+
+MousePointerController::MousePointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                               const sp<Looper>& looper,
+                                               SpriteController& spriteController, bool enabled)
+      : PointerController(policy, looper, spriteController, enabled) {
+    PointerController::setPresentation(Presentation::POINTER);
+}
+
+MousePointerController::~MousePointerController() {
+    MousePointerController::fade(Transition::IMMEDIATE);
+}
+
+// --- TouchPointerController ---
+
+TouchPointerController::TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                               const sp<Looper>& looper,
+                                               SpriteController& spriteController, bool enabled)
+      : PointerController(policy, looper, spriteController, enabled) {
+    PointerController::setPresentation(Presentation::SPOT);
+}
+
+TouchPointerController::~TouchPointerController() {
+    TouchPointerController::clearSpots();
+}
+
+// --- StylusPointerController ---
+
+StylusPointerController::StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                                 const sp<Looper>& looper,
+                                                 SpriteController& spriteController, bool enabled)
+      : PointerController(policy, looper, spriteController, enabled) {
+    PointerController::setPresentation(Presentation::STYLUS_HOVER);
+}
+
+StylusPointerController::~StylusPointerController() {
+    StylusPointerController::fade(Transition::IMMEDIATE);
 }
 
 } // namespace android

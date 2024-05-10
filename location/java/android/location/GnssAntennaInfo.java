@@ -347,8 +347,8 @@ public final class GnssAntennaInfo implements Parcelable {
         @Override
         public String toString() {
             return "SphericalCorrections{"
-                    + "Corrections=" + Arrays.toString(mCorrections)
-                    + ", CorrectionUncertainties=" + Arrays.toString(mCorrectionUncertainties)
+                    + "Corrections=" + Arrays.deepToString(mCorrections)
+                    + ", CorrectionUncertainties=" + Arrays.deepToString(mCorrectionUncertainties)
                     + ", DeltaTheta=" + getDeltaTheta()
                     + ", DeltaPhi=" + getDeltaPhi()
                     + '}';

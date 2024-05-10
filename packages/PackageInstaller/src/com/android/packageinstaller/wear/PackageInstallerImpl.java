@@ -265,10 +265,10 @@ public class PackageInstallerImpl {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(action);
         mContext.registerReceiver(broadcastReceiver, intentFilter,
-                Context.RECEIVER_EXPORTED_UNAUDITED);
+                Context.RECEIVER_EXPORTED);
 
         // Create a matching PendingIntent and use it to generate the IntentSender
-        Intent broadcastIntent = new Intent(action);
+        Intent broadcastIntent = new Intent(action).setPackage(mContext.getPackageName());
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, packageName.hashCode(),
                 broadcastIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT
                         | PendingIntent.FLAG_MUTABLE);

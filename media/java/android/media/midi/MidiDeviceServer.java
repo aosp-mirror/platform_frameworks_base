@@ -25,6 +25,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.midi.MidiDispatcher;
 
 import dalvik.system.CloseGuard;
@@ -34,8 +35,10 @@ import libcore.io.IoUtils;
 import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Internal class used for providing an implementation for a MIDI device.
@@ -78,6 +81,17 @@ public final class MidiDeviceServer implements Closeable {
     private final HashMap<IBinder, PortClient> mPortClients = new HashMap<IBinder, PortClient>();
     private final HashMap<MidiInputPort, PortClient> mInputPortClients =
             new HashMap<MidiInputPort, PortClient>();
+
+    private AtomicInteger mTotalInputBytes = new AtomicInteger();
+    private AtomicInteger mTotalOutputBytes = new AtomicInteger();
+
+    private static final int UNUSED_UID = -1;
+
+    private final Object mUmpUidLock = new Object();
+    @GuardedBy("mUmpUidLock")
+    private final int[] mUmpInputPortUids;
+    @GuardedBy("mUmpUidLock")
+    private final int[] mUmpOutputPortUids;
 
     public interface Callback {
         /**
@@ -133,6 +147,11 @@ public final class MidiDeviceServer implements Closeable {
                 int portNumber = mOutputPort.getPortNumber();
                 mInputPortOutputPorts[portNumber] = null;
                 mInputPortOpen[portNumber] = false;
+                synchronized (mUmpUidLock) {
+                    mUmpInputPortUids[portNumber] = UNUSED_UID;
+                }
+                mTotalOutputBytes.addAndGet(mOutputPort.pullTotalBytesCount());
+                updateTotalBytes();
                 updateDeviceStatus();
             }
             IoUtils.closeQuietly(mOutputPort);
@@ -156,6 +175,11 @@ public final class MidiDeviceServer implements Closeable {
                 dispatcher.getSender().disconnect(mInputPort);
                 int openCount = dispatcher.getReceiverCount();
                 mOutputPortOpenCount[portNumber] = openCount;
+                synchronized (mUmpUidLock) {
+                    mUmpOutputPortUids[portNumber] = UNUSED_UID;
+                }
+                mTotalInputBytes.addAndGet(mInputPort.pullTotalBytesCount());
+                updateTotalBytes();
                 updateDeviceStatus();
            }
 
@@ -202,6 +226,25 @@ public final class MidiDeviceServer implements Closeable {
                     return null;
                 }
 
+                if (isUmpDevice()) {
+                    if (portNumber >= mOutputPortCount) {
+                        Log.e(TAG, "out portNumber out of range in openInputPort: " + portNumber);
+                        return null;
+                    }
+                    synchronized (mUmpUidLock) {
+                        if (mUmpInputPortUids[portNumber] != UNUSED_UID) {
+                            Log.e(TAG, "input port already open in openInputPort: " + portNumber);
+                            return null;
+                        }
+                        if ((mUmpOutputPortUids[portNumber] != UNUSED_UID)
+                                && (Binder.getCallingUid() != mUmpOutputPortUids[portNumber])) {
+                            Log.e(TAG, "different uid for output in openInputPort: " + portNumber);
+                            return null;
+                        }
+                        mUmpInputPortUids[portNumber] = Binder.getCallingUid();
+                    }
+                }
+
                 try {
                     FileDescriptor[] pair = createSeqPacketSocketPair();
                     MidiOutputPort outputPort = new MidiOutputPort(pair[0], portNumber);
@@ -232,6 +275,25 @@ public final class MidiDeviceServer implements Closeable {
             if (portNumber < 0 || portNumber >= mOutputPortCount) {
                 Log.e(TAG, "portNumber out of range in openOutputPort: " + portNumber);
                 return null;
+            }
+
+            if (isUmpDevice()) {
+                if (portNumber >= mInputPortCount) {
+                    Log.e(TAG, "in portNumber out of range in openOutputPort: " + portNumber);
+                    return null;
+                }
+                synchronized (mUmpUidLock) {
+                    if (mUmpOutputPortUids[portNumber] != UNUSED_UID) {
+                        Log.e(TAG, "output port already open in openOutputPort: " + portNumber);
+                        return null;
+                    }
+                    if ((mUmpInputPortUids[portNumber] != UNUSED_UID)
+                            && (Binder.getCallingUid() != mUmpInputPortUids[portNumber])) {
+                        Log.e(TAG, "different uid for input in openOutputPort: " + portNumber);
+                        return null;
+                    }
+                    mUmpOutputPortUids[portNumber] = Binder.getCallingUid();
+                }
             }
 
             try {
@@ -350,6 +412,13 @@ public final class MidiDeviceServer implements Closeable {
         mInputPortOpen = new boolean[mInputPortCount];
         mOutputPortOpenCount = new int[numOutputPorts];
 
+        synchronized (mUmpUidLock) {
+            mUmpInputPortUids = new int[mInputPortCount];
+            mUmpOutputPortUids = new int[mOutputPortCount];
+            Arrays.fill(mUmpInputPortUids, UNUSED_UID);
+            Arrays.fill(mUmpOutputPortUids, UNUSED_UID);
+        }
+
         mGuard.open("close");
     }
 
@@ -405,18 +474,20 @@ public final class MidiDeviceServer implements Closeable {
         synchronized (mGuard) {
             if (mIsClosed) return;
             mGuard.close();
-
             for (int i = 0; i < mInputPortCount; i++) {
                 MidiOutputPort outputPort = mInputPortOutputPorts[i];
                 if (outputPort != null) {
+                    mTotalOutputBytes.addAndGet(outputPort.pullTotalBytesCount());
                     IoUtils.closeQuietly(outputPort);
                     mInputPortOutputPorts[i] = null;
                 }
             }
             for (MidiInputPort inputPort : mInputPorts) {
+                mTotalInputBytes.addAndGet(inputPort.pullTotalBytesCount());
                 IoUtils.closeQuietly(inputPort);
             }
             mInputPorts.clear();
+            updateTotalBytes();
             try {
                 mMidiManager.unregisterDeviceServer(mServer);
             } catch (RemoteException e) {
@@ -448,5 +519,17 @@ public final class MidiDeviceServer implements Closeable {
         MidiReceiver[] receivers = new MidiReceiver[mOutputPortCount];
         System.arraycopy(mOutputPortDispatchers, 0, receivers, 0, mOutputPortCount);
         return receivers;
+    }
+
+    private void updateTotalBytes() {
+        try {
+            mMidiManager.updateTotalBytes(mServer, mTotalInputBytes.get(), mTotalOutputBytes.get());
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in updateTotalBytes");
+        }
+    }
+
+    private boolean isUmpDevice() {
+        return mDeviceInfo.getDefaultProtocol() != MidiDeviceInfo.PROTOCOL_UNKNOWN;
     }
 }

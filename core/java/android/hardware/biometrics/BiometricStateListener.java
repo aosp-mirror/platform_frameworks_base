@@ -73,4 +73,5 @@ public abstract class BiometricStateListener extends IBiometricStateListener.Stu
      */
     public void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments) {
     }
+
 }

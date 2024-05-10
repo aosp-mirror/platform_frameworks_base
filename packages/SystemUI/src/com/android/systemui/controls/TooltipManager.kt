@@ -28,7 +28,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
 import com.android.systemui.Prefs
-import com.android.systemui.R
+import com.android.systemui.res.R
 import com.android.systemui.recents.TriangleShape
 
 /**

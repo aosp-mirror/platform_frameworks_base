@@ -23,6 +23,10 @@ import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
+import android.hardware.usb.flags.Flags;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.NetworkCapabilities;
@@ -40,6 +44,7 @@ import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -50,17 +55,22 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
 import com.android.launcher3.icons.BaseIconFactory.IconOptions;
 import com.android.launcher3.icons.IconFactory;
+import com.android.launcher3.util.UserIconInfo;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.settingslib.utils.BuildCompatUtils;
 
 import java.text.NumberFormat;
+import java.util.List;
 
 public class Utils {
 
     @VisibleForTesting
     static final String STORAGE_MANAGER_ENABLED_PROPERTY =
             "ro.storage_manager.enabled";
+
+    public static final String INCOMPATIBLE_CHARGER_WARNING_DISABLED =
+            "incompatible_charger_warning_disabled";
 
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
@@ -308,8 +318,16 @@ public class Utils {
 
     @ColorInt
     public static int getColorAttrDefaultColor(Context context, int attr) {
+        return getColorAttrDefaultColor(context, attr, 0);
+    }
+
+    /**
+     * Get color styled attribute {@code attr}, default to {@code defValue} if not found.
+     */
+    @ColorInt
+    public static int getColorAttrDefaultColor(Context context, int attr, @ColorInt int defValue) {
         TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
-        @ColorInt int colorAccent = ta.getColor(0, 0);
+        @ColorInt int colorAccent = ta.getColor(0, defValue);
         ta.recycle();
         return colorAccent;
     }
@@ -376,27 +394,19 @@ public class Utils {
     /**
      * Determine whether a package is a "system package", in which case certain things (like
      * disabling notifications or disabling the package altogether) should be disallowed.
+     * <p>
+     * Note: This function is just for UI treatment, and should not be used for security purposes.
+     *
+     * @deprecated Use {@link ApplicationInfo#isSignedWithPlatformKey()} and
+     * {@link #isEssentialPackage} instead.
      */
+    @Deprecated
     public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
         if (sSystemSignature == null) {
             sSystemSignature = new Signature[]{getSystemSignature(pm)};
         }
-        if (sPermissionControllerPackageName == null) {
-            sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
-        }
-        if (sServicesSystemSharedLibPackageName == null) {
-            sServicesSystemSharedLibPackageName = pm.getServicesSystemSharedLibraryPackageName();
-        }
-        if (sSharedSystemSharedLibPackageName == null) {
-            sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
-        }
-        return (sSystemSignature[0] != null
-                && sSystemSignature[0].equals(getFirstSignature(pkg)))
-                || pkg.packageName.equals(sPermissionControllerPackageName)
-                || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
-                || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
-                || pkg.packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
-                || isDeviceProvisioningPackage(resources, pkg.packageName);
+        return (sSystemSignature[0] != null && sSystemSignature[0].equals(getFirstSignature(pkg)))
+                || isEssentialPackage(resources, pm, pkg.packageName);
     }
 
     private static Signature getFirstSignature(PackageInfo pkg) {
@@ -413,6 +423,29 @@ public class Utils {
         } catch (NameNotFoundException e) {
         }
         return null;
+    }
+
+    /**
+     * Determine whether a package is a "essential package".
+     * <p>
+     * In which case certain things (like disabling the package) should be disallowed.
+     */
+    public static boolean isEssentialPackage(
+            Resources resources, PackageManager pm, String packageName) {
+        if (sPermissionControllerPackageName == null) {
+            sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
+        }
+        if (sServicesSystemSharedLibPackageName == null) {
+            sServicesSystemSharedLibPackageName = pm.getServicesSystemSharedLibraryPackageName();
+        }
+        if (sSharedSystemSharedLibPackageName == null) {
+            sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
+        }
+        return packageName.equals(sPermissionControllerPackageName)
+                || packageName.equals(sServicesSystemSharedLibPackageName)
+                || packageName.equals(sSharedSystemSharedLibPackageName)
+                || packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || isDeviceProvisioningPackage(resources, packageName);
     }
 
     /**
@@ -517,7 +550,12 @@ public class Utils {
 
     /**
      * Return the combined service state.
-     * To make behavior consistent with SystemUI and Settings/AboutPhone/SIM status UI
+     * To make behavior consistent with SystemUI and Settings/AboutPhone/SIM status UI.
+     *
+     * This method returns a single service state int if either the voice reg state is
+     * {@link ServiceState#STATE_IN_SERVICE} or if data network is registered via a
+     * WWAN transport type. We consider the combined service state of an IWLAN network
+     * to be OOS.
      *
      * @param serviceState Service state. {@link ServiceState}
      */
@@ -526,30 +564,62 @@ public class Utils {
             return ServiceState.STATE_OUT_OF_SERVICE;
         }
 
-        // Consider the device to be in service if either voice or data
-        // service is available. Some SIM cards are marketed as data-only
-        // and do not support voice service, and on these SIM cards, we
-        // want to show signal bars for data service as well as the "no
-        // service" or "emergency calls only" text that indicates that voice
-        // is not available. Note that we ignore the IWLAN service state
-        // because that state indicates the use of VoWIFI and not cell service
-        final int state = serviceState.getState();
-        final int dataState = serviceState.getDataRegistrationState();
+        final int voiceRegState = serviceState.getVoiceRegState();
 
-        if (state == ServiceState.STATE_OUT_OF_SERVICE
-                || state == ServiceState.STATE_EMERGENCY_ONLY) {
-            if (dataState == ServiceState.STATE_IN_SERVICE && isNotInIwlan(serviceState)) {
+        // Consider a mobile connection to be "in service" if either voice is IN_SERVICE
+        // or the data registration reports IN_SERVICE on a transport type of WWAN. This
+        // effectively excludes the IWLAN condition. IWLAN connections imply service via
+        // Wi-Fi rather than cellular, and so we do not consider these transports when
+        // determining if cellular is "in service".
+
+        if (voiceRegState == ServiceState.STATE_OUT_OF_SERVICE
+                || voiceRegState == ServiceState.STATE_EMERGENCY_ONLY) {
+            if (isDataRegInWwanAndInService(serviceState)) {
                 return ServiceState.STATE_IN_SERVICE;
             }
         }
-        return state;
+
+        return voiceRegState;
+    }
+
+    // ServiceState#mDataRegState can be set to IN_SERVICE if the network is registered
+    // on either a WLAN or WWAN network. Since we want to exclude the WLAN network, we can
+    // query the WWAN network directly and check for its registration state
+    private static boolean isDataRegInWwanAndInService(ServiceState serviceState) {
+        final NetworkRegistrationInfo networkRegWwan = serviceState.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS,
+                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        if (networkRegWwan == null) {
+            return false;
+        }
+
+        return networkRegWwan.isInService();
     }
 
     /** Get the corresponding adaptive icon drawable. */
     public static Drawable getBadgedIcon(Context context, Drawable icon, UserHandle user) {
+        int userType = UserIconInfo.TYPE_MAIN;
+        try {
+            UserInfo ui = context.getSystemService(UserManager.class).getUserInfo(
+                    user.getIdentifier());
+            if (ui != null) {
+                if (ui.isCloneProfile()) {
+                    userType = UserIconInfo.TYPE_CLONED;
+                } else if (ui.isManagedProfile()) {
+                    userType = UserIconInfo.TYPE_WORK;
+                } else if (ui.isPrivateProfile()) {
+                    userType = UserIconInfo.TYPE_PRIVATE;
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
         try (IconFactory iconFactory = IconFactory.obtain(context)) {
             return iconFactory
-                    .createBadgedIconBitmap(icon, new IconOptions().setUser(user))
+                    .createBadgedIconBitmap(
+                            icon,
+                            new IconOptions().setUser(new UserIconInfo(user, userType)))
                     .newIcon(context);
         }
     }
@@ -558,21 +628,6 @@ public class Utils {
     public static Drawable getBadgedIcon(Context context, ApplicationInfo appInfo) {
         return getBadgedIcon(context, appInfo.loadUnbadgedIcon(context.getPackageManager()),
                 UserHandle.getUserHandleForUid(appInfo.uid));
-    }
-
-    private static boolean isNotInIwlan(ServiceState serviceState) {
-        final NetworkRegistrationInfo networkRegWlan = serviceState.getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS,
-                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-        if (networkRegWlan == null) {
-            return true;
-        }
-
-        final boolean isInIwlan = (networkRegWlan.getRegistrationState()
-                == NetworkRegistrationInfo.REGISTRATION_STATE_HOME)
-                || (networkRegWlan.getRegistrationState()
-                == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING);
-        return !isInIwlan;
     }
 
     /**
@@ -615,4 +670,62 @@ public class Utils {
                 (VcnTransportInfo) networkCapabilities.getTransportInfo();
         return vcnTransportInfo.getWifiInfo();
     }
+
+    /** Whether there is any incompatible chargers in the current UsbPort? */
+    public static boolean containsIncompatibleChargers(Context context, String tag) {
+        // Avoid the caller doesn't have permission to read the "Settings.Secure" data.
+        try {
+            // Whether the incompatible charger warning is disabled or not
+            if (Settings.Secure.getInt(context.getContentResolver(),
+                    INCOMPATIBLE_CHARGER_WARNING_DISABLED, 0) == 1) {
+                Log.d(tag, "containsIncompatibleChargers: disabled");
+                return false;
+            }
+        } catch (Exception e) {
+            Log.e(tag, "containsIncompatibleChargers()", e);
+            return false;
+        }
+
+        final List<UsbPort> usbPortList =
+                context.getSystemService(UsbManager.class).getPorts();
+        if (usbPortList == null || usbPortList.isEmpty()) {
+            return false;
+        }
+        for (UsbPort usbPort : usbPortList) {
+            Log.d(tag, "usbPort: " + usbPort);
+            if (!usbPort.supportsComplianceWarnings()) {
+                continue;
+            }
+            final UsbPortStatus usbStatus = usbPort.getStatus();
+            if (usbStatus == null || !usbStatus.isConnected()) {
+                continue;
+            }
+            final int[] complianceWarnings = usbStatus.getComplianceWarnings();
+            if (complianceWarnings == null || complianceWarnings.length == 0) {
+                continue;
+            }
+            for (int complianceWarningType : complianceWarnings) {
+                if (Flags.enableUsbDataComplianceWarning()
+                        && Flags.enableInputPowerLimitedWarning()) {
+                    switch (complianceWarningType) {
+                        case UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED:
+                        case UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY:
+                            return true;
+                        default:
+                            break;
+                    }
+                } else {
+                    switch (complianceWarningType) {
+                        case UsbPortStatus.COMPLIANCE_WARNING_OTHER:
+                        case UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY:
+                            return true;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 }

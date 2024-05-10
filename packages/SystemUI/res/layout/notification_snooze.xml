@@ -21,7 +21,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="?androidprv:attr/colorSurface"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
+    android:background="?androidprv:attr/materialColorSurfaceContainerHigh"
     android:theme="@style/Theme.SystemUI">
 
     <RelativeLayout
@@ -36,7 +38,7 @@
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:paddingStart="@*android:dimen/notification_content_margin_end"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="?androidprv:attr/materialColorOnSurface"
             android:paddingEnd="4dp"/>
 
         <ImageView
@@ -46,6 +48,7 @@
             android:layout_toEndOf="@+id/snooze_option_default"
             android:layout_centerVertical="true"
             android:paddingTop="1dp"
+            android:importantForAccessibility="yes"
             android:tint="#9E9E9E" />
 
         <TextView

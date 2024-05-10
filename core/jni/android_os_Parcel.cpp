@@ -691,7 +691,7 @@ static jboolean android_os_Parcel_hasFileDescriptorsInRange(JNIEnv* env, jclass 
 
 // String tries to allocate itself on the stack, within a known size, but will
 // make a heap allocation if not.
-template <size_t StackReserve>
+template <jsize StackReserve>
 class StackString {
 public:
     StackString(JNIEnv* env, jstring str) : mEnv(env), mJStr(str) {

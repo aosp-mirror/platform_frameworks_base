@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <Interpolator.h>
 #include <cutils/log.h>
 

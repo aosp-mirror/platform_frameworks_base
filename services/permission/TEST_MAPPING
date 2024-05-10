@@ -1,0 +1,113 @@
+{
+    "platinum-test": [
+        {
+            "name": "CtsPermissionTestCases",
+            "options": [
+                {
+                    "include-annotation": "android.platform.test.annotations.PlatinumTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                }
+            ]
+        }
+    ],
+    "presubmit": [
+        {
+            "name": "CtsPermissionTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.BackgroundPermissionsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.SplitPermissionTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PermissionFlagsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.SharedUidPermissionsTest"
+                }
+            ]
+        },
+        {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#rebootWithDuplicatePermission"
+                }
+            ]
+        },
+        {
+            "name": "CtsPermissionPolicyTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "include-filter": "android.permissionpolicy.cts.RestrictedPermissionsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PermissionMaxSdkVersionTest"
+                }
+            ]
+        },
+        {
+            "name": "CtsStatsdHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.cts.statsd.atom.UidAtomTests#testDangerousPermissionState"
+                }
+            ]
+        }
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
+                }
+            ]
+        },
+        {
+            "name": "CtsPermissionTestCases",
+            "options": [
+                {
+                    "include-filter": "android.permission.cts.PermissionUpdateListenerTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.BackgroundPermissionsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.SplitPermissionTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PermissionFlagsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.SharedUidPermissionsTest"
+                }
+            ]
+        },
+        {
+            "name": "CtsPermissionPolicyTestCases",
+            "options": [
+                {
+                    "include-filter": "android.permissionpolicy.cts.RestrictedPermissionsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PermissionMaxSdkVersionTest"
+                }
+            ]
+        }
+    ],
+    "imports": [
+        {
+            "path": "vendor/xts/gts-tests/tests/permission"
+        }
+    ]
+}

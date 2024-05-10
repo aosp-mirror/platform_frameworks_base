@@ -17,30 +17,32 @@ package com.android.internal.util;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.testng.Assert.assertThrows;
-
 import android.util.Dumpable;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.dump.DumpableContainerImpl;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.atomic.AtomicReference;
 
-public final class DumpableContainerImplTest {
+@RunWith(AndroidJUnit4.class)
+public class DumpableContainerImplTest {
 
     private final DumpableContainerImpl mImpl = new DumpableContainerImpl();
     private final StringWriter mSw = new StringWriter();
     private final PrintWriter mWriter = new PrintWriter(mSw);
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testAddDumpable_null() {
-        assertThrows(NullPointerException.class, () -> mImpl.addDumpable(null));
+        mImpl.addDumpable(null);
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testAddDumpable_dumpableWithoutName() {
         Dumpable namelessDumpable = new Dumpable() {
 
@@ -55,7 +57,7 @@ public final class DumpableContainerImplTest {
             }
 
         };
-        assertThrows(NullPointerException.class, () -> mImpl.addDumpable(namelessDumpable));
+        mImpl.addDumpable(namelessDumpable);
     }
 
     @Test
@@ -179,9 +181,9 @@ public final class DumpableContainerImplTest {
                         + "......6 Args: 4,8,15,16,23,42,\n");
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testRemoveDumpable_null() {
-        assertThrows(NullPointerException.class, () -> mImpl.removeDumpable(null));
+        mImpl.removeDumpable(null);
     }
 
     @Test

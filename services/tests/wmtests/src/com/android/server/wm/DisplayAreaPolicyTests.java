@@ -190,7 +190,7 @@ public class DisplayAreaPolicyTests extends WindowTestsBase {
         final WindowManagerService wms = mWm;
         final DisplayContent displayContent = mock(DisplayContent.class);
         doReturn(true).when(displayContent).isTrusted();
-        doReturn(true).when(displayContent).supportsSystemDecorations();
+        doReturn(true).when(displayContent).isHomeSupported();
         final RootDisplayArea root = new SurfacelessDisplayAreaRoot(wms);
         final TaskDisplayArea taskDisplayAreaWithHome = new TaskDisplayArea(displayContent, wms,
                 "Tasks1", FEATURE_DEFAULT_TASK_CONTAINER);

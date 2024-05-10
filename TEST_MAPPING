@@ -15,6 +15,22 @@
       ]
     }
   ],
+  "presubmit-pm": [
+    {
+      "name": "PackageManagerServiceServerTests",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ],
   "presubmit": [
     {
       "name": "ManagedProvisioningTests",
@@ -49,7 +65,15 @@
       ]
     },
     {
-      "name": "ExtServicesUnitTests",
+      "name": "FrameworksInputMethodSystemServerTests",
+      "options": [
+        {"include-filter": "com.android.server.inputmethod"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
+      "name": "ExtServicesUnitTests-tplus",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -57,7 +81,7 @@
       ]
     },
     {
-      "name": "TestablesTests",
+      "name": "ExtServicesUnitTests-sminus",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -102,7 +126,27 @@
           "exclude-annotation": "org.junit.Ignore"
         }
       ]
+    },
+    {
+      "name": "vts_treble_vintf_framework_test"
+    },
+    {
+      "name": "vts_treble_vintf_vendor_test"
+    },
+    {
+      "name": "CtsStrictJavaPackagesTestCases"
     }
+  ],
+  "postsubmit-ravenwood": [
+    // TODO(ravenwood) promote it to presubmit
+    // TODO: Enable it once the infra knows how to run it.
+//    {
+//      "name": "CtsUtilTestCasesRavenwood",
+//      "file_patterns": [
+//        "*Ravenwood*",
+//        "*ravenwood*"
+//      ]
+//    }
   ],
   "postsubmit-managedprofile-stress": [
     {
@@ -125,7 +169,15 @@
      ]
    },
    {
-     "name": "ExtServicesUnitTests",
+     "name": "ExtServicesUnitTests-tplus",
+     "options": [
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       }
+     ]
+   },
+   {
+     "name": "ExtServicesUnitTests-sminus",
      "options": [
        {
          "exclude-annotation": "androidx.test.filters.FlakyTest"
@@ -156,6 +208,20 @@
    },
    {
      "name": "FrameworksServicesTests",
+     "options": [
+       {
+         "include-annotation": "android.platform.test.annotations.Presubmit"
+       },
+       {
+         "exclude-annotation": "androidx.test.filters.FlakyTest"
+       },
+       {
+         "exclude-annotation": "org.junit.Ignore"
+       }
+     ]
+   },
+   {
+     "name": "PackageManagerServiceServerTests",
      "options": [
        {
          "include-annotation": "android.platform.test.annotations.Presubmit"

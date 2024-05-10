@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="accessibility_menu_service_name" msgid="730136711554740131">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಮೆನು"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ನಿಯಂತ್ರಿಸುವುದಕ್ಕಾಗಿ ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಮೆನು ದೊಡ್ಡ ಸ್ಕ್ರೀನ್ ಮೆನುವನ್ನು ಒದಗಿಸುತ್ತದೆ. ನೀವು ನಿಮ್ಮ ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಬಹುದು, ವಾಲ್ಯೂಮ್ ಮತ್ತು ಪ್ರಖರತೆಯನ್ನು ನಿಯಂತ್ರಿಸಬಹುದು, ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಹುದು ಮತ್ತು ಇನ್ನೂ ಹೆಚ್ಚಿನವನ್ನು ಮಾಡಬಹುದು."</string>
+    <string name="assistant_label" msgid="6796392082252272356">"Assistant"</string>
+    <string name="assistant_utterance" msgid="65509599221141377">"Assistant"</string>
+    <string name="a11y_settings_label" msgid="3977714687248445050">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="power_label" msgid="7699720321491287839">"ಪವರ್ ಬಟನ್‌"</string>
+    <string name="power_utterance" msgid="7444296686402104807">"ಪವರ್ ಆಯ್ಕೆಗಳು"</string>
+    <string name="recent_apps_label" msgid="6583276995616385847">"ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"ನೋಟಿಫಿಕೇಶನ್‌ಗಳು"</string>
+    <string name="screenshot_label" msgid="863978141223970162">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
+    <string name="screenshot_utterance" msgid="1430760563401895074">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
+    <string name="volume_up_label" msgid="8592766918780362870">"ವಾಲ್ಯೂಮ್ ಜಾಸ್ತಿ"</string>
+    <string name="volume_down_label" msgid="8574981863656447346">"ವಾಲ್ಯೂಮ್ ಕಡಿಮೆ"</string>
+    <string name="brightness_up_label" msgid="8010753822854544846">"ಪ್ರಖರತೆ ಹೆಚ್ಚು ಮಾಡಿ"</string>
+    <string name="brightness_down_label" msgid="7115662941913272072">"ಪ್ರಖರತೆ ಕಡಿಮೆ ಮಾಡಿ"</string>
+    <string name="previous_button_content_description" msgid="840869171117765966">"ಹಿಂದಿನ ಸ್ಕ್ರೀನ್‌ಗೆ ಹೋಗಿ"</string>
+    <string name="next_button_content_description" msgid="6810058269847364406">"ಮುಂದಿನ ಸ್ಕ್ರೀನ್‌ಗೆ ಹೋಗಿ"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನಿಯಂತ್ರಿಸಲು ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಮೆನು ದೊಡ್ಡ ಸ್ಕ್ರೀನ್ ಮೆನುವನ್ನು ಒದಗಿಸುತ್ತದೆ. ನೀವು ನಿಮ್ಮ ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಬಹುದು, ವಾಲ್ಯೂಮ್ ಮತ್ತು ಪ್ರಖರತೆಯನ್ನು ನಿಯಂತ್ರಿಸಬಹುದು, ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಹುದು ಮತ್ತು ಇನ್ನೂ ಹೆಚ್ಚಿನದನ್ನು ಮಾಡಬಹುದು."</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"ದೊಡ್ಡ ಮೆನುವಿನ ಮೂಲಕ ಸಾಧನವನ್ನು ನಿಯಂತ್ರಿಸಿ"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಮೆನು ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"ದೊಡ್ಡ ಬಟನ್‌ಗಳು"</string>
+    <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಮೆನು ಬಟನ್‌ಗಳ ಗಾತ್ರವನ್ನು ಹೆಚ್ಚಿಸಿ"</string>
+    <string name="pref_help_title" msgid="6871558837025010641">"ಸಹಾಯ"</string>
+    <string name="brightness_percentage_label" msgid="7391554573977867369">"ಪ್ರಖರತೆ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+    <string name="music_volume_percentage_label" msgid="398635599662604706">"ಸಂಗೀತ ವಾಲ್ಯೂಮ್‌ <xliff:g id="PERCENTAGE">%1$s</xliff:g> %%"</string>
+</resources>

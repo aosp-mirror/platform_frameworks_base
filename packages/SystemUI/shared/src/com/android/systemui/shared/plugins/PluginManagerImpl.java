@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager;
 
 import java.io.FileDescriptor;
@@ -247,19 +248,23 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     // This allows plugins to include any libraries or copied code they want by only including
     // classes from the plugin library.
     static class ClassLoaderFilter extends ClassLoader {
-        private final String mPackage;
+        private final String[] mPackages;
         private final ClassLoader mBase;
 
-        public ClassLoaderFilter(ClassLoader base, String pkg) {
+        ClassLoaderFilter(ClassLoader base, String... pkgs) {
             super(ClassLoader.getSystemClassLoader());
             mBase = base;
-            mPackage = pkg;
+            mPackages = pkgs;
         }
 
         @Override
         protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-            if (!name.startsWith(mPackage)) super.loadClass(name, resolve);
-            return mBase.loadClass(name);
+            for (String pkg : mPackages) {
+                if (name.startsWith(pkg)) {
+                    return mBase.loadClass(name);
+                }
+            }
+            return super.loadClass(name, resolve);
         }
     }
 

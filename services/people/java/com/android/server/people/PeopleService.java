@@ -63,9 +63,8 @@ public class PeopleService extends SystemService {
 
     private static final String TAG = "PeopleService";
 
-    private DataManager mDataManager;
-    @VisibleForTesting
-    ConversationListenerHelper mConversationListenerHelper;
+    private DataManager mLazyDataManager;
+    private ConversationListenerHelper mLazyConversationListenerHelper;
 
     private PackageManagerInternal mPackageManagerInternal;
 
@@ -76,17 +75,30 @@ public class PeopleService extends SystemService {
      */
     public PeopleService(Context context) {
         super(context);
-
-        mDataManager = new DataManager(context);
-        mConversationListenerHelper = new ConversationListenerHelper();
-        mDataManager.addConversationsListener(mConversationListenerHelper);
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        if (phase == PHASE_SYSTEM_SERVICES_READY) {
-            mDataManager.initialize();
+    @VisibleForTesting
+    ConversationListenerHelper getConversationListenerHelper() {
+        if (mLazyConversationListenerHelper == null) {
+            initLazyStuff();
         }
+        return mLazyConversationListenerHelper;
+    }
+
+    private synchronized void initLazyStuff() {
+        if (mLazyDataManager == null) {
+            mLazyDataManager = new DataManager(getContext());
+            mLazyDataManager.initialize();
+            mLazyConversationListenerHelper = new ConversationListenerHelper();
+            mLazyDataManager.addConversationsListener(mLazyConversationListenerHelper);
+        }
+    }
+
+    private DataManager getDataManager() {
+        if (mLazyDataManager == null) {
+            initLazyStuff();
+        }
+        return mLazyDataManager;
     }
 
     @Override
@@ -105,12 +117,12 @@ public class PeopleService extends SystemService {
 
     @Override
     public void onUserUnlocked(@NonNull TargetUser user) {
-        mDataManager.onUserUnlocked(user.getUserIdentifier());
+        getDataManager().onUserUnlocked(user.getUserIdentifier());
     }
 
     @Override
     public void onUserStopping(@NonNull TargetUser user) {
-        mDataManager.onUserStopping(user.getUserIdentifier());
+        getDataManager().onUserStopping(user.getUserIdentifier());
     }
 
     /**
@@ -171,28 +183,28 @@ public class PeopleService extends SystemService {
         public ConversationChannel getConversation(
                 String packageName, int userId, String shortcutId) {
             enforceSystemRootOrSystemUI(getContext(), "get conversation");
-            return mDataManager.getConversation(packageName, userId, shortcutId);
+            return getDataManager().getConversation(packageName, userId, shortcutId);
         }
 
         @Override
         public ParceledListSlice<ConversationChannel> getRecentConversations() {
             enforceSystemRootOrSystemUI(getContext(), "get recent conversations");
             return new ParceledListSlice<>(
-                    mDataManager.getRecentConversations(
+                    getDataManager().getRecentConversations(
                             Binder.getCallingUserHandle().getIdentifier()));
         }
 
         @Override
         public void removeRecentConversation(String packageName, int userId, String shortcutId) {
             enforceSystemOrRoot("remove a recent conversation");
-            mDataManager.removeRecentConversation(packageName, userId, shortcutId,
+            getDataManager().removeRecentConversation(packageName, userId, shortcutId,
                     Binder.getCallingUserHandle().getIdentifier());
         }
 
         @Override
         public void removeAllRecentConversations() {
             enforceSystemOrRoot("remove all recent conversations");
-            mDataManager.removeAllRecentConversations(
+            getDataManager().removeAllRecentConversations(
                     Binder.getCallingUserHandle().getIdentifier());
         }
 
@@ -200,7 +212,7 @@ public class PeopleService extends SystemService {
         public boolean isConversation(String packageName, int userId, String shortcutId) {
             enforceHasReadPeopleDataPermission();
             handleIncomingUser(userId);
-            return mDataManager.isConversation(packageName, userId, shortcutId);
+            return getDataManager().isConversation(packageName, userId, shortcutId);
         }
 
         private void enforceHasReadPeopleDataPermission() throws SecurityException {
@@ -213,7 +225,7 @@ public class PeopleService extends SystemService {
         @Override
         public long getLastInteraction(String packageName, int userId, String shortcutId) {
             enforceSystemRootOrSystemUI(getContext(), "get last interaction");
-            return mDataManager.getLastInteraction(packageName, userId, shortcutId);
+            return getDataManager().getLastInteraction(packageName, userId, shortcutId);
         }
 
         @Override
@@ -224,7 +236,7 @@ public class PeopleService extends SystemService {
             if (status.getStartTimeMillis() > System.currentTimeMillis()) {
                 throw new IllegalArgumentException("Start time must be in the past");
             }
-            mDataManager.addOrUpdateStatus(packageName, userId, conversationId, status);
+            getDataManager().addOrUpdateStatus(packageName, userId, conversationId, status);
         }
 
         @Override
@@ -232,14 +244,14 @@ public class PeopleService extends SystemService {
                 String statusId) {
             handleIncomingUser(userId);
             checkCallerIsSameApp(packageName);
-            mDataManager.clearStatus(packageName, userId, conversationId, statusId);
+            getDataManager().clearStatus(packageName, userId, conversationId, statusId);
         }
 
         @Override
         public void clearStatuses(String packageName, int userId, String conversationId) {
             handleIncomingUser(userId);
             checkCallerIsSameApp(packageName);
-            mDataManager.clearStatuses(packageName, userId, conversationId);
+            getDataManager().clearStatuses(packageName, userId, conversationId);
         }
 
         @Override
@@ -250,21 +262,21 @@ public class PeopleService extends SystemService {
                 checkCallerIsSameApp(packageName);
             }
             return new ParceledListSlice<>(
-                    mDataManager.getStatuses(packageName, userId, conversationId));
+                    getDataManager().getStatuses(packageName, userId, conversationId));
         }
 
         @Override
         public void registerConversationListener(
                 String packageName, int userId, String shortcutId, IConversationListener listener) {
             enforceSystemRootOrSystemUI(getContext(), "register conversation listener");
-            mConversationListenerHelper.addConversationListener(
+            getConversationListenerHelper().addConversationListener(
                     new ListenerKey(packageName, userId, shortcutId), listener);
         }
 
         @Override
         public void unregisterConversationListener(IConversationListener listener) {
             enforceSystemRootOrSystemUI(getContext(), "unregister conversation listener");
-            mConversationListenerHelper.removeConversationListener(listener);
+            getConversationListenerHelper().removeConversationListener(listener);
         }
     };
 
@@ -393,7 +405,7 @@ public class PeopleService extends SystemService {
         public void onCreatePredictionSession(AppPredictionContext appPredictionContext,
                 AppPredictionSessionId sessionId) {
             mSessions.put(sessionId,
-                    new SessionInfo(appPredictionContext, mDataManager, sessionId.getUserId(),
+                    new SessionInfo(appPredictionContext, getDataManager(), sessionId.getUserId(),
                             getContext()));
         }
 
@@ -448,18 +460,18 @@ public class PeopleService extends SystemService {
 
         @Override
         public void pruneDataForUser(@UserIdInt int userId, @NonNull CancellationSignal signal) {
-            mDataManager.pruneDataForUser(userId, signal);
+            getDataManager().pruneDataForUser(userId, signal);
         }
 
         @Nullable
         @Override
         public byte[] getBackupPayload(@UserIdInt int userId) {
-            return mDataManager.getBackupPayload(userId);
+            return getDataManager().getBackupPayload(userId);
         }
 
         @Override
         public void restore(@UserIdInt int userId, @NonNull byte[] payload) {
-            mDataManager.restore(userId, payload);
+            getDataManager().restore(userId, payload);
         }
 
         @VisibleForTesting

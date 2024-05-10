@@ -39,6 +39,8 @@ import android.widget.ImageView;
 import androidx.preference.PreferenceViewHolder;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.settingslib.widget.preference.illustration.R;
+
 import com.airbnb.lottie.LottieAnimationView;
 
 import org.junit.Before;
@@ -48,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+
 
 @RunWith(RobolectricTestRunner.class)
 public class IllustrationPreferenceTest {
@@ -61,6 +64,8 @@ public class IllustrationPreferenceTest {
     private PreferenceViewHolder mViewHolder;
     private FrameLayout mMiddleGroundLayout;
     private final Context mContext = ApplicationProvider.getApplicationContext();
+    private IllustrationPreference.OnBindListener mOnBindListener;
+    private LottieAnimationView mOnBindListenerAnimationView;
 
     @Before
     public void setUp() {
@@ -82,6 +87,12 @@ public class IllustrationPreferenceTest {
 
         final AttributeSet attributeSet = Robolectric.buildAttributeSet().build();
         mPreference = new IllustrationPreference(mContext, attributeSet);
+        mOnBindListener = new IllustrationPreference.OnBindListener() {
+            @Override
+            public void onBind(LottieAnimationView animationView) {
+                mOnBindListenerAnimationView = animationView;
+            }
+        };
     }
 
     @Test
@@ -185,5 +196,42 @@ public class IllustrationPreferenceTest {
 
         assertThat(mBackgroundView.getMaxHeight()).isEqualTo(restrictedHeight);
         assertThat(mAnimationView.getMaxHeight()).isEqualTo(restrictedHeight);
+    }
+
+    @Test
+    public void setOnBindListener_isNotified() {
+        mOnBindListenerAnimationView = null;
+        mPreference.setOnBindListener(mOnBindListener);
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mOnBindListenerAnimationView).isNotNull();
+        assertThat(mOnBindListenerAnimationView).isEqualTo(mAnimationView);
+    }
+
+    @Test
+    public void setOnBindListener_notNotified() {
+        mOnBindListenerAnimationView = null;
+        mPreference.setOnBindListener(null);
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mOnBindListenerAnimationView).isNull();
+    }
+
+    @Test
+    public void onBindViewHolder_default_shouldNotApplyDynamicColor() {
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mPreference.isApplyDynamicColor()).isFalse();
+    }
+
+    @Test
+    public void onBindViewHolder_applyDynamicColor_shouldReturnTrue() {
+        mPreference.applyDynamicColor();
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mPreference.isApplyDynamicColor()).isTrue();
     }
 }

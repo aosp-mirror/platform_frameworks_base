@@ -31,7 +31,7 @@ android_test {
     libs: ["android.test.runner.stubs"],
     static_libs: [
         "androidx.test.rules",
-        "ub-uiautomator",
+        "androidx.test.uiautomator_uiautomator",
         "mockito-target-minus-junit4",
         "print-test-util-lib",
     ],
