@@ -115,7 +115,7 @@ constructor(
     private val shadeInteractor: ShadeInteractor,
 ) {
     private var burnInJob: Job? = null
-    private val burnInModel = MutableStateFlow(BurnInModel())
+    internal val burnInModel = MutableStateFlow(BurnInModel())
 
     val burnInLayerVisibility: Flow<Int> =
         keyguardTransitionInteractor.startedKeyguardState
