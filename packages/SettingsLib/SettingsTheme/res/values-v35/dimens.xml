@@ -13,11 +13,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
--->
+  -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:color="@color/settingslib_materialColorSurfaceContainerHigh"/>
-    <item android:state_selected="true" android:color="@color/settingslib_materialColorSurfaceContainerHigh"/>
-    <item android:state_activated="true" android:color="@color/settingslib_materialColorSurfaceContainerHigh"/>
-    <item android:color="@color/settingslib_materialColorSurfaceBright"/> <!-- not selected -->
-</selector>
+<resources>
+    <dimen name="settingslib_preference_corner_radius">20dp</dimen>
+</resources>

@@ -19,12 +19,12 @@
     <item
         android:left="?android:attr/listPreferredItemPaddingStart"
         android:right="?android:attr/listPreferredItemPaddingEnd"
-        android:top="1dp">
+        android:top="2dp">
         <shape android:shape="rectangle">
             <solid
                 android:color="@color/settingslib_preference_bg_color" />
             <corners
-                android:radius="?android:attr/dialogCornerRadius" />
+                android:radius="@dimen/settingslib_preference_corner_radius" />
         </shape>
     </item>
 </layer-list>
