@@ -2912,10 +2912,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         final int proxyUid = attributionSource.getUid();
         final String proxyPackageName = attributionSource.getPackageName();
         final String proxyAttributionTag = attributionSource.getAttributionTag();
-        final int proxiedUid = attributionSource.getNextUid();
         final int proxyVirtualDeviceId = attributionSource.getDeviceId();
+
+        final int proxiedUid = attributionSource.getNextUid();
         final String proxiedPackageName = attributionSource.getNextPackageName();
         final String proxiedAttributionTag = attributionSource.getNextAttributionTag();
+        final int proxiedVirtualDeviceId = attributionSource.getNextDeviceId();
 
         verifyIncomingProxyUid(attributionSource);
         verifyIncomingOp(code);
@@ -2952,7 +2954,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             final SyncNotedAppOp proxyReturn = noteOperationUnchecked(code, proxyUid,
                     resolveProxyPackageName, proxyAttributionTag, proxyVirtualDeviceId,
-                    Process.INVALID_UID, null, null, proxyFlags, !isProxyTrusted,
+                    Process.INVALID_UID, null, null,
+                    Context.DEVICE_ID_DEFAULT, proxyFlags, !isProxyTrusted,
                     "proxy " + message, shouldCollectMessage);
             if (proxyReturn.getOpMode() != AppOpsManager.MODE_ALLOWED) {
                 return new SyncNotedAppOp(proxyReturn.getOpMode(), code, proxiedAttributionTag,
@@ -2970,9 +2973,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         final int proxiedFlags = isProxyTrusted ? AppOpsManager.OP_FLAG_TRUSTED_PROXIED
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXIED;
         return noteOperationUnchecked(code, proxiedUid, resolveProxiedPackageName,
-                proxiedAttributionTag, proxyVirtualDeviceId, proxyUid, resolveProxyPackageName,
-                proxyAttributionTag, proxiedFlags, shouldCollectAsyncNotedOp, message,
-                shouldCollectMessage);
+                proxiedAttributionTag, proxiedVirtualDeviceId, proxyUid, resolveProxyPackageName,
+                proxyAttributionTag, proxyVirtualDeviceId, proxiedFlags, shouldCollectAsyncNotedOp,
+                message, shouldCollectMessage);
     }
 
     @Override
@@ -3023,14 +3026,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         return noteOperationUnchecked(code, uid, resolvedPackageName, attributionTag,
                 virtualDeviceId, Process.INVALID_UID, null, null,
-                AppOpsManager.OP_FLAG_SELF, shouldCollectAsyncNotedOp, message,
-                shouldCollectMessage);
+                Context.DEVICE_ID_DEFAULT, AppOpsManager.OP_FLAG_SELF, shouldCollectAsyncNotedOp,
+                message, shouldCollectMessage);
     }
 
     private SyncNotedAppOp noteOperationUnchecked(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag, int virtualDeviceId, int proxyUid,
-            String proxyPackageName, @Nullable String proxyAttributionTag, @OpFlags int flags,
-            boolean shouldCollectAsyncNotedOp, @Nullable String message,
+            String proxyPackageName, @Nullable String proxyAttributionTag, int proxyVirtualDeviceId,
+            @OpFlags int flags, boolean shouldCollectAsyncNotedOp, @Nullable String message,
             boolean shouldCollectMessage) {
         PackageVerificationResult pvr;
         try {
@@ -3161,8 +3164,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag,
                     virtualDeviceId, flags, AppOpsManager.MODE_ALLOWED);
+
             attributedOp.accessed(proxyUid, proxyPackageName, proxyAttributionTag,
-                    uidState.getState(), flags);
+                    getPersistentId(proxyVirtualDeviceId), uidState.getState(), flags);
 
             if (shouldCollectAsyncNotedOp) {
                 collectAsyncNotedOp(uid, packageName, code, attributionTag, flags, message,
@@ -3528,9 +3532,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
-                virtualDeviceId, Process.INVALID_UID, null, null, OP_FLAG_SELF,
-                startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                attributionFlags, attributionChainId);
+                virtualDeviceId, Process.INVALID_UID, null, null, Context.DEVICE_ID_DEFAULT,
+                OP_FLAG_SELF, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                shouldCollectMessage, attributionFlags, attributionChainId);
     }
 
     /** @deprecated Use {@link #startProxyOperationWithState} instead. */
@@ -3568,18 +3572,32 @@ public class AppOpsService extends IAppOpsService.Stub {
         final int proxyUid = attributionSource.getUid();
         final String proxyPackageName = attributionSource.getPackageName();
         final String proxyAttributionTag = attributionSource.getAttributionTag();
-        final int proxiedUid = attributionSource.getNextUid();
         final int proxyVirtualDeviceId = attributionSource.getDeviceId();
+
+        final int proxiedUid = attributionSource.getNextUid();
         final String proxiedPackageName = attributionSource.getNextPackageName();
         final String proxiedAttributionTag = attributionSource.getNextAttributionTag();
+        final int proxiedVirtualDeviceId = attributionSource.getNextDeviceId();
 
         verifyIncomingProxyUid(attributionSource);
         verifyIncomingOp(code);
         if (!isValidVirtualDeviceId(proxyVirtualDeviceId)) {
-            Slog.w(TAG, "startProxyOperationImpl returned MODE_IGNORED as virtualDeviceId "
-                    + proxyVirtualDeviceId + " is invalid");
-            return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag,
-                    proxiedPackageName);
+            Slog.w(
+                    TAG,
+                    "startProxyOperationImpl returned MODE_IGNORED as proxyVirtualDeviceId "
+                            + proxyVirtualDeviceId
+                            + " is invalid");
+            return new SyncNotedAppOp(
+                    AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag, proxiedPackageName);
+        }
+        if (!isValidVirtualDeviceId(proxiedVirtualDeviceId)) {
+            Slog.w(
+                    TAG,
+                    "startProxyOperationImpl returned MODE_IGNORED as proxiedVirtualDeviceId "
+                            + proxiedVirtualDeviceId
+                            + " is invalid");
+            return new SyncNotedAppOp(
+                    AppOpsManager.MODE_IGNORED, code, proxiedAttributionTag, proxiedPackageName);
         }
         if (!isIncomingPackageValid(proxyPackageName, UserHandle.getUserId(proxyUid))
                 || !isIncomingPackageValid(proxiedPackageName, UserHandle.getUserId(proxiedUid))) {
@@ -3621,7 +3639,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             // Test if the proxied operation will succeed before starting the proxy operation
             final SyncNotedAppOp testProxiedOp = startOperationDryRun(code,
                     proxiedUid, resolvedProxiedPackageName, proxiedAttributionTag,
-                    proxyVirtualDeviceId, resolvedProxyPackageName, proxiedFlags,
+                    proxiedVirtualDeviceId, resolvedProxyPackageName, proxiedFlags,
                     startIfModeDefault);
 
             if (!shouldStartForMode(testProxiedOp.getOpMode(), startIfModeDefault)) {
@@ -3633,7 +3651,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             final SyncNotedAppOp proxyAppOp = startOperationUnchecked(clientId, code, proxyUid,
                     resolvedProxyPackageName, proxyAttributionTag, proxyVirtualDeviceId,
-                    Process.INVALID_UID, null, null, proxyFlags,
+                    Process.INVALID_UID, null, null, Context.DEVICE_ID_DEFAULT, proxyFlags,
                     startIfModeDefault, !isProxyTrusted, "proxy " + message,
                     shouldCollectMessage, proxyAttributionFlags, attributionChainId);
             if (!shouldStartForMode(proxyAppOp.getOpMode(), startIfModeDefault)) {
@@ -3642,9 +3660,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return startOperationUnchecked(clientId, code, proxiedUid, resolvedProxiedPackageName,
-                proxiedAttributionTag, proxyVirtualDeviceId, proxyUid, resolvedProxyPackageName,
-                proxyAttributionTag, proxiedFlags, startIfModeDefault, shouldCollectAsyncNotedOp,
-                message, shouldCollectMessage, proxiedAttributionFlags, attributionChainId);
+                proxiedAttributionTag, proxiedVirtualDeviceId, proxyUid, resolvedProxyPackageName,
+                proxyAttributionTag, proxyVirtualDeviceId, proxiedFlags, startIfModeDefault,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, proxiedAttributionFlags,
+                attributionChainId);
     }
 
     private boolean shouldStartForMode(int mode, boolean startIfModeDefault) {
@@ -3654,9 +3673,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     private SyncNotedAppOp startOperationUnchecked(IBinder clientId, int code, int uid,
             @NonNull String packageName, @Nullable String attributionTag, int virtualDeviceId,
             int proxyUid, String proxyPackageName, @Nullable String proxyAttributionTag,
-            @OpFlags int flags, boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
-            @Nullable String message, boolean shouldCollectMessage,
-            @AttributionFlags int attributionFlags, int attributionChainId) {
+            int proxyVirtualDeviceId, @OpFlags int flags, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, @Nullable String message,
+            boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
+            int attributionChainId) {
         PackageVerificationResult pvr;
         try {
             pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
@@ -3751,13 +3771,13 @@ public class AppOpsService extends IAppOpsService.Stub {
                     + " flags: " + AppOpsManager.flagsToString(flags));
             try {
                 if (isRestricted) {
-                    attributedOp.createPaused(clientId, proxyUid, proxyPackageName,
-                            proxyAttributionTag, virtualDeviceId, uidState.getState(), flags,
-                            attributionFlags, attributionChainId);
+                    attributedOp.createPaused(clientId, virtualDeviceId, proxyUid, proxyPackageName,
+                            proxyAttributionTag, getPersistentId(proxyVirtualDeviceId),
+                            uidState.getState(), flags, attributionFlags, attributionChainId);
                 } else {
-                    attributedOp.started(clientId, proxyUid, proxyPackageName,
-                            proxyAttributionTag, virtualDeviceId, uidState.getState(), flags,
-                            attributionFlags, attributionChainId);
+                    attributedOp.started(clientId, virtualDeviceId, proxyUid, proxyPackageName,
+                            proxyAttributionTag, getPersistentId(proxyVirtualDeviceId),
+                            uidState.getState(), flags, attributionFlags, attributionChainId);
                     startType = START_TYPE_STARTED;
                 }
             } catch (RemoteException e) {
@@ -4946,7 +4966,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         if (accessTime > 0) {
             attributedOp.accessed(accessTime, accessDuration, proxyUid, proxyPkg,
-                    proxyAttributionTag, uidState, opFlags);
+                    proxyAttributionTag, PERSISTENT_DEVICE_ID_DEFAULT, uidState, opFlags);
         }
         if (rejectTime > 0) {
             attributedOp.rejected(rejectTime, uidState, opFlags);
