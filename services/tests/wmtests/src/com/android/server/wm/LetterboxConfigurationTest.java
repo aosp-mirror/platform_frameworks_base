@@ -18,14 +18,16 @@ package com.android.server.wm;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
-
 import static com.android.server.wm.testing.Assert.assertThrows;
+
+import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,11 +37,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.platform.test.annotations.Presubmit;
+import android.util.DisplayMetrics;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.server.wm.testing.Assert;
+import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -277,7 +281,7 @@ public class LetterboxConfigurationTest {
     }
 
     @Test
-    public void test_lettterboxPositionWhenReachabilityEnabledIsSet() {
+    public void test_letterboxPositionWhenReachabilityEnabledIsSet() {
         // Check that horizontal reachability is set with correct arguments
         mLetterboxConfiguration.setPersistentLetterboxPositionForHorizontalReachability(
                 false /* forBookMode */, LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT);
@@ -343,5 +347,49 @@ public class LetterboxConfigurationTest {
         mLetterboxConfiguration.setLetterboxTabletopModePositionMultiplier(0);
         mLetterboxConfiguration.setLetterboxTabletopModePositionMultiplier(0.5f);
         mLetterboxConfiguration.setLetterboxTabletopModePositionMultiplier(1);
+    }
+
+    @Test
+    public void test_evaluateThinLetterboxWhenDensityChanges() {
+        final Resources rs = mock(Resources.class);
+        final DisplayMetrics dm = mock(DisplayMetrics.class);
+        final LetterboxConfigurationPersister lp = mock(LetterboxConfigurationPersister.class);
+        spyOn(mContext);
+        when(rs.getDisplayMetrics()).thenReturn(dm);
+        when(mContext.getResources()).thenReturn(rs);
+        when(rs.getDimensionPixelSize(R.dimen.config_letterboxThinLetterboxWidthDp))
+                .thenReturn(100);
+        when(rs.getDimensionPixelSize(R.dimen.config_letterboxThinLetterboxHeightDp))
+                .thenReturn(200);
+        final LetterboxConfiguration configuration = new LetterboxConfiguration(mContext, lp);
+
+        // Verify the values are the expected ones
+        dm.density = 100;
+        when(rs.getDimensionPixelSize(R.dimen.config_letterboxThinLetterboxWidthDp))
+                .thenReturn(100);
+        when(rs.getDimensionPixelSize(R.dimen.config_letterboxThinLetterboxHeightDp))
+                .thenReturn(200);
+        final int thinWidthPx = configuration.getThinLetterboxWidthPx();
+        final int thinHeightPx = configuration.getThinLetterboxHeightPx();
+        assertEquals(100, thinWidthPx);
+        assertEquals(200, thinHeightPx);
+
+        // We change the values in the resources but not the update condition (density) and the
+        // result should not change
+        when(rs.getDimensionPixelSize(R.dimen.config_letterboxThinLetterboxWidthDp))
+                .thenReturn(300);
+        when(rs.getDimensionPixelSize(R.dimen.config_letterboxThinLetterboxHeightDp))
+                .thenReturn(400);
+        final int thinWidthPx2 = configuration.getThinLetterboxWidthPx();
+        final int thinHeightPx2 = configuration.getThinLetterboxHeightPx();
+        assertEquals(100, thinWidthPx2);
+        assertEquals(200, thinHeightPx2);
+
+        // We update the condition (density) so the new resource values should be read
+        dm.density = 150;
+        final int thinWidthPx3 = configuration.getThinLetterboxWidthPx();
+        final int thinHeightPx3 = configuration.getThinLetterboxHeightPx();
+        assertEquals(300, thinWidthPx3);
+        assertEquals(400, thinHeightPx3);
     }
 }
