@@ -17,11 +17,9 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.content.res.Resources
-import android.os.SystemProperties
 import android.util.Log
 import android.view.View.GONE
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.Flags.notificationMinimalismPrototype
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -31,6 +29,7 @@ import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.Compile
 import com.android.systemui.util.children
@@ -381,16 +380,13 @@ constructor(
     fun updateResources() {
         maxKeyguardNotifications =
             infiniteIfNegative(
-                if (notificationMinimalismPrototype()) {
-                    SystemProperties.getInt(
-                        "persist.notification_minimalism_prototype.lock_screen_max_notifs",
-                        1
-                    )
+                if (NotificationMinimalismPrototype.V1.isEnabled) {
+                    NotificationMinimalismPrototype.V1.maxNotifs
                 } else {
                     resources.getInteger(R.integer.keyguard_max_notification_count)
                 }
             )
-        maxNotificationsExcludesMedia = notificationMinimalismPrototype()
+        maxNotificationsExcludesMedia = NotificationMinimalismPrototype.V1.isEnabled
 
         dividerHeight =
             max(1f, resources.getDimensionPixelSize(R.dimen.notification_divider_height).toFloat())
