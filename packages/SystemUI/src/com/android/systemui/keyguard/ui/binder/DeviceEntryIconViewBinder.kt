@@ -76,7 +76,7 @@ object DeviceEntryIconViewBinder {
                         view,
                         HapticFeedbackConstants.CONFIRM,
                     )
-                    applicationScope.launch { viewModel.onLongPress() }
+                    applicationScope.launch { viewModel.onUserInteraction() }
                 }
             }
 
@@ -116,6 +116,17 @@ object DeviceEntryIconViewBinder {
                 launch("$TAG#viewModel.accessibilityDelegateHint") {
                     viewModel.accessibilityDelegateHint.collect { hint ->
                         view.accessibilityHintType = hint
+                        if (hint != DeviceEntryIconView.AccessibilityHintType.NONE) {
+                            view.setOnClickListener {
+                                vibratorHelper.performHapticFeedback(
+                                    view,
+                                    HapticFeedbackConstants.CONFIRM,
+                                )
+                                applicationScope.launch { viewModel.onUserInteraction() }
+                            }
+                        } else {
+                            view.setOnClickListener(null)
+                        }
                     }
                 }
                 launch("$TAG#viewModel.useBackgroundProtection") {
