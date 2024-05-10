@@ -5,12 +5,12 @@ import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.PromptVerticalListContentView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
 import com.android.systemui.biometrics.domain.model.BiometricOperationInfo
 import com.android.systemui.biometrics.domain.model.BiometricPromptRequest
 import com.android.systemui.biometrics.promptInfo
 import com.android.systemui.biometrics.shared.model.BiometricUserInfo
+import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -110,7 +110,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                     it.description = description
                     it.subtitle = subtitle
                 },
-                kind = Utils.CREDENTIAL_PIN,
+                kind = PromptKind.Pin,
                 userId = USER_ID,
                 challenge = OPERATION_ID,
                 opPackageName = OP_PACKAGE_NAME
@@ -135,7 +135,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                     it.subtitle = subtitle
                     it.contentView = contentView
                 },
-                kind = Utils.CREDENTIAL_PIN,
+                kind = PromptKind.Pin,
                 userId = USER_ID,
                 challenge = OPERATION_ID,
                 opPackageName = OP_PACKAGE_NAME
@@ -163,7 +163,7 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
                     it.subtitle = subtitle
                     it.contentView = contentView
                 },
-                kind = Utils.CREDENTIAL_PIN,
+                kind = PromptKind.Pin,
                 userId = USER_ID,
                 challenge = OPERATION_ID,
                 opPackageName = OP_PACKAGE_NAME
@@ -171,13 +171,13 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
             assertThat(showTitleOnly).isFalse()
         }
 
-    @Test fun usePinCredentialForPrompt() = useCredentialForPrompt(Utils.CREDENTIAL_PIN)
+    @Test fun usePinCredentialForPrompt() = useCredentialForPrompt(PromptKind.Pin)
 
-    @Test fun usePasswordCredentialForPrompt() = useCredentialForPrompt(Utils.CREDENTIAL_PASSWORD)
+    @Test fun usePasswordCredentialForPrompt() = useCredentialForPrompt(PromptKind.Password)
 
-    @Test fun usePatternCredentialForPrompt() = useCredentialForPrompt(Utils.CREDENTIAL_PATTERN)
+    @Test fun usePatternCredentialForPrompt() = useCredentialForPrompt(PromptKind.Pattern)
 
-    private fun useCredentialForPrompt(kind: Int) =
+    private fun useCredentialForPrompt(kind: PromptKind) =
         testScope.runTest {
             val isStealth = false
             credentialInteractor.stealthMode = isStealth
@@ -211,11 +211,10 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
             assertThat(prompt)
                 .isInstanceOf(
                     when (kind) {
-                        Utils.CREDENTIAL_PIN -> BiometricPromptRequest.Credential.Pin::class.java
-                        Utils.CREDENTIAL_PASSWORD ->
+                        PromptKind.Pin -> BiometricPromptRequest.Credential.Pin::class.java
+                        PromptKind.Password ->
                             BiometricPromptRequest.Credential.Password::class.java
-                        Utils.CREDENTIAL_PATTERN ->
-                            BiometricPromptRequest.Credential.Pattern::class.java
+                        PromptKind.Pattern -> BiometricPromptRequest.Credential.Pattern::class.java
                         else -> throw Exception("wrong kind")
                     }
                 )
@@ -341,6 +340,28 @@ class PromptCredentialInteractorTest : SysuiTestCase() {
 
             job.cancel()
         }
+
+    /** Update the current request to use credential-based authentication instead of biometrics. */
+    private fun PromptCredentialInteractor.useCredentialsForAuthentication(
+        promptInfo: PromptInfo,
+        kind: PromptKind,
+        userId: Int,
+        challenge: Long,
+        opPackageName: String,
+    ) {
+        biometricPromptRepository.setPrompt(
+            promptInfo,
+            userId,
+            challenge,
+            kind,
+            opPackageName,
+        )
+    }
+
+    /** Unset the current authentication request. */
+    private fun PromptCredentialInteractor.resetPrompt() {
+        biometricPromptRepository.unsetPrompt()
+    }
 }
 
 private fun pinRequest(): BiometricPromptRequest.Credential.Pin =

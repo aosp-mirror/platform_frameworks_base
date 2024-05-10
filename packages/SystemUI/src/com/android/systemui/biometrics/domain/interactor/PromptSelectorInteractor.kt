@@ -18,7 +18,6 @@ package com.android.systemui.biometrics.domain.interactor
 
 import android.hardware.biometrics.PromptInfo
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.biometrics.Utils
 import com.android.systemui.biometrics.Utils.getCredentialType
 import com.android.systemui.biometrics.Utils.isDeviceCredentialAllowed
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
@@ -95,7 +94,7 @@ interface PromptSelectorInteractor {
     /** Use credential-based authentication instead of biometrics. */
     fun useCredentialsForAuthentication(
         promptInfo: PromptInfo,
-        @Utils.CredentialType kind: Int,
+        kind: PromptKind,
         userId: Int,
         challenge: Long,
         opPackageName: String,
@@ -152,14 +151,7 @@ constructor(
     override val credentialKind: Flow<PromptKind> =
         combine(prompt, isCredentialAllowed) { prompt, isAllowed ->
             if (prompt != null && isAllowed) {
-                when (
-                    getCredentialType(lockPatternUtils, prompt.userInfo.deviceCredentialOwnerId)
-                ) {
-                    Utils.CREDENTIAL_PIN -> PromptKind.Pin
-                    Utils.CREDENTIAL_PASSWORD -> PromptKind.Password
-                    Utils.CREDENTIAL_PATTERN -> PromptKind.Pattern
-                    else -> PromptKind.Biometric()
-                }
+                getCredentialType(lockPatternUtils, prompt.userInfo.deviceCredentialOwnerId)
             } else {
                 PromptKind.Biometric()
             }
@@ -191,7 +183,7 @@ constructor(
 
     override fun useCredentialsForAuthentication(
         promptInfo: PromptInfo,
-        @Utils.CredentialType kind: Int,
+        kind: PromptKind,
         userId: Int,
         challenge: Long,
         opPackageName: String,
@@ -200,7 +192,7 @@ constructor(
             promptInfo = promptInfo,
             userId = userId,
             gatekeeperChallenge = challenge,
-            kind = kind.asBiometricPromptCredential(),
+            kind = kind,
             opPackageName = opPackageName,
         )
     }
@@ -209,13 +201,3 @@ constructor(
         promptRepository.unsetPrompt()
     }
 }
-
-// TODO(b/251476085): remove along with Utils.CredentialType
-/** Convert a [Utils.CredentialType] to the corresponding [PromptKind]. */
-private fun @receiver:Utils.CredentialType Int.asBiometricPromptCredential(): PromptKind =
-    when (this) {
-        Utils.CREDENTIAL_PIN -> PromptKind.Pin
-        Utils.CREDENTIAL_PASSWORD -> PromptKind.Password
-        Utils.CREDENTIAL_PATTERN -> PromptKind.Pattern
-        else -> PromptKind.Biometric()
-    }
