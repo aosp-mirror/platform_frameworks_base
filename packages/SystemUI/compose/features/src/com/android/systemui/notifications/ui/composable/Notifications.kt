@@ -136,6 +136,7 @@ fun SceneScope.HeadsUpNotificationSpace(
 /** Adds the space where notification stack should appear in the scene. */
 @Composable
 fun SceneScope.ConstrainedNotificationStack(
+    stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -144,6 +145,7 @@ fun SceneScope.ConstrainedNotificationStack(
             modifier.onSizeChanged { viewModel.onConstrainedAvailableSpaceChanged(it.height) }
     ) {
         NotificationPlaceholder(
+            stackScrollView = stackScrollView,
             viewModel = viewModel,
             modifier = Modifier.fillMaxSize(),
         )
@@ -310,6 +312,7 @@ fun SceneScope.NotificationScrollingStack(
                     .debugBackground(viewModel, DEBUG_BOX_COLOR)
         ) {
             NotificationPlaceholder(
+                stackScrollView = stackScrollView,
                 viewModel = viewModel,
                 modifier =
                     Modifier.verticalNestedScrollToScene(
@@ -388,6 +391,7 @@ fun SceneScope.NotificationShelfSpace(
 
 @Composable
 private fun SceneScope.NotificationPlaceholder(
+    stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -406,10 +410,8 @@ private fun SceneScope.NotificationPlaceholder(
                             " bounds=${coordinates.boundsInWindow()}"
                     }
                     // NOTE: positionInWindow.y scrolls off screen, but boundsInWindow.top will not
-                    viewModel.onStackBoundsChanged(
-                        top = positionInWindow.y,
-                        bottom = positionInWindow.y + coordinates.size.height,
-                    )
+                    stackScrollView.setStackTop(positionInWindow.y)
+                    stackScrollView.setStackBottom(positionInWindow.y + coordinates.size.height)
                 }
     ) {
         content {}
